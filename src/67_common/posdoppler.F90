@@ -123,13 +123,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
+ use m_drivexc, only : mkdenpos
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw

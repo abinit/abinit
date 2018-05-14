@@ -92,7 +92,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_kg,           only : mkkin 
  use m_hamiltonian,  only : init_hamiltonian,destroy_hamiltonian,&
 &                           load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
- use m_getghc,       only : getghc
+ use m_getghc,        only : getghc
  use m_fftcore,          only : kpgsph
  use m_fft,              only : fftpac
  use m_mkffnl,           only : mkffnl

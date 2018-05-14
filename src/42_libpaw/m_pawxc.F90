@@ -32,7 +32,7 @@ module m_pawxc
 
 #ifdef HAVE_LIBPAW_ABINIT
  use m_xcpositron,  only : xcpositron
- use m_drivexc,     only : drivexc_main
+ use m_drivexc,     only : drivexc_main, size_dvxc, xcmult, mkdenpos
 #endif
 
  use m_libpaw_libxc
@@ -291,7 +291,6 @@ subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_size_dvxc_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -470,7 +469,6 @@ subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_xcmult_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -599,7 +597,6 @@ subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_mkdenpos_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
