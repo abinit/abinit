@@ -1,9 +1,9 @@
 # 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
 # Test on AlAs, with PAW pseudopotentials
 # (L. Baguet, 05.2018)
-# This is the most demanding test :
+# This is the most demanding test of nonlinear:
 # PAW + nsppol=2 + nsym=1 + kptopt=3 + empty bands
-# However, tolwfr and number of kpoint is reduced to limit the computation time
+# However, tolwfr and the number of kpoints are reduced to limit the computation time, leading to crazy results
 
 # Enable ouput for nonliner (full DFPT only)
 #*****************************************************
@@ -56,6 +56,9 @@
 # K point grid
 #**************************************
    ngkpt       2 2 2
+   nshiftk     1
+   shiftk      0.5 0.5 0.5
+# The usual Monkhorst-Pack grid is not used in order to reduce the number of kpoints (and decrease the computation time)
 #   nshiftk     4
 #   shiftk      0.5 0.5 0.5
 #               0.5 0.0 0.0
@@ -172,5 +175,5 @@ optdriver7    5 # for nonlinear calculation
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Must give same results than t101.in
+#%%   Give same results than t101.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.
 #%%<END TEST_INFO>
