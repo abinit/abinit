@@ -150,6 +150,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  use m_numeric_tools,    only : invcb
  use m_xciit,            only : xciit
  use m_xcpbe,            only : xcpbe
+ use m_xchcth,           only : xchcth
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -23,7 +23,7 @@ sources = [
 "m_drivexc.F90",
 "m_libxc_functionals.F90",
 "m_xc_noncoll.F90",
-"xchcth.F90",
+"m_xchcth.F90",
 "xchelu.F90",
 "m_xciit.F90",
 "xclb.F90",

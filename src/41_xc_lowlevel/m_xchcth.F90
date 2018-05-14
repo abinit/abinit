@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xchcth
+!! NAME
+!!  m_xchcth
+!!
+!! FUNCTION
+!! Treat XC GGA functional of HCTH type.
+!! See Hamprecht, Cohen, Tozer and Handy, J. Chem. Phys. 109, 6264 (1998) for HCTH-93.
+!!  Boese, Doltsinis, Handy and Sprik, J. Chem. Phys. 112, 1670 (2000) for HCTH-120 and HCTH-147.
+!!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) for HCTH-407.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2002-2018 ABINIT group (XG,LG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_xchcth
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_numeric_tools,      only : invcb
+
+ implicit none
+
+ private
+!!***
+
+ public :: xchcth
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/xchcth
 !! NAME
 !! xchcth
@@ -13,13 +60,6 @@
 !! gradient of the density, return the associated Exc energy,
 !! potential, and, in case of response-function, functions needed
 !! to build the XC kernel.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (XG,LG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  ixc=number of the XC functional : 16 for HCTH-93, 17 for HCTH-120, 26 for HCTH-147 and 27 for HCTH-407.
@@ -46,8 +86,6 @@
 !! TODO
 !! Response function not coded yet, but part of it are already present
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      drivexc
 !!
@@ -56,19 +94,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- use m_numeric_tools,      only : invcb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1203,4 +1229,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 !ENDDEBUG
 
 end subroutine xchcth
+!!***
+
+end module m_xchcth
 !!***
