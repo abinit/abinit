@@ -1,4 +1,49 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_srkhna14
+!! NAME
+!!  m_pred_srkna14
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_srkhna14
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+ use m_geometry,    only : xcart2xred, xred2xcart, metric
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_srkna14
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_srkna14
 !! NAME
 !! pred_srkna14
@@ -20,29 +65,15 @@
 !! energy of the initial atomic configuration is never evaluated using this
 !! algorithm.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! icycle : Index of the present cycle
 !! zDEBUG : if true print some debugging information
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
-!!
-!! NOTES
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
 !!      mover
@@ -52,21 +83,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,    only : xcart2xred, xred2xcart, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -284,4 +301,7 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
  hist%time(hist%ihist)=hist%time(ihist_prev)+ab_mover%dtion
 
 end subroutine pred_srkna14
+!!***
+
+end module m_pred_srkhna14
 !!***

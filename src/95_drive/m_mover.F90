@@ -58,6 +58,8 @@ module m_mover
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_isokinetic,    only : pred_isokinetic
  use m_pred_diisrelax,     only : pred_diisrelax
+ use m_pred_nose,          only : pred_nose
+ use m_pred_srkhna14,      only : pred_srkna14
 
  implicit none
 

@@ -1,11 +1,56 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_nose
+!! NAME
+!!  m_pred_nose
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_nose
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,    only : xcart2xred, xred2xcart, metric
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_nose
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_nose
 !! NAME
 !! pred_nose
 !!
 !! FUNCTION
-!! Ionmov predictors (8) Verlet algorithm with a nose-hoover
-!! thermostat
+!! Ionmov predictors (8) Verlet algorithm with a nose-hoover thermostat
 !!
 !! IONMOV 8:
 !! Given a starting point xred that is a vector of length 3*natom
@@ -25,14 +70,6 @@
 !! See ionmov=6, but with a nose-hoover thermostat
 !! Velocity verlet algorithm : Swope et al JCP 76 (1982) 637
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
 !!                                needed by the preditor
@@ -40,13 +77,8 @@
 !! ntime  : Maximal number of iterations
 !! zDEBUG : if true print some debugging information
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
-!!
-!! NOTES
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
 !!      mover
@@ -56,21 +88,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_numeric_tools,  only : uniformrandom
- use m_geometry,    only : xcart2xred, xred2xcart, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -484,4 +502,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
 end subroutine pred_nose
+!!***
+
+end module m_pred_nose
 !!***
