@@ -130,7 +130,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 #undef ABI_FUNC
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw

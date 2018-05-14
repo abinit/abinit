@@ -597,7 +597,6 @@ subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_mkdenpos_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none

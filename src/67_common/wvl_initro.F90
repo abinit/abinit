@@ -65,7 +65,6 @@ subroutine wvl_initro(&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_initro'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none

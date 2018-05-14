@@ -963,6 +963,7 @@ end subroutine xcmult
 
 subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
