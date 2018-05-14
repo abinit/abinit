@@ -24,16 +24,10 @@ sources = [
 "m_libxc_functionals.F90",
 "m_xc_noncoll.F90",
 "m_xchcth.F90",
-"xchelu.F90",
 "m_xciit.F90",
-"xclb.F90",
 "m_xcpbe.F90",
 "m_xcpositron.F90",
-"xcpzca.F90",
-"xcspol.F90",
-"xctetr.F90",
-"xctfw.F90",
-"xcwign.F90",
-"xcxalp.F90" ]
+"m_xclda.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

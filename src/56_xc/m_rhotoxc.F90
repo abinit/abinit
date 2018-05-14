@@ -40,6 +40,7 @@ module m_rhotoxc
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_xcpositron,       only : xcpositron
  use m_drivexc,          only : size_dvxc, drivexc_main, xcmult, mkdenpos
+ use m_xclda,            only : xctfw
 
  implicit none
 
