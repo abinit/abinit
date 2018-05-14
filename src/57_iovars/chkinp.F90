@@ -389,6 +389,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  builtintest
    call chkint_eq(0,0,cond_string,cond_values,ierr,'builtintest',dt%builtintest,8,(/0,1,2,3,4,5,6,7/),iout)
 
+!  chkdilatmx
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
+
 !  chksymbreak
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,3,(/0,1,-1/),iout)
    if(dt%chksymbreak==1)then
@@ -439,6 +442,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  diemac
    call chkdpr(0,0,cond_string,cond_values,ierr,'diemac',dt%diemac,1,0.01_dp,iout)
+
+!  dilatmx
+   call chkdpr(0,0,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,1,zero,iout)
+   if(dt%chkdilatmx==1)then
+     cond_string(1)='chkdilatmx' ; cond_values(1)=1
+!    Checks that presently chkdilatmx is smaller than 1.15
+     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,1.15_dp,iout)
+   end if
 
 !  dmatpuopt
    if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
