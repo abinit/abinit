@@ -68,6 +68,7 @@ subroutine pred_steepdesc(ab_mover,forstr,hist,itime,zDEBUG,iexit)
  use m_abihist
 
  use m_geometry,       only : mkradim, mkrdim, xcart2xred, xred2xcart
+ use m_predtk,         only : fdtion
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
