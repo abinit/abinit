@@ -558,7 +558,7 @@ program anaddb
 
    close(ddbun)
 
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
 
