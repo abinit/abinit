@@ -448,7 +448,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%chkdilatmx==1)then
      cond_string(1)='chkdilatmx' ; cond_values(1)=1
 !    Checks that presently chkdilatmx is smaller than 1.15
-     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,1.15_dp,iout)
+     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,-1,1.15_dp,iout)
    end if
 
 !  dmatpuopt
