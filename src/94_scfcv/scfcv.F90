@@ -237,6 +237,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_dft_energy,       only : energy
  use m_initylmg,         only : initylmg
  use m_rhotoxc,          only : rhotoxc
+ use m_drivexc,          only : check_kxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
