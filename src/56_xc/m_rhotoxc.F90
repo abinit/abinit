@@ -29,7 +29,7 @@ module m_rhotoxc
  use m_errors
  use m_profiling_abi
 
- use m_drivexc, only : drivexc_main
+ use m_drivexc, only : drivexc_main, xcmult
 
  implicit none
 

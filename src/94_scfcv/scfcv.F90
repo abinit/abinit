@@ -244,7 +244,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_62_poisson
