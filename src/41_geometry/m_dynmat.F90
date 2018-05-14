@@ -1127,7 +1127,7 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
          do idir1=1,3
            vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
          end do
-         ! Transform vector from cartestian to reduced coordinates
+         ! Transform vector from cartesian to reduced coordinates
          call cart39(flg1,flg2,transpose(rprimd),ipert2,natom,transpose(gprimd),vec1,vec2)
          do idir1=1,3
            d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
