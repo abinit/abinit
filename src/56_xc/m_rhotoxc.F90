@@ -29,6 +29,8 @@ module m_rhotoxc
  use m_errors
  use m_profiling_abi
 
+ use m_drivexc, only : drivexc_main
+
  implicit none
 
  private
