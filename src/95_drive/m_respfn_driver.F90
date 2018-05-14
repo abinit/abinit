@@ -79,6 +79,7 @@ module m_respfn_driver
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
  use m_dfpt_loopert, only : dfpt_looppert
+ use m_rhotoxc,    only : rhotoxc
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif

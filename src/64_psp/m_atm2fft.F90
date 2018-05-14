@@ -37,7 +37,7 @@ module m_atm2fft
  use m_pawtab,      only : pawtab_type
  use m_distribfft,  only : distribfft_type
  use m_fft,         only : zerosym
- use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
 
  implicit none
 
@@ -199,7 +199,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'atm2fft'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

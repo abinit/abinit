@@ -31,7 +31,6 @@ sources = [
  "m_wfutils.F90",
  "m_symtk.F90",
  "mknormpath.F90",
- "proc_distrb_cycle.F90",
  "radsintr.F90",
  "smatrix.F90",
 ]

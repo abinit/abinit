@@ -161,6 +161,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
  use m_dens,             only : mag_constr
+ use m_rhotoxc,          only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

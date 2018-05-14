@@ -126,6 +126,7 @@ program abinit
  use m_out_acknowl, only : out_acknowl
  use m_timana,      only : timana
  use m_builtin_tests, only : testfi
+ use m_mpi_setup,     only : mpi_setup
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif

@@ -53,6 +53,7 @@ module m_dfpt_vtorho
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
  use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
+use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 
@@ -227,7 +228,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtorho'
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 

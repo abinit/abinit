@@ -51,7 +51,7 @@ MODULE m_wfd
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
- use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
+ use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
@@ -880,7 +880,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_init'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -5651,7 +5650,6 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_write_wfk'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

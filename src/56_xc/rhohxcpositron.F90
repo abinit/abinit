@@ -68,6 +68,7 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  use m_errors
  use m_profiling_abi
 
+ use m_xcpositron, only : xcpositron
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
 !This section has been created automatically by the script Abilint (TD).

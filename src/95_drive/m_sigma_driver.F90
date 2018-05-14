@@ -50,7 +50,7 @@ module m_sigma_driver
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
  use m_blas,          only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
@@ -195,7 +195,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_70_gw

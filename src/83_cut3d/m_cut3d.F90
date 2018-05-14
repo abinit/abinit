@@ -43,7 +43,7 @@ MODULE m_cut3d
  use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
- use m_mpinfo,           only : destroy_mpi_enreg
+ use m_mpinfo,           only : destroy_mpi_enreg, initmpi_seq
  use m_cgtools,          only : cg_getspin
  use m_gsphere,          only : getkpgnorm
  use m_epjdos,           only : recip_ylm, dens_in_sph
@@ -1814,7 +1814,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

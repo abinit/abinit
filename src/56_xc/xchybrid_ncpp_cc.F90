@@ -76,6 +76,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  use m_geometry,    only : metric
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
+ use m_rhotoxc,     only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -105,7 +106,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  integer :: ixc_gga,libxc_gga_initialized,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
- type(xcdata_type) :: xcdata_gga,xcdata_hybrid 
+ type(xcdata_type) :: xcdata_gga,xcdata_hybrid
  logical :: calcgrxc,nmxc
 !arrays
  integer :: gga_id(2)

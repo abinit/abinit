@@ -35,7 +35,7 @@ MODULE m_FFT_prof
  use m_cgtools,        only : set_istwfk
  use m_fftcore,        only : get_kg, print_ngfft, fftalg_info, kgindex, getng, sphereboundary
  use m_fft_mesh,       only : calc_eigr, calc_ceigr
- use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
+ use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_oscillators,    only : rho_tw_g
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1497,7 +1497,6 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_rhotwg'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

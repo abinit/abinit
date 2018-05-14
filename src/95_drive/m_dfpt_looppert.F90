@@ -82,6 +82,7 @@ module m_dfpt_loopert
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
+ use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
 
  implicit none
 
@@ -228,7 +229,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_64_psp
  use interfaces_65_paw

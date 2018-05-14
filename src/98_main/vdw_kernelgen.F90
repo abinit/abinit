@@ -60,7 +60,6 @@ program vdw_kernelgen
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_kernelgen'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

@@ -34,6 +34,7 @@ module m_dfpt_fef
 
  use m_kg,        only : kpgio
  use m_cgtools,   only : overlap_g
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 
@@ -109,7 +110,6 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_initberry'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

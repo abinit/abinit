@@ -166,12 +166,12 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_fft,         only : fftpac
  use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
+use m_mpinfo,       only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
- use interfaces_32_util
  use interfaces_65_paw
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section

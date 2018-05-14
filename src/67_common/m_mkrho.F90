@@ -42,7 +42,7 @@ module m_mkrho
  use m_spacepar,     only : symrhg
  use defs_datatypes, only : pseudopotential_type
  use m_atomdata,     only : atom_length
- use m_mpinfo,       only : ptabs_fourdp
+ use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
 
  implicit none
@@ -138,7 +138,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_66_wfs
  use interfaces_67_common

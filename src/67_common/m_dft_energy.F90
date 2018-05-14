@@ -61,6 +61,8 @@ module m_dft_energy
  use m_mkrho,            only : mkrho
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
+ use m_rhotoxc,          only : rhotoxc
+ use m_mpinfo,           only : proc_distrb_cycle
 
  implicit none
 
@@ -223,7 +225,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_62_poisson
@@ -959,7 +960,6 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkresi'
- use interfaces_32_util
  use interfaces_66_wfs
 !End of the abilint section
 

@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xciit
+!! NAME
+!!  m_xciit
+!!
+!! FUNCTION
+!! Exchange-correlation at finite temperature of an electron gas
+!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2002-2018 ABINIT group (JFD,LK)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_xciit
+
+ use defs_basis
+ use m_errors
+
+ implicit none
+
+ private
+!!***
+
+ public :: xciit
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/xciit
 !! NAME
 !!  xciit
@@ -6,12 +48,6 @@
 !! FUNCTION
 !! Exchange-correlation at finite temperature of an electron gas
 !! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (JFD,LK)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  temp= (electronic) temperature
@@ -33,17 +69,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 &                dvxc)!Optional argument
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -135,10 +163,10 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments ------------------------------------
  real(dp) :: fexsGamma
- real(dp),intent(in) :: Gamma,t 
+ real(dp),intent(in) :: Gamma,t
 !Local variables-------------------------------
  real(dp) :: lambda
  real(dp) :: tanht,tanhst
@@ -195,7 +223,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments ------------------------------------
  real(dp) :: Fxc_iit
  real(dp),intent(in) :: rs,t,deltavxc
@@ -261,4 +289,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !!***
 
 end subroutine xciit
+!!***
+
+end module m_xciit
 !!***

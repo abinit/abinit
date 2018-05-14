@@ -1,18 +1,55 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_drivexc
+!! NAME
+!!  m_drivexc
+!!
+!! FUNCTION
+!! Driver of XC functionals. Optionally, deliver the XC kernel, or even the derivative
+!! of the XC kernel (the third derivative of the XC energy)
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2012-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_drivexc
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use libxc_functionals
+
+ implicit none
+
+ private
+!!***
+
+ public :: drivexc_main
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/drivexc_main
 !! NAME
 !! drivexc_main
 !!
 !! FUNCTION
-!! Driver of XC functionals.Optionally, deliver the XC kernel, or even the derivative
+!! Driver of XC functionals. Optionally, deliver the XC kernel, or even the derivative
 !! of the XC kernel (the third derivative of the XC energy)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  ixc=index of the XC functional
@@ -66,7 +103,7 @@
 !!    be equal to the spin-up kinetic energy density,
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. 
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
 !!  [xc_tb09_c]=c parameter for the mgga TB09 functional, within libxc
 
 !! OUTPUT
@@ -124,26 +161,16 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
 &                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
 
- use defs_basis
- use m_profiling_abi
- use m_errors
- use libxc_functionals
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'drivexc_main'
- use interfaces_41_xc_lowlevel, except_this_one => drivexc_main
+ use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -372,4 +399,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
  end if
 
 end subroutine drivexc_main
+!!***
+
+end module m_drivexc
 !!***

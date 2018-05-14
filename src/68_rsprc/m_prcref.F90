@@ -43,7 +43,7 @@ module m_prcref
  use m_numeric_tools, only : dotproduct
  use m_geometry, only : xcart2xred, metric
  use m_cgtools,  only : dotprod_vn, mean_fftr
- use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg
+ use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg, initmpi_seq
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fftcore,  only : kgindex
@@ -54,6 +54,7 @@ module m_prcref
  use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
  use m_atm2fft,    only : atm2fft
+ use m_rhotoxc,    only : rhotoxc
 
  implicit none
 
@@ -2007,7 +2008,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

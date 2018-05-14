@@ -124,7 +124,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_fftcore,         only : print_ngfft
  use m_kpts,            only : tetra_from_kptrlatt
  use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free, esymm_failed
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -146,7 +146,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 

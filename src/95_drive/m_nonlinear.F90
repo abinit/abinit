@@ -65,6 +65,8 @@ module m_nonlinear
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
+ use m_rhotoxc,     only : rhotoxc
+ use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 
@@ -1541,7 +1543,6 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initmv'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -157,13 +157,13 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_initylmg,   only : initylmg
  use m_mkffnl,     only : mkffnl
  use m_getgh1c,    only : rf_transgrid_and_pack
+ use m_mpinfo,     only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_pert'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
@@ -881,7 +881,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      ABI_DATATYPE_DEALLOCATE(cprj_jband)
 
    end do   ! end loop over k-points
-   
+
  end do   ! end loop over spins
 
  call destroy_rf_hamiltonian(rf_hamkq_i2pert)
@@ -1045,7 +1045,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !!                    fab: this is the enf if over nspden
 !                   end if
 
- 
+
  call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
  ABI_DEALLOCATE(rho1r1_tot)

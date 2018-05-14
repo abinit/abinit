@@ -64,12 +64,12 @@
 
  use m_time,         only : timab
  use m_io_tools,     only : get_unit
+ use m_mpinfo,       only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optics_vloc'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

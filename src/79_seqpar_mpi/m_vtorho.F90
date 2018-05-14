@@ -71,6 +71,7 @@ module m_vtorho
  use m_vtowfk,             only : vtowfk
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
+ use m_mpinfo,             only : proc_distrb_cycle
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -277,7 +278,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
