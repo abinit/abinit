@@ -37,6 +37,9 @@ A.4 Replaced *tribes* by *relevance* in doc/topics.
 A.5 Replace `EELF` file extension by `ELF`. See [[prtelf]].
     By Guido Petretto.
 
+A.6 Definition of a maximal value for dilatmx, at 1.15 , than can be bypassed by setting chkdilatmx=0.
+    This is to prevent users slowing down ABINIT too much inadvertantly.
+
 * * *
 
 ### B. Most noticeable achievements
