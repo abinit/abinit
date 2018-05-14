@@ -60,6 +60,7 @@ module m_mover
  use m_pred_diisrelax,     only : pred_diisrelax
  use m_pred_nose,          only : pred_nose
  use m_pred_srkhna14,      only : pred_srkna14
+ use m_pred_isothermal,    only : pred_isothermal
 
  implicit none
 
