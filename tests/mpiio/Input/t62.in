@@ -114,6 +114,7 @@ pawecutdg   9.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = atlas_intel_18.0_openmpi
 #%% [files]
 #%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
