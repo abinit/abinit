@@ -82,7 +82,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  use m_pawcprj,     only : pawcprj_type, pawcprj_get, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_symkn
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
- use m_smatrix,     only : smatrix
+ use m_berrytk,     only : smatrix
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

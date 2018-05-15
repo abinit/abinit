@@ -26,7 +26,6 @@ sources = [
  "m_ewald.F90",
  "m_geometry.F90",
  "m_supercell.F90",
- "polcart.F90",
  "m_symlist.F90",
  "m_symsg.F90",
  "m_symfind.F90",

@@ -32,7 +32,7 @@ sources = [
  "m_symtk.F90",
  "mknormpath.F90",
  "radsintr.F90",
- "m_smatrix.F90",
+ "m_berrytk.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
