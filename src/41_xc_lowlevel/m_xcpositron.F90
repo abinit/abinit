@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xcpositron
+!! NAME
+!!  m_xcpositron
+!!
+!! FUNCTION
+!! Compute electron-positron correlation potentials and energy density.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (GJ,MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_xcpositron
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_numeric_tools,      only : invcb
+
+ implicit none
+
+ private
+!!***
+
+ public :: xcpositron
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/xcpositron
 !! NAME
 !! xcpositron
@@ -7,13 +51,6 @@
 !! Compute electron-positron correlation potentials and energy density.
 !! Used electron-positron correlation functional is controlled by ixcpositron argument.
 !! Returns Fxc, Vxc_pos, Vxc_el from input rhor_pos and rhor_el for positron and electrons.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  grhoe2(ngr)=square of the gradient of electronic density rhoe (needed for GGA)
@@ -62,20 +99,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                     dvxce,dvxcp) ! optional arguments
 
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- use m_numeric_tools,      only : invcb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -359,4 +385,7 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
  if (gga)       vxcegr(:)=half*vxcegr(:)
 
 end subroutine xcpositron
+!!***
+
+end module m_xcpositron
 !!***

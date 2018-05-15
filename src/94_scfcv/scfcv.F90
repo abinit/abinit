@@ -193,7 +193,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
+ use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar, initmpi_seq, proc_distrb_cycle
  use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
@@ -236,17 +236,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_forces,           only : fresid
  use m_dft_energy,       only : energy
  use m_initylmg,         only : initylmg
+ use m_rhotoxc,          only : rhotoxc
+ use m_drivexc,          only : check_kxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -2760,12 +2759,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
 &                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wf_mixing'
- use interfaces_32_util
  use interfaces_66_wfs
 !End of the abilint section
 

@@ -73,7 +73,7 @@ program mrgscr
  use m_fft_mesh,            only : g2ifft
  use m_fftcore,             only : get_cache_kb, getng
  use m_numeric_tools,       only : iseven, cspint
- use m_mpinfo,              only : destroy_mpi_enreg
+ use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
  use m_crystal_io,          only : crystal_from_hdr
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
@@ -99,7 +99,6 @@ program mrgscr
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgscr'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

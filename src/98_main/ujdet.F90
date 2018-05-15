@@ -46,7 +46,7 @@ program ujdet
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
  use m_parser,      only : intagm, parsefile
- use m_mpinfo,      only : destroy_mpi_enreg
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_dtfil,       only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
@@ -54,7 +54,6 @@ program ujdet
 #undef ABI_FUNC
 #define ABI_FUNC 'ujdet'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 

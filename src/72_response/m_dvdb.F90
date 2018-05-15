@@ -48,7 +48,7 @@ MODULE m_dvdb
  use m_symtk,         only : mati3inv, littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
@@ -291,7 +291,6 @@ subroutine dvdb_init(db, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_init'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -900,7 +899,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1861,7 +1859,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -4144,7 +4141,6 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

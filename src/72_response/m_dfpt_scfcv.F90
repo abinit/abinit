@@ -64,6 +64,7 @@ module m_dfpt_scfcv
  use m_rf2,      only : rf2_getidirs
  use m_dens,     only : calcdensph
  use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
+ use m_dfpt_vtorho, only : dfpt_vtorho
 
  implicit none
 
@@ -1588,6 +1589,7 @@ end subroutine dfpt_scfcv
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &                enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

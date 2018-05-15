@@ -53,7 +53,7 @@ MODULE m_io_kss
  use m_abilasi,          only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
  use m_dtset,            only : dtset_copy, dtset_free
- use m_mpinfo,           only : destroy_mpi_enreg
+ use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t
@@ -62,6 +62,7 @@ MODULE m_io_kss
  use m_kg,               only : mkkin, mkkpg
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
  use m_mkffnl,           only : mkffnl
+ use m_getghc,           only : getghc
 
  implicit none
 
@@ -1028,9 +1029,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #undef ABI_FUNC
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -1723,7 +1722,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'outkss'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -30,10 +30,15 @@ module m_pawxc
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
+#ifdef HAVE_LIBPAW_ABINIT
+ use m_xcpositron,  only : xcpositron
+ use m_drivexc,     only : drivexc_main, size_dvxc, xcmult, mkdenpos
+#endif
+
  use m_libpaw_libxc
 
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
+ use m_pawang,      only : pawang_type
+ use m_pawrad,      only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
 
  implicit none
  private
@@ -184,7 +189,6 @@ subroutine pawxc_xcpositron_abinit()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_xcpositron_abinit'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -287,7 +291,6 @@ subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_size_dvxc_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -466,7 +469,6 @@ subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_xcmult_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -595,7 +597,6 @@ subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_mkdenpos_wrapper'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -1057,7 +1058,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        if(nspden==2) then
          rhoarr(:,2)=rhoarr(:,1)/two
        endif
-       if(nspden==4) then 
+       if(nspden==4) then
          rhoarr(:,2)=zero
          rhoarr(:,3)=zero
          rhoarr(:,4)=zero
@@ -3872,7 +3873,7 @@ end subroutine pawxcsphpositron
    if(nspden==2) then
      rho_updn(:,:,2)=rho_updn(:,:,1)/two
    endif
-   if(nspden==4) then 
+   if(nspden==4) then
      rho_updn(:,:,2)=zero
      rho_updn(:,:,3)=zero
      rho_updn(:,:,4)=zero
@@ -5448,7 +5449,6 @@ subroutine pawxc_drivexc_abinit()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_drivexc_abinit'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none

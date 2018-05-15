@@ -41,6 +41,7 @@ MODULE m_paral_pert
  use m_pawfgrtab, only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_redistribute
  use m_pawrhoij,  only : pawrhoij_type, pawrhoij_free, pawrhoij_redistribute
  use m_paral_atom,only : get_atm_proc
+ use m_mpinfo,    only : initmpi_atom
 
  implicit none
 
@@ -225,7 +226,6 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'set_pert_paw'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -484,7 +484,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'unset_pert_paw'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

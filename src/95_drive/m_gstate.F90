@@ -86,6 +86,8 @@ module m_gstate
  use m_initylmg,         only : initylmg
  use m_pspini,           only : pspini
  use m_mover,            only : mover
+ use m_mpinfo,          only : proc_distrb_cycle
+
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif
@@ -222,7 +224,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_56_io_mpi

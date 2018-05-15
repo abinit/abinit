@@ -19,7 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_dfpt_fef.F90",
  "dfptnl_pert.F90",
- "dfpt_cgwf.F90",
+ "m_dfpt_cgwf.F90",
  "dfpt_dyfro.F90",
  "dfpt_dyxc1.F90",
  "dfpt_eltfrhar.F90",
@@ -43,7 +43,7 @@ sources = [
  "dfpt_rhotov.F90",
  "m_dfpt_scfcv.F90",
  "dfpt_vlocal.F90",
- "dfpt_vtorho.F90",
+ "m_dfpt_vtorho.F90",
  "m_dfpt_vtowfk.F90",
  "dfpt_v1zeeman.F90",
  "dfpt_wfkfermi.F90",

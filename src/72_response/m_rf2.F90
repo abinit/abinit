@@ -36,6 +36,7 @@ MODULE m_rf2
 
  use m_getgh1c,     only : getgh1c
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
+ use m_getghc,      only : getghc
 
  implicit none
 

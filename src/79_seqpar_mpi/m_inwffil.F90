@@ -48,7 +48,7 @@ module m_inwffil
  use m_cgtools,  only : cg_envlop, pw_orthon
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
- use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
+ use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg, proc_distrb_cycle
  use m_kg,       only : kpgio, ph1d3d, getph
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc
@@ -188,7 +188,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inwffil'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_79_seqpar_mpi
 !End of the abilint section
 
@@ -1141,7 +1140,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfsinp'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2120,7 +2118,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 #undef ABI_FUNC
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

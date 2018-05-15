@@ -57,7 +57,7 @@ MODULE m_screening
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -2861,7 +2861,6 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_mdielf'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

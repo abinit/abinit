@@ -108,13 +108,13 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initberry'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 

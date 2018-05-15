@@ -43,6 +43,7 @@ module m_dfpt_mkrho
  use m_pawrhoij,      only : pawrhoij_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paral_atom,    only : get_my_atmtab
+use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 
@@ -120,12 +121,12 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
 & occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -616,6 +617,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
 &                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

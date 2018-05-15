@@ -69,7 +69,7 @@ program cut3d
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
  use m_geometry,        only : xred2xcart, metric
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
@@ -80,7 +80,6 @@ program cut3d
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

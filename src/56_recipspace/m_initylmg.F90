@@ -34,6 +34,7 @@ module m_initylmg
  use m_xmpi
 
  use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+ use m_mpinfo,      only : proc_distrb_cycle
 
  implicit none
 
@@ -114,7 +115,6 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initylmg'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

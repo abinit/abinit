@@ -104,12 +104,12 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
  use m_mkffnl,           only : mkffnl
+ use m_mpinfo,           only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_32_util
  use interfaces_66_wfs, except_this_one => fock2ACE
 !End of the abilint section
 
