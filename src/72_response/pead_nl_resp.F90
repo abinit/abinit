@@ -86,11 +86,12 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  use m_kg,         only : mkkpg
  use m_pawtab,     only : pawtab_type
  use m_pawcprj,    only : pawcprj_type
- use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,&
-&                         load_k_hamiltonian,gs_hamiltonian_type
+ use m_hamiltonian,only : init_hamiltonian, destroy_hamiltonian, &
+                          load_k_hamiltonian, gs_hamiltonian_type
  use m_fft,        only : fftpac
  use m_mkffnl,     only : mkffnl
-use m_mpinfo,      only : proc_distrb_cycle
+ use m_mpinfo,     only : proc_distrb_cycle
+ use m_nonlop      only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

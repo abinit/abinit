@@ -31,6 +31,7 @@
 #include "abi_common.h"
 
 module m_lobpcgwf
+
  use defs_abitypes
  use defs_basis
  use m_profiling_abi
@@ -46,6 +47,7 @@ module m_lobpcgwf
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
+ use m_nonlop       only : nonlop
 
  private
 

@@ -43,14 +43,14 @@ module m_dft_energy
  use m_kg,               only : mkkin
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
- use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
-&                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+                                bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
-&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_init_unpacked, &
+                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_get_nspden, symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -63,6 +63,7 @@ module m_dft_energy
  use m_getghc,           only : getghc
  use m_rhotoxc,          only : rhotoxc
  use m_mpinfo,           only : proc_distrb_cycle
+ use m_nonlop            only : nonlop
 
  implicit none
 

@@ -131,6 +131,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_kg,       only : mkkin, mkkpg
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
+ use m_nonlop    only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

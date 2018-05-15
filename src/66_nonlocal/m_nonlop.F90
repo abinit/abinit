@@ -1,4 +1,53 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_nonlop
+!! NAME
+!!  m_nonlop
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_nonlop
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_gemm_nonlop
+
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_nonlop_pl,   only : nonlop_pl
+ use m_nonlop_ylm,  only : nonlop_ylm
+
+ implicit none
+
+ private
+!!***
+
+ public :: nonlopt
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/nonlop
 !! NAME
 !! nonlop
@@ -16,13 +65,6 @@
 !!   - using Legendre Polynomials Pl (Norm-conserving psps only)
 !!   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 !!   - using GPUs (N-conserving or PAW)
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  choice: chooses possible output:
@@ -272,28 +314,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_gemm_nonlop
-
- use m_time,        only : timab
- use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_nonlop_pl,   only : nonlop_pl
- use m_nonlop_ylm,  only : nonlop_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -748,4 +771,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  DBG_EXIT("COLL")
 
 end subroutine nonlop
+!!***
+
+end module m_nonlop
 !!***
