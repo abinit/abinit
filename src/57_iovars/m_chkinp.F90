@@ -1,42 +1,20 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/chkinp
+!!****m* ABINIT/m_chkinp
 !! NAME
-!! chkinp
+!!  m_chkinp
 !!
 !! FUNCTION
-!! Check consistency of input data against itself.
-!! Please: use the alphabetic order
-!! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
+!! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
-!!  iout=unit number for output file
-!!  mpi_enregs(0:ndtset_alloc)=informations about MPI parallelization
-!!  ndtset=number of datasets
-!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
-!!  npsp=number of pseudopotentials
-!!  pspheads(npsp)=<type pspheader_type>all the important information from the
-!!   pseudopotential file header, as well as the psp file name
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! PARENTS
-!!      abinit
 !!
 !! CHILDREN
-!!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dtset_copy,dtset_free,metric,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -46,7 +24,7 @@
 
 #include "abi_common.h"
 
-subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
+module m_chkinp
 
  use defs_basis
  use defs_datatypes
@@ -65,6 +43,51 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use m_dtset,          only : dtset_copy, dtset_free
  use m_exit,           only : get_timelimit
  use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
+
+ implicit none
+
+ private
+!!***
+
+ public :: chkinp
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/chkinp
+!! NAME
+!! chkinp
+!!
+!! FUNCTION
+!! Check consistency of input data against itself.
+!! Please: use the alphabetic order
+!! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
+!!
+!! INPUTS
+!!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
+!!  iout=unit number for output file
+!!  mpi_enregs(0:ndtset_alloc)=informations about MPI parallelization
+!!  ndtset=number of datasets
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
+!!  npsp=number of pseudopotentials
+!!  pspheads(npsp)=<type pspheader_type>all the important information from the
+!!   pseudopotential file header, as well as the psp file name
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      abinit
+!!
+!! CHILDREN
+!!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
+!!      dtset_copy,dtset_free,metric,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3497,4 +3520,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  DBG_EXIT("COLL")
 
 end subroutine chkinp
+!!***
+
+end module m_chkinp
 !!***
