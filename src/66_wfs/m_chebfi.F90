@@ -113,12 +113,13 @@ contains
 
 subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chebfi'
  use interfaces_14_hidewrite
- use interfaces_66_wfs, except_this_one => chebfi
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -626,6 +627,7 @@ end subroutine chebfi
 
 function cheb_poly(x, n, a, b) result(y)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -682,6 +684,7 @@ end function cheb_poly
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

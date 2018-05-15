@@ -108,6 +108,7 @@ CONTAINS
 
  subroutine init_invovl(nkpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -146,6 +147,7 @@ CONTAINS
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -460,6 +462,7 @@ end subroutine make_invovl
 !! SOURCE
 
  subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
