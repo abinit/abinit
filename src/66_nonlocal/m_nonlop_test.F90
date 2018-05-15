@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_nonlop_test
+!! NAME
+!!  m_nonlop_test
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_nonlop_test
+
+ implicit none
+
+ private
+!!***
+
+ public :: nonlop_test
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/nonlop_test
 !! NAME
 !! nonlop_test
@@ -11,13 +48,6 @@
 !! launches Abinit (several datasets) and analyse the result, in order to compare
 !!  <Psi_i|H^(i)|Psi_j> compute with DFPT or Finite Differences.
 !! H^(i) is the ith derivative of the Hamiltonian with respect to one or several perturbation(s).
-!!
-!! COPYRIGHT
-!! Copyright (C) 2017-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mcg)=wavefunctions (may be read from disk file)
@@ -434,4 +464,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  call destroy_hamiltonian(gs_hamk)
 
 end subroutine nonlop_test
+!!***
+
+end module m_nonlop_test
 !!***

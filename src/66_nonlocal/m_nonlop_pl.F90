@@ -1,4 +1,59 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_nonlop_pl
+!! NAME
+!!  nonlop_pl
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_nonlop_pl
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+ use m_contistr01
+ use m_contistr03
+ use m_contistr12
+ use m_contstr21
+ use m_contstr23
+ use m_contstr25
+ use m_contstr25a
+ use m_contstr26
+
+ use m_geometry,   only : strconv
+ use m_kg,         only : ph1d3d
+ use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
+                          metcon, metcon_so, metric_so
+ implicit none
+
+ private
+!!***
+
+ public :: nonlop_pl
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/nonlop_pl
 !! nonlop_pl
 !!
@@ -16,13 +71,6 @@
 !!     Kleinmann-Bylander energy $Ekb^{R}_{ln}$.
 !!   - The |P_{Rlmn}> are the projector functions.
 !! * This routine uses Legendre polynomials Pl to express Vnl.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  choice: chooses possible output:
@@ -134,37 +182,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
- use m_contistr01
- use m_contistr03
- use m_contistr12
- use m_contstr21
- use m_contstr23
- use m_contstr25
- use m_contstr25a
- use m_contstr26
-
- use m_geometry,   only : strconv
- use m_kg,         only : ph1d3d
- use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
-                          metcon, metcon_so, metric_so
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1712,4 +1735,7 @@ end subroutine ddkten
 !!***
 
 end subroutine nonlop_pl
+!!***
+
+end module m_nonlop_pl
 !!***

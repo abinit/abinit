@@ -290,8 +290,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  use m_gemm_nonlop
 
  use m_time,        only : timab
- use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
- use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_copy
+ use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_nonlop_pl,   only : nonlop_pl
+ use m_nonlop_ylm,  only : nonlop_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

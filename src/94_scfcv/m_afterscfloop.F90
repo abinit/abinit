@@ -26,6 +26,50 @@
 
 module m_afterscfloop
 
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_energies
+ use m_errors
+ use m_profiling_abi
+ use m_efield
+ use m_orbmag
+ use m_ab7_mixing
+ use m_hdr
+
+ use m_time,             only : timab
+ use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_geometry,         only : xred2xcart, metric
+ use m_crystal,          only : prtposcar
+ use m_results_gs ,      only : results_gs_type
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron
+ use m_dtset,            only : dtset_copy, dtset_free
+ use m_paw_dmft,         only : paw_dmft_type
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type
+ use m_pawrhoij,         only : pawrhoij_type
+ use m_paw_an,           only : paw_an_type
+ use m_paw_ij,           only : paw_ij_type
+ use m_pawfgrtab,        only : pawfgrtab_type
+ use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
+ use m_pawfgr,           only : pawfgr_type
+ use m_fock,             only : fock_type
+ use m_kg,               only : getph
+ use m_spin_current,     only : spin_current
+ use m_mkrho,            only : mkrho, prtrhomxmn
+ use m_elpolariz,        only : elpolariz
+ use m_nonlop_test,      only : nonlop_test
+
+#ifdef HAVE_BIGDFT
+ use m_abi2big
+ use BigDFT_API, only : last_orthon, &
+      & kswfn_free_scf_data, denspot_free_history,&
+      & write_energies, total_energies, XC_potential,&
+      & eigensystem_info, applyprojectorsonthefly
+#endif
+
  implicit none
 
  private
@@ -239,49 +283,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_energies
- use m_errors
- use m_profiling_abi
- use m_efield
- use m_orbmag
- use m_ab7_mixing
- use m_hdr
-
- use m_time,             only : timab
- use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
- use m_geometry,         only : xred2xcart, metric
- use m_crystal,          only : prtposcar
- use m_results_gs ,      only : results_gs_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron
- use m_dtset,            only : dtset_copy, dtset_free
- use m_paw_dmft,         only : paw_dmft_type
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
- use m_pawrhoij,         only : pawrhoij_type
- use m_paw_an,           only : paw_an_type
- use m_paw_ij,           only : paw_ij_type
- use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
- use m_pawfgr,           only : pawfgr_type
- use m_fock,             only : fock_type
- use m_kg,               only : getph
- use m_spin_current,     only : spin_current
- use m_mkrho,            only : mkrho, prtrhomxmn
- use m_elpolariz,        only : elpolariz
-
-#ifdef HAVE_BIGDFT
- use m_abi2big
- use BigDFT_API, only : last_orthon, &
-      & kswfn_free_scf_data, denspot_free_history,&
-      & write_energies, total_energies, XC_potential,&
-      & eigensystem_info, applyprojectorsonthefly
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

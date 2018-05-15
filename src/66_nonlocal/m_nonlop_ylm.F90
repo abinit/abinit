@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_nonlop_ylm
+!! NAME
+!!  m_nonlop_ylm
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_nonlop_ylm
+
+ use defs_basis
+ use defs_abitypes
+ use m_xmpi
+ use m_profiling_abi
+ use m_errors
+
+ use m_geometry, only : strconv
+ use m_kg,       only : ph1d3d, mkkpg
+ use m_pawcprj,  only : pawcprj_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: nonlop_ylm
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/nonlop_ylm
 !! NAME
 !! nonlop_ylm
@@ -21,13 +68,6 @@
 !!   - Application of (Vnl-lambda.S) in reciprocal space
 !!     (<in|Vnl-lambda.S|in> and derivatives or (Vnl-lambda.S)|in>).
 !! * This routine uses spherical harmonics Ylm to express Vnl.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
@@ -276,28 +316,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine nonlop_ylm(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 &                      enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,hermdij)
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_profiling_abi
- use m_errors
-
- use m_geometry, only : strconv
- use m_kg,       only : ph1d3d, mkkpg
- use m_pawcprj,  only : pawcprj_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
