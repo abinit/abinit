@@ -8,7 +8,6 @@
 
 #include "abi_common.h"
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/rayleigh_ritz_subdiago
 !! NAME
 !! rayleigh_ritz_subdiago
@@ -296,6 +295,7 @@ end subroutine rayleigh_ritz_subdiago
 !!  Should we overlap computations and communications? (easy in theory, tedious in practice)
 !!
 !! SOURCE
+
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
  use defs_basis
@@ -383,7 +383,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
      if(mpi_enreg%me_g0 == 1) gsc(:, 1:npw*nspinor*nband:npw) = gsc(:, 1:npw*nspinor*nband:npw) / sqrt2
    end if
  end if
- 
+
  do iproc=0,nbproc-1
    ! Build the local matrix belonging to processor iproc
    !write(message, *) 'RR: build', iproc
@@ -423,7 +423,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
 &   buffsize_iproc(2), blocksize, coords_iproc(2), grid_dims(2))
    call abi_xgemm(blas_transpose,'n',buffsize_iproc(1),buffsize_iproc(2),vectsize,cone,left_temp,vectsize,&
 &   right_temp,vectsize,czero,ham_iproc,buffsize_iproc(1), x_cplx=cplx)
-   
+
    ! Sum to iproc, and fill sca_ matrices
    call xmpi_sum_master(ham_iproc, iproc, abi_communicator, ierr)
    call xmpi_sum_master(ovl_iproc, iproc, abi_communicator, ierr)
@@ -452,7 +452,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
    call xmpi_sum(sca_ham%buffer_real, abi_complement_communicator, ierr)
    call xmpi_sum(sca_ovl%buffer_real, abi_complement_communicator, ierr)
  end if
- 
+
  ! Transform back
  if(istwf_k == 2) then
    cg = cg / sqrt2
@@ -465,7 +465,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
    end if
  end if
  call timab(timer_subham, 2, tsec)
- 
+
  !======================================================================================================
  ! Do the diagonalization
  !======================================================================================================
@@ -558,22 +558,12 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
 end subroutine rayleigh_ritz_distributed
 !!***
 
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/from_mat_to_block_cyclic
 !! NAME
 !! from_mat_to_block_cyclic
 !!
 !! FUNCTION
 !! Fills block_cyclic_mat with the columns of full_mat owned by iproc, using a 1D block-cyclic distribution
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! full_mat(2,vectsize*nband)=full input matrix
@@ -596,6 +586,7 @@ end subroutine rayleigh_ritz_distributed
 !!
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
+
  use defs_basis
  use defs_abitypes
 
@@ -632,21 +623,12 @@ subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat,
 end subroutine from_mat_to_block_cyclic
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/from_block_cyclic_to_mat
 !! NAME
 !! from_block_cyclic_to_mat
 !!
 !! FUNCTION
 !! Fills the columns of full_mat owned by iproc with block_cyclic_mat, using a 1D block-cyclic distribution
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! block_cyclic_mat(2,vectsize*buffsize)=local part of full_mat
@@ -669,6 +651,7 @@ end subroutine from_mat_to_block_cyclic
 !!
 !! SOURCE
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
+
  use defs_basis
  use defs_abitypes
 
@@ -707,7 +690,6 @@ end subroutine from_block_cyclic_to_mat
 !!***
 #endif
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/pack_matrix
 !! NAME
 !! pack_matrix
@@ -742,6 +724,7 @@ end subroutine from_block_cyclic_to_mat
 !! SOURCE
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
+
  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
@@ -776,5 +759,6 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
      isubh=isubh+cplx
    end do
  end do
+
 end subroutine pack_matrix
 !!***

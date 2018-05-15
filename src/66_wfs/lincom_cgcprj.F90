@@ -5,18 +5,19 @@
 !! lincom_cgcprj
 !!
 !! FUNCTION
-!! For one k point and spinpol, compute a set (size nband_out) of linear combinations of nband_in wavefunctions,
+!! For one k point and spin, compute a set (size nband_out) of linear combinations of nband_in wavefunctions,
 !! that are known in the cg+cprj representation :
 !! cgout_n(:,:) <--- Sum_m [ cg_m(:,:) . alpha_mn ]
 !! cprjout_n(:,:) <--- Sum_m [ cprj_m(:,:) . alpha_mn ]
-!! If nband_out is smaller or equal to nband_in, the result might be in-place (output in cg instead of cgout, and in cprj instead of cprjout).
+!! If nband_out is smaller or equal to nband_in, the result might be in-place
+!! output in cg instead of cgout, and in cprj instead of cprjout).
 !! Otherwise, it is contained in the optional cgout+cprjout pair.
-
+!!
 !! In the present status, the cg and cgout relates to all the k points and spins, and rely on the icg index,
 !! while it is assumed that cprj and cprjout refer to the specific k point and spin.
 !! This is not coherent.
 !! THIS MIGHT BE CHANGED IN THE FUTURE !
-
+!!
 !! This implementation is NOT band-parallelized
 !! Also, it is far of being optimal at the level of linear algebra, and involves extra copying
 !! that are detrimental for performance...
@@ -34,7 +35,7 @@
 !!  icg=shift in cg array to locate current k-point and spinpol (for input, and possibly for in-place output)
 !!  inplace= if 0, output in cgout and cprjout ; if 1, output in cg and cprj
 !!  mcg=second dimension of cg array (mpw*nspinor*mband*mkmem*nsppol)
-!!  mcprj=second dimension of cprj array 
+!!  mcprj=second dimension of cprj array
 !!  natom=number of atoms
 !!  nband_in=number of bands, size of the input set of wavefunctions
 !!  nband_out=number of bands, size of the output set of wavefunctions (should be equal to nband_in if inplace==1)
@@ -43,7 +44,7 @@
 !!  usepaw=1 if PAW is activated
 !!  [icgout= shift in cgout array to locate current k-point and spinpol (for output)]
 !!  [mcgout=second dimension of cgout array (mpw*nspinor*mband*mkmem*nsppol)]
-!!  [mcprjout=second dimension of cprjout array] 
+!!  [mcprjout=second dimension of cprjout array]
 !!
 !! OUTPUT
 !!  [cgout(2,mcgout)= plane wave wavefunction coefficients for the set of output wavefunctions]
@@ -52,7 +53,7 @@
 !! SIDE EFFECTS
 !!  (this quantities are input, and possibly updated output when inplace==1)
 !!  cg(2,mcg)= plane wave wavefunction coefficients for the set of input wavefunctions (all k points and spinpol)
-!!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors 
+!!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!
 !! PARENTS
 !!      cgcprj_cholesky,wf_mixing
@@ -69,12 +70,13 @@
 #include "abi_common.h"
 
  subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
-& icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, & 
+& icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout) ! optional args
 
  use defs_basis
- use m_errors 
+ use m_errors
  use m_profiling_abi
+
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_lincom, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -118,7 +120,7 @@
      MSG_ERROR(' inplace==0 while .not.present(cgout) is not permitted ')
    end if
    if(usepaw==1) then
-     if(.not.present(cprjout))then 
+     if(.not.present(cprjout))then
        MSG_ERROR(' inplace==0 and usepaw==1 while .not.present(cprjout) is not permitted ')
      end if
    end if
