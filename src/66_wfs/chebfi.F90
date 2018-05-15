@@ -76,7 +76,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  use m_errors
  use m_xmpi
  use m_profiling_abi
- use m_efield
  use m_abi_linalg
  use m_invovl
 #if defined HAVE_MPI2
