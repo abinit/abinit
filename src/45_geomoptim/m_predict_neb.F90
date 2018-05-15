@@ -1,4 +1,52 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_predict_neb
+!! NAME
+!!  m_predict_neb
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2012-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_predict_neb
+
+ use defs_basis
+ use defs_abitypes
+ use m_splines
+ use m_mep
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
+
+ implicit none
+
+ private
+!!***
+
+ public :: predict_neb
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/predict_neb
 !! NAME
 !! predict_neb
@@ -7,18 +55,11 @@
 !! Given the past history of images, predict the new set of images using Nudged Elastic Band method.
 !! No change of acell, rprim and vel at present.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
 !! itimimage_eff=time index in the history
 !! list_dynimage(nimage)=list of dynamical images. The non-dynamical ones will not change.
-!!       Example : in the NEB of string method, one expect the two end images to be fixed.
+!!       Example: in the NEB of string method, one expect the two end images to be fixed.
 !! This is quite useful when ground states of the A and B states is known
 !! mpi_enreg=MPI-parallelisation information
 !! natom=dimension of vel_timimage and xred_timimage
@@ -59,24 +100,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
- use defs_basis
- use defs_abitypes
- use m_splines
- use m_mep
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -323,4 +348,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  ABI_DEALLOCATE(xred)
 
 end subroutine predict_neb
+!!***
+
+end module m_predict_neb
 !!***

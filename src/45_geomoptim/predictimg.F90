@@ -83,6 +83,8 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  use m_use_ga
 
  use m_results_gs , only : results_gs_type
+ use m_predict_neb, only : predict_copy
+ use m_predict_steepest, only : predict_steepest
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -157,27 +159,22 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  select case(imgmov)
 
  case(0)
-
    call predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &   ntimimage_stored,results_img)
 
  case(1)
-
    call predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,ndynimage,nimage,&
 &   ntimimage_stored,results_img)
 
  case(2)
-
    call predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(4)
-
    call predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &   ntimimage_stored,results_img)
 
  case(5)
-
    call predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 

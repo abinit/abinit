@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_crystal
+!! NAME
+!!
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2018 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_predict_steepest
+
+ use defs_basis
+ use m_profiling_abi
+ use m_mep
+
+ use m_results_img, only : results_img_type,get_geometry_img
+
+ implicit none
+
+ private
+!!***
+
+ public :: predict_steepest
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/predict_steepest
 !! NAME
 !! predict_steepest
@@ -7,13 +51,6 @@
 !! Given the past history of images, predict the new set of images.
 !! Here, simple steepest descent algorithm, based on the value of the forces on the current timimage step.
 !! No change of acell, rprim and vel at present.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
@@ -56,20 +93,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,&
 &                           ndynimage,nimage,ntimimage_stored,results_img)
-
- use m_profiling_abi
-
- use defs_basis
- use m_results_img, only : results_img_type,get_geometry_img
- use m_mep
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -126,4 +151,7 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
  ABI_DEALLOCATE(rprimd)
 
 end subroutine predict_steepest
+!!***
+
+end module m_predict_steepest
 !!***

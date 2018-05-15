@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_predict_pimd
+!! NAME
+!!  m_predict_pimd
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2010-2018 ABINIT group (GG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_predict_pimd
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_pimd
+ use m_xmpi
+ use m_results_img
+
+ use m_geometry,       only : mkradim, mkrdim
+
+ implicit none
+
+ private
+!!***
+
+ !public :: prtposcar
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/predict_pimd
 !! NAME
 !! predict_pimd
@@ -11,13 +58,6 @@
 !! computes self-consistently the velocities, the stress and the cell at time t and produces
 !! an estimation of the velocities, stress and new cell at time t+dtion
 !! No change of acell and rprim at present.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (GG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! imgmov=gives the algorithm to be used for prediction of new set of images
@@ -64,23 +104,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage_stored,pimd_param,prtvolimg,results_img)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_pimd
- use m_xmpi
- use m_results_img
-
- use m_geometry,       only : mkradim, mkrdim
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -327,4 +352,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
  ABI_DEALLOCATE(mpibuffer)
 
 end subroutine predict_pimd
+!!***
+
+end module m_predict_pimd
 !!***
