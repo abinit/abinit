@@ -1,4 +1,58 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_chebfi
+!! NAME
+!!  m_chebfi
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2014-2018 ABINIT group (AL)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_chebfi
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_xmpi
+ use m_profiling_abi
+ use m_abi_linalg
+ use m_invovl
+
+ use m_time,          only : timab
+ use m_cgtools,       only : dotprod_g
+ use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
+ use m_hamiltonian,   only : gs_hamiltonian_type
+ use m_getghc,        only : getghc
+
+ implicit none
+
+ private
+!!***
+
+ public :: chebfi
+!!***
+
+contains
+!!***
+
+
 !!****f* ABINIT/chebfi
 !! NAME
 !! chebfi
@@ -6,13 +60,6 @@
 !! FUNCTION
 !! this routine updates the wave functions at a given k-point,
 !! using the ChebFi method (see paper by A. Levitt and M. Torrent)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variales for this dataset
@@ -31,7 +78,7 @@
 !!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If gs_hamk%usepaw==0
 !!    enl(nband)=contribution from each band to nonlocal pseudopotential part of total energy, at this k-point
- !!
+!!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
 !!
@@ -63,31 +110,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use m_abi_linalg
- use m_invovl
-#if defined HAVE_MPI2
- use mpi
-#endif
-
- use m_time, only : timab
- use m_cgtools, only : dotprod_g
- use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_getghc,        only : getghc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -98,10 +121,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 !End of the abilint section
 
  implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -579,20 +598,12 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 end subroutine chebfi
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/cheb_poly
 !! NAME
 !! cheb_poly
 !!
 !! FUNCTION
 !! Computes the value of the Chebyshev polynomial of degree n on the interval [a,b] at x
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! x= input variable
@@ -602,8 +613,6 @@ end subroutine chebfi
 !!
 !! OUTPUT
 !! y= Tn(x)
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      chebfi
@@ -615,7 +624,6 @@ end subroutine chebfi
 !! SOURCE
 
 function cheb_poly(x, n, a, b) result(y)
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -645,7 +653,6 @@ function cheb_poly(x, n, a, b) result(y)
 end function cheb_poly
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/cheb_oracle
 !! NAME
 !! cheb_oracle
@@ -653,13 +660,6 @@ end function cheb_poly
 !! FUNCTION
 !! Returns the number of necessary iterations to decrease residual by at least tol
 !! Here as in the rest of the code, the convention is that residuals are squared (||Ax-lx||^2)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! x= input variable
@@ -671,8 +671,6 @@ end function cheb_poly
 !! OUTPUT
 !! n= number of iterations needed to decrease residual by tol
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      chebfi
 !!
@@ -683,7 +681,6 @@ end function cheb_poly
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -723,4 +720,7 @@ function cheb_oracle(x, a, b, tol, nmax) result(n)
  end if
 
 end function cheb_oracle
+!!***
+
+end module m_chebfi
 !!***

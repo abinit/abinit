@@ -21,7 +21,7 @@ sources = [
  "m_esymm.F90",    # Modules first
  "m_bandfft_kpt.F90",  # Modules first
  "m_invovl.F90",
- "chebfi.F90",
+ "m_chebfi.F90",
  "cgcprj_cholesky.F90",
  "dotprod_set_cgcprj.F90",
  "dotprodm_sumdiag_cgcprj.F90",
