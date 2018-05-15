@@ -63,7 +63,7 @@ module m_dft_energy
  use m_getghc,           only : getghc
  use m_rhotoxc,          only : rhotoxc
  use m_mpinfo,           only : proc_distrb_cycle
- use m_nonlop            only : nonlop
+ use m_nonlop,           only : nonlop
 
  implicit none
 
@@ -229,7 +229,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use interfaces_53_ffts
  use interfaces_62_poisson
  use interfaces_65_paw
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

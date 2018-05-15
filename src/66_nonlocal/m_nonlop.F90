@@ -42,7 +42,7 @@ module m_nonlop
  private
 !!***
 
- public :: nonlopt
+ public :: nonlop
 !!***
 
 contains
@@ -318,11 +318,12 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop'
- use interfaces_66_nonlocal, except_this_one => nonlop
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

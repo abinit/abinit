@@ -121,13 +121,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_spacepar,         only : meanvalue_g
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
- use m_nonlop            only : nonlop
+ use m_nonlop,            only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstrnps'
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

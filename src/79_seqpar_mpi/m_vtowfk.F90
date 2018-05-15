@@ -45,7 +45,7 @@ module m_vtowfk
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
- use m_nonlop       only : nonlop
+ use m_nonlop,      only : nonlop
 
  implicit none
 
@@ -162,7 +162,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #define ABI_FUNC 'vtowfk'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_79_seqpar_mpi
 !End of the abilint section

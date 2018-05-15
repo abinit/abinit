@@ -158,7 +158,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_mkffnl,     only : mkffnl
  use m_getgh1c,    only : rf_transgrid_and_pack
  use m_mpinfo,     only : proc_distrb_cycle
- use m_nonlop      only : nonlop
+ use m_nonlop,     only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
