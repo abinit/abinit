@@ -1421,6 +1421,8 @@ Variable(
 If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded,
 but simply issue a warning. There will be no rescaling. If 1, after tentative
 rescaling as described in [[dilatmx]], will stop the execution.
+Also, the use of [[chkdilatmx]]=0 allows one to set [[dilatmx]] to a larger value than 1.15 ,
+otherwise forbidden, as being a waste of CPU and memory.
 """,
 ),
 
@@ -2216,20 +2218,33 @@ Variable(
     defaultval=1.0,
     mnemonics="lattice DILATation: MaXimal value",
     text="""
-Gives the maximal permitted scaling of the lattice parameters when the cell
-shape and dimension is varied (see variable [[optcell]]). Accordingly defines
-the plane wave basis set for this purpose. The [[dilatmx]] threshold might be
-exceeded if [[chkdilatmx]]=0, otherwise ABINIT exits after three tentative
-rescalings, as described below.
+[[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
+on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
+Usefull only when [[ionmov]]==2 and [[optcell]]/=0, that is, cell optimization.
 
-[[dilatmx]] is used to define the sphere of plane waves and FFT box coherent
-with the possible modifications of the cell ([[ionmov]]==2 and [[optcell]]
-/=0). For these definitions, it is equivalent to changing [[ecut]] by
-multiplying it by [[dilatmx]]  2  (the result is an "effective ecut", called
-internally "ecut_eff", other uses of [[ecut]] being not modified when [[dilatmx]]>1.0.
+In the default mode ([[chkdilatmx]]=1), when the [[dilatmx]] threshold is exceeded, 
+ABINIT will rescale uniformly the
+tentative new primitive vectors to a value that leads at most to 90% of the
+maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
+prevent the geometry optimization algorithms to have taken a too large trial
+step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
+booking of a larger planewave basis, but will not rescale the tentative new primitive vectors 
+nor lead to an exit when the [[dilatmx]] treshold is exceeded.
+The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
+determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
+this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0 .
+
+Detailed explanation : The memory space for the planewave basis set is defined 
+by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
+internally "ecut_eff". Other uses of [[ecut]] are not modified when [[dilatmx]]>1.0.
+Still, operations (like scalar products) are taking into account these fake non-used planewaves,
+thus slowing down the ABINIT execution.
 Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
 is allowed, although its meaning is no longer related to a maximal expected scaling.
+
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
+By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
+This behaviour will be overcome by using [[chkdilatmx]]==0 .
 Supposing you think that the optimized [[acell]] values might be 10% larger
 than your input values, use simply [[dilatmx]] 1.1. This will already lead to
 an increase of the number of planewaves by a factor (1.1)  3  =1.331, and a
@@ -2237,13 +2252,6 @@ corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
 
-When the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
-tentative new primitive vectors to a value that leads at most to 90% of the
-maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
-forbid the geometry optimization algorithms to have take a too large trial
-step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
-definition of an appropriate planewave basis, but will not lead to an exit
-when the threshold is exceeded.
 """,
 ),
 

@@ -1102,15 +1102,16 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 
 !First step
  do ipert1=1,mpert
-   do ipert2=1,mpert
-     fac = one; if (ipert2==natom+2) fac = two_pi ** 2
+   fac = one; if (ipert1==natom+2) fac = two_pi ** 2
 
+   do ipert2=1,mpert
      do ii=1,2
        do idir1=1,3
          do idir2=1,3
            vec1(idir2)=d2red(ii,idir1,ipert1,idir2,ipert2)
          end do
-         call cart39(flg1,flg2,rprimd,ipert2,natom,gprimd,vec1,vec2)
+         ! Transform vector from cartesian to reduced coordinates
+         call cart39(flg1,flg2,transpose(rprimd),ipert1,natom,transpose(gprimd),vec1,vec2)
          do idir2=1,3
            d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2) * fac
          end do
@@ -1121,15 +1122,16 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 
 !Second step
  do ipert1=1,mpert
-   fac = one; if (ipert1==natom+2) fac = two_pi ** 2
-
    do ipert2=1,mpert
+     fac = one; if (ipert2==natom+2) fac = two_pi ** 2
+
      do ii=1,2
        do idir2=1,3
          do idir1=1,3
            vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
          end do
-         call cart39(flg1,flg2,rprimd,ipert1,natom,gprimd,vec1,vec2)
+         ! Transform vector from cartesian to reduced coordinates
+         call cart39(flg1,flg2,transpose(rprimd),ipert2,natom,transpose(gprimd),vec1,vec2)
          do idir1=1,3
            d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
          end do
