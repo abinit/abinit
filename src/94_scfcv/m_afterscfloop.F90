@@ -284,6 +284,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -292,7 +293,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
- use interfaces_66_nonlocal
  use interfaces_67_common
 !End of the abilint section
 

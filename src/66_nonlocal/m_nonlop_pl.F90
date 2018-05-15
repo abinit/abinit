@@ -189,11 +189,12 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_pl'
- use interfaces_66_nonlocal, except_this_one => nonlop_pl
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

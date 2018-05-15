@@ -123,7 +123,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_test'
- use interfaces_66_nonlocal, except_this_one => nonlop_test
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

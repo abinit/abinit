@@ -323,11 +323,12 @@ contains
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,hermdij)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_ylm'
- use interfaces_66_nonlocal, except_this_one => nonlop_ylm
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -1208,4 +1209,7 @@ contains
  DBG_EXIT("COLL")
 
 end subroutine nonlop_ylm
+!!***
+
+end module m_nonlop_ylm
 !!***
