@@ -103,6 +103,7 @@ contains
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

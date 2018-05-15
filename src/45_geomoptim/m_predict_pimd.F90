@@ -40,7 +40,7 @@ module m_predict_pimd
  private
 !!***
 
- !public :: prtposcar
+ public :: predict_pimd
 !!***
 
 contains
@@ -107,11 +107,12 @@ contains
 subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage_stored,pimd_param,prtvolimg,results_img)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predict_pimd'
- use interfaces_45_geomoptim, except_this_one => predict_pimd
+ use interfaces_45_geomoptim
 !End of the abilint section
 
  implicit none
