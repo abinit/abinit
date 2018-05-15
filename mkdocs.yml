@@ -191,6 +191,9 @@ pages:
         - Images: tutorial/paral_images.md
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
+    - Multibinit:
+        - Lattice Model: tutorial/lattice_model.md
+        - Fit Process: tutorial/fit_process.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md

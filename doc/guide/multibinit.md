@@ -84,10 +84,18 @@ Multibinit needs a DDB file of abinit to build the harmonic part of the potentia
 response functions ([[lesson:rf2]]) to compute the DDB for the phonon part, then follow the lesson on elasticity ([[lesson:elastic]]) to compute the DDB for the elastic part. 
 At the end, use [[help:mrgddb|DDB merge tool]] to generate the model.ddb.
 
+To learn the procedure to compute the  harmonic part of the potential, you can follow this [[lesson:lattice_model | tutorial]]
+
 ### 3.2 How to compute the anharmonic part from a training set
 
 To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. This file will be used to fit a polynome following the method developed in this [[cite:Escorihuela-Sayalero2017|paper]]. Generate the training set requieres to get some experience in molecular dynamics simulation. 
 
 ### 3.3 How to bound a model
 
+Multibinit includes an automatic bound process.
+In this [[lesson:fit_process | tutorial]], you will learn the basic knowlegde to bound a model in multibinit.
+
 ### 3.4 How to bound run a dynamics
+
+Multibinit takes advantage of the mover routine of ABINIT which allows the users to perform atomic relaxation, molecular dynamics and monte Carlo simulations.
+In this [[lesson:lattice_model | tutorial]], you will learn the basic knowlegde to perform a dynamics into multibinit.
