@@ -282,11 +282,12 @@ After having edited the python modules you **must rerun** `./mksite serve` to se
 
 Bibliographic references must be in bibtex format and should provide enough information so that the python code
 can generate appropriate links in the website.
-The central bibliography database is presently located in `~abinit/doc/abiref.bib`
+The central bibliography database is presently located in `~abinit/doc/abiref.bib`.
 
-For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
-(there are units tests to enforce the presence of particular entries in the bibtex document and
-your bibtex may not fullfill these requirements).
+For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your own bibtex file
+to the central bibliography database. Indeed,
+there are units tests to enforce the presence of particular entries in the bibtex document and
+your bibtex may not fullfill these requirements.
 
 Providing bibtex data from the publisher site is a better method.
 If you know the DOI of the article, it is also possible to use [BetterBib](https://github.com/nschloe/betterbib)
@@ -328,6 +329,8 @@ Run the tests with:
     pytest abimkdocs_tests/test_bibtex.py
 
 with pytest to validate your changes.
+
+In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wiki-links) with the "cite" namespace.
 
 ## Topics
 
