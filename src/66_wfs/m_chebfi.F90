@@ -32,6 +32,7 @@ module m_chebfi
  use m_xmpi
  use m_profiling_abi
  use m_abi_linalg
+ use m_rayleigh_ritz
  use m_invovl
 
  use m_time,          only : timab

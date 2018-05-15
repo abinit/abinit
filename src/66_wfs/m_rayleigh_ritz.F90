@@ -1,12 +1,58 @@
-! This file contains routines that perform the Rayleigh-Ritz,
-! either by forming the full matrix (_subdiago) or by forming the
-! distributed matrix in block-cyclic form (_distributed)
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_rayleigh_ritz
+!! NAME
+!!  m_rayleigh_ritz
+!!
+!! FUNCTION
+!! This file contains routines that perform the Rayleigh-Ritz,
+!! either by forming the full matrix (_subdiago) or by forming the
+!! distributed matrix in block-cyclic form (_distributed)
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2014-2018 ABINIT group (AL)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "abi_common.h"
+
+module m_rayleigh_ritz
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_cgtools
+ use m_xmpi
+ use m_profiling_abi
+ use m_abi_linalg
+ use m_slk
+
+ use m_time,          only : timab
+ use m_numeric_tools, only : pack_matrix
+
+ implicit none
+
+ private
+!!***
+
+ public :: rayleigh_ritz
+#if defined HAVE_LINALG_SCALAPACK
+ public :: rayleigh_ritz_distributed
+#endif
+!!***
+
+contains
+!!***
 
 !!****f* ABINIT/rayleigh_ritz_subdiago
 !! NAME
@@ -15,13 +61,6 @@
 !! FUNCTION
 !! Performs a rayleigh-ritz procedure (subspace rotation), building the
 !! hamiltonian/overlap matrices in full and calling the subdiago method
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  mpi_enreg=informations about MPI parallelization
@@ -46,19 +85,10 @@
 !!
 !! NOTES
 !!  TODO choose generalized eigenproblem or ortho + diago (see #if 1)
+!!
 !! SOURCE
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
- use defs_basis
- use defs_abitypes
- use m_cgtools
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use m_abi_linalg
-
- use m_time,     only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -247,11 +277,11 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  call timab(timer_rotation, 2, tsec)
 
 #endif
+
 end subroutine rayleigh_ritz_subdiago
 !!***
 
 #if defined HAVE_LINALG_SCALAPACK
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/rayleigh_ritz_distributed
 !! NAME
 !! rayleigh_ritz_distributed
@@ -259,13 +289,6 @@ end subroutine rayleigh_ritz_subdiago
 !! FUNCTION
 !! Performs a rayleigh-ritz procedure (subspace rotation), building the distributed
 !! hamiltonian/overlap matrices directly, and calling the ScaLapack routines
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  mpi_enreg=informations about MPI parallelization
@@ -297,16 +320,6 @@ end subroutine rayleigh_ritz_subdiago
 !! SOURCE
 
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use m_abi_linalg
- use m_slk
-
- use m_time,     only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -587,9 +600,6 @@ end subroutine rayleigh_ritz_distributed
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
- use defs_basis
- use defs_abitypes
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -650,10 +660,8 @@ end subroutine from_mat_to_block_cyclic
 !! CHILDREN
 !!
 !! SOURCE
-subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
- use defs_basis
- use defs_abitypes
+subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -688,77 +696,9 @@ subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat,
 
 end subroutine from_block_cyclic_to_mat
 !!***
+
 #endif
+!ScaLapack
 
-!!****f* ABINIT/pack_matrix
-!! NAME
-!! pack_matrix
-!!
-!! FUNCTION
-!! Packs a matrix into hermitian format
-!!
-!! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AL)
-!! this file is distributed under the terms of the
-!! gnu general public license, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!! N: size of matrix
-!! cplx: is the matrix complex
-!! mat_in(2, N*N)= matrix to be packed
-!!
-!! OUTPUT
-!! mat_out(N*N+1)= packed matrix
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!      rayleigh_ritz
-!!
-!! CHILDREN
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine pack_matrix(mat_in, mat_out, N, cplx)
-
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_matrix'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_matrix'
-!End of the abilint section
-
- integer, intent(in) :: N, cplx
- real(dp), intent(in) :: mat_in(cplx, N*N)
- real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
- integer :: isubh, i, j
-
- ! *************************************************************************
-
- isubh = 1
- do j=1,N
-   do i=1,j
-     mat_out(isubh)    = mat_in(1, (j-1)*N+i)
-     ! bad for vectorization, but it's not performance critical, so ...
-     if(cplx == 2) then
-       mat_out(isubh+1)  = mat_in(2, (j-1)*N+i)
-     end if
-     isubh=isubh+cplx
-   end do
- end do
-
-end subroutine pack_matrix
+end module m_rayleigh_ritz
 !!***
