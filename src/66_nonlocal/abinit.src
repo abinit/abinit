@@ -20,12 +20,11 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_contract.F90",
  "ctocprj.F90",
- "ddkten.F90",
  "dfpt_mkffkg.F90",
  "getcprj.F90",
  "metstr.F90",
  "mkffkg.F90",
- "mkffnl.F90",
+ "m_mkffnl.F90",
  "m_vkbr.F90",
  "m_fock.F90",
  "m_gemm_nonlop.F90",

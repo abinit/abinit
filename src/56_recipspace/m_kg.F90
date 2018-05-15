@@ -34,6 +34,7 @@ MODULE m_kg
 
  use m_fftcore,     only : kpgsph, bound
  use defs_abitypes, only : MPI_type
+ use m_mpinfo,      only : proc_distrb_cycle
 
  implicit none
 
@@ -539,7 +540,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'kpgio'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

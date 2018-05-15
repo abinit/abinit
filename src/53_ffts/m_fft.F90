@@ -52,7 +52,7 @@ MODULE m_fft
  use m_blas,          only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
 &                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
- use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
  implicit none
@@ -1552,7 +1552,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

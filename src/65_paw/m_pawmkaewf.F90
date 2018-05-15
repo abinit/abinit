@@ -54,6 +54,7 @@ module m_pawmkaewf
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
+ use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 
@@ -147,7 +148,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkaewf'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section

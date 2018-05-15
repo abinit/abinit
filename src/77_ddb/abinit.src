@@ -20,13 +20,12 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_epweights.F90",
  "defs_elphon.F90",
- "ddb_diel.F90",
+ "m_ddb_diel.F90",
  "ddb_elast.F90",
  "m_ddb_interpolate.F90",
  "m_eliashberg_1d.F90",
  "m_elphon.F90",
  "m_harmonic_thermo.F90",
- "ddb_hybrid.F90",
  "ddb_internalstr.F90",
  "m_a2ftr.F90",
  "m_anaddb_dataset.F90",
@@ -40,7 +39,7 @@ sources = [
  "ddb_piezo.F90",
  "m_raman.F90",
  "m_iogkk.F90",
- "relaxpol.F90",
+ "m_relaxpol.F90",
  "m_thmeig.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

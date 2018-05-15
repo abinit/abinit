@@ -15,6 +15,7 @@
  acell_3img    3*10.0d0  ! Intermediate point
  acell_lastimg 3*11.0d0  ! End point
  dilatmx 1.25
+ chkdilatmx 0
 
  xred  3*0.200d0
        3*-0.200d0

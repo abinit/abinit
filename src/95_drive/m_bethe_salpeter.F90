@@ -49,7 +49,7 @@ module m_bethe_salpeter
  use m_io_tools,        only : file_exists, iomode_from_fname
  use m_geometry,        only : mkrdim, metric, normv
  use m_abilasi,         only : matrginv
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
@@ -85,6 +85,10 @@ module m_bethe_salpeter
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
  use m_exc_build,       only : exc_build_ham
+ use m_setvtr,          only : setvtr
+ use m_mkrho,           only : prtrhomxmn
+ use m_pspini,          only : pspini
+ use m_drivexc,         only : mkdenpos
 
  implicit none
 
@@ -183,12 +187,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #undef ABI_FUNC
 #define ABI_FUNC 'bethe_salpeter'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

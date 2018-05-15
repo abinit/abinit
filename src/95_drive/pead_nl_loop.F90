@@ -113,6 +113,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_pawrhoij, only : pawrhoij_type
  use m_inwffil,  only : inwffil
  use m_spacepar, only : hartre
+ use m_initylmg, only : initylmg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,7 +122,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_72_response
  use interfaces_79_seqpar_mpi

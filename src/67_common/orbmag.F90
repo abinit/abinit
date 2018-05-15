@@ -92,16 +92,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_kg,           only : mkkin 
  use m_hamiltonian,  only : init_hamiltonian,destroy_hamiltonian,&
 &                           load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
-
+ use m_getghc,        only : getghc
  use m_fftcore,          only : kpgsph
  use m_fft,              only : fftpac
+ use m_mkffnl,           only : mkffnl
  use m_paw_ij,           only : paw_ij_type
  use m_pawang,           only : pawang_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-      & pawcprj_get, pawcprj_getdim, pawcprj_set_zero, pawcprj_symkn
+ use m_pawcprj,  only :  pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
+                         pawcprj_get, pawcprj_getdim, pawcprj_set_zero, pawcprj_symkn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -111,8 +112,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

@@ -83,13 +83,13 @@
 &                       pawcprj_gather_spin, pawcprj_free
  use m_paw_io,   only : pawio_print_ij
  use m_paw_dmft, only : paw_dmft_type
+ use m_mpinfo,   only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrhoij'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw, except_this_one => pawmkrhoij
 !End of the abilint section
 
@@ -222,7 +222,7 @@
        bdtot_index=bdtot_index+nband_k
        cycle
      end if
-     
+
      cplex=2;if (istwfk(ikpt)>1) cplex=1
 
 !    In case of spinors parallelism, need some extra storage
