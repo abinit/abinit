@@ -280,13 +280,16 @@ After having edited the python modules you **must rerun** `./mksite serve` to se
 
 ## How to add a bibliographic reference
 
-Citations must be in bibtex format and provide enough information so that the python code
-can generate appropriated links in the website.
+Bibliographic references must be in bibtex format and should provide enough information so that the python code
+can generate appropriate links in the website.
+The central bibliography database is presently located in `~abinit/doc/abiref.bib`
+
 For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
 (there are units tests to enforce the presence of particular entries in the bibtex document and
 your bibtex may not fullfill these requirements).
 
-If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
+Providing bibtex data from the publisher site is a better method.
+If you know the DOI of the article, it is also possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
 BetterBib is available from the Python Package Index, so simply type:
 
