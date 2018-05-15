@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_smatrix
+!! NAME
+!!  m_smatrix
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2000-2018 ABINIT  group (MVeithen)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_smatrix
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_cgtools,   only : overlap_g
+ use m_abilasi,   only : dzgedi, dzgefa
+
+ implicit none
+
+ private
+!!***
+
+ public :: smatrix
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/smatrix
 !! NAME
 !! smatrix
@@ -7,13 +51,6 @@
 !! Compute the overlap matrix between the k-points k and k + dk.
 !! Depending on the value of job and ddkflag, compute also its determinant,
 !! its inverse and the product of its inverse with the wavefunctions at k.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT  group (MVeithen)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! cg(2,mcg_k) = planewave coefficients of wavefunctions at k
@@ -101,22 +138,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 &  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_cgtools,   only : overlap_g
- use m_abilasi,   only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -608,4 +632,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !ENDDEBUG
 
 end subroutine smatrix
+!!***
+
+end module m_smatrix
 !!***

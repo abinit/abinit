@@ -133,6 +133,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                         pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
                         pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
  use m_mpinfo,    only : proc_distrb_cycle
+ use m_smatrix,   only : smatrix
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -41,6 +41,7 @@ module m_cgwf
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
  use m_getghc,        only : getghc
+ use m_smatrix,       only : smatrix
 
  implicit none
 
