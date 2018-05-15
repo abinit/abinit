@@ -22,22 +22,24 @@ This is an example of how to bound a model with multibinit:
 
 * General flags:
 
-        bound_coeff  = 2
+        bound_coeff    = 2
         bound_maxCoeff = 10  
 
 * Flag for the generation of the coefficients:
   
-        bound_rangePower     = 6 8
-        bound_cutoff         = 10 
-        bound_anhaStrain     = 0
-
+        bound_rangePower = 6 8
+        bound_cutoff     = 10 
+        bound_anhaStrain = 0
+        bound_SPCoupling = 1
+        bound_anhaStrain = 0
+  
 * Flag for the molecular dynamics during the bound process:
 
         bound_cell  = 10 10 10
         bound_step  = 5000  
         bound_temp  = 500
   
-The previous flags will activate the option two of the bound process ([[multibinit:bound_coeff]]=2) and try to add up to 10 anharmonic coefficients ([[multibinit:bound_maxCoeff]]=10). The list of all the possible coefficients will be generated with a power range of 3 to 4 ([[multibinit:bound_rangePower]]=6 8) and a cut off of 10 bohr ([[multibinit:bound_cutoff]]=10). This option of the bound process will add one by one the additional coefficients and test if the model is bound by running a molecular dynamics on 10 10 10 supercell  ([[multibinit:bound_cell]]=10 10 10) at 500K  ([[multibinit:bound_temp]]=500)  over 5000 time step ([[multibinit:bound_step]]=5000).
+The previous flags will activate the option two of the bound process ([[multibinit:bound_coeff]]=2) and try to add up to 10 anharmonic coefficients ([[multibinit:bound_maxCoeff]]=10). The list of all the possible coefficients will be generated with a power range of 3 to 4 ([[multibinit:bound_rangePower]]=6 8) and a cut off of 10 bohr ([[multibinit:bound_cutoff]]=10). Moreover, the strain-phonon counpling is activated ([[multibinit:bound_SPCoupling]]=1) but you will not fit anharmonic strain ([[multibinit:bound_anhaStrain]]=0). This option of the bound process will add one by one the additional coefficients and test if the model is bound by running a molecular dynamics on 10 10 10 supercell  ([[multibinit:bound_cell]]=10 10 10) at 500K  ([[multibinit:bound_temp]]=500)  over 5000 time step ([[multibinit:bound_step]]=5000).
 
 ## Related Input Variables
 
