@@ -111,6 +111,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_atm2fft,      only : dfpt_atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

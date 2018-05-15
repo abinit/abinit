@@ -185,9 +185,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_paw_an,   only : paw_an_type, paw_an_reset_flags
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_copy,pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,pawrhoij_get_nspden
- use m_pawcprj,  only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_copy
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
+&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr, mkkpg
@@ -197,6 +197,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_mkffnl,   only : mkffnl
  use m_getgh1c,  only : getgh1c
  use m_dfpt_mkrho, only : dfpt_accrho
+ use m_atm2fft,    only : dfpt_atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
