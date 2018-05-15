@@ -1,24 +1,61 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_steepdesc
+!! NAME
+!!  m_pred_steepdesc
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_steepdesc
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+ use m_geometry,       only : mkradim, mkrdim, xcart2xred, xred2xcart
+ use m_predtk,         only : fdtion
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_steepdesc
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_steepdesc
 !! NAME
 !! pred_steepdesc
 !!
 !! FUNCTION
 !! Ionmov predictor (21) Steepest Descent Algorithm
-!! The update of positions is given by the following
-!! equation:
+!! The update of positions is given by the following equation:
 !!
 !! $$\Delta r_{n,i}=\lambda F_{n,i}$$
 !!
 !! r is the position of the 'n' ion along the 'i' direction
 !! F is the force of the 'n' ion along the 'i' direction.
-!!
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! ab_mover<type abimover>=Subset of dtset only related with
@@ -35,8 +72,7 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces,
-!!                               stresses, cell and energies.
+!! hist<type abihist>=Historical record of positions, forces, stresses, cell and energies.
 !!
 !! ncycle: Number of cycles of a particular time step
 !!
@@ -53,22 +89,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine pred_steepdesc(ab_mover,forstr,hist,itime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,       only : mkradim, mkrdim, xcart2xred, xred2xcart
- use m_predtk,         only : fdtion
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -232,4 +253,7 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
  hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
 end subroutine pred_steepdesc
+!!***
+
+end module m_pred_steepdesc
 !!***

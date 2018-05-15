@@ -43,7 +43,7 @@ module m_mover
 
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2fred, chkdilatmx
+ use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
  use m_time,               only : abi_wtime, sec2str
@@ -65,6 +65,8 @@ module m_mover
  use m_pred_velverlet,     only : pred_velverlet
  use m_pred_moldyn,        only : pred_moldyn
  use m_pred_langevin,      only : pred_langevin
+ use m_pred_steepdesc,     only : pred_steepdesc
+ use m_pred_simple,        only : pred_simple, prec_simple
 
  implicit none
 
@@ -1286,8 +1288,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
- !use m_abihist, only : abihist,abihist_findIndex
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1394,13 +1394,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,  only : fcart2fred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
