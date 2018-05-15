@@ -141,7 +141,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 #define ABI_FUNC 'berryphase_new'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_65_paw
 !End of the abilint section
 

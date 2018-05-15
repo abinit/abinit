@@ -117,7 +117,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawgrnl'
- use interfaces_64_psp
  use interfaces_65_paw, except_this_one => pawgrnl
 !End of the abilint section
 

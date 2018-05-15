@@ -232,7 +232,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
@@ -2549,7 +2548,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

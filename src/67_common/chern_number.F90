@@ -99,7 +99,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section

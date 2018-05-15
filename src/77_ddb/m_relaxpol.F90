@@ -115,7 +115,6 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'relaxpol'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
