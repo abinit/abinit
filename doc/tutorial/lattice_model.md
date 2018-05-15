@@ -78,7 +78,7 @@ In this tutorial, we will take as an example of a material without unstabilities
 for the other lessons. Why not create "Work_latticeModel"*
 
 
-The file ~abinit/tests/tutorespfn/Input/tmulti1.files lists the file names and root names.
+The file ~abinit/tests/tutomultibinit/Input/tmulti1.files lists the file names and root names.
 You can copy it in the Work_latticeModel directory and look at this file, you should see:
 
       tutomulti1_1.in
@@ -87,9 +87,9 @@ You can copy it in the Work_latticeModel directory and look at this file, you sh
 
 As mentionned in the [[help:multibinit | guide of multibinit]]:
 
-    * tutomulti1_1.in is the main input file
-    * tutomulti1_1.out is the main output
-    * tmulti1_DDB is the DDB which contains the system definition and a list of derivatives
+   * tutomulti1_1.in is the main input file
+   * tutomulti1_1.out is the main output
+   * tmulti1_DDB is the DDB which contains the system definition and a list of derivatives
 
 It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti1_DDB and ~abinit/tests/tutomultibinit/Input/tmulti1_DDB in your work_latticeModel directory. 
 You should read carefully the input file:
@@ -98,7 +98,7 @@ You should read carefully the input file:
 
 You now should make the run (less than a seconds):
 
-  ./multibinit < tmulti1.files > /tmulti1_1_stdout
+  ./multibinit < tmulti1.files > tmulti1_1_stdout
 
 The resulting main output file, trf1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
@@ -108,14 +108,30 @@ The aim of the run that you just made was to read the DDB file, generate the sho
 You can see into the output file, the Born effective charges, The clamped ion elastic tensor and the internal strain coupling parameters. Take some time to open and read the tmulti1_1.out file.
 Once the DDB file is complete, the generation of the XML file within multibinit requires only few input variables:
 
-   * [[multibinit:prt_model]]= 1     => active the generation of the XML file
+   * [[multibinit:prt_model]] = 1     => active the generation of the XML file, takes the time to read the possible options for [[multibinit:prt_model]].
    * [[multibinit:ngqpt]]    = 2 2 2 => specified the q-point mesh included in the tmulti1_DDB file
-   * [[multibinit:dipdip]]   = 0     => here the computation of the dipole-dipole interaction is disable because we don't need to compute it to generate the XML, indeed in multibinit will be able to regenerate the dipole-dipole interaction in a next run.
+   * [[multibinit:dipdip]]   = 0     => here the computation of the dipole-dipole interaction is disable because we don't need to compute it to generate the XML, indeed in multibinit will be able to regenerate the dipole-dipole interaction in a next run. Let's remind you that the default for this option is 1, so in many of you multibinit run you will never use this input.
 
-After this run, you should see in you directory tmulti1_1_model.xml, you can take some time to open and read this file. You will find all the informations about the system definition (lattice parameters, atomic positions) and the data for the harmonic part of the potential.
+After this run, you should see in your directory tmulti1_1_model.xml, you can take some time to open and read this file. You will find all the informations about the system definition (lattice parameters, atomic positions) and the data for the harmonic part of the potential.
 
+You XML file is now generated you can now use it as input for multibinit. To do that, open copy now in your work directory the files ~abinit/tests/tutomultibinit/Input/tmulti2.files; you should see inside:
 
+      tutomulti1_2.in
+      tutomulti1_2.out
+      tmulti1_1_model.xml
 
+Here the DDB file is remplace by the XML file, do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory and run:
+
+   ./multibinit < tmulti2.files > tmulti1_2_stdout
+  
+In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit will generate again a new XML which is not useful. You can set this input variable to 0 but in this case, multibinit will just read the XML.
+
+With the two last examples, we showed that multibinit is able to read either the DDB file or the XML as input for the system definition and the harmonic part of the potential.
+
+We can now run our first dynamic within multibinit, you can copy into you directory the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3*. and have a look the
+
+{% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
+  
 * * *
 
 This MULTIBINIT tutorial is now finished. You are advised to read now the [[lesson:fit_process|second tutorial on Multibinit]]

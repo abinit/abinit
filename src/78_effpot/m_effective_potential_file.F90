@@ -2670,7 +2670,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
+! dipdip is always set to 1 in this call
+  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,1,inp%rfmeth,&
 &   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
