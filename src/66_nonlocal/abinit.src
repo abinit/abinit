@@ -30,7 +30,6 @@ sources = [
  "m_gemm_nonlop.F90",
  "m_hamiltonian.F90",
  "m_nonlop.F90",
- "nonlop_gpu.F90",
  "m_nonlop_pl.F90",
  "m_nonlop_test.F90",
  "m_nonlop_ylm.F90",
