@@ -118,7 +118,6 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 #define ABI_FUNC 'dfpt_dyfro'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

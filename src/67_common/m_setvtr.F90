@@ -51,6 +51,7 @@ module m_setvtr
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
  use m_rhotoxc,           only : rhotoxc
+ use m_mklocl,            only : mklocl
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

@@ -325,7 +325,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

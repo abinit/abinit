@@ -137,11 +137,12 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl'
- use interfaces_67_common, except_this_one => mklocl
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -294,6 +295,7 @@ end subroutine mklocl
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

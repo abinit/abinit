@@ -186,7 +186,6 @@ contains
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
