@@ -116,24 +116,11 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 &  mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvars'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => outvars
 !End of the abilint section
 
  implicit none

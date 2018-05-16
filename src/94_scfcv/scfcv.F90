@@ -202,18 +202,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
- use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify,&
-&                               paw_an_reset_flags
+ use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_pawfgrtab,        only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder, pawcprj_getdim
  use m_pawdij,           only : pawdij, symdij,pawdijhat
  use m_pawfgr,           only : pawfgr_type
- use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
-&                               paw_ij_reset_flags
+ use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy,&
-&                               fock_BZ_destroy, fock_update_ exc, fock_updatecwaveocc
+ use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
+                                fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
  use m_gwls_hamiltonian, only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc

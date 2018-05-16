@@ -805,7 +805,6 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 #undef ABI_FUNC
 #define ABI_FUNC 'prtimg'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
