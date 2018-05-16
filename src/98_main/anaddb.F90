@@ -90,7 +90,6 @@ program anaddb
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none

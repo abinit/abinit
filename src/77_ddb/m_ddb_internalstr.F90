@@ -40,7 +40,7 @@ module m_ddb_internalstr
  private
 !!***
 
- public :: m_ddb_internalstr
+ public :: ddb_internalstr
 !!***
 
 contains
@@ -90,6 +90,7 @@ subroutine ddb_internalstr(asr,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
 natom,nblok)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
