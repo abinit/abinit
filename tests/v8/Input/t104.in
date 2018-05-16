@@ -80,7 +80,7 @@
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   3
-    tolwfr   1.0d-16
+    tolwfr   1.0d-18
     getden   2
     getwfk   2
 
@@ -95,13 +95,13 @@
 #*******************************
    getden2   1
    getwfk2   1
-   tolwfr2   1.0d-18
+   tolwfr2   1.0d-20
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
     rfddk3   1
     rfdir3   1 1 1
-   tolwfr3   1.0d-18
+   tolwfr3   1.0d-20
 # For a more effective non self-consistent computation:
     nstep3   1
     nline3   100
@@ -124,7 +124,7 @@
  rf2_dkdk5   1
    getddk5   3
   prepanl5   1
-   tolwfr5   1.0d-18
+   tolwfr5   1.0d-20
 # Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
     nstep5   1
     nline5   100

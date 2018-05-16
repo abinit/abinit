@@ -86,6 +86,7 @@
 #*******************************
    getden2   1
    getwfk2   1
+   tolwfr2   1.0d-28
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
