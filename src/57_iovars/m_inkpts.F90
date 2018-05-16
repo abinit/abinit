@@ -632,13 +632,13 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
  integer, allocatable :: symafm_new(:)
  integer, allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
  integer,allocatable :: intarr(:)
- real(dp) :: gmet(3,3),gprimd(3,3),qpt(3),rmet(3,3),shiftq(3,210)
+ real(dp) :: gmet(3,3),gprimd(3,3),qpt(3),rmet(3,3),shiftq(3,MAX_NSHIFTK)
  real(dp),allocatable :: qpts(:,:),tnons_new(:,:),wtq(:)
  real(dp),allocatable :: dprarr(:)
 
 ! *************************************************************************
 
-!Compute the maximum size of arrays intarr and dprarr (nshiftq is 210 at maximum)
+!Compute the maximum size of arrays intarr and dprarr (nshiftq is MAX_NSHIFTK at maximum)
  marr=630
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
@@ -713,9 +713,9 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nshiftq',tread,'INT')
    if(tread==1)nshiftq=intarr(1)
 
-   if(nshiftq<1 .or. nshiftq>210 )then
-     write(message,  '(3a,i4,a,a,a)' )&
-&     'The only allowed values of nshiftq are between 1 and 210,',ch10,&
+   if(nshiftq<1 .or. nshiftq>MAX_NSHIFTK )then
+     write(message,  '(a,i0,2a,i0,3a)' )&
+&     'The only allowed values of nshiftq are between 1 and,',MAX_NSHIFTK,ch10,&
 &     'while it is found to be',nshiftq,'.',ch10,&
 &     'Action: change the value of nshiftq in your input file, or change qptopt.'
      MSG_ERROR(message)

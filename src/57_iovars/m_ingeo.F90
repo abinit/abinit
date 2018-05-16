@@ -279,12 +279,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-<<<<<<< HEAD:src/57_iovars/ingeo.F90
 !      write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
-=======
-!      write(std_out,*)' ingeo : angdeg=',angdeg(1:3)
-!      write(std_out,*)' ingeo : aa,cc=',aa,cc
->>>>>>> 904567cf9d7e5cddfed3302f508d22107adb11aa:src/57_iovars/m_ingeo.F90
      else
 !      Treat all the other cases
        rprim(:,:)=0.0_dp
@@ -1028,13 +1023,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    nsym=jsym
  end if
 
-<<<<<<< HEAD:src/57_iovars/ingeo.F90
  !call symmultsg(nsym,symafm,symrel,tnons)
-=======
-!DEBUG
-!call symmultsg(nsym,symafm,symrel,tnons)
-!ENDDEBUG
->>>>>>> 904567cf9d7e5cddfed3302f508d22107adb11aa:src/57_iovars/m_ingeo.F90
 
 !9) initialize the list of fixed atoms, and initial velocities -----------------
 !Note: these inputs do not influence the previous generation of
