@@ -100,7 +100,7 @@ jdtset 1 2 3 4
 #%%   t81.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% psp_files = Si-LDA.paw
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Laflamme Janssen
 #%% keywords = DFPT, PAW
