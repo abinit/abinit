@@ -1,17 +1,58 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outvar_o_z
+!! NAME
+!!  m_outvar_o_z
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outvar_o_z
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_results_out
+ use m_profiling_abi
+ use m_xmpi
+
+ use m_geometry,     only : mkrdim, xred2xcart
+ use m_parser,       only : prttagm, prttagm_images
+
+ implicit none
+
+ private
+!!***
+
+ public :: outvar_o_z
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/outvar_o_z
 !! NAME
 !! outvar_o_z
 !!
 !! FUNCTION
-!! Echo variables between acell and gw_ ... (by alphabetic order)
-!! for the ABINIT code.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!! Echo variables between acell and gw_ ... (by alphabetic order) for the ABINIT code.
 !!
 !! INPUTS
 !!  choice= 1 if echo of preprocessed variables, 2 if echo after call driver
@@ -53,8 +94,6 @@
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! Note that this routine is called only by the processor me==0 .
 !! In consequence, no use of message and wrtout routine.
@@ -72,25 +111,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine outvar_o_z(choice,dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & results_out,strimg,timopt)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_results_out
- use m_profiling_abi
- use m_xmpi
-
- use m_geometry,     only : mkrdim, xred2xcart
- use m_parser,       only : prttagm, prttagm_images
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1770,4 +1793,7 @@ end subroutine prtocc
 !!***
 
 end subroutine outvar_o_z
+!!***
+
+end module m_outvar_o_z
 !!***

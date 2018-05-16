@@ -1,17 +1,57 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outvar_i_n
+!! NAME
+!!  m_outvar_i_n
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outvar_i_n
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_errors
+ use m_results_out
+ use m_errors
+
+ use m_parser,  only : prttagm, prttagm_images
+
+ implicit none
+
+ private
+!!***
+
+ public :: outvar_i_n
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/outvar_i_n
 !! NAME
 !! outvar_i_n
 !!
 !! FUNCTION
-!! Echo variables between acell and natom (by alphabetic order)
-!! for the ABINIT code.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!! Echo variables between acell and natom (by alphabetic order) for the ABINIT code.
 !!
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
@@ -54,8 +94,6 @@
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! Note that this routine is called only by the processor me==0 .
 !! In consequence, no use of message and wrtout routine.
@@ -70,25 +108,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine outvar_i_n (dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & response_,results_out,strimg)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_errors
- use m_results_out
- use m_errors
-
- use m_parser,  only : prttagm, prttagm_images
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1105,4 +1127,7 @@ subroutine outvar_i_n (dtsets,iout,&
  DBG_EXIT("COLL")
 
 end subroutine outvar_i_n
+!!***
+
+end module m_outvar_i_n
 !!***

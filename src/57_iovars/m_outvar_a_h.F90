@@ -1,17 +1,54 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outvar_a_h
+!! NAME
+!!  m_outvar_a_h
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outvar_a_h
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_results_out
+
+ use m_parser,  only : prttagm, prttagm_images
+
+ implicit none
+
+ private
+!!***
+
+ public :: outvar_a_h
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/outvar_a_h
 !! NAME
 !! outvar_a_h
 !!
 !! FUNCTION
-!! Echo variables between acell and gw_ ... (by alphabetic order)
-!! for the ABINIT code.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!! Echo variables between acell and gw_ ... (by alphabetic order) for the ABINIT code.
 !!
 !! INPUTS
 !!  choice= 1 if echo of preprocessed variables, 2 if echo after call driver
@@ -51,8 +88,6 @@
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! Note that this routine is called only by the processor me==0 .
 !! In consequence, no use of message and wrtout routine.
@@ -70,22 +105,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,&
 & results_out,strimg)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_results_out
-
- use m_parser,  only : prttagm, prttagm_images
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1204,4 +1226,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  ABI_DEALLOCATE(prtimg)
 
 end subroutine outvar_a_h
+!!***
+
+end module m_outvar_a_h
 !!***

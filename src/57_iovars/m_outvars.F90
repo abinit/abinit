@@ -1,16 +1,64 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outvars
+!! NAME
+!!  m_outvars
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outvars
+
+ use defs_basis
+ use defs_abitypes
+ use m_results_out
+ use m_profiling_abi
+ use m_errors
+ use m_xomp
+ use m_xmpi
+#if defined HAVE_NETCDF
+ use netcdf
+#endif
+ use m_outvar_a_h
+ use m_outvar_i_n
+ use m_outvar_o_z
+
+ use m_nctk,      only : create_nc_file
+
+ implicit none
+
+ private
+!!***
+
+ public :: outvars
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/outvars
 !! NAME
 !! outvars
 !!
 !! FUNCTION
 !! Echo variables for the ABINIT code.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  choice= 1 if echo of preprocessed variables, 2 if echo after call driver
@@ -64,27 +112,21 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 &  mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
 
- use defs_basis
- use defs_abitypes
- use m_results_out
- use m_profiling_abi
- use m_errors
- use m_xomp
- use m_xmpi
-#if defined HAVE_NETCDF
- use netcdf
-#endif
 
- use m_nctk,      only : create_nc_file
+
+
+
+
+
+
+
+
+
+
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -383,4 +425,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !**************************************************************************
 
 end subroutine outvars
+!!***
+
+end module m_outvars
 !!***
