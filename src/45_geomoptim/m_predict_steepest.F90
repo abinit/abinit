@@ -1,10 +1,8 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_crystal
+!!****m* ABINIT/m_predict_steepest
 !! NAME
 !!
-!!
 !! FUNCTION
-!!
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2009-2018 ABINIT group (XG)
