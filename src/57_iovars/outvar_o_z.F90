@@ -1135,6 +1135,9 @@
  intarr(1,:)=dtsets(:)%usepawu
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepawu','INT',0)
 
+ intarr(1,:)=dtsets(:)%usepead
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepead','INT',0)
+
  intarr(1,:)=dtsets(:)%useria
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useria','INT',0)
 

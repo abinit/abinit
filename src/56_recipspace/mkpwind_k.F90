@@ -128,9 +128,8 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
 
  dg(:) = -indkk_f2ibz(ikpt,3:5) &
-& -nint(-fkptns(:,ikpt) - dk(:) - tol10 + &
-& fkptns(:,ikpt1)) &
-& +indkk_f2ibz(ikpt1,3:5)
+      & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
+      & + indkk_f2ibz(ikpt1,3:5)
 
  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 

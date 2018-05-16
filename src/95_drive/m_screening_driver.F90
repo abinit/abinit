@@ -50,7 +50,7 @@ module m_screening_driver
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_crystal,       only : crystal_free, crystal_t, crystal_print
  use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
@@ -70,7 +70,7 @@ module m_screening_driver
                              wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
- use m_chi0,          only : output_chi0sumrule
+ use m_chi0tk,        only : output_chi0sumrule
  use m_pawang,        only : pawang_type
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -83,6 +83,10 @@ module m_screening_driver
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
+ use m_setvtr,        only : setvtr
+ use m_mkrho,         only : prtrhomxmn
+ use m_pspini,        only : pspini
 
  implicit none
 
@@ -173,12 +177,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #undef ABI_FUNC
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -848,7 +848,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkxc1=0
    ABI_DT_MALLOC(Paw_an,(Cryst%natom))
    call paw_an_nullify(Paw_an)
-   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real

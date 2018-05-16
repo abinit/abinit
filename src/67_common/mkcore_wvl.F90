@@ -85,6 +85,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  use m_paw_numeric, only : paw_splint
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab,      only : pawtab_type
+ use m_drivexc,     only : mkdenpos
 
  use defs_wvltypes
 #if defined HAVE_BIGDFT
@@ -95,7 +96,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_wvl'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -557,6 +557,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,  only : pawtab_type
  use m_xmpi,    only : xmpi_comm_size,xmpi_sum
+ use m_drivexc,     only : mkdenpos
 
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
@@ -567,7 +568,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_wvl_old'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_67_common, except_this_one => mkcore_wvl_old
 !End of the abilint section
 

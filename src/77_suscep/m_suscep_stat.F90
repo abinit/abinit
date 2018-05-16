@@ -35,13 +35,13 @@ MODULE m_suscep_stat
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, &
-&                      pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
- use m_mpinfo,  only : destroy_mpi_enreg
+ use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
+ use m_mpinfo,  only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary
  use m_fft,     only : fftpac
+ use m_spacepar,     only : symrhg
 
  implicit none
 
@@ -170,10 +170,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suscep_stat'
- use interfaces_32_util
- use interfaces_51_manage_mpi
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -918,7 +915,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'susk'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section
@@ -1522,7 +1518,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suskmm'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section

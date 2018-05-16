@@ -69,6 +69,7 @@ MODULE m_use_ga
  use m_ga
  use m_sort
 
+ use m_symfind,        only : symfind, symanal, symlatt
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
@@ -752,7 +753,6 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'checksymmetrygroup'
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -782,7 +782,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
 
   call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
+&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
 
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
 

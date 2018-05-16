@@ -16,12 +16,6 @@
 !!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
 !!  RS09 = doi:10.1103/PhysRevLett.103.096102
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -249,12 +243,6 @@ contains
 !! FUNCTION
 !!  Aggregates the various quantities calculated by the other vdW routines and
 !!  produces energy, potential and stress tensor.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  volume= the volume of the cell
@@ -645,12 +633,6 @@ end subroutine xc_vdw_aggregate
 !!  Calculates the exchange-correlation energy correction due to
 !!  van der Waals interactions at one point.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nspden= number of spin components
 !!  rho= electronic density
@@ -873,12 +855,6 @@ end subroutine xc_vdw_energy
 !!  Cleans-up the mess once van der Waals corrections to the energy are
 !!  not needed anymore.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  vdw_params= van der Waals parameters
 !!
@@ -937,12 +913,6 @@ end subroutine xc_vdw_done
 !!
 !! FUNCTION
 !!  Exports internal vdW-DF parameters.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! OUTPUT
 !!  vdw_params= van der Waals parameters
@@ -1006,12 +976,6 @@ end subroutine xc_vdw_get_params
 !!
 !! FUNCTION
 !!  Calculates the van der Waals kernel.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  vdw_params= parameters for the van der Waals calculations
@@ -1402,12 +1366,6 @@ end subroutine xc_vdw_init
 !!  Initializes LibXC parameters for the LDA-based part of vdW-DF
 !!  calculations.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  ixc_vdw= vdW-DF functional to apply
 !!
@@ -1489,12 +1447,6 @@ end subroutine xc_vdw_libxc_init
 !!
 !! FUNCTION
 !!  Estimates the memory to be used by the vdW-DF method.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  unt= unit to write the data to
@@ -1612,17 +1564,11 @@ end subroutine xc_vdw_memcheck
 !! FUNCTION
 !!  Reads vdW-DF variables from disk.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  filename= file to read data from
 !!
 !! TODO
-!!  FIXME: design an extension for ETSF_IO
+!!  design an extension for ETSF_IO
 !!
 !! PARENTS
 !!      driver
@@ -1795,12 +1741,6 @@ end subroutine xc_vdw_read
 !! FUNCTION
 !!  Sets the vdW-DF parameters directly related to the functional.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  vdw_func= van der Waals functional
 !!  vdw_zab= Zab parameter to use for the calculations
@@ -1846,12 +1786,6 @@ end subroutine xc_vdw_set_functional
 !!
 !! FUNCTION
 !!  Imports external vdW-DF parameters.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUT
 !!  vdw_params= van der Waals parameters
@@ -1915,12 +1849,6 @@ end subroutine xc_vdw_set_params
 !!
 !! FUNCTION
 !!  Displays the parameters in use for the vdW-DF corrections.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  unt= unit to write the data to
@@ -2003,12 +1931,6 @@ end subroutine xc_vdw_show
 !! FUNCTION
 !!  Returns the status of the main vdW-DF switch.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  None
 !!
@@ -2049,12 +1971,6 @@ end function xc_vdw_status
 !!
 !! FUNCTION
 !!  Switches on and off the calculation of vdW interactions.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  condition= boolean condition to trigger the calculations
@@ -2115,12 +2031,6 @@ end subroutine xc_vdw_trigger
 !!
 !! FUNCTION
 !!  Writes vdW-DF variables to disk.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  filename= file to write data to
@@ -2308,12 +2218,6 @@ end subroutine xc_vdw_write
 !! FUNCTION
 !!  Softens the kernel by applying a filter in reciprocal space.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nqpts= number of q-mesh points
 !!  nrpts= number of mesh points in real space
@@ -2482,12 +2386,6 @@ end subroutine vdw_df_filter
 !!  Dion et al., PRL 92, 246401 (2004), or to return a 4th-order
 !!  polynomial for small distances.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  d1= first coordinate
 !!  d2= second coordinate
@@ -2592,12 +2490,6 @@ end function vdw_df_kernel
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates. Uses
 !!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  d1= first coordinate
@@ -2791,12 +2683,6 @@ end function vdw_df_kernel_value
 !! FUNCTION
 !!  Calculates LDA-based XC energy density for other vdW routines.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  ixc= functional to apply
 !!  nspden= number of spin components
@@ -2919,12 +2805,6 @@ end subroutine vdw_df_ldaxc
 !!
 !! FUNCTION
 !!  Creates a 1D mesh following user specifications.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  npts= length of the mesh
@@ -3154,12 +3034,6 @@ end subroutine vdw_df_create_mesh
 !! FUNCTION
 !!  Returns the index of a specified value in a sorted array.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  list_1d= sorted array
 !!  npts= length of the sorted array
@@ -3221,12 +3095,6 @@ end function vdw_df_indexof
 !!
 !! FUNCTION
 !!  Calculates values of Phi(d1,d2) by interpolating the kernel.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  d1= first coordinate
@@ -3317,12 +3185,6 @@ end function vdw_df_interpolate
 !!
 !! FUNCTION
 !!  Performs consistency checks of the vdW-DF kernel.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Camilo Espejo, Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  test_mode= bitfield to enable/disable tests
@@ -3502,12 +3364,6 @@ end subroutine vdw_df_netcdf_ioerr
 !! FUNCTION
 !!  Expands user-specified tweaks for internal use.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  input_tweaks= condensed tweaks
 !!
@@ -3557,12 +3413,6 @@ end subroutine vdw_df_set_tweaks
 !!
 !! FUNCTION
 !!  Writes function names for debugging purposes.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  func_name= name of the function to print

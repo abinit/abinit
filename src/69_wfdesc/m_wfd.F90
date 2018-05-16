@@ -51,7 +51,7 @@ MODULE m_wfd
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
- use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
+ use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
@@ -61,6 +61,9 @@ MODULE m_wfd
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
+ use m_spacepar,       only : symrhg, irrzg
+ use m_initylmg,       only : initylmg
+ use m_mkffnl,         only : mkffnl
 
  implicit none
 
@@ -462,8 +465,6 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kdata_init'
- use interfaces_56_recipspace
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -879,7 +880,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_init'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -5650,7 +5650,6 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_write_wfk'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -6847,8 +6846,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_mkrho'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

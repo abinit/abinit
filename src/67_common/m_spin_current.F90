@@ -36,6 +36,7 @@ module m_spin_current
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
+ use m_special_funcs,   only : gamma_function
 
  implicit none
 
@@ -626,7 +627,6 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vso_realspace_local'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

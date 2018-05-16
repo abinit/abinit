@@ -48,6 +48,7 @@ MODULE m_kxc
  use m_xmpi
  use m_crystal
  use m_distribfft
+ use m_xcdata
  use libxc_functionals
 
  use defs_abitypes,   only : MPI_type, dataset_type
@@ -57,8 +58,9 @@ MODULE m_kxc
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
  use m_fft,           only : fourdp_6d
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_spacepar,      only : hartre
+ use m_rhotoxc,       only : rhotoxc
 
  implicit none
 
@@ -413,14 +415,12 @@ end subroutine kxc_local
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_alda'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -1072,14 +1072,12 @@ end subroutine kxc_eok
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_driver'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_xc
 !End of the abilint section
@@ -1337,16 +1335,13 @@ end subroutine kxc_driver
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_ADA'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

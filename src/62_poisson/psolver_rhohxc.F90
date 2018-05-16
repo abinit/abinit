@@ -61,7 +61,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 & usexcnhat,usepaw,usewvl,vhartr, vxc, vxcavg, wvl,wvl_den,wvl_e,&
 & xccc3d,xclevel,xc_denpos)
 
-! use defs_basis,only: std_out,std_out_default
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
@@ -72,6 +71,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
  use m_xmpi, only: xmpi_comm_rank,xmpi_comm_size,xmpi_sum
  use m_geometry, only : metric
+ use m_drivexc,     only : mkdenpos
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
@@ -83,7 +83,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_rhohxc'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_62_poisson, except_this_one => psolver_rhohxc
 !End of the abilint section
 

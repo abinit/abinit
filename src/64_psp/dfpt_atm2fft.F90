@@ -40,7 +40,7 @@
 !!       6 cartesian strain component 11,22,33,32,31,21 (in case strain perturbation)
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT
-!!  nattyp(ntypat)=array describing how many atoms of each type in cell 
+!!  nattyp(ntypat)=array describing how many atoms of each type in cell
 !!  ntypat=number of types of atoms.
 !!  optn,optn2,optv= (see NOTES below)
 !!  paral_kgb=--optional-- 1 if "band-FFT" parallelism is activated (only needed when comm_fft is present)
@@ -115,13 +115,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  use m_pawtab,       only : pawtab_type
  use m_distribfft,   only : distribfft_type
  use m_fft,          only : zerosym
- use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_atm2fft'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -185,7 +184,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  end if
 
  if (present(gauss))then
-   if (.not.present(optn2_in)) then   
+   if (.not.present(optn2_in)) then
      optn2 = 3
    else
      if(optn2_in/=3)then
@@ -193,16 +192,16 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      else
        optn2 = optn2_in
      end if
-   end if     
+   end if
  end if
 
  if (present(atmrhor1))then
    if(.not.present(optn_in))then
      optn = 1
    else
-     optn = optn_in   
+     optn = optn_in
    end if
-   if (.not.present(optn2_in)) then   
+   if (.not.present(optn2_in)) then
      MSG_BUG('rho1 calculation need optn2 !')
    else
      optn2 = optn2_in
@@ -211,7 +210,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    optn  = 0
    optn2 = 0
  end if
- 
+
  if (present(atmvlocr1))then
    if(.not.present(optv_in))then
      optv = 1
@@ -226,9 +225,9 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      MSG_BUG('vloc1 calculation need vspl!')
    end if
  else
-   optv  = 0 
+   optv  = 0
  end if
- 
+
  if(ipert==natom+1.or.ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) then
 
 !  (In case of d/dk or an electric/magnetic field)
@@ -236,7 +235,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      atmrhor1(1:cplex*nfft,1:ndir)=zero
      if (present(atmrhog1)) atmrhog1 = zero
    end if
-   if (optv==1) then 
+   if (optv==1) then
      atmvlocr1(1:cplex*nfft,1:ndir)=zero
      if (present(atmvlocg1)) atmvlocg1 = zero
    end if
@@ -366,7 +365,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
            ig2=i2-(i2/id2)*n2-1
            gq2=dble(ig2)+qphon(2)
            gq(2)=gq2
-           
+
            do i1=1,n1
              ig1=i1-(i1/id1)*n1-1
              gq1=dble(ig1)+qphon(1)
@@ -377,27 +376,27 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
              gsquar=gq1*gq1*gmet(1,1)+gq2*gq2*gmet(2,2)+gq3*gq3*gmet(3,3) &
 &             +two*(gq1*gq2*gmet(1,2)+gq2*gq3*gmet(2,3)+gq3*gq1*gmet(3,1))
 
-             
+
 !             Skip G**2 outside cutoff:
              if (gsquar<=cutoff) then
-               
+
 !               Identify min/max indexes (to cancel unbalanced contributions later)
                if (qeq05) then
                  ig1max=max(ig1max,ig1);ig1min=min(ig1min,ig1)
                  ig2max=max(ig2max,ig2);ig2min=min(ig2min,ig2)
                  ig3max=max(ig3max,ig3);ig3min=min(ig3min,ig3)
                end if
-               
+
                gmag=sqrt(gsquar)
                have_g0=(ig1==0.and.ig2==0.and.ig3==0.and.qeq0)
 
                jj=1+int(gmag*dqm1)
                diff=gmag-qgrid(jj)
-               
+
 !               Compute structure factor
                phre_igia(:) = zero
                phim_igia(:) = zero
-               
+
                do ia=ia1,ia2
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
@@ -435,7 +434,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
                    ff=  (3._dp*bb**2-1._dp)*vspl(jj+1,2,itypat) &
 &                   - (3._dp*aa**2-1._dp)*vspl(jj,2,itypat)
                    dv_at = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-&                   - 2.0_dp*v_at) / gsquar                   
+&                   - 2.0_dp*v_at) / gsquar
                  end if
                end if ! end optv
 
@@ -483,12 +482,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
                    dn_at=(ee*dqm1+ff*dqdiv6)/gmag
                  end if
                end if ! end optn
-               
+
                do id=1,ndir
-                 sfr=zero;sfi=zero                
+                 sfr=zero;sfi=zero
                  do ia=ia1,ia2
                    if (ipert==natom+3.or.ipert==natom+4) then
-!                    sum[Exp(-i.2pi.g.xred)]  
+!                    sum[Exp(-i.2pi.g.xred)]
                      sfr=sfr+phre_igia(ia)
                      sfi=sfi-phim_igia(ia)
                    else
@@ -516,7 +515,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
                  else
 !                  Strain case
-                   
+
 !                  Compute G in cartesian coordinates
                    gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
 &                   gprimd(1,3)*dble(ig3)
@@ -526,7 +525,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &                   gprimd(3,3)*dble(ig3)
 
 !                  Accumulate -dV^AT/dG*rho(G)*SF(G)*Gi.Gj/G
-!                  or -dn^AT/dG*V(G)*SF(G)*Gi.Gj/G              
+!                  or -dn^AT/dG*V(G)*SF(G)*Gi.Gj/G
                    if (optv==1) then
                      if(jdir(id)<=3) then
                        term_v = dv_at*gcart(eps1(jdir(id)))*gcart(eps2(jdir(id))) + v_at
@@ -572,7 +571,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
        workv(im,1,:)=zero
      end if
    end if
-   
+
 !  Identify unbalanced g-vectors
    if (qeq05) then  !This doesn't work in parallel
      ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
@@ -610,7 +609,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
        my_comm_fft=xmpi_comm_self;paral_kgb_fft=0;
        mpi_enreg_fft%distribfft => my_distribfft
      end if
-     
+
      if (optv==1) then
        do id=1,ndir
 !        Eliminate unbalanced g-vectors
@@ -619,14 +618,14 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          else if (qeq05) then !q=1/2; this doesn't work in parallel
            call zerosym(workv(:,:,id),2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
          end if
-         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)  
+         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
          atmvlocr1(:,id)=atmvlocr1(:,id)*xnorm
        end do
 
        !if (present(atmvlocg1)) atmvlocg1 = workv
        ABI_DEALLOCATE(workv)
      end if
-     
+
      if (optn==1) then
        do id=1,ndir
 !        Eliminate unbalanced g-vectors
@@ -645,7 +644,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !    Destroy fake mpi_enreg
      call unset_mpi_enreg_fft(mpi_enreg_fft)
    end if
-   
+
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
      ABI_DATATYPE_DEALLOCATE(my_distribfft)
@@ -655,6 +654,6 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  end if
 
  DBG_EXIT("COLL")
- 
+
 end subroutine dfpt_atm2fft
 !!***

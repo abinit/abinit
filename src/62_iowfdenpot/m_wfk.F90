@@ -82,9 +82,10 @@ MODULE m_wfk
  use m_fstrings,     only : sjoin, strcat, endswith, itoa
  use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, open_file, close_unit, delete_file, file_exists
  use m_numeric_tools,only : mask2blocks
+ use m_cgtk,         only : cgtk_rotate
  use m_fftcore,      only : get_kg, ngfft_seq
  use m_distribfft,   only : init_distribfft_seq
- use m_mpinfo,       only : destroy_mpi_enreg
+ use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
  use m_rwwf,         only : rwwf
 
  implicit none
@@ -4062,7 +4063,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_tofullbz'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -4223,7 +4223,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
          ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
          ! Rotate nband_k wavefunctions (output in cg_kf)
-         call cg_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
+         call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
            npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,cg_kf,work_ngfft,work)
 
          ABI_FREE(work)
@@ -4307,7 +4307,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
            ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
            ! Rotate nband_k wavefunctions (output in cg_kf)
-           call cg_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
+           call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
              npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,cg_kf,work_ngfft,work)
 
            ABI_FREE(work)
@@ -4463,7 +4463,6 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_prof'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

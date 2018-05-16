@@ -110,25 +110,20 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
  character(len=2) :: ibnd_fmt,ikpt_fmt
  character(len=7) :: strunit1,strunit2
  character(len=39) :: kind_of_output
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
- if (nsppol<1.or.nsppol>2) then
-   write(message, '(a,i0)' )' nsppol must be 1 or 2. Argument was ',nsppol
-   MSG_BUG(message)
- end if
-
  if (enunit<0.or.enunit>2) then
-   write(message, '(a,i0)' )' enunit must be 0, 1 or 2. Argument was ',enunit
-   MSG_BUG(message)
+   write(msg, '(a,i0)' )' enunit must be 0, 1 or 2. Argument was ',enunit
+   MSG_BUG(msg)
  end if
 
  if (prteig > 0) then
-   write(message, '(a,a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
-   call wrtout(iout,message,'COLL')
-   if (open_file(fname_eig, message, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(message)
+   write(msg, '(a,a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
+   call wrtout(iout,msg,'COLL')
+   if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
+     MSG_ERROR(msg)
    end if
    rewind(temp_unit) ! always rewind disk file and print latest eigenvalues
  end if
@@ -141,10 +136,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
  nkpt_eff=nkpt
 
-!DEBUG
-!write(message,'(a,5i5)')' prtvol,iscf,kptopt,nkpt_eff,nkpt_max ',prtvol,iscf,kptopt,nkpt_eff,nkpt_max
-!call wrtout(iout,message,'COLL')
-!ENDDEBUG
+!write(msg,'(a,5i5)')' prtvol,iscf,kptopt,nkpt_eff,nkpt_max ',prtvol,iscf,kptopt,nkpt_eff,nkpt_max
+!call wrtout(iout,msg,'COLL')
 
  if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>nkpt_max)nkpt_eff=nkpt_max
  if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>1 .and. iout==ab_out)nkpt_eff=1
@@ -157,7 +150,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
      if (enunit==0 .and. ienunit==1)cycle
 !  Print eigenvalues in hartree for enunit=0 or 2
 !  The definition of two different strings is quite ridiculous. Historical reasons ...
-     
+
      if (ienunit==0)then
        convrt=one
        strunit1='hartree'
@@ -193,27 +186,23 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
          magnet = abs(rhoup - rhodn)
        end if
      end if
-     
+
      if(iscf>=0 .and. (ienunit==0 .or. option==1))then
-       write(message, '(3a,f10.5,3a,f10.5)' ) &
-&       ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       call wrtout(iout,message,'COLL')
-       if (prteig > 0) then
-         call wrtout(temp_unit,message,'COLL')
-       end if
+       write(msg, '(3a,f10.5,3a,f10.5)' ) &
+        ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       call wrtout(iout,msg,'COLL')
+       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
      end if
 
-     
+
 !    if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
      if(iscf>=0 .and. ienunit==0)then ! For historical reasons
        if(tmagnet==1)then
-         write(message, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
+         write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
 &         ' Magnetization (Bohr magneton)=',magnet,ch10,&
 &         ' Total spin up =',rhoup,'   Total spin down =',rhodn
-         call wrtout(iout,message,'COLL')
-         if (prteig > 0) then
-           call wrtout(temp_unit,message,'COLL')
-         end if
+         call wrtout(iout,msg,'COLL')
+         if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
        end if
      end if
 
@@ -222,27 +211,23 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
        ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
        if (nsppol==2.and.isppol==1) then
-         write(message, '(4a,'//ikpt_fmt//',2x,a)' ) &
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
 &         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN UP:'
        else if (nsppol==2.and.isppol==2) then
-         write(message, '(4a,'//ikpt_fmt//',2x,a)' ) &
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
 &         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN DOWN:'
        else
-         write(message, '(4a,'//ikpt_fmt//',2x,a)' ) &
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
 &         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points:'
        end if
-       call wrtout(iout,message,'COLL')
-       if (prteig > 0) then
-         call wrtout(temp_unit,message,'COLL')
-       end if
+       call wrtout(iout,msg,'COLL')
+       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
 
        if(ienunit==0)then
          if(option>=4 .and. option<=7)then
-           message = '  (in case of degenerate eigenvalues, averaged derivative)'
-           call wrtout(iout,message,'COLL')
-           if (prteig > 0) then
-             call wrtout(temp_unit,message,'COLL')
-           end if
+           msg = '  (in case of degenerate eigenvalues, averaged derivative)'
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
          end if
        end if
 
@@ -251,47 +236,40 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
          ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
          ibnd_fmt="i3" ; if(nband_k>=1000)ibnd_fmt="i6" ; if(nband_k>=1000000)ibnd_fmt="i9"
          if(ikpt<=nkpt_eff)then
-           write(message, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
+           write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
 &           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
 &           kptns(1:3,ikpt)+tol10,' (reduced coord)'
-           call wrtout(iout,message,'COLL')
-           if (prteig > 0) then
-             call wrtout(temp_unit,message,'COLL')
-           end if
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
            do ii=0,(nband_k-1)/8
-!            write(message, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
-             write(message, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),&
+!            write(msg, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
+             write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),&
 &             iband=1+ii*8,min(nband_k,8+ii*8))
-             call wrtout(iout,message,'COLL')
-             if (prteig > 0) then
-               call wrtout(temp_unit,message,'COLL')
-             end if
+             call wrtout(iout,msg,'COLL')
+             if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
            end do
            if(ienunit==0 .and. option==1 .and. occopt>=3 .and. occopt<=8)then
-             write(message, '(5x,a,'//ikpt_fmt//')' )  ' occupation numbers for kpt#',ikpt
-             call wrtout(iout,message,'COLL')
+             write(msg, '(5x,a,'//ikpt_fmt//')' )  ' occupation numbers for kpt#',ikpt
+             call wrtout(iout,msg,'COLL')
              do ii=0,(nband_k-1)/8
-               write(message, '(8(f10.5,1x))' ) (occ(iband+band_index),&
-&               iband=1+ii*8,min(nband_k,8+ii*8))
-               call wrtout(iout,message,'COLL')
+               write(msg, '(8(f10.5,1x))' ) (occ(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+               call wrtout(iout,msg,'COLL')
              end do
            end if
 
          else
            if(ikpt==nkpt_eff+1)then
-             write(message, '(a,a)' ) &
-&             ' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
-             call wrtout(iout,message,'COLL')
+             write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
+             call wrtout(iout,msg,'COLL')
            end if
            if (prteig > 0) then
-             write(message, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
+             write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
 &             ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
 &             kptns(1:3,ikpt)+tol10,' (reduced coord)'
-             call wrtout(temp_unit,message,'COLL')
+             call wrtout(temp_unit,msg,'COLL')
              do ii=0,(nband_k-1)/8
-               write(message, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),&
-&               iband=1+ii*8,min(nband_k,8+ii*8))
-               call wrtout(temp_unit,message,'COLL')
+               write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+               call wrtout(temp_unit,msg,'COLL')
              end do
            end if
          end if
@@ -307,12 +285,10 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
    do isppol=1,nsppol
 
      if(nsppol==2)then
-       if(isppol==1)write(message, '(2a)' ) ch10,' SPIN UP channel '
-       if(isppol==2)write(message, '(2a)' ) ch10,' SPIN DOWN channel '
-       call wrtout(iout,message,'COLL')
-       if(prteig>0) then
-         call wrtout(temp_unit,message,'COLL')
-       end if
+       if(isppol==1)write(msg, '(2a)' ) ch10,' SPIN UP channel '
+       if(isppol==2)write(msg, '(2a)' ) ch10,' SPIN DOWN channel '
+       call wrtout(iout,msg,'COLL')
+       if(prteig>0) call wrtout(temp_unit,msg,'COLL')
      end if
 
      do ikpt=1,nkpt
@@ -320,46 +296,45 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
        ikpt_fmt="i5" ; if(nkpt>=10000)ikpt_fmt="i7" ; if(nkpt>=1000000)ikpt_fmt="i9"
 
        if(ikpt<=nkpt_eff)then
-         write(message, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
+         write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
 &         'Non-SCF case, kpt',ikpt,' (',(kptns(ii,ikpt),ii=1,3),'), residuals and eigenvalues='
-         call wrtout(iout,message,'COLL')
+         call wrtout(iout,msg,'COLL')
          if (prteig > 0) then
-           write(message, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
+           write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
 &           'Non-SCF case, kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
-           call wrtout(temp_unit,message,'COLL')
+           call wrtout(temp_unit,msg,'COLL')
          end if
          do ii=0,(nband_k-1)/8
-           write(message, '(1p,8e10.2)' )(resid(iband+band_index),iband=1+8*ii,min(8+8*ii,nband_k))
-           call wrtout(iout,message,'COLL')
+           write(msg, '(1p,8e10.2)' )(resid(iband+band_index),iband=1+8*ii,min(8+8*ii,nband_k))
+           call wrtout(iout,msg,'COLL')
          end do
          do ii=0,(nband_k-1)/6
-           write(message, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
-           call wrtout(iout,message,'COLL')
-           if (prteig > 0) then
-             call wrtout(temp_unit,message,'COLL')
-           end if
+           write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
          end do
        else
          if(ikpt==nkpt_eff+1)then
-           write(message, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
-           call wrtout(iout,message,'COLL')
+           write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
+           call wrtout(iout,msg,'COLL')
          end if
          if (prteig > 0) then
-           write(message, '(1x,a,i5,a,f9.5,2f9.5,a)' ) &
-&           'Non-SCF kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
-           call wrtout(temp_unit,message,'COLL')
+           write(msg, '(1x,a,i5,a,f9.5,2f9.5,a)' )'Non-SCF kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
+           call wrtout(temp_unit,msg,'COLL')
            do ii=0,(nband_k-1)/6
-             write(message, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
-             call wrtout(temp_unit,message,'COLL')
+             write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
+             call wrtout(temp_unit,msg,'COLL')
            end do
          end if
        end if
 
+       ! MG: I don't understand why we should include the buffer in the output.
+       ! It's already difficult to make the tests pass for the residuals without the buffer if nband >> nbocc
        residk=maxval(resid(band_index+1:band_index+nband_k))
        if (residk>tolwfr) then
-         write(message, '(1x,a,2i5,a,1p,e13.5)' ) &
+         write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
 &         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (incl. the buffer)=',residk
-         call wrtout(iout,message,'COLL')
+         call wrtout(iout,msg,'COLL')
        end if
 
        band_index=band_index+nband_k
@@ -368,8 +343,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
    call wrtout(iout," ",'COLL')
 
  else
-   write(message, '(a,i0,a)' )' option = ',option,', is not an allowed value.'
-   MSG_BUG(message)
+   write(msg, '(a,i0,a)' )' option = ',option,', is not an allowed value.'
+   MSG_BUG(msg)
  end if
 
  if (prteig > 0) close (temp_unit)

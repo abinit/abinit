@@ -88,6 +88,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type
+ use m_getghc,        only : getghc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

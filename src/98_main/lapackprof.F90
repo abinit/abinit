@@ -61,7 +61,6 @@ program lapackprof
 #undef ABI_FUNC
 #define ABI_FUNC 'lapackprof'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
