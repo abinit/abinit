@@ -1,19 +1,58 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_ddb_internalstr
+!! NAME
+!!  m_ddb_internalstr
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XW)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_ddb_internalstr
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_crystal
+ use m_ddb
+
+ use m_fstrings,     only : itoa, sjoin
+ use m_dynmat,       only : asria_corr
+
+ implicit none
+
+ private
+!!***
+
+ public :: m_ddb_internalstr
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/ddb_internalstr
 !!
 !! NAME
 !! ddb_internalstr
 !!
 !! FUNCTION
-!! Get the insternal strain tensors,both force response and displacement
-!! response ones.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XW)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! Get the insternal strain tensors,both force response and displacement response ones.
 !!
 !! INPUTS
 !! blkval(2,3,mpert,3,mpert,nblok)=
@@ -44,13 +83,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine ddb_internalstr(asr,&
 !&crystal,&
 & blkval,&
@@ -58,15 +90,6 @@ subroutine ddb_internalstr(asr,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
 natom,nblok)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_crystal
- use m_ddb
-
- use m_fstrings,     only : itoa, sjoin
- use m_dynmat,       only : asria_corr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -480,4 +503,7 @@ natom,nblok)
  end do
 
 end subroutine ddb_internalstr
+!!***
+
+end module m_ddb_internalstr
 !!***

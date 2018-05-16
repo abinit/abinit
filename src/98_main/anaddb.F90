@@ -81,6 +81,9 @@ program anaddb
  use m_raman,          only : ramansus, electrooptic
  use m_ddb_diel,       only : ddb_diel
  use m_relaxpol,       only : relaxpol
+ use m_ddb_elast,      only : ddb_elast
+ use m_ddb_piezo,      only : ddb_piezo
+ use m_ddb_internalstr, only : ddb_internalstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

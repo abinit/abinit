@@ -1,4 +1,49 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_ddb_piezo
+!! NAME
+!!  m_ddb_piezo
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XW)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_ddb_piezo
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_fstrings,       only : sjoin, itoa
+ use m_abilasi,        only : matrginv
+ use m_anaddb_dataset, only : anaddb_dataset_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: ddb_piezo
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/ddb_piezo
 !!
 !! NAME
@@ -10,13 +55,6 @@
 !! Compute relaxed ion and free stress dielectric tensor;
 !! Compute relaxed ion elastic and compliance tensors under fixed
 !! displacement field boundary conditions.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XW)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! anaddb_dtset= (derived datatype) contains all the input variables
@@ -40,7 +78,6 @@
 !! condition, which include piezoelectric corrections to the elastic (compliance)
 !! tensors calculated in ddb_elast.F90 whose boundary condition is fixed E-field.
 !!
-!!
 !! PARENTS
 !!      anaddb
 !!
@@ -49,22 +86,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_fstrings,       only : sjoin, itoa
- use m_abilasi,        only : matrginv
- use m_anaddb_dataset, only : anaddb_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -806,4 +828,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !end the part for computation of elastic at fixed displacement field
 
 end subroutine ddb_piezo
+!!***
+
+end module m_ddb_piezo
 !!***

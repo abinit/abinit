@@ -1,4 +1,53 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_ddb_elast
+!! NAME
+!!  m_ddb_elast
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XW)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_ddb_elast
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_crystal
+ use m_ddb
+
+ use m_fstrings,       only : itoa, sjoin
+ use m_abilasi,        only : matrginv
+ use m_dynmat,         only : asria_corr
+ use m_anaddb_dataset, only : anaddb_dataset_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: ddb_elast
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/ddb_elast
 !!
 !! NAME
@@ -9,13 +58,6 @@
 !! under the fixed electric field boundary condition; in which realxed ion
 !! tensors can generate two output tensors one is conventional, the other
 !! considers the sress correction.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XW)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! anaddb_dtset= (derived datatype) contains all the input variables
@@ -50,29 +92,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &            instrain,iout,mpert,&
 ! &msize,&
 &            natom,nblok)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_crystal
- use m_ddb
-
- use m_fstrings,       only : itoa, sjoin
- use m_abilasi,        only : matrginv
- use m_dynmat,         only : asria_corr
- use m_anaddb_dataset, only : anaddb_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -668,4 +692,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !end the part of stress corrected elastic and compliance tensors
 
 end subroutine ddb_elast
+!!***
+
+end module m_ddb_elast
 !!***
