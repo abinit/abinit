@@ -212,8 +212,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
 &                               paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
-&                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
+ use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy,&
+&                               fock_BZ_destroy, fock_update_ exc, fock_updatecwaveocc
  use m_gwls_hamiltonian, only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
@@ -238,6 +238,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_initylmg,         only : initylmg
  use m_rhotoxc,          only : rhotoxc
  use m_drivexc,          only : check_kxc
+ use m_odamix,           only : odamix
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

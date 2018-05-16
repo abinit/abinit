@@ -54,7 +54,7 @@ sources = [
  "m_plowannier.F90",
  "m_vcoul.F90",
  "nres2vres.F90",
- "odamix.F90",
+ "m_odamix.F90",
  "optics_vloc.F90",
  "orbmag.F90",
  "posdoppler.F90",

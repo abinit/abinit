@@ -1,4 +1,64 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_odamix
+!! NAME
+!!  m_odamix
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_odamix
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_xcdata
+
+ use m_time,       only : timab
+ use m_geometry,   only : metric
+ use m_cgtools,    only : dotprod_vn
+ use m_pawang,     only : pawang_type
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_paw_an,     only : paw_an_type
+ use m_paw_ij,     only : paw_ij_type
+ use m_pawfgrtab,  only : pawfgrtab_type
+ use m_pawrhoij,   only : pawrhoij_type
+ use m_energies,   only : energies_type
+ use m_spacepar,   only : hartre
+ use m_rhotoxc,    only : rhotoxc
+
+ implicit none
+
+ private
+!!***
+
+ public :: odamix
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/odamix
 !! NAME
 !! odamix
@@ -6,13 +66,6 @@
 !! FUNCTION
 !! This routine is called to compute the total energy and various parts of it.
 !! The routine computes -if requested- the forces.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -126,12 +179,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          gprimd,gsqcut,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &          nkxc,ntypat,nvresid,n3xccc,optres,paw_ij,&
@@ -139,28 +186,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,usepaw,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
 &          taug,taur,vxctau,add_tfw) ! optional arguments
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
- use m_xcdata
-
- use m_time,        only : timab
- use m_geometry,     only : metric
- use m_cgtools,    only : dotprod_vn
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_type
- use m_pawtab, only : pawtab_type
- use m_paw_an, only : paw_an_type
- use m_paw_ij, only : paw_ij_type
- use m_pawfgrtab, only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_energies, only : energies_type
- use m_spacepar, only : hartre
- use m_rhotoxc,  only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -667,4 +692,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !ENDEBUG
 
 end subroutine odamix
+!!***
+
+end module m_odamix
 !!***
