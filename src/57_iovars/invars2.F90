@@ -2398,8 +2398,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(dtset%nsym/=1) then
      write(message,*)&
 &     'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
-&     '(because symmetry is not yet used)',ch10,&
-&     'Action : check your calculation  with nsym=1'
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)

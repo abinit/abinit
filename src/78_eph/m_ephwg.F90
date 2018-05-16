@@ -50,6 +50,7 @@ module m_ephwg
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, sec2str
+ use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
