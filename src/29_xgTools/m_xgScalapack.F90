@@ -27,6 +27,7 @@ module m_xgScalapack
   use m_errors
   use m_slk
   use m_xg
+  use m_xomp
 
   use m_time,     only: timab
 
@@ -59,12 +60,14 @@ module m_xgScalapack
   integer, parameter, public :: SLK_FORCED = 1
   integer, parameter, public :: SLK_DISABLED = 0
   integer, save :: M__CONFIG = SLK_AUTO
+  integer, save :: M__MAXDIM = 1000
 
   type, public :: xgScalapack_t
     integer :: comms(M__NDATA)
     integer :: rank(M__NDATA)
     integer :: size(M__NDATA)
     integer :: coords(2)
+    integer :: ngroup
     integer :: verbosity
     type(grid_scalapack) :: grid
   end type xgScalapack_t
@@ -111,9 +114,14 @@ module m_xgScalapack
     integer            , intent(in   ) :: verbosity
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
+#ifdef HAVE_LINALG_MKL_THREADS
+    integer :: mkl_get_max_threads
+#endif
 #ifdef HAVE_LINALG_SCALAPACK
     integer :: maxProc
     integer :: nproc
+    integer :: nthread
+    integer :: ngroup
     integer :: subgroup
     integer :: mycomm(2)
     integer :: ierr
@@ -130,6 +138,14 @@ module m_xgScalapack
     xgScalapack%rank = xmpi_undefined_rank
     xgScalapack%verbosity = verbosity
 
+    nthread = 1
+#ifdef HAVE_LINALG_MKL_THREADS
+    nthread =  mkl_get_max_threads()
+#else
+    nthreads = xomp_get_num_threads(open_parallel=.true.)
+    if ( nthread == 0 ) nthread = 1
+#endif
+
 #ifdef HAVE_LINALG_SCALAPACK
 
     nproc = xmpi_comm_size(comm)
@@ -137,9 +153,11 @@ module m_xgScalapack
     xgScalapack%rank(M__WORLD) = xmpi_comm_rank(comm)
     xgScalapack%size(M__WORLD) = nproc
 
-    maxProc = (maxDim / 1000)+1 ! ( 1000 x 1000 matrice per MPI )
+    maxProc = (maxDim / (M__MAXDIM*nthread))+1 ! ( M__MAXDIM x M__MAXDIM matrice per MPI )
     if ( M__CONFIG > 0 .and. M__CONFIG <= nproc ) then
       maxProc = M__CONFIG
+    else if ( maxProc > nproc ) then
+      maxProc = nproc
     end if
 
     if ( maxProc == 1 .or. M__CONFIG == SLK_DISABLED) then
@@ -153,13 +171,16 @@ module m_xgScalapack
       write(std_out,*) " xgScalapack will use", maxProc, "/", nproc, "MPIs"
     end if
 
+    ngroup = nproc/maxProc
+    xgScalapack%ngroup = ngroup
+
     if ( maxProc < nproc ) then
-      if ( xgScalapack%rank(M__WORLD) < maxProc ) then
-        subgroup = 0
+      if ( xgScalapack%rank(M__WORLD) < maxProc*ngroup ) then
+        subgroup = xgScalapack%rank(M__WORLD)/maxProc
         mycomm(1) = M__SLK
         mycomm(2) = M__UNUSED
       else
-        subgroup = 1
+        subgroup = -1
         mycomm(1) = M__UNUSED
         mycomm(2) = M__SLK
       end if
@@ -207,7 +228,7 @@ module m_xgScalapack
 
   end subroutine xgScalapack_init
 
-  subroutine xgScalapack_config(myconfig)
+  subroutine xgScalapack_config(myconfig,maxDim)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -217,6 +238,7 @@ module m_xgScalapack
 !End of the abilint section
 
     integer, intent(in) :: myconfig
+    integer, intent(in) :: maxDim
     if ( myconfig == SLK_AUTO) then
       M__CONFIG = myconfig
       MSG_COMMENT("xgScalapack in auto mode")
@@ -229,6 +251,9 @@ module m_xgScalapack
     else
       MSG_WARNING("Bad value for xgScalapack config -> autodetection")
       M__CONFIG = SLK_AUTO
+    end if
+    if ( maxDim > 0 ) then
+      M__MAXDIM = maxDim
     end if
 
   end subroutine xgScalapack_config
@@ -424,18 +449,21 @@ module m_xgScalapack
     call xgBlock_getSize(matrix,rows,cols)
     call xgBlock_reverseMap(matrix,tab,rows,cols)
 
-    if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      lap = 1
+    ! If we did the he(e|g)v and we are the first group
+    if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null .and. xgScalapack%rank(M__WORLD)<xgScalapack%size(M__SLK) ) then
+      lap = xgScalapack%ngroup
       sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
-      do while ( sendto < xgScalapack%size(M__WORLD) )
+      if ( sendto < xgScalapack%size(M__WORLD) ) then
+      !do while ( sendto < xgScalapack%size(M__WORLD) )
         !call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
         call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
         if ( ierr /= 0 ) then
           MSG_ERROR("Error sending data")
         end if
-        lap = lap+1
-        sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
-      end do
+        !lap = lap+1
+        !sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
+      !end do
+      end if
     else if ( xgScalapack%comms(M__UNUSED) /= xmpi_comm_null ) then
       receivefrom = MODULO(xgScalapack%rank(M__WORLD), xgScalapack%size(M__SLK))
       if ( receivefrom >= 0 ) then
@@ -445,8 +473,8 @@ module m_xgScalapack
           MSG_ERROR("Error receiving data")
         end if
       end if
-    else
-      MSG_BUG("Error scattering data")
+    !else
+      !MSG_BUG("Error scattering data")
     end if
 
     call timab(M__tim_scatter,2,tsec)

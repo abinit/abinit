@@ -99,7 +99,7 @@
  type(dataset_type),intent(inout),target :: dtsets(0:ndtset_alloc)
  type(MPI_type),intent(inout) :: mpi_enreg
 !arrays
- integer,intent(in) :: tread(11)
+ integer,intent(in) :: tread(12)
  character(len=fnlen),intent(in) :: filnam(5)
 
 !Local variables-------------------------------

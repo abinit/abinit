@@ -102,7 +102,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: message
 !arrays
- integer :: ngfft(18),ngfftdg(18),ngfftc(3),tread(11)
+ integer :: ngfft(18),ngfftdg(18),ngfftc(3),tread(12)
  integer,allocatable :: intarr(:),istwfk(:),symrel(:,:,:)
  integer,pointer :: nkpt_rbz(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
@@ -196,6 +196,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_slk',tread(10),'INT')
    if(tread(10)==1) dtsets(idtset)%np_slk=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slk_rankpp',tread(12),'INT')
+   if(tread(12)==1) dtsets(idtset)%slk_rankpp=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pw_unbal_thresh',tread0,'DPR')
    if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)

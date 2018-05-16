@@ -547,6 +547,7 @@ type dataset_type
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: signperm
+ integer :: slk_rankpp
  integer :: smdelta
  integer :: spgaxor
  integer :: spgorig
