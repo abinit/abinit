@@ -99,7 +99,7 @@
 !!      ddb_from_file,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfpt_atm2fft
 !!      dfpt_init_mag1,dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv
 !!      dfpt_vlocal,disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free
-!!      ebands_init,efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
+!!      ebands_init,efmas_main,efmas_analysis,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
 !!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
 !!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
 !!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
@@ -164,7 +164,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main
+ use m_efmas,      only : efmas_main, efmas_analysis
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
