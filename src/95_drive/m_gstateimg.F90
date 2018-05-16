@@ -52,6 +52,7 @@ module m_gstateimg
  use m_pawtab,       only : pawtab_type
  use m_dtfil,        only : dtfil_init, status
  use m_gstate,       only : gstate
+ use m_predtk,       only : prtxvf
 
 #if defined  HAVE_BIGDFT
  use BigDFT_API, only: mpi_environment_set

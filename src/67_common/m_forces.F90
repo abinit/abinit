@@ -47,6 +47,7 @@ module m_forces
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl
+ use m_predtk,           only : prtxvf
 
  implicit none
 
