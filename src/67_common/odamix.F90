@@ -160,13 +160,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_pawrhoij, only : pawrhoij_type
  use m_energies, only : energies_type
  use m_spacepar, only : hartre
+ use m_rhotoxc,  only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
 

@@ -30,6 +30,8 @@ module m_eph_driver
  use m_errors
  use m_profiling_abi
 
+ use m_pspini,          only : pspini
+
  implicit none
 
  private
@@ -129,7 +131,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_time,            only : cwtime
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -148,8 +150,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #undef ABI_FUNC
 #define ABI_FUNC 'eph'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -393,14 +393,16 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
 
    else if (abs(dtset%eph_extrael) > tol12) then
-     NOT_IMPLEMENTED_ERROR()
+     !NOT_IMPLEMENTED_ERROR()
      ! TODO: Be careful with the trick used in elphon for passing the concentration
-     !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-     !call wrtout(ab_out,msg)
-     !if (use_wfq) then
-     !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
-     !  call wrtout(ab_out,msg)
-     !end if
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+     call wrtout(ab_out,msg)
+     if (use_wfq) then
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+       call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
+       call wrtout(ab_out,msg)
+     end if
    end if
 
    ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run

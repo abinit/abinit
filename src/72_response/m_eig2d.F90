@@ -50,6 +50,7 @@ MODULE m_eig2d
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_double_grid,only : kptfine_av
+ use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
  implicit none
 
@@ -77,7 +78,7 @@ MODULE m_eig2d
 !! eig2d_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -108,7 +109,7 @@ MODULE m_eig2d
 !! fan_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -138,7 +139,7 @@ MODULE m_eig2d
 !! gkk_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -857,7 +858,7 @@ end subroutine gkk_free
 !!  npert = number of phonon perturbations, without taking into account directions:
 !!            natom.
 !!  nsym = number of symmetries (not used yet).
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  mpw1 = maximum number of planewaves used to represent first-order wavefunctions.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  npwar1(nkpt_rbz,mpert) = number of planewaves at k-point for first-order.
@@ -906,8 +907,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2stern'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -1362,7 +1361,7 @@ end subroutine eig2stern
 !!  npert = number of phonon perturbations, without taking into account directions:
 !!            natom.
 !!  nsym = number of symmetries (not used yet).
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized.
 !!  smdelta = integer controling the calculation of electron lifetimes.
@@ -1408,8 +1407,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2tot'
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

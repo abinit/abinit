@@ -52,7 +52,7 @@ MODULE m_fft
  use m_blas,          only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
 &                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
- use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
  implicit none
@@ -1552,7 +1552,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -3069,7 +3068,7 @@ end subroutine fftmpi_u
 !!
 !! INPUTS
 !!  cplex= if 1, input array is REAL, if 2, input array is COMPLEX
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  n1,n2,n3=FFT dimensions nfft=n1*n2*n3
 !!  ig1,ig2,ig3=optional arguments= indexes of unbalanced g-vectors to cancel
 !!              if not present, ig1=1+n1/2, ig2=1+n2/2, ig3=1+n3/2 for even n1,n2,n3

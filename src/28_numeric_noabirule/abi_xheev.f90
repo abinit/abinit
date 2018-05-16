@@ -4,7 +4,7 @@
 !!  abi_xheev
 !!
 !! FUNCTION
-!!  abi_xheev is the generic function that compute 
+!!  abi_xheev is the generic function that compute
 !!  all eigenvalues and, optionally, eigenvectors of a
 !!  symmetric or hermitian matrix A.
 !!
@@ -85,12 +85,12 @@
  usegpu_=0;if (present(use_gpu)) usegpu_=use_gpu
  istwf_k_=1;if (present(istwf_k)) istwf_k_=istwf_k
  use_slk_ = 0; if(present(use_slk)) use_slk_ = 1
- 
+
  if( n > eigen_d_maxsize ) then
     write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
     MSG_ERROR(msg)
  endif
-    
+
 #ifdef HAVE_LINALG_MAGMA
  if (usegpu_==1) then
     !work only if  lwork=n**2 + 33*n?
@@ -128,9 +128,9 @@
  else
 #endif
 
-#ifdef HAVE_LINALG_PLASMA   
- ! FDahm & LNGuyen  (November 2012) : 
- !  In Plasma v 2.4.6, eigen routines support only 
+#ifdef HAVE_LINALG_PLASMA
+ ! FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
  !the eigenvalues computation (jobz=N) and not the
  !full eigenvectors bases determination (jobz=V)
  if (LSAME(jobz,'N')) then
@@ -167,13 +167,13 @@
 #ifdef HAVE_LINALG_MAGMA
  end if
 #endif
-    
+
  if(info/=0) then
     write(msg,'(a,i0)')' Problem in abi_xheev, info= ',info
     !MSG_WARNING(msg)
     MSG_ERROR(msg)
  endif
- 
+
  if (present(tim_xeigen).and.present(timopt)) then
    if(abs(timopt)==3) then
      call timab(tim_xeigen,2,tsec)
@@ -213,15 +213,15 @@ end subroutine abi_dheev
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n
  real(dp), DEV_CONTARRD intent(inout) :: a(:,:)  ! Here I need lda to be consistent
- real(dp), intent(out) :: w(n) 
+ real(dp), intent(out) :: w(n)
  integer, optional, intent(in) :: x_cplx
  integer, optional, intent(in) :: timopt,tim_xeigen,use_slk,use_gpu
  integer, optional, intent(in) :: istwf_k
 
  integer :: info
-    
+
 ! *********************************************************************
-    
+
  call abi_dheev(jobz,uplo,n,a,n,w,eigen_d_work,eigen_d_lwork,eigen_z_rwork,info, &
 &         x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
@@ -267,10 +267,10 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w,work,lwork,rwork,info)
  type(c_ptr) :: plasma_work
 #endif
     ! *********************************************************************
-    
+
 #ifdef HAVE_LINALG_PLASMA
- ! FDahm & LNGuyen  (November 2012) : 
- !  In Plasma v 2.4.6, eigen routines support only 
+ ! FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
  !the eigenvalues computation (jobz=N) and not the
  !full eigenvectors bases determination (jobz=V)
  if (LSAME(jobz,'N')) then
@@ -326,7 +326,7 @@ end subroutine abi_cheev
  integer :: info
 
 ! *********************************************************************
-    
+
  call abi_cheev(jobz,uplo,n,a,n,w,eigen_c_work,eigen_c_lwork,eigen_c_rwork,info)
 
 end subroutine abi_cheev_alloc
@@ -375,10 +375,10 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w,work,lwork,rwork,info)
 #endif
 
  ! *********************************************************************
-    
+
 #ifdef HAVE_LINALG_PLASMA
- ! FDahm & LNGuyen  (November 2012) : 
- !  In Plasma v 2.4.6, eigen routines support only 
+ ! FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
  !the eigenvalues computation (jobz=N) and not the
  !full eigenvectors bases determination (jobz=V)
  if (LSAME(jobz,'N')) then
@@ -435,7 +435,7 @@ subroutine abi_zheev_alloc(jobz,uplo,n,a,w)
  integer :: info
 
 ! *********************************************************************
-    
+
  call abi_zheev(jobz,uplo,n,a,n,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
 
 end subroutine abi_zheev_alloc

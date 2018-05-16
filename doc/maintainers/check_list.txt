@@ -5,7 +5,7 @@
 A. All merges, when appropriate
 -------------------------------
 A.1 Update the year, use the script developers/maintainers/change_year.sh (read it first ...)
-A.2 Update herald.F90
+A.2 Update m_specialmsg.F90
 A.3 Update KNOWN_PROBLEMS
 A.4 Run the "On-demand only slaves"
 A.5 Check manually that "make tests_in" works (on one of the slaves)
@@ -45,6 +45,5 @@ E. For the second and other merges of a production version
 Prepare the release, which means (send a letter to JMB) :
 E.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
 E.2 Also update install notes and topics.
-(The delivery of binary packages has been disabled, as of v7.11.5)
 *******************************************************************
 [This file can be found at doc/maintainers/check_list.txt]

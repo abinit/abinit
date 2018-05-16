@@ -27,7 +27,7 @@
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang=
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor
@@ -103,13 +103,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
+ use m_mkffnl,           only : mkffnl
+ use m_mpinfo,           only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_32_util
- use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => fock2ACE
 !End of the abilint section
 

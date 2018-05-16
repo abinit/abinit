@@ -85,13 +85,14 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_cgtools
 
  use m_kg,             only : mkkpg
+ use m_initylmg,       only : initylmg
+ use m_mkffnl,         only : mkffnl
+ use m_mpinfo,         only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_test'
- use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_test
 !End of the abilint section
 
@@ -112,7 +113,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 !scalars
  integer,parameter :: ndtset_test=6,tim_nonlop=4
  integer,save :: idtset=0
- integer :: bandpp,bdtot_index,blocksize,choice,cplex,cpopt,dimffnl,iatom,iatom_only
+ integer :: bandpp,bdtot_index,blocksize,choice,cplex,cpopt,dimffnl,iatm,iatom,iatom_only
  integer :: iband,iband_last,iband_test,iblock,icg,ider_ffnl,idir,idir_ffnl,idir_nonlop
  integer :: ii,ikg,ikpt,ilm,inlout,isppol,istwf_k,me_distrb,my_nspinor,nband_k,nblockbd
  integer :: nkpg,nnlout,npw_k,paw_opt,signs,spaceComm
@@ -186,7 +187,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  end do
 
 !Set parameters for the "nonlop" routine according to users choice
- cpopt=-1 ; paw_opt=3*psps%usepaw
+ cpopt=-1 ; paw_opt=3*psps%usepaw ; iatm=gs_hamk%atindx(iatom)
  inquire(file='config/dij',exist=ex);if(ex) paw_opt=1*psps%usepaw
  if(signs==1)then
    iatom_only=-1 ; idir_ffnl=0
@@ -197,7 +198,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    end if
    if(choice==2)then
      ider_ffnl=0
-     nnlout=3*natom ; inlout=3*(iatom-1)+idir
+     nnlout=3*natom ; inlout=3*(iatm-1)+idir ! Atoms are type-sorted in enlout()
    end if
    if(choice==3)then
      ider_ffnl=1
@@ -213,7 +214,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    end if
    if(choice==54)then
      ider_ffnl=2 ; cplex=2
-     nnlout=18*natom ; inlout=18*(iatom-1)+2*idir-1
+     nnlout=18*natom ; inlout=18*(iatm-1)+2*idir-1 ! Atoms are type-sorted in enlout()
    end if
    if(choice==55)then
      ider_ffnl=2 ; cplex=2

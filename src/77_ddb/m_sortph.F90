@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, FDortu,MVeithen)
+!!  Copyright (C) 2008-2018 ABINIT group (MVer, FDortu, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,8 +91,7 @@ end subroutine end_sortph
 !! sortph
 !!
 !! FUNCTION
-!! Sort the energies in order to have fine phonon
-!! dispersion curves
+!! Sort the energies in order to have fine phonon dispersion curves
 !! It is best not to include the gamma point in the list
 !!
 !! MODIFIED

@@ -198,7 +198,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
    write(message, '(a,a,a,a,a)' )&
 &   'The treatment of spin-orbit interaction is required (pspso/=0)',ch10,&
 &   'but pseudopotential file format cannot contain spin-orbit information !',ch10,&
-&   'Action : check your pseudopotential input file.'
+&   'Action: check your pseudopotential input file.'
    MSG_ERROR(message)
  end if
 
@@ -395,7 +395,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'Pseudopotential input file does not have',ch10,&
 &           'angular momenta in order expected for first projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
-&           'Action : check your pseudopotential input file.'
+&           'Action: check your pseudopotential input file.'
            MSG_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)
@@ -549,7 +549,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'Pseudopotential input file does not have',ch10,&
 &           'angular momenta in order expected for second projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
-&           'Action : check your pseudopotential input file.'
+&           'Action: check your pseudopotential input file.'
            MSG_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)

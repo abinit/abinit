@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Conduct Fourier transform of REAL or COMPLEX function f(r)=fofr defined on
-!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid 
+!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid
 !! in reciprocal space, in full storage mode, or the reverse operation.
 !! For the reverse operation, the final data is divided by nfftot.
 !! REAL case when cplex=1, COMPLEX case when cplex=2
@@ -28,7 +28,7 @@
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! isign=sign of Fourier transform exponent: current convention uses
-!!  +1 for transforming from G to r 
+!!  +1 for transforming from G to r
 !!  -1 for transforming from r to G.
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
@@ -75,7 +75,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  use m_profiling_abi
  use m_errors
  use m_fftcore
- 
+
  use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sgfft,       only : sg_fft_rc
@@ -120,7 +120,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 ! *************************************************************************
 
  ABI_UNUSED(paral_kgb)
- 
+
  ! Keep track of timing
  call timab(260+tim_fourdp,1,tsec)
 
@@ -160,7 +160,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
- ! Branch immediately depending on nproc_fft 
+ ! Branch immediately depending on nproc_fft
  if (nproc_fft > 1) then
    call fourdp_mpi(cplex,nfft,ngfft,ndat1,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    goto 100
@@ -180,7 +180,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
    call timab(260+tim_fourdp,2,tsec); return
  end if
 
- if (fftalga==FFT_DFTI) then 
+ if (fftalga==FFT_DFTI) then
    ! Call sequential or MPI MKL.
    if (nproc_fft == 1) then
      call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat1,isign,fofg,fofr)
@@ -344,9 +344,9 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
    else if (isign==-1) then
 
      ! Insert fofr into the augmented fft box
-     if (cplex==1) then 
+     if (cplex==1) then
        ! REAL case
-!$OMP PARALLEL DO PRIVATE(base) 
+!$OMP PARALLEL DO PRIVATE(base)
        do i3=1,n3
          do i2=1,n2
            base=n1*(i2-1+n2*(i3-1))

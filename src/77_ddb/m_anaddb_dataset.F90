@@ -1236,12 +1236,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%rifcsph=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rifcsph',tread,'DPR')
  if(tread==1) anaddb_dtset%rifcsph=dprarr(1)
- if(anaddb_dtset%rifcsph<-tol12)then
-   write(message, '(a,f10.3,3a)' )&
-&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
-&   'Action: correct rifcsph in your input file.'
-   MSG_ERROR(message)
- end if
+! if(anaddb_dtset%rifcsph<-tol12)then
+!   write(message, '(a,f10.3,3a)' )&
+!&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
+!&   'Action: correct rifcsph in your input file.'
+!   MSG_ERROR(message)
+! end if
 
 !S
 
