@@ -81,6 +81,7 @@ module m_respfn_driver
  use m_dfpt_loopert,only : dfpt_looppert
  use m_rhotoxc,     only : rhotoxc
  use m_drivexc,     only : check_kxc
+ use m_mklocl,      only : mklocl
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif

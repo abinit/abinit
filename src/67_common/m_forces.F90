@@ -46,6 +46,7 @@ module m_forces
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft
+ use m_mklocl,           only : mklocl
 
  implicit none
 

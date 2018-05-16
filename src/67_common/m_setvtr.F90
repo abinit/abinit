@@ -1076,6 +1076,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 #endif
 
  use m_geometry,    only : xred2xcart
+ use m_mklocl,      only : mklocl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

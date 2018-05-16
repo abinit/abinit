@@ -110,6 +110,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use m_fft,           only : zerosym
  use m_atm2fft,       only : atm2fft
  use m_dynmat,        only : dfpt_sydy
+ use m_mklocl,        only : mklocl_recipspace
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
