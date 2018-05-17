@@ -112,6 +112,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_65_paw
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
