@@ -97,6 +97,8 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
  use m_profiling_abi
  use m_errors
 
+ use m_mkffkg, only : dfpt_mkffkg
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -189,7 +191,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
  ABI_ALLOCATE(teffv,(2,mblkpw))
 
 !Loop on subsets of plane waves (blocking)
-!!$OMP DO 
+!!$OMP DO
  do ipw1=1,npw,mblkpw
 
    ipw2=min(npw,ipw1+mblkpw-1)

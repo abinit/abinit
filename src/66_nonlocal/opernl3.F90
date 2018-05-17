@@ -112,6 +112,8 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  use m_profiling_abi
  use m_errors
 
+ use m_mkffkg, only : dfpt_mkffkg
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -148,7 +150,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  integer :: ilang4,ilang5,ilang6,ilangx,iproj,ipw,ipw1,ipw2,jffkg,jj,jjs,mblkpw
  integer :: mmproj,mu,nffkg,nffkgd,nffkge,nffkgk,nffkgs,nffkgs2,nincpw,nproj
  integer :: ntens
- real(dp) :: ai,ar 
+ real(dp) :: ai,ar
  real(dp),parameter :: two_pi2=two_pi**2
  character(len=500) :: message
 !arrays
@@ -225,7 +227,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  end do
  nffkg=nffkge+nffkgd+nffkgs+nffkgs2+nffkgk
 
-!Disabled by MG on Dec  6 2011, omp sections have to be tested, this coding causes a 
+!Disabled by MG on Dec  6 2011, omp sections have to be tested, this coding causes a
 !sigfault with nthreads==1
 !
 !Loop on subsets of plane waves (blocking)

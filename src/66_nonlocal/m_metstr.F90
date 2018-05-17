@@ -1,3 +1,21 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+module m_metstr
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ implicit none
+
+ private
+!!***
+
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/metstr
 !! NAME
@@ -83,18 +101,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -153,7 +160,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
 !  For historical reasons:
    dgmetds(:,:)=0.5d0*dgmetds(:,:)
 
-!  
+!
 !  The code below was written by a Mathematica program and formatted by
 !  a combination of editing scripts.  It is not intended to be read
 !  by human beings, and certainly not to be modified by one.  Conceivably
@@ -161,7 +168,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
 !  However, it is only executed ONCE in each run for a given lattice and
 !  strain component, so why worry.  Only a small double loop at the end
 !  is executed on any but the first call.
-!  
+!
    if (rank==0) then
      if(iterm==1) then
        cm(1,1,1,0)=dgmetds(1,1)
@@ -2886,4 +2893,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
  end do
 
 end subroutine metstr
+!!***
+
+end module m_metstr
 !!***

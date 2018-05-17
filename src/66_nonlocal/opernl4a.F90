@@ -95,6 +95,8 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  use defs_basis
  use m_profiling_abi
 
+ use m_mkffkg, only : dfpt_mkffkg
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -128,7 +130,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  integer :: jump,mblkpw,mmproj,mu,nffkg,nffkgd,nffkge,nffkgk,nffkgs,nffkgs2
  integer :: nincpw,nproj,ntens,start
  real(dp) :: ai,ar,sci1,sci2,sci3,sci4,sci5,sci6,sci7,sci8
- real(dp) :: scr1,scr2,scr3,scr4,scr5,scr6,scr7,scr8 
+ real(dp) :: scr1,scr2,scr3,scr4,scr5,scr6,scr7,scr8
  real(dp),parameter :: two_pi2=two_pi*two_pi
 !arrays
  integer,allocatable :: parity(:)
@@ -213,7 +215,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 
 !Loop on subsets of plane waves (blocking)
 
-!Disabled by MG on Dec  6 2011, omp sections have to be tested, this coding causes a 
+!Disabled by MG on Dec  6 2011, omp sections have to be tested, this coding causes a
 !sigfault with nthreads==1
 !Feb 16 2012: The code does not crash anymore but it's not efficient.
 !
