@@ -115,7 +115,6 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'opernl2'
- use interfaces_66_nonlocal, except_this_one => opernl2
 !End of the abilint section
 
  implicit none

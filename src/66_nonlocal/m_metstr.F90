@@ -1,22 +1,46 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_metstr
+!! NAME
+!!  m_metstr
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "abi_common.h"
 
-
 module m_metstr
 
  use defs_basis
- use m_profiling_abi
  use m_errors
+ use m_profiling_abi
 
  implicit none
 
  private
 !!***
 
-!{\src2tex{textfont=tt}}
+ public :: metstr
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/metstr
 !! NAME
 !! metstr
@@ -102,6 +126,7 @@ module m_metstr
 !! SOURCE
 
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
