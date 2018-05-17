@@ -37,7 +37,7 @@ module m_opernl
  private
 !!***
 
- public :: opern2
+ public :: opernl2
  public :: opernl3
  public :: opernl4a
  public :: opernl4b
@@ -138,6 +138,7 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -759,6 +760,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1363,6 +1365,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,vect)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2378,6 +2381,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 &  ia3,idir,indlmn,ispinor,itypat,jproj,kg_k,kpg_k,kpt,&
 &  lmnmax,matblk,mincat,mlang3,mlang4,mproj,ndgxdt,nffnl,nincat,&
 &  nkpg,nlang,nloalg,npw,ntypat,ph3d,vect)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
