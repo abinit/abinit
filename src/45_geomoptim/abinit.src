@@ -47,7 +47,6 @@ sources = [
  "m_pred_steepdesc.F90",
  "m_pred_velverlet.F90",
  "m_pred_verlet.F90",
- "predictimg.F90",
  "m_predict_neb.F90",
  "m_predict_pimd.F90",
  "m_predict_steepest.F90",
