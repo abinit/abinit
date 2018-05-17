@@ -117,10 +117,10 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
+    integer :: nthread
 #ifdef HAVE_LINALG_SCALAPACK
     integer :: maxProc
     integer :: nproc
-    integer :: nthread
     integer :: ngroup
     integer :: subgroup
     integer :: mycomm(2)
@@ -142,7 +142,7 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
 #else
-    nthreads = xomp_get_num_threads(open_parallel=.true.)
+    nthread = xomp_get_num_threads(open_parallel=.true.)
     if ( nthread == 0 ) nthread = 1
 #endif
 
