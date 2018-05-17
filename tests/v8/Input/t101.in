@@ -56,7 +56,9 @@
 
 # Number of Datasets
 #**************************************
-    ndtset   7
+#    ndtset   7
+    ndtset   5
+    jdtset   3 4 5 6 7
 
 # PAW option
 #*******************************
@@ -71,15 +73,15 @@
 
 # DATASET1 : Ground state (density)
 #*******************************
-   getden1   0
-   getwfk1   0
-   tolvrs1   1.0d-8
-   kptopt1   1
+#   getden1   0
+#   getwfk1   0
+#   tolvrs1   1.0d-8
+#   kptopt1   1
 
 # DATASET2 : Ground state (highly converged wavefunction)
 #*******************************
-   getden2   1
-   getwfk2   1
+#   getden2   1
+#   getwfk2   1
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
@@ -144,9 +146,13 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% [shell]
+#%% pre_commands = 
+#%%   iw_cp t101o_DS2_DEN t101o_DS2_DEN;
+#%%   iw_cp t101o_DS2_WFK t101o_DS2_WFK
 #%% [files]
 #%% files_to_test = 
-#%%    t100.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t101.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
