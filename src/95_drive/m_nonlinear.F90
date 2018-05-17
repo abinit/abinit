@@ -68,6 +68,7 @@ module m_nonlinear
  use m_rhotoxc,     only : rhotoxc
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
+ use m_common,      only : setup1
 
  implicit none
 

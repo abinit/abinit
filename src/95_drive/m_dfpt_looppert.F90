@@ -72,7 +72,7 @@ module m_dfpt_loopert
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
-&                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
+                          pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
  use m_rf2,        only : rf2_getidirs
@@ -85,6 +85,7 @@ module m_dfpt_loopert
  use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
+ use m_common,     only : prteigrs
 
  implicit none
 

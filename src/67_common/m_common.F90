@@ -1,4 +1,57 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_common
+!! NAME
+!!  m_common
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG,AF)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_common
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_exit
+ use m_fock
+ use m_io_tools
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+
+ use m_fstrings,         only : indent
+ use m_electronpositron, only : electronpositron_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: scprqt
+ public :: setup1
+ public :: prteigrs
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/scprqt
 !! NAME
 !! scprqt
@@ -7,13 +60,6 @@
 !! Conducts printing inside the scfcv.F90 routine, according to the value of choice.
 !! Also checks the convergence with respect to the different criteria.
 !! Eventually send a signal to quit the SCF cycle.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG,AF)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  choice= if 1 => called at the initialisation of scfcv.f
@@ -96,13 +142,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fname_eig,filnam1,initGS,&
 &  iscf,istep,kpt,maxfor,moved_atm_inside,mpi_enreg,&
@@ -110,20 +149,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_exit
- use m_fock
- use m_io_tools
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
-
- use m_fstrings,         only : indent
- use m_electronpositron, only : electronpositron_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -191,7 +216,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    do ikpt=1, nkpt
      do iband=1, nband(ikpt+(isppol-1)*nkpt)
        ishift = ishift+1
-       residm_band(iband, isppol) = max (resid(ishift), residm_band(iband, isppol)) 
+       residm_band(iband, isppol) = max (resid(ishift), residm_band(iband, isppol))
      end do
    end do
  end do
@@ -200,7 +225,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case (1)
 !  Examine tolerance criteria
-! NB: The tests on tolwfr and the presence of tolerances in the SCF case are 
+! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
 ! also done at the level of the parser in chkinp.
    tolwfr=tollist(2)
    toldff=tollist(3)
@@ -520,7 +545,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldff_ok=0
        else if (diffor<toldff) then
          toldff_ok=toldff_ok+1
-! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave 
+! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
 !  functions are relatively converged as well
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
@@ -582,20 +607,20 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          call wrtout(std_out,message,'COLL')
          quit=1
        end if
-!    Here treat the vdw_df_threshold criterion for non-SCF vdW-DF 
-!    calculations: If input vdw_df_threshold is lesss than toldfe 
-!    then the vdW-DF is triggered once selfconsistency criteria is 
-!    reached for the first time.  
+!    Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
+!    calculations: If input vdw_df_threshold is lesss than toldfe
+!    then the vdW-DF is triggered once selfconsistency criteria is
+!    reached for the first time.
 !    write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
 !    &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
 !    &      (abs(deltae)<toldfe),ch10
 !    call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
        ivdw = 0
-       if ( toldfe > vdw_df_threshold ) then 
-         ivdw = ivdw + 1    
+       if ( toldfe > vdw_df_threshold ) then
+         ivdw = ivdw + 1
        end if
-       call xc_vdw_trigger((toldfe_ok==1 .and. toldfe>vdw_df_threshold))   
+       call xc_vdw_trigger((toldfe_ok==1 .and. toldfe>vdw_df_threshold))
        if ( ivdw == 2) then
          quit=1
        end if
@@ -738,7 +763,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    MSG_BUG(message)
  end select
 
-!Additional stuff for the Fock+SCF cycle 
+!Additional stuff for the Fock+SCF cycle
  if (present(fock)) then
    if (associated(fock)) then
      fock%fock_common%scf_converged=(quit==1)
@@ -766,7 +791,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
      if (choice==2) then
        if (dtset%positron<0.and.istep<=nstep) then
-         if (electronpositron%scf_converged) then 
+         if (electronpositron%scf_converged) then
            if (electronpositron%istep/=electronpositron%nstep) then
              if ((.not.noquit).and.&
 &             (diff_e<electronpositron%postoldfe.or.diff_f<electronpositron%postoldff).and.&
@@ -815,12 +840,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
    end if
  end if
- 
+
  call flush_unit(ab_out)
 
  DBG_EXIT("COLL")
 
- contains 
+ contains
 
    logical function converged()
 
@@ -862,4 +887,495 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  end function converged
 
 end subroutine scprqt
+!!***
+
+!!****f* ABINIT/setup1
+!! NAME
+!! setup1
+!!
+!! FUNCTION
+!! Call near top of main routine to handle setup of various arrays,
+!! filenames, checking of input data, etc.
+!!
+!! INPUTS
+!!  acell(3)=length scales (bohr)
+!!  amu(ntypat)=mass of each atom type
+!!  ecut_eff=effective energy cutoff (hartree) for planewave basis sphere
+!!  ecutc_eff=- PAW only - effective energy cutoff (hartree) for the coarse grid
+!!  natom=number of atoms
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfftc(18)=contain all needed information about 3D FFT for the coarse grid
+!!  nkpt=number of k points
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  ntypat=number of types of atoms
+!!  response=0 if called by gstate, =1 if called by respfn
+!!  rprim(3,3)=dimensionless real space primitive translations
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!
+!! OUTPUT
+!!  amass(natom)=atomic masses for each atom (in atomic units, where the electron mass is one)
+!!  bantot=total number of bands at all k points
+!!  gmet(3,3)=metric for reciprocal space inner products (bohr^-2)
+!!  gprimd(3,3)=dimens. primitive translations for reciprocal space (bohr**-1)
+!!  gsqcut_eff=Fourier cutoff on G^2 for "large sphere" of radius double
+!!  gsqcutc_eff=(PAW) Fourier cutoff on G^2 for "large sphere" of radius double for the coarse FFT grid
+!!   that of the basis sphere--appropriate for charge density rho(G),
+!!   Hartree potential, and pseudopotentials, corresponding to ecut_eff
+!!  rmet(3,3)=real space metric (bohr**2)
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  ucvol=unit cell volume (bohr^3)
+!!
+!! NOTES
+!! SHOULD BE CLEANED !
+!!
+!! PARENTS
+!!      gstate,nonlinear,respfn
+!!
+!! CHILDREN
+!!      getcut,metric,mkrdim,wrtout
+!!
+!! SOURCE
+
+subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
+&  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
+&  response,rmet,rprim,rprimd,ucvol,usepaw)
+
+ use m_geometry,   only : mkrdim, metric
+ use m_kg,         only : getcut
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'setup1'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: natom,nkpt,nsppol
+ integer,intent(in) :: response,usepaw
+ integer,intent(out) :: bantot
+ real(dp),intent(in) :: ecut_eff,ecutc_eff
+ real(dp),intent(out) :: gsqcut_eff,gsqcutc_eff,ucvol
+!arrays
+ integer,intent(in) :: ngfft(18),ngfftc(18)
+ real(dp),intent(in) :: acell(3),amu(dtset%ntypat),rprim(3,3)
+ real(dp),intent(out) :: amass(natom),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),intent(out) :: rprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,ikpt,isppol
+ real(dp) :: boxcut,boxcutc
+ character(len=500) :: message
+!arrays
+ real(dp) :: k0(3)
+
+! ************************************************************************
+
+!Compute bantot
+ bantot=0
+ do isppol=1,nsppol
+   do ikpt=1,nkpt
+     bantot=bantot+dtset%nband(ikpt+(isppol-1)*nkpt)
+   end do
+ end do
+
+ if(dtset%nqpt>1.or.dtset%nqpt<0) then
+   write(message,'(a,i0,5a)')&
+&   '  nqpt =',dtset%nqpt,' is not allowed',ch10,&
+&   '  (only 0 or 1 are allowed).',ch10,&
+&   '  Action : correct your input file.'
+   call wrtout(ab_out,message,'COLL')
+   MSG_ERROR(message)
+ end if
+
+!Compute dimensional primitive translations rprimd
+ call mkrdim(acell,rprim,rprimd)
+
+!Obtain dimensional translations in reciprocal space gprimd,
+!metrics and unit cell volume, from rprimd.
+!Also output rprimd, gprimd and ucvol
+ call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
+
+!Assign masses to each atom (for MD)
+ do iatom=1,natom
+   amass(iatom)=amu_emass*amu(dtset%typat(iatom))
+ end do
+
+!Get boxcut for given acell, gmet, ngfft, and ecut_eff
+!(center at 000 for groundstate, center at q for respfn):
+!boxcut=ratio of basis sphere diameter to fft box side
+ k0(:)=0.0_dp
+ if(response==1 .and. dtset%nqpt==1)then
+   k0(:)=dtset%qptn(:)
+   write(message, '(a)' )' setup1 : take into account q-point for computing boxcut.'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
+ if (usepaw==1) then
+   write(message,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   call getcut(boxcutc,ecutc_eff,gmet,gsqcutc_eff,dtset%iboxcut,ab_out,k0,ngfftc)
+   write(message,'(2a)') ch10,' Fine grid specifications (used for densities):'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
+ else
+   call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
+   gsqcutc_eff=gsqcut_eff
+ end if
+
+!Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
+ if (boxcut<2.0_dp.and.dtset%intxc==1) then
+   write(message, '(a,es12.4,a,a,a,a,a)' )&
+&   '  boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+&   '  Need larger ngfft to use intxc=1.',ch10,&
+&   '  Action : you could increase ngfft, or decrease ecut, or put intxcn=0.'
+   MSG_ERROR(message)
+ end if
+
+end subroutine setup1
+!!***
+
+!!****f* ABINIT/prteigrs
+!!
+!! NAME
+!! prteigrs
+!!
+!! FUNCTION
+!! Print out eigenvalues band by band and k point by k point.
+!! If option=1, do it in a standard way, for self-consistent calculations.
+!! If option=2, print out residuals and eigenvalues, in a format
+!! adapted for nonself-consistent calculations, within the loops.
+!! If option=3, print out eigenvalues, in a format
+!! adapted for nonself-consistent calculations, at the end of the job.
+!! If option=4, print out derivatives of eigenvalues (same format as option==3, except header that is printed)
+!! If option=5, print out Fan contribution to zero-point motion correction to eigenvalues (averaged)
+!!                  (same format as option==3, except header that is printed)
+!! If option=6, print out DDW contribution to zero-point motion correction to eigenvalues (averaged)
+!!                  (same format as option==3, except header that is printed)
+!! If option=7, print out Fan+DDW contribution to zero-point motion correction to eigenvalues (averaged)
+!!                  (same format as option==3, except header that is printed)
+!!
+!! INPUTS
+!!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+!!   or, if option==4, diagonal of derivative of eigenvalues
+!!   or, if option==5...7, zero-point motion correction to eigenvalues (averaged)
+!!  enunit=choice parameter: 0=>output in hartree; 1=>output in eV;
+!!   2=> output in both hartree and eV
+!!  fermie=fermi energy (Hartree)
+!!  fname_eig=filename for printing of the eigenenergies
+!!  iout=unit number for formatted output file
+!!  iscf=option for self-consistency
+!!  kptns(3,nkpt)=k points in reduced coordinates
+!!  kptopt=option for the generation of k points
+!!  mband=maximum number of bands
+!!  nband(nkpt)=number of bands at each k point
+!!  nkpt=number of k points
+!!  nnsclo_now=number of non-self-consistent loops for the current vtrial
+!!    (often 1 for SCF calculation, =nstep for non-SCF calculations)
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
+!!  occopt=option for occupancies
+!!  option= (see above)
+!!  prteig=control print eigenenergies
+!!  prtvol=control print volume and debugging
+!!  resid(mband*nkpt*nsppol)=residuals (hartree**2)
+!!  tolwfr=tolerance on band residual of wf, hartrees**2 (needed when option=2)
+!!  vxcavg=average of vxc potential
+!!  wtk(nkpt)=k-point weights
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! PARENTS
+!!      clnup1,dfpt_looppert,respfn,scprqt,vtorho
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
+&  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
+
+ use m_io_tools,  only : open_file
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'prteigrs'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nkpt,nnsclo_now,nsppol
+ integer,intent(in) :: occopt,option,prteig,prtvol
+ real(dp),intent(in) :: fermie,tolwfr,vxcavg
+ character(len=*),intent(in) :: fname_eig
+!arrays
+ integer,intent(in) :: nband(nkpt*nsppol)
+ real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
+ real(dp),intent(in) :: occ(mband*nkpt*nsppol),resid(mband*nkpt*nsppol)
+ real(dp),intent(in) :: wtk(nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: nkpt_max=50
+ integer :: band_index,iband,ienunit,ii,ikpt,isppol,nband_index,nband_k,nkpt_eff,tmagnet,tmetal,temp_unit
+ real(dp) :: convrt,magnet,residk,rhodn,rhoup
+ character(len=2) :: ibnd_fmt,ikpt_fmt
+ character(len=7) :: strunit1,strunit2
+ character(len=39) :: kind_of_output
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ if (enunit<0.or.enunit>2) then
+   write(msg, '(a,i0)' )' enunit must be 0, 1 or 2. Argument was ',enunit
+   MSG_BUG(msg)
+ end if
+
+ if (prteig > 0) then
+   write(msg, '(a,a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
+   call wrtout(iout,msg,'COLL')
+   if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
+     MSG_ERROR(msg)
+   end if
+   rewind(temp_unit) ! always rewind disk file and print latest eigenvalues
+ end if
+
+ kind_of_output=              ' Eigenvalues                          '
+ if(option==4) kind_of_output=' Expectation of eigenvalue derivatives'
+ if(option==5) kind_of_output=' Fan corrections to eigenvalues at T=0'
+ if(option==6) kind_of_output=' DDW corrections to eigenvalues at T=0'
+ if(option==7) kind_of_output=' Fan+DDW corrs   to eigenvalues at T=0'
+
+ nkpt_eff=nkpt
+
+!write(msg,'(a,5i5)')' prtvol,iscf,kptopt,nkpt_eff,nkpt_max ',prtvol,iscf,kptopt,nkpt_eff,nkpt_max
+!call wrtout(iout,msg,'COLL')
+
+ if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>nkpt_max)nkpt_eff=nkpt_max
+ if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>1 .and. iout==ab_out)nkpt_eff=1
+
+ if(option==1 .or. (option>=3 .and. option<=7))then
+
+   do ienunit=0,1
+
+     if (enunit==1 .and. ienunit==0)cycle
+     if (enunit==0 .and. ienunit==1)cycle
+!  Print eigenvalues in hartree for enunit=0 or 2
+!  The definition of two different strings is quite ridiculous. Historical reasons ...
+
+     if (ienunit==0)then
+       convrt=one
+       strunit1='hartree'
+       strunit2='hartree'
+     end if
+     if (ienunit==1)then
+       convrt=Ha_eV
+       strunit1='   eV  '
+       strunit2='eV     '
+     end if
+
+     band_index=0
+
+     if(ienunit==0)then  ! XG20140730 I do not know why this is only done when ienunit==0
+       tmetal=0
+       if(option==1 .and. occopt>=3 .and. occopt<=8)tmetal=1
+       tmagnet=0
+       if(tmetal==1 .and. nsppol==2)then
+         tmagnet=1
+         rhoup = 0._dp
+         rhodn = 0._dp
+         nband_index = 1
+         do isppol=1,nsppol
+           do ikpt=1,nkpt
+             nband_k=nband(ikpt+(isppol-1)*nkpt)
+             do iband=1,nband_k
+               if(isppol==1) rhoup = rhoup + wtk(ikpt)*occ(nband_index)
+               if(isppol==2) rhodn = rhodn + wtk(ikpt)*occ(nband_index)
+               nband_index = nband_index + 1
+             end do
+           end do
+         end do
+         magnet = abs(rhoup - rhodn)
+       end if
+     end if
+
+     if(iscf>=0 .and. (ienunit==0 .or. option==1))then
+       write(msg, '(3a,f10.5,3a,f10.5)' ) &
+        ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       call wrtout(iout,msg,'COLL')
+       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+     end if
+
+
+!    if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
+     if(iscf>=0 .and. ienunit==0)then ! For historical reasons
+       if(tmagnet==1)then
+         write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
+&         ' Magnetization (Bohr magneton)=',magnet,ch10,&
+&         ' Total spin up =',rhoup,'   Total spin down =',rhodn
+         call wrtout(iout,msg,'COLL')
+         if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+       end if
+     end if
+
+!    Loop over spins (suppress spin data if nsppol not 2)
+     do isppol=1,nsppol
+
+       ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
+       if (nsppol==2.and.isppol==1) then
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
+&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN UP:'
+       else if (nsppol==2.and.isppol==2) then
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
+&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN DOWN:'
+       else
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
+&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points:'
+       end if
+       call wrtout(iout,msg,'COLL')
+       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+
+       if(ienunit==0)then
+         if(option>=4 .and. option<=7)then
+           msg = '  (in case of degenerate eigenvalues, averaged derivative)'
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+         end if
+       end if
+
+       do ikpt=1,nkpt
+         nband_k=nband(ikpt+(isppol-1)*nkpt)
+         ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
+         ibnd_fmt="i3" ; if(nband_k>=1000)ibnd_fmt="i6" ; if(nband_k>=1000000)ibnd_fmt="i9"
+         if(ikpt<=nkpt_eff)then
+           write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
+&           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
+&           kptns(1:3,ikpt)+tol10,' (reduced coord)'
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+           do ii=0,(nband_k-1)/8
+!            write(msg, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
+             write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),&
+&             iband=1+ii*8,min(nband_k,8+ii*8))
+             call wrtout(iout,msg,'COLL')
+             if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+           end do
+           if(ienunit==0 .and. option==1 .and. occopt>=3 .and. occopt<=8)then
+             write(msg, '(5x,a,'//ikpt_fmt//')' )  ' occupation numbers for kpt#',ikpt
+             call wrtout(iout,msg,'COLL')
+             do ii=0,(nband_k-1)/8
+               write(msg, '(8(f10.5,1x))' ) (occ(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+               call wrtout(iout,msg,'COLL')
+             end do
+           end if
+
+         else
+           if(ikpt==nkpt_eff+1)then
+             write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
+             call wrtout(iout,msg,'COLL')
+           end if
+           if (prteig > 0) then
+             write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
+&             ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
+&             kptns(1:3,ikpt)+tol10,' (reduced coord)'
+             call wrtout(temp_unit,msg,'COLL')
+             do ii=0,(nband_k-1)/8
+               write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+               call wrtout(temp_unit,msg,'COLL')
+             end do
+           end if
+         end if
+         band_index=band_index+nband_k
+       end do ! do ikpt=1,nkpt
+     end do ! do isppol=1,nsppol
+
+   end do ! End loop over Hartree or eV
+
+ else if(option==2)then
+
+   band_index=0
+   do isppol=1,nsppol
+
+     if(nsppol==2)then
+       if(isppol==1)write(msg, '(2a)' ) ch10,' SPIN UP channel '
+       if(isppol==2)write(msg, '(2a)' ) ch10,' SPIN DOWN channel '
+       call wrtout(iout,msg,'COLL')
+       if(prteig>0) call wrtout(temp_unit,msg,'COLL')
+     end if
+
+     do ikpt=1,nkpt
+       nband_k=nband(ikpt+(isppol-1)*nkpt)
+       ikpt_fmt="i5" ; if(nkpt>=10000)ikpt_fmt="i7" ; if(nkpt>=1000000)ikpt_fmt="i9"
+
+       if(ikpt<=nkpt_eff)then
+         write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
+&         'Non-SCF case, kpt',ikpt,' (',(kptns(ii,ikpt),ii=1,3),'), residuals and eigenvalues='
+         call wrtout(iout,msg,'COLL')
+         if (prteig > 0) then
+           write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
+&           'Non-SCF case, kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
+           call wrtout(temp_unit,msg,'COLL')
+         end if
+         do ii=0,(nband_k-1)/8
+           write(msg, '(1p,8e10.2)' )(resid(iband+band_index),iband=1+8*ii,min(8+8*ii,nband_k))
+           call wrtout(iout,msg,'COLL')
+         end do
+         do ii=0,(nband_k-1)/6
+           write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
+           call wrtout(iout,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+         end do
+       else
+         if(ikpt==nkpt_eff+1)then
+           write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
+           call wrtout(iout,msg,'COLL')
+         end if
+         if (prteig > 0) then
+           write(msg, '(1x,a,i5,a,f9.5,2f9.5,a)' )'Non-SCF kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
+           call wrtout(temp_unit,msg,'COLL')
+           do ii=0,(nband_k-1)/6
+             write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
+             call wrtout(temp_unit,msg,'COLL')
+           end do
+         end if
+       end if
+
+       ! MG: I don't understand why we should include the buffer in the output.
+       ! It's already difficult to make the tests pass for the residuals without the buffer if nband >> nbocc
+       residk=maxval(resid(band_index+1:band_index+nband_k))
+       if (residk>tolwfr) then
+         write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
+&         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (incl. the buffer)=',residk
+         call wrtout(iout,msg,'COLL')
+       end if
+
+       band_index=band_index+nband_k
+     end do
+   end do
+   call wrtout(iout," ",'COLL')
+
+ else
+   write(msg, '(a,i0,a)' )' option = ',option,', is not an allowed value.'
+   MSG_BUG(msg)
+ end if
+
+ if (prteig > 0) close (temp_unit)
+
+end subroutine prteigrs
+!!***
+
+end module m_common
 !!***

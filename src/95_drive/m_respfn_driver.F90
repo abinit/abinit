@@ -63,7 +63,7 @@ module m_respfn_driver
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
+                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
@@ -82,6 +82,8 @@ module m_respfn_driver
  use m_rhotoxc,     only : rhotoxc
  use m_drivexc,     only : check_kxc
  use m_mklocl,      only : mklocl
+ use m_common,      only : setup1, prteigrs
+
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif

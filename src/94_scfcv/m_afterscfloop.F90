@@ -61,6 +61,7 @@ module m_afterscfloop
  use m_mkrho,            only : mkrho, prtrhomxmn
  use m_elpolariz,        only : elpolariz
  use m_nonlop_test,      only : nonlop_test
+ use m_common,           only : scprqt
 
 #ifdef HAVE_BIGDFT
  use m_abi2big

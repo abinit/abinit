@@ -237,6 +237,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_rhotoxc,          only : rhotoxc
  use m_drivexc,          only : check_kxc
  use m_odamix,           only : odamix
+ use m_common,           only : scprqt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

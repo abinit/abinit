@@ -66,6 +66,7 @@ module m_dfpt_scfcv
  use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
+ use m_common,     only : scprqt
 
  implicit none
 
