@@ -194,7 +194,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 #undef ABI_FUNC
 #define ABI_FUNC 'gstateimg'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim
 !End of the abilint section
 
  implicit none

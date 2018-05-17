@@ -114,7 +114,6 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predict_pimd'
- use interfaces_45_geomoptim
 !End of the abilint section
 
  implicit none

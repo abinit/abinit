@@ -1744,6 +1744,7 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 &                     ucvol,usepaw,usexcnhat,vtrial1,vxc1,xclevel,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

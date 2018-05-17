@@ -28,12 +28,12 @@ module m_pimd_langevin
 
  use defs_basis
  use m_profiling_abi
+ use m_errors
  use m_pimd
  use m_random_zbq
 
  use m_symtk,     only : matr3inv
  use m_geometry,  only : xcart2xred, xred2xcart
-
 
 
  implicit none
@@ -108,6 +108,7 @@ contains
 subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -544,6 +545,7 @@ end subroutine pimd_langevin_npt
 
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
