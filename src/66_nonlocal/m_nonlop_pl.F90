@@ -39,6 +39,7 @@ module m_nonlop_pl
  use m_contstr25a
  use m_contstr26
  use m_metstr
+ use m_opernl
 
  use m_geometry,   only : strconv
  use m_kg,         only : ph1d3d
