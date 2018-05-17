@@ -1,14 +1,14 @@
 #parallelization
 paral_kgb 1
-npband 8
+npband 10
 npfft 1
 npkpt 1
-bandpp 62
+bandpp 50
 use_gemm_nonlop 1
 
 prtden 0 prtwf 0 prteig 0
 ecut 6.
-nband 496
+nband 500
 
 #SCF cycle parameters
 tolvrs 1.d-3 nstep 50
@@ -307,12 +307,12 @@ prtvol 4
 #%% executable = abinit
 #%% [files]
 #%% psp_files = 13al.pspnc
-#%% [NCPU_8]
+#%% [NCPU_10]
 #%% files_to_test = 
 #%%   tmoldyn_07.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = 
 #%% keywords = 
