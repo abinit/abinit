@@ -173,7 +173,7 @@ module m_lobpcg2
 #else
 !#elif defined HAVE_FC_GETENV
     !call getenv("OMP_NUM_THREADS",linalg_threads)
-    nthreads = xomp_get_num_threads(open_parallel=.true.)
+    nthread = xomp_get_num_threads(open_parallel=.true.)
     !read(linalg_threads,'(i5)',iostat=ierr) nthread
     !if ( ierr /= 0 ) nthread = 1
     if ( nthread == 0 ) nthread = 1
