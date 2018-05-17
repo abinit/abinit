@@ -34,6 +34,8 @@ module m_predict_pimd
  use m_results_img
 
  use m_geometry,       only : mkradim, mkrdim
+ use m_pimd_langevin,  only : pimd_langevin_npt, pimd_langevin_nvt
+ use m_pimd_nosehoover, only : pimd_nosehoover_npt, pimd_nosehoover_nvt
 
  implicit none
 
