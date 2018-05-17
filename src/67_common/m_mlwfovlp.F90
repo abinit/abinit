@@ -50,6 +50,7 @@ module m_mlwfovlp
  use m_pawtab,   only : pawtab_type
  use m_pawcprj,  only : pawcprj_type
  use m_paw_sphharm, only : ylm_cmplx, initylmr
+ use m_evdw_wannier, only : evdw_wannier
 
  implicit none
 
@@ -133,7 +134,6 @@ contains
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

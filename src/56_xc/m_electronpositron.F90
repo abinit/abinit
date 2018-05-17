@@ -41,6 +41,7 @@ MODULE m_electronpositron
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_mpinfo,   only : proc_distrb_cycle
 
  implicit none
 
@@ -514,7 +515,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exchange_electronpositron'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 

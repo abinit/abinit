@@ -27,7 +27,7 @@ sources = [
  "getcprjb.F90",
  "metstr.F90",
  "mkffkg.F90",
- "mkffnl.F90",
+ "m_mkffnl.F90",
  "m_vkbr.F90",
  "m_fock.F90",
  "m_gemm_nonlop.F90",

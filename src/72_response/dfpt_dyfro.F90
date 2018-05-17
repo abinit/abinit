@@ -108,6 +108,8 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use defs_datatypes,  only : pseudopotential_type
  use m_pawtab,        only : pawtab_type
  use m_fft,           only : zerosym
+ use m_atm2fft,       only : atm2fft
+ use m_dynmat,        only : dfpt_sydy
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -115,9 +117,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 #define ABI_FUNC 'dfpt_dyfro'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
- use interfaces_72_response, except_this_one => dfpt_dyfro
 !End of the abilint section
 
  implicit none

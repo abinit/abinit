@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of ABINIT 
+.Version 8.8.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Dec 2016.
-- ( at 20h17 )
+.Starting date : Mon 14 May 2018.
+- ( at 17h43 )
   
 - input  file    -> t01.in
 - output file    -> t01.out
@@ -34,7 +34,7 @@
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =           1
        mpw =         893          nfft =       28800          nkpt =           1
 ================================================================================
-P This job should need less than                       8.729 Mbytes of memory.
+P This job should need less than                       8.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 ================================================================================
@@ -143,6 +143,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
             bmass4     1.00000000E+01
             bmass5     2.00000000E+01
             bmass6     2.00000000E+01
+       chkdilatmx           0
           dilatmx      1.50000000E+00
             dtion      5.00000000E-02
              ecut      1.00000000E+01 Hartree
@@ -249,14 +250,14 @@ P           mkmem           1
          ecut(hartree)=     22.500   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm : epsatm=    1.36305739
+  pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -4323,6 +4324,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1785.000    1785.000
             bmass4     1.00000000E+01
             bmass5     2.00000000E+01
             bmass6     2.00000000E+01
+       chkdilatmx           0
           dilatmx      1.50000000E+00
             dtion      5.00000000E-02
              ecut      1.00000000E+01 Hartree
@@ -4640,10 +4642,10 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         17.3
+- Proc.   0 individual time (sec): cpu=         26.1  wall=         27.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  46 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.4  wall=         17.3
+.Delivered 115 WARNINGs and  52 COMMENTs to log file.
++Overall time at end (sec) : cpu=         26.1  wall=         27.1

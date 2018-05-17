@@ -221,6 +221,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
      if (mpi_enreg%paral_spinor==1) then
        call xmpi_sum(buffer2,mpi_enreg%comm_spinor,ierr)
      end if
+     call timab(48,2,tsec)
      creb(:)=buffer2(:,1)
      cimb(:)=buffer2(:,2)
    end if

@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/poslifetime
 !! NAME
-!! poslifetime 
+!! poslifetime
 !!
 !! FUNCTION
 !! Calculate the positron lifetime
@@ -75,7 +75,6 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  use m_profiling_abi
  use m_errors
  use m_xmpi
-
  use m_electronpositron
 
  use m_pawang, only : pawang_type
@@ -83,13 +82,13 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  use m_pawtab, only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawxc, only: pawxcsum
+ use m_drivexc,     only : mkdenpos
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'poslifetime'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
@@ -505,7 +504,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
            if (option/=1) then
              ABI_DEALLOCATE(rhoarr1_j)
            end if
-           
+
 !          Second formalism: use (l,m) moments for densities
          else if (dtset%pawxcdev/=0) then
 

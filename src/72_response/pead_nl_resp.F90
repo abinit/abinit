@@ -89,12 +89,13 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,&
 &                         load_k_hamiltonian,gs_hamiltonian_type
  use m_fft,        only : fftpac
+ use m_mkffnl,     only : mkffnl
+use m_mpinfo,      only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pead_nl_resp'
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_66_nonlocal
 !End of the abilint section

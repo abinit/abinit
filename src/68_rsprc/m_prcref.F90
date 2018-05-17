@@ -43,7 +43,7 @@ module m_prcref
  use m_numeric_tools, only : dotproduct
  use m_geometry, only : xcart2xred, metric
  use m_cgtools,  only : dotprod_vn, mean_fftr
- use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg
+ use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg, initmpi_seq
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fftcore,  only : kgindex
@@ -52,6 +52,9 @@ module m_prcref
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
  use m_distribfft, only : init_distribfft_seq
+ use m_forces,     only : fresid
+ use m_atm2fft,    only : atm2fft
+ use m_rhotoxc,    only : rhotoxc
 
  implicit none
 
@@ -201,7 +204,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #define ABI_FUNC 'prcref'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 
@@ -855,7 +857,6 @@ end subroutine prcref
 #define ABI_FUNC 'prcref_PMA'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 
@@ -2007,7 +2008,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
