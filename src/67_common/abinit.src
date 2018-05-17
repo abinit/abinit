@@ -60,7 +60,6 @@ sources = [
  "posdoppler.F90",
  "poslifetime.F90",
  "posratecore.F90",
- "prtene.F90",
  "prtefield.F90",
  "m_rhotov.F90",
  "m_common.F90",

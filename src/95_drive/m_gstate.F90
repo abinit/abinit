@@ -87,7 +87,7 @@ module m_gstate
  use m_pspini,           only : pspini
  use m_mover,            only : mover
  use m_mpinfo,           only : proc_distrb_cycle
- use m_common,           only : setup1, prteigrs
+ use m_common,           only : setup1, prteigrs, prtene
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
