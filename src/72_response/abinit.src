@@ -60,7 +60,6 @@ sources = [
  "m_rf2.F90",
  "m_paral_pert.F90",
  "m_strain.F90",
- "newfermie1.F90",
  "pead_nl_resp.F90",
  "rf2_init.F90",
  "vlocalstr.F90",
