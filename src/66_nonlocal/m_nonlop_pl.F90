@@ -196,7 +196,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_pl'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
