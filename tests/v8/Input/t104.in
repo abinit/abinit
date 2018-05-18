@@ -47,9 +47,9 @@
 
 # Plane wave basis set
 #**************************************
-       ecut  3
+       ecut  3.5
      ecutsm  0
-  pawecutdg  6
+  pawecutdg  7.0
 
 # K point grid
 #**************************************
@@ -173,7 +173,7 @@
 #%%   ww_mv t104o_DS4_1WF12 t105o_DS4_1WF12
 #%% [files]
 #%% files_to_test = 
-#%%    t104.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t104.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -181,7 +181,6 @@
 #%% authors = L. Baguet
 #%% keywords = PAW, DFPT
 #%% description = 
-#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
-#%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Test the polarized case (with a non-polarized system). Must give same results than t101.in
+#%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t102.in
 #%%<END TEST_INFO>

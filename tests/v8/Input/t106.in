@@ -193,15 +193,14 @@
 #%%   ww_mv t106o_DS4_1WF12 t107o_DS4_1WF12
 #%% [files]
 #%% files_to_test = 
-#%%    t106.out, tolnlines =22 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t106.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW, DFPT, NONLINEAR
+#%% keywords = PAW, DFPT
 #%% description = 
-#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
-#%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Give same results than t101.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.
+#%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
+#%%   Give same results than t102.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.
 #%%<END TEST_INFO>

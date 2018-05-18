@@ -178,5 +178,5 @@ optdriver7    5 # for nonlinear calculation
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Give same results than t101.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.
+#%%   Give same results than t103.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.
 #%%<END TEST_INFO>

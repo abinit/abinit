@@ -47,9 +47,9 @@
 
 # Plane wave basis set
 #**************************************
-       ecut  3
+       ecut  3.5
      ecutsm  0
-  pawecutdg  6
+  pawecutdg  7
 
 # K point grid
 #**************************************
@@ -166,5 +166,5 @@ optdriver7    5 # for nonlinear calculation
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Test the polarized case (with a non-polarized system). Must give same results than t101.in
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t103.in
 #%%<END TEST_INFO>
