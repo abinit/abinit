@@ -252,7 +252,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_coeff/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -263,7 +263,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -360,8 +360,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%bound_coeff>0.and.inp%bound_coeff<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_coeff,comm,hist=hist)
+ if(inp%bound_model>0.and.inp%bound_model<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
  end if
 
 !****************************************************************************************
@@ -397,7 +397,7 @@ program multibinit
 ! Print the Phonon dos/spectrum
 ! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
-!&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
+!&           inp%ncell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
 !Intialisation of the effective potential type

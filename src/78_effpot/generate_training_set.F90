@@ -126,7 +126,6 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
   ABI_DATATYPE_ALLOCATE(thm_scells,(nconfig))
 
-
   call thermal_supercell_make(amplitudes,crystal, Ifc,namplitude, nconfig, option,int(rlatt),&
 &                             temperature_K, thm_scells)
 
@@ -144,7 +143,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
       call random_number(rand)
       direction = int(rand*6+1)
       call random_number(rand)
-      delta = rand/100
+      delta = rand/500
       call random_number(rand)
       delta = delta*(two*rand-1)
 

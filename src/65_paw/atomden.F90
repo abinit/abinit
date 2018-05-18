@@ -112,7 +112,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !Local variables-------------------------------
 !scalars
  character(len=500) :: message
- integer :: cnt,delta,i,l,m,n,iatom,itypat,igrid,n_cells,n_grid_p
+ integer :: cnt,delta,i,l,m,n,iatom,itypat,igrid,ncells,n_grid_p
  integer :: ierr,spaceComm,nprocs,master,rank,remainder
  real(dp) :: a_norm,b_norm,c_norm
  real(dp) :: r_max,R_sphere_max,dp_dummy,ybcbeg,ybcend
@@ -174,13 +174,13 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    m_max(itypat) = -m_min(itypat) 
    n_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_c,delta_c)))
    n_max(itypat) = -n_min(itypat)
-   n_cells = (l_max(itypat)-l_min(itypat)+1) &
+   ncells = (l_max(itypat)-l_min(itypat)+1) &
 &   *(m_max(itypat)-m_min(itypat)+1) &
 &   *(n_max(itypat)-n_min(itypat)+1)
    n_equiv_atoms(itypat) = 0
    do iatom=1,natom
      if (typat(iatom)==itypat) then
-       n_equiv_atoms(itypat) = n_equiv_atoms(itypat) + n_cells
+       n_equiv_atoms(itypat) = n_equiv_atoms(itypat) + ncells
      end if ! if type=itypat
    end do ! number of atoms per cell
    if ((rank==master).and.(prtvol>9)) then
