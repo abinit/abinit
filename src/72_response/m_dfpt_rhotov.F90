@@ -41,7 +41,7 @@ module m_dfpt_rhotov
  private
 !!***
 
- !public :: prtposcar
+ public :: dfpt_rhotov
 !!***
 
 contains
@@ -121,12 +121,13 @@ contains
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhotov'
  use interfaces_56_xc
- use interfaces_72_response, except_this_one => dfpt_rhotov
+ use interfaces_72_response
 !End of the abilint section
 
  implicit none
