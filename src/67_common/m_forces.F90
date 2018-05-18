@@ -48,6 +48,7 @@ module m_forces
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl
  use m_predtk,           only : prtxvf
+ use m_xchybrid,         only : xchybrid_ncpp_cc
 
  implicit none
 

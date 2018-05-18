@@ -52,6 +52,7 @@ module m_setvtr
  use m_atm2fft,           only : atm2fft
  use m_rhotoxc,           only : rhotoxc
  use m_mklocl,            only : mklocl
+ use m_xchybrid,          only : xchybrid_ncpp_cc
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

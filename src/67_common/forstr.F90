@@ -206,6 +206,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_stress,           only : stress
  use m_forces,           only : forces
  use m_initylmg,         only : initylmg
+ use m_xchybrid,         only : xchybrid_ncpp_cc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
