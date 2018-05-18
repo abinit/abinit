@@ -3890,7 +3890,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !      WRITE(44,string) (DBLE(ifreq)*2.d0-1.d0)*3.1415926/op%Greens%beta, &
         iw=aimag(Gw(ifreq,op%flavors,op%flavors+1))
          WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
-         real(Gw(ifreq,iflavor1,iflavor1b)),imag(Gw(ifreq,iflavor1,iflavor1b)),&
+         real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
             ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , (op%Greens%Mk(iflavor1,iflavor1b,1))/iw!-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
       !   WRITE(102,*) aimag(Gw(ifreq,op%flavors,op%flavors+1)), (op%Greens%Mk(iflavor1,iflavor1b,1))/iw,op%Greens%Mk(iflavor1,iflavor1b,1),iw
         END DO
@@ -3939,7 +3939,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !    WRITE(44,string) (DBLE(ifreq)*2.d0-1.d0)*3.1415926/op%Greens%beta, &
       iw=aimag(Gw(ifreq,op%flavors,op%flavors+1))
        WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
-       real(Gw(ifreq,iflavor1,iflavor1b)),imag(Gw(ifreq,iflavor1,iflavor1b)),&
+       real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
           ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , &
 &          (op%Greens%Mk(iflavor1,iflavor1b,1)-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
       END DO

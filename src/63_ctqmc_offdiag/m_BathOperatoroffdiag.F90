@@ -423,59 +423,6 @@ SUBROUTINE BathOperatoroffdiag_activateParticle(op,flavor)
 END SUBROUTINE BathOperatoroffdiag_activateParticle
 !!***
 
-!!****f* ABINIT/m_BathOperatoroffdiag/BathOperatoroffdiag_hybrid
-!! NAME
-!!  BathOperatoroffdiag_hybrid
-!!
-!! FUNCTION
-!!  Compute the hybridization for the active flavor
-!!  at time time
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  op=bath operator
-!!  time=time  F(time)
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
-!! SOURCE
-
-!DOUBLE PRECISION FUNCTION BathOperatoroffdiag_hybrid(op,time)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'BathOperatoroffdiag_hybrid'
-!!End of the abilint section
-!
-!  TYPE(BathOperatoroffdiag), INTENT(IN) :: op
-!  DOUBLE PRECISION  , INTENT(IN) :: time
-!#include "BathOperatoroffdiag_hybrid.h"
-!
-!  IF ( op%activeFlavor .LE. 0 ) &
-!    CALL ERROR("BathOperatoroffdiag_hybrid : no active hybrid func        ")
-!#include "BathOperatoroffdiag_hybrid"
-!  BathOperatoroffdiag_hybrid = hybrid
-!
-!END FUNCTION BathOperatoroffdiag_hybrid
-!!!***
-
 !!****f* ABINIT/m_BathOperatoroffdiag/BathOperatoroffdiag_getDetAdd
 !! NAME
 !!  BathOperatoroffdiag_getDetAdd
