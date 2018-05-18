@@ -1,7 +1,6 @@
 # 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
 # Test on AlAs, with PAW pseudopotentials
-# (L. Baguet, 05.2018)
-# nsppol = 2
+# (L. Baguet, 04.2018)
 
 # Enable ouput for nonliner (full DFPT only)
 #*****************************************************
@@ -31,11 +30,6 @@
 #********************************
    ixc 7
 
-# Polarization
-#*******************************
-          nsppol    2
-  spinmagntarget    0
-
 # SCF procedure
 #*******************************
    nstep    100
@@ -43,7 +37,7 @@
 # Bands
 #*******************************
   occopt    1
-   nband    8
+   nband    4
 
 # Plane wave basis set
 #**************************************
@@ -63,8 +57,8 @@
 # Number of Datasets
 #**************************************
 #    ndtset   7
-    ndtset   5
-    jdtset   3 4 5 6 7
+    ndtset   3
+    jdtset   5 6 7
 
 # PAW option
 #*******************************
@@ -73,7 +67,7 @@
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   2
-    tolwfr   1.0d-26
+    tolwfr   1.0d-28
     getden   2
     getwfk   2
 
@@ -88,28 +82,27 @@
 #*******************************
 #   getden2   1
 #   getwfk2   1
-#   tolwfr2   1.0d-28
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
-    rfddk3   1
-    rfdir3   1 1 1
-# For a more effective non self-consistent computation:
-    nstep3   1
-    nline3   100
-   tolrde3   1.0d-30 # tolrde is choosen to be much lower than tolwfr.
+#    rfddk3   1
+#    rfdir3   1 1 1
+## For a more effective non self-consistent computation:
+#    nstep3   1
+#    nline3   100
+#   tolrde3   1.0d-30 # tolrde is choosen to be much lower than tolwfr.
                      # This way the conjugate gradient steps stop at tolwfr, and not tolrde (usually around 1.0d-3).
                      # If nline is sufficiently large, the computation converges in one step only.
 
 # DATASET4 : Phonons, Electric field
 #*******************************
-   rfelfd4   3
-   rfphon4   1
-  rfatpol4   1 2
-    rfdir4   1 1 1
-   getddk4   3
-   prtden4   1
-  prepanl4   1
+#   rfelfd4   3
+#   rfphon4   1
+#  rfatpol4   1 2
+#    rfdir4   1 1 1
+#   getddk4   3
+#   prtden4   1
+#  prepanl4   1
 
 # DATASET5 : dkdk
 #*******************************
@@ -153,10 +146,7 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [shell]
-#%% pre_commands = 
-#%%   iw_cp t103o_DS2_DEN t103o_DS2_DEN;
-#%%   iw_cp t103o_DS2_WFK t103o_DS2_WFK
+#%% test_chain = t102.in, t103.in
 #%% [files]
 #%% files_to_test = 
 #%%    t103.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
@@ -169,5 +159,4 @@ optdriver7    5 # for nonlinear calculation
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Test the polarized case (with a non-polarized system). Must give same results than t101.in
 #%%<END TEST_INFO>

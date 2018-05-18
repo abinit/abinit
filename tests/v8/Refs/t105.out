@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 18 May 2018.
-- ( at 10h56 )
+- ( at 11h13 )
   
-- input  file    -> t103.in
-- output file    -> t103.out
-- root for input  files -> t103i
-- root for output files -> t103o
+- input  file    -> t105.in
+- output file    -> t105.out
+- root for input  files -> t105i
+- root for output files -> t105o
 
 - inpspheads : Reading pseudopotential header in XML form from /home/baguet/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
 - inpspheads : Reading pseudopotential header in XML form from /home/baguet/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
@@ -30,16 +30,16 @@
  Values of the parameters that define the memory need for DATASET  5 (RF).
      intxc =       0      iscf =       7    lmnmax =       8     lnmax =       4
      mgfft =      12  mpssoang =       2    mqgrid =    3001     natom =       2
-  nloc_mem =       2    nspden =       1   nspinor =       1    nsppol =       1
+  nloc_mem =       2    nspden =       2   nspinor =       1    nsppol =       2
       nsym =      24    n1xccc =       1    ntypat =       2    occopt =       1
    xclevel =       1
--    mband =           4        mffmem =           1         mkmem =          16
+-    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
 ================================================================================
-P This job should need less than                       1.447 Mbytes of memory.
+P This job should need less than                       2.233 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+_ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 
@@ -48,16 +48,16 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  Values of the parameters that define the memory need for DATASET  6 (RF).
      intxc =       0      iscf =       7    lmnmax =       8     lnmax =       4
      mgfft =      12  mpssoang =       2    mqgrid =    3001     natom =       2
-  nloc_mem =       2    nspden =       1   nspinor =       1    nsppol =       1
+  nloc_mem =       2    nspden =       2   nspinor =       1    nsppol =       2
       nsym =      24    n1xccc =       1    ntypat =       2    occopt =       1
    xclevel =       1
--    mband =           4        mffmem =           1         mkmem =          16
+-    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
 ================================================================================
-P This job should need less than                       1.447 Mbytes of memory.
+P This job should need less than                       2.233 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+_ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 
@@ -66,17 +66,17 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  Values of the parameters that define the memory need for DATASET  7.
      intxc =       0    ionmov =       0      iscf =      17    lmnmax =       8
      lnmax =       4     mgfft =      12  mpssoang =       2    mqgrid =    3001
-     natom =       2  nloc_mem =       2    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       1    ntypat =       2
+     natom =       2  nloc_mem =       2    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       1    ntypat =       2
     occopt =       1   xclevel =       1
--    mband =           4        mffmem =           1         mkmem =          16
+-    mband =           8        mffmem =           1         mkmem =          16
        mpw =          77          nfft =        1728          nkpt =          16
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       3.131 Mbytes of memory.
+P This job should need less than                       4.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ P           mkmem          16
 P          mkqmem          16
 P          mk1mem          16
             natom           2
-            nband           4
+            nband           8
            ndtset           3
             ngfft          12      12      12
           ngfftdg          18      18      18
@@ -172,12 +172,17 @@ P          mk1mem          16
             nline5        100
             nline6        100
             nline7          4
+           nspden           2
+           nsppol           2
             nstep5          1
             nstep6          1
             nstep7        100
              nsym          24
            ntypat           2
-              occ      2.000000  2.000000  2.000000  2.000000
+              occ      1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver5          1
         optdriver6          1
         optdriver7          5
@@ -206,6 +211,7 @@ P          mk1mem          16
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         216
+   spinmagntarget      0.00000000E+00
            symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
                       -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
                       -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
@@ -218,7 +224,7 @@ P          mk1mem          16
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolwfr      1.00000000E-28
+           tolwfr      1.00000000E-26
             typat      1  2
           usepead5          1
           usepead6          1
@@ -238,10 +244,25 @@ P          mk1mem          16
 ================================================================================
 
  chkinp: Checking input parameters for consistency, jdtset=   5.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
 
  chkinp: Checking input parameters for consistency, jdtset=   6.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
 
  chkinp: Checking input parameters for consistency, jdtset=   7.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -319,7 +340,7 @@ P          mk1mem          16
    2.52339172E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -337,22 +358,22 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   966.76392618047      9.668E+02 4.234E-29 0.000E+00
+-ETOT  1   966.76392618050      9.668E+02 7.442E-27 0.000E+00
 
- At SCF step    1   max residual=  4.23E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  7.44E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3627E-29; max=  4.2341E-29
+ Mean square residual over all n,k,spin=   9.3425E-28; max=  7.4417E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -371,22 +392,22 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   966.76392611607      9.668E+02 4.226E-29 0.000E+00
+-ETOT  1   966.76392611610      9.668E+02 7.444E-27 0.000E+00
 
- At SCF step    1   max residual=  4.23E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  7.44E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2494E-29; max=  4.2264E-29
+ Mean square residual over all n,k,spin=   8.8136E-28; max=  7.4438E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -405,23 +426,23 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   264.88049987337      2.649E+02 9.380E-29 0.000E+00
+-ETOT  1   264.88049987338      2.649E+02 8.692E-27 0.000E+00
 
- At SCF step    1   max residual=  9.38E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  8.69E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7721E-29; max=  9.3805E-29
+ Mean square residual over all n,k,spin=   1.1838E-27; max=  8.6922E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -440,23 +461,23 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF7
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   264.88049988886      2.649E+02 9.385E-29 0.000E+00
+-ETOT  1   264.88049988887      2.649E+02 8.692E-27 0.000E+00
 
- At SCF step    1   max residual=  9.39E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  8.69E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7731E-29; max=  9.3850E-29
+ Mean square residual over all n,k,spin=   1.1839E-27; max=  8.6916E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -513,7 +534,7 @@ P          mk1mem          16
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17641
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -531,24 +552,24 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF25
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF10
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF25
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF10
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -20004.028191665     -2.000E+04 8.979E-29 0.000E+00
+-ETOT  1  -20004.028191664     -2.000E+04 4.186E-27 0.000E+00
 
- At SCF step    1   max residual=  8.98E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  4.19E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.0958E-29; max=  8.9792E-29
+ Mean square residual over all n,k,spin=   7.1671E-28; max=  4.1858E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -567,24 +588,24 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF26
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF26
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -20004.028192332     -2.000E+04 9.022E-29 0.000E+00
+-ETOT  1  -20004.028192331     -2.000E+04 8.417E-27 0.000E+00
 
- At SCF step    1   max residual=  9.02E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  8.42E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.3121E-29; max=  9.0215E-29
+ Mean square residual over all n,k,spin=   8.1141E-28; max=  8.4171E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -603,25 +624,25 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF28
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF12
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF28
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF12
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6731.4437271976     -6.731E+03 9.592E-29 0.000E+00
+-ETOT  1  -6731.4437271971     -6.731E+03 9.894E-27 0.000E+00
 
- At SCF step    1   max residual=  9.59E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  9.89E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.1535E-29; max=  9.5923E-29
+ Mean square residual over all n,k,spin=   1.1393E-27; max=  9.8940E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -640,25 +661,25 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF30
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF7
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF30
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6731.4437273191     -6.731E+03 9.583E-29 0.000E+00
+-ETOT  1  -6731.4437273186     -6.731E+03 9.915E-27 0.000E+00
 
- At SCF step    1   max residual=  9.58E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  9.91E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.1015E-29; max=  9.5834E-29
+ Mean square residual over all n,k,spin=   1.0632E-27; max=  9.9149E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -677,25 +698,25 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF28
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF9
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF28
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6731.4437269226     -6.731E+03 9.595E-29 0.000E+00
+-ETOT  1  -6731.4437269221     -6.731E+03 9.999E-27 0.000E+00
 
- At SCF step    1   max residual=  9.59E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  1.00E-26 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.0903E-29; max=  9.5948E-29
+ Mean square residual over all n,k,spin=   1.1018E-27; max=  9.9990E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -714,25 +735,25 @@ P          mk1mem          16
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t103o_DS5_1WF30
--dfpt_looppert : read the wavefunctions from file: t103o_DS4_1WF10
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t103o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t105o_DS5_1WF30
+-dfpt_looppert : read the wavefunctions from file: t105o_DS4_1WF10
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t105o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6731.4437270441     -6.731E+03 9.604E-29 0.000E+00
+-ETOT  1  -6731.4437270437     -6.731E+03 9.990E-27 0.000E+00
 
- At SCF step    1   max residual=  9.60E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step    1   max residual=  9.99E-27 < tolwfr=  1.00E-26 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.1501E-29; max=  9.6035E-29
+ Mean square residual over all n,k,spin=   1.1052E-27; max=  9.9899E-27
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -814,105 +835,105 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17641
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t103o_DS2_WFK
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t105o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF34
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF42
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF39
 
 NONLINEAR :  perts :  1.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF39
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF42
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF4
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF34
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF42
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF39
 
 NONLINEAR :  perts :  2.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF39
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF42
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF34
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF42
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF39
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF35
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF35
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.2
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF12
--inwffil : will read wavefunctions from disk file t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t103o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t103o_DS6_1WF37
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t105o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t105o_DS6_1WF37
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.3
 
@@ -978,7 +999,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    3    2   3    4   1    4        -14.8326922418         69.5009586025
    3    2   3    4   2    4        -14.8326922400        -14.9571742101
    3    2   3    4   3    4         29.6653844813        -53.5906876942
-   1    4   1    1   1    4       -143.4327373572          0.0000000000
+   1    4   1    1   1    4       -143.4327373572         -0.0000000000
    1    4   1    1   2    4         71.7163686786          6.0160400147
    1    4   1    1   3    4         71.7163686786          6.0160400147
    1    4   2    1   1    4          0.0000000000          0.0000000000
@@ -987,7 +1008,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    1    4   3    1   1    4          0.0000000000          0.0000000000
    1    4   3    1   2    4          0.0000000000          0.0000000000
    1    4   3    1   3    4         71.7163686786          6.0160400147
-   1    4   1    2   1    4        168.6177015426          0.0000000000
+   1    4   1    2   1    4        168.6177015426         -0.0000000000
    1    4   1    2   2    4        -84.3088507708         -6.6466935247
    1    4   1    2   3    4        -84.3088507708         -6.6466935247
    1    4   2    2   1    4          0.0000000000          0.0000000000
@@ -1002,17 +1023,17 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    1    4   1    4   1    2         29.6653844813        -53.5906876942
    1    4   1    4   2    2          0.0000000000          0.0000000000
    1    4   1    4   3    2          0.0000000000          0.0000000000
-   1    4   1    4   1    4        499.4159925489        690.3114144126
-   1    4   1    4   2    4       -166.4719975170       -820.4838143523
-   1    4   1    4   3    4       -166.4719974874       -694.4248136420
+   1    4   1    4   1    4        499.4159925491        690.3114144125
+   1    4   1    4   2    4       -166.4719975169       -820.4838143522
+   1    4   1    4   3    4       -166.4719974875       -694.4248136419
    1    4   2    4   1    1         19.2944055430         21.7838751356
    1    4   2    4   2    1         19.2944055427         22.3587882294
    1    4   2    4   3    1          0.0000000000          0.0000000000
    1    4   2    4   1    2        -14.8326922424         70.4540553006
    1    4   2    4   2    2        -14.8326922418         69.5009586025
    1    4   2    4   3    2          0.0000000000          0.0000000000
-   1    4   2    4   1    4       -166.4719975153       -845.0105091448
-   1    4   2    4   2    4       -166.4719974874       -694.4248136420
+   1    4   2    4   1    4       -166.4719975152       -845.0105091447
+   1    4   2    4   2    4       -166.4719974875       -694.4248136419
    1    4   2    4   3    4        166.4719974987        750.3019632113
    1    4   3    4   1    1         19.2944055430         21.7838751356
    1    4   3    4   2    1          0.0000000000          0.0000000000
@@ -1020,14 +1041,14 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    1    4   3    4   1    2        -14.8326922424         70.4540553006
    1    4   3    4   2    2          0.0000000000          0.0000000000
    1    4   3    4   3    2        -14.8326922418         69.5009586025
-   1    4   3    4   1    4       -166.4719975153       -845.0105091448
-   1    4   3    4   2    4        166.4719975040        789.1333595755
-   1    4   3    4   3    4       -166.4719975170       -820.4838143523
+   1    4   3    4   1    4       -166.4719975152       -845.0105091447
+   1    4   3    4   2    4        166.4719975040        789.1333595754
+   1    4   3    4   3    4       -166.4719975169       -820.4838143522
    2    4   1    1   1    4         71.7163686786          6.0160400147
    2    4   1    1   2    4          0.0000000000          0.0000000000
    2    4   1    1   3    4          0.0000000000          0.0000000000
    2    4   2    1   1    4         71.7163686786         -6.0160400147
-   2    4   2    1   2    4       -143.4327373572          0.0000000000
+   2    4   2    1   2    4       -143.4327373572         -0.0000000000
    2    4   2    1   3    4         71.7163686786          6.0160400147
    2    4   3    1   1    4          0.0000000000          0.0000000000
    2    4   3    1   2    4          0.0000000000          0.0000000000
@@ -1036,7 +1057,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    2    4   1    2   2    4          0.0000000000          0.0000000000
    2    4   1    2   3    4          0.0000000000          0.0000000000
    2    4   2    2   1    4        -84.3088507718          6.6466935247
-   2    4   2    2   2    4        168.6177015426          0.0000000000
+   2    4   2    2   2    4        168.6177015426         -0.0000000000
    2    4   2    2   3    4        -84.3088507708         -6.6466935247
    2    4   3    2   1    4          0.0000000000          0.0000000000
    2    4   3    2   2    4          0.0000000000          0.0000000000
@@ -1047,27 +1068,27 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    2    4   1    4   1    2        -14.8326922418         69.5009586025
    2    4   1    4   2    2        -14.8326922384        -17.8164643047
    2    4   1    4   3    2          0.0000000000          0.0000000000
-   2    4   1    4   1    4       -166.4719975170       -820.4838143523
-   2    4   1    4   2    4       -166.4719975184        999.7096038770
-   2    4   1    4   3    4        166.4719975004        725.7752684188
+   2    4   1    4   1    4       -166.4719975169       -820.4838143522
+   2    4   1    4   2    4       -166.4719975186        999.7096038770
+   2    4   1    4   3    4        166.4719975004        725.7752684187
    2    4   2    4   1    1          0.0000000000          0.0000000000
    2    4   2    4   2    1        -38.5888110831         -8.2961010174
    2    4   2    4   3    1          0.0000000000          0.0000000000
    2    4   2    4   1    2          0.0000000000          0.0000000000
    2    4   2    4   2    2         29.6653844813        -53.5906876942
    2    4   2    4   3    2          0.0000000000          0.0000000000
-   2    4   2    4   1    4       -166.4719974874       -694.4248136420
-   2    4   2    4   2    4        499.4159925489        690.3114144126
-   2    4   2    4   3    4       -166.4719975170       -820.4838143523
+   2    4   2    4   1    4       -166.4719974875       -694.4248136419
+   2    4   2    4   2    4        499.4159925491        690.3114144125
+   2    4   2    4   3    4       -166.4719975169       -820.4838143522
    2    4   3    4   1    1          0.0000000000          0.0000000000
    2    4   3    4   2    1         19.2944055430         21.7838751356
    2    4   3    4   3    1         19.2944055427         22.3587882294
    2    4   3    4   1    2          0.0000000000          0.0000000000
    2    4   3    4   2    2        -14.8326922424         70.4540553006
    2    4   3    4   3    2        -14.8326922418         69.5009586025
-   2    4   3    4   1    4        166.4719975040        789.1333595755
-   2    4   3    4   2    4       -166.4719975153       -845.0105091448
-   2    4   3    4   3    4       -166.4719974874       -694.4248136420
+   2    4   3    4   1    4        166.4719975040        789.1333595754
+   2    4   3    4   2    4       -166.4719975152       -845.0105091447
+   2    4   3    4   3    4       -166.4719974875       -694.4248136419
    3    4   1    1   1    4         71.7163686786          6.0160400147
    3    4   1    1   2    4          0.0000000000          0.0000000000
    3    4   1    1   3    4          0.0000000000          0.0000000000
@@ -1076,7 +1097,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    3    4   2    1   3    4          0.0000000000          0.0000000000
    3    4   3    1   1    4         71.7163686786          6.0160400147
    3    4   3    1   2    4         71.7163686786         -6.0160400147
-   3    4   3    1   3    4       -143.4327373572          0.0000000000
+   3    4   3    1   3    4       -143.4327373572         -0.0000000000
    3    4   1    2   1    4        -84.3088507708         -6.6466935247
    3    4   1    2   2    4          0.0000000000          0.0000000000
    3    4   1    2   3    4          0.0000000000          0.0000000000
@@ -1085,16 +1106,16 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    3    4   2    2   3    4          0.0000000000          0.0000000000
    3    4   3    2   1    4        -84.3088507708         -6.6466935247
    3    4   3    2   2    4        -84.3088507718          6.6466935247
-   3    4   3    2   3    4        168.6177015426          0.0000000000
+   3    4   3    2   3    4        168.6177015426         -0.0000000000
    3    4   1    4   1    1         19.2944055427         22.3587882294
    3    4   1    4   2    1          0.0000000000          0.0000000000
    3    4   1    4   3    1         19.2944055430         21.7838751356
    3    4   1    4   1    2        -14.8326922418         69.5009586025
    3    4   1    4   2    2          0.0000000000          0.0000000000
    3    4   1    4   3    2        -14.8326922424         70.4540553006
-   3    4   1    4   1    4       -166.4719974891       -669.8981188495
-   3    4   1    4   2    4        166.4719975004        725.7752684188
-   3    4   1    4   3    4       -166.4719975153       -845.0105091448
+   3    4   1    4   1    4       -166.4719974892       -669.8981188494
+   3    4   1    4   2    4        166.4719975004        725.7752684187
+   3    4   1    4   3    4       -166.4719975152       -845.0105091447
    3    4   2    4   1    1          0.0000000000          0.0000000000
    3    4   2    4   2    1         19.2944055427         22.3587882294
    3    4   2    4   3    1         19.2944055398        -12.9128610243
@@ -1102,17 +1123,17 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    3    4   2    4   2    2        -14.8326922418         69.5009586025
    3    4   2    4   3    2        -14.8326922384        -17.8164643047
    3    4   2    4   1    4        166.4719974987        750.3019632113
-   3    4   2    4   2    4       -166.4719975170       -820.4838143523
-   3    4   2    4   3    4       -166.4719975184        999.7096038770
+   3    4   2    4   2    4       -166.4719975169       -820.4838143522
+   3    4   2    4   3    4       -166.4719975186        999.7096038770
    3    4   3    4   1    1          0.0000000000          0.0000000000
    3    4   3    4   2    1          0.0000000000          0.0000000000
    3    4   3    4   3    1        -38.5888110831         -8.2961010174
    3    4   3    4   1    2          0.0000000000          0.0000000000
    3    4   3    4   2    2          0.0000000000          0.0000000000
    3    4   3    4   3    2         29.6653844813        -53.5906876942
-   3    4   3    4   1    4       -166.4719975446        824.5972135817
-   3    4   3    4   2    4       -166.4719974874       -694.4248136420
-   3    4   3    4   3    4        499.4159925489        690.3114144126
+   3    4   3    4   1    4       -166.4719975447        824.5972135816
+   3    4   3    4   2    4       -166.4719974875       -694.4248136419
+   3    4   3    4   3    4        499.4159925491        690.3114144125
  
 
   Non-linear optical susceptibility tensor d (pm/V)
@@ -1151,9 +1172,9 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
   susceptibility tensor (Bohr^-1)
   induced by an atomic displacement
    atom  displacement
-    1          1       -0.000000000        0.000000000        0.000000000
-                        0.000000000        0.000000000       -0.197443527
-                        0.000000000       -0.197443527        0.000000000
+    1          1       -0.000000000       -0.000000000       -0.000000000
+                       -0.000000000       -0.000000000       -0.197443527
+                       -0.000000000       -0.197443527        0.000000000
     1          2        0.000000000       -0.000000000       -0.197443527
                        -0.000000000       -0.000000000       -0.000000000
                        -0.197443527       -0.000000000       -0.000000000
@@ -1161,8 +1182,8 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
                        -0.197443527       -0.000000000       -0.000000000
                        -0.000000000       -0.000000000       -0.000000000
 
-    2          1        0.000000000       -0.000000000       -0.000000000
-                       -0.000000000       -0.000000000        0.204011045
+    2          1        0.000000000        0.000000000        0.000000000
+                        0.000000000       -0.000000000        0.204011045
                        -0.000000000        0.204011045       -0.000000000
     2          2       -0.000000000        0.000000000        0.204011045
                         0.000000000        0.000000000        0.000000000
@@ -1259,7 +1280,7 @@ P           mkmem          16
 P          mkqmem          16
 P          mk1mem          16
             natom           2
-            nband           4
+            nband           8
            ndtset           3
             ngfft          12      12      12
           ngfftdg          18      18      18
@@ -1267,12 +1288,17 @@ P          mk1mem          16
             nline5        100
             nline6        100
             nline7          4
+           nspden           2
+           nsppol           2
             nstep5          1
             nstep6          1
             nstep7        100
              nsym          24
            ntypat           2
-              occ      2.000000  2.000000  2.000000  2.000000
+              occ      1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver5          1
         optdriver6          1
         optdriver7          5
@@ -1301,6 +1327,7 @@ P          mk1mem          16
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         216
+   spinmagntarget      0.00000000E+00
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1319,7 +1346,7 @@ P          mk1mem          16
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolwfr      1.00000000E-28
+           tolwfr      1.00000000E-26
             typat      1  2
           usepead5          1
           usepead6          1
@@ -1416,10 +1443,10 @@ P          mk1mem          16
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          5.9  wall=          5.9
+- Proc.   0 individual time (sec): cpu=          9.3  wall=          9.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  35 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.9  wall=          5.9
++Overall time at end (sec) : cpu=          9.3  wall=          9.3
