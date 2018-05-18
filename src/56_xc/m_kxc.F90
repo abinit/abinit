@@ -61,6 +61,7 @@ MODULE m_kxc
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_spacepar,      only : hartre
  use m_rhotoxc,       only : rhotoxc
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
  implicit none
 

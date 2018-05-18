@@ -198,6 +198,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_getgh1c,  only : getgh1c
  use m_dfpt_mkrho, only : dfpt_accrho
  use m_atm2fft,    only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

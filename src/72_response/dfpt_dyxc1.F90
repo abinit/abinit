@@ -96,6 +96,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use m_cgtools,       only : dotprod_vn
  use m_pawtab,        only : pawtab_type
  use m_atm2fft,       only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
