@@ -3559,7 +3559,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  type(abihist),intent(inout) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
+ integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
  real(dp):: factor
  logical :: revelant_factor,need_map,need_verbose
 !arrays
@@ -3609,7 +3609,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    end if
  end do
 
- ncell = product(ncell)
+ ncells = product(ncell)
 
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
@@ -3617,13 +3617,13 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
    if(factE_hist == 1) then
 !    In this case we mutiply the energy of the hist by the number of cell
-     hist%etot(ii) = hist%etot(ii)  * ncell
+     hist%etot(ii) = hist%etot(ii)  * ncells
    end if
-   if(factE_hist /=1 .and. factE_hist /= ncell)then
+   if(factE_hist /=1 .and. factE_hist /= ncells)then
      write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
 &          ' --- !WARNING',ch10,&
 &          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
-&          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
+&          '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
 &          '     Please check the energy of the step ',ii,ch10,&
 &          ' ---',ch10
      if(need_verbose) call wrtout(std_out,msg,'COLL')

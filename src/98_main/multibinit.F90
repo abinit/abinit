@@ -195,6 +195,10 @@ program multibinit
    call instrng (filnam(1),lenstr,option,strlen,string)
    !To make case-insensitive, map characters to upper case:
    call inupper(string(1:lenstr))
+
+   !Check whether the string only contains valid keywords
+   call chkvars(string)
+
  end if
 
  call xmpi_bcast(string,master, comm, ierr)

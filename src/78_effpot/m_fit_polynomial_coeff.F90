@@ -290,7 +290,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(generateterm == 1)then
 ! we need to regerate them
    if(need_verbose)then
-     write(message, '(4a)' )ch10,' The coefficients for the fit must  will be generate'
+     write(message, '(4a)' )ch10,' The coefficients for the fit will be generated'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 

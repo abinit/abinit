@@ -6,9 +6,7 @@ energy_reference = -1.7145176622E+01
 
 dipdip = 1
 dipdip_prt = 1
-ifcout = 20000
 
-brav  =  1         ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
 ngqpt =  1  1  1   ! Monkhorst-Pack indices
 
 nph1l  =       8 
@@ -21,7 +19,7 @@ qph1l  =      0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
 
-n_cell =   2 2 2
+ncell =   2 2 2
 dynamics =  12
 temperature = 1000
 ntime  = 50
