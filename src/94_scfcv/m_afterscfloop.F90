@@ -43,7 +43,7 @@ module m_afterscfloop
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
  use m_dtset,            only : dtset_copy, dtset_free
  use m_paw_dmft,         only : paw_dmft_type
  use m_pawang,           only : pawang_type
@@ -62,6 +62,7 @@ module m_afterscfloop
  use m_elpolariz,        only : elpolariz
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
+ use m_xctk,             only : xcden
 
 #ifdef HAVE_BIGDFT
  use m_abi2big

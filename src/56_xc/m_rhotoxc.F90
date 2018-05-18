@@ -41,6 +41,7 @@ module m_rhotoxc
  use m_xcpositron,       only : xcpositron
  use m_drivexc,          only : size_dvxc, drivexc_main, xcmult, mkdenpos
  use m_xclda,            only : xctfw
+ use m_xctk,             only : xcden, xcpot
 
  implicit none
 

@@ -90,6 +90,8 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
  use m_profiling_abi
  use m_errors
 
+ use m_xctk,     only : xcden, xcpot
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

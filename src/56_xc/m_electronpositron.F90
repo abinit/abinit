@@ -41,7 +41,8 @@ MODULE m_electronpositron
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_mpinfo,   only : proc_distrb_cycle
  use m_xcpositron, only : xcpositron
- use m_drivexc, only : mkdenpos
+ use m_drivexc,    only : mkdenpos
+ use m_xctk,       only : xcden
 
  implicit none
 

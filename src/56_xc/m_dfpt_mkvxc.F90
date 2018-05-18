@@ -33,6 +33,7 @@ module m_dfpt_mkvxc
 
  use m_time,     only : timab
  use m_symtk,    only : matr3inv
+ use m_xctk,     only : xcden, xcpot
 
  implicit none
 

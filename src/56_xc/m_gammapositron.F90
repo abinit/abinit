@@ -31,7 +31,8 @@ module m_gammapositron
  use m_errors
  use m_electronpositron
 
- use m_numeric_tools,      only : invcb
+ use m_numeric_tools,   only : invcb
+ use m_xctk,            only : xcden
 
  implicit none
 
