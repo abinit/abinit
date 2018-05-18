@@ -1881,7 +1881,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 #define ABI_FUNC 'clnup1'
  use interfaces_14_hidewrite
  use interfaces_59_ionetcdf
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

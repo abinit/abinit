@@ -104,11 +104,12 @@ contains
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
 &                           xred,n1xccc,optstr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xchybrid_ncpp_cc'
- use interfaces_56_xc, except_this_one => xchybrid_ncpp_cc
+ use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -293,6 +294,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 end subroutine xchybrid_ncpp_cc
 !!***
 
+#if 0
+
 !!****f* ABINIT/hybrid_corr
 !! NAME
 !! hybrid_corr
@@ -312,7 +315,7 @@ end subroutine xchybrid_ncpp_cc
 !!  rprimd(3,3) = dimensional primitive translations for real space in Bohr.
 !!
 !! TODO
-!!  This routine is not used
+!!  This routine is not used and does no compile
 !!
 !! OUTPUT
 !!
@@ -333,6 +336,7 @@ end subroutine xchybrid_ncpp_cc
 !! SOURCE
 
 subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hybrid_mixing,vxc,enxc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -428,6 +432,8 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 
 end subroutine hybrid_corr
 !!***
+
+#endif
 
 end module m_xchybrid
 !!***

@@ -1080,7 +1080,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 #define ABI_FUNC 'kxc_driver'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

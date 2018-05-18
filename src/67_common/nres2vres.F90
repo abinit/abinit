@@ -91,7 +91,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use m_rhotoxc,  only : rhotoxc
  use m_dfpt_mkvxc, only : dfpt_mkvxc
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

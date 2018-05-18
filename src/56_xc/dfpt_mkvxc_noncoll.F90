@@ -86,7 +86,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc_noncoll'
- use interfaces_56_xc, except_this_one => dfpt_mkvxc_noncoll
 !End of the abilint section
 
  implicit none

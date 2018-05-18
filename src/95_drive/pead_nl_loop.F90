@@ -123,7 +123,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_72_response
  use interfaces_79_seqpar_mpi
 !End of the abilint section

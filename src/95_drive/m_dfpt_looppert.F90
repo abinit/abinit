@@ -235,7 +235,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response
 !End of the abilint section
 

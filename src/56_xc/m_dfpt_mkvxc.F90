@@ -134,11 +134,11 @@ contains
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
 &          nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc'
- use interfaces_56_xc, except_this_one => dfpt_mkvxc
 !End of the abilint section
 
  implicit none
@@ -484,11 +484,12 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
 &                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxcgga'
- use interfaces_56_xc, except_this_one => dfpt_mkvxcgga
+ use interfaces_56_xc
 !End of the abilint section
 
  implicit none

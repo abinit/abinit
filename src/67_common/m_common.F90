@@ -154,12 +154,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scprqt'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => scprqt
 !End of the abilint section
 
  implicit none
@@ -1413,6 +1413,7 @@ end subroutine prteigrs
 !! SOURCE
 
 subroutine prtene(dtset,energies,iout,usepaw)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
