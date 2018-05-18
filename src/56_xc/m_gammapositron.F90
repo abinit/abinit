@@ -323,7 +323,6 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gammapositron_fft'
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

@@ -862,7 +862,6 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhohxcpositron'
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

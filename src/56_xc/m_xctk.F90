@@ -94,6 +94,7 @@ contains
 subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor,rhonow, & !Mandatory arguments
 &  lrhonow)              !Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -402,6 +403,7 @@ end subroutine xcden
 subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 & nspgrad,paral_kgb,qphon,rhonow,vxc,&
 & vxctau) ! optional argument
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
