@@ -34,6 +34,7 @@ MODULE m_double_grid
  use m_kptrank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
+ use m_symtk,          only : matr3inv
 
  implicit none
 
@@ -180,7 +181,6 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'double_grid_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

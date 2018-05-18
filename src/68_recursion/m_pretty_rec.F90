@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !!  This module  provides some minor functions applied in the
-!!  recursion 
+!!  recursion
 !!
 !! COPYRIGHT
 !! Copyright (C) 2002-2018 ABINIT group (XG)
@@ -17,7 +17,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!     
+!!
 !!
 !! CHILDREN
 !!
@@ -32,16 +32,14 @@
 
 MODULE m_pretty_rec
 
- use m_profiling_abi
-
  use defs_basis
+ use m_profiling_abi
 
  implicit none
 
- private  
+ private
 
- public ::           &
-&         prtwork                ! calculate the work done during recursion
+ public ::  prtwork                ! calculate the work done during recursion
 
  interface prtwork
   module procedure prtworksim
@@ -208,10 +206,8 @@ subroutine prtworkadv(work_now,adv)
   end if
  endif
 
- 
 end subroutine prtworkadv
 !!***
-
 
 END MODULE m_pretty_rec
 !!***

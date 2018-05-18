@@ -2,6 +2,7 @@
 description: How to obtain a Scanning Tunneling Microscopy map
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to obtain a Scanning Tunneling Microscopy map with the ABINIT package.
 

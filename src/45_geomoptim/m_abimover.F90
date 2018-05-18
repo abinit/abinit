@@ -106,7 +106,7 @@ end type delocint
 !! abimover
 !!
 !! FUNCTION
-!! This datatype has the purpouse of store all the data taked
+!! This datatype has the purpose of store all the data taked
 !! usually from dtset needed for the different predictors
 !! to update positions, acell, etc.
 !!
@@ -939,7 +939,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !  This is the initialization for ionmov==27
 !  -------------------------------------------
  case (27)                ! Generation of the training set for effective potential
-   specs%ncycle = 1       ! Number of internal cycles 
+   specs%ncycle = 1       ! Number of internal cycles
    specs%isFconv=.FALSE.  ! Convergence is not used
    specs%isVused=.FALSE.   ! Velocities are not used for update of atomic positions
 !  Values use in XML Output

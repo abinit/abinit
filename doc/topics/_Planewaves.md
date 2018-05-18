@@ -2,6 +2,7 @@
 description: How to perform numerically precise calculations with planewaves or projector- augmented waves and pseudopotentials
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform numerically precise calculations with planewaves or projector-
 augmented waves and pseudopotentials with the ABINIT package.

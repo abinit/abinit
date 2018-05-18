@@ -174,7 +174,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
  use m_time,     only : timab
  use m_io_tools, only : file_exists
- use m_mpinfo,   only : destroy_mpi_enreg
+ use m_geometry, only : stresssym
+ use m_dynmat,   only : dfpt_sygra
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_hdr,      only : hdr_skip
  use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
@@ -189,6 +191,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr, symrhg
+ use m_initylmg, only : initylmg
+ use m_mkffnl,   only : mkffnl
+ use m_getgh1c,  only : getgh1c
+ use m_dfpt_mkrho, only : dfpt_accrho
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -196,16 +204,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #define ABI_FUNC 'dfpt_nstpaw'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 
@@ -1472,7 +1475,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
        end if
-       call pawmkrho(arg,cplex,gprimd,idir1,indsy1,ipert1,&
+       call pawmkrho(1,arg,cplex,gprimd,idir1,indsy1,ipert1,&
 &       mpi_enreg,my_natom,dtset%natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,&
 &       pawfgr,pawfgrtab,-10001,pawdrhoij1(:,idir1),pawdrhoij1_unsym(:,idir1),pawtab,&
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&

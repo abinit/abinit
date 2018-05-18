@@ -179,9 +179,9 @@ subroutine abi_dcopy_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  real(dp), intent(inout) :: tdest(*)
 !Only for lobpcgwf
  integer, intent(in), optional :: x_cplx
-    
+
  call abi_dcopy(size,tsrc(1),incsrc,tdest(1),incdest,x_cplx)
-    
+
 end subroutine abi_dcopy_1d
 !!***
 
@@ -217,7 +217,7 @@ subroutine abi_dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 !Only for lobpcgwf
  integer, intent(in), optional :: x_cplx
 
- ! write(*,*) "dcopy2D size=",size 
+ ! write(*,*) "dcopy2D size=",size
  call abi_dcopy(size,tsrc(1,1),incsrc,tdest(1,1),incdest,x_cplx)
 
 end subroutine abi_dcopy_2d
@@ -338,7 +338,7 @@ end subroutine abi_dcopy_1d_0d
  else
     call dcopy(size,tsrc,incsrc,tdest,incdest)
  end if
- 
+
 #ifdef DEV_LINALG_TIMING
  call timab(TIMAB_XCOPY,2,tsec)
 #endif
@@ -351,7 +351,7 @@ end subroutine abi_d2zcopy_2d
 !! abi_z2dcopy_2d
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
 !!
 !! PARENTS

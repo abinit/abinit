@@ -1,3 +1,4 @@
+#!/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created: Nov 12, 2016
@@ -17,6 +18,7 @@ Version: 0.0 - Initial building of program
          0.1 - Additional for angle dependent calculation
          0.2 - Additional user input required and number of output files reduced
          0.3 - Moved all user prompted input to an input file
+         0.4 - Additional help menu options (via --help) have been added
 
 Output: Program will output a text file containing the raman spectrum vs frequency
         and an outfile which outlines what happens in the calculation.
@@ -42,7 +44,7 @@ def READ_INPUT(user_filein):
     Output:  array of input information used by program
     """
     #declare array of  values
-    vararray = [0,0,0,0,0,0]
+    vararray = ['',0,0,0,0,'',1000]
     
     #check if file exists
     check = CHECK_FILE(user_filein)  
@@ -50,10 +52,6 @@ def READ_INPUT(user_filein):
     if check == False:
         print('')
         print('The input file was not found in the directory. \n Please correct this.')
-        print('\n Remember the input file should be formated as follows:\n\n '\
-                 'filename "name of file"\n outname "name of outfile"\n temp "temperature in Kelvin"\n frequency '\
-                 '"frequency in cm^-1"\n spread "spread of lorentz in cm^-1"\n '\
-                 'calctype "type of calculation 0- abort, 1- powder, 2-ij polarization, 3- angle"\n')
         sys.exit()
     else:
         for line in open(user_filein):
@@ -73,11 +71,15 @@ def READ_INPUT(user_filein):
                     fill = 0
                 elif l[0] == 'calctype':        # calculation type
                     vararray[4] = int(l[1])
-                elif l[0] == 'outname':        # calculation type
+                elif l[0] == 'outname':         # calculation type
                     vararray[5] = str(l[1])
+                elif l[0] == 'freqsteps':       # number of frequency steps
+                    vararray[6] = int(l[1])
+                    
         #set output file name
         global outname
         #check for output file
+        outname = vararray[5]
         outname = CHECK_REPEAT(outname)  
 
         vararray[5] = outname
@@ -194,10 +196,11 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
     
     Purpose: To call and activate the raman spectrum part of this calculation.
     """
-    T       = vararray[1]
-    input2  = vararray[2]
-    width   = vararray[3]
-    choice1 = vararray[4]
+    T         = vararray[1]
+    input2    = vararray[2]
+    width     = vararray[3]
+    choice1   = vararray[4]
+    freqsteps = vararray[6]
     
     #Decide what to do when the user makes a choice
     ramanplot = 0
@@ -227,7 +230,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         #Modify the input data silently.
         menergy = GET_MODEENERGY(output)
         rarray  = GET_RAMANMATRIX(output)
-        ramanplot = RAMAN_POWDER(menergy,rarray,input2,width,T)
+        ramanplot = RAMAN_POWDER(menergy,rarray,input2,width,T,freqsteps)
         
         #After the calculation completes we print the results to a file
         outfile = outname+'_intensity_powder'
@@ -261,12 +264,12 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         #Modify the input data silently.
         menergy = GET_MODEENERGY(output)
         rarray  = GET_RAMANMATRIX(output)
-        ramanxx = RAMAN_POLAR(menergy,rarray,input2,'XX',width,T)
-        ramanxy = RAMAN_POLAR(menergy,rarray,input2,'XY',width,T)
-        ramanxz = RAMAN_POLAR(menergy,rarray,input2,'XZ',width,T)
-        ramanyy = RAMAN_POLAR(menergy,rarray,input2,'YY',width,T)
-        ramanyz = RAMAN_POLAR(menergy,rarray,input2,'YZ',width,T)
-        ramanzz = RAMAN_POLAR(menergy,rarray,input2,'ZZ',width,T)
+        ramanxx = RAMAN_POLAR(menergy,rarray,input2,'XX',width,T,freqsteps)
+        ramanxy = RAMAN_POLAR(menergy,rarray,input2,'XY',width,T,freqsteps)
+        ramanxz = RAMAN_POLAR(menergy,rarray,input2,'XZ',width,T,freqsteps)
+        ramanyy = RAMAN_POLAR(menergy,rarray,input2,'YY',width,T,freqsteps)
+        ramanyz = RAMAN_POLAR(menergy,rarray,input2,'YZ',width,T,freqsteps)
+        ramanzz = RAMAN_POLAR(menergy,rarray,input2,'ZZ',width,T,freqsteps)
         
         #After the calculation completes we print the results to a file
         outfile = outname+'_intensity_ij'
@@ -339,7 +342,6 @@ def LOAD_ANADDB(infile):
     
     """
     keywords =['', #Abinit version
-               False, #dieflag - frequency dependent dielectric constant
                False, #nfreq   - number of frequency steps
                False, #nlflag  - Raman tensor and nonlinear optical tensor
                False, #elaflag - elastic tensor flag
@@ -351,12 +353,6 @@ def LOAD_ANADDB(infile):
             if line.startswith( '.Version'):
                 l = line.strip('\n').split(' ')
                 keywords[0] = str(l[1])
-            elif line.startswith( '     dieflag'):
-                l = line.strip('\n').split(' ')
-                if int(l[len(l)-1]) > 0:
-                    keywords[1] = 'True' 
-                else:
-                    keywords[1] = 'False'
             elif line.startswith( '       nfreq'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1]) > 10:
@@ -382,33 +378,10 @@ def LOAD_ANADDB(infile):
     outinfo= [0,0,0,0]
     modeenergy = []
     modedata = []
-    diedata = []
     
     #Now look through keywords and extract desired information
     for i in range(len(keywords)): 
-        if keywords[i] and i == 1 and keywords[i] != 'False': #dielectric tensor as a function of frequency
-            #Do something
-            printout('Starting extraction of the dielectric Tensor as a function of frequency.')
-            diedata=np.zeros(shape=(int(keywords[2]),7))
-            with open(infile,'r') as f:
-                for num,line in enumerate(f,1):
-                    if line.startswith(' Frequency(Hartree)    Dielectric constant                Reflectivity'):
-                        c=2
-                        for c in range(2,int(keywords[2])+2):
-                            data = linecache.getline(infile,num+c)
-                            l=data.strip('\n').split()                            
-                            diedata[c-2][0]= l[0]
-                            diedata[c-2][1]= l[1]
-                            diedata[c-2][2]= l[2]
-                            diedata[c-2][3]= l[3]
-                            diedata[c-2][4]= l[4]
-                            diedata[c-2][5]= l[5]
-                            diedata[c-2][6]= l[6]
-                            
-            outinfo[3] = diedata
-            printout('Finished extraction of the dielectric Tensor as a function of frequency.')
-
-        elif keywords[i] and i == 3: #Raman tensor and modes
+        if keywords[i] and i == 3: #Raman tensor and modes
             printout('Starting extraction of the raman tensor.')
             with open(infile,'r') as f:
                 for num,line in enumerate(f,1):
@@ -490,7 +463,7 @@ def GET_RAMANMATRIX(outinfo):
         
     return array
     
-def RAMAN_POWDER(menergy,rarray,laser,width,T):
+def RAMAN_POWDER(menergy,rarray,laser,width,T,freqsteps):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
@@ -498,7 +471,6 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
     Purpose: To calculate the Raman Spectrum of a power sample over a frequency 
     range a little larger than the frequency range of the phonon modes.
     """
-    freqsteps = 1000
     ramanplot = np.zeros(shape = (freqsteps,2))
     #Compute Bose Factor
     mbose = np.zeros(len(menergy))
@@ -545,7 +517,7 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
         
     return ramanplot
     
-def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
+def RAMAN_POLAR(menergy,rarray,laser,option,width,T,freqsteps):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
@@ -553,7 +525,6 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
     Purpose: Calculate the Raman Spectrum for light polarized along 1 and 
     measured along a polarization along 2.
     """
-    freqsteps = 1000
     #Compute Bose Factor
     mbose = np.zeros(len(menergy))
     for i in range(len(menergy)):
@@ -765,14 +736,7 @@ def DETER_MENU(var_array):
     keywords,output = LOAD_ANADDB(infile)
            
     for i in range(len(keywords)):
-        if keywords[i]== 'True' and i == 1:
-            #run module to print Dielectric tensor as a function of frequency
-            outfile = outname+'_dielectric_freq'
-            printoutfile('# Freq    dielectric      Reflectivity',outfile)
-            printoutfile('#           x y z x y z  ',outfile)
-            for j in range(int(keywords[2])):
-                printoutfile('%e %e %e %e %e %e %e' %(output[3][j][0],output[3][j][1],output[3][j][2],output[3][j][3],output[3][j][4],output[3][j][5],output[3][j][6]),outfile)
-        elif keywords[i]== 'True' and i == 3:
+        if keywords[i]== 'True' and i == 3:
             #Choose to identify the modes characteristics or make a Raman Spectrum  
             printout('Entering Raman Spectrum Calculation.')
             printout('')
@@ -794,7 +758,7 @@ if __name__ == '__main__':
     __copyright__  = 'none'
     __credits__    = 'none'
     __license__    = 'none'
-    __version__    = '0.3'
+    __version__    = '0.4'
     __maintainer__ = 'Nicholas Pike'
     __email__      = 'Nicholas.pike@ulg.ac.be'
     __status__     = 'production'
@@ -830,8 +794,37 @@ if __name__ == '__main__':
     if any('SPYDER' in name for name in os.environ):
         user_inputfile = 'input_raman'
     else:
-        #Determines what the program is to do if it is run from command line
-        user_inputfile = sys.argv[1] #input should be python program_name tfile 
+        if sys.argv[1] == '--help':
+            print('--help\t\t  +Prints this help menu.\n')
+            print('--input\t\t  +Prints an example input file.\n')
+            print('--usage\t\t  +Prints an example of how to use this program.\n')
+            print('--author\t  +Prints the authors name.\n')
+            print('--email\t\t  +Prints the authors email address.\n')
+            print('--version\t  +Prints the version number of this program.\n')            
+            sys.exit()
+        elif sys.argv[1] == '--input':
+            print('The input file should be formated as follows:\n\t '\
+                 'filename "name of file"\n\t outname "name of outfile"\n\t temp "temperature in Kelvin"\n\t frequency '\
+                 '"frequency in cm^-1"\n\t spread "spread of lorentz in Ha"\n\t '\
+                 'freqstep "number of frequency steps (default 1000)"\n\t '\
+                 'calctype "type of calculation"\n\t\t 0- abort, 1- powder, 2-ij polarization, 3- angle\n')    
+            sys.exit()
+        elif sys.argv[1] == '--usage':
+            print('Usage: python %s input_file or %s input_file'%(sys.argv[0],sys.argv[0]))
+            sys.exit()
+        elif sys.argv[1] == '--author':
+            print('Author: %s'%__author__)
+            sys.exit()            
+        elif sys.argv[1] == '--email':
+            print('Email bugs to: %s'%__email__)
+            sys.exit()    
+        elif sys.argv[1] == '--version':
+            print('Version %s'%__version__)
+            sys.exit()             
+            
+        else:
+            #Determines what the program is to do if it is run from command line
+            user_inputfile = sys.argv[1] #input should be python program_name tfile 
           
     #Name of default input file 
     vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file

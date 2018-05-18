@@ -152,15 +152,24 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_contistr01
+ use m_contistr03
+ use m_contistr12
+ use m_contstr21
+ use m_contstr23
+ use m_contstr25
+ use m_contstr25a
+ use m_contstr26
 
- use m_kg,  only : ph1d3d
+ use m_geometry,   only : strconv
+ use m_kg,         only : ph1d3d
+ use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
+                          metcon, metcon_so, metric_so
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_pl'
- use interfaces_41_geometry
- use interfaces_42_nlstrain
  use interfaces_66_nonlocal, except_this_one => nonlop_pl
 !End of the abilint section
 
@@ -1255,6 +1264,452 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !DEBUG
 !write(std_out,*)' nonlop_pl: exit '
 !ENDDEBUG
+
+contains
+!!***
+
+!!****f* ABINIT/trace2
+!! NAME
+!! trace2
+!!
+!! FUNCTION
+!! Sum indices to compute trace of rank 2 tensor gxa related to l=2
+!! $trace=sum_{i,j} {gxa(i,j) gmet(i,j)}$
+!!
+!! INPUTS
+!!  gxa(2,6) = $sum_{G} {e^(2 \pi i G cdot t} {{f_2(|k+G|)} \over {|k+G|^2}} (k+G) cdot (k+G) C(G_{nk})}$
+!!  gmet(3,3)=(symmetric) metric tensor in reciprocal space (bohr^-2)
+!!
+!! OUTPUT
+!!  trace(2)=sum_{i,j} {gxa(i,j) gmet(i,j)}$ (Re and Im).
+!!
+!! NOTES
+!! Here index 6 refers to vector components
+!! of (k+G) but note tensor is symmetric=>only 6 components.
+!! The components are given in the order 11 22 33 32 31 21.
+!! The initial 2 handles the Re and Im parts.
+!!
+!! PARENTS
+!!      nonlop_pl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine trace2(gxa,gmet,trace)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'trace2'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: gmet(3,3),gxa(2,6)
+ real(dp),intent(out) :: trace(2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: reim
+
+! *************************************************************************
+
+!Write out index summation, Re and Im parts
+ do reim=1,2
+   trace(reim)=gxa(reim,1)*gmet(1,1)+gxa(reim,2)*gmet(2,2)+&
+&   gxa(reim,3)*gmet(3,3)+&
+&   2.0d0*(gxa(reim,4)*gmet(3,2)+gxa(reim,5)*gmet(3,1)+&
+&   gxa(reim,6)*gmet(2,1))
+ end do
+
+end subroutine trace2
+!!***
+
+!!****f* ABINIT/strsocv
+!! NAME
+!! strsocv
+!!
+!! FUNCTION
+!! Convert from antisymmetric storage mode 3x3x3 rank3 tensor in reduced
+!! coordinates "red" to symmetric storage mode 3x3 rank2 tensor in
+!! cartesian coordinates "cart", using metric tensor "gprimd".
+!!
+!! INPUTS
+!!  red(6,3)=3x3x3 tensor in antisymmetric storage mode,
+!!           reduced coordinates
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!
+!! OUTPUT
+!!  cart(6)=3x3 tensor in symmetric storage mode,
+!!          cartesian coordinates
+!!
+!! NOTES
+!! This routine is used to compute spin-orbit stress tensor.
+!!
+!! red is antisymmetric in first two indices and stored
+!!     as 11 22 33 32 31 21.
+!! cart is symmetric and stored as 11 22 33 32 31 21.
+!!
+!!{{\ \begin{eqnarray}
+!! cart(1,1) & = &        & red(i,j,2) G(3,i) G(1,j) + red(i,j,3) G(1,i) G(2,j) \nonumber
+!! cart(2,2) & = &        & red(i,j,1) G(2,i) G(3,j) + red(i,j,3) G(1,i) G(2,j) \nonumber
+!! cart(3,3) & = &        & red(i,j,1) G(2,i) G(3,j) + red(i,j,2) G(3,i) G(1,j) \nonumber
+!! cart(3,2) & = &  0.5 ( & red(i,j,3) G(1,i) G(3,j) + red(i,j,2) G(2,i) G(1,j)) \nonumber
+!! cart(3,1) & = &  0.5 ( & red(i,j,3) G(3,i) G(2,j) + red(i,j,1) G(2,i) G(1,j)) \nonumber
+!! cart(2,1) & = &  0.5 ( & red(i,j,2) G(3,i) G(2,j) + red(i,j,1) G(1,i) G(3,j))
+!! \end{eqnarray} }}
+!!
+!! PARENTS
+!!      nonlop_pl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine strsocv(red,gprimd,cart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'strsocv'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),red(6,3)
+ real(dp),intent(out) :: cart(6)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj
+!arrays
+ real(dp) :: work(3,3,3)
+
+! *************************************************************************
+
+ do ii=1,3
+   work(1,1,ii)=0.d0
+   work(2,2,ii)=0.d0
+   work(3,3,ii)=0.d0
+   work(3,2,ii)=red(4,ii) ; work(2,3,ii)=-red(4,ii)
+   work(3,1,ii)=red(5,ii) ; work(1,3,ii)=-red(5,ii)
+   work(2,1,ii)=red(6,ii) ; work(1,2,ii)=-red(6,ii)
+ end do
+
+ cart(:)=0.d0
+ do jj=1,3
+   do ii=1,3
+     cart(1)=cart(1)+work(ii,jj,2)*gprimd(3,ii)*gprimd(1,jj)&
+&     +work(ii,jj,3)*gprimd(1,ii)*gprimd(2,jj)
+     cart(2)=cart(2)+work(ii,jj,1)*gprimd(2,ii)*gprimd(3,jj)&
+&     +work(ii,jj,3)*gprimd(1,ii)*gprimd(2,jj)
+     cart(3)=cart(3)+work(ii,jj,1)*gprimd(2,ii)*gprimd(3,jj)&
+&     +work(ii,jj,2)*gprimd(3,ii)*gprimd(1,jj)
+     cart(4)=cart(4)+work(ii,jj,3)*gprimd(1,ii)*gprimd(3,jj)&
+&     +work(ii,jj,2)*gprimd(2,ii)*gprimd(1,jj)
+     cart(5)=cart(5)+work(ii,jj,3)*gprimd(3,ii)*gprimd(2,jj)&
+&     +work(ii,jj,1)*gprimd(2,ii)*gprimd(1,jj)
+     cart(6)=cart(6)+work(ii,jj,2)*gprimd(3,ii)*gprimd(2,jj)&
+&     +work(ii,jj,1)*gprimd(1,ii)*gprimd(3,jj)
+   end do
+ end do
+ cart(4)=0.5d0*cart(4)
+ cart(5)=0.5d0*cart(5)
+ cart(6)=0.5d0*cart(6)
+
+end subroutine strsocv
+!!***
+
+!!****f* ABINIT/scalewf_nonlop
+!! NAME
+!! scalewf_nonlop
+!!
+!! FUNCTION
+!! At the start of nonlop (or similar routines), as well as its end,
+!! the wavefunctions, when stored with istwfk/=2,
+!! need to be scaled (by a factor of 2 or 1/2),
+!! except for the G=0 component.
+!! Only the first spinor component is to be modified.
+!!
+!! INPUTS
+!!  istwf_k=storage mode of the vector
+!!  mpi_enreg=informations about MPI parallelization
+!!  npw=number of planewaves
+!!  option=1 multiply by 2
+!!        =2 multiply by 1/2
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!!  vect(2,npw)=vector that is rescaled
+!!
+!! NOTES
+!!  XG030513 : MPIWF One should pay attention to the
+!!  G=0 component, that will be only one one proc...
+!!
+!! PARENTS
+!!      nonlop_pl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'scalewf_nonlop'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!This type is defined in defs_mpi
+!scalars
+ integer,intent(in) :: istwf_k,npw,option
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ real(dp),intent(inout) :: vect(2,npw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipw
+ real(dp) :: scale
+ character(len=500) :: message
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if(istwf_k/=1)then
+
+   if(option/=1 .and. option/=2)then
+     write(message,'(a,a,a,i0)')&
+&     'The argument option should be 1 or 2,',ch10,&
+&     'however, option=',option
+     MSG_BUG(message)
+   end if
+
+   scale=two
+   if(option==2)scale=half
+
+!  Storage for the Gamma point. The component of the G=0 vector
+!  should not be scaled, and no G=0 imaginary part is allowed.
+   if(istwf_k==2)then
+     if (mpi_enreg%me_g0==1) then
+       vect(2,1)=zero
+!$OMP PARALLEL DO
+       do ipw=2,npw
+         vect(1,ipw)=scale*vect(1,ipw)
+         vect(2,ipw)=scale*vect(2,ipw)
+       end do
+!$OMP END PARALLEL DO
+     else
+!$OMP PARALLEL DO
+       do ipw=1,npw
+         vect(1,ipw)=scale*vect(1,ipw)
+         vect(2,ipw)=scale*vect(2,ipw)
+       end do
+!$OMP END PARALLEL DO
+     end if
+   end if
+
+!  Other storage modes, for k points with time-reversal symmetry.
+!  All components should be scaled.
+   if(istwf_k>2)then
+!$OMP PARALLEL DO
+     do ipw=1,npw
+       vect(1,ipw)=scale*vect(1,ipw)
+       vect(2,ipw)=scale*vect(2,ipw)
+     end do
+!$OMP END PARALLEL DO
+   end if
+
+ end if ! istwf_k/=1
+
+ DBG_EXIT("COLL")
+
+end subroutine scalewf_nonlop
+!!***
+
+!!****f* ABINIT/ddkten
+!! NAME
+!! ddkten
+!!
+!! FUNCTION
+!! Compact or decompact the tensors related to the ffnl(:,1,...)
+!! part of the ddk operator, taking into account the direction
+!! of the ddk perturbation.
+!!
+!! INPUTS
+!!  compact= if 1, compact from tmpfac
+!!  idir=direction of the ddk perturbation
+!!  rank=0,1,2, or 3 = rank of tmpfac tensor, also angular momentum (=l)
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!! Input/Output:
+!!  temp(2,(rank*(rank+1))/2)=compacted tensor
+!!    for l=1, just a scalar
+!!    for l=2, a vector
+!!  tmpfac(2,(rank+1)*(rank+2)/2)=decompacted tensor
+!!    for l=1, a vector
+!!    for l=2, a symmetric matrix, stored as
+!!     (1 . .)
+!!     (6 2 .)
+!!     (5 4 3)
+!!
+!! NOTES
+!! For l=0, there is no contribution.
+!!
+!! PARENTS
+!!      nonlop_pl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddkten(compact,idir,rank,temp,tmpfac)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddkten'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: compact,idir,rank
+!arrays
+ real(dp),intent(inout) :: temp(2,(rank*(rank+1))/2)
+ real(dp),intent(inout) :: tmpfac(2,((rank+1)*(rank+2))/2)
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: message
+
+! *************************************************************************
+
+ if(rank/=1 .and. rank/=2 .and. rank/=3)then
+   write(message, '(a,i10,a,a,a)' )&
+&   'Input rank=',rank,' not allowed.',ch10,&
+&   'Possible values are 1,2,3 only.'
+   MSG_BUG(message)
+ end if
+
+!Take care of p angular momentum
+ if(rank==1)then
+
+!  Compaction tmpfac -> temp
+   if(compact==1)then
+     temp(:,1)=tmpfac(:,idir)
+
+!    Decompaction temp -> tmpfac
+   else
+     tmpfac(:,1:3)=0.0d0
+     tmpfac(:,idir)=temp(:,1)
+   end if
+
+!  Take care of d angular momentum
+!  rank=2 11->1 22->2 33->3 32->4 31->5 21->6
+
+ else if(rank==2)then
+
+!  Compaction tmpfac -> temp
+   if(compact==1)then
+     if(idir==1)then
+!      Count the number of non-zero derivatives with respect to k(idir)
+!      The factor of 2 on the diagonal comes from the derivative with
+!      respect to the first K then to the second K
+       temp(:,1)=2.0d0*tmpfac(:,1); temp(:,2)=tmpfac(:,6); temp(:,3)=tmpfac(:,5)
+     else if(idir==2)then
+       temp(:,2)=2.0d0*tmpfac(:,2); temp(:,1)=tmpfac(:,6); temp(:,3)=tmpfac(:,4)
+     else if(idir==3)then
+       temp(:,3)=2.0d0*tmpfac(:,3); temp(:,1)=tmpfac(:,5); temp(:,2)=tmpfac(:,4)
+     end if
+!    Decompaction temp -> tmpfac
+   else
+     tmpfac(:,1:6)=0.0d0
+     tmpfac(:,idir)=2.0d0*temp(:,idir)
+     if(idir==1)then
+       tmpfac(:,5)=temp(:,3); tmpfac(:,6)=temp(:,2)
+     else if(idir==2)then
+       tmpfac(:,4)=temp(:,3); tmpfac(:,6)=temp(:,1)
+     else if(idir==3)then
+       tmpfac(:,4)=temp(:,2); tmpfac(:,5)=temp(:,1)
+     end if
+   end if
+
+!  Take care of f angular momentum
+ else if(rank==3)then
+!  rank=3 111->1 221->2 331->3 321->4 311->5 211->6 222->7 332->8 322->9 333->10
+!  rank=2 11->1 22->2 33->3 32->4 31->5 21->6
+
+!  Compaction tmpfac -> temp
+   if(compact==1)then
+     if(idir==1)then
+!      Count the number of non-zero derivatives with respect to k(idir)
+       temp(:,1)=3.0d0*tmpfac(:,1)
+       temp(:,2:4)=tmpfac(:,2:4)
+       temp(:,5:6)=2.0d0*tmpfac(:,5:6)
+     else if(idir==2)then
+       temp(:,6)=2.0d0*tmpfac(:,2)
+       temp(:,4)=2.0d0*tmpfac(:,9)
+       temp(:,5)=tmpfac(:,4)
+       temp(:,1)=tmpfac(:,6)
+       temp(:,3)=tmpfac(:,8)
+       temp(:,2)=3.0d0*tmpfac(:,7)
+     else if(idir==3)then
+       temp(:,3)=3.0d0*tmpfac(:,10)
+       temp(:,5)=2.0d0*tmpfac(:,3)
+       temp(:,4)=2.0d0*tmpfac(:,8)
+       temp(:,6)=tmpfac(:,4)
+       temp(:,1)=tmpfac(:,5)
+       temp(:,2)=tmpfac(:,9)
+     end if
+!    Decompaction temp -> tmpfac
+   else
+     tmpfac(:,1:10)=0.0d0
+     if(idir==1)then
+       tmpfac(:,1)=3.0d0*temp(:,1)
+       tmpfac(:,2:4)=temp(:,2:4)
+       tmpfac(:,5:6)=2.0d0*temp(:,5:6)
+     else if(idir==2)then
+       tmpfac(:,2)=2.0d0*temp(:,6)
+       tmpfac(:,9)=2.0d0*temp(:,4)
+       tmpfac(:,4)=temp(:,5)
+       tmpfac(:,6)=temp(:,1)
+       tmpfac(:,8)=temp(:,3)
+       tmpfac(:,7)=3.0d0*temp(:,2)
+     else if(idir==3)then
+       tmpfac(:,10)=3.0d0*temp(:,3)
+       tmpfac(:,3)=2.0d0*temp(:,5)
+       tmpfac(:,8)=2.0d0*temp(:,4)
+       tmpfac(:,4)=temp(:,6)
+       tmpfac(:,5)=temp(:,1)
+       tmpfac(:,9)=temp(:,2)
+     end if
+   end if
+
+ end if
+
+end subroutine ddkten
+!!***
 
 end subroutine nonlop_pl
 !!***

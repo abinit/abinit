@@ -461,7 +461,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end if
 
  intarr(1,:)=dtsets(:)%chkdilatmx
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkdilatmx','INT',0)
 
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
@@ -1154,6 +1154,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
+
+ intarr(1,:)=dtsets(:)%hmcsst
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmcsst','INT',0)
+
+ intarr(1,:)=dtsets(:)%hmctt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmctt','INT',0)
 
 !DEBUG
 !write(std_out,*)' hyb_mixing=',dtsets(0:ndtset_alloc)%hyb_mixing

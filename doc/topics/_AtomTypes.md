@@ -2,6 +2,7 @@
 description: How to specify the types of atoms that form the system
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to specify the types of atoms that form the system.
 

@@ -41,6 +41,7 @@ module m_effective_potential_file
 
  use m_io_tools,   only : open_file
  use m_geometry,   only : xcart2xred, metric
+ use m_symfind,    only : symfind, symlatt
  use m_crystal,    only : crystal_t, crystal_init, crystal_free
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
@@ -1347,7 +1348,6 @@ end subroutine system_getDimFromXML
 #undef ABI_FUNC
 #define ABI_FUNC 'system_xml2effpot'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2184,7 +2184,7 @@ end subroutine system_getDimFromXML
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
-&  0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+&  0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
@@ -2312,7 +2312,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -2388,7 +2387,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
   call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
-&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+&              0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
 &              crystal%typat,use_inversion,crystal%xred)
   if(crystal%nsym/=nsym)then
     write(message,'(4a,I0,3a,I0,3a)') ch10,&

@@ -79,13 +79,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  use m_pimd
  use m_random_zbq
 
+ use m_symtk,     only : matr3inv
  use m_geometry,  only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_npt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

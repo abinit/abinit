@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "indirect_parallel_Fourier.F90",
  "m_fftw3.F90",
  "m_dfti.F90",
  "m_fftcore.F90",

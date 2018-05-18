@@ -97,7 +97,7 @@ def main(filename,home_dir=""):
       valid_rc=no_error['valid'].search(valid)
       norc = norc and ( valid_rc != None )
   
-      if url_rc != None and infor_rc != None and valid_rc != None:
+      if url_rc != None and info_rc != None and valid_rc != None:
           break
 
       if not norc :

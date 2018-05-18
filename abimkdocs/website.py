@@ -292,6 +292,7 @@ class Website(object):
 
         # Build flat list of tests.
         from doc import tests as tmod
+        self.abinit_tests = tmod.abitests
         tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
 
         # Construct dictionary rpath --> test. Use OrderedDict to have deterministic behaviour.
@@ -630,15 +631,19 @@ in order of number of occurrence in the input files provided with the package.
                 def sort_relevances(t):
                     # TODO: Add rank to ABI_RELEVANCES
                     try:
-                        return {"basic": 0, "compulsory": 1, "expert": 2, "useful": 3, "internal": 4,
+                        return {"compulsory": 0, "basic": 1, "useful": 2, "expert": 3, "internal": 4,
                                 "prpot": 5, "prfermi": 6, "prden": 7, "prgeo": 8, "prdos": 9, "prgs": 10,
                                 "prngs": 11, "prmisc": 12}[t[0]]
                     except KeyError:
                         raise KeyError("Cannot find relevance `%s` in dict. Add it to sort_relevances with the proper rank."
                                 % str(t))
 
-                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_relevances(t))
-                for relevance, group in sort_and_groupby(items, key=lambda t: t[0]):
+                # Build list of (relevance, variable) tuple then sort and group by relevance.
+                items = [(v.topic2relevances[topic][0], v) for v in vlist]
+                for num, group in sort_and_groupby(items, key=lambda t: sort_relevances(t)):
+                    # Alphabetical order inside group.
+                    group = list(sorted(group, key=lambda t: t[1].name))
+                    relevance = group[0][0]
                     lines.append("*%s:*\n" % relevance)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
                     lines.append(" ")
@@ -659,6 +664,7 @@ in order of number of occurrence in the input files provided with the package.
             # Read template, interpolate and write md file included in mkdocs.yml.
             with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
                 template = fh.read()
+                template = template.replace("is the source file for this topics. Can be edited."," file has been generated automatically from the corresponding _* source file. DO NOT EDIT. Edit the source file instead.")
                 template = template.replace("{{ related_variables }}", related_variables)
                 template = template.replace("{{ selected_input_files }}", selected_input_files)
 
@@ -1080,12 +1086,18 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = "%s varset" % name
 
             elif namespace == "test":
-                # Handle [[test:libxc_41]]
-                # TODO: Treat subsuite
+                # Handle [[test:libxc_41]] (syntax for suite) [[test:gspw_01]] (syntax for subsuite)
                 tokens = name.split("_")
-                suite_name, tnum = "_".join(tokens[:-1]), tokens[-1]
-                url = "/tests/%s/Input/t%s.in" % (suite_name, tnum)
-                if a.text is None: a.text = "%s[%s]" % (suite_name, tnum)
+                prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
+                if prefix in self.abinit_tests.all_subsuite_names:
+                    # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
+                    suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
+                    url = "/tests/%s/Input/t%s.in" % (suite_name, name)
+                else:
+                    # [[test:libxc_41]]
+                    url = "/tests/%s/Input/t%s.in" % (prefix, tnum)
+
+                if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
                 test = self.rpath2test[url[1:]]
                 content = test.description # + "\n\n" + ", ".join(test.authors)
                 add_popover(a, content=content)

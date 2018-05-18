@@ -2,6 +2,7 @@
 description: How to constrain the geometry of the system in geometry optimization, molecular dynamics or searches
 authors: GG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to constaint the geometry of the system in geometry optimization, molecular
 dynamics or searches with the ABINIT package.

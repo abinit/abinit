@@ -19,19 +19,22 @@ class Procedure(object):
     local_uses: List of strings with the name of the modules used (explicit) by this procedure
     includes: List of strings with the name of the included file.
     parents: List of `Procedure` calling this one
-    children: List of `Procedure` called by this one
+    children: List of string with the name of the subroutines called by this procedure.
     """
 
     def __init__(self, name, ancestor, preamble, path=None):
         self.name = name.strip()
         self.ancestor = ancestor
-        self.preamble = preamble
+        self.preamble = "\n".join(preamble)
         self.path = path
+        self.basename = os.path.basename(self.path)
 
         self.num_f90lines, self.num_doclines = 0, 0
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
-        #self.visibility = "public"
+        # TODO
+        self.visibility = "public"
+        #self.has_implicit_none = False
 
     @lazy_property
     def is_program(self):
@@ -50,22 +53,39 @@ class Procedure(object):
         return isinstance(self, Function)
 
     @lazy_property
-    def dirname(self):
+    def dirpath(self):
+        """Absolute path of the directory in which the procedure is located."""
         return None if self.path is None else os.path.dirname(self.path)
 
+    @lazy_property
+    def dirname(self):
+        """name of the directory in which the procedure is located."""
+        return None if self.path is None else os.path.basename(os.path.dirname(self.path))
+
+    @property
+    def is_public(self):
+        return self.visibility == "public"
+
+    @property
+    def is_private(self):
+        return self.visibility == "private"
+
+    #@lazy_property
+    #def global_uses(self)
+    #    """String with all the modules used by this procedure (locals + globals)"""
+
     def __repr__(self):
-        #anc_name = self.ancestor.name if self.ancestor is not None else "None"
-        #return "<%s: %s, ancestor %s>" % (self.__class__.__name__, self.name, anc_name)
         return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     @lazy_property
     def public_procedures(self):
+        """List of public procedures."""
         if self.is_program:
             return [self]
         elif self.is_module:
-            return [self] + [p for p in self.contains] # if p.is_public
+            return [self] + [p for p in self.contains if p.is_public]
         elif self.is_subroutine or self.is_function:
-            return [self] # if self.is_public else []
+            return [self]  if self.is_public else []
         raise TypeError("Don't know how to find public entities of type: %s" % type(self))
 
     def stree(self, level=0):
@@ -81,13 +101,18 @@ class Procedure(object):
         return self.to_string()
 
     def to_string(self, verbose=0, width=90):
+        """
+        String representation with verbosity level `verbose`.
+        Text is wrapped at `width` columns.
+        """
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
 
-        app("%s: %s" % (self.__class__.__name__, self.name)),
+        app("%s: %s\n" % (self.__class__.__name__.upper(), self.name))
+        app("Directory: %s" % os.path.basename(self.dirname))
+
         if self.ancestor is not None:
-            app("Ancestor: %s (%s)" % (self.ancestor.name, self.ancestor.ftype))
-        app("")
+            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.ftype))
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -98,27 +123,29 @@ class Procedure(object):
         if self.contains:
             app("CONTAINS:\n%s\n" % w.fill(", ".join(c.name for c in self.contains)))
 
-        app("PARENTS:\n%s\n" % w.fill(", ".join(p.name for p in self.parents)))
-        app("CHILDREN:\n%s\n" % w.fill(", ".join(c for c in self.children)))
+        app("PARENTS:\n%s\n" % w.fill(", ".join(sorted(p.name for p in self.parents))))
+        #if verbose:
+        # Add directory of parents
+        dirnames = sorted(set(os.path.basename(p.dirname) for p in self.parents))
+        app("PARENT_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
+
+        app("CHILDREN:\n%s\n" % w.fill(", ".join(sorted(c for c in self.children))))
+        #if verbose:
+        ## Add directory of children
+        #dirnames = sorted(set(os.path.basename(p.dirname) for p in self.children))
+        #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
+
+        if verbose:
+            app("DOC_STRING:\n%s" % self.preamble)
 
         return "\n".join(lines)
-
-    #@property
-    #def is_public(self):
-    #    return self.visibility == "public"
-
-    #@property
-    #def is_private(self):
-    #    return self.visibility == "private"
-
-    #@lazy_property
-    #def global_uses(self)
-    #    """String with all the modules used by thie procedure (locals + globals)"""
 
     @lazy_property
     def uses(self):
         """
-        List of strings with all the modules used by this procedure (locals + globals)
+        List of strings with the modules used by this procedure.
+        The list includes the modules used explicitly inside the procedure as well as
+        the modules imported at the module level.
         """
         uses = self.local_uses[:]
         if self.is_module or self.is_program:
@@ -397,6 +424,8 @@ re.I | re.VERBOSE)
 
             # Invokations of Fortran functions are difficult to handle
             # without inspecting locals so we only handle explicit calls to routines.
+            # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
+            # should also handle call obj%foo()
             m = self.RE_SUBCALL.match(line)
             if m:
                 subname = m.group("name")
@@ -444,7 +473,6 @@ re.I | re.VERBOSE)
                         else:
                             raise RuntimeError("Cannot find end_ftype `%s` in stack:\n%s" % (
                                 end_ftype, pformat([s[0].ftype for s in stack])))
-
                     else:
                         stack[-1][1] = "closed"
 
@@ -475,7 +503,7 @@ re.I | re.VERBOSE)
                 elif p.is_subroutine: self.subroutines.append(p)
                 elif p.is_function: self.functions.append(p)
                 elif p.is_program: self.programs.append(p)
-                else: raise ValueError("Don't know how to handle %s" % type(p))
+                else: raise ValueError("Don't know how to handle type `%s`" % type(p))
 
         return self
 

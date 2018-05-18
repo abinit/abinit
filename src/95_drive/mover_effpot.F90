@@ -89,13 +89,13 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_mover,            only : mover
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
 
 implicit none
@@ -250,7 +250,7 @@ implicit none
    do ii=1,3 ! Only copy the diagonal part
              ! might be adapt with ngqpt(9) instead of ngqpt(3) because is needed in wght9.f
      dtset%ph_ngqpt(ii) = inp%ngqpt((ii))
-   end do   
+   end do
    dtset%ph_nqshift = inp%nqshft
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
@@ -326,10 +326,10 @@ implicit none
      dtset%restartxf = 0  ! RESTART from (X,F) history
      dtset%dtion = inp%dtion  ! Delta Time for IONs
      dtset%ionmov = 13  ! Number for the dynamic
-     dtset%ntime = inp%bound_step  ! Number of TIME steps 
+     dtset%ntime = inp%bound_step  ! Number of TIME steps
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
-     dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures 
-     dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures 
+     dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures
+     dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures
      dtset%strtarget(1:6) = zero
    end if
 
@@ -358,16 +358,16 @@ implicit none
      !TEST_AM
      qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
      bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
-     
+
      ! freq_q = 300
      ! freq_b = 300
-     
+
      ! time_q = (33.35641 / freq_q) / 2.418884 *1E5
      ! time_b = (33.35641 / freq_b) / 2.418884 *1E6
-     
-     ! qmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_q**2) 
+
+     ! qmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_q**2)
      ! bmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_b**2)
-     
+
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
@@ -397,10 +397,10 @@ implicit none
      if(filetype /= 1)then
           write(message, '(5a)' )&
 &           ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
-&           ' It is not compatible with ionmov 27'           
+&           ' It is not compatible with ionmov 27'
           MSG_ERROR(message)
      end if
-     
+
    end if
 
 !  set psps
@@ -496,7 +496,7 @@ implicit none
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
 
-   
+
    ABI_ALLOCATE(xred,(3,dtset%natom))
    ABI_ALLOCATE(xred_old,(3,dtset%natom))
    ABI_ALLOCATE(vel,(3,dtset%natom))
@@ -568,7 +568,7 @@ implicit none
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
 &                inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
 &                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&                anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.) 
+&                anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff

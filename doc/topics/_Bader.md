@@ -2,6 +2,7 @@
 description: How to perform a Bader analysis
 authors: PCasek, FF, XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a Bader analysis with the ABINIT package.
 

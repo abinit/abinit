@@ -5,9 +5,9 @@
 !! m_strain
 !!
 !! FUNCTION
-!! Module for get the strain 
+!! Module for get the strain
 !! Container type is defined
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
@@ -30,6 +30,8 @@ module m_strain
  use m_profiling_abi
  use m_xmpi
 
+ use m_symtk,         only : matr3inv
+
  implicit none
 
  private :: strain_def2strain
@@ -39,7 +41,7 @@ module m_strain
  public  :: strain_init
  public  :: strain_apply
 !!***
- 
+
 !!****t* defs_abitypes/strain_type
 !! NAME
 !! strain_type
@@ -60,7 +62,7 @@ module m_strain
 !   Direction of the strain (-1 if isostatic)
 
    real(dp) :: strain(3,3)
-!   Matrix representing the strain 
+!   Matrix representing the strain
 
  end type strain_type
 !!***
@@ -91,7 +93,7 @@ CONTAINS  !=====================================================================
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine strain_init(strain,delta,direction,name)
 
 
@@ -107,7 +109,7 @@ subroutine strain_init(strain,delta,direction,name)
 !scalars
    character(len=fnlen),optional,intent(in) :: name
    real(dp),optional,intent(in) :: delta
-   integer,optional,intent(in) :: direction 
+   integer,optional,intent(in) :: direction
 !array
    type(strain_type),intent(out) :: strain
 !Local variables-------------------------------
@@ -119,19 +121,19 @@ subroutine strain_init(strain,delta,direction,name)
  else
    strain%name = ''
  end if
- 
+
  if (present(delta)) then
    strain%delta = delta
  else
    strain%delta = zero
  end if
- 
+
  if (present(direction)) then
    strain%direction = direction
  else
    strain%direction = 0
  end if
- 
+
  call strain_strain2def(strain%strain,strain)
 
 end subroutine strain_init
@@ -158,7 +160,7 @@ end subroutine strain_init
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine strain_free(strain)
 
 
@@ -212,7 +214,7 @@ end subroutine strain_free
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 
 
@@ -220,7 +222,6 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strain_get'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -241,7 +242,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
  real(dp) :: identity(3,3)
 ! *************************************************************************
 
-!check inputs 
+!check inputs
  symmetrized_in = .FALSE.
  if(present(symmetrized)) then
    symmetrized_in = symmetrized
@@ -251,7 +252,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 &   (present(rprim).and..not.present(rprim_def))) then
     write(message, '(a)' )&
 &     ' strain_get: should give rprim_def and rprim as input of the routines'
-    MSG_BUG(message)  
+    MSG_BUG(message)
   end if
 
  if(present(rprim_def).and.present(rprim))then
@@ -259,13 +260,13 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 !  Fill the identity matrix
    identity = zero
    forall(i=1:3)identity(i,i)=1
-   
+
    call matr3inv(rprim,rprim_inv)
    mat_delta_tmp =  matmul(rprim_def,transpose(rprim_inv))-identity
    identity = zero
    do i=1,3
      do j=1,3
-       if (abs(mat_delta_tmp(i,j))>tol10) then 
+       if (abs(mat_delta_tmp(i,j))>tol10) then
          identity(i,j) = mat_delta_tmp(i,j)
        end if
      end do
@@ -275,7 +276,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 
  else if (present(mat_delta)) then
    mat_delta_tmp = mat_delta
- 
+
  else
    write(message, '(a)' )&
 &     ' strain_get: should give rprim_def or mat_delta as input of the routines'
@@ -319,7 +320,7 @@ end subroutine strain_get
 !! CHILDREN
 !!
 !! SOURCE
- 
+
 subroutine strain_apply(rprim,rprim_def,strain)
 
 
@@ -359,7 +360,7 @@ end subroutine strain_apply
 !! transfer deformation matrix in structure strain
 !!
 !! INPUTS
-!! rprim = contains 
+!! rprim = contains
 !!
 !! OUTPUT
 !!
@@ -370,7 +371,7 @@ end subroutine strain_apply
 !! CHILDREN
 !!
 !! SOURCE
- 
+
 subroutine strain_def2strain(mat_strain,strain)
 
 
@@ -386,7 +387,7 @@ subroutine strain_def2strain(mat_strain,strain)
 !scalars
 !array
  real(dp),intent(in) :: mat_strain(3,3)
- type(strain_type),intent(inout) :: strain 
+ type(strain_type),intent(inout) :: strain
 !Local variables-------------------------------
 !scalar
 !arrays
@@ -395,8 +396,8 @@ subroutine strain_def2strain(mat_strain,strain)
  strain%delta = zero
  strain%direction = 0
  strain%strain = mat_strain
- 
- if (all(abs(mat_strain)<tol10)) then 
+
+ if (all(abs(mat_strain)<tol10)) then
    strain%name = "reference"
    strain%delta = zero
    strain%direction = 0
@@ -440,7 +441,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))>tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))>tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (abs(mat_strain(3,2)-mat_strain(3,2))<tol10) then 
+      if (abs(mat_strain(3,2)-mat_strain(3,2))<tol10) then
         strain%name = "shear"
         strain%delta = mat_strain(3,2) * 2
         strain%direction = 4
@@ -450,7 +451,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))>tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))>tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (abs(mat_strain(3,1)-mat_strain(1,3))<tol10) then 
+      if (abs(mat_strain(3,1)-mat_strain(1,3))<tol10) then
         strain%name = "shear"
         strain%delta = mat_strain(3,1) * 2
         strain%direction = 5
@@ -460,7 +461,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))>tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))>tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (abs(mat_strain(1,2)-mat_strain(2,1))<tol10) then 
+      if (abs(mat_strain(1,2)-mat_strain(2,1))<tol10) then
         strain%name = "shear"
         strain%delta = mat_strain(2,1) * 2
         strain%direction = 6
@@ -468,7 +469,7 @@ subroutine strain_def2strain(mat_strain,strain)
       end if
     end if
   end if
-  
+
 end subroutine strain_def2strain
 !!***
 
@@ -481,7 +482,7 @@ end subroutine strain_def2strain
 !! transfer deformation matrix in structure strain
 !!
 !! INPUTS
-!! rprim = contains 
+!! rprim = contains
 !!
 !! OUTPUT
 !!
@@ -492,7 +493,7 @@ end subroutine strain_def2strain
 !! CHILDREN
 !!
 !! SOURCE
- 
+
 subroutine strain_strain2def(mat_strain,strain)
 
 
@@ -508,7 +509,7 @@ subroutine strain_strain2def(mat_strain,strain)
 !scalars
 !array
  real(dp),intent(out) :: mat_strain(3,3)
- type(strain_type),intent(in) :: strain 
+ type(strain_type),intent(in) :: strain
 !Local variables-------------------------------
 !scalar
  integer :: i
@@ -516,7 +517,7 @@ subroutine strain_strain2def(mat_strain,strain)
 ! *************************************************************************
 
  mat_strain(:,:) = zero
- forall(i=1:3)mat_strain(i,i)=1  
+ forall(i=1:3)mat_strain(i,i)=1
 
  select case(strain%direction)
  case(1)
@@ -559,7 +560,7 @@ end subroutine strain_strain2def
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine strain_print(strain)
 
 
@@ -575,7 +576,7 @@ subroutine strain_print(strain)
 !Arguments ------------------------------------
 !scalars
 !array
- type(strain_type),intent(in) :: strain 
+ type(strain_type),intent(in) :: strain
 !Local variables-------------------------------
 !scalar
  integer :: ii
@@ -583,12 +584,12 @@ subroutine strain_print(strain)
 !arrays
 ! *************************************************************************
 
- if(strain%name == "reference") then 
+ if(strain%name == "reference") then
    write(message,'(4a)') ch10,' no strain found:',&
 &  ' This structure is equivalent to the reference structure',ch10
    call wrtout(std_out,message,'COLL')
  else
-   if(strain%name /= "") then 
+   if(strain%name /= "") then
      write(message,'(3a,I2,a,(ES10.2),a)') &
 &      ' The strain is ',trim(strain%name),' type in the direction ',&
 &      strain%direction,' with delta of ',strain%delta, ':'

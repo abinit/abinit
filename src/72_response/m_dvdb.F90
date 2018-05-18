@@ -45,13 +45,16 @@ MODULE m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
+ use m_symtk,         only : mati3inv, littlegroup_q
+ use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
+ use m_spacepar,      only : symrhg, setsym
 
  implicit none
 
@@ -288,8 +291,6 @@ subroutine dvdb_init(db, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_init'
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -898,7 +899,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1166,7 +1166,6 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_complete'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1506,7 +1505,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1643,9 +1641,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_symmetrize'
- use interfaces_41_geometry
- use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1864,7 +1859,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -2237,7 +2231,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2730,7 +2723,6 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_get_v1scf_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3207,8 +3199,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_list_perts'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3710,7 +3700,6 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1rsym'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3859,8 +3848,6 @@ subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1complete'
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -4154,7 +4141,6 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -4309,8 +4295,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_interpolate_and_write'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

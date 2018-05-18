@@ -2,6 +2,7 @@
 description: How to plot phonon band structures
 authors: SS,XG,YG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to plot phonon band structures with the ABINIT package.
 
