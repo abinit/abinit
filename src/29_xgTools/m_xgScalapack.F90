@@ -180,7 +180,7 @@ module m_xgScalapack
         mycomm(1) = M__SLK
         mycomm(2) = M__UNUSED
       else
-        subgroup = -1
+        subgroup = ngroup+1
         mycomm(1) = M__UNUSED
         mycomm(2) = M__SLK
       end if
