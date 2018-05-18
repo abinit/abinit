@@ -852,11 +852,11 @@
  dprarr(1,:)=dtsets(:)%slabzbeg
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slabzbeg','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%slabzend
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slabzend','DPR',0)
+
  intarr(1,:)=dtsets(:)%slk_rankpp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'slk_rankpp','INT',0)
-
- intarr(1,:)=dtsets(:)%pawusecp
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawusecp','INT',0)
 
  dprarr(1,:)=dtsets(:)%smdelta
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
