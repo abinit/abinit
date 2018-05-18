@@ -1,6 +1,53 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/dfpt_rhotov
+!!****m* ABINIT/m_dfpt_rhotov
+!! NAME
+!!  m_dfpt_rhotov
 !!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_rhotov
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_cgtools
+
+ use m_time,        only : timab
+ use m_spacepar,    only : hartrestr, hartre
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
+
+ implicit none
+
+ private
+!!***
+
+ !public :: prtposcar
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/dfpt_rhotov
 !! NAME
 !! dfpt_rhotov
 !!
@@ -8,13 +55,6 @@
 !! This routine is called to compute, from a given 1st-order total density
 !!   - the trial (local) 1st-order potential and/or the residual potential,
 !!   - some contributions to the 2nd-order energy
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, SPr)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order WF on FFT grid are REAL; if 2, COMPLEX
@@ -76,27 +116,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_cgtools
-
- use m_time,        only : timab
- use m_spacepar,    only : hartrestr, hartre
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -365,4 +388,7 @@
  call timab(157,2,tsec)
 
 end subroutine dfpt_rhotov
+!!***
+
+end module m_dfpt_rhotov
 !!***

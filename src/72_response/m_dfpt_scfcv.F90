@@ -67,6 +67,7 @@ module m_dfpt_scfcv
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
  use m_common,     only : scprqt
+ use m_dfpt_rhotov, only : dfpt_rhotov
 
  implicit none
 
