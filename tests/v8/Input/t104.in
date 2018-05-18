@@ -73,7 +73,7 @@
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   2
-    tolwfr   1.0d-26
+    tolwfr   1.0d-20
     getden   2
     getwfk   2
 
@@ -88,7 +88,7 @@
 #*******************************
    getden2   1
    getwfk2   1
-   tolwfr2   1.0d-28
+   tolwfr2   1.0d-22
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
