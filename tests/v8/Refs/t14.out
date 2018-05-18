@@ -34,19 +34,19 @@
    prt_model         1
      strcpli        -1
  Fit the coefficients :
-        fit_coeff  1
- fit_generateTerm  0
- fit_initializeDa  0
-       fit_cutoff  0.00000000E+00
-       fit_option  0
-       fit_ncoeff  2
-         fit_grid  1  1  1
-        ts_option  0
-   fit_rangePower  3  4
-   fit_anhaStrain  0
-   fit_SPCoupling  1
-    fit_nfixcoeff  2
-     fit_fixcoeff         1     2
+         fit_coeff  1
+ fit_generateCoeff  0
+ fit_initializeDat  0
+        fit_cutoff  0.00000000E+00
+        fit_option  0
+        fit_ncoeff  2
+          fit_grid  1  1  1
+         ts_option  0
+    fit_rangePower  3  4
+    fit_anhaStrain  0
+    fit_SPCoupling  1
+     fit_nfixcoeff  2
+      fit_fixcoeff          1      2
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :

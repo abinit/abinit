@@ -76,7 +76,7 @@ module m_multibinit_dataset
   integer :: bound_step
   integer :: fit_anhaStrain
   integer :: fit_SPCoupling
-  integer :: fit_generateTerm
+  integer :: fit_generateCoeff
   integer :: fit_initializeData
   integer :: fit_coeff
   integer :: fit_option
@@ -267,7 +267,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
- multibinit_dtset%fit_generateTerm=1
+ multibinit_dtset%fit_generateCoeff=1
  multibinit_dtset%fit_initializeData=1
  multibinit_dtset%fit_tolMSDE=zero
  multibinit_dtset%fit_tolMSDS=zero
@@ -927,14 +927,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  
- multibinit_dtset%fit_generateTerm=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_generateTerm',tread,'INT')
- if(tread==1) multibinit_dtset%fit_generateTerm=intarr(1)
- if(multibinit_dtset%fit_generateTerm<0.or.multibinit_dtset%fit_generateTerm>1)then
+ multibinit_dtset%fit_generateCoeff=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_generateCoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_generateCoeff=intarr(1)
+ if(multibinit_dtset%fit_generateCoeff<0.or.multibinit_dtset%fit_generateCoeff>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_generateTerm is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'fit_generateCoeff is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
-&   'Action: correct fit_generateTerm in your input file.'
+&   'Action: correct fit_generateCoeff in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1850,40 +1850,40 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
-   write(nunit,'(1x,a16,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
-   write(nunit,'(1x,a16,I3.1)')'fit_generateTerm',multibinit_dtset%fit_generateTerm
+   write(nunit,'(1x,a17,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
+   write(nunit,'(1x,a17,I3.1)')'fit_generateCoeff',multibinit_dtset%fit_generateCoeff
    if(multibinit_dtset%fit_initializeData==0)then
-     write(nunit,'(1x,a16,I3.1)')'fit_initializeData',multibinit_dtset%fit_initializeData
+     write(nunit,'(1x,a17,I3.1)')'fit_initializeData',multibinit_dtset%fit_initializeData
    end if
    if(multibinit_dtset%fit_tolMSDE > 0)then
-     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDE',multibinit_dtset%fit_tolMSDE
+     write(nunit,'(1x,a17,es16.8)')'    fit_tolMSDE',multibinit_dtset%fit_tolMSDE
    end if
    if(multibinit_dtset%fit_tolMSDF > 0)then
-     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDF',multibinit_dtset%fit_tolMSDF
+     write(nunit,'(1x,a17,es16.8)')'    fit_tolMSDF',multibinit_dtset%fit_tolMSDF
    end if
    if(multibinit_dtset%fit_tolMSDS > 0)then
-     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDS',multibinit_dtset%fit_tolMSDS
+     write(nunit,'(1x,a17,es16.8)')'    fit_tolMSDS',multibinit_dtset%fit_tolMSDS
    end if
    if(multibinit_dtset%fit_tolMSDFS > 0)then
-     write(nunit,'(1x,a16,es16.8)')'   fit_tolMSDFS',multibinit_dtset%fit_tolMSDFS
+     write(nunit,'(1x,a17,es16.8)')'   fit_tolMSDFS',multibinit_dtset%fit_tolMSDFS
    end if
-   write(nunit,'(1x,a16,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
-   write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
-   write(nunit,'(1x,a16,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
-   write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
-   write(nunit,'(1x,a16,I3.1)')'   ts_option',multibinit_dtset%ts_option
-   write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
-   write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
-   write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
+   write(nunit,'(1x,a17,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
+   write(nunit,'(1x,a17,I3.1)')'      fit_option',multibinit_dtset%fit_option
+   write(nunit,'(1x,a17,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
+   write(nunit,'(1x,a17,3i3)') '        fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(1x,a17,I3.1)')'   ts_option',multibinit_dtset%ts_option
+   write(nunit,'(1x,a17,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
+   write(nunit,'(1x,a17,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
+   write(nunit,'(1x,a17,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
    if(multibinit_dtset%fit_nbancoeff /= 0) then
-     write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
-     write(nunit,'(1x,a16)',advance='no')'   fit_bancoeff'
-     write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
+     write(nunit,'(1x,a17,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
+     write(nunit,'(1x,a17)',advance='no')'   fit_bancoeff'
+     write(nunit,'(4x,9i7)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
    end if
    if(multibinit_dtset%fit_nfixcoeff /= 0) then    
-     write(nunit,'(1x,a16,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
-     write(nunit,'(1x,a16)',advance='no')'   fit_fixcoeff'
-     write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
+     write(nunit,'(1x,a17,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
+     write(nunit,'(1x,a17)',advance='no')'   fit_fixcoeff'
+     write(nunit,'(4x,9i7)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
    end if
  end if
 

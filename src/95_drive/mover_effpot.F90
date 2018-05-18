@@ -356,18 +356,19 @@ implicit none
      freq_q = 0.1
      freq_b = 0.01
      !TEST_AM
+     
      qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
      bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
 
-     ! freq_q = 300
-     ! freq_b = 300
+!TEST_AM
+!     freq_q = 800  / Ha_cmm1
+!     freq_b = 800  / (10*Ha_cmm1)
 
-     ! time_q = (33.35641 / freq_q) / 2.418884 *1E5
-     ! time_b = (33.35641 / freq_b) / 2.418884 *1E6
-
-     ! qmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_q**2)
-     ! bmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_b**2)
-
+!     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
+!     bmass = 10000*qmass
+!TEST_AM
+     
+     
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
