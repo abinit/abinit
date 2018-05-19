@@ -495,6 +495,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
+ dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
@@ -789,6 +790,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtdosm            = dtin%prtdosm
  dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
  dtout%prtefg             = dtin%prtefg
+ dtout%prtefmas           = dtin%prtefmas 
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prtfc              = dtin%prtfc

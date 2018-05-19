@@ -622,6 +622,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
+   dtsets(idtset)%prtefmas=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
@@ -841,6 +842,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_intmeth = 2
    dtsets(idtset)%eph_extrael = zero
    dtsets(idtset)%eph_fermie = zero
+   dtsets(idtset)%eph_frohlichm = 0
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]

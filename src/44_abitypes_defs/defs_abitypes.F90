@@ -490,6 +490,7 @@ type dataset_type
  integer :: prtdosm
  integer :: prtebands=1
  integer :: prtefg
+ integer :: prtefmas
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
@@ -920,6 +921,7 @@ type dataset_type
  integer :: eph_intmeth ! = 1
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)

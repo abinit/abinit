@@ -214,7 +214,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! This part performs the initialization of basic objects used to perform e-ph calculations i.e:
  !
- ! 1) crystal structure `cryst`
+ ! 1) Crystal structure `cryst`
  ! 2) Ground state band energies: `ebands`
  ! 3) Interatomic force constants: `ifc`
  ! 4) DVDB database with the dvscf potentials
@@ -538,7 +538,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
 ! Otherwise just leave these defaults.
 !MG: 1) Disabled for the time being because of SIGFPE in v8[41]
-!    2) I've addeded a new abinit variable (tmesh) to specifiy the list of temperatures.
+!    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
 !MG: Disabled for the time being because of SIGFPE in v8[41]
      !call phdos_print_msqd(phdos, path, 1000, one, one)
