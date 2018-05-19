@@ -38,6 +38,7 @@ module m_efmas
  public :: efmasdeg_free_array
  public :: check_degeneracies
  public :: print_tr_efmas
+ public :: print_efmas
  public :: efmas_main
  public :: efmas_analysis 
 
@@ -343,6 +344,8 @@ CONTAINS
      if(efmas%deg_dim(ideg)>1) then
        efmas%degenerate(ideg) = .true.
      end if
+     !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
+     !The band range might be larger than the nband interval: it includes it, and also include degenerate states
      if(efmas%degs_bounds(1,ideg)<=bands(2) .and. efmas%degs_bounds(2,ideg)>=bands(1)) then
        efmas%treated(ideg) = .true.
        if(efmas%degs_bounds(1,ideg)<=bands(1)) then
@@ -398,6 +401,68 @@ CONTAINS
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_efmas/print_efmas
+!! NAME
+!! print_efmas
+!!
+!! FUNCTION
+!! This routine prints the information needed to compute rapidly the band effective masses, 
+!! namely, the generalized second-order k-derivatives of the eigenenergies,
+!! see Eq.(66) of Laflamme2016. 
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine print_efmas(efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'efmas_main'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+  implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+  integer,            intent(in) :: nkpt_rbz
+  type(MPI_type),     intent(in) :: mpi_enreg
+ !arrays
+  real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
+  type(efmasdeg_type), intent(in) :: efmasdeg(:)
+  type(efmasval_type), intent(in) :: efmasval(:,:)
+
+!Local variables-------------------------------
+  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+!----------------------------------------------------------------------
+
+  !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz. To be reexamined when parallelization is done.
+! do ikpt=1,nkpt_rbz
+!   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
+!    deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+!    ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+!    do iband=1,deg_dim
+!       do jband=1,deg_dim
+!         eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)
+
+
+!HERE
+
+end subroutine print_efmas
+!!***
+
+!----------------------------------------------------------------------
+
+
 
 !!****f* m_efmas/print_tr_efmas
 !! NAME
@@ -592,7 +657,7 @@ CONTAINS
 !! efmas_main
 !!
 !! FUNCTION
-!! This routine calculates the band curvature double tensor, Eq.50 of Laflamme2016,
+!! This routine calculates the generalized second-order k-derivative, Eq.66 of Laflamme2016,
 !! in reduced coordinates.
 !!
 !! INPUTS
@@ -742,6 +807,8 @@ CONTAINS
   band2tot_index=0
   bandtot_index=0
 
+  !XG20180519 : in the original coding by Jonathan, there is a lack of care about using dtset%nkpt or nkpt_rbz ...
+  !Not important in the sequential case (?!) but likely problematic in the parallel case.
   do ikpt=1,dtset%nkpt
     npw_k = npwarr(ikpt,ipert)
     nband_k = dtset%nband(ikpt)
@@ -912,9 +979,10 @@ CONTAINS
 !! efmas_analysis
 !!
 !! FUNCTION
-!! This routine analyzes the band curvature double tensor and compute the effective mass tensor
+!! This routine analyzes the generalized second-order k-derivatives of eigenenergies, 
+!! and compute the effective mass tensor
 !! (inverse of hessian of eigenvalues with respect to the wavevector)
-!! in cartesian coordinates.
+!! in cartesian coordinates along different directions in k-space, or also the transport equivalent effective mass.
 !!
 !! INPUTS
 !!  dtset = dataset structure containing the input variable of the calculation.
@@ -961,8 +1029,8 @@ CONTAINS
  !arrays
   real(dp), intent(in) :: rprimd(3,3)
   real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
-  type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
-  type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
+  type(efmasdeg_type), intent(in) :: efmasdeg(:)
+  type(efmasval_type), intent(in) :: efmasval(:,:)
 
  !Local variables-------------------------------
   logical :: degenerate
@@ -1089,6 +1157,7 @@ CONTAINS
 
   ABI_ALLOCATE(eff_mass,(mdim,mdim))
 
+!XG20180519 : incoherent, efmasdeg is dimensioned at nkpt_rbz, and not at dtset%nkpt ...
   do ikpt=1,dtset%nkpt
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
