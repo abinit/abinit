@@ -41,9 +41,9 @@
 
 # Plane wave basis set
 #**************************************
-       ecut  3
+       ecut  3.5
      ecutsm  0
-  pawecutdg  6
+  pawecutdg  7.0
 
 # K point grid
 #**************************************

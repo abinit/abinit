@@ -49,9 +49,9 @@
 
 # Plane wave basis set
 #**************************************
-       ecut  3
+       ecut  3.5
      ecutsm  0
-  pawecutdg  6
+  pawecutdg  7.0
 
 # K point grid
 #**************************************
@@ -82,7 +82,7 @@
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   3
-    tolwfr   1.0d-18
+    tolwfr   1.0d-20
     getden   2
     getwfk   2
 
@@ -97,7 +97,7 @@
 #*******************************
    getden2   1
    getwfk2   1
-   tolwfr2   1.0d-20
+   tolwfr2   1.0d-22
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
@@ -126,7 +126,6 @@
 # rf2_dkdk5   1
 #   getddk5   3
 #  prepanl5   1
-#   tolwfr5   1.0d-20
 ## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
 #    nstep5   1
 #    nline5   100
@@ -139,7 +138,6 @@
 # getdelfd6   4
 #  getdkdk6   5
 #  prepanl6   1
-#   tolwfr6   1.0d-18
 ## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
 #    nstep6   1
 #    nline6   100
