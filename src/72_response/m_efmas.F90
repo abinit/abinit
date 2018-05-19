@@ -37,7 +37,7 @@ module m_efmas
  public :: efmasdeg_free
  public :: efmasdeg_free_array
  public :: check_degeneracies
- public :: print_efmas
+ public :: print_tr_efmas
  public :: efmas_main
  public :: efmas_analysis 
 
@@ -399,9 +399,9 @@ CONTAINS
 
 !----------------------------------------------------------------------
 
-!!****f* m_efmas/print_efmas
+!!****f* m_efmas/print_tr_efmas
 !! NAME
-!! print_efmas
+!! print_tr_efmas
 !!
 !! FUNCTION
 !! This routine prints the transport equivalent effective mass and others info
@@ -418,14 +418,14 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
+ subroutine print_tr_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
 &                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'print_efmas'
+#define ABI_FUNC 'print_tr_efmas'
 !End of the abilint section
 
    implicit none
@@ -450,19 +450,19 @@ CONTAINS
    if(deg_dim>1) then
      extras = present(efmas_eigval) .and. present(efmas_eigvec) 
      if(mdim==3 .and. .not. extras) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
      if(mdim==2 .and. .not. (extras .or. present(transport_tensor_scale))) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
    else
      extras = present(efmas_eigval) .and. present(efmas_eigvec)
      if(mdim>1 .and. .not. extras) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
@@ -582,7 +582,7 @@ CONTAINS
 &     ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim,ch10
    endif
 
- end subroutine print_efmas
+ end subroutine print_tr_efmas
 !!***
 
 !----------------------------------------------------------------------
@@ -632,7 +632,7 @@ CONTAINS
 !!      dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -933,7 +933,7 @@ CONTAINS
 !!      dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -1188,10 +1188,10 @@ CONTAINS
             end do
 
             !PRINTING RESULTS
-            call print_efmas(std_out,kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
+            call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
 &             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
 &             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
-            call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
+            call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
 &             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
 &             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
             ABI_DEALLOCATE(m_cart)
@@ -1461,9 +1461,9 @@ CONTAINS
 
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
 
         ABI_DEALLOCATE(unit_r)
@@ -1677,9 +1677,9 @@ CONTAINS
 
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
 
         ABI_DEALLOCATE(unit_r)
@@ -1771,9 +1771,9 @@ CONTAINS
           m_cart(adir,:)=1._dp/eigf3d(:)
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
 &          ntheta,m_avg,m_avg_frohlich,saddle_warn)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
 &          ntheta,m_avg,m_avg_frohlich,saddle_warn)
 
         ABI_DEALLOCATE(f3d)

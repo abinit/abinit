@@ -46,7 +46,7 @@ module m_efmas_defs
                                              ! Two first indices are for band indices within degenerate subspace
                                              ! Two last indices are for number of directions
    complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(1:ndeg,1:ndeg,mdim,mdim) 
-                                             ! See Eq.(50) of Laflamme2016 : full second-order derivative
+                                             ! See Eq.(50) of Laflamme2016 : generalized second-order k-derivative
 
  end type efmasval_type
 !!***
