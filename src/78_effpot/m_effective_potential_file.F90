@@ -45,7 +45,7 @@ module m_effective_potential_file
  use m_crystal,    only : crystal_t, crystal_init, crystal_free
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
-
+ use m_ddb_internalstr, only : ddb_internalstr
 
  implicit none
 
@@ -2312,7 +2312,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none

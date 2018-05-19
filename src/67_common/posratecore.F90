@@ -68,12 +68,12 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  use m_pawrhoij, only : pawrhoij_type
  use m_pawxc, only: pawxcsum
  use m_drivexc,     only : mkdenpos
+ use m_gammapositron, only : gammapositron
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posratecore'
- use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
 

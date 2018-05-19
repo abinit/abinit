@@ -25,6 +25,27 @@
 
 module m_rhotov
 
+ use defs_basis
+ use defs_abitypes
+ use defs_wvltypes
+ use m_errors
+ use m_profiling_abi
+ use m_ab7_mixing
+ use m_abi2big
+ use m_xmpi
+ use m_cgtools
+ use m_xcdata
+
+ use m_time,             only : timab
+ use m_geometry,         only : xred2xcart
+ use m_energies,         only : energies_type
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
+ use libxc_functionals,  only : libxc_functionals_is_hybrid
+ use m_spacepar,         only : hartre
+ use m_dens,             only : mag_constr
+ use m_rhotoxc,          only : rhotoxc
+ use m_xchybrid,         only : xchybrid_ncpp_cc
+
  implicit none
 
  private
@@ -143,31 +164,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optional arguments
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_profiling_abi
- use m_ab7_mixing
- use m_abi2big
- use m_xmpi
- use m_cgtools
- use m_xcdata
-
- use m_time,             only : timab
- use m_geometry,         only : xred2xcart
- use m_energies,         only : energies_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use libxc_functionals,  only : libxc_functionals_is_hybrid
- use m_spacepar,         only : hartre
- use m_dens,             only : mag_constr
- use m_rhotoxc,          only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotov'
- use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
 !End of the abilint section

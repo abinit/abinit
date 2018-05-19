@@ -66,8 +66,6 @@ MODULE m_mep
 !! FUNCTION
 !! Datatype with the variables required to perform MEP search
 !!
-!! NOTES
-!!
 !! SOURCE
 
  type,public :: mep_type
@@ -137,10 +135,6 @@ subroutine mep_init(dtset,mep_param)
 !scalars
  type(dataset_type),target,intent(in) :: dtset
  type(mep_type),intent(inout) :: mep_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -206,10 +200,6 @@ subroutine mep_destroy(mep_param)
 !Arguments ------------------------------------
 !scalars
  type(mep_type),intent(inout) :: mep_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -1216,8 +1206,6 @@ end subroutine mep_rk4
 !! OUTPUT
 !!  mep_img_dotp=dot product
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1274,8 +1262,6 @@ end function mep_img_dotp
 !! OUTPUT
 !!  mep_img_norm=norm
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1299,9 +1285,6 @@ function mep_img_norm(vect)
  real(dp) :: mep_img_norm
 !arrays
  real(dp),intent(in) :: vect(:,:)
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -1329,12 +1312,9 @@ end function mep_img_norm
 !! OUTPUT
 !!  mep_img_dotp_red=dot product
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -1358,7 +1338,6 @@ function mep_img_dotp_red(rmet,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii,jj,size1,size2
-!arrays
 
 !************************************************************************
 
@@ -1397,8 +1376,6 @@ end function mep_img_dotp_red
 !! OUTPUT
 !!  mep_img_norm_red=norm
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1423,9 +1400,6 @@ function mep_img_norm_red(rmet,vect)
 !arrays
  real(dp),intent(in) :: rmet(3,3)
  real(dp),intent(in) :: vect(:,:)
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 

@@ -60,7 +60,7 @@ module m_dfpt_loopert
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main
+ use m_efmas,      only : efmas_main, efmas_analysis
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -72,7 +72,7 @@ module m_dfpt_loopert
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
-&                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
+                          pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
  use m_rf2,        only : rf2_getidirs
@@ -83,6 +83,9 @@ module m_dfpt_loopert
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
  use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
+ use m_atm2fft,    only : dfpt_atm2fft
+ use m_berrytk,    only : smatrix
+ use m_common,     only : prteigrs
 
  implicit none
 
@@ -189,7 +192,7 @@ contains
 !!      ddb_from_file,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfpt_atm2fft
 !!      dfpt_init_mag1,dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv
 !!      dfpt_vlocal,disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free
-!!      ebands_init,efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
+!!      ebands_init,efmas_main,efmas_analysis,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
 !!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
 !!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
 !!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
@@ -211,7 +214,7 @@ contains
 
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
-&  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
+&  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasval,eigbrd,eig2nkq,&
 &  eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &  etotal,fermie,iexit,indsym,kxc,&
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
@@ -230,10 +233,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response
 !End of the abilint section
 
@@ -281,7 +282,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(out) :: eigbrd(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eigbrd)
  real(dp), intent(out) :: eig2nkq(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eig2nkq)
  type(efmasdeg_type),allocatable,intent(in) :: efmasdeg(:)
- type(efmasfr_type),allocatable,intent(in) :: efmasfr(:,:)
+ type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
@@ -2409,17 +2410,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
  !Calculation of effective masses.
  if(dtset%efmas == 1) then
-   call efmas_main(cg0_pert,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasfr,eigen0_pert,&
-&   eigen1_pert,gh0c1_pert,gh1c_pert,istwfk_pert,&
-&   kpt_rbz_pert,mpert,mpi_enreg,&
-&   nkpt_rbz,npwarr_pert,rprimd)
+   call efmas_main(cg0_pert,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0_pert,&
+&   eigen1_pert,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr_pert,rprimd)
    ABI_DEALLOCATE(gh1c_pert)
    ABI_DEALLOCATE(gh0c1_pert)
    ABI_DEALLOCATE(cg1_pert)
-   ABI_DEALLOCATE(kpt_rbz_pert)
    ABI_DEALLOCATE(istwfk_pert)
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
+
+   call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
+
+   ABI_DEALLOCATE(kpt_rbz_pert)
+
  end if
 
 
@@ -2547,7 +2550,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

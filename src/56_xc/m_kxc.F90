@@ -61,6 +61,7 @@ MODULE m_kxc
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_spacepar,      only : hartre
  use m_rhotoxc,       only : rhotoxc
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
  implicit none
 
@@ -1079,7 +1080,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 #define ABI_FUNC 'kxc_driver'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

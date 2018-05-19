@@ -48,10 +48,9 @@ module m_abiimages
 
  private
 
- public ::             &
-      abiimages,         &
-      abiimages_ini,     &
-      abiimages_fin
+ public ::  abiimages
+ public ::  abiimages_ini
+ public ::  abiimages_fin
 
 
 !----------------------------------------------------------------------
@@ -71,8 +70,6 @@ module m_abiimages
 !!               of the N images
 !!  img_past:    An N-array of abihist objects containing the
 !!               old values of the N images
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -97,11 +94,7 @@ module m_abiimages
  end type abiimages
 !!***
 
-!----------------------------------------------------------------------
-
-contains  !=============================================================
-
-!----------------------------------------------------------------------
+contains
 !!***
 
 !!****f* m_abiimages/abiimages_ini
@@ -118,14 +111,10 @@ contains  !=============================================================
 !! OUTPUT
 !!  abiimages <type(abiimages)> = The abiimages to initialize
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!      abihist_fin
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -220,7 +209,6 @@ subroutine abiimages_fin(images)
 
 end subroutine abiimages_fin
 !!***
-
 
 end module m_abiimages
 !!***
