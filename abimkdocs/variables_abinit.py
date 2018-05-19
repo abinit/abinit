@@ -3476,6 +3476,24 @@ has effect only if set to a non-zero value. See also [[eph_extrael]].
 ),
 
 Variable(
+    abivarname="eph_frohlichm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electron-PHonon: FROHLICH Model",
+    text="""
+* If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian. 
+Then use it to compute the 
+change of electronic eigenvalues due to electron-phonon interaction, 
+using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation 
+as well as temperature dependence. 
+""",
+),
+
+Variable(
     abivarname="eph_fsewin",
     varset="eph",
     vartype="real",
@@ -13364,6 +13382,20 @@ Variable(
   * If nonzero, calculate the electric field gradient at each atomic site in the unit cell. Using this option requires [[quadmom]] to be set as well. Values will be written to main output file (search for Electric Field Gradient). If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. If prtefg=2, the full electric field gradient tensors in atomic units are also given, showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. This is useful for comparing the accurate PAW-based results to those of simple ion-only models. Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
 [[nspden]]) and also LDA+U (see [[usepawu]]).
+""",
+),
+
+Variable(
+    abivarname="prtefmas",
+    varset="respfn",
+    vartype="integer",
+    topics=['printing_prngs', 'EffMass_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRint EFfective MASs data",
+    requires="[[efmas]]==1",
+    text="""
+  * If 1, at the end of an effective mass calculation ([[efmas]]=1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
 """,
 ),
 
