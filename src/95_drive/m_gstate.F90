@@ -73,7 +73,7 @@ module m_gstate
  use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
-&                               electronpositron_calctype
+                                electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
  use m_dtfil,            only : dtfil_init_time, status
  use m_jellium,          only : jellium
@@ -86,7 +86,8 @@ module m_gstate
  use m_initylmg,         only : initylmg
  use m_pspini,           only : pspini
  use m_mover,            only : mover
- use m_mpinfo,          only : proc_distrb_cycle
+ use m_mpinfo,           only : proc_distrb_cycle
+ use m_common,           only : setup1, prteigrs, prtene
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -1880,7 +1881,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 #define ABI_FUNC 'clnup1'
  use interfaces_14_hidewrite
  use interfaces_59_ionetcdf
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

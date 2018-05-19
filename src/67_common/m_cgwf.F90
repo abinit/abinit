@@ -41,6 +41,7 @@ module m_cgwf
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
  use m_getghc,        only : getghc
+ use m_berrytk,       only : smatrix
 
  implicit none
 
@@ -159,7 +160,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common

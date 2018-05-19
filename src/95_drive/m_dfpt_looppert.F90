@@ -72,7 +72,7 @@ module m_dfpt_loopert
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
-&                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
+                          pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
  use m_rf2,        only : rf2_getidirs
@@ -83,6 +83,9 @@ module m_dfpt_loopert
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
  use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
+ use m_atm2fft,    only : dfpt_atm2fft
+ use m_berrytk,    only : smatrix
+ use m_common,     only : prteigrs
 
  implicit none
 
@@ -221,6 +224,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -229,10 +233,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response
 !End of the abilint section
 
@@ -2548,7 +2550,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -43,7 +43,7 @@ module m_mover
 
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2fred, chkdilatmx
+ use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
  use m_time,               only : abi_wtime, sec2str
@@ -52,10 +52,22 @@ module m_mover
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
  use m_dtfil,              only : dtfil_init_time, status
+ use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_initylmg,           only : initylmg
+ use m_pred_isokinetic,    only : pred_isokinetic
+ use m_pred_diisrelax,     only : pred_diisrelax
+ use m_pred_nose,          only : pred_nose
+ use m_pred_srkhna14,      only : pred_srkna14
+ use m_pred_isothermal,    only : pred_isothermal
+ use m_pred_verlet,        only : pred_verlet
+ use m_pred_velverlet,     only : pred_velverlet
+ use m_pred_moldyn,        only : pred_moldyn
+ use m_pred_langevin,      only : pred_langevin
+ use m_pred_steepdesc,     only : pred_steepdesc
+ use m_pred_simple,        only : pred_simple, prec_simple
+
  implicit none
 
  private
@@ -1276,7 +1288,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
- !use m_abihist, only : abihist,abihist_findIndex
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1385,12 +1396,6 @@ end subroutine mover
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,  only : fcart2fred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
