@@ -84,22 +84,21 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  use m_xmpi
  use m_errors
  use m_profiling_abi
-
  use m_orbmag
 
- use m_fftcore, only : kpgsph
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
+ use m_fftcore,  only : kpgsph
+ use m_berrytk,  only : smatrix
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-      & pawcprj_get, pawcprj_getdim, pawcprj_set_zero
+                        pawcprj_get, pawcprj_getdim, pawcprj_set_zero
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
@@ -146,7 +145,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 ! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- 
+
  nband_k = dtorbmag%mband_occ
 
  if (usepaw == 1) then ! cprj allocation
@@ -187,17 +186,17 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
 
  ddkflag = 1
- 
+
 !itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
  itrs = 0
- 
+
  job = 1
  shiftbd = 1
 
  ABI_ALLOCATE(has_smat_indx,(dtorbmag%fnkpt,0:6,0:6))
  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
  has_smat_indx(:,:,:)=.FALSE.
- 
+
  do adir = 1, 3
 
    IA = czero
@@ -215,10 +214,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
      ! loop over kpts, assuming for now kptopt 3, nsppol = 1, nspinor = 1
      ! and no parallelism, no symmorphic symmetry elements
-     
-     
+
+
      do ikpt = 1, dtorbmag%fnkpt
-        
+
         icprj = dtorbmag%cprjindex(ikpt,isppol)
 
         npw_k = npwarr(ikpt)
@@ -412,7 +411,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
- 
+
  write(message,'(a)')' Chern number C from orbital magnetization '
  call wrtout(ab_out,message,'COLL')
  write(message,'(a,a)')'----C is a real vector, given along Cartesian directions----',ch10
@@ -430,7 +429,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 !  ! =======================================
 !  ! code to test orthonormality of cg_k
 !  ! =======================================
- 
+
 !  ikpt = 2
 !  npw_k = npwarr(ikpt)
 !  isppol = 1
@@ -450,7 +449,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 !        ket_end = ket_start + npw_k*my_nspinor - 1
 !        ket(1:2,1:npw_k*my_nspinor) = cg(1:2,ket_start:ket_end)
 
-!        tot_r = 0.0; tot_i = 0.0     
+!        tot_r = 0.0; tot_i = 0.0
 !        do ispinor = 1, my_nspinor
 !           ovlp_r = 0.0; ovlp_i = 0.0
 !           spnshft = (ispinor-1)*npw_k

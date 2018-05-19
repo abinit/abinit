@@ -37,6 +37,7 @@ MODULE m_rf2
  use m_getgh1c,     only : getgh1c
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
  use m_getghc,      only : getghc
+ use m_nonlop,      only : nonlop
 
  implicit none
 
@@ -474,7 +475,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_apply_hamiltonian'
  use interfaces_14_hidewrite
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

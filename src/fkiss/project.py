@@ -345,7 +345,7 @@ class AbinitProject(object):
                     used_mod = self.all_modules[use_name]
                 except KeyError:
                     raise RuntimeError(("Fortran module `%s` used by `%s` not found in Abinit project.\n" +
-                                        "Add it to EXTERNAL_MODS set.") % (use_name, fort_file.path))
+                                        "Add it to the EXTERNAL_MODS set if it's not a typo.") % (use_name, fort_file.path))
                 fort_file.used_mods.append(used_mod)
 
                 # FIXME

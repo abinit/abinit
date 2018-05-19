@@ -206,12 +206,12 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_stress,           only : stress
  use m_forces,           only : forces
  use m_initylmg,         only : initylmg
+ use m_xchybrid,         only : xchybrid_ncpp_cc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
- use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal

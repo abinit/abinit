@@ -175,21 +175,12 @@ use m_mpinfo,      only : proc_distrb_cycle
 !---- Local variables : structured datatypes
 
 #if defined HAVE_MPI
-             integer :: status1(MPI_STATUS_SIZE)
-!BEGIN TF_CHANGES
-             spaceComm=mpi_enreg%comm_cell
-!END TF_CHANGES
+integer :: status1(MPI_STATUS_SIZE)
+spaceComm=mpi_enreg%comm_cell
 #endif
 
 
 ! ***********************************************************************
-
-!DEBUG
-!write(std_out,*)' pead_nl_mv : enter '
-!flush(6)
-!stop
-!ENDDEBUG
-
 
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
@@ -647,9 +638,6 @@ use m_mpinfo,      only : proc_distrb_cycle
 
  end if
 
-
-
-
 !DEBUG
 !write(100,*)'pead_nl_mv.f : d3_berry'
 !write(100,*)'Perturbation',i1dir,i3dir
@@ -679,9 +667,7 @@ use m_mpinfo,      only : proc_distrb_cycle
 
  if (mpi_enreg%me == 0) then
 
-   write(message,'(a,a,a)')ch10,&
-&   ' Berryphase part of the third-order energy:',ch10
-!  call wrtout(ab_out,message,'COLL')
+   write(message,'(a,a,a)')ch10,' Berryphase part of the third-order energy:',ch10
    call wrtout(std_out,  message,'COLL')
 
    if (i1pert < natom + 1) then
@@ -692,12 +678,10 @@ use m_mpinfo,      only : proc_distrb_cycle
      write(message,'(a,i3)')&
 &     '            j1: homogenous electric field along direction ',i1dir
    end if
-!  call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a)')&
 &   '            j2: k-point derivative along direction i2dir '
-!  call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    if (i3pert < natom + 1) then
@@ -708,7 +692,6 @@ use m_mpinfo,      only : proc_distrb_cycle
      write(message,'(a,i3,a)')&
 &     '            j3: homogenous electric field along direction ',i3dir,ch10
    end if
-!  call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
 !  write(ab_out,'(5x,a5,8x,a9,5x,a14)')'i2dir','real part','imaginary part'
@@ -730,16 +713,7 @@ use m_mpinfo,      only : proc_distrb_cycle
 !write(100,'(3(2x,f20.9))')d3_berry(2,:)
 !ENDDEBUG
 
-
-
-!close(dtfil%unwff1)
-!close(dtfil%unwff2)
-
  call status(0,dtfil%filstat,iexit,level,'exit          ')
-
-!DEBUG
-!write(std_out,*)' pead_nl_mv : exit '
-!ENDDEBUG
 
 end subroutine pead_nl_mv
 !!***

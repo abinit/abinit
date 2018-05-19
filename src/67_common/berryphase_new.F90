@@ -133,6 +133,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                         pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
                         pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
  use m_mpinfo,    only : proc_distrb_cycle
+ use m_berrytk,   only : smatrix, polcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -140,7 +141,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 #define ABI_FUNC 'berryphase_new'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_65_paw
 !End of the abilint section
 

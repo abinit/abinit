@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Compute 2nd-order non-linear xc core-correction (part1) to the dynamical matrix.
-!! In case of derivative with respect to k or electric field perturbation, 
+!! In case of derivative with respect to k or electric field perturbation,
 !! the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
@@ -89,19 +89,20 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
+ use m_xmpi
 
  use defs_datatypes,  only : pseudopotential_type
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_vn
  use m_pawtab,        only : pawtab_type
- use m_xmpi,          only : xmpi_sum
+ use m_atm2fft,       only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyxc1'
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_dyxc1
 !End of the abilint section
 
