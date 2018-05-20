@@ -423,11 +423,11 @@ CONTAINS
 
  subroutine print_efmas(efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmas_main'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'print_efmas'
 !End of the abilint section
 
   implicit none
@@ -1015,8 +1015,7 @@ end subroutine print_efmas
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmas_main'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'efmas_analysis'
 !End of the abilint section
 
   implicit none
