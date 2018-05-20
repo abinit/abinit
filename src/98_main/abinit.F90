@@ -120,6 +120,7 @@ program abinit
  use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
+ use m_chkinp,      only : chkinp
  use m_dtfil,       only : iofn1, status
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_parser,      only : parsefile
@@ -127,6 +128,7 @@ program abinit
  use m_timana,      only : timana
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
+ use m_outvars,       only : outvars
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif

@@ -124,6 +124,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
  use m_drivexc, only : mkdenpos
+ use m_gammapositron, only : gammapositron_fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -131,7 +132,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => posdoppler

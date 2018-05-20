@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_atm2fft.F90",
- "dfpt_atm2fft.F90",
  "m_psptk.F90",
  "m_psps.F90",
  "m_pspini.F90",
