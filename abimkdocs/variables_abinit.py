@@ -3261,15 +3261,17 @@ Variable(
     abivarname="efmas_deg",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_useful'],
+    topics=['EffMass_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="EFfective MASs, activate DEGenerate formalism",
     requires="[[efmas]] > 0",
     text="""
-Activate (==1) or not (==0) the treatment of degenerate bands (within a
-criterion [[efmas_deg_tol]]). Also computed the transport equivalent effective mass
-(see [[cite:Mecholsky2014]]).
+Activate (==1) or not (==0) the treatment of degenerate bands 
+(criterion [[efmas_deg_tol]] is used to determine whether bands are degenerate). 
+Also compute the transport equivalent effective mass (see [[cite:Mecholsky2014]]).
+
+[[efmas]]=0 should only be used for testing purposes.
 """,
 ),
 
