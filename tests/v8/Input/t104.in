@@ -1,6 +1,7 @@
 # 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
-# Test on AlAs, with norm conserving pseudopotentials
-# (L. Baguet, 04.2018)
+# Test on AlAs, with PAW pseudopotentials
+# (L. Baguet, 05.2018)
+# nsppol = 2
 
 # Enable ouput for nonliner (full DFPT only)
 #*****************************************************
@@ -30,6 +31,11 @@
 #********************************
    ixc 7
 
+# Polarization
+#*******************************
+          nsppol    2
+  spinmagntarget    0
+
 # SCF procedure
 #*******************************
    nstep    100
@@ -37,12 +43,13 @@
 # Bands
 #*******************************
   occopt    1
-   nband    4
+   nband    8
 
 # Plane wave basis set
 #**************************************
-       ecut  3
+       ecut  3.5
      ecutsm  0
+  pawecutdg  7.0
 
 # K point grid
 #**************************************
@@ -55,12 +62,18 @@
 
 # Number of Datasets
 #**************************************
-    ndtset   7
+#    ndtset   7
+    ndtset   4
+    jdtset   1 2 3 4
+
+# PAW option
+#*******************************
+  pawxcdev   0 # non-zero pawxcdev is not allowed for dataset 7, so we use pawxcdev=0 for all
 
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   2
-    tolwfr   1.0d-28
+    tolwfr   1.0d-20
     getden   2
     getwfk   2
 
@@ -75,6 +88,7 @@
 #*******************************
    getden2   1
    getwfk2   1
+   tolwfr2   1.0d-22
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
@@ -99,56 +113,74 @@
 
 # DATASET5 : dkdk
 #*******************************
- rf2_dkdk5   1
-   getddk5   3
-  prepanl5   1
-# Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
-    nstep5   1
-    nline5   100
+# rf2_dkdk5   1
+#   getddk5   3
+#  prepanl5   1
+## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+#    nstep5   1
+#    nline5   100
 
 # DATASET6 : dkde
 #*******************************
- rf2_dkde6   1
-   getddk6   3
-  get1den6   4
- getdelfd6   4
-  getdkdk6   5
-  prepanl6   1
-# Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
-    nstep6   1
-    nline6   100
+# rf2_dkde6   1
+#   getddk6   3
+#  get1den6   4
+# getdelfd6   4
+#  getdkdk6   5
+#  prepanl6   1
+## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+#    nstep6   1
+#    nline6   100
 
 # DATASET7 : 3DTE calculation (full DFPT)
 #*****************************************
-optdriver7    5 # for nonlinear calculation
-  usepead7    0
-   getddk7    3
-  get1den7    4
-   get1wf7    4
-  getdkde7    6
-  d3e_pert1_phon7   1
- d3e_pert1_atpol7   1 2
-  d3e_pert1_elfd7   1
-   d3e_pert1_dir7   1 1 1
-  d3e_pert2_elfd7   1
-   d3e_pert2_dir7   1 1 1
-  d3e_pert3_elfd7   1
-   d3e_pert3_dir7   1 1 1
+#optdriver7    5 # for nonlinear calculation
+#  usepead7    0
+#   getddk7    3
+#  get1den7    4
+#   get1wf7    4
+#  getdkde7    6
+#  d3e_pert1_phon7   1
+# d3e_pert1_atpol7   1 2
+#  d3e_pert1_elfd7   1
+#   d3e_pert1_dir7   1 1 1
+#  d3e_pert2_elfd7   1
+#   d3e_pert2_dir7   1 1 1
+#  d3e_pert3_elfd7   1
+#   d3e_pert3_dir7   1 1 1
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% test_chain = t104.in, t105.in
+#%% [shell]
+#%% post_commands = 
+#%%   ww_mv t104o_DS2_DEN   t105o_DS2_DEN;
+#%%   ww_mv t104o_DS2_WFK   t105o_DS2_WFK;
+#%%   ww_mv t104o_DS3_1WF7  t105o_DS3_1WF7;
+#%%   ww_mv t104o_DS3_1WF8  t105o_DS3_1WF8;
+#%%   ww_mv t104o_DS3_1WF9  t105o_DS3_1WF9;
+#%%   ww_mv t104o_DS4_DEN1  t105o_DS4_DEN1;
+#%%   ww_mv t104o_DS4_DEN4  t105o_DS4_DEN4;
+#%%   ww_mv t104o_DS4_DEN10 t105o_DS4_DEN10;
+#%%   ww_mv t104o_DS4_DEN11 t105o_DS4_DEN11;
+#%%   ww_mv t104o_DS4_DEN12 t105o_DS4_DEN12;
+#%%   ww_mv t104o_DS4_1WF1  t105o_DS4_1WF1;
+#%%   ww_mv t104o_DS4_1WF4  t105o_DS4_1WF4;
+#%%   ww_mv t104o_DS4_1WF10 t105o_DS4_1WF10;
+#%%   ww_mv t104o_DS4_1WF11 t105o_DS4_1WF11;
+#%%   ww_mv t104o_DS4_1WF12 t105o_DS4_1WF12
 #%% [files]
 #%% files_to_test = 
-#%%    t100.out, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
-#%% psp_files = 13al.pspnc,33as.pspnc
+#%%    t104.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
+#%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = NC, DFPT, NONLINEAR
+#%% keywords = PAW, DFPT
 #%% description = 
-#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7). 
-#%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
+#%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t102.in
 #%%<END TEST_INFO>
