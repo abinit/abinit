@@ -395,7 +395,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(efmasdeg,efmasval,mpi_enreg,ncid)
+ subroutine print_efmas(efmasdeg,efmasval,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -414,17 +414,23 @@ CONTAINS
  type(efmasval_type), intent(in) :: efmasval(:,:)
 
 !Local variables-------------------------------
- integer :: ikpt,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
- complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+ integer :: deg_dim,eig2_diag_arr_dim
+ integer :: ideg,ideg_tot,ieig,ikpt,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ integer, allocatable :: ndegs_arr(:)
+ integer, allocatable :: degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:)
+ integer, allocatable :: degs_bounds_arr(:,:)
+ complex(dpc), allocatable :: eig2_diag_arr(:)
+ character(len=500) :: msg
 !----------------------------------------------------------------------
 
-  !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
-  !To be reexamined/corrected when parallelization is done.
+!XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
+!To be reexamined/corrected at the time of parallelization.
 
  nkptdeg=size(efmasdeg,1)
  nkptval=size(efmasval,2)
  if(nkptdeg/=nkptval) then
-   write(msg,'(a,2i8,a)') ' (nkptdeg,nkptval)=',nkptdeg,nkptval,' differ, which is inconsistent'
+   write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkptval =',nkptdeg,' and ',nkptval,' differ, which is inconsistent.'
    MSG_ERROR(msg)
  end if
  nkpt=nkptdeg
@@ -433,19 +439,38 @@ CONTAINS
 !Total number of (degenerate) sets over all k points
  ndegs_tot=sum(efmasdeg%ndegs)
 !Total number of generalized second-order k-derivatives
+ eig2_diag_arr_dim=0
  do ikpt=1,nkpt
-  HERE 
+   do ideg=1,efmasdeg(ikpt)%ndegs 
+     deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 * 9
+   enddo
  enddo
 
- ABI_MALLOC(ndegs_arr,nkpt)
- ABI_MALLOC(degs_range_arr,2*nkpt)
- ABI_MALLOC(ideg_arr,nkpt*mband)
- ABI_MALLOC(degs_bound_arr,2*ndegs_tot)
+ ABI_MALLOC(ndegs_arr, (nkpt) )
+ ABI_MALLOC(degs_range_arr, (2,nkpt) )
+ ABI_MALLOC(ideg_arr, (mband,nkpt) )
+ ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
+ ABI_MALLOC(eig2_diag_arr, (eig2_diag_arr_dim) )
+
+ ideg_tot=1
+ ieig=1
+ do ikpt=1,nkpt
+   ndegs_arr(ikpt)=efmasdeg(ikpt)%ndegs
+   degs_range_arr(:,ikpt)=efmasdeg(ikpt)%deg_range(:)
+   ideg_arr(:,ikpt)=efmasdeg(ikpt)%ideg(:)
+   do ideg=1,efmasdeg(ikpt)%ndegs
+     degs_bounds_arr(:,ideg_tot)=efmasdeg(ikpt)%degs_bounds(:,ideg)
+     deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     ideg_tot=ideg_tot+1
+   enddo
+ enddo
  
  ABI_FREE(ndegs_arr)
  ABI_FREE(degs_range_arr)
  ABI_FREE(ideg_arr)
- ABI_FREE(degs_bound_arr)
+ ABI_FREE(degs_bounds_arr)
+ ABI_FREE(eig2_diag_arr)
 
 !
 ! write nkpt_rbz and mband
