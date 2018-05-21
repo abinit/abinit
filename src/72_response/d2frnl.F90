@@ -182,7 +182,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig1=1,usecprj=0
- integer :: bdtot_index,bufdim,choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
+ integer :: bandmin,bandmax,bdtot_index,bufdim
+ integer :: choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
  integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase,deg_dim
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
  integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
@@ -601,8 +602,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        call check_degeneracies(efmasdeg(ikpt),dtset%efmas_bands(:,ikpt),nband_k,eigen(bdtot_index+1:bdtot_index+nband_k), &
 &       dtset%efmas_deg_tol)
        do ideg=1,efmasdeg(ikpt)%ndegs
-         if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) )) then
-           deg_dim=efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+         if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
+           deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
            ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(deg_dim,deg_dim,3,3))
            ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(deg_dim,deg_dim,3,3))
            efmasval(ikpt,ideg)%ch2c=zero
@@ -747,7 +748,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        end if
 
        if(need_efmas) then
-         if(iband>=efmasdeg(ikpt)%band_range(1) .and. iband<=(efmasdeg(ikpt)%band_range(2))) then
+         bandmin=efmasdeg(ikpt)%degs_bounds(1, efmasdeg(ikpt)%deg_range(1) )
+         bandmax=efmasdeg(ikpt)%degs_bounds(2, efmasdeg(ikpt)%deg_range(2) )
+         if ( iband>=bandmin .and. iband<=bandmax ) then
            choice_efmas=8; signs=2
            cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
            paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
@@ -772,8 +775,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  dotprod=0
                  call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
 &                 mpi_enreg%comm_spinorfft)
-                 isub = iband-efmasdeg(ikpt)%degl(ideg)
-                 jsub = jband-efmasdeg(ikpt)%degl(ideg)
+                 isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
+                 jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
                  efmasval(ikpt,ideg)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
                end do
              end do

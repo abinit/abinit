@@ -268,6 +268,7 @@ CONTAINS
 
  subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -803,7 +804,7 @@ end subroutine print_efmas
     ABI_ALLOCATE(cg0,(2,npw_k*nspinor))
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-      deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
       degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
       degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
@@ -1141,7 +1142,7 @@ end subroutine print_efmas
   do ikpt=1,dtset%nkpt
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
-     deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+     deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
      degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
  

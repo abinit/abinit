@@ -60,7 +60,7 @@ module m_dfpt_loopert
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main, efmas_analysis
+ use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
