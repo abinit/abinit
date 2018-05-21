@@ -354,7 +354,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  if(need_efmas) then
    ABI_MALLOC(enlout_efmas,(0))
    ABI_DATATYPE_ALLOCATE(efmasdeg,(dtset%nkpt))
-   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%nkpt,dtset%mband))
+   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%mband,dtset%nkpt))
  end if
 
 !Initialize Hamiltonian (k-independent terms)
@@ -604,13 +604,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        do ideg=1,efmasdeg(ikpt)%ndegs
          if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
            deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
-           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(deg_dim,deg_dim,3,3))
-           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(deg_dim,deg_dim,3,3))
-           efmasval(ikpt,ideg)%ch2c=zero
-           efmasval(ikpt,ideg)%eig2_diag=zero
+           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(deg_dim,deg_dim,3,3))
+           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(deg_dim,deg_dim,3,3))
+           efmasval(ideg,ikpt)%ch2c=zero
+           efmasval(ideg,ikpt)%eig2_diag=zero
          else
-           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(0,0,0,0))
-           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(0,0,0,0))
+           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(0,0,0,0))
+           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(0,0,0,0))
          end if
        end do
      end if
@@ -777,7 +777,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &                 mpi_enreg%comm_spinorfft)
                  isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
                  jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
-                 efmasval(ikpt,ideg)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                 efmasval(ideg,ikpt)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
                end do
              end do
            end do

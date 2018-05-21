@@ -422,13 +422,13 @@ CONTAINS
   !To be reexamined/corrected when parallelization is done.
 
  nkptdeg=size(efmasdeg,1)
- nkptval=size(efmasval,1)
+ nkptval=size(efmasval,2)
  if(nkptdeg/=nkptval) then
    write(msg,'(a,2i8,a)') ' (nkptdeg,nkptval)=',nkptdeg,nkptval,' differ, which is inconsistent'
    MSG_ERROR(msg)
  end if
  nkpt=nkptdeg
- mband=size(efmasval,2)
+ mband=size(efmasval,1)
 
 !Total number of (degenerate) sets over all k points
  ndegs_tot=sum(efmasdeg%ndegs)
@@ -459,7 +459,7 @@ CONTAINS
 !    ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
 !    do iband=1,deg_dim
 !       do jband=1,deg_dim
-!         eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)
+!         eig2_diag_cart(iband,jband,:,:)=efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)
 
 
 !HERE
@@ -696,7 +696,7 @@ end subroutine print_efmas
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
+!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order derivatives of eigenvalues
 !!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution double tensor
 !!    efmasval(:,:)%eig2_diag OUTPUT : band curvature double tensor
 !!
@@ -916,7 +916,7 @@ end subroutine print_efmas
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_ch2c(adir,bdir) = efmasval(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(iband,jband,adir,bdir)
 
             end do !bdir
           end do  !adir
@@ -928,7 +928,7 @@ end subroutine print_efmas
           end do
 
           eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
-          efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
+          efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
 
           !!! Decomposition of the hessian in into its different contributions.
           if(debug) then
@@ -995,7 +995,7 @@ end subroutine print_efmas
 !!  dtset = dataset structure containing the input variable of the calculation.
 !!  efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
 !!    efmasval(:,:)%eig2_diag band curvature double tensor
-!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
+!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
 !!  mpi_enreg = informations about MPI parallelization.
@@ -1183,7 +1183,7 @@ end subroutine print_efmas
 
           eff_mass=zero
 
-          eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)          
+          eig2_diag_cart(iband,jband,:,:)=efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)          
           eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag_cart(iband,jband,:,:)),transpose(rprimd))/two_pi**2
 
 
