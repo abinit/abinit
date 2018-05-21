@@ -189,9 +189,6 @@ CONTAINS
    if(allocated(efmasdeg%degs_bounds)) then
      ABI_FREE(efmasdeg%degs_bounds)
    end if
-   if(allocated(efmasdeg%deg_dim)) then
-     ABI_FREE(efmasdeg%deg_dim)
-   end if
    if(allocated(efmasdeg%ideg)) then
      ABI_FREE(efmasdeg%ideg)
    end if
@@ -286,7 +283,7 @@ CONTAINS
    real(dp),intent(in),optional :: deg_tol
 
    !!!Local variables-------------------------------
-   integer :: iband, ideg
+   integer :: deg_dim,iband, ideg
    integer, allocatable :: degs_bounds(:,:)
    real(dp) :: tol
    real(dp) :: eigen_tmp(nband)
@@ -319,14 +316,14 @@ CONTAINS
    ABI_FREE(degs_bounds)
 
    !!! Determine if treated bands are part of a degeneracy at 0th order.
-   ABI_MALLOC(efmasdeg%deg_dim,   (efmasdeg%ndegs))
-   efmasdeg%deg_range=0; efmasdeg%deg_dim=0
+   efmasdeg%deg_range=0
+   deg_dim=0
    treated=.false.
    write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmasdeg%ndegs
    write(std_out,'(a)') 'Set index; range of bands included in the set; is the set degenerate?(T/F); &
 &                        is the set treated by EFMAS?(T/F):'
    do ideg=1,efmasdeg%ndegs
-     efmasdeg%deg_dim(ideg) = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+     deg_dim = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
      !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
      !The band range might be larger than the nband interval: it includes it, and also include degenerate states
      if(efmasdeg%degs_bounds(1,ideg)<=bands(2) .and. efmasdeg%degs_bounds(2,ideg)>=bands(1)) then
@@ -339,14 +336,13 @@ CONTAINS
        end if
      end if
      write(std_out,'(2i6,a,i6,2l4)') ideg, efmasdeg%degs_bounds(1,ideg), ' -', efmasdeg%degs_bounds(2,ideg), &
-&                                    (efmasdeg%deg_dim(ideg)>1), treated
+&                                    (deg_dim>1), treated
    end do
 
 !   write(std_out,*)'ndegs=',          efmasdeg%ndegs
 !   write(std_out,*)'degs_bounds=',    efmasdeg%degs_bounds
 !   write(std_out,*)'ideg=',           efmasdeg%ideg
 !   write(std_out,*)'deg_range=',      efmasdeg%deg_range
-!   write(std_out,*)'deg_dim=',        efmasdeg%deg_dim
 
   !!This first attempt WORKS, but only if the symmetries are enabled, see line 1578 of dfpt_looppert.F90.
   !use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
@@ -431,10 +427,9 @@ CONTAINS
 !   write efmasdeg(ikpt)%ndegs
 !   ndegs=efmasdeg(ikpt)%ndegs
 !   write efmasdeg(ikpt)%deg_range(1:2)
-!   write efmasdeg(ikpt)%deg_dim(1:ndegs)
 !   write efmasdeg(ikpt)%degs_bounds(1:2,1:ndegs)
 !   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-!    deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+!    deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
 !    ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
 !    do iband=1,deg_dim
 !       do jband=1,deg_dim
@@ -808,9 +803,9 @@ end subroutine print_efmas
     ABI_ALLOCATE(cg0,(2,npw_k*nspinor))
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-      degenerate = (efmasdeg(ikpt)%deg_dim(ideg)>1) .and. (dtset%efmas_deg/=0)
+      deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+      degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
       degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
-      deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 
       ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
       !!! If treated band degenerate at 0th order, check that we are at extrema.
@@ -1146,9 +1141,9 @@ end subroutine print_efmas
   do ikpt=1,dtset%nkpt
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
-     degenerate = (efmasdeg(ikpt)%deg_dim(ideg)>1) .and. (dtset%efmas_deg/=0)
+     deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+     degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
-     deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
  
      !!! Allocations
      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
