@@ -164,7 +164,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  call ddb_malloc(ddb_new,msize,nblok,natom,ntypat)
  ddb_new%flg = 0
  ddb_new%amu = ddb%amu
- ddb_new%typ = 0
+ ddb_new%typ = 1
  ddb_new%qpt = zero
  ddb_new%nrm = one
 
