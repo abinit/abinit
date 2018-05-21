@@ -195,9 +195,6 @@ CONTAINS
    if(allocated(efmasdeg%ideg)) then
      ABI_FREE(efmasdeg%ideg)
    end if
-   if(allocated(efmasdeg%degenerate)) then
-     ABI_FREE(efmasdeg%degenerate)
-   end if
 
  end subroutine efmasdeg_free
 !!***
@@ -324,9 +321,7 @@ CONTAINS
    ABI_FREE(degs_bounds)
 
    !!! Determine if treated bands are part of a degeneracy at 0th order.
-   ABI_MALLOC(efmas%degenerate,(efmas%ndegs))
    ABI_MALLOC(efmas%deg_dim,   (efmas%ndegs))
-   efmas%degenerate = .false.; 
    efmas%band_range=0; efmas%deg_range=0; efmas%deg_dim=0
    treated=.false.
    write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmas%ndegs
@@ -334,9 +329,6 @@ CONTAINS
 &                        is the set treated by EFMAS?(T/F):'
    do ideg=1,efmas%ndegs
      efmas%deg_dim(ideg) = efmas%degs_bounds(2,ideg) - efmas%degs_bounds(1,ideg) + 1
-     if(efmas%deg_dim(ideg)>1) then
-       efmas%degenerate(ideg) = .true.
-     end if
      !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
      !The band range might be larger than the nband interval: it includes it, and also include degenerate states
      if(efmas%degs_bounds(1,ideg)<=bands(2) .and. efmas%degs_bounds(2,ideg)>=bands(1)) then
@@ -351,7 +343,7 @@ CONTAINS
        end if
      end if
      write(std_out,'(2i6,a,i6,2l4)') ideg, efmas%degs_bounds(1,ideg), ' -', efmas%degs_bounds(2,ideg), &
-&                                    efmas%degenerate(ideg), treated
+&                                    (efmas%deg_dim(ideg)>1), treated
    end do
 
 !   write(std_out,*)'ndegs=',          efmas%ndegs
@@ -359,7 +351,6 @@ CONTAINS
 !   write(std_out,*)'ideg=',           efmas%ideg
 !   write(std_out,*)'band_range=',     efmas%band_range
 !   write(std_out,*)'deg_range=',      efmas%deg_range
-!   write(std_out,*)'degenerate=',     efmas%degenerate
 !   write(std_out,*)'deg_dim=',        efmas%deg_dim
 
   !!This first attempt WORKS, but only if the symmetries are enabled, see line 1578 of dfpt_looppert.F90.
@@ -446,7 +437,6 @@ CONTAINS
 !   ndegs=efmasdeg(ikpt)%ndegs
 !   write efmasdeg(ikpt)%band_range(1:2)
 !   write efmasdeg(ikpt)%deg_range(1:2)
-!   write efmasdeg(ikpt)%degenerate(1:ndegs)
 !   write efmasdeg(ikpt)%deg_dim(1:ndegs)
 !   write efmasdeg(ikpt)%degs_bounds(1:2,1:ndegs)
 !   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
@@ -824,7 +814,7 @@ end subroutine print_efmas
     ABI_ALLOCATE(cg0,(2,npw_k*nspinor))
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-      degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
+      degenerate = (efmasdeg(ikpt)%deg_dim(ideg)>1) .and. (dtset%efmas_deg/=0)
       degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
       deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 
@@ -1162,7 +1152,7 @@ end subroutine print_efmas
   do ikpt=1,dtset%nkpt
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
-     degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
+     degenerate = (efmasdeg(ikpt)%deg_dim(ideg)>1) .and. (dtset%efmas_deg/=0)
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
      deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
  
