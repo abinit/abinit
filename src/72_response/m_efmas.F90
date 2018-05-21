@@ -420,7 +420,7 @@ CONTAINS
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
  integer, allocatable :: degs_bounds_arr(:,:)
- complex(dpc), allocatable :: eig2_diag_arr(:)
+ complex(dpc), allocatable :: eig2_diag_arr(:,:,:)
  character(len=500) :: msg
 !----------------------------------------------------------------------
 
@@ -443,16 +443,18 @@ CONTAINS
  do ikpt=1,nkpt
    do ideg=1,efmasdeg(ikpt)%ndegs 
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
-     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 * 9
+     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 
    enddo
  enddo
 
+!Allocate the arrays to be nc-written
  ABI_MALLOC(ndegs_arr, (nkpt) )
  ABI_MALLOC(degs_range_arr, (2,nkpt) )
  ABI_MALLOC(ideg_arr, (mband,nkpt) )
  ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
- ABI_MALLOC(eig2_diag_arr, (eig2_diag_arr_dim) )
+ ABI_MALLOC(eig2_diag_arr, (3,3,eig2_diag_arr_dim) )
 
+!Prepare the arrays to be nc-written
  ideg_tot=1
  ieig=1
  do ikpt=1,nkpt
@@ -462,29 +464,22 @@ CONTAINS
    do ideg=1,efmasdeg(ikpt)%ndegs
      degs_bounds_arr(:,ideg_tot)=efmasdeg(ikpt)%degs_bounds(:,ideg)
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     do jband=1,deg_dim
+       do iband=1,deg_dim
+         eig2_diag_arr(:,:,ieig+iband-1)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
+       enddo
+       ieig=ieig+deg_dim
+     enddo
      ideg_tot=ideg_tot+1
    enddo
  enddo
  
+!Allocate the arrays 
  ABI_FREE(ndegs_arr)
  ABI_FREE(degs_range_arr)
  ABI_FREE(ideg_arr)
  ABI_FREE(degs_bounds_arr)
  ABI_FREE(eig2_diag_arr)
-
-!
-! write nkpt_rbz and mband
-! do ikpt=1,nkpt_rbz
-!   write efmasdeg(ikpt)%ndegs
-!   ndegs=efmasdeg(ikpt)%ndegs
-!   write efmasdeg(ikpt)%deg_range(1:2)
-!   write efmasdeg(ikpt)%degs_bounds(1:2,1:ndegs)
-!   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-!    deg_dim    = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
-!    ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
-!    do iband=1,deg_dim
-!       do jband=1,deg_dim
-!         eig2_diag_cart(iband,jband,:,:)=efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)
 
 
 !HERE
