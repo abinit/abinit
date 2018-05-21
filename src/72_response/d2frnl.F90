@@ -604,8 +604,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        do ideg=1,efmasdeg(ikpt)%ndegs
          if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
            deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
-           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(deg_dim,deg_dim,3,3))
-           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(deg_dim,deg_dim,3,3))
+           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(3,3,deg_dim,deg_dim))
+           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(3,3,deg_dim,deg_dim))
            efmasval(ideg,ikpt)%ch2c=zero
            efmasval(ideg,ikpt)%eig2_diag=zero
          else
@@ -777,7 +777,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &                 mpi_enreg%comm_spinorfft)
                  isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
                  jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
-                 efmasval(ideg,ikpt)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                 efmasval(ideg,ikpt)%ch2c(mu,nu,jsub,isub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
                end do
              end do
            end do

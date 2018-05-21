@@ -723,7 +723,7 @@ end subroutine print_efmas
 !! SIDE EFFECTS
 !!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order derivatives of eigenvalues
 !!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution double tensor
-!!    efmasval(:,:)%eig2_diag OUTPUT : band curvature double tensor
+!!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
 !!
 !! PARENTS
 !!      dfpt_looppert
@@ -877,8 +877,8 @@ end subroutine print_efmas
       end if !degenerate(1)
       ABI_DEALLOCATE(eigen1_deg)
 
-      ABI_ALLOCATE(eig2_diag,(deg_dim,deg_dim,3,3))
-      ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+      ABI_ALLOCATE(eig2_diag,(3,3,deg_dim,deg_dim))
+      ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
       eig2_diag = zero
 
       do iband=1,deg_dim
@@ -941,7 +941,7 @@ end subroutine print_efmas
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(adir,bdir,iband,jband)
 
             end do !bdir
           end do  !adir
@@ -952,13 +952,13 @@ end subroutine print_efmas
             end do
           end do
 
-          eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
-          efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
+          eig2_diag(:,:,iband,jband) = eig2_paral - eig2_gauge_change
+          efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=eig2_diag(:,:,iband,jband)
 
           !!! Decomposition of the hessian in into its different contributions.
           if(debug) then
 
-            eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+            eig2_diag_cart(:,:,iband,jband) = matmul(matmul(rprimd,eig2_diag(:,:,iband,jband)),transpose(rprimd))/two_pi**2
             eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
             eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
             eig2_ch2c                  = matmul(matmul(rprimd,eig2_ch2c),                 transpose(rprimd))/two_pi**2
@@ -967,7 +967,7 @@ end subroutine print_efmas
             write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
             do adir=1,3
               write(std_out,'(3f12.8,2(a,3f12.8))')&
-&               real(eig2_diag_cart(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
+&               real(eig2_diag_cart(adir,:,iband,jband),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
             end do
             write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
             do adir=1,3
@@ -1200,7 +1200,7 @@ end subroutine print_efmas
      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
      ABI_ALLOCATE(eigenval,(deg_dim))
 
-     ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+     ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
      do iband=1,deg_dim
         write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
@@ -1208,14 +1208,14 @@ end subroutine print_efmas
 
           eff_mass=zero
 
-          eig2_diag_cart(iband,jband,:,:)=efmasval(ideg,ikpt)%eig2_diag(iband,jband,:,:)          
-          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag_cart(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+          eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)          
+          eig2_diag_cart(:,:,iband,jband) = matmul(matmul(rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(rprimd))/two_pi**2
 
 
           if(.not. degenerate .and. iband==jband) then
 
             !Compute effective mass tensor from second derivative matrix. Simple inversion.
-            eff_mass(:,:) = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
+            eff_mass(:,:) = eig2_diag_cart(1:mdim,1:mdim,iband,jband)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
             ABI_ALLOCATE(work,(3))
             call zgetri(mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,work,3,info)
@@ -1262,7 +1262,7 @@ end subroutine print_efmas
                   unit_r(2)=sinth*sinph
                   unit_r(3)=costh
 
-                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),unit_r(:))) 
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),unit_r(:))) 
                   m_avg = m_avg + weight*sinth*f3d_scal
                   m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
@@ -1284,7 +1284,7 @@ end subroutine print_efmas
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
             do adir=1,ndirs
-              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),dirs(:,adir)))
+              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),dirs(:,adir)))
             end do
 
             !PRINTING RESULTS
@@ -1387,11 +1387,11 @@ end subroutine print_efmas
 
             do iband=1,deg_dim
               do jband=1,deg_dim
-                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))
-                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dth))
-                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dph))
+                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))
+                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),dr_dth))
+                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),dr_dph))
               end do
             end do
             !DIAGONALIZATION
@@ -1501,10 +1501,10 @@ end subroutine print_efmas
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1648,7 +1648,7 @@ end subroutine print_efmas
 
           do iband=1,deg_dim
             do jband=1,deg_dim
-              matr2d = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
+              matr2d = eig2_diag_cart(1:mdim,1:mdim,iband,jband)
               f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(matr2d,unit_r))
               df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(matr2d,unit_r))+&
 &              DOT_PRODUCT(unit_r,MATMUL(matr2d,dr_dph))
@@ -1720,10 +1720,10 @@ end subroutine print_efmas
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1826,7 +1826,7 @@ end subroutine print_efmas
         m_avg_frohlich=zero
         saddle_warn=.false.
 
-        f3d(:,:) = eig2_diag_cart(:,:,1,1)
+        f3d(:,:) = eig2_diag_cart(1,1,:,:)
 
         !DIAGONALIZATION
         eigenvec = f3d        !IN
@@ -1851,7 +1851,7 @@ end subroutine print_efmas
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
           eigenvec = f3d        !IN

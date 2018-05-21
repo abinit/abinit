@@ -41,12 +41,12 @@ module m_efmas_defs
  type efmasval_type
 
    !For k-point
-   complex(dpc),allocatable :: ch2c(:,:,:,:) ! ch2c(1:deg_dim,1:deg_dim,mdim,mdim) 
+   complex(dpc),allocatable :: ch2c(:,:,:,:) ! ch2c(mdim,mdim,1:deg_dim,1:deg_dim) 
                                              ! where mdim=3 labels reciprocal space directions
                                              ! See Eq.(50) of Laflamme2016 : 2nd-order Hamiltonian contribution
-                                             ! Two first indices are for band indices within degenerate subspace
-                                             ! Two last indices are for number of directions
-   complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(1:deg_dim,1:deg_dim,mdim,mdim) 
+                                             ! Two first indices are for number of directions
+                                             ! Two last indices are for band indices within degenerate subspace
+   complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(mdim,mdim,1:deg_dim,1:deg_dim) 
                                              ! where mdim=3 labels reciprocal space directions
                                              ! See Eq.(50) of Laflamme2016 : generalized second-order k-derivative
 
