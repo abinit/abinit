@@ -269,9 +269,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine check_degeneracies(efmas,bands,nband,eigen,deg_tol)
-
-!  use m_efmas, only : efmasdeg_type
+ subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -282,7 +280,7 @@ CONTAINS
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasdeg_type),intent(out) :: efmas
+   type(efmasdeg_type),intent(out) :: efmasdeg
    integer,intent(in) :: bands(2),nband
    real(dp),intent(in) :: eigen(nband)
    real(dp),intent(in),optional :: deg_tol
@@ -299,59 +297,56 @@ CONTAINS
    tol=tol5; if(present(deg_tol)) tol=deg_tol
 
    !!! Determine sets of degenerate states in eigen0, i.e., at 0th order.
-   efmas%ndegs=1
+   efmasdeg%ndegs=1
    ABI_MALLOC(degs_bounds,(2,nband))
-   ABI_MALLOC(efmas%ideg, (nband))
+   ABI_MALLOC(efmasdeg%ideg, (nband))
    degs_bounds=0; degs_bounds(1,1)=1
-   efmas%ideg=0; efmas%ideg(1)=1
+   efmasdeg%ideg=0; efmasdeg%ideg(1)=1
 
    eigen_tmp(:) = eigen(:)
 
    do iband=2,nband
      if (ABS(eigen_tmp(iband)-eigen_tmp(iband-1))>tol) then
-       degs_bounds(2,efmas%ndegs) = iband-1
-       efmas%ndegs=efmas%ndegs+1
-       degs_bounds(1,efmas%ndegs) = iband
+       degs_bounds(2,efmasdeg%ndegs) = iband-1
+       efmasdeg%ndegs=efmasdeg%ndegs+1
+       degs_bounds(1,efmasdeg%ndegs) = iband
      end if
-     efmas%ideg(iband) = efmas%ndegs
+     efmasdeg%ideg(iband) = efmasdeg%ndegs
    end do
-   degs_bounds(2,efmas%ndegs)=nband
-   ABI_MALLOC(efmas%degs_bounds,(2,efmas%ndegs))
-   efmas%degs_bounds(1:2,1:efmas%ndegs) = degs_bounds(1:2,1:efmas%ndegs)
+   degs_bounds(2,efmasdeg%ndegs)=nband
+   ABI_MALLOC(efmasdeg%degs_bounds,(2,efmasdeg%ndegs))
+   efmasdeg%degs_bounds(1:2,1:efmasdeg%ndegs) = degs_bounds(1:2,1:efmasdeg%ndegs)
    ABI_FREE(degs_bounds)
 
    !!! Determine if treated bands are part of a degeneracy at 0th order.
-   ABI_MALLOC(efmas%deg_dim,   (efmas%ndegs))
-   efmas%band_range=0; efmas%deg_range=0; efmas%deg_dim=0
+   ABI_MALLOC(efmasdeg%deg_dim,   (efmasdeg%ndegs))
+   efmasdeg%deg_range=0; efmasdeg%deg_dim=0
    treated=.false.
-   write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmas%ndegs
+   write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmasdeg%ndegs
    write(std_out,'(a)') 'Set index; range of bands included in the set; is the set degenerate?(T/F); &
 &                        is the set treated by EFMAS?(T/F):'
-   do ideg=1,efmas%ndegs
-     efmas%deg_dim(ideg) = efmas%degs_bounds(2,ideg) - efmas%degs_bounds(1,ideg) + 1
+   do ideg=1,efmasdeg%ndegs
+     efmasdeg%deg_dim(ideg) = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
      !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
      !The band range might be larger than the nband interval: it includes it, and also include degenerate states
-     if(efmas%degs_bounds(1,ideg)<=bands(2) .and. efmas%degs_bounds(2,ideg)>=bands(1)) then
+     if(efmasdeg%degs_bounds(1,ideg)<=bands(2) .and. efmasdeg%degs_bounds(2,ideg)>=bands(1)) then
        treated = .true.
-       if(efmas%degs_bounds(1,ideg)<=bands(1)) then
-         efmas%band_range(1) = efmas%degs_bounds(1,ideg)
-         efmas%deg_range(1) = ideg
+       if(efmasdeg%degs_bounds(1,ideg)<=bands(1)) then
+         efmasdeg%deg_range(1) = ideg
        end if
-       if(efmas%degs_bounds(2,ideg)>=bands(2)) then
-         efmas%band_range(2) = efmas%degs_bounds(2,ideg)
-         efmas%deg_range(2) = ideg
+       if(efmasdeg%degs_bounds(2,ideg)>=bands(2)) then
+         efmasdeg%deg_range(2) = ideg
        end if
      end if
-     write(std_out,'(2i6,a,i6,2l4)') ideg, efmas%degs_bounds(1,ideg), ' -', efmas%degs_bounds(2,ideg), &
-&                                    (efmas%deg_dim(ideg)>1), treated
+     write(std_out,'(2i6,a,i6,2l4)') ideg, efmasdeg%degs_bounds(1,ideg), ' -', efmasdeg%degs_bounds(2,ideg), &
+&                                    (efmasdeg%deg_dim(ideg)>1), treated
    end do
 
-!   write(std_out,*)'ndegs=',          efmas%ndegs
-!   write(std_out,*)'degs_bounds=',    efmas%degs_bounds
-!   write(std_out,*)'ideg=',           efmas%ideg
-!   write(std_out,*)'band_range=',     efmas%band_range
-!   write(std_out,*)'deg_range=',      efmas%deg_range
-!   write(std_out,*)'deg_dim=',        efmas%deg_dim
+!   write(std_out,*)'ndegs=',          efmasdeg%ndegs
+!   write(std_out,*)'degs_bounds=',    efmasdeg%degs_bounds
+!   write(std_out,*)'ideg=',           efmasdeg%ideg
+!   write(std_out,*)'deg_range=',      efmasdeg%deg_range
+!   write(std_out,*)'deg_dim=',        efmasdeg%deg_dim
 
   !!This first attempt WORKS, but only if the symmetries are enabled, see line 1578 of dfpt_looppert.F90.
   !use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
@@ -435,7 +430,6 @@ CONTAINS
 ! do ikpt=1,nkpt_rbz
 !   write efmasdeg(ikpt)%ndegs
 !   ndegs=efmasdeg(ikpt)%ndegs
-!   write efmasdeg(ikpt)%band_range(1:2)
 !   write efmasdeg(ikpt)%deg_range(1:2)
 !   write efmasdeg(ikpt)%deg_dim(1:ndegs)
 !   write efmasdeg(ikpt)%degs_bounds(1:2,1:ndegs)

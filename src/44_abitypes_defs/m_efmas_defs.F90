@@ -63,12 +63,14 @@ module m_efmas_defs
  type efmasdeg_type
 
    !For k-point
-   integer :: ndegs                           ! Number of degenerate sets of eigenvalues (related to one specific k point)
-   integer, allocatable :: degs_bounds(:,:)   ! degs_bounds(2,ndegs) actually the second dimension is declared as nband_k
+   integer :: ndegs                           ! Number of (degenerate) sets of eigenvalues (related to one specific k point)
+   integer, allocatable :: degs_bounds(:,:)   ! degs_bounds(2,ndegs) 
+                                              ! Minimal and maximal band indices for each possibly degenerate set of eigenvalues
+                                              ! actually the second dimension is declared as nband_k
    !For band
-   integer :: band_range(2)                   ! index of bands defining the extended band interval of bands i
-                                              !  (possibly extended due to the degeneracies)
-   integer :: deg_range(2)                    ! index of the sets that corresponds to the extended interval of bands
+   integer :: deg_range(2)                    ! Indices of the sets that corresponds to the interval of bands for which
+                                              ! the generalized second-order k-derivative eig2_diag is computed,
+                                              ! possibly extended due to the degeneracies.
    integer,allocatable :: deg_dim(:)          ! deg_dim(ndegs), dimension of the degeneracy of each set of eigenvalues
    integer,allocatable :: ideg(:)             ! ideg(nband_k)  index of the set to which a particular band belongs
 
