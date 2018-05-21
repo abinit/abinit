@@ -192,17 +192,11 @@ CONTAINS
    if(allocated(efmasdeg%deg_dim)) then
      ABI_FREE(efmasdeg%deg_dim)
    end if
-   if(allocated(efmasdeg%degl)) then
-     ABI_FREE(efmasdeg%degl)
-   end if
    if(allocated(efmasdeg%ideg)) then
      ABI_FREE(efmasdeg%ideg)
    end if
    if(allocated(efmasdeg%degenerate)) then
      ABI_FREE(efmasdeg%degenerate)
-   end if
-   if(allocated(efmasdeg%treated)) then
-     ABI_FREE(efmasdeg%treated)
    end if
 
  end subroutine efmasdeg_free
@@ -301,6 +295,7 @@ CONTAINS
    integer, allocatable :: degs_bounds(:,:)
    real(dp) :: tol
    real(dp) :: eigen_tmp(nband)
+   logical :: treated
 
    ! *********************************************************************
 
@@ -330,24 +325,22 @@ CONTAINS
 
    !!! Determine if treated bands are part of a degeneracy at 0th order.
    ABI_MALLOC(efmas%degenerate,(efmas%ndegs))
-   ABI_MALLOC(efmas%treated   ,(efmas%ndegs))
    ABI_MALLOC(efmas%deg_dim,   (efmas%ndegs))
-   ABI_MALLOC(efmas%degl,      (efmas%ndegs))
-   efmas%degenerate = .false.; efmas%treated=.false.
+   efmas%degenerate = .false.; 
    efmas%band_range=0; efmas%deg_range=0; efmas%deg_dim=0
+   treated=.false.
    write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmas%ndegs
    write(std_out,'(a)') 'Set index; range of bands included in the set; is the set degenerate?(T/F); &
 &                        is the set treated by EFMAS?(T/F):'
    do ideg=1,efmas%ndegs
      efmas%deg_dim(ideg) = efmas%degs_bounds(2,ideg) - efmas%degs_bounds(1,ideg) + 1
-     efmas%degl(ideg) = efmas%degs_bounds(1,ideg)-1
      if(efmas%deg_dim(ideg)>1) then
        efmas%degenerate(ideg) = .true.
      end if
      !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
      !The band range might be larger than the nband interval: it includes it, and also include degenerate states
      if(efmas%degs_bounds(1,ideg)<=bands(2) .and. efmas%degs_bounds(2,ideg)>=bands(1)) then
-       efmas%treated(ideg) = .true.
+       treated = .true.
        if(efmas%degs_bounds(1,ideg)<=bands(1)) then
          efmas%band_range(1) = efmas%degs_bounds(1,ideg)
          efmas%deg_range(1) = ideg
@@ -358,7 +351,7 @@ CONTAINS
        end if
      end if
      write(std_out,'(2i6,a,i6,2l4)') ideg, efmas%degs_bounds(1,ideg), ' -', efmas%degs_bounds(2,ideg), &
-&                                    efmas%degenerate(ideg), efmas%treated(ideg)
+&                                    efmas%degenerate(ideg), treated
    end do
 
 !   write(std_out,*)'ndegs=',          efmas%ndegs
@@ -367,8 +360,6 @@ CONTAINS
 !   write(std_out,*)'band_range=',     efmas%band_range
 !   write(std_out,*)'deg_range=',      efmas%deg_range
 !   write(std_out,*)'degenerate=',     efmas%degenerate
-!   write(std_out,*)'treated=',        efmas%treated
-!   write(std_out,*)'degl=',           efmas%degl
 !   write(std_out,*)'deg_dim=',        efmas%deg_dim
 
   !!This first attempt WORKS, but only if the symmetries are enabled, see line 1578 of dfpt_looppert.F90.
@@ -421,7 +412,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz)
+ subroutine print_efmas(efmasdeg,efmasval,mband,mpi_enreg,nkpt_rbz,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -434,10 +425,11 @@ CONTAINS
 
  !Arguments ------------------------------------
  !scalars
+  integer,            intent(in) :: mband
+  integer,            intent(in) :: ncid
   integer,            intent(in) :: nkpt_rbz
   type(MPI_type),     intent(in) :: mpi_enreg
  !arrays
-  real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
   type(efmasdeg_type), intent(in) :: efmasdeg(:)
   type(efmasval_type), intent(in) :: efmasval(:,:)
 
@@ -445,8 +437,18 @@ CONTAINS
   complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
 !----------------------------------------------------------------------
 
-  !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz. To be reexamined when parallelization is done.
+  !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
+  !To be reexamined/corrected when parallelization is done.
+!
+! write nkpt_rbz and mband
 ! do ikpt=1,nkpt_rbz
+!   write efmasdeg(ikpt)%ndegs
+!   ndegs=efmasdeg(ikpt)%ndegs
+!   write efmasdeg(ikpt)%band_range(1:2)
+!   write efmasdeg(ikpt)%deg_range(1:2)
+!   write efmasdeg(ikpt)%degenerate(1:ndegs)
+!   write efmasdeg(ikpt)%deg_dim(1:ndegs)
+!   write efmasdeg(ikpt)%degs_bounds(1:2,1:ndegs)
 !   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 !    deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 !    ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
@@ -823,7 +825,7 @@ end subroutine print_efmas
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
       degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
-      degl       = efmasdeg(ikpt)%degl(ideg)
+      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
       deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 
       ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
@@ -1161,7 +1163,7 @@ end subroutine print_efmas
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
      degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
-     degl       = efmasdeg(ikpt)%degl(ideg)
+     degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
      deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
  
      !!! Allocations

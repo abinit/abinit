@@ -67,12 +67,10 @@ module m_efmas_defs
    integer, allocatable :: degs_bounds(:,:)   ! degs_bounds(2,ndegs) actually the second dimension is declared as nband_k
    !For band
    logical,allocatable :: degenerate(:)       ! degenerate(ndegs), 1 if the eigenvalue set is degenerate
-   logical,allocatable :: treated(:)          ! treated(ndegs), 1 if the eigenvalue set has been treated
    integer :: band_range(2)                   ! index of bands defining the extended band interval of bands i
                                               !  (possibly extended due to the degeneracies)
    integer :: deg_range(2)                    ! index of the sets that corresponds to the extended interval of bands
    integer,allocatable :: deg_dim(:)          ! deg_dim(ndegs), dimension of the degeneracy of each set of eigenvalues
-   integer,allocatable :: degl(:)             ! degl(ndegs)  degl(:)=degs_bounds(1,:)-1 . Index shift.
    integer,allocatable :: ideg(:)             ! ideg(nband_k)  index of the set to which a particular band belongs
 
  end type efmasdeg_type
