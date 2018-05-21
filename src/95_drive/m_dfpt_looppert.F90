@@ -2425,7 +2425,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal_ncwrite(crystal, ncid))
      NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
-     call print_efmas(efmasdeg,efmasval,dtset%mband,mpi_enreg,nkpt_rbz,ncid)
+     call print_efmas(efmasdeg,efmasval,ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif

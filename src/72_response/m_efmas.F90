@@ -395,7 +395,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(efmasdeg,efmasval,mband,mpi_enreg,nkpt_rbz,ncid)
+ subroutine print_efmas(efmasdeg,efmasval,mpi_enreg,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -404,24 +404,49 @@ CONTAINS
 #define ABI_FUNC 'print_efmas'
 !End of the abilint section
 
-  implicit none
+ implicit none
 
- !Arguments ------------------------------------
- !scalars
-  integer,            intent(in) :: mband
-  integer,            intent(in) :: ncid
-  integer,            intent(in) :: nkpt_rbz
-  type(MPI_type),     intent(in) :: mpi_enreg
- !arrays
-  type(efmasdeg_type), intent(in) :: efmasdeg(:)
-  type(efmasval_type), intent(in) :: efmasval(:,:)
+!Arguments ------------------------------------
+!scalars
+ integer,            intent(in) :: ncid
+!arrays
+ type(efmasdeg_type), intent(in) :: efmasdeg(:)
+ type(efmasval_type), intent(in) :: efmasval(:,:)
 
 !Local variables-------------------------------
-  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+ integer :: ikpt,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
 !----------------------------------------------------------------------
 
   !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
   !To be reexamined/corrected when parallelization is done.
+
+ nkptdeg=size(efmasdeg,1)
+ nkptval=size(efmasval,1)
+ if(nkptdeg/=nkptval) then
+   write(msg,'(a,2i8,a)') ' (nkptdeg,nkptval)=',nkptdeg,nkptval,' differ, which is inconsistent'
+   MSG_ERROR(msg)
+ end if
+ nkpt=nkptdeg
+ mband=size(efmasval,2)
+
+!Total number of (degenerate) sets over all k points
+ ndegs_tot=sum(efmasdeg%ndegs)
+!Total number of generalized second-order k-derivatives
+ do ikpt=1,nkpt
+  HERE 
+ enddo
+
+ ABI_MALLOC(ndegs_arr,nkpt)
+ ABI_MALLOC(degs_range_arr,2*nkpt)
+ ABI_MALLOC(ideg_arr,nkpt*mband)
+ ABI_MALLOC(degs_bound_arr,2*ndegs_tot)
+ 
+ ABI_FREE(ndegs_arr)
+ ABI_FREE(degs_range_arr)
+ ABI_FREE(ideg_arr)
+ ABI_FREE(degs_bound_arr)
+
 !
 ! write nkpt_rbz and mband
 ! do ikpt=1,nkpt_rbz
