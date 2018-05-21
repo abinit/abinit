@@ -256,7 +256,7 @@ contains
     call get_dims_hist(ncid,InVar%natom,InVar%ntypat,nimage,mdtime,&
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
-    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=zero
+    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=0
     ABI_MALLOC(znucl,(InVar%ntypat))
     call read_csts_hist(ncid,dtion,InVar%typat,znucl,InVar%amu)
     ABI_FREE(znucl)
