@@ -352,18 +352,18 @@ implicit none
      !   freq_b = 0.02
      ! end if
 
-     !TEST_AM
+!TEST_AM_old way 
      freq_q = 0.1
      freq_b = 0.01
-     !TEST_AM
-     
      qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
      bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
+!TEST_AM
+     
 
 !TEST_AM
 !     freq_q = 800  / Ha_cmm1
 !     freq_b = 800  / (10*Ha_cmm1)
-
+!
 !     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
 !     bmass = 10000*qmass
 !TEST_AM

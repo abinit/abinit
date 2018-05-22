@@ -788,11 +788,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(msg, '(6a,3I4,5a)' )ch10,&
+       write(msg, '(6a,3I4,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
-&        '     The previous harmonic part was build for bigger cell,',ch10,&
-&        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
-&        '     The simulation might be completely wong',ch10,&
+&        '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
+&        '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
 &        ' ---'
        call wrtout(std_out,msg,"COLL")
        if (abs(min1) < abs(min1_cell)) min1 = min1_cell
