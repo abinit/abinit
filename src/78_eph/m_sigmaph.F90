@@ -436,7 +436,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
- integer :: ik_bz, ikq_bz
+ integer :: ik_bz, ikq_bz, iq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu,ndiv
@@ -804,29 +804,23 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
                    mod(nint((kq(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+
+         iq_bz = eph_dg%indexes_to_coarse(&
+                   mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                   mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                   mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
  
          ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
          ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
          !fine grid around kq
          do jj=1,eph_dg%ndiv
 
+           !kq
            ikq_bz_fine = eph_dg%coarse_to_dense(ikq_bz,jj)
            ikq_ibz_fine = eph_dg%bz2ibz_dense(ikq_bz_fine)
 
-           !get q such that k->k'+q 
-           !calculate indexes of k and k'
-           indexes_jk = eph_dg%dense_to_indexes(:,ik_bz_fine) !k
-           indexes_ik = eph_dg%dense_to_indexes(:,ikq_bz_fine) !k'
-           !calcualte indexes of q 
-           indexes_qq = indexes_jk - indexes_ik !q = k - k'
-           !bring to first bz
-           indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
-           indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
-           indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
-           !calculate given two indexes of k and k' give index of q such that k -> k'+q
-           iq_bz_fine = eph_dg%indexes_to_dense(indexes_qq(1),&
-                                                indexes_qq(2),&
-                                                indexes_qq(3))
+           !qq
+           iq_bz_fine = eph_dg%coarse_to_dense(iq_bz,jj)
            iq_ibz_fine = eph_dg%bz2ibz_dense(iq_bz_fine)
 
            eph_dg_mapping(:, jj) = &
@@ -842,9 +836,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        if (sigma%qint_method > 0) then
          if (sigma%use_doublegrid) then
            do jj=1,eph_dg%ndiv
-             iq_bz_fine = eph_dg_mapping(3,jj) 
+#if 0
+             iq_ibz_fine = eph_dg_mapping(6,jj)
+             iqlk(jj) = iq_ibz_fine
+#else
+             iq_bz_fine = eph_dg_mapping(3,jj)
              iqlk(jj) = lgroup_find_ibzimage(sigma%ephwg%lgk, eph_dg%kpts_dense(:,iq_bz_fine))
              ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+#endif
            end do
          else
            iqlk(1) = iq_ibz
@@ -1150,7 +1149,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                                  (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
                    sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
                  end if
-                  
+
                end if
 
  
@@ -1739,7 +1738,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
- logical :: downsample, use_doublegrid
+ logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: dksqmax,ph_wstep
  character(len=500) :: wfk_fname_dense
@@ -2116,7 +2115,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! 5. Create a scatter array between the points in the fine grid
  ! 
 
- use_doublegrid = .False.
+ new%use_doublegrid = .False.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
      (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
 
@@ -2134,7 +2133,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! number of bands and kpoints (comensurability)
    ABI_CHECK(hdr_wfk_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
 
-   use_doublegrid = .True.
+   new%use_doublegrid = .True.
 
  !read bs_interpmult
  else if (dtset%bs_interp_kmult(1) /= 0 .or.&
@@ -2155,24 +2154,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    intp_nshiftk = 1
    ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
                                       intp_nshiftk, intp_shiftk, band_block, comm)
-   use_doublegrid = .True.
+   new%use_doublegrid = .True.
  end if
 
  if (new%qint_method > 0) then
    ! bstart and new%bsum select the band range.
    bstart = 1
-   if (.not. use_doublegrid) then
-     downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
-     if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%nshiftk /= my_shiftq)
-     if (downsample) then
-       MSG_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
-       tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
-       new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
-       call ebands_free(tmp_ebands)
-     else
-       new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
-     end if
-   else
+   if (new%use_doublegrid) then 
      ! Double-grid technique from ab-initio energies or star-function interpolation.
      !if (dtset% dtftil% ....) then
      !  tmp_ebands = wfk_read_ebands(filepath, comm)
@@ -2184,16 +2172,39 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !    intp_kptrlatt, my_nshiftq, my_shiftq, [bstart, bstart + new%nbsum - 1], comm)
      !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
      !end if
-     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
+     new%ephwg          = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
+#if 0
+     open(unit=5,file='tetra_ibz.dat')
+     do ii=1,new%ephwg%nibz
+       write(5,*) new%ephwg%ibz(:,ii)
+     end do
+     close(unit=5)
+
+     open(unit=5,file='dg_ibz.dat')
+     do ii=1,ebands_dense%nkpt
+       write(5,*) ebands_dense%kptns(:,ii)
+     end do
+#endif
+
      !call ebands_free(tmp_ebands)
+   else
+     downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
+     if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%nshiftk /= my_shiftq)
+     if (downsample) then
+       MSG_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
+       tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
+       new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
+       call ebands_free(tmp_ebands)
+     else
+       new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
+     end if
    end if
  else 
-   if (use_doublegrid) then
+   if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
    endif
  end if
- new%use_doublegrid = use_doublegrid
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
