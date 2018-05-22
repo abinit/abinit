@@ -21,7 +21,7 @@ sources = [
  "m_esymm.F90",    # Modules first
  "m_bandfft_kpt.F90",  # Modules first
  "m_invovl.F90",
- "chebfi.F90",
+ "m_chebfi.F90",
  "cgcprj_cholesky.F90",
  "dotprod_set_cgcprj.F90",
  "dotprodm_sumdiag_cgcprj.F90",
@@ -45,7 +45,7 @@ sources = [
  "prep_wavef_sym_undo.F90",
  "prep_index_wavef_bandpp.F90",
  "prep_sort_wavef_spin.F90",
- "rayleigh_ritz.F90",
+ "m_rayleigh_ritz.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

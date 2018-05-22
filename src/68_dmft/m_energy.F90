@@ -33,6 +33,7 @@ MODULE m_energy
  use defs_basis
  use m_errors
  use m_profiling_abi
+
  use m_pawtab, only : pawtab_type
 
  implicit none
@@ -78,7 +79,7 @@ MODULE m_energy
 
   real(dp) :: natom
 
-  real(dp), allocatable :: e_dc(:) 
+  real(dp), allocatable :: e_dc(:)
 
   real(dp), allocatable :: e_hu(:)
 
@@ -976,7 +977,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        prt_pawuenergy=0
      else
        upawu = pawtab(cryst_struc%typat(iatom))%upawu
-       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu        
+       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu
        prt_pawuenergy=3
      end if
 

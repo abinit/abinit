@@ -31,10 +31,12 @@ module m_relaxpol
 
  use m_fstrings,  only : sjoin, itoa
  use m_symtk,     only : matr3inv
+ use m_berrytk,   only : polcart
  use m_abilasi,   only : dzgedi, dzgefa
  use m_geometry,  only : xcart2xred
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t
+
 
  implicit none
 
@@ -113,7 +115,6 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'relaxpol'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
