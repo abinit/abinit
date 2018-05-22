@@ -487,6 +487,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  call xmpi_sum(cwavef,mpi_enreg%comm_spinor,ierr)
                end if
              end if
+             ! write (*,*) npw_k, nband_k, blocksize, dtset%nsppol, mpi_enreg%paral_spinor
+
              if(ioption==1)then
 !              Multiplication by 2pi i (k+G)_alpha
                gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
