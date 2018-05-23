@@ -2,6 +2,7 @@
 description: How to use the Abipy python package
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to use the Abipy python package with the ABINIT package.
 

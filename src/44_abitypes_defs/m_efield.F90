@@ -97,13 +97,13 @@ module m_efield
 ! Real(dp) arrays
   real(dp) :: dkvecs(3,3)        ! dkvec(:,idir) = vector between a k-poinit
                                  ! and its nearest neighbour along idir
-!! if berryopt=4,6,7, dtset%red_efieldbar and dtset%red_dfield will be initialized in 67_common/initberry.F90 
-  real(dp) :: efield_dot(3)      ! reciprocal lattice coordinates of the 
+!! if berryopt=4,6,7, dtset%red_efieldbar and dtset%red_dfield will be initialized in 67_common/initberry.F90
+  real(dp) :: efield_dot(3)      ! reciprocal lattice coordinates of the
                                  ! electric field
   real(dp) :: red_ptot1(3)       ! reduced total polarization
-  real(dp) :: efield2(3)         ! unreduced electric field, only used when berryopt == 14 in order to save real electric field for print out.  
+  real(dp) :: efield2(3)         ! unreduced electric field, only used when berryopt == 14 in order to save real electric field for print out.
 
-  real(dp) :: gmet_str(2,2,3)    ! gmet_str(:,:,idir) is the metric of the metric of 
+  real(dp) :: gmet_str(2,2,3)    ! gmet_str(:,:,idir) is the metric of the metric of
                                  ! the space of strings of direction idir
 ! Integer pointers
   integer, allocatable :: atom_indsym(:,:,:) ! atom_indsym(4,nsym,natom)
@@ -173,7 +173,7 @@ module m_efield
   real(dp),allocatable :: epawf3(:,:,:)
 ! epawf3(natom,3,3) ! F3-type force term (derivatives of projectors with respect to ion posiion)
 ! that arises in force for finite electric field with PAW
-! epawf3(iatom,idir,fdir) is derivative of polarization component idir with respect to iatom 
+! epawf3(iatom,idir,fdir) is derivative of polarization component idir with respect to iatom
 ! displaced in direction fdir
 ! see equation 32 of Torrent et al. CMS 42, 337 (2008)
 

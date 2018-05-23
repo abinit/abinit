@@ -141,7 +141,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
      write(message, '(a,i0,a,a,a,a)' )&
 &     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
 &     'This is not allowed.  ',ch10,&
-&     'Action : modify ndtset in the input file.'
+&     'Action: modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
  end if ! master
@@ -606,7 +606,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
        write(msg, '(6a)' ) &
 &       'The size of your input file: ',TRIM(filnam),' (including included files) is such that',ch10,&
 &       'the internal character string that should contain it is too small !',ch10,&
-&       'Action : decrease the size of your input file.'
+&       'Action: decrease the size of your input file.'
        MSG_ERROR(msg)
      end if
 !    Concatenate total string
@@ -1670,7 +1670,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !&  '  attempted to read',ii,' elements for array length',narr,ch10,&
 !&  '  This might be due to an erroneous value for the size ',ch10,&
 !&  '  of this array, in the input file.',ch10,&
-!&  '  Action : check the data provided for this keyword,',ch10,&
+!&  '  Action: check the data provided for this keyword,',ch10,&
 !&  '  as well as its declared dimension. They do not match.'
 !call wrtout(std_out,message,'COLL')
 !end if
@@ -2172,19 +2172,19 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 
    if(cond_number==0 .or. advice_change_cond==0)then
      write(message, '(2a,a,a,a)' ) trim(message),ch10,&
-&     '  Action : you should change the input variable ',trim(input_name),'.'
+&     '  Action: you should change the input variable ',trim(input_name),'.'
    else if(cond_number==1)then
      write(message, '(2a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action : you should change the input variables ',trim(input_name),&
+&     '  Action: you should change the input variables ',trim(input_name),&
 &     ' or ',trim(cond_string(1)),'.'
    else if(cond_number==2)then
      write(message, '(2a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action : you should change one of the input variables ',&
+&     '  Action: you should change one of the input variables ',&
 &     trim(input_name),',',ch10,&
 &     '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
    else if(cond_number==3)then
      write(message, '(2a,a,a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action : you should change one of the input variables ',&
+&     '  Action: you should change one of the input variables ',&
 &     trim(input_name),',',ch10,&
 &     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),&
 &     ' or ',trim(cond_string(3)),'.'

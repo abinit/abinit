@@ -339,7 +339,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg, '(a,i4,a,a,a,a,a)' )&
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_BUG(msg)
  end if
 
@@ -347,7 +347,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg,'(a,i4,5a)')&
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_BUG(msg)
  end if
 
@@ -5176,7 +5176,7 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    if((size(fofgin_p,2)==0).and.(luse_ndo)) then
      write(message, '(a,a,a,i4,i5)' )&
 &     'fofgin_p has a dimension equal to zero and luse_ndo true',ch10,&
-&     'Action : check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
+&     'Action: check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
      MSG_BUG(message)
    end if
  end if

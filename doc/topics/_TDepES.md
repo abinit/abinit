@@ -2,6 +2,7 @@
 description: To to calculate the temperature dependence of the electronic structure
 authors: SP
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate the temperature dependence of the electronic structure with the ABINIT package.
 

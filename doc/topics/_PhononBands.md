@@ -2,6 +2,7 @@
 description: How to compute phonon bands, density of states, interatomic force constants, sound velocity ...
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute phonon bands, density of states, interatomic force constants, sound
 velocity ... with the ABINIT package.

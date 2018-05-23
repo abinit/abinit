@@ -2,6 +2,7 @@
 description: How to use Van der Waals functionals
 authors: YPouillon, BVanTroeye
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to use Van der Waals functionals with the ABINIT package.
 

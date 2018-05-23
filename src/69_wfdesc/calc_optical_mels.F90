@@ -6,7 +6,7 @@
 !!  Calculate all optical matrix elements in the BZ.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,8 +16,8 @@
 !! lomo_spin(Wfd%nsppol)=Index of the lomo band for the different spins.
 !! lomo_min,max_band=minimum and max band index to be calculated.
 !! nkbz=Number of points in the full Brillouin zone.
-!! inclvkb=if different from 0, [Vnl,r] is included in the calculation of the matrix element of the velocity operator
-!!   No meaning for PAW (except for LDA+U)
+!! inclvkb=if different from 0, [Vnl,r] is included in the calculation of the
+!!   matrix element of the velocity operator. No meaning for PAW (except for LDA+U)
 !! qpt(3)
 !! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
@@ -26,11 +26,6 @@
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.
 !! Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
 !! Wfd<wfd_t>=Handler for the wavefunctions.
-!!   nkibz=Number of irreducible k-points.
-!!   nsppol=Number of independent spin polarizations.
-!!   usepaw=1 for PAW, 0 otherwise.
-!!   nspinor=Number of spinorial components.
-!!   comm=MPI Communicator.
 !!
 !! OUTPUT
 !! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k>
@@ -151,7 +146,8 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     npw_k = Wfd%npwarr(ik_ibz)
     kg_k  => Wfd%Kdata(ik_ibz)%kg_k
 
-    if (inclvkb/=0.and.usepaw==0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
+    if (inclvkb/=0.and.usepaw==0) then
+      ! Prepare term i <n,k|[Vnl,r]|n"k>
       call vkbr_init(vkbr,Cryst,Psps,inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
     end if
 
@@ -223,7 +219,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  do spin=1,nsppol
    do ik_bz=1,nkbz
     !
-    ! * Get ik_ibz, and symmetries index from ik_bz.
+    ! Get ik_ibz, and symmetries index from ik_bz.
     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
     mat_dp = DBLE(Cryst%symrec(:,:,isym_k))

@@ -1554,6 +1554,9 @@ class File_F90(File):
         "Translate macros stored in project.macro_dict"
         if self.dir in project.macro_dirs:
             for mac in project.macro_dict.keys():
+                # This to prevent abinit from expanding LIBPAW macros
+                #print(mac)
+                if mac in ("USE_DEFS", "USE_MSG_HANDLING", "USE_MEMORY_PROFILING"): continue
                 self.code = self.code.replace(mac,project.macro_dict[mac])
 
 class File_F90_Library(File_F90):

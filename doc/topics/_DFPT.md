@@ -2,6 +2,7 @@
 description: How to generically perform DFPT calculations
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to generically perform DFPT calculations with the ABINIT package.
 
@@ -34,6 +35,9 @@ calculations.
 
 All the tutorials dedicated to response functions can be followed both with
 norm-conserving pseudopotentials and with PAW atomic datasets.
+
+DFPT in ABINIT is implemented for non-magnetic, collinear as well as non-collinear systems [[nsppol]]=1, 2 as well as 4.
+However, the treatment of the strain perturbation is not yet implemented with [[nsppol]]=4 (non-collinear systems).
 
 More detailed explanations to perform a response calculation are given in the [[help:respfn]].
 

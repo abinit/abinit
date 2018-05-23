@@ -2,6 +2,7 @@
 description: How to to specify a crystal, with atomic positions and symmetries
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to to specify a crystal, with atomic positions and symmetries with the ABINIT package.
 

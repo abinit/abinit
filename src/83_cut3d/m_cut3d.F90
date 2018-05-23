@@ -38,17 +38,19 @@ MODULE m_cut3d
 
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
+ use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
- use m_mpinfo,           only : destroy_mpi_enreg
+ use m_mpinfo,           only : destroy_mpi_enreg, initmpi_seq
  use m_cgtools,          only : cg_getspin
  use m_gsphere,          only : getkpgnorm
  use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
  use m_kg,               only : kpgio, ph1d3d, getph
  use m_fftcore,          only : sphereboundary
+ use m_initylmg,         only : initylmg
 
  implicit none
 
@@ -506,7 +508,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_planeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1002,7 +1003,6 @@ subroutine reduce(r,rcart,rprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'reduce'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1219,7 +1219,6 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_volumeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1815,9 +1814,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1867,7 +1864,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp),allocatable :: cg_k(:,:),cgcband(:,:),denpot(:,:,:),eig_k(:)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),k1(:,:)
  real(dp),allocatable :: kpgnorm(:),occ_k(:),ph1d(:,:),ph3d(:,:,:),rint(:)
- real(dp),allocatable :: sum_1atom_1ll(:,:),sum_1atom_1lm(:,:)
+ real(dp),allocatable :: sum_1atom_1ll(:,:,:),sum_1atom_1lm(:,:,:)
  real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
  character(len=fnlen) :: fileqps
@@ -2115,7 +2112,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_ALLOCATE(wfg_qps,(npw_k))
        do iband=1,nband_qps
          cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-         wfg(:,iband) = cmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
+         wfg(:,iband) = dcmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
        end do
 
        wfg_qps = matmul( wfg(:,:) , ccoeff(:,cband) )
@@ -2124,7 +2121,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      write(std_out,*) 'norm',SUM( abs(wfg_qps(:))**2 )
        ABI_DEALLOCATE(ccoeff)
        ABI_DEALLOCATE(wfg)
-       ABI_ALLOCATE(cgcband,(2,npw_k))
+       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       cgcband = zero
        cgcband(1,:)= real(wfg_qps(:))
        cgcband(2,:)= aimag(wfg_qps(:))
        ABI_DEALLOCATE(wfg_qps)
@@ -2132,21 +2130,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      else ! not a GW wavefunction
 
 ! get spin vector for present state
-       if (nspinor == 2) then
-         cgshift=(cband-1)*npw_k*nspinor
-         ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
-         cgcband(:,1:nspinor*npw_k)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
-         call cg_getspin(cgcband, npw_k, spinvec)
-         write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
-         ABI_DEALLOCATE(cgcband)
-       end if
-
-!      The shift is to get the good band values
-       cgshift=(cband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-       ABI_ALLOCATE(cgcband,(2,npw_k))
-       cgcband(:,1:npw_k)=cg_k(:,cgshift+1:cgshift+npw_k)
-
+       cgshift=(cband-1)*npw_k*nspinor
+       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       cgcband(:,1:npw_k*nspinor)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
      end if ! test QPS wavefunction from GW
+
+     if (nspinor == 2) then
+       call cg_getspin(cgcband, npw_k, spinvec)
+       write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
+     end if
 
 !    Fix the phase of cgcband, for portability reasons
 !    call fxphas(cgcband,cgcband,0,npw_k,1,npw_k,0)
@@ -2155,7 +2147,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(fofgout,(2,npw_k))
      ABI_ALLOCATE(fofr,(2,n4,n5,n6))
 
-     call fourwf(cplex,denpot,cgcband,fofgout,fofr,gbound,gbound,&
+     call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
 &     npw_k,n4,n5,n6,0,paral_kgb,tim_fourwf0,weight,weight)
 
@@ -2229,18 +2221,19 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-       ABI_ALLOCATE(sum_1atom_1ll,(mlang,natom))
-       ABI_ALLOCATE(sum_1atom_1lm,(mlang**2,natom))
+       ABI_ALLOCATE(sum_1atom_1ll,(nspinor**2,mlang,natom))
+       ABI_ALLOCATE(sum_1atom_1lm,(nspinor**2,mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
 
        rc_ylm = 1 ! Real or Complex spherical harmonics.
        mlang_type = 5
-       call recip_ylm (bess_fit,cgcband,xmpi_comm_self,istwfk(ckpt),&
-&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,ph3d,prtsphere,rint,&
+
+       call recip_ylm (bess_fit,cgcband,istwfk(ckpt),mpi_enreg,&
+&       nradint,nradintmax,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
-       call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
+       call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
 
        write(std_out,'(a)' )' Charge in the sphere around each atom '
