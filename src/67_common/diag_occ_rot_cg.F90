@@ -21,7 +21,7 @@
 !!   nband = number of band to be processed
 !!   blocksize = size of the block for th LO.. algorithm
 !!               still have to be equal to nband
-!!   spinpol = number of spin polarisation
+!!   nspinor = number of spinor components
 !!   
 !!
 !! OUTPUT
@@ -34,6 +34,10 @@
 !! CHILDREN
 !!
 !! SOURCE
+!!
+!! TODO /!\ No parallel computing yet !
+!! TODO add the possibility of using ScaLAPACK to do computation in parallel
+!! TODO Make the computation of the new wf parallel
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -41,17 +45,16 @@
 
 #include "abi_common.h"
 
-subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot,npw, nband, blocksize, spinpol, occ_diag, &
+subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspinor, occ_diag, &
 &                          cwavef_rot) 
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
+  use defs_basis
+  use defs_abitypes
+  use m_profiling_abi
+  use m_xmpi
+  use m_errors
 
- use m_paw_dmft,     only : paw_dmft_type
+! use m_paw_dmft,     only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -59,32 +62,60 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot,npw, nband, blocksize, spinpol
 #define ABI_FUNC 'diag_occ_rot_cg'
 !End of the abilint section
 
- implicit none
+  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw, nband, blocksize, spinpol
+  integer,intent(in) :: npw, nband, blocksize, nspinor
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: paw_dmft
 !no_abirules
- real(dp), intent(in) :: occ_nd(2, nband, nband)
- real(dp), intent(in) :: cwavef_toberot(2, npw, nband)
- real(dp), intent(out) :: occ_diag(2, nband)
- real(dp), intent(out) :: cwavef_rot(2, npw, nband)
+  real(dp), intent(in) :: occ_nd(2, nband, nband)
+  real(dp), intent(in) :: cwavef_toberot(2, npw, nband, nspinor)
+  real(dp), intent(out) :: occ_diag(nband)
+  real(dp), intent(out) :: cwavef_rot(2, npw, nband, nspinor)
 
 !Local variables-------------------------------
 
 !scalars
+  integer :: info, lwork, n, np
 
 !arrays
+  complex(dpc) :: occ_nd_cpx(nband, nband), rwork(3*nband-1)
+  complex, allocatable :: work(:)
+
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+  DBG_ENTER("COLL")
+  occ_nd_cpx = CMPLX(occ_nd(1,:,:), occ_nd(2,:,:))
 
+!! Get diagonal occupations and associeted base
 
- DBG_EXIT("COLL")
+! Compute the optimal working array size
+  ABI_ALLOCATE(work,(1))
+  call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
+  lwork = work(1)
+  ABI_DEALLOCATE(work)
+
+! Compute the eigenvalues (occ_diag) and vectors
+  ABI_ALLOCATE(work,(lwork))
+  call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, lwork, rwork, info)
+  ABI_DEALLOCATE(work)
+! occ_nd_cpx is now the eigen vectors (P) of the occ_nd matrix
+
+!! Get the corresponding wave functions
+  ! C_grot = P* C_g
+  cwavef_rot(:,:,:,:) = zero
+  do n=1,nband
+    do np=1,nband
+      cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + real(occ_nd_cpx(np, n))*cwavef_toberot(1,:,np,:)
+      cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) - aimag(occ_nd_cpx(np, n))*cwavef_toberot(2,:,np,:)
+    end do
+  end do
+  
+  DBG_EXIT("COLL")
 
 end subroutine diag_occ_rot_cg
 !!***
