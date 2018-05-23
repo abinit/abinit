@@ -41,7 +41,7 @@
        fit_option  0
        fit_ncoeff  2
          fit_grid  1  1  1
-    fit_ts_option  0
+    ts_option  0
    fit_rangePower  3  4
    fit_anhaStrain  0
    fit_SPCoupling  1

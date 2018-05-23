@@ -412,7 +412,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &         ' with NetCDF in order to fit the polynomial coefficients'
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
-        call effective_potential_file_readMDfile(filename,hist,option=inp%fit_ts_option)
+        call effective_potential_file_readMDfile(filename,hist,option=inp%ts_option)
       else
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
@@ -2670,8 +2670,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-! dipdip is always set to 1 in this call
-  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,1,inp%rfmeth,&
+  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
 &   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 

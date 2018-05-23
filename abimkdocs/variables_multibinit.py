@@ -47,15 +47,15 @@ Variable(
     text="""
 Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
 
-* dipdip_range if superior to n_cell and superior to short-range interaction
-* n_cell if dipdip_range inferior to n_cell
+* dipdip_range if superior to ncell and superior to short-range interaction
+* ncell if dipdip_range inferior to ncell
 * short-range if dipdip_range inferior to short-range interaction
 
 For example:
 
     * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
     
-    * if n_cell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
+    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
 """,
 ),
 
@@ -393,7 +393,7 @@ Indexes of the banned coefficients during the fit process of the model
 ),
 
 Variable(
-    abivarname="fit_ts_option@multibinit",
+    abivarname="ts_option@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['FitProcess_useful'],
@@ -408,7 +408,7 @@ Variable(
 ),
 
 Variable(
-    abivarname="bound_coeff@multibinit",
+    abivarname="bound_model@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['BoundProcess_basic'],

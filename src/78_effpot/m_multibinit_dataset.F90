@@ -69,7 +69,7 @@ module m_multibinit_dataset
   integer :: eivec
   integer :: elphflag
   integer :: enunit
-  integer :: bound_coeff
+  integer :: bound_model
   integer :: bound_maxCoeff
   integer :: bound_SPCoupling
   integer :: bound_AnhaStrain
@@ -83,7 +83,7 @@ module m_multibinit_dataset
   integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
-  integer :: fit_ts_option
+  integer :: ts_option
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -252,7 +252,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%energy_reference= zero
  multibinit_dtset%enunit=0
  multibinit_dtset%fit_anhaStrain=0
- multibinit_dtset%bound_coeff=0
+ multibinit_dtset%bound_model=0
  multibinit_dtset%bound_anhaStrain=0
  multibinit_dtset%bound_cutoff=0 
  multibinit_dtset%bound_maxCoeff=4
@@ -263,7 +263,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_cutoff=0
  multibinit_dtset%fit_nbancoeff=0
  multibinit_dtset%fit_ncoeff=0
- multibinit_dtset%fit_ts_option=0
+ multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
@@ -671,14 +671,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%fit_ts_option=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ts_option',tread,'INT')
- if(tread==1) multibinit_dtset%fit_ts_option=intarr(1)
- if(multibinit_dtset%fit_ts_option<0.or.multibinit_dtset%fit_ts_option>1)then
+ multibinit_dtset%ts_option=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ts_option',tread,'INT')
+ if(tread==1) multibinit_dtset%ts_option=intarr(1)
+ if(multibinit_dtset%ts_option<0.or.multibinit_dtset%ts_option>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_ts_option is',multibinit_dtset%fit_ts_option,', but the only allowed values',ch10,&
+&   'ts_option is',multibinit_dtset%ts_option,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
-&   'Action: correct fit_ts_option in your input file.'
+&   'Action: correct ts_option in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1221,14 +1221,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%bound_coeff=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_coeff',tread,'INT')
- if(tread==1) multibinit_dtset%bound_coeff=intarr(1)
- if(multibinit_dtset%bound_coeff<0.and.multibinit_dtset%bound_coeff>1)then
+ multibinit_dtset%bound_model=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_model',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_model=intarr(1)
+ if(multibinit_dtset%bound_model<0.and.multibinit_dtset%bound_model>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'bound_coeff is',multibinit_dtset%bound_coeff,', but the only allowed values',ch10,&
+&   'bound_model is',multibinit_dtset%bound_model,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
-&   'Action: correct bound_coeff in your input file.'
+&   'Action: correct bound_model in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1871,7 +1871,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
    write(nunit,'(1x,a16,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
    write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
-   write(nunit,'(1x,a16,I3.1)')'   fit_ts_option',multibinit_dtset%fit_ts_option
+   write(nunit,'(1x,a16,I3.1)')'   ts_option',multibinit_dtset%ts_option
    write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
    write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
@@ -1887,7 +1887,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    end if
  end if
 
- if(multibinit_dtset%bound_coeff /=0)then
+ if(multibinit_dtset%bound_model /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
    write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain   
    write(nunit,'(1x,a16,I3)')    'bound_SPCoupling',multibinit_dtset%bound_SPCoupling

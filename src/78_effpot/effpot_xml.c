@@ -560,7 +560,7 @@ void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voig
                                    double elastic3rd[6][6], double elastic_displacement[*natom][3][6],
                                    double internal_strain[*natom][3],
                                    double phonon_strain_atmfrc[*nrpt][*natom][3][*natom][3],
-                                   int phonon_strain_cell[*nrpt][3]){
+                                   int phonon_straincell[*nrpt][3]){
   xmlDocPtr doc;
   char *pch;
   int i,irpt,ia,ib,mu,nu;
@@ -655,7 +655,7 @@ void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voig
                     key = xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
                     pch = strtok(key,"\t \n");
                     for(i=0;i<3;i++){
-                      phonon_strain_cell[irpt][i]=atoi(pch);
+                      phonon_straincell[irpt][i]=atoi(pch);
                       pch = strtok(NULL,"\t \n");
                     }
                     irpt++;

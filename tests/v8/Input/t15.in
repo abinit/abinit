@@ -18,7 +18,7 @@ fit_nfixcoeff  = -1
 #---------------------------------------------------------------
 #Inputs for the bound process:
 #---------------------------------------------------------------                                                                                                                                                  
-bound_coeff = 2
+bound_model = 2
 bound_maxCoeff = 5 
 bound_rangePower = 6 8
 bound_cutoff = 7.5
