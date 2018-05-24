@@ -286,6 +286,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhoaug(:,:,:)=zero
        do ikpt=1,dtset%nkpt
 
+
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
@@ -470,6 +471,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            ABI_ALLOCATE(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
+! ---------- DMFT
            if(allocated(cwavef_toberot))  then
              ABI_DEALLOCATE(cwavef_toberot)
              ABI_DEALLOCATE(cwavef_rot)
@@ -483,6 +485,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_ALLOCATE(occ_diag,(blocksize))
              ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
            end if
+! ---------- END DMFT
 
            do iblock=1,nbdblock
              if (dtset%nspinor==1) then
@@ -540,7 +543,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                end do
 
                ! spinor parallelisation ??
-               call diag_occ_rot_cg(paw_dmft%occnd(:,:,:,ikpt,:), cwavef_toberot, npw_k, nband_k, blocksize,&
+               call diag_occ_rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_toberot, npw_k, nband_k, blocksize,&
 &                                   dtset%nspinor, occ_diag, cwavef_rot) 
 
                do ib=1,blocksize
