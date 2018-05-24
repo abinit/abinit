@@ -2336,7 +2336,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer,parameter :: master=0
  integer :: nptsym,nsym
  integer :: msym = 192,  use_inversion = 1, space_group
- real(dp):: tolsym = tol8
+ real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
@@ -2498,13 +2498,13 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    else
 !    firts give the corect stress values store in hartree
 !    diagonal parts
-     effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok)
-     effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok)
-     effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok)
+     effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok) *  crystal%ucvol
 !    the shear parts
-     effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok)
-     effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok)
-     effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok)
+     effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok) *  crystal%ucvol
    end if
 !  Get forces
    effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
@@ -2541,18 +2541,18 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(1 1)=',effective_potential%strten(1),&
-&   '  sigma(3 2)=',effective_potential%strten(4)
+&   '  sigma(1 1)=',effective_potential%strten(1) / crystal%ucvol,&
+&   '  sigma(3 2)=',effective_potential%strten(4) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(2 2)=',effective_potential%strten(2),&
-&   '  sigma(3 1)=',effective_potential%strten(5)
+&   '  sigma(2 2)=',effective_potential%strten(2) / crystal%ucvol,&
+&   '  sigma(3 1)=',effective_potential%strten(5) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(3 3)=',effective_potential%strten(3),&
-&   '  sigma(2 1)=',effective_potential%strten(6)
+&   '  sigma(3 3)=',effective_potential%strten(3) / crystal%ucvol,&
+&   '  sigma(2 1)=',effective_potential%strten(6) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' ) ' '
@@ -2673,7 +2673,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
-! Interpolation of the dynamical matrix for each qpoint from ifc, maybe useless...
+! Interpolation of the dynamical matrix for each qpoint from ifc
 !***************************************************************************
 
   ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
@@ -2692,9 +2692,12 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
 
 !Transfer value in effective_potential structure
-  effective_potential%harmonics_terms%nqpt      = inp%nph1l
+  effective_potential%harmonics_terms%nqpt         = inp%nph1l
   effective_potential%harmonics_terms%qpoints(:,:) = inp%qph1l(:,:)
 
+! Store the highest frequency
+  max_phfq = zero
+  
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -2715,10 +2718,17 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! Write the phonon frequencies
     call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
+!   Store the highest frequency in cmm-1
+    max_phfq = max(maxval(phfrq*Ha_cmm1),max_phfq)
+
     effective_potential%harmonics_terms%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
     effective_potential%harmonics_terms%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
 
   end do
+
+  write(message, '(2a,f15.7,a)' ) ch10,&
+&   ' The highest frequency found is ',max_phfq,' cm-1'
+  call wrtout(std_out,message,'COLL')
 
   ABI_DEALLOCATE(d2cart)
   ABI_DEALLOCATE(displ)
@@ -2926,7 +2936,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
             effective_potential%harmonics_terms%strain_coupling(ipert1,idir2,ipert2)=&
-&                                                            instrain(ii,ipert1)
+&                                                            (-1.0_dp)*instrain(ii,ipert1)
         end do
       end do
     end do

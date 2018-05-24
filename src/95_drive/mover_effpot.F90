@@ -361,9 +361,9 @@ implicit none
      
 
 !TEST_AM
-!     freq_q = 800  / Ha_cmm1
-!     freq_b = 800  / (10*Ha_cmm1)
-!
+!     freq_q = 817.9512858  / Ha_cmm1
+!     freq_b = 817.9512858  / Ha_cmm1
+
 !     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
 !     bmass = 10000*qmass
 !TEST_AM

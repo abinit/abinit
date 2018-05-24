@@ -1704,6 +1704,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      call wrtout(std_out,message,'COLL')
      exit
    end if
+   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%bound_cell(ii)) then
+     write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
+&                 ' --- !WARNING',ch10,&
+&                 '     The range of dipdip_range (',multibinit_dtset%dipdip_range(:),')',ch10,&
+&                 '     But the range of the cell for the simulation is',&
+&                       multibinit_dtset%ncell(:),')',ch10,&
+&                 '     dipdip_range is set to bound_cell.',ch10,&
+&                 ' ---',ch10
+     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
+     call wrtout(std_out,message,'COLL')
+     exit
+   end if
  end do
 
 !Check if only one tolerance is specify

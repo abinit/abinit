@@ -55,7 +55,7 @@ module m_effective_potential
  use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
- use m_geometry,       only : fcart2fred, xcart2xred, xred2xcart, metric
+ use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
@@ -86,7 +86,8 @@ module m_effective_potential
  !AM_EXPERIMENTAL
  public :: effective_potential_computeGradient
 ! public :: effective_potential_effpot2ddb
-! public :: effective_potential_printPDOS
+ ! public :: effective_potential_printPDOS
+ public :: effective_potential_checkDEV
  public :: effective_potential_writeNETCDF
  public :: OPERATOR(==)
  !AM_EXPERIMENTAL
@@ -2516,6 +2517,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 2 - Transfert the reference values
 !------------------------------------
 
+! Set the value of the energy
   energy = eff_pot%energy * ncell
 
   if(need_verbose)then
@@ -2525,6 +2527,25 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(std_out,msg,'COLL')
   end if
 
+!Set the value of the initial strees (should be zero if the system is relaxed)
+!According to the original definition of the model, the reference should always be
+! a critical point of the PES so the first order derivative should not be take into account...
+!  do ii=1,6
+!   energy = energy + ncell * eff_pot%strten(ii)*strain_tmp(ii)
+! end do
+! strten(:) = ncell * eff_pot%strten(:)
+!Set the value of the initial forces (should be zero if the system is relaxed)
+! ii = 1
+! This next part is not working, need to apply strain to the original fcart
+! do ia=1,eff_pot%supercell%natom
+!   fcart(:,ia) = eff_pot%fcart(:,ii)
+!   do mu=1,3
+!     energy = energy + eff_pot%fcart(mu,ii)*disp_tmp(mu,ii)
+!   end do
+!   ii = ii + 1
+!   if(ii > eff_pot%crystal%natom) ii = 1
+! end do
+ 
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -2648,7 +2669,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     energy_part = zero
     fcart_part(:,:)  = zero
     strten_part(:) = zero
-
     call polynomial_coeff_evaluate(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
@@ -2662,7 +2682,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       call wrtout(std_out,msg,'COLL')
     end if
     energy = energy + energy_part
-    fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
+    fcart(:,:) = fcart(:,:) + fcart_part(:,:)
     strten(:) = strten(:) + strten_part(:)
   end if
 
@@ -3499,7 +3519,8 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !!
 !! FUNCTION
 !! Routine for develloper Check by finite differences the equations in
-!! effective_potential_evaluate
+!! effective_potential_evaluate need to provide HIST file, so you need to
+!! activate the fit_process or bound_process to activate the reading of the HIST
 !!
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
@@ -3558,7 +3579,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
    MSG_BUG(msg)
  end if
  rprimd =  eff_pot%supercell%rprimd
- istep = 127
+ istep = 130
  call effective_potential_getDisp(disp,du_delta,natom,eff_pot%supercell%rprimd,&
 &                                 eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
 &                                 xcart_ref=eff_pot%supercell%xcart,&
@@ -3566,7 +3587,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  npt=5
- delta = 0.005
+ delta = 0.000005
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
  rprimd =  hist%rprimd(:,:,istep)
@@ -3575,7 +3596,6 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
-!         strain = zero
 
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
 &                                         eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
@@ -3617,7 +3637,7 @@ identity = zero
 forall(ii=1:3)identity(ii,ii)=1
 
  npt=5
- delta = 0.005
+ delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
 
  do jj=1,6

@@ -89,7 +89,7 @@ CONTAINS  !=====================================================================
 !! comm = MPI communicator
 !! cutoff_in = optional,cut off to apply to the range of interation if
 !!           the coefficient are genereted in this routine
-!! max_power_strain = maximum power of the strain
+!! max_power_strain = maximum order of the strain of the strain phonon coupling
 !! fit_initializeData = optional, logical !If true, we store all the informations for the fit,
 !!                      it will reduce the computation time but increase a lot the memory...
 !! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process

@@ -281,20 +281,31 @@ program multibinit
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
          MSG_ERROR(message)
-       else if(inp%confinement==2) then
-         write(message, '(3a)' )&
+       else
+         if (inp%bound_model/=0) then
+           write(message, '(3a)' )&
+&         'There is no MD file to bound the model ',ch10,&
+&         'Action: add MD file'
+           MSG_ERROR(message)           
+         else if(inp%confinement==2) then
+           write(message, '(3a)' )&
 &         'There is no MD file to compute the confinement',ch10,&
 &         'Action: add MD file'
-         MSG_ERROR(message)
+           MSG_ERROR(message)
+         end if
        end if
      end if
    end if
-
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
    call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
+
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+! stop
+!TEST_AM
 
 !Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
@@ -321,9 +332,6 @@ program multibinit
    end select
  end if
 
-!TEST_AM
-! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
-!TEST_AM
 
 !Fit the coeff
  if (inp%fit_coeff/=0)then
