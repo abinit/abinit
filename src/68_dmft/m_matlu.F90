@@ -1483,14 +1483,13 @@ end subroutine add_matlu
  character(len=500) :: message
 !arrays
  type(coeff2c_type),allocatable :: gathermatlu(:)
- real(dp),allocatable :: eig(:),rwork(:),work(:),valuer(:,:),valuer2(:,:)
- real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
- real(dp),allocatable :: eigvec(:,:)
+ real(dp),allocatable :: eig(:),rwork(:),work(:),valuer(:,:)!,valuer2(:,:)
+ !real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
+! real(dp),allocatable :: eigvec(:,:)
  complex(dpc),allocatable :: zwork(:)
  logical :: donotdiag,print_temp_mat2
  complex(dpc),allocatable :: temp_mat(:,:)
  complex(dpc),allocatable :: temp_mat2(:,:)
- real(dp) :: dum(2,0)
 !debug complex(dpc),allocatable :: temp_mat3(:,:)
 !************************************************************************
 
@@ -1603,13 +1602,13 @@ end subroutine add_matlu
          ABI_ALLOCATE(work,(lworkr))
          work = zero
          ABI_ALLOCATE(valuer,(tndim,tndim))
-         ABI_ALLOCATE(valuer2,(tndim,tndim))
-         ABI_ALLOCATE(valuer3,(tndim,tndim))
-         ABI_ALLOCATE(valuer4,(tndim,tndim))
+!         ABI_ALLOCATE(valuer2,(tndim,tndim))
+!         ABI_ALLOCATE(valuer3,(tndim,tndim))
+!         ABI_ALLOCATE(valuer4,(tndim,tndim))
          ABI_ALLOCATE(zwork,(lwork))
-         valuer2=zero
-         valuer3=zero
-         valuer4=zero
+!         valuer2=zero
+!         valuer3=zero
+!         valuer4=zero
          zwork = czero
          ABI_ALLOCATE(eig,(tndim))
          eig = zero
@@ -1625,32 +1624,32 @@ end subroutine add_matlu
          endif
 !debug       temp_mat2(:,:)=gathermatlu(iatom)%value(:,:)
 !           write(std_out,*)"diag"
-         if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))<tol8) then
+         if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))<tol6) then
            write(message,'(a,2x,a,e9.3,a)') ch10,"Imaginary part of Local Hamiltonian is lower than ",&
 &                   tol8, ": the real matrix is used"
            call wrtout(std_out,message,'COLL')
            valuer=real(gathermatlu(iatom)%value,kind=dp)
-           write(message,'(a)') ch10
-           call wrtout(std_out,message,'COLL')
-           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
-           call wrtout(std_out,message,'COLL')
-           do im1=1,tndim
-             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
-&             (valuer(im1,im2),im2=1,tndim)
-             call wrtout(std_out,message,'COLL')
-           end do
-           do im1=1,tndim
-             valuer(im1,im1)=real(im1,kind=dp)*0.00000000001_dp+valuer(im1,im1)
-           enddo
-           write(message,'(a)') ch10
-           call wrtout(std_out,message,'COLL')
-           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
-           call wrtout(std_out,message,'COLL')
-           do im1=1,tndim
-             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
-&             (valuer(im1,im2),im2=1,tndim)
-             call wrtout(std_out,message,'COLL')
-           end do
+!           write(message,'(a)') ch10
+!           call wrtout(std_out,message,'COLL')
+!           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
+!&             (valuer(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
+!           do im1=1,tndim
+!             valuer(im1,im1)=real(im1,kind=dp)*0.00000000001_dp+valuer(im1,im1)
+!           enddo
+!           write(message,'(a)') ch10
+!           call wrtout(std_out,message,'COLL')
+!           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(2(1x,18(1x,f20.15,f20.15)))')&
+!&             (valuer(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
            !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
            call blockdiago_fordsyev(valuer,tndim,eig)
            write(6,*) "work(1)",work(1)
@@ -1700,13 +1699,13 @@ end subroutine add_matlu
 !&            valuer4,tndim,czero,valuer                ,tndim)
            write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
-           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
-           call wrtout(std_out,message,'COLL')
-           do im1=1,tndim
-             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
-&             (valuer(im1,im2),im2=1,tndim)
-             call wrtout(std_out,message,'COLL')
-           end do
+!           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
+!&             (valuer(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
          else
            if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))>tol8) then
              write(message,'(a)') " Local hamiltonian in correlated basis is complex"
@@ -1757,9 +1756,9 @@ end subroutine add_matlu
          ABI_DEALLOCATE(rwork)
          ABI_DEALLOCATE(work)
          ABI_DEALLOCATE(valuer)
-         ABI_DEALLOCATE(valuer2)
-         ABI_DEALLOCATE(valuer3)
-         ABI_DEALLOCATE(valuer4)
+!         ABI_DEALLOCATE(valuer2)
+!         ABI_DEALLOCATE(valuer3)
+!         ABI_DEALLOCATE(valuer4)
          ABI_DEALLOCATE(eig)
 !     endif
 !   enddo
@@ -1898,32 +1897,6 @@ end subroutine add_matlu
    enddo
    ABI_DATATYPE_DEALLOCATE(gathermatlu)
  enddo ! isppol
-
-! do isppol=1,nsppol
-!   do iatom=1,natom
-!     tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-!     ABI_ALLOCATE(eigvec,(2,tndim*tndim))
-!       write(6,*) "BEFORE"
-!     do im1=1,tndim
-!       write(6,'(20f21.14)') (eigvectmatlu(iatom,isppol)%value(im1,im2),im2=1,tndim)
-!       do im2=1,tndim
-!         im3=(im1-1)*tndim+im2
-!         eigvec(1,im3)=real(eigvectmatlu(iatom,isppol)%value(im1,im2))
-!         eigvec(2,im3)=aimag(eigvectmatlu(iatom,isppol)%value(im1,im2))
-!       enddo
-!     enddo
-!     call fxphas_seq(eigvec,dum,0,0,1,tndim*tndim,0,tndim,tndim,0)
-!       write(6,*) "AFTER"
-!     do im1=1,tndim
-!       do im2=1,tndim
-!         im3=(im1-1)*tndim+im2
-!         eigvectmatlu(iatom,isppol)%value(im1,im2)=cmplx(eigvec(1,im3),eigvec(2,im3))
-!       enddo
-!       write(6,'(20f21.14)') (eigvectmatlu(iatom,isppol)%value(im1,im2),im2=1,tndim)
-!     enddo
-!     ABI_DEALLOCATE(eigvec)
-!   enddo
-! enddo
 
  end subroutine diag_matlu
 !!***
