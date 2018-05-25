@@ -514,6 +514,7 @@ contains
 
   subroutine spin_terms_t_total_Heff(self,S, Heff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

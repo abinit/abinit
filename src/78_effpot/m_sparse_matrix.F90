@@ -482,6 +482,7 @@ endif
     self%last%val=val
     self%last%next=>null()
     self%length = self%length+1
+    print *, 'length', self%length
   end subroutine llist_append
 
   subroutine llist_iter_restart(self)
@@ -564,15 +565,22 @@ endif
     type(llist):: self
     integer, intent(in) :: i, mode
     real(dp), intent(in):: val
+    print *, "debug insert"
+    print *, "first i", self%first%i
+    print *, "last i", self%last%i
+    print *, i
     call llist_iter_restart(self)
     if(.not.associated(self%last)) then
+       print *, "append"
        ! no element in list
        call llist_append(self,i,val)
-       return
+       print *, self%last%i
+       print *, self%last%val
     else if (i<self%first%i) then
+       print *, "insert head"
        call llist_insert_head(self, i, val)
-       return
     else
+       print *, "insert middle"
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
@@ -599,8 +607,8 @@ endif
        endif
     endif
 
-    allocate(self%last%next)
-    self%last=>self%last%next
+    !allocate(self%last%next)
+    !self%last=>self%last%next
 
   end subroutine llist_sorted_insert
 

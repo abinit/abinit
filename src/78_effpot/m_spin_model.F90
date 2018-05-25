@@ -129,6 +129,7 @@ contains
   ! finalize
   subroutine spin_model_t_finalize(self)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -147,6 +148,14 @@ contains
 
 
   subroutine spin_model_t_set_params(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_model_t_set_params'
+!End of the abilint section
+
     class(spin_model_t), intent(inout) :: self
     real(dp):: mfield(3, self%nmatoms)
     integer ::  i 

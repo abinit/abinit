@@ -318,9 +318,12 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    !print *, "unitcell: ", unitcell
+    !print *, "natoms", natoms
+    !print *, "nmatoms", nmatoms
     !print *, "positions", positions
+    !print *, "unitcell: ", unitcell
     !print *, "spinat", spinat
+    !print *, "index_spin", index_spin
     call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
             & reshape(positions, [3, natoms]), &
             & nmatoms, &
@@ -712,7 +715,7 @@ contains
 
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3)
+    integer :: sc_matrix(3,3), atom_index(self%nmatoms)
 
     integer ::  typat_primcell(self%natoms), sc_nmatoms,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
@@ -721,12 +724,22 @@ contains
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
+
     typat_primcell(:)=1
     ! TODO hexu:should use supercell generate with lattice model
     !init_supercell(natom_primcell, sc_matrix, rprimd_primcell,
     !             typat_primcell, xcart_primcell, znucl, scell)
 
     znucl(:)=0
+
+    counter=0
+    do i=1, self%natoms
+      if(self%index_spin(i)>0) then
+          counter=counter+1
+          atom_index(counter)=i
+      endif
+    enddo 
+
     call init_supercell(self%natoms, sc_matrix, self%unitcell, typat_primcell, &
          self%positions, znucl, scell)
     ! cell, positions
@@ -760,6 +773,7 @@ contains
           sc_index_spin(i)=-1
        endif
     end do
+    print *, sc_index_spin
 
     do i=1, sc_nmatoms
        sc_znucl(i)=1
@@ -776,20 +790,25 @@ contains
     !print *, "The total number of terms in primitive cell: ", self%total_nnz
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
-          call find_supercell_ijR(scell=scell, i0=self%total_ilist%data(i), &
-               j0=self%total_jlist%data(i), &
+          ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
+          call find_supercell_ijR(scell=scell, i0=atom_index(self%total_ilist%data(i)), &
+               j0=atom_index(self%total_jlist%data(i)), &
                R0=[self%total_Rlist(1)%data(i),  &
                self%total_Rlist(2)%data(i),  &
                self%total_Rlist(3)%data(i)], &
                R=scell%rvecs(:,icell), &
                i1=ii,j1=jj,R1=rr,R_sc=R_sc)
+          ! ii is the index in atom supercell not in spin supercell 
           !scell%rvecs(icell)
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
              end do
           end do
-          call spin_terms_t_set_bilinear_term_single(sc_ham, ii, jj, tmp)
+          print *, "i0", self%total_ilist%data(i)
+          print *, "ii", ii, sc_index_spin(ii)
+          print *, "jj", jj, sc_index_spin(jj)
+          call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
        enddo
     enddo
 
