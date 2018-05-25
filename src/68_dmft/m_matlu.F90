@@ -1453,7 +1453,7 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
- use m_matrix,         only : blockdiago_fordsyev
+ use m_matrix,         only : blockdiago_fordsyev,blockdiago_forzheev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1712,6 +1712,7 @@ end subroutine add_matlu
              MSG_COMMENT(message)
            endif
            call zheev('v','u',tndim,gathermatlu(iatom)%value,tndim,eig,zwork,lwork,rwork,info)
+           !call blockdiago_forzheev(gathermatlu(iatom)%value,tndim,eig)
          endif
          if(prtopt>=3) then
            write(message,'(a)') ch10
