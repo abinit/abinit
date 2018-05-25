@@ -1453,6 +1453,7 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
+ use m_matrix,         only : blockdiago_fordsyev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1482,11 +1483,14 @@ end subroutine add_matlu
  character(len=500) :: message
 !arrays
  type(coeff2c_type),allocatable :: gathermatlu(:)
- real(dp),allocatable :: eig(:),rwork(:),work(:),valuer(:,:)
+ real(dp),allocatable :: eig(:),rwork(:),work(:),valuer(:,:),valuer2(:,:)
+ real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
+ real(dp),allocatable :: eigvec(:,:)
  complex(dpc),allocatable :: zwork(:)
  logical :: donotdiag,print_temp_mat2
  complex(dpc),allocatable :: temp_mat(:,:)
  complex(dpc),allocatable :: temp_mat2(:,:)
+ real(dp) :: dum(2,0)
 !debug complex(dpc),allocatable :: temp_mat3(:,:)
 !************************************************************************
 
@@ -1595,12 +1599,17 @@ end subroutine add_matlu
          ABI_ALLOCATE(rwork,(3*tndim-2))
          rwork = zero
 
-         lworkr=3*tndim-1
+         lworkr=tndim*(tndim+2)*2
          ABI_ALLOCATE(work,(lworkr))
          work = zero
          ABI_ALLOCATE(valuer,(tndim,tndim))
-
+         ABI_ALLOCATE(valuer2,(tndim,tndim))
+         ABI_ALLOCATE(valuer3,(tndim,tndim))
+         ABI_ALLOCATE(valuer4,(tndim,tndim))
          ABI_ALLOCATE(zwork,(lwork))
+         valuer2=zero
+         valuer3=zero
+         valuer4=zero
          zwork = czero
          ABI_ALLOCATE(eig,(tndim))
          eig = zero
@@ -1621,8 +1630,83 @@ end subroutine add_matlu
 &                   tol8, ": the real matrix is used"
            call wrtout(std_out,message,'COLL')
            valuer=real(gathermatlu(iatom)%value,kind=dp)
-           call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
+           write(message,'(a)') ch10
+           call wrtout(std_out,message,'COLL')
+           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
+           call wrtout(std_out,message,'COLL')
+           do im1=1,tndim
+             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
+&             (valuer(im1,im2),im2=1,tndim)
+             call wrtout(std_out,message,'COLL')
+           end do
+           do im1=1,tndim
+             valuer(im1,im1)=real(im1,kind=dp)*0.00000000001_dp+valuer(im1,im1)
+           enddo
+           write(message,'(a)') ch10
+           call wrtout(std_out,message,'COLL')
+           write(message,'(a,i4,a,i4)')  "BEFORE valuer for atom",iatom,"  and isppol",isppol
+           call wrtout(std_out,message,'COLL')
+           do im1=1,tndim
+             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
+&             (valuer(im1,im2),im2=1,tndim)
+             call wrtout(std_out,message,'COLL')
+           end do
+           !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
+           call blockdiago_fordsyev(valuer,tndim,eig)
+           write(6,*) "work(1)",work(1)
+!!       For reproductibility
+!           ! valuer2: eigenvector for the perturb matrix
+!           valuer2=real(gathermatlu(iatom)%value,kind=dp)
+!           do im1=1,tndim
+!             valuer2(im1,im1)=float(im1)*0.00000000001+valuer2(im1,im1)
+!           enddo
+!           call dsyev('v','u',tndim,valuer2,tndim,eig,work,lworkr,info)
+!           write(message,'(a)') ch10
+!           call wrtout(std_out,message,'COLL')
+!           write(message,'(a,i4,a,i4)')  "       valuer2 for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))')&
+!&             (valuer2(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
+!           call dgemm('n','n',tndim,tndim,tndim,cone,valuer,tndim,&
+!&            valuer2,tndim,czero,valuer3                ,tndim)
+!           call dgemm('c','n',tndim,tndim,tndim,cone,valuer2,tndim,&
+!&            valuer3                   ,tndim,czero,valuer4,tndim)
+!           ! valuer4: compute unpert matrix in the basis of the
+!           ! perturb basis
+!           write(message,'(a)') ch10
+!           call wrtout(std_out,message,'COLL')
+!           write(message,'(a,i4,a,i4)')  "BEFORE valuer4 for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))')&
+!&             (valuer4(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
+!           call dsyev('v','u',tndim,valuer4,tndim,eig,work,lworkr,info)
+!           ! valuer4: Diago valuer4 (nearly diag)
+!           write(message,'(a)') ch10
+!           call wrtout(std_out,message,'COLL')
+!           write(message,'(a,i4,a,i4)')  "AFTER  valuer4 for atom",iatom,"  and isppol",isppol
+!           call wrtout(std_out,message,'COLL')
+!           do im1=1,tndim
+!             write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))')&
+!&             (valuer4(im1,im2),im2=1,tndim)
+!             call wrtout(std_out,message,'COLL')
+!           end do
+!           call dgemm('n','n',tndim,tndim,tndim,cone,valuer2,tndim,&
+!&            valuer4,tndim,czero,valuer                ,tndim)
+           write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
+           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
+           call wrtout(std_out,message,'COLL')
+           do im1=1,tndim
+             write(message,'(2(1x,18(1x,"(",f20.15,",",f20.15,")")))')&
+&             (valuer(im1,im2),im2=1,tndim)
+             call wrtout(std_out,message,'COLL')
+           end do
          else
            if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))>tol8) then
              write(message,'(a)') " Local hamiltonian in correlated basis is complex"
@@ -1673,6 +1757,9 @@ end subroutine add_matlu
          ABI_DEALLOCATE(rwork)
          ABI_DEALLOCATE(work)
          ABI_DEALLOCATE(valuer)
+         ABI_DEALLOCATE(valuer2)
+         ABI_DEALLOCATE(valuer3)
+         ABI_DEALLOCATE(valuer4)
          ABI_DEALLOCATE(eig)
 !     endif
 !   enddo
@@ -1811,6 +1898,32 @@ end subroutine add_matlu
    enddo
    ABI_DATATYPE_DEALLOCATE(gathermatlu)
  enddo ! isppol
+
+! do isppol=1,nsppol
+!   do iatom=1,natom
+!     tndim=nspinor*(2*matlu(iatom)%lpawu+1)
+!     ABI_ALLOCATE(eigvec,(2,tndim*tndim))
+!       write(6,*) "BEFORE"
+!     do im1=1,tndim
+!       write(6,'(20f21.14)') (eigvectmatlu(iatom,isppol)%value(im1,im2),im2=1,tndim)
+!       do im2=1,tndim
+!         im3=(im1-1)*tndim+im2
+!         eigvec(1,im3)=real(eigvectmatlu(iatom,isppol)%value(im1,im2))
+!         eigvec(2,im3)=aimag(eigvectmatlu(iatom,isppol)%value(im1,im2))
+!       enddo
+!     enddo
+!     call fxphas_seq(eigvec,dum,0,0,1,tndim*tndim,0,tndim,tndim,0)
+!       write(6,*) "AFTER"
+!     do im1=1,tndim
+!       do im2=1,tndim
+!         im3=(im1-1)*tndim+im2
+!         eigvectmatlu(iatom,isppol)%value(im1,im2)=cmplx(eigvec(1,im3),eigvec(2,im3))
+!       enddo
+!       write(6,'(20f21.14)') (eigvectmatlu(iatom,isppol)%value(im1,im2),im2=1,tndim)
+!     enddo
+!     ABI_DEALLOCATE(eigvec)
+!   enddo
+! enddo
 
  end subroutine diag_matlu
 !!***

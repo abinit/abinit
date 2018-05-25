@@ -326,7 +326,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    opt_diag=0
  end if
  call wrtout(std_out,message,'COLL')
-
  if(opt_diag==1) then
    write(std_out,*) "  ==  The atomic levels are diagonalized"
  else if(opt_diag==2) then
