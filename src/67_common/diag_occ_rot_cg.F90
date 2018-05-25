@@ -71,49 +71,78 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: paw_dmft
 !no_abirules
-  real(dp), intent(in) :: occ_nd(2, nband, nband)
-  real(dp), intent(in) :: cwavef_toberot(2, npw, nband, nspinor)
-  real(dp), intent(out) :: occ_diag(nband)
-  real(dp), intent(out) :: cwavef_rot(2, npw, nband, nspinor)
+  real(dp), intent(in) :: occ_nd(2, blocksize, blocksize)
+  real(dp), intent(in) :: cwavef_toberot(2, npw, blocksize, nspinor)
+  real(dp), intent(out) :: occ_diag(blocksize)
+  real(dp), intent(out) :: cwavef_rot(2, npw, blocksize, nspinor)
 
 !Local variables-------------------------------
 
 !scalars
   integer :: info, lwork, n, np
+  character(len=500) :: message
 
 !arrays
-  complex(dpc) :: occ_nd_cpx(nband, nband), rwork(3*nband-1)
-  complex, allocatable :: work(:)
-
+  complex(dpc) :: occ_nd_cpx(blocksize, blocksize), rwork(3*blocksize-1)
+  complex(dpc), allocatable :: work(:)
 
 ! *************************************************************************
 
   DBG_ENTER("COLL")
-  occ_nd_cpx = CMPLX(occ_nd(1,:,:), occ_nd(2,:,:))
+
+  if(nband /= blocksize) then
+    message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure &
+& that bandpp*npband = blocksize."
+    MSG_ERROR(message)
+  end if
+
+!! Initialisation
+  rwork = zero
+  info = 0
+  cwavef_rot(:,:,:,:) = zero
+
+  do n=1,blocksize
+    do np=1,blocksize
+      occ_nd_cpx(n,np) = complex(occ_nd(1,n,np), occ_nd(2,n,np))
+    end do
+  end do
 
 !! Get diagonal occupations and associeted base
 
 ! Compute the optimal working array size
   ABI_ALLOCATE(work,(1))
-  call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
+  work = zero
+  call zheev('V', 'U', blocksize, occ_nd_cpx, blocksize, occ_diag, work, -1, rwork, info)
   lwork = work(1)
   ABI_DEALLOCATE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
   ABI_ALLOCATE(work,(lwork))
-  call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, lwork, rwork, info)
-  ABI_DEALLOCATE(work)
+  work = zero
+
+  call zheev('V', 'U', blocksize, occ_nd_cpx, blocksize, occ_diag, work, lwork, rwork, info)
 ! occ_nd_cpx is now the eigen vectors (P) of the occ_nd matrix
 
-!! Get the corresponding wave functions
-  ! C_grot = P* C_g
-  cwavef_rot(:,:,:,:) = zero
-  do n=1,nband
-    do np=1,nband
-      cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + real(occ_nd_cpx(np, n))*cwavef_toberot(1,:,np,:)
-      cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) - aimag(occ_nd_cpx(np, n))*cwavef_toberot(2,:,np,:)
+  ABI_DEALLOCATE(work)
+
+!! Compute the corresponding wave functions if nothing wrong happened
+  if(info == 0) then
+    ! c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]
+    do n=1,blocksize
+      do np=1,blocksize
+        cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + realpart(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:) &
+&                                                 + imagpart(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:)
+        cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) + realpart(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:) &
+&                                                 - imagpart(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:)
+      end do
     end do
-  end do
+  else if (info > 0) then
+    message = " something wrong happened with the diagonalisation of the occupation matrix (did't converge)"
+    MSG_ERROR(message)
+  else
+    message = " something wrong happened with the diagonalisation of the occupation matrix (bad input argument)"
+    MSG_ERROR(message)
+  end if
   
   DBG_EXIT("COLL")
 
