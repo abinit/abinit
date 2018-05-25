@@ -217,7 +217,12 @@ implicit none
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
-
+!NOTE:ARGUMENTS OF MOVER SHOULD BE CLEAN
+!     We may just need to provide AB_MOVER wich is the main object
+!     for mover and set  scfcv_args as an optional and depending on
+!     the king of calculation (abinit or multibinit), we provide
+!     to mover scfcv_args or effective_potential...
+!***************************************************************
 !  Free dtset
    call dtset_free(dtset)
 
@@ -353,19 +358,18 @@ implicit none
      ! end if
 
 !TEST_AM_old way 
-     freq_q = 0.1
-     freq_b = 0.01
-     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
-     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
+!     freq_q = 0.1
+!     freq_b = 0.01
+!     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
+!     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
 !TEST_AM
      
 
 !TEST_AM
-!     freq_q = 817.9512858  / Ha_cmm1
-!     freq_b = 817.9512858  / Ha_cmm1
-
-!     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
-!     bmass = 10000*qmass
+     freq_q = 800  / Ha_cmm1
+     freq_b = 800  / Ha_cmm1
+     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
+     bmass = 10000*qmass
 !TEST_AM
      
      

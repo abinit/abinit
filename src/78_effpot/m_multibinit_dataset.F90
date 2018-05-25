@@ -1829,6 +1829,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%dynamics/=0)then
    write(nunit,'(a)')' Molecular Dynamics :'
+   write(nunit,'(3x,a9,3I10.1)')' dynamics',multibinit_dtset%dynamics
    write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    if (multibinit_dtset%nctime /=1)then
