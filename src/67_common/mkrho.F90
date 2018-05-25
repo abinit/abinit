@@ -164,6 +164,64 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  DBG_ENTER("COLL")
 
+! ---------- DMFT TEST
+! real(dp) :: F(2,3,3)
+! integer :: I,J
+!
+! F(:,:,:) = zero
+! F(1,1,1) = 1.0_dp
+! F(1,1,2) = 2.0_dp
+! F(1,2,1) = 2.0_dp
+! F(1,1,3) = 0.0_dp
+! F(1,3,1) = 0.0_dp
+! F(1,2,2) = 1.0_dp
+! F(1,2,3) = 1.0_dp
+! F(1,3,2) = 1.0_dp
+! F(1,3,3) = 0.0_dp
+! 
+! ! Allocation of DMFT temporaries arrays
+! ABI_ALLOCATE(cwavef_toberot,(2,6,3,1))
+! ABI_ALLOCATE(cwavef_rot,(2,6,3,1))
+! ABI_ALLOCATE(occ_diag,(3))
+! ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+!
+! ! initialisation of DMFT arrays
+! cwavef_rot(:,:,:,:) = zero
+! cwavef_toberot(:,:,:,:) = zero
+! 
+!
+! ! eye
+! do I=1,3
+!   cwavef_toberot(1, I, I, 1) = 1
+! end do
+! 
+! cwavef_toberot(1, 4, 1, 1) = -dsqrt(1.0_dp/3.0_dp)
+! cwavef_toberot(1, 5, 1, 1) = dsqrt(1.0_dp/3.0_dp)
+! cwavef_toberot(1, 6, 1, 1) = -dsqrt(1.0_dp/3.0_dp)
+! cwavef_toberot(1, 4, 2, 1) = -0.78867513_dp
+! cwavef_toberot(1, 5, 2, 1) = -dsqrt(1.0_dp/3.0_dp) 
+! cwavef_toberot(1, 6, 2, 1) = 0.21132487_dp
+! cwavef_toberot(1, 4, 3, 1) = -0.21132457_dp
+! cwavef_toberot(1, 5, 3, 1) = -dsqrt(1.0_dp/3.0_dp)
+! cwavef_toberot(1, 6, 3, 1) = 0.78867513_dp
+! occ_diag(:) = zero
+!
+! call diag_occ_rot_cg(F, cwavef_toberot, 6, 3, 3,&
+!&                       1, occ_diag, cwavef_rot) 
+!
+! write(*, *) '?? TEST'
+! write(*,*) '??', occ_diag(:)
+! write(*, *) '?? INIT'
+! do I=1,6
+!   write(*,*) '??', cwavef_toberot(1,I,:,1)
+! end do
+! write(*, *) '?? FINAL'
+! do I=1,6
+!   write(*,*) '??', cwavef_rot(1,I,:,1)
+! end do
+!
+! ---------- END TEST
+
  call timab(790+tim_mkrho,1,tsec)
  call timab(799,1,tsec)
 
@@ -542,7 +600,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  cwavef_toberot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
                end do
 
-               ! spinor parallelisation ??
                call diag_occ_rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_toberot, npw_k, nband_k, blocksize,&
 &                                   dtset%nspinor, occ_diag, cwavef_rot) 
 
