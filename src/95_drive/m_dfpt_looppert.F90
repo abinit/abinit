@@ -2426,7 +2426,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal_ncwrite(crystal, ncid))
 !    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
-     call print_efmas(efmasdeg,efmasval,ncid)
+     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif

@@ -399,7 +399,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(efmasdeg,efmasval,ncid)
+ subroutine print_efmas(efmasdeg,efmasval,kpt,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -414,6 +414,7 @@ CONTAINS
 !scalars
  integer,            intent(in) :: ncid
 !arrays
+ real(dp),            intent(in) :: kpt(:,:)
  type(efmasdeg_type), intent(in) :: efmasdeg(:)
  type(efmasval_type), intent(in) :: efmasval(:,:)
 
@@ -442,6 +443,11 @@ CONTAINS
    MSG_ERROR(msg)
  end if
  nkpt=nkptdeg
+ if(nkpt/=size(kpt,2)) then
+   write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkpt =',nkptdeg,' and ',nkpt,' differ, which is inconsistent.'
+   MSG_ERROR(msg)
+ end if
+
  mband=size(efmasval,1)
 
 !Total number of (degenerate) sets over all k points
@@ -487,6 +493,8 @@ CONTAINS
 
 !Define dimensions
  ncerr=nctk_def_dims(ncid, [ &
+&  nctkdim_t("number_of_reduced_dimensions", 3), &
+&  nctkdim_t("real_or_complex", 2), &
 &  nctkdim_t("number_of_kpoints", nkpt), &
 &  nctkdim_t("max_number_of_states", mband), &
 &  nctkdim_t("total_number_of_degenerate_sets", ndegs_tot), &
@@ -495,16 +503,18 @@ CONTAINS
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
+& nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), &
 & nctkarr_t("number_of_degenerate_sets", "int", "number_of_kpoints"), &
 & nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
-& nctkarr_t("eig2_diag_arr", "dp", "two, three, three, eig2_diag_arr_dim")  &
+& nctkarr_t("eig2_diag_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
   ]) 
  NCF_CHECK(ncerr)
 
  ! Write data.
  NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
