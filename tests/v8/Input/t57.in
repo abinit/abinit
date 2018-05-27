@@ -1,10 +1,10 @@
-# Test for the calculation of effective mass tensor in CaO. 
+# Test for the calculation of Frohlich ZPR in CaO. Really underconverged calculation, for testing purposes.
   
   ndtset 3
   
   # Ground state calculation
     kptopt1   1
-    ngkpt1    4 4 4   # for testing purposes
+    ngkpt1    2 2 2   # for testing purposes
     nshiftk1  1
     shiftk1   0. 0. 0.
     tolvrs1   1.0d-22
@@ -67,7 +67,7 @@ znucl 20 8
 nband 12
 nbdbuf 2
 diemac 6
-ecut 30               # Underconverged ecut. 
+ecut 15               # Underconverged ecut. 
 nstep 100
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -77,7 +77,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t56.out, tolnlines = 5, tolabs = 1.1e-6, tolrel = 2.0e-4
+#%%   t57.out, tolnlines = 5, tolabs = 1.1e-6, tolrel = 2.0e-4
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -85,6 +85,7 @@ nstep 100
 #%% authors = X. Gonze
 #%% keywords = DFPT
 #%% description =
-#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass.
+#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass 
+#%%  and also the Frohlich ZPR from the general formula.
 #%% topics = EffMass
 #%%<END TEST_INFO>
