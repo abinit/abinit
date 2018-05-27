@@ -2421,10 +2421,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if(dtset%prtefmas==1)then
      fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
+     write(std_out,*)' dfpt_looppert : will write ',fname
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal_ncwrite(crystal, ncid))
-     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
      call print_efmas(efmasdeg,efmasval,ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif

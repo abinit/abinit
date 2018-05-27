@@ -25,7 +25,11 @@ module m_efmas
  use defs_basis
  use defs_abitypes
  use m_errors
+#ifdef HAVE_NETCDF
+ use netcdf, only : nf90_noerr, nf90_put_var
+#endif
  use m_efmas_defs
+ use m_nctk, only : nctkarr_t, nctkdim_t, nctk_def_arrays, nctk_def_dims, nctk_idname, nctk_set_datamode
 
  implicit none
 
@@ -415,13 +419,17 @@ CONTAINS
 
 !Local variables-------------------------------
  integer :: deg_dim,eig2_diag_arr_dim
- integer :: ideg,ideg_tot,ieig,ikpt,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ integer :: iband,ideg,ideg_tot,ieig,ikpt 
+ integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
  integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
  integer, allocatable :: degs_bounds_arr(:,:)
- complex(dpc), allocatable :: eig2_diag_arr(:,:,:)
+ real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
  character(len=500) :: msg
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
 !----------------------------------------------------------------------
 
 !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
@@ -439,9 +447,9 @@ CONTAINS
 !Total number of (degenerate) sets over all k points
  ndegs_tot=sum(efmasdeg%ndegs)
 !Total number of generalized second-order k-derivatives
- eig2_diag_arr_dim=0
+ eig2_diag_arr_dim=zero
  do ikpt=1,nkpt
-   do ideg=1,efmasdeg(ikpt)%ndegs 
+   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
      eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 
    enddo
@@ -452,7 +460,7 @@ CONTAINS
  ABI_MALLOC(degs_range_arr, (2,nkpt) )
  ABI_MALLOC(ideg_arr, (mband,nkpt) )
  ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
- ABI_MALLOC(eig2_diag_arr, (3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
 
 !Prepare the arrays to be nc-written
  ideg_tot=1
@@ -463,18 +471,47 @@ CONTAINS
    ideg_arr(:,ikpt)=efmasdeg(ikpt)%ideg(:)
    do ideg=1,efmasdeg(ikpt)%ndegs
      degs_bounds_arr(:,ideg_tot)=efmasdeg(ikpt)%degs_bounds(:,ideg)
+     ideg_tot=ideg_tot+1
+   enddo
+   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
      do jband=1,deg_dim
        do iband=1,deg_dim
-         eig2_diag_arr(:,:,ieig+iband-1)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
+         eig2_diag_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
+         eig2_diag_arr(2,:,:,ieig+iband-1)=imag(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
        enddo
        ieig=ieig+deg_dim
      enddo
-     ideg_tot=ideg_tot+1
    enddo
  enddo
- 
-!Allocate the arrays 
+
+!Define dimensions
+ ncerr=nctk_def_dims(ncid, [ &
+&  nctkdim_t("number_of_kpoints", nkpt), &
+&  nctkdim_t("max_number_of_states", mband), &
+&  nctkdim_t("total_number_of_degenerate_sets", ndegs_tot), &
+&  nctkdim_t("eig2_diag_arr_dim", eig2_diag_arr_dim)&
+&  ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+& nctkarr_t("number_of_degenerate_sets", "int", "number_of_kpoints"), &
+& nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
+& nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
+& nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
+& nctkarr_t("eig2_diag_arr", "dp", "two, three, three, eig2_diag_arr_dim")  &
+  ]) 
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+
+!Deallocate the arrays 
  ABI_FREE(ndegs_arr)
  ABI_FREE(degs_range_arr)
  ABI_FREE(ideg_arr)
@@ -877,7 +914,7 @@ end subroutine print_efmas
       eig2_diag = zero
 
       do iband=1,deg_dim
-        write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
+        write(std_out,*)"  In the set (possibly degenerate) compute band ",iband  ! This line here to avoid weird
         cg0(:,:) = cg(:,1+(degl+iband-1)*npw_k*nspinor+icg2:(degl+iband)*npw_k*nspinor+icg2)
         do jband=1,deg_dim
           eig2_part = zero
