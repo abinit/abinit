@@ -97,13 +97,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawpsp,      only : pawpsp_cg
  use m_paw_numeric, only : paw_spline
+ use m_spacepar,    only : redgr
+ use m_atm2fft,     only : atm2fft, dfpt_atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrxc'
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_eltfrxc
 !End of the abilint section
 

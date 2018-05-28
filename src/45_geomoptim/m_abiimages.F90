@@ -6,13 +6,13 @@
 !! FUNCTION
 !! This module contains definition one type to store the atomic
 !! configuration of a set of images, and some methods to
-!! create, manipulate and destroy the defined type 
+!! create, manipulate and destroy the defined type
 !!
 !!
 !! Datatypes :
 !!
 !! * abiimages     : Atomic configuration of a set of images
-!!                 
+!!
 !!
 !!
 !! Subroutines :
@@ -48,11 +48,10 @@ module m_abiimages
 
  private
 
- public ::             &
-      abiimages,         &
-      abiimages_ini,     &
-      abiimages_fin
- 
+ public ::  abiimages
+ public ::  abiimages_ini
+ public ::  abiimages_fin
+
 
 !----------------------------------------------------------------------
 !!***
@@ -64,15 +63,13 @@ module m_abiimages
 !! FUNCTION
 !! The type abiimages contains the configurations of N images,
 !! The history of those images are store using N abihist objects
-!! And the present configuration use a single abihist object 
+!! And the present configuration use a single abihist object
 !!
 !! It contains:
 !!  img_present: An abihist object with the present values
 !!               of the N images
 !!  img_past:    An N-array of abihist objects containing the
-!!               old values of the N images 
-!!
-!! NOTES
+!!               old values of the N images
 !!
 !! SOURCE
 
@@ -97,11 +94,7 @@ module m_abiimages
  end type abiimages
 !!***
 
-!----------------------------------------------------------------------
-
-contains  !=============================================================
-
-!----------------------------------------------------------------------
+contains
 !!***
 
 !!****f* m_abiimages/abiimages_ini
@@ -113,19 +106,15 @@ contains  !=============================================================
 !!
 !! INPUTS
 !!  natom = Number of atoms per unitary cell for each image
-!!  mxhist = Maximal number of records store per image  
+!!  mxhist = Maximal number of records store per image
 !!
 !! OUTPUT
 !!  abiimages <type(abiimages)> = The abiimages to initialize
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!      abihist_fin
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -153,7 +142,7 @@ subroutine abiimages_ini(images,nimages,natom,nrecord)
  images%irecord=1
  images%nrecord=nrecord
 
-!Allocate the present 
+!Allocate the present
  call abihist_ini(images%img_present,natom,nimages)
 
 !Allocate the past
@@ -220,7 +209,6 @@ subroutine abiimages_fin(images)
 
 end subroutine abiimages_fin
 !!***
-
 
 end module m_abiimages
 !!***

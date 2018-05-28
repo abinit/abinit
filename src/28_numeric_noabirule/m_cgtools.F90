@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
+!! Copyright (C) 1992-2018 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,6 +24,9 @@
 !!
 !!    b) Any compiler would complain about type mismatch (REAL,COMPLEX)
 !!       if an explicit interface is given.
+!!
+!! 3) The use of mpi_type is not allowed here. MPI parallelism should be handled in a generic
+!!    way by passing the MPI communicator so that the caller can decide how to handle MPI.
 !!
 
 #if defined HAVE_CONFIG_H
@@ -47,6 +50,7 @@ MODULE m_cgtools
 
  use m_fstrings,   only : toupper
  use m_time,       only : timab
+ use m_numeric_tools,   only : hermit
 
  implicit none
 
@@ -110,6 +114,9 @@ MODULE m_cgtools
  public :: cg_zprecon_block         ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
+ public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+ public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
+                                    ! orthogonalize by modified Gram-Schmidt.
 !***
 
  !integer,parameter,private :: MIN_SIZE = 5000
@@ -1646,7 +1653,7 @@ end subroutine dotprod_v
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
 !!  dens(cplex*nfft,nspden)=real space density on FFT grid
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nfftot= total number of FFT grid points
 !!  nspden=number of spin-density components
@@ -2117,10 +2124,6 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc),parameter :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
- complex(dpc),parameter :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
- complex(dpc),parameter :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
- complex(dpc),parameter :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
  complex(dpc) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 
@@ -2128,15 +2131,15 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
  cgcmat_ = czero
  call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat_,2)
 
-! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
- cspin(0) = cgcmat_(1,1)*pauli_0(1,1) + cgcmat_(2,1)*pauli_0(2,1) &
-& + cgcmat_(1,2)*pauli_0(1,2) + cgcmat_(2,2)*pauli_0(2,2)
- cspin(1) = cgcmat_(1,1)*pauli_x(1,1) + cgcmat_(2,1)*pauli_x(2,1) &
-& + cgcmat_(1,2)*pauli_x(1,2) + cgcmat_(2,2)*pauli_x(2,2)
- cspin(2) = cgcmat_(1,1)*pauli_y(1,1) + cgcmat_(2,1)*pauli_y(2,1) &
-& + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
- cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
-& + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_mat*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat_(1,1)*pauli_mat(1,1,0) + cgcmat_(2,1)*pauli_mat(2,1,0) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,0) + cgcmat_(2,2)*pauli_mat(2,2,0)
+ cspin(1) = cgcmat_(1,1)*pauli_mat(1,1,1) + cgcmat_(2,1)*pauli_mat(2,1,1) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,1) + cgcmat_(2,2)*pauli_mat(2,2,1)
+ cspin(2) = cgcmat_(1,1)*pauli_mat(1,1,2) + cgcmat_(2,1)*pauli_mat(2,1,2) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,2) + cgcmat_(2,2)*pauli_mat(2,2,2)
+ cspin(3) = cgcmat_(1,1)*pauli_mat(1,1,3) + cgcmat_(2,1)*pauli_mat(2,1,3) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,3) + cgcmat_(2,2)*pauli_mat(2,2,3)
 !write(std_out,*) 'cgmat: ', cgcmat_
 !write(std_out,*) 'real(spin): ', real(cspin)
 !write(std_out,*) 'aimag(spin): ', aimag(cspin)
@@ -4349,7 +4352,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ispinor
  real(dp) :: fac,poly,xx
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -4409,8 +4412,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         message = 'the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.'
-         MSG_WARNING(message)
+         MSG_WARNING('the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.')
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -4762,15 +4764,13 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,ispinor,jpw,spnshft1,spnshft2
- character(len=500) :: message
 
 ! *************************************************************************
 
 !Check if vect1(:,0) = 0 and vect2(:,0) = 0
  if ((abs(vect1(1,0)) > tol12).or.(abs(vect1(2,0)) > tol12).or. &
 & (abs(vect2(1,0)) > tol12).or.(abs(vect2(2,0)) > tol12)) then
-   message = ' vect1(:,0) and/or vect2(:,0) are not equal to zero'
-   MSG_BUG(message)
+   MSG_BUG('vect1(:,0) and/or vect2(:,0) are not equal to zero')
  end if
 
 !Compute the scalar product
@@ -4787,6 +4787,813 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
  end do
 
 end subroutine overlap_g
+!!***
+
+!!****f* ABINIT/subdiago
+!! NAME
+!! subdiago
+!!
+!! FUNCTION
+!! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!!
+!! INPUTS
+!!  icg=shift to be applied on the location of data in the array cg
+!!  igsc=shift to be applied on the location of data in the array gsc
+!!  istwf_k=input parameter that describes the storage of wfs
+!!  mcg=second dimension of the cg array
+!!  mgsc=second dimension of the gsc array
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  npw_k=number of plane waves at this k point
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
+!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
+!!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  me_g0=1 if this processors has G=0, 0 otherwise.
+!!
+!! OUTPUT
+!!  eig_k(nband_k)=array for holding eigenvalues (hartree)
+!!  evec(2*nband_k,nband_k)=array for holding eigenvectors
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)=wavefunctions
+!!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
+!!
+!! PARENTS
+!!      rayleigh_ritz,vtowfk
+!!
+!! CHILDREN
+!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!
+!! SOURCE
+
+subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
+&                   mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
+&                   subham,subovl,use_subovl,usepaw,me_g0)
+
+ use m_linalg_interfaces
+ use m_abi_linalg
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'subdiago'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nband_k,npw_k,me_g0
+ integer,intent(in) :: nspinor,paral_kgb,use_subovl,usepaw
+ real(dp),intent(inout) :: subham(nband_k*(nband_k+1)),subovl(nband_k*(nband_k+1)*use_subovl)
+ real(dp),intent(out) :: eig_k(nband_k),evec(2*nband_k,nband_k)
+ real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
+
+!Local variables-------------------------------
+ integer :: iband,ii,ierr,rvectsize,vectsize,use_slk
+ character(len=500) :: message
+ ! real(dp) :: tsec(2)
+ real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
+ real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
+
+! *********************************************************************
+
+ if (paral_kgb<0) then
+   MSG_BUG('paral_kgb should be positive ')
+ end if
+
+ ! 1 if Scalapack version is used.
+ use_slk = paral_kgb
+
+ rvectsize=npw_k*nspinor
+ vectsize=2*rvectsize;if (me_g0==1) vectsize=vectsize-1
+
+!Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
+! MG FIXME: In these two calls we are aliasing the args
+ call hermit(subham,subham,ierr,nband_k)
+ if (use_subovl==1) then
+   call hermit(subovl,subovl,ierr,nband_k)
+ end if
+
+!Diagonalize the Hamitonian matrix
+ if(istwf_k==2) then
+   ABI_ALLOCATE(evec_tmp,(nband_k,nband_k))
+   ABI_ALLOCATE(subham_tmp,(nband_k*(nband_k+1)/2))
+   subham_tmp=subham(1:nband_k*(nband_k+1):2)
+   evec_tmp=zero
+   if (use_subovl==1) then
+     ABI_ALLOCATE(subovl_tmp,(nband_k*(nband_k+1)/2))
+     subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
+!    TO DO: Not sure this one has been fully tested
+     call abi_xhpgv(1,'V','U',nband_k, subham_tmp,subovl_tmp, eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     ABI_DEALLOCATE(subovl_tmp)
+   else
+     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+   end if
+   evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
+   ABI_DEALLOCATE(evec_tmp)
+   ABI_DEALLOCATE(subham_tmp)
+ else
+   if (use_subovl==1) then
+     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+   else
+     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+   end if
+ end if
+
+!Normalize each eigenvector and set phase:
+!The problem with minus/plus signs might be present also if .not. use_subovl
+!if(use_subovl == 0) then
+ call cg_normev(evec,nband_k,nband_k)
+!end if
+
+ if(istwf_k==2)then
+   do iband=1,nband_k
+     do ii=1,nband_k
+       if(abs(evec(2*ii,iband))>1.0d-10)then
+         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
+&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         MSG_BUG(message)
+       end if
+     end do
+   end do
+ end if
+
+!=====================================================
+!Carry out rotation of bands C(G,n) according to evecs
+! ZGEMM if istwfk==1, DGEMM if istwfk==2
+!=====================================================
+ if (istwf_k==2) then
+
+   ABI_STAT_ALLOCATE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in blockvectora")
+   ABI_STAT_ALLOCATE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in blockvectorb")
+   ABI_STAT_ALLOCATE(blockvectorc,(vectsize,nband_k), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in blockvectorc")
+
+   do iband=1,nband_k
+     if (me_g0 == 1) then
+       call abi_xcopy(1,cg(1,cgindex_subd(iband)),1,blockvectora(1,iband),1)
+       call abi_xcopy(rvectsize-1,cg(1,cgindex_subd(iband)+1),2,blockvectora(2,iband),1)
+       call abi_xcopy(rvectsize-1,cg(2,cgindex_subd(iband)+1),2,blockvectora(rvectsize+1,iband),1)
+     else
+       call abi_xcopy(rvectsize,cg(1,cgindex_subd(iband)),2,blockvectora(1,iband),1)
+       call abi_xcopy(rvectsize,cg(2,cgindex_subd(iband)),2,blockvectora(rvectsize+1,iband),1)
+     end if
+     call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
+   end do
+
+   call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
+&   cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+
+   do iband=1,nband_k
+     if (me_g0 == 1) then
+       call abi_xcopy(1,blockvectorc(1,iband),1,cg(1,cgindex_subd(iband)),1)
+       call abi_xcopy(rvectsize-1,blockvectorc(2,iband),1,cg(1,cgindex_subd(iband)+1),2)
+       call abi_xcopy(rvectsize-1,blockvectorc(rvectsize+1,iband),1,cg(2,cgindex_subd(iband)+1),2)
+     else
+       call abi_xcopy(rvectsize,blockvectorc(1,iband),1,cg(1,cgindex_subd(iband)),2)
+       call abi_xcopy(rvectsize,blockvectorc(rvectsize+1,iband),1,cg(2,cgindex_subd(iband)),2)
+     end if
+   end do
+
+!  If paw, musb also rotate S.C(G,n):
+   if (usepaw==1) then
+
+     do iband=1,nband_k
+       if (me_g0 == 1) then
+         call abi_xcopy(1,gsc(1,gscindex_subd(iband)),1,blockvectora(1,iband),1)
+         call abi_xcopy(rvectsize-1,gsc(1,gscindex_subd(iband)+1),2,blockvectora(2,iband),1)
+         call abi_xcopy(rvectsize-1,gsc(2,gscindex_subd(iband)+1),2,blockvectora(rvectsize+1,iband),1)
+       else
+         call abi_xcopy(rvectsize  ,gsc(1,gscindex_subd(iband)),2,blockvectora(1,iband),1)
+         call abi_xcopy(rvectsize  ,gsc(2,gscindex_subd(iband)),2,blockvectora(rvectsize+1,iband),1)
+       end if
+       call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
+     end do
+
+     call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
+&     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+
+     do iband=1,nband_k
+       if (me_g0 == 1) then
+         call abi_xcopy(1,blockvectorc(1,iband),1,gsc(1,gscindex_subd(iband)),1)
+         call abi_xcopy(rvectsize-1,blockvectorc(2,iband),1,gsc(1,gscindex_subd(iband)+1),2)
+         call abi_xcopy(rvectsize-1,blockvectorc(rvectsize+1,iband),1,gsc(2,gscindex_subd(iband)+1),2)
+       else
+         call abi_xcopy(rvectsize,blockvectorc(1,iband),1,gsc(1,gscindex_subd(iband)),2)
+         call abi_xcopy(rvectsize,blockvectorc(rvectsize+1,iband),1,gsc(2,gscindex_subd(iband)),2)
+       end if
+     end do
+
+   end if
+
+   ABI_DEALLOCATE(blockvectora)
+   ABI_DEALLOCATE(blockvectorb)
+   ABI_DEALLOCATE(blockvectorc)
+
+ else
+
+   ABI_STAT_ALLOCATE(work,(2,npw_k*nspinor*nband_k), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in work")
+
+!  MG: Do not remove this initialization.
+!  telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
+   work=zero
+
+   call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
+&   cg(:,icg+1:npw_k*nspinor*nband_k+icg),npw_k*nspinor, &
+&   evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
+
+   call abi_xcopy(npw_k*nspinor*nband_k,work(1,1),1,cg(1,1+icg),1,x_cplx=2)
+
+!  If paw, must also rotate S.C(G,n):
+   if (usepaw==1) then
+     call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
+&     gsc(:,1+igsc:npw_k*nspinor*nband_k+igsc),npw_k*nspinor, &
+&     evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
+     call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
+   end if
+
+   ABI_DEALLOCATE(work)
+ end if
+
+ contains
+
+   function cgindex_subd(iband)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cgindex_subd'
+!End of the abilint section
+
+   integer :: iband,cgindex_subd
+   cgindex_subd=npw_k*nspinor*(iband-1)+icg+1
+ end function cgindex_subd
+   function gscindex_subd(iband)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'gscindex_subd'
+!End of the abilint section
+
+   integer :: iband,gscindex_subd
+   gscindex_subd=npw_k*nspinor*(iband-1)+igsc+1
+ end function gscindex_subd
+
+end subroutine subdiago
+!!***
+
+!!****f* m_cgtools/pw_orthon
+!! NAME
+!! pw_orthon
+!!
+!! FUNCTION
+!! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
+!! Two orthogonality conditions are available:
+!!  Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
+!!  Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
+!!
+!! INPUTS
+!!  icg=shift to be given to the location of the data in cg(=vecnm)
+!!  igsc=shift to be given to the location of the data in gsc(=ovl_vecnm)
+!!  istwf_k=option parameter that describes the storage of wfs
+!!  mcg=maximum size of second dimension of cg(=vecnm)
+!!  mgsc=maximum size of second dimension of gsc(=ovl_vecnm)
+!!  nelem=number of complex elements in each vector
+!!  nvec=number of vectors to be orthonormalized
+!!  ortalgo= option for the choice of the algorithm
+!!         -1: no orthogonalization (direct return)
+!!          0 or 2: old algorithm (use of buffers)
+!!          1: new algorithm (use of blas)
+!!          3: new new algorithm (use of lapack without copy)
+!!  useoverlap=select the orthogonality condition
+!!               0: no overlap between vectors
+!!               1: vectors are overlapping
+!!  me_g0=1 if this processor has G=0, 0 otherwise
+!!  comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!  vecnm= input: vectors to be orthonormalized; array of nvec column
+!!                vectors,each of length nelem,shifted by icg
+!!                This array is complex or else real(dp) of twice length
+!!         output: orthonormalized set of vectors
+!!  if (useoverlap==1) only:
+!!    ovl_vecnm= input: product of overlap and input vectors:
+!!                      S|vecnm>,where S is the overlap operator
+!!               output: updated S|vecnm> according to vecnm
+!!
+!! NOTES
+!! Note that each vector has an arbitrary phase which is not fixed in this routine.
+!!
+!! WARNING: not yet suited for nspinor=2 with istwfk/=1
+!!
+!! PARENTS
+!!      lapackprof,vtowfk,wfconv
+!!
+!! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
+!!
+!! SOURCE
+
+subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useoverlap,vecnm,me_g0,comm)
+
+ use m_abi_linalg
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pw_orthon'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,useoverlap,me_g0,comm
+!arrays
+ real(dp),intent(inout) :: ovl_vecnm(2,mgsc*useoverlap),vecnm(2,mcg)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2
+ integer :: rvectsiz,vectsize,cg_idx,gsc_idx
+ real(dp) :: doti,dotr,sum,xnorm
+ character(len=500) :: msg
+!arrays
+ integer :: cgindex(nvec),gscindex(nvec)
+ real(dp) :: buffer2(2),tsec(2)
+ real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
+ complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:)
+ complex(dpc),allocatable :: cgramxbx(:,:)
+
+! *************************************************************************
+
+#ifdef DEBUG_MODE
+!Make sure imaginary part at G=0 vanishes
+ if (istwf_k==2) then
+   do ivec=1,nvec
+     if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>zero)then
+!      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
+       write(msg,'(2a,3i0,2es16.6,a,a)')&
+&       ' For istwf_k=2,observed the following element of vecnm :',ch10,&
+&       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,&
+&       '  with a non-negligible imaginary part.'
+       MSG_BUG(msg)
+     end if
+   end do
+ end if
+#endif
+
+!Nothing to do if ortalgo=-1
+ if(ortalgo==-1) return
+
+ do ivec=1,nvec
+   cgindex(ivec)=nelem*(ivec-1)+icg+1
+   gscindex(ivec)=nelem*(ivec-1)+igsc+1
+ end do
+
+ if (ortalgo==3) then
+!  =========================
+!  First (new new) algorithm
+!  =========================
+!  NEW VERSION: avoid copies, use ZHERK for NC
+   cg_idx = cgindex(1)
+   if (useoverlap==1) then
+     gsc_idx = gscindex(1)
+     call cgpaw_cholesky(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
+   else
+     call cgnc_cholesky(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm,use_gemm=.FALSE.)
+   end if
+
+ else if(ortalgo==1) then
+!  =======================
+!  Second (new) algorithm
+!  =======================
+!  This first algorithm seems to be more efficient especially in the parallel band-FFT mode.
+
+   if(istwf_k==1) then
+     vectsize=nelem
+     ABI_ALLOCATE(cgramxbx,(nvec,nvec))
+     ABI_ALLOCATE(cblockvectorx,(vectsize,nvec))
+     ABI_ALLOCATE(cblockvectorbx,(vectsize,nvec))
+     call abi_xcopy(nvec*vectsize,vecnm(:,cgindex(1):cgindex(nvec)-1),1,cblockvectorx,1,x_cplx=2)
+     if (useoverlap == 1) then
+       call abi_xcopy(nvec*vectsize,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
+     else
+       call abi_xcopy(nvec*vectsize,vecnm(:,cgindex(1):cgindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
+     end if
+     call abi_xorthonormalize(cblockvectorx,cblockvectorbx,nvec,comm,cgramxbx,vectsize)
+     call abi_xcopy(nvec*vectsize,cblockvectorx,1,vecnm(:,cgindex(1):cgindex(nvec)-1),1,x_cplx=2)
+     if (useoverlap == 1) then
+       call abi_xtrsm('r','u','n','n',vectsize,nvec,cone,cgramxbx,nvec,cblockvectorbx,vectsize)
+       call abi_xcopy(nvec*vectsize,cblockvectorbx,1,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,x_cplx=2)
+     end if
+     ABI_DEALLOCATE(cgramxbx)
+     ABI_DEALLOCATE(cblockvectorx)
+     ABI_DEALLOCATE(cblockvectorbx)
+
+   else if(istwf_k==2) then
+     ! Pack real and imaginary part of the wavefunctions.
+     rvectsiz=nelem
+     vectsize=2*nelem; if(me_g0==1) vectsize=vectsize-1
+     ABI_ALLOCATE(rgramxbx,(nvec,nvec))
+     ABI_ALLOCATE(rblockvectorx,(vectsize,nvec))
+     ABI_ALLOCATE(rblockvectorbx,(vectsize,nvec))
+     do ivec=1,nvec
+       if (me_g0 == 1) then
+         call abi_xcopy(1,vecnm(1,cgindex(ivec)),1,rblockvectorx (1,ivec),1)
+         call abi_xcopy(rvectsiz-1,vecnm(1,cgindex(ivec)+1),2,rblockvectorx(2,ivec),1)
+         call abi_xcopy(rvectsiz-1,vecnm(2,cgindex(ivec)+1),2,rblockvectorx(rvectsiz+1,ivec),1)
+         if (useoverlap == 1) then
+           call abi_xcopy(1,ovl_vecnm(1,gscindex(ivec)),1,rblockvectorbx(1,ivec),1)
+           call abi_xcopy(rvectsiz-1,ovl_vecnm(1,gscindex(ivec)+1),2,rblockvectorbx(2,ivec),1)
+           call abi_xcopy(rvectsiz-1,ovl_vecnm(2,gscindex(ivec)+1),2,rblockvectorbx(rvectsiz+1,ivec),1)
+         else
+           call abi_xcopy(1,vecnm(1,cgindex(ivec)),1,rblockvectorbx(1,ivec),1)
+           call abi_xcopy(rvectsiz-1,vecnm(1,cgindex(ivec)+1),2,rblockvectorbx(2,ivec),1)
+           call abi_xcopy(rvectsiz-1,vecnm(2,cgindex(ivec)+1),2,rblockvectorbx(rvectsiz+1,ivec),1)
+         end if
+         rblockvectorx (2:vectsize,ivec)=rblockvectorx (2:vectsize,ivec)*sqrt2
+         rblockvectorbx(2:vectsize,ivec)=rblockvectorbx(2:vectsize,ivec)*sqrt2
+       else
+         call abi_xcopy(rvectsiz,vecnm(1,cgindex(ivec)),2,rblockvectorx(1,ivec),1)
+         call abi_xcopy(rvectsiz,vecnm(2,cgindex(ivec)),2,rblockvectorx(rvectsiz+1,ivec),1)
+         if (useoverlap == 1) then
+           call abi_xcopy(rvectsiz,ovl_vecnm(1,gscindex(ivec)),2,rblockvectorbx(1,ivec),1)
+           call abi_xcopy(rvectsiz,ovl_vecnm(2,gscindex(ivec)),2,rblockvectorbx(rvectsiz+1,ivec),1)
+         else
+           call abi_xcopy(rvectsiz,vecnm(1,cgindex(ivec)),2,rblockvectorbx(1,ivec),1)
+           call abi_xcopy(rvectsiz,vecnm(2,cgindex(ivec)),2,rblockvectorbx(rvectsiz+1,ivec),1)
+         end if
+         rblockvectorx (1:vectsize,ivec)=rblockvectorx (1:vectsize,ivec)*sqrt2
+         rblockvectorbx(1:vectsize,ivec)=rblockvectorbx(1:vectsize,ivec)*sqrt2
+       end if
+     end do
+
+     call ortho_reim(rblockvectorx,rblockvectorbx,nvec,comm,rgramxbx,vectsize)
+
+     do ivec=1,nvec
+       ! Unpack results
+       if (me_g0 == 1) then
+         call abi_xcopy(1,rblockvectorx(1,ivec),1,vecnm(1,cgindex(ivec)),1)
+         vecnm(2,cgindex(ivec))=zero
+         rblockvectorx(2:vectsize,ivec)=rblockvectorx(2:vectsize,ivec)/sqrt2
+         call abi_xcopy(rvectsiz-1,rblockvectorx(2,ivec),1,vecnm(1,cgindex(ivec)+1),2)
+         call abi_xcopy(rvectsiz-1,rblockvectorx(rvectsiz+1,ivec),1,vecnm(2,cgindex(ivec)+1),2)
+       else
+         rblockvectorx(1:vectsize,ivec)=rblockvectorx(1:vectsize,ivec)/sqrt2
+         call abi_xcopy(rvectsiz,rblockvectorx(1,ivec),1,vecnm(1,cgindex(ivec)),2)
+         call abi_xcopy(rvectsiz,rblockvectorx(rvectsiz+1,ivec),1,vecnm(2,cgindex(ivec)),2)
+       end if
+
+       if(useoverlap == 1) then
+         call abi_xtrsm('r','u','n','n',vectsize,nvec,one,rgramxbx,nvec,rblockvectorbx,vectsize)
+         if (me_g0 == 1) then
+           call abi_xcopy(1,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),1)
+           ovl_vecnm(2,gscindex(ivec))=zero
+           rblockvectorbx(2:vectsize,ivec)=rblockvectorbx(2:vectsize,ivec)/sqrt2
+           call abi_xcopy(rvectsiz-1,rblockvectorbx(2,ivec),1,ovl_vecnm(1,gscindex(ivec)+1),2)
+           call abi_xcopy(rvectsiz-1,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)+1),2)
+         else
+           rblockvectorbx(1:vectsize,ivec)=rblockvectorbx(1:vectsize,ivec)/sqrt2
+           call abi_xcopy(rvectsiz,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),2)
+           call abi_xcopy(rvectsiz,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)),2)
+         end if
+       end if
+     end do
+     ABI_DEALLOCATE(rgramxbx)
+     ABI_DEALLOCATE(rblockvectorx)
+     ABI_DEALLOCATE(rblockvectorbx)
+   end if
+
+ else if (ortalgo==4) then
+!  else if (ANY(ortalgo==(/0,2/))) then
+
+   cg_idx = cgindex(1)
+   if (useoverlap==0) then
+     call cgnc_gramschmidt(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm)
+   else
+     gsc_idx = gscindex(1)
+     call cgpaw_gramschmidt(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
+   end if
+
+ else if (ANY(ortalgo==(/0,2/))) then
+!  =======================
+!  Third (old) algorithm
+!  =======================
+
+   do ivec=1,nvec
+!    Normalize each vecnm(n,m) in turn:
+
+     if (useoverlap==1) then ! Using overlap S...
+       if(istwf_k/=2)then
+         sum=zero;ii0=1
+       else
+         if (me_g0 ==1) then
+           sum=half*ovl_vecnm(1,1+nelem*(ivec-1)+igsc)*vecnm(1,1+nelem*(ivec-1)+icg)
+           ii0=2
+         else
+           sum=zero;ii0=1
+         end if
+       end if
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:sum) SHARED(icg,ivec,nelem,vecnm)
+       do ii=ii0+nelem*(ivec-1),nelem*ivec
+         sum=sum+vecnm(1,ii+icg)*ovl_vecnm(1,ii+igsc)+vecnm(2,ii+icg)*ovl_vecnm(2,ii+igsc)
+       end do
+
+     else ! Without overlap...
+       if(istwf_k/=2)then
+         sum=zero;ii0=1
+       else
+         if (me_g0 ==1) then
+           sum=half*vecnm(1,1+nelem*(ivec-1)+icg)**2
+           ii0=2
+         else
+           sum=zero;ii0=1
+         end if
+       end if
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:sum) SHARED(icg,ivec,nelem,vecnm)
+       do ii=ii0+nelem*(ivec-1)+icg,nelem*ivec+icg
+         sum=sum+vecnm(1,ii)**2+vecnm(2,ii)**2
+       end do
+     end if
+
+     call timab(48,1,tsec)
+     call xmpi_sum(sum,comm,ierr)
+     call timab(48,2,tsec)
+
+     if(istwf_k>=2)sum=two*sum
+     xnorm = sqrt(abs(sum)) ;  sum=1.0_dp/xnorm
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,sum,vecnm)
+     do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
+       vecnm(1,ii)=vecnm(1,ii)*sum
+       vecnm(2,ii)=vecnm(2,ii)*sum
+     end do
+     if (useoverlap==1) then
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,sum,ovl_vecnm)
+       do ii=1+nelem*(ivec-1)+igsc,nelem*ivec+igsc
+         ovl_vecnm(1,ii)=ovl_vecnm(1,ii)*sum
+         ovl_vecnm(2,ii)=ovl_vecnm(2,ii)*sum
+       end do
+     end if
+
+!    Remove projection in all higher states.
+     if (ivec<nvec) then
+
+       if(istwf_k==1)then
+!        Cannot use time-reversal symmetry
+
+         if (useoverlap==1) then ! Using overlap.
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             dotr=zero ; doti=zero
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:doti,dotr) SHARED(ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+               doti=doti+vecnm(1,ii1+ii)*ovl_vecnm(2,ii2+ii)-vecnm(2,ii1+ii)*ovl_vecnm(1,ii2+ii)
+             end do
+
+             call timab(48,1,tsec)
+             buffer2(1)=doti;buffer2(2)=dotr
+             call xmpi_sum(buffer2,comm,ierr)
+             call timab(48,2,tsec)
+             doti=buffer2(1)
+             dotr=buffer2(2)
+
+!            Then subtract the appropriate amount of the lower state
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+#ifdef FC_INTEL
+!            DIR$ ivdep
+#endif
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
+             end do
+
+             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+             do ii=1,nelem
+               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)&
+&               -dotr*ovl_vecnm(1,ii1+ii)&
+&               +doti*ovl_vecnm(2,ii1+ii)
+               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)&
+               -doti*ovl_vecnm(1,ii1+ii)&
+&               -dotr*ovl_vecnm(2,ii1+ii)
+             end do
+           end do
+         else
+!          ----- No overlap -----
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             dotr=zero ; doti=zero
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:doti,dotr) SHARED(ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+&
+&               vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
+               doti=doti+vecnm(1,ii1+ii)*vecnm(2,ii2+ii)-&
+&               vecnm(2,ii1+ii)*vecnm(1,ii2+ii)
+             end do
+!            Init mpi_comm
+             buffer2(1)=doti
+             buffer2(2)=dotr
+             call timab(48,1,tsec)
+             call xmpi_sum(buffer2,comm,ierr)
+!            call xmpi_sum(doti,spaceComm,ierr)
+!            call xmpi_sum(dotr,spaceComm,ierr)
+             call timab(48,2,tsec)
+             doti=buffer2(1)
+             dotr=buffer2(2)
+
+!            Then subtract the appropriate amount of the lower state
+#ifdef FC_INTEL
+!            DIR$ ivdep
+#endif
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+&
+&               doti*vecnm(2,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-&
+&               dotr*vecnm(2,ii1+ii)
+             end do
+           end do
+
+         end if  ! Test on useoverlap
+
+       else if(istwf_k==2)then
+!        At gamma point use of time-reversal symmetry saves cpu time.
+
+         if (useoverlap==1) then
+!          ----- Using overlap -----
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
+             if (me_g0 ==1) then
+               dotr=half*vecnm(1,ii1+1)*ovl_vecnm(1,ii2+1)
+!              Avoid double counting G=0 contribution
+!              Imaginary part of vecnm at G=0 should be zero,so only take real part
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+               do ii=2,nelem
+                 dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
+&                 vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+               end do
+             else
+               dotr=0._dp
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+               do ii=1,nelem
+                 dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
+&                 vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+               end do
+             end if
+
+             dotr=two*dotr
+
+             call timab(48,1,tsec)
+             call xmpi_sum(dotr,comm,ierr)
+             call timab(48,2,tsec)
+
+!            Then subtract the appropriate amount of the lower state
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+#ifdef FC_INTEL
+!            DIR$ ivdep
+#endif
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+             end do
+             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+             do ii=1,nelem
+               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
+               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
+             end do
+           end do
+         else
+!          ----- No overlap -----
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+             if (me_g0 ==1) then
+!              Avoid double counting G=0 contribution
+!              Imaginary part of vecnm at G=0 should be zero,so only take real part
+               dotr=half*vecnm(1,ii1+1)*vecnm(1,ii2+1)
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+               do ii=2,nelem
+                 dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
+               end do
+             else
+               dotr=0._dp
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+               do ii=1,nelem
+                 dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
+               end do
+             end if
+             dotr=two*dotr
+
+             call timab(48,1,tsec)
+             call xmpi_sum(dotr,comm,ierr)
+             call timab(48,2,tsec)
+
+!            Then subtract the appropriate amount of the lower state
+#ifdef FC_INTEL
+!            DIR$ ivdep
+#endif
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+             end do
+           end do
+         end if  ! Test on useoverlap
+
+       else
+!        At other special points,use of time-reversal symmetry saves cpu time.
+
+         if (useoverlap==1) then
+!          ----- Using overlap -----
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
+!            Avoid double counting G=0 contribution
+!            Imaginary part of vecnm at G=0 should be zero,so only take real part
+             dotr=zero
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+             end do
+             dotr=two*dotr
+
+             call timab(48,1,tsec)
+             call xmpi_sum(dotr,comm,ierr)
+             call timab(48,2,tsec)
+
+!            Then subtract the appropriate amount of the lower state
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+#ifdef FC_INTEL
+!            DIR$ ivdep
+#endif
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+             end do
+             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+             do ii=1,nelem
+               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
+               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
+             end do
+           end do
+         else
+!          ----- No overlap -----
+           do ivec2=ivec+1,nvec
+!            First compute scalar product
+             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+!            Avoid double counting G=0 contribution
+!            Imaginary part of vecnm at G=0 should be zero,so only take real part
+             dotr=zero
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
+             end do
+             dotr=two*dotr
+
+             call timab(48,1,tsec)
+             call xmpi_sum(dotr,comm,ierr)
+             call timab(48,2,tsec)
+
+!            Then subtract the appropriate amount of the lower state
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             do ii=1,nelem
+               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+             end do
+           end do
+         end if
+
+!        End use of time-reversal symmetry
+       end if
+
+     end if  ! Test on "ivec"
+
+!    end loop over vectors (or bands) with index ivec :
+   end do
+
+ else
+   write(msg,'(a,i0)')"Wrong value for ortalgo: ",ortalgo
+   MSG_ERROR(msg)
+ end if ! End of the second algorithm
+
+end subroutine pw_orthon
 !!***
 
 END MODULE m_cgtools

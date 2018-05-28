@@ -75,6 +75,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
+ use m_getghc,      only : getghc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

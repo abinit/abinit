@@ -2,8 +2,8 @@
 !!****m* ABINIT/m_xgTools
 !! NAME
 !!  m_xgTools
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !! This is a module to manage and help developer with 2D arrays for low level routines.
 !! Particularly, it manages memory for allocations and deallocations (see xg_routines),
 !! It handles MPI, complex and real values (*8 kind only) automatically.
@@ -15,7 +15,7 @@
 !! An example of how to use those types and routines can be found in
 !! 30_diago/m_lobpcg2.F90. This is a full rewrite of LOBPCG algorithm which uses
 !! only these types to perfom calculations.
-!! 
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2016-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
@@ -211,7 +211,7 @@ module m_xg
     integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim 
+      current_dim = asked_dim
       if ( allocated(array) ) then
         ABI_FREE(array)
       end if
@@ -239,7 +239,7 @@ module m_xg
     integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim 
+      current_dim = asked_dim
       if ( allocated(array) ) then
         ABI_FREE(array)
       end if
@@ -267,7 +267,7 @@ module m_xg
     integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim 
+      current_dim = asked_dim
       if ( allocated(array) ) then
         ABI_FREE(array)
       end if
@@ -353,14 +353,14 @@ module m_xg
         ABI_FREE(xg%vecR)
       end if
       ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-      !xg%vecR(:,:) = 0.d0
+      xg%vecR(:,:) = 0.d0
       xg%trans = 't'
     case (SPACE_C)
       if ( allocated(xg%vecC) ) then
         ABI_FREE(xg%vecC)
       end if
       ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-      !xg%vecC(:,:) = dcmplx(0.d0)
+      xg%vecC(:,:) = dcmplx(0.d0)
       xg%trans = 'c'
     case default
       MSG_ERROR("Invalid space")
@@ -409,7 +409,7 @@ module m_xg
     cols = size(array,dim=2)/rows
     if ( shift_col+cols > xg%cols ) then
       MSG_WARNING("Ignore some columns, input array to large")
-    endif 
+    endif
 
     select case (xg%space)
     case (SPACE_R)
@@ -541,7 +541,7 @@ module m_xg
     xgBlock%rows = rows
     xgBlock%LDim = rows
     xgBlock%cols = cols
-    xgBlock%normal = 'n' 
+    xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
 
   end subroutine xgBlock_map
@@ -667,7 +667,7 @@ module m_xg
     double precision :: tsec(2)
 
     call timab(tim_get,1,tsec)
-    
+
     if ( size(array,dim=1) /= 2 ) then
       MSG_ERROR("First dim must be 2")
     end if
@@ -908,7 +908,7 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       call dcopy(size,xgBlock1%vecR,incx,xgBlock2%vecR,incy)
     case(SPACE_C)
-      call zcopy(size,xgBlock1%vecC,incx,xgBlock2%vecC,incy) 
+      call zcopy(size,xgBlock1%vecC,incx,xgBlock2%vecC,incy)
     end select
     call timab(tim_copy,2,tsec)
 
@@ -966,8 +966,8 @@ module m_xg
     case (SPACE_C)
       cptr = getClocC(xgBlock2%Ldim,xgBlock2%cols,xgBlock2%vecC(:,:))
       call c_f_pointer(cptr,subC,(/ (xgBlock2%cols*(xgBlock2%cols+1))/2 /))
-    end select 
-    
+    end select
+
     select case(uplo)
     case ('u','U')
       select case(xgBlock1%space)
@@ -985,7 +985,7 @@ module m_xg
             subC(i+col) = xgBlock1%vecC(i,j)
           end do
         end do
-      end select 
+      end select
 
     case ('l','L')
       select case(xgBlock1%space)
@@ -1003,7 +1003,7 @@ module m_xg
             subC(i+col) = xgBlock1%vecC(i,j)
           end do
         end do
-      end select 
+      end select
     case default
       MSG_ERROR("Error for packing matrix")
     end select
@@ -1201,7 +1201,7 @@ module m_xg
         xgBlock1%vecR,xgBlock1%LDim, &
       xgBlock3%vecR, &
       rwork, lrwork,info)
-      
+
 
     case (SPACE_C)
       call checkResize(rwork,lrwork,3*xgBlock1%cols-2)
@@ -1337,7 +1337,7 @@ module m_xg
       call dspev(jobz,uplo,xgBlock4%cols, &
         xgBlock1%vecR, xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, &
       rwork, info)
-      
+
 
     case (SPACE_C)
       call checkResize(cwork,lcwork,2*xgBlock4%cols-1)
@@ -1405,7 +1405,7 @@ module m_xg
       call dspevd(jobz,uplo,xgBlock4%cols, &
         xgBlock1%vecR, xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, &
         rwork, lrwork, iwork, liwork,info)
-      
+
 
     case (SPACE_C)
       call checkResize(cwork,lcwork,2*xgBlock4%rows)
@@ -1738,7 +1738,7 @@ module m_xg
 !!
 !! NAME
 !! xgBlock_hpgvx
- 
+
   subroutine xgBlock_hpgvx(itype,jobz,range,uplo,xgBlock1,xgBlock2,vl,vu,il,iu,abstol,xgBlock3,xgBlock4,info)
 
 
@@ -1819,7 +1819,7 @@ module m_xg
 !!
 !! NAME
 !! xgBlock_hpgvd
- 
+
   subroutine xgBlock_hpgvd(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, xgBlock4, info)
 
 
@@ -2204,7 +2204,7 @@ module m_xg
     double precision, intent(  out), optional :: max_val
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
-    integer         , intent(  out), optional :: min_elt 
+    integer         , intent(  out), optional :: min_elt
     integer :: icol
     double precision,external :: ddot
 
@@ -2398,7 +2398,7 @@ module m_xg
 !!
 !! NAME
 !! xgBlock_zero
-  
+
   subroutine xgBlock_zero(xgBlock)
 
 
@@ -2477,7 +2477,7 @@ module m_xg
     type(xgBlock_t), intent(inout) :: xgBlock
     type(xgBlock_t), intent(in   ) :: diag
     integer :: i
-    
+
     if ( diag%cols /= 1 .or. diag%rows/= min(xgBlock%rows,xgBlock%cols) ) then
       MSG_ERROR("Bad diagonal")
     end if
@@ -2573,7 +2573,7 @@ module m_xg
     double precision, intent(out) :: average
     complex(kind=8) :: averageC
     integer :: i
-    
+
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       average = 0.d0
@@ -2611,7 +2611,7 @@ module m_xg
     double precision, intent(out) :: deviation
     complex(kind=8) :: deviationC
     double precision :: average
-    integer :: i 
+    integer :: i
 
     call xgBlock_average(xgBlock,average)
     select case(xgBlock%space)
@@ -2652,7 +2652,7 @@ module m_xg
     character(len=4) :: ccols
     character(len=50) :: fstring
 
-    
+
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       write(ccols,'(i4)') xgBlock%cols

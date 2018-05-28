@@ -216,9 +216,9 @@ end module m_crystal
         func = mod.contains[1]
         assert func.is_function and func.name == "idx_spatial_inversion" and func.ancestor is mod
 
-    def test_tricky_module(self)
+    def test_tricky_module(self):
         """Parsing tricky Fortran module similar to 42_libpaw/m_libpaw_libxc.F90"""
-        s = """
+        s = """\
 #include "libpaw.h"
 
 module m_libpaw_libxc_funcs
@@ -396,4 +396,4 @@ module m_libpaw_libxc
  implicit none
 
 end module m_libpaw_libxc
-""""
+"""

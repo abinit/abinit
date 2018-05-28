@@ -13,6 +13,7 @@ In particular, it couples to the electronic spins (Zeeman term) as well as to th
 Input variables to deal with these two situations are decoupled in ABINIT.
 [[zeemanfield]] gives access to the Zeeman coupling, and is in production.
 The coupling to the electronic orbital motion is much more delicate to treat, and is currently in development.
+Chern number calculation is available.
 Both types of input variables are listed below.
 
 ## Related Input Variables

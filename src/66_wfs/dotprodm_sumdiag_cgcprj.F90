@@ -5,7 +5,7 @@
 !! dotprodm_sumdiag_cgcprj
 !!
 !! FUNCTION
-!! For one k point and spinpol, compute the matrix of sum of diagonal scalar products 
+!! For one k point and spinpol, compute the matrix of sum of diagonal scalar products
 !! between sets of nband wavefunctions that are known in the cg+cprj representation
 !! The sets of wavefunctions must be contained in a big array of sets of wavefunctions.
 !! Sij=Sum_m <wfm(set i)|wfm(set j)>
@@ -25,20 +25,21 @@
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
-!!  cg_set(2,mcg,mset)= plane wave wavefunction coefficients for several sets of wavefunctions (all k points and spinpol)
-!!  cprj_set(natom,mcprj,mset) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors in the different sets
+!!  cg_set(2,mcg,mset)= plane wave wavefunction coefficients for several sets of wavefunctions (all k points and spins)
+!!  cprj_set(natom,mcprj,mset) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk>
+!!    with NL projectors in the different sets
 !!  dimcprj(natom)=number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom
-!!  ibg=shift in cprj_set array to locate current k-point 
+!!  ibg=shift in cprj_set array to locate current k-point
 !!  icg=shift in cg_set array to locate current k-point
 !!  ikpt=current k point index
 !!  isppol=current spin polarization index
 !!  istwf=input option parameter that describes the storage of wfs
 !!  mband=maximum number of bands (used in the dimensioning of cprj_set)
 !!  mcg=second dimension of cg array (mpw*nspinor*mband*mkmem*nsppol)
-!!  mcprj=second dimension of cprj array 
+!!  mcprj=second dimension of cprj array
 !!  mkmem=number of k points which can fit in memory
 !!  mpi_enreg=information about MPI parallelization
-!!  mset=third dimension of cg_set and cprj_set, maximum number of sets 
+!!  mset=third dimension of cg_set and cprj_set, maximum number of sets
 !!  natom=number of atoms
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nbd=number of bands for each set of wavefunctions
@@ -54,7 +55,8 @@
 !!  usepaw=1 if PAW is activated
 !!
 !! OUTPUT
-!!  smn(2,nset1,nset2)=matrix of sum of diagonal scalar products between the first set of wavefunctions and the second set of wavefunctions
+!!  smn(2,nset1,nset2)=matrix of sum of diagonal scalar products between the first set
+!!    of wavefunctions and the second set of wavefunctions
 !!
 !! SIDE EFFECTS
 !!
@@ -82,6 +84,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
  use m_cgtools
  use m_errors
  use m_xmpi
+
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
 
@@ -96,7 +99,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ibg,icg,ikpt,isppol,istwf
- integer, intent(in) :: mband,mcg,mcprj,mkmem,mset 
+ integer, intent(in) :: mband,mcg,mcprj,mkmem,mset
  integer, intent(in) :: natom,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat
  integer, intent(in) :: shift_set1,shift_set2,usepaw
  type(MPI_type),intent(in) :: mpi_enreg
@@ -202,7 +205,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
          end if ! usepaw
 
 !      if(.false.)then
-       else 
+       else
 !        Diagonal part : no need to extract another wavefunction, and the scalar product must be real
 
 !        Calculate Smn=<cg1|cg1>
@@ -231,14 +234,14 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
          doti=zero
 
        end if ! Compare ind_set1 and ind_set2
-       
+
        smn(1,iset1,iset2)=smn(1,iset1,iset2)+dotr
        smn(2,iset1,iset2)=smn(2,iset1,iset2)+doti
 
      end do ! iset2
    end do ! iset1
 
-!  End loop over bands ibd 
+!  End loop over bands ibd
    icgb=icgb+npw*nspinor
  end do
 

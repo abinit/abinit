@@ -48,13 +48,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  use m_pptools,        only : prmat
  use m_geometry,       only : shellstruct
  use m_parser,         only : prttagm
+ use m_supercell,      only : mksupercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_det'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_65_paw, except_this_one => pawuj_det
 !End of the abilint section
 

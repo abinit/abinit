@@ -1,15 +1,18 @@
 ## v8.8
 
+Version 8.8, released on April 28, 2018.
+List of changes with respect to version 8.6.
+
 Many thanks to the contributors to the ABINIT project between
 November 2017 and April 2018. These release notes
-are relative to modifications/improvements of ABINITv8.8 with respect to v8.6.
-Merge request 285 first MR not included in the release. 
+are relative to modifications/improvements of ABINIT v8.8 with respect to v8.6.
+The merge request #285 is the first MR not reported in these release notes.
 
-The list of contributors includes :
-B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
+The list of contributors includes:
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
 C. Espejo, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, A. Martin,
 H. Miranda, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, F. Ricci, 
-G.-M. Rinanese, M. Torrent , M. Verstraete, J. Zwanziger
+G.-M. Rignanese, M. Torrent , M. Verstraete, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -17,36 +20,32 @@ This might take some time ...
 
 Xavier
 
-* * *
+### A. Warnings and important remarks
 
-Version 8.8, released on April 28, 2018.
-
-List of changes with respect to version 8.6 .
-
-* * *
-
-###A. Warnings and important remarks
-
-A.1 Due to the availability of new input variables, some obsolete input variables have been suppressed :
+A.1 Due to the availability of new input variables, some obsolete input variables have been suppressed:
 
 * input variable cgtyphf, see now [[fockoptmix]];
 * input variable gwfockmix, see now [[hyb_mixing]] and [[hyb_mixing_sr]].
 
 A.2 The algorithm used for computing the weights for the phonon band structure interpolation in ANADDB
-    in the case [[brav@anaddb]]=1 has changed. See B.5.
+    in the case [[brav@anaddb]] = 1 has changed. See B.5.
 
 A.3 Tests v7#71-72 have been moved to v7#76-77.
 
-A.4 Replaced "tribes" by "relevance" in doc/topics.
+A.4 Replaced *tribes* by *relevance* in doc/topics.
 
-A.5 Replace "EELF" extension by "ELF". See [[prtelf]].
+A.5 Replace `EELF` file extension by `ELF`. See [[prtelf]].
     By Guido Petretto.
+
+A.6 Definition of a maximal value for dilatmx, at 1.15 , than can be bypassed by setting chkdilatmx=0.
+    This is to prevent users slowing down ABINIT too much inadvertantly.
 
 * * *
 
-###B. Most noticeable achievements
+### B. Most noticeable achievements
 
-B.1 The whole ABINIT documentation has been placed under the control of mkdocs, and most files have been translated to markdown 
+B.1 The whole ABINIT documentation has been placed under the control of [mkdocs](http://www.mkdocs.org/),
+    and most files have been translated to markdown 
     (well, there are still a few remaining files not placed in this system, but these are quite few).
     The capabilities developed for [v8.6](#v86)
     (Topics -B.1-, central bibliography -B.2-, restructured and searcheable list of input variables -B.3-,
@@ -55,58 +54,53 @@ B.1 The whole ABINIT documentation has been placed under the control of mkdocs, 
     The appearance is also new. 
     The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
     central bibliographic database.
-    Entry point : see the new header of any ABINIT documentation file (e.g. the [new user's guide](..) ).
-    By M. Giantomassi, with some help from X. Gonze
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
+    By M. Giantomassi, with some help from X. Gonze.
 
-B.2 The DFPT has been extended to non-collinear systems ([[nspden]]=4), with or without spin-orbit coupling,
+B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
     for the ddk, electric field and atomic displacement perturbations,
     as well as for the Zeeman magnetic field perturbation (see B.3). 
-    See tests [[test:v8_66|v8#66]] to [[test:v8_80|80]]. For experts, see the new input variable [[ixcrot]].
+    See tests from [[test:v8_66]] to [[test:v8_80]]. For experts, see the new input variable [[ixcrot]].
     By F. Ricci, S. Prokhorenko, M. Verstraete, M. Torrent and E. Bousquet.
     
 B.3 DFPT can now treat the magnetic field perturbation (Zeeman interaction - magnetic field couple to the spin).
-    See the input variable [[rfmagn]], as well as tests [[test:v8_66|v8#66]] to [[test:v8_70|70]].
+    See the input variable [[rfmagn]], as well as tests [[test:v8_66]] to [[test:v8_70]].
     The new input variable [[tim1rev]] has been introduced, to allow treating perturbations with non-zero q wavevectors.
     By S. Prokhorenko and E. Bousquet.
 
-B.4 GW is now available with [[nspinor]]=2 with or without spin-orbit coupling,
-    and with [[nspden]]=1 or 4 (collinear or non-collinear spin-magnetisation).
-    Implemented only in the norm-conserving case.
-    See tests [[test:v8_90|v8#90]] to [[test:v8_93|93]]. 
+B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching ABINIT (also in high-throughput mode)
+    and the jupyter notebook based tutorials, nicknamed [abitutorials](https://github.com/abinit/abitutorials) are now sufficiently 
+    mature to be advertised. They have been used at the ICTP electron-phonon doctoral school in March 2018.
+    Feedback on AbiPy and abitutorials is welcome. 
     By M. Giantomassi.
 
-B.5 The python library abipy [[https://github.com/abinit/abipy]], for lauching ABINIT (also in high-throughput)
-    and the jupyter notebook based tutorials, nicknamed `abitutorials' [[https://github.com/abinit/abitutorials]] are now sufficiently 
-    mature to be advertised. They have been used at an ICTP electron-phonon doctoral school in March 2018.
-    Feedback on abipy and abitutorials is welcome. 
-    By M. Giantomassi.
-
-B.6 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
-    has been implemented. It has replaced the old algorithm in case [[brav@anaddb]]=1 . The old algorithm is still
-    available for back-compatibility purposes, now corresponding to [[brav@anaddb]]=-1 , see [[test:v7_93]],
-    although there is no real reason for using it. 
-    The new algorithm is very general, respect better the symmetries, and should even supercede the use of other values of [[brav@anaddb]].
+B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
+    has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1. 
+    The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1, 
+    see [[test:v7_93]], although there is no real reason for using it. 
+    The new algorithm is very general, respect better the symmetries, and should even supercede 
+    the use of other values of [[brav@anaddb]].
     By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.
 
-B.7 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
+B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
     See the theory in [[cite:Ceresoli2006]].
-    Associated input variable : [[orbmag]]. Associated test [[test:v8_33]].
+    Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
-    thanks to converted nucdipmom_k to complex type and explicit BLAS call. Tutorial nuc is nightly tested.
-    By J. Zwanziger (tutorial nuc testing by X. Gonze).
+    this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call. 
+    Lesson [[lesson:nuc|nuc]] is nightly tested.
+    By J. Zwanziger ([[lesson:nuc|nuc]] testing by X. Gonze).
 
-    
 * * *
 
 ###C. Changes for the developers (also compilers)
 
-C.1 Add support for NAG 6.2, use netcdf4 & hdf5 with NAG 6.2 .
-    New builders : abiref_nag_6.2_openmpi and atlas_gnu_7.2_fb
+C.1 Add support for NAG 6.2, use netcdf4 and hdf5 with NAG 6.2.
+    New builders: abiref_nag_6.2_openmpi and atlas_gnu_7.2_fb
 
-C.2 New version of ELPA module (2011->2017 compatible)
+C.2 New version of ELPA module (2011 -> 2017 compatible)
     By M. Torrent
 
-C.3 Replaced http://www.abinit.org  by https://www.abinit.org everywhere in the doc. 
+C.3 Replaced http://www.abinit.org by https://www.abinit.org everywhere in the doc. 
     By JM Beuken
 
 C.4 Added fake -n/--no-split option to makemake. 
@@ -118,6 +112,12 @@ C.5 Upgrade Abinit to PSML API 1.1.
 
 C.6 Allowed for free-form link flags statements in configure options
     By Y. Pouillon
+
+C.7 Intel 18.0 is now officially supported (one bot using it is present in the test farm).
+    The situation is not perfect though, as  in mrgscr and mrgdv, the ADVANCE='NO' specification for the write instruction does not work, but
+   it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
+   Namely, v3#87-91, vv67mbpt#37-39, v7#86-88, v8#41-44, v8#63
+   Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
 
 * * *
 
@@ -134,15 +134,15 @@ D.2 Numerous progresses have been made related to the hybrid functionals (althou
 * The downsampling of the Brillouin Zone to build the Fock operator has been implemented and tested.
 See the input variable [[fockdownsampling]] as well as tests [[test:libxc_72]] and [[test:paral_09]]. 
 
-* The B3LYP functional has been implemented, [[ixc]]=-402.
+* The B3LYP functional has been implemented, [[ixc]] = -402.
 
 * The new input variables [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_dft]], and [[hyb_range_fock]]
-give sufficient flexibility in the "PBE0" and "HSE" family of functionals. 
+give sufficient flexibility in the PBE0 and HSE family of functionals. 
 
 * GW calculations can now start on top of hybrid functional calculations.
 
-* At variance, there is also now more flexibility to run hybrid calculations using the "GW" infrastructure 
-([[gwcalctyp]]=5, 15  and 25) by the definition of the [[ixc_sigma]] input variable.
+* At variance, there is also now more flexibility to run hybrid calculations using the GW infrastructure 
+([[gwcalctyp]] = 5, 15, 25) by the definition of the [[ixc_sigma]] input variable.
 
 * There has been also important work concerning the self-consistency, although this work is not finalized yet
 (one reason why hybrid functionals are not yet in production).
@@ -151,11 +151,11 @@ the number of inner iterations, see [[fockoptmix]], [[auxc_ixc]] and [[auxc_scal
 in which the ACE operator is upgraded, the wavefunction mixing has been implemented ([[fockoptmix]] and [[wfmix]]).
 
 See the new tests v7#67-72 libxc#44, 45, 72, 73, 74, 
-and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral #09.
+and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
 D.3 The [[lesson:tdepes|lesson on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
-    See all tests tutorespfn/tdepes* .
+    See all tests in `tutorespfn/tdepes*`.
     By X. Gonze and M. Giantomassi
 
 D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].
@@ -171,27 +171,28 @@ D.5 Ongoing work on the multibinit project.
 D.6 Adjustment of lesson tutoparal ucrpa, see test tutoparal#tucrpa_4.
     By B. Amadon
 
-D.7 The ddk file is now available in netCDF format, and test with the optic postprocessor has been set up.
+D.7 The ddk file is now available in netCDF format (lightweight version without first-order wavefunctions), 
+    and test with the optic post-processor has been set up.
     See the new [[test:v7_49]]. 
     By M. Giantomassi
 
-D.8 Continued development of the electron-phonon [[optdriver]]=7 module of ABINIT.
+D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABINIT.
     New input variable [[tmesh]], defining a linear mesh of temperatures, see tests [[test:v8_44]] and [[test:v8_45]].
-    Also, debuggin and improvement of doc.
+    Also, debugging and improvement of doc.
     By M. Giantomassi
 
-D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case...
+D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
     By M. Verstraete
 
-D.10 On-going development : main executable "tdep", for the TDEP algorithm, by Hellman and coworkers.
-     See src/98_main/tdep.F90, as well as directory 80_tdep . 
+D.10 On-going development: main executable `tdep`, for the TDEP algorithm, by Hellman and coworkers.
+     See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
      No automatic tests provided yet, no documentation as well ...
      By F. Bottin, J. Bouchet, J. Bieder.
 
 D.11 Capability to print perturbed vxc potential in response function calculations.
      By G. Antonius
 
-D.12 On-going modularization of all source *.F90 files, to get rid off abilint.
+D.12 On-going modularization of all source F90 files, to get rid off abilint.
      By M. Giantomassi
 
 D.13 On-going improvements in the doc, to benefit from the new processing capabilities,
@@ -204,25 +205,30 @@ D.14 Post-processing script for Raman calculations (script/post-processing/Raman
      Additionally, the script will automatically extract the dielectric tensor as a function of frequency if it is available.
      By N. Pike
 
-D.15 Refactoring for DFPT+NON_COLL : first version for PAW
+D.15 Refactoring for DFPT+NON_COLL: first version for PAW
      By M. Torrent
 
 D.16 Fix of several bugs in constrained magnetization calculations [[magconon]].
      By E. Bousquet
 
 D.17 Wrong sign of the derivative of spherical harmonics for f orbitals.
-     Can lead to problems in BSE and GW calculations with certain pseudos
-     Detected and corrected by Henrique Pereira Miranda
-     See https://gitlab.abinit.org/trunk/abinit/merge_requests/267 for the corrected expressions.
-     By Henrique Pereira Miranda
+     Can lead to problems in BSE and GW calculations if pseudos with explicit f-projectors are used.
+     Detected and corrected by Henrique Pereira Miranda.
+     See [[gitsha:87617d261b5905e368081af4b899b3ddd7ec83fe]] for the corrected expressions.
 
 D.18 Add possibility to do DFT+U calculations without spin polarization 
      in the exchange and correlation functional: the spin polarization thus only comes from the U and J terms. 
-     Can be used with usepawu=4, but still under tests.
+     Can be used with [[usepawu]] = 4, but still under tests.
      By B. Amadon
 
-D.19 Miscellaneous additional bug fixes and improvements of documentation by :
-     W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+D.19 GW is now available with [[nspinor]] = 2 with or without spin-orbit coupling,
+    and with [[nspden]] = 1 or 4 (collinear or non-collinear spin-magnetisation).
+    Implemented only in the norm-conserving case. Still under testing.
+    See tests from [[test:v8_90]] to [[test:v8_93]]. 
+    By M. Giantomassi.
+
+D.20 Miscellaneous additional bug fixes and improvements of documentation by:
+     L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 
 * * *
@@ -239,7 +245,7 @@ M. Giantomassi, O. Gingras, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, J. 
 F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, M. Torrent , M. Verstraete, J. Wiktor, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
-and examine the links to help files or test cases ...
+and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier

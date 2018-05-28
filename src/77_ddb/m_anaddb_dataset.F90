@@ -30,6 +30,7 @@ module m_anaddb_dataset
  use m_errors
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
+ use m_symtk,     only : mati3det
  use m_parser,    only : intagm
  use m_ddb,       only : DDB_QTOL
 
@@ -316,7 +317,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #undef ABI_FUNC
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1236,12 +1236,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%rifcsph=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rifcsph',tread,'DPR')
  if(tread==1) anaddb_dtset%rifcsph=dprarr(1)
- if(anaddb_dtset%rifcsph<-tol12)then
-   write(message, '(a,f10.3,3a)' )&
-&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
-&   'Action: correct rifcsph in your input file.'
-   MSG_ERROR(message)
- end if
+! if(anaddb_dtset%rifcsph<-tol12)then
+!   write(message, '(a,f10.3,3a)' )&
+!&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
+!&   'Action: correct rifcsph in your input file.'
+!   MSG_ERROR(message)
+! end if
 
 !S
 

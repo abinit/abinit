@@ -11,7 +11,8 @@ This page gives hints on how to generate the electronic band structure related t
 The eigenenergies along a set of segments can be computed (non-self-consistent
 calculations [[iscf]]=-2) using a negative value of [[kptopt]], with
 [[kptbounds]] defining the end points of the segments, and [[ndivsm]] (or
-[[ndivk]]) defining the sampling.
+[[ndivk]]) defining the sampling. Choice of output unit in the main output file 
+is governed by [[enunit]].
 
 A band structure can even be represented using weights proportional to the
 orbital content (so-called "Fat Bands"), in case of PAW calculation, see

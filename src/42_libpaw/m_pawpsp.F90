@@ -120,7 +120,7 @@ CONTAINS
 !!  lnmax=max number of (l,n) components
 !!  mqgrid=number of grid points for q grid
 !!  qgrid(mqgrid)=values at which form factors are returned
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  wfll(:,lnmax)=paw projector on radial grid
 !!
 !! OUTPUT
@@ -291,7 +291,7 @@ end subroutine pawpsp_nl
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  vloc(:)=V(r) on radial grid.
 !!  zion=nominal valence charge of atom.
 !!
@@ -469,7 +469,7 @@ end subroutine pawpsp_lo
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  nr(:)=n(r) on radial grid.
 !!
 !! OUTPUT
@@ -1807,7 +1807,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  real(dp),allocatable :: ncorwk(:),nhat(:),nhatwk(:),nwk(:),r2k(:)
  real(dp),allocatable :: rtncor(:),rtnval(:),rvlocr(:)
  real(dp),allocatable :: vbare(:),vh(:),vhnzc(:)
- real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work2(:),work3(:),work4(:)
+ real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work1b(:),work2(:),work3(:),work4(:)
  logical :: tmp_lmselect(1)
 
 ! *************************************************************************
@@ -1815,8 +1815,8 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==========================================================
 !Perfom tests on meshes
 
-! initialise logical 
- non_magnetic_xc=.false. 
+! initialise logical
+ non_magnetic_xc=.false.
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -2210,6 +2210,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc1,(msz*nspden))
        LIBPAW_ALLOCATE(vxc2,(msz*nspden))
        LIBPAW_ALLOCATE(work1,(msz))
+       LIBPAW_ALLOCATE(work1b,(msz))
        LIBPAW_ALLOCATE(work2,(msz*nspden))
        LIBPAW_ALLOCATE(work3,(msz*nspden))
        work2(1:msz)=nwk
@@ -2223,21 +2224,23 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
+       LIBPAW_DEALLOCATE(work1b)
        LIBPAW_DEALLOCATE(work2)
        LIBPAW_DEALLOCATE(work3)
      else
        LIBPAW_ALLOCATE(vxc1,(msz))
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
+       LIBPAW_ALLOCATE(work1b,(msz))
        if (pawxcdev/=0) then
          call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
@@ -2245,15 +2248,16 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
+       LIBPAW_DEALLOCATE(work1b)
      endif
 !    Compute difference of XC potentials
      if (usexcnhat==0.and.pawtab%usexcnhat/=0)  vxc1(1:msz)=vxc2(1:msz)-vxc1(1:msz)
@@ -2490,6 +2494,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 #endif
 
  LIBPAW_ALLOCATE(work1,(core_mesh%mesh_size*nspden))
+ LIBPAW_ALLOCATE(work1b,(core_mesh%mesh_size*nspden))
  LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size*nspden))
  LIBPAW_ALLOCATE(work3,(1))
  LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
@@ -2498,10 +2503,11 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,work1,1,0,work2,xclevel,xc_denpos)
  end if
  LIBPAW_DEALLOCATE(work1)
+ LIBPAW_DEALLOCATE(work1b)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
  LIBPAW_DEALLOCATE(work4)
@@ -2739,7 +2745,7 @@ subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
 !Calculate derivatives
  call nderiv_gen(dfdr(1:nr),vv,radmesh,der2=d2fdr(1:nr))
- 
+
  rho(2:nr)=d2fdr(2:nr) + 2._dp*dfdr(2:nr)/radmesh%rad(2:nr)
  call pawrad_deducer0(rho,nr,radmesh)
 
@@ -4768,7 +4774,7 @@ end subroutine pawpsp_bcast
 !!              (if density<xc_denpos, density=zero)
 !!
 !! OUTPUT
-!!  pawrad <type(pawrad_type)>=data containing PAW radial grid informations
+!!  pawrad <type(pawrad_type)>=data containing PAW radial grid information
 !!  pawtab <type(pawtab_type)>=data containing the PAW dataset (partial waves...)
 !!
 !! SIDE EFFECTS
@@ -4879,7 +4885,7 @@ subroutine pawpsp_main( &
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,  msg,'COLL')
 
-!    Return header informations
+!    Return header information
      call pawpsp_read_header_xml(lloc,lmax,pspcod,&
 &     pspxc,psxml,r2well,zion,znucl)
 !    Fill in pawpsp_header object:

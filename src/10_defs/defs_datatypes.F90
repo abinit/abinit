@@ -156,8 +156,8 @@ module defs_datatypes
 !! it set a flag for each npsp if params have been set or not. This is
 !! redundant with psps%pspcod in the way that when psps%pspcod(i) is 2,
 !! then gth_params%set(i) is .true.. GTH pseudo previous to wavelets introduction
-!! doesn't have geometric informations. These have been added on the last line.
-!! It is three radius informations, the %hasGeometry flag is there to know
+!! doesn't have geometric information. These have been added on the last line.
+!! It is three radius information, the %hasGeometry flag is there to know
 !! which kind of pseudo has been read.
 !!
 !! SOURCE
@@ -182,7 +182,7 @@ module defs_datatypes
    !   dimension = num l channels, 3 coeffs, num psp = (1:lmax+1,1:3,npsp)
 
   logical, allocatable :: hasGeometry(:)
-   ! Flag for geometric informations in the pseudo. size (npsp)
+   ! Flag for geometric information in the pseudo. size (npsp)
 
   logical, allocatable :: set(:)
    ! Consistency array, used for checking size (npsp)

@@ -30,6 +30,8 @@ module m_raman
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,           only : matr3inv
+
  implicit none
 
  private
@@ -316,7 +318,6 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'electrooptic'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
