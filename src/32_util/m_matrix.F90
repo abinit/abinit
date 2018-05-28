@@ -502,6 +502,26 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
     write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
  end do
 
+! Now, set the first coefficient of eigenvectors positive.
+
+ do im2=1,tndim ! loop over eigenvectors
+  do im1=1,tndim ! loop over components
+   if(abs(matrix(im1,im2))>tol8) then
+    if(matrix(im1,im2)<0) then
+     do im3=1,tndim
+      if(abs(matrix(im3,im2))>tol8) then
+        matrix(im3,im2)=-matrix(im3,im2)
+      endif
+     enddo
+     exit
+    endif
+   endif
+  enddo
+ enddo
+ write(std_out,*) "Impose first component of eigenvectors is positive"
+ do im1=1,tndim
+    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+ end do
 ! write(std_out,*) "inverse operation: reconstitute original matrix: then the column"
 ! Apermutcolback=zero
 ! do im1=1,tndim
