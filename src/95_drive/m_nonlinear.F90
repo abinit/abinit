@@ -39,6 +39,7 @@ module m_nonlinear
  use m_xcdata
 
  use m_dtfil,    only : status
+ use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab
  use m_symtk,    only : symmetrize_xred, littlegroup_q
  use m_dynmat,   only : d3sym, sytens
@@ -212,7 +213,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: blkflg_tmp(:,:,:,:,:,:),blkflg_sav(:,:,:,:,:,:)
  integer,allocatable :: carflg_tmp(:,:,:,:,:,:),carflg_sav(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
- real(dp) :: dum_shiftk(3,MAX_NSHIFTK)
  integer,allocatable :: indsym(:,:,:),indsy1(:,:,:),irrzon(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
  integer,allocatable :: kptindex(:,:),l_size_atm(:)
@@ -220,7 +220,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: symq(:,:,:),symrec(:,:,:),symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3)
+ real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
