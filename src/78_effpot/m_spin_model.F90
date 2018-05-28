@@ -216,6 +216,7 @@ contains
     integer, intent(in) :: mode
     integer :: i
     real(dp) :: S(3, self%nmatoms)
+    character(len=500) :: msg
     if(mode==0) then
        ! set all spin to z direction.
        S(1,:)=0.0d0
