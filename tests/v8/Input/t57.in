@@ -1,46 +1,80 @@
 # Test for the calculation of Frohlich ZPR in CaO. Really underconverged calculation, for testing purposes.
   
-  ndtset 3
+  ndtset 5
+  
+    kptopt   1
+#   ngkpt    4 4 4   # for testing purposes
+   kptrlatt -2  2  2      # In cartesian coordinates, this grid is simple cubic, and
+             2 -2  2      # actually corresponds to the so-called 8x8x8 Monkhorst-Pack grid.
+             2  2 -2
+#   nshiftk  1
+#   shiftk   0. 0. 0.
+    tolvrs   1.0d-16
+     nqpt    1
+      qpt    3*0.0
   
   # Ground state calculation
-    kptopt1   1
-    ngkpt1    2 2 2   # for testing purposes
-    nshiftk1  1
-    shiftk1   0. 0. 0.
-    tolvrs1   1.0d-22
-  
     #Restore the default parameters for the ground state part,
     #i.e. override the common parameters defined for the effective mass datasets.
     tolwfr1   0.0d0
-    nkpt1     0
+      nqpt1   0
+     nband1   8
+     nbdbuf1   0
+
+  # RF calculation of ddk
+    rfdir2   1 1 1
+    rfelfd2  2
+    kptopt2  2
+    tolwfr2  1.0d-12
+    getwfk2  -1
+      iscf2  -3
+     nband2   8
+     nbdbuf2   0
+
+  # RF calculation of phonons and electric field perturbation
+    rfphon3  1
+    rfatpol3  1 2
+    rfdir3   1 1 1
+    rfelfd3  3
+    kptopt3  2
+    tolvrs3  1.0d-8
+    getwfk3  1
+    getddk3  2
+     nband3   8
+    nbdbuf3   0
   
-  # WFK calc. at requested k-point
-  
-    iscf2    -2
-    getden2   1
-  
+  # Non-SCF at the specific points where we want to have the effective mass, including the conduction bands
+    iscf4    -2
+    getden4   1
+    kptopt4   0        # K-points can be specified in any way one want, they just need to be present in the
+    nkpt4     2        # ground state calc. too.
+    kpt4      0.00 0.00 0.00   # Gamma
+              0.00 0.50 0.50   # X
+    tolwfr4   1.0d-16  # Must use tolwfr for non-self-consistent calculations.
+      nqpt4   0
                                                                                                           
-  # Response Function calculation : d/dk
-    rfelfd3   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
+  # Response Function calculation : d/dk  at the specific points, with added bands.
+    rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
   
-    getden3   1
-    getwfk3   2
+    getden5   1
+    getwfk5   4
+    get1wf5   2
   
-    kptopt    0        # K-points can be specified in any way one want, they just need to be present in the 
-    nkpt      2        # ground state calc. too.
-    kpt       0.00 0.00 0.00   # Gamma                                                                      
+    kptopt5   0        # K-points can be specified in any way one want, they just need to be present in the 
+    nkpt5     2        # ground state calc. too.
+    kpt5      0.00 0.00 0.00   # Gamma                                                                      
               0.00 0.50 0.50   # X
               
                                                                                                           
-    tolwfr    1.0d-22  # Must use tolwfr for non-self-consistent calculations.
+    tolwfr5   1.0d-12  # Must use tolwfr for non-self-consistent calculations.
   
-    efmas3       1     # Triggers the calculation of effective mass tensors for the specified k-points.
-    efmas_bands  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+    efmas5       1     # Triggers the calculation of effective mass tensors for the specified k-points.
+    efmas_bands5 6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
                  7 9   
-    efmas_calc_dirs3 1
-    efmas_n_dirs3 7
-    efmas_ntheta3 100
-    efmas_dirs3 
+    efmas_calc_dirs5 1
+    efmas_n_dirs5 7
+    efmas_ntheta5 100
+    efmas_dirs5 
               1 0 0
               0 1 0
               0 0 1
@@ -48,8 +82,8 @@
               0 1 1
               1 0 1
               1 1 0
-     prtefmas3     1
-   
+     prtefmas5     1
+
 #######################################################################   
 acell 3*9.136
 xred
@@ -63,11 +97,11 @@ typat 1 2
 natom 2
 ntypat 2
 znucl 20 8
-# Disable symmetries.        
-nband 12
+nband 9 
 nbdbuf 2
 diemac 6
-ecut 15               # Underconverged ecut. 
+ ecut 30               # Underconverged ecut. 
+#ecut 15
 nstep 100
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
