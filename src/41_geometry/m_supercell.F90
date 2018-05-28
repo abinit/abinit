@@ -246,7 +246,9 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
  scell%ntypat = size(znucl)
  ABI_ALLOCATE(scell%znucl,(scell%ntypat))
- scell%znucl = znucl
+ print *, "znucl:", znucl
+ print *, "size:", scell%ntypat
+ scell%znucl(:) = znucl(:)
 
 !number of atoms in full supercell
  scell%natom= natom_primcell*scell%ncells

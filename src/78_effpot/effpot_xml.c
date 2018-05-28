@@ -29,6 +29,8 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
+static double const eV=1.6e-19;
+
 //define type for dynamical double format array 
 typedef struct {
   double *array;
@@ -1139,6 +1141,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
 
       //printf("index_spin: %d\n", ind_spin);
 
+      if (ind_spin>0){
       // gyroratio (optional)
       key = xmlGetProp(cur, BAD_CAST "gyroratio");
       //printf("gyroratio: %s\n", key);
@@ -1161,7 +1164,6 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
       }
       xmlFree(key);
 
-      if (ind_spin > 0) {
         (*nmatoms)++;
       }
       insertIntArray(&index_spin_array, ind_spin);
@@ -1305,7 +1307,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
               xmlFree(key);
               for(size_t i=0; i< size; i++)
                 {
-                  (*exc_vallist)[counter*3+i]=dtmp[i];
+                  (*exc_vallist)[counter*3+i]=dtmp[i]*eV;
                 }
             }
 
@@ -1386,7 +1388,7 @@ int xml_read_spin_dmi( char * fname, int *dmi_nnz, int *dmi_ilist[],
               xmlFree(key);
               for(size_t i=0; i< size; i++)
                 {
-                  (*dmi_vallist)[counter*3+i]=dtmp[i];
+                  (*dmi_vallist)[counter*3+i]=dtmp[i]*eV;
                 }
             }
 
@@ -1462,7 +1464,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               xmlFree(key);
               for(size_t i=0; i< size; i++)
                 {
-                  (*uni_amplitude_list)[i]=dtmp[i];
+                  (*uni_amplitude_list)[i]=dtmp[i]*eV;
                 }
             }
             if (!xmlStrcmp(cur3->name, BAD_CAST"direction")) {
@@ -1555,7 +1557,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
               xmlFree(key);
               for(size_t i=0; i< size; i++)
                 {
-                  (*bi_vallist)[counter*9+i]=dtmp[i];
+                  (*bi_vallist)[counter*9+i]=dtmp[i]*eV;
                 }
             }
 

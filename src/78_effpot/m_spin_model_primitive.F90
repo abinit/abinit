@@ -773,7 +773,7 @@ contains
           sc_index_spin(i)=-1
        endif
     end do
-    print *, sc_index_spin
+    !print *, sc_index_spin
 
     do i=1, sc_nmatoms
        sc_znucl(i)=1
@@ -805,9 +805,9 @@ contains
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
              end do
           end do
-          print *, "i0", self%total_ilist%data(i)
-          print *, "ii", ii, sc_index_spin(ii)
-          print *, "jj", jj, sc_index_spin(jj)
+          !print *, "i0", self%total_ilist%data(i)
+          !print *, "ii", ii, sc_index_spin(ii)
+          !print *, "jj", jj, sc_index_spin(jj)
           call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
        enddo
     enddo

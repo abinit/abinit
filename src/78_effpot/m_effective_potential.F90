@@ -1474,6 +1474,7 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
  if(present(supercell))then
    call copy_supercell(supercell,eff_pot%supercell)
  else
+   print *, "ZNUCL", eff_pot%crystal%znucl
    call init_supercell(eff_pot%crystal%natom, (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/), &
 &                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
 &                      eff_pot%crystal%znucl, eff_pot%supercell)
