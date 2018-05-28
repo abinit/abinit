@@ -1449,7 +1449,7 @@ end subroutine add_matlu
 !! CHILDREN
 !!
 !! SOURCE
- subroutine diag_matlu(matlu,matlu_diag,natom,prtopt,eigvectmatlu,nsppol_imp,checkstop,optreal)
+ subroutine diag_matlu(matlu,matlu_diag,natom,prtopt,eigvectmatlu,nsppol_imp,checkstop,optreal,test)
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
@@ -1475,11 +1475,12 @@ end subroutine add_matlu
  integer,optional,intent(in) :: nsppol_imp
  logical,optional,intent(in) :: checkstop
  integer,optional,intent(in) :: optreal
+ integer,optional,intent(in) :: test
 !Local variables-------------------------------
 !scalars
  integer :: iatom,im1,im2,im3,imc,imc1,info,ispinor,ispinor1,isppol,lwork,tndim,lworkr
  integer :: nsppol,nsppolimp,nspinor
- logical :: checkstop_in
+ logical :: checkstop_in,blockdiag
  character(len=500) :: message
 !arrays
  type(coeff2c_type),allocatable :: gathermatlu(:)
@@ -1504,6 +1505,11 @@ end subroutine add_matlu
   checkstop_in=checkstop
  else
   checkstop_in=.true.
+ endif
+ if(present(test)) then
+  blockdiag=(test==8)
+ else
+  blockdiag=.false.
  endif
  nspinor=matlu(1)%nspinor
 
@@ -1651,8 +1657,11 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
            !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
-           call blockdiago_fordsyev(valuer,tndim,eig)
-           write(6,*) "work(1)",work(1)
+           if (blockdiag) then
+             call blockdiago_fordsyev(valuer,tndim,eig)
+           else
+             call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
+           endif
 !!       For reproductibility
 !           ! valuer2: eigenvector for the perturb matrix
 !           valuer2=real(gathermatlu(iatom)%value,kind=dp)

@@ -377,7 +377,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! function to be real)
      ! ---------------------------------------------------------------
      call diag_matlu(energy_level%matlu,level_diag,natom,&
-&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1)
+&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1,&
+&     test=paw_dmft%dmft_solv)  ! temporary: test should be extended to all cases.
 
 !     call rotate_matlu(energy_level%matlu,eigvectmatlu,natom,3,1)
 !       write(message,'(a,2x,a,f13.5)') ch10,&
