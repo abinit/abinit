@@ -73,6 +73,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
  use m_Ctqmc
  use m_CtqmcInterface
+ use m_Ctqmcoffdiag
+ use m_CtqmcoffdiagInterface
  use m_GreenHyb
  use m_data4entropyDMFT
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
@@ -114,7 +116,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
  complex(dpc) :: omega_current,integral(2,2)
- real(dp) :: omega
+ real(dp) :: doccsum,noise,omega
  real(dp) :: facd,facnd
  logical :: nondiaglevels
 ! arrays
@@ -146,6 +148,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  !type(self_type) :: self
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
+ type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
@@ -250,9 +253,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  opt_nondiag should be 0 by default
  opt_diag    = 1
  if(paw_dmft%dmft_solv>=6)  then
-   opt_nondiag = 1 ! Use cthyb in triqs
+   opt_nondiag = 1 ! Use cthyb in triqs or ctqmc in abinit with offdiag terms in F
  else
-   opt_nondiag = 0 ! use fast ctqmc in ABINIT without non diagonal terms.
+   opt_nondiag = 0 ! use fast ctqmc in ABINIT without off diagonal terms in F
  end if
 
  useylm=0
@@ -323,7 +326,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    opt_diag=0
  end if
  call wrtout(std_out,message,'COLL')
-
  if(opt_diag==1) then
    write(std_out,*) "  ==  The atomic levels are diagonalized"
  else if(opt_diag==2) then
@@ -375,7 +377,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! function to be real)
      ! ---------------------------------------------------------------
      call diag_matlu(energy_level%matlu,level_diag,natom,&
-&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1)
+&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1,&
+&     test=paw_dmft%dmft_solv)  ! temporary: test should be extended to all cases.
 
 !     call rotate_matlu(energy_level%matlu,eigvectmatlu,natom,3,1)
 !       write(message,'(a,2x,a,f13.5)') ch10,&
@@ -1300,7 +1303,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    Main calls to CTQMC code in ABINIT
 ! =================================================================
-     if(paw_dmft%dmft_solv==5) then
+     if(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
 
        write(message,'(a,2x,a)') ch10,&
 &       " == Initializing CTQMC"
@@ -1308,17 +1311,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 !    Initialisation
 ! =================================================================
+     if(paw_dmft%dmft_solv==5) then
        nomega=paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
 &       std_out,paw_dmft%spacecomm)
-
-!  for non diagonal code
-!     call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
-!&         paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
-!&         paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-!&         std_out,paw_dmft%spacecomm,opt_nondiag)
-
 !    options
 ! =================================================================
        call CtqmcInterface_setOpts(hybrid,&
@@ -1330,20 +1327,41 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
 &       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
 &       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
+     if(paw_dmft%dmft_solv==8) then
+       nomega=paw_dmft%dmftqmc_l
+       call CtqmcoffdiagInterface_init(hybridoffdiag,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
+&        paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
+&        paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
+&        std_out,paw_dmft%spacecomm,opt_nondiag)
+!    options
+! =================================================================
+       call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
+       opt_Fk      =opt_fk,&
+&       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
+&       opt_analysis=paw_dmft%dmftctqmc_correl,&
+&       opt_check   =paw_dmft%dmftctqmc_check ,&
+&       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
+&       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
+&       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
        write(message,'(a,2x,2a)') ch10,&
 &       " == Initialization CTQMC done", ch10
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv>=6) then
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+         open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
-       ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
 !     use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
-         gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
          gw_tmp_nd(ifreq,nflavor,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        end do
      end if
@@ -1383,7 +1401,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    CTQMC run TRIQS
 ! =================================================================
-       else if (paw_dmft%dmft_solv>=6) then
+       else if (paw_dmft%dmft_solv==8) then
+         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         docc(:,:) = zero
+         call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+&        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
+&        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+         ABI_DEALLOCATE(docc)
+       ! TODO: Handle de luj0 case for entropy
+
+       else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
 
        ! fw1_nd: Hybridation
        ! levels_ctqmc: niveaux
@@ -1738,7 +1765,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
 ! < HACK >
-       if(paw_dmft%dmft_solv>=6) then
+       if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
          if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /=0) then
            MSG_ERROR(message)
          end if
@@ -1747,26 +1774,88 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
          close(unt)
        else
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         !call Ctqmc_printGreen(paw_dmft%hybrid(iatom)%hybrid,unt) !Problem here
-         do itau=1,paw_dmft%dmftqmc_l
-           write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-           (gtmp(itau,iflavor), iflavor=1, nflavor)
-         end do
-         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
-         close(unt)
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             (gtmp(itau,iflavor), iflavor=1, nflavor)
+           end do
+           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
+           close(unt)
+         endif
+         if(paw_dmft%dmft_solv==8) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
+&           message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+           end do
+           close(unt)
+           ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+           call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
+           do itau=1,paw_dmft%dmftqmc_l
+             do isppol=1,nsppol
+               do ispinor1=1,nspinor
+                 do im1=1,tndim
+                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+                   do ispinor2=1,nspinor
+                     do im2=1,tndim
+                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+                       matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&                        gtmp_nd(itau,iflavor1,iflavor2)
+                     end do  ! im2
+                   end do  ! ispinor2
+                 end do  ! im1
+               end do  ! ispinor
+             end do ! isppol
+             call rotate_matlu(matlu1,eigvectmatlu,natom,3,0)
+             call slm2ylm_matlu(matlu1,natom,2,0)
+             call sym_matlu(cryst_struc,matlu1,pawang)
+             call slm2ylm_matlu(matlu1,natom,1,0)
+             call rotate_matlu(matlu1,eigvectmatlu,natom,3,1)
+             do isppol=1,nsppol
+               do ispinor1=1,nspinor
+                 do im1=1,tndim
+                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+                   do ispinor2=1,nspinor
+                     do im2=1,tndim
+                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+                       gtmp_nd(itau,iflavor1,iflavor2)=&
+                        matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+                     end do  ! im2
+                   end do  ! ispinor2
+                 end do  ! im1
+               end do  ! ispinor
+             end do ! isppol
+           end do  !itau
+           call destroy_matlu(matlu1,natom)
+           ABI_DATATYPE_DEALLOCATE(matlu1)
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
+&           message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+           end do
+           close(unt)
+         endif
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
          !close(4243)
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         do ifreq=1,paw_dmft%dmft_nwlo
-           write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
-&           (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
-         end do
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do ifreq=1,paw_dmft%dmft_nwlo
+             write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
+&             (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
+           end do
+         endif
          close(unt)
        end if
 ! </ HACK >
@@ -1775,13 +1864,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      !----------------------------------------
      ! </DEBUG>
      !----------------------------------------
-     if(paw_dmft%dmft_solv>=6) then
+     if(paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
      !Nothing just hybrid var problem
      else
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC"
        call wrtout(std_out,message,'COLL')
-       call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==5) call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==8) call CtqmcoffdiagInterface_finalize(hybridoffdiag)
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC done"
        call wrtout(std_out,message,'COLL')
@@ -1903,7 +1993,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
        end do
      end if
-     if(paw_dmft%dmft_solv<6) ABI_DEALLOCATE(gw_tmp)
+     if(paw_dmft%dmft_solv<6) then
+      ! write(6,*) "dmft_solv",paw_dmft%dmft_solv
+       ABI_DEALLOCATE(gw_tmp)
+     endif
      ABI_DEALLOCATE(gw_tmp_nd)
      ABI_DEALLOCATE(gtmp)
      ABI_DEALLOCATE(gtmp_nd)

@@ -67,7 +67,6 @@ inp_files = [
 "t90.in",
 "t91.in",
 "t92.in",
-"t93.in",
 #Nonlinear + Second order Sternheimer
 "t100.in",
 "t101.in",
@@ -77,4 +76,5 @@ inp_files = [
 "t105.in",
 "t106.in",
 "t107.in"
+"t93.in"
 ]
