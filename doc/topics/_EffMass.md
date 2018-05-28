@@ -35,7 +35,7 @@ Spin-polarized systems ([[nspden]] = 2) as well as spinors ([[nspinor]] = 2)
 can be treated, although the spin-orbit interaction can only be treated in the
 PAW case.
 
-The treatment of degenerescences is limited to the extremal points of the band
+The treatment of degeneracies is limited to the extremal points of the band
 structure (which are the most relevant in any case).
 
 By the way, the first derivative of the eigenenergies is also computed and

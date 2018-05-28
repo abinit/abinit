@@ -47,7 +47,8 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  use m_xmpi
 
  use m_time,     only : timab
- use m_geometry, only : xcart2xred, xred2xcart
+ use m_geometry, only : xcart2xred, xred2xcart, strconv
+ use m_fft_mesh, only : mkgrid_fft
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type
  use m_mpinfo,   only : ptabs_fourdp
@@ -57,7 +58,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_paw'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => mkcore_paw
 !End of the abilint section
 

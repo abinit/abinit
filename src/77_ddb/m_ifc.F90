@@ -43,6 +43,7 @@ MODULE m_ifc
 
  use m_io_tools,    only : open_file
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
+ use m_symtk,       only : matr3inv
  use m_special_funcs,  only : abi_derfc
  use m_time,        only : cwtime
  use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
@@ -907,10 +908,10 @@ subroutine ifc_print(ifc,header,unit,prtvol)
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
  call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
  call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
- call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f5.2")))
+ call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom
-   call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f5.2"))
+   call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
  end do
 
  call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
@@ -1656,6 +1657,8 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
    rmax = wkdist(natom*nrpt)
 
    ! zero the outside IFCs: act on wghatm
+
+   ! fix number of spheres
    if(nsphere/=0.and.nsphere<natom*nrpt)then
      rcut_min = min(rcut_min, wkdist(nsphere+1))
      do ii=nsphere+1,natom*nrpt
@@ -1666,6 +1669,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
      end do
    end if
 
+   ! or fix radius of maximum ifc
    if(rifcsph>tol10)then
      do ii=nsphere+1,natom*nrpt
        index=list(ii)
@@ -1678,9 +1682,10 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
      end do
    end if
 
+   ! filter smoothly to 0 at edge of WS cell
    if (rifcsph < -tol10) then
      ! Use different filter
-     r0 = abs(rifcsph) * rmax; rsigma = one
+     r0 = abs(rifcsph) * rmax; rsigma = half*(rmax-r0) !one
      rcut_min = r0 ! Set it to r0
      do ii=nsphere+1,natom*nrpt
        index=list(ii)
@@ -1748,7 +1753,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_write'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

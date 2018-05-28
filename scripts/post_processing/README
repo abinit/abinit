@@ -33,18 +33,20 @@ post-processing tools
     Plot the bandstructure from _EIG.nc file.
 
 - plot_bs.py
-    Plot the electronic bandstructure, the zero-point motion renormalization and the broadening from a
-    _EP.nc file.
+    Plot the electronic bandstructure, the zero-point motion renormalization
+    and the broadening from a _EP.nc file.
 
 - rf_mods.py
-    Module conting the classes required by the "temperature_para.py" and "plot_bs.py" scripts
+    Module conting the classes required by the "temperature_para.py" and
+   "plot_bs.py" scripts
 
 - rf_mods_seq.py
     Sequential version to be used if the memory required is too large
 
 - temperature_para.py
-    Compute the temperature dependence, zero-point motion renormalization and broadening
-    from _EIGR2D.nc and _EIGI2D.nc files. This script produce a _EP.nc file that can be later used.
+    Compute the temperature dependence, zero-point motion renormalization 
+    and broadening from _EIGR2D.nc and _EIGI2D.nc files. This script 
+    produces a _EP.nc file that can be later used.
 
 - temperature_para_seq.py
     Sequential version to be used if the memory required is too large
@@ -56,6 +58,12 @@ post-processing tools
     Determines the Raman spectra from the anaddb output file as a function 
     of frequency.  With version 0.3 the user creates a simple input file to run
     the script. Examples are given with in the script itself.  After finding the
-    anaddb output file it extracts the raman matrix and the dielectric tensor,
-    if present. The code is documented internally.
+    anaddb output file it extracts the raman matrix. The code is documented
+    internally.
+
+- Elastic_debye.py
+    Determines the derived elastic properties (Bulk, Young's Modulus, Debye
+    Temperature, Thermal Conductivity @300K from Slack, etc) from the anaddb
+    output file. Program is documented internally.
+
 

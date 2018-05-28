@@ -536,7 +536,7 @@ end subroutine Get_Mem_Dev
 
  write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node:'
  call wrtout(std_out,msg,'PERS')
- 
+
 #if defined HAVE_GPU_CUDA
 !Check device(s) properties
  ABI_ALLOCATE(flops,(nb_devices))

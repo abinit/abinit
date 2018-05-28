@@ -36,6 +36,7 @@ module m_fstab
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : bisect
+ use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta
@@ -247,7 +248,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 #undef ABI_FUNC
 #define ABI_FUNC 'fstab_init'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

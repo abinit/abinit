@@ -28,7 +28,8 @@ MODULE m_dtset
  use m_errors
  use m_xmpi
 
- use m_geometry,     only : mkrdim, metric
+ use m_symtk,        only : mati3inv, littlegroup_q, symatm
+ use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm
  use defs_abitypes,  only : dataset_type
 
@@ -217,7 +218,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &           'number of electrons=',dtset%nelect,ch10,&
 &           'and spinmagntarget=',dtset%spinmagntarget,ch10,&
 &           'This combination is not possible, because of a lack of bands.',ch10,&
-&           'Action : modify input file ... ',ch10,&
+&           'Action: modify input file ... ',ch10,&
 &           '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
            MSG_ERROR(message)
          end if
@@ -239,7 +240,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &       'Initialization of occ, with nspden=',dtset%nspden,ch10,&
 &       'and spinmagntarget=',dtset%spinmagntarget,ch10,&
 &       'This combination is not possible.',ch10,&
-&       'Action : modify input file ... ',ch10,&
+&       'Action: modify input file ... ',ch10,&
 &       '(check nspden, nspinor, nsppol and spinmagntarget)'
        MSG_ERROR(message)
      end if
@@ -330,7 +331,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      MSG_WARNING(message)
 
      write(message, '(a,a,a,a,a,a)' ) &
-&     'Action : check input file for occ,wtk, and charge.',ch10,&
+&     'Action: check input file for occ,wtk, and charge.',ch10,&
 &     'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
 &     'but IS automatically normalized otherwise.',ch10
      call wrtout(std_out,message,'COLL')
@@ -595,6 +596,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
  dtout%hyb_range_fock  = dtin%hyb_range_fock
+ dtout%hmcsst             = dtin%hmcsst  
+ dtout%hmctt              = dtin%hmctt  
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -686,6 +689,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%nkpt               = dtin%nkpt
  dtout%nkpthf             = dtin%nkpthf
  dtout%nkptgw             = dtin%nkptgw
+ dtout%nonlinear_info     = dtin%nonlinear_info
  dtout%nline              = dtin%nline
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf
@@ -870,6 +874,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%use_nonscf_gkk     = dtin%use_nonscf_gkk
  dtout%usepaw             = dtin%usepaw
  dtout%usepawu            = dtin%usepawu
+ dtout%usepead            = dtin%usepead
  dtout%usepotzero         = dtin%usepotzero
  dtout%userec             = dtin%userec
  dtout%useria             = dtin%useria
@@ -1537,7 +1542,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 &       'The component number',idtset,' of the input variable ',trim(getname),',',&
 &       ' equal to',getvalue,',',ch10,&
 &       'does not correspond to an existing index.',ch10,&
-&       'Action : correct ',trim(getname),' or jdtset in your input file.'
+&       'Action: correct ',trim(getname),' or jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end if
@@ -1599,7 +1604,6 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -2210,7 +2214,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
      elseif(dtsets(idtset)%accuracy>6)then
        write(message, '(a,a,a)' )&
 &       'accuracy >6 is forbiden !',ch10,&
-&       'Action : check your input data file.'
+&       'Action: check your input data file.'
        MSG_ERROR(message)
      end if
    else

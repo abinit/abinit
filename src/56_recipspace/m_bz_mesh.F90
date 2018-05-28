@@ -54,6 +54,7 @@ MODULE m_bz_mesh
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
+ use m_symtk,          only : chkgrp, littlegroup_q
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
@@ -2620,7 +2621,6 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_init'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

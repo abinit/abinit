@@ -33,10 +33,12 @@ MODULE m_memeval
  use m_xmpi
  use m_errors
 
- use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
+ use m_symtk,         only : mati3inv, littlegroup_q
+ use m_spgdata,       only : prtspgroup
  use m_fftcore,       only : getng
  use m_kg,            only : getmpw
+ use m_libpaw_tools,  only : libpaw_write_comm_set
 
  implicit none
 
@@ -89,8 +91,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory_eval'
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -376,7 +376,7 @@ end subroutine memory_eval
 !!  mgfftdiel =maximum single fft dimension for susceptibility and dielectric
 !!   matrices.
 !!  mkmem =maximum number of k points which can fit in core memory
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpssang is 1+maximum angular momentum for nonlocal pseudopotential
 !!  mpssoang is 1+maximum (spin*angular momentum) for nonlocal pseudopotential
 !!  mpw   =maximum number of planewaves in basis sphere (large number)
@@ -2595,13 +2595,13 @@ end subroutine setmqgrid
 !! INPUTS
 !!  dtset=<type datafiles_type>contains all input variables.
 !!  idtset=number of the current dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npsp=number of pseudopotentials
-!!  option : if 0 , no test of available memory
-!!           if 1 , the routine tries to allocate the estimated memory, for testing
-!!                    purposes, and if a failure occurs, the routine stops.
-!!           if 2 , like 1, but before stopping, the routine will provide
-!!                    an estimation of the available memory.
+!!  option: if 0, no test of available memory
+!!          if 1, the routine tries to allocate the estimated memory, for testing
+!!                purposes, and if a failure occurs, the routine stops.
+!!          if 2, like 1, but before stopping, the routine will provide
+!!                an estimation of the available memory.
 !!  pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!

@@ -64,13 +64,13 @@ program multibinit
  use m_fstrings,   only : replace, inupper
  use m_time,       only : asctime, timein
  use m_parser,     only : instrng
+ use m_dtfil,      only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_78_effpot
  use interfaces_95_drive
 !End of the abilint section

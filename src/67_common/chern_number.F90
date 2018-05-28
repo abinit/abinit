@@ -84,22 +84,21 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  use m_xmpi
  use m_errors
  use m_profiling_abi
-
  use m_orbmag
 
- use m_fftcore, only : kpgsph
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
+ use m_fftcore,  only : kpgsph
+ use m_berrytk,  only : smatrix
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-      & pawcprj_get, pawcprj_getdim, pawcprj_set_zero
+                        pawcprj_get, pawcprj_getdim, pawcprj_set_zero
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
@@ -123,8 +122,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
 
 !Local variables -------------------------
-!scalars
- integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
+ !scalars
+ integer :: adir,bdir,bdx,bdxc,bfor,bsigma,ddkflag,epsabg,gdir,gdx,gdxc,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg
  integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
  integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3,npw_k,npw_kb,npw_kg,shiftbd
@@ -134,19 +133,19 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  !arrays
  integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
  real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2)
- real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
- real(dp),allocatable :: smat_kk(:,:,:)
- logical,allocatable :: has_smat(:,:)
+ real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:)
+ real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:),smat_inv(:,:,:),smat_kk(:,:,:)
+ logical,allocatable :: has_smat_indx(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
 
 ! ***********************************************************************
-! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+ ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
 
 ! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- 
+
  nband_k = dtorbmag%mband_occ
 
  if (usepaw == 1) then ! cprj allocation
@@ -187,17 +186,17 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
 
  ddkflag = 1
- 
+
 !itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
  itrs = 0
- 
+
  job = 1
  shiftbd = 1
 
- ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,dtorbmag%fnkpt))
- ABI_ALLOCATE(smat_all,(2,nband_k,nband_k,dtorbmag%fnkpt,dtorbmag%fnkpt))
- has_smat(:,:)=.FALSE.
- 
+ ABI_ALLOCATE(has_smat_indx,(dtorbmag%fnkpt,0:6,0:6))
+ ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
+ has_smat_indx(:,:,:)=.FALSE.
+
  do adir = 1, 3
 
    IA = czero
@@ -215,10 +214,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
      ! loop over kpts, assuming for now kptopt 3, nsppol = 1, nspinor = 1
      ! and no parallelism, no symmorphic symmetry elements
-     
-     
+
+
      do ikpt = 1, dtorbmag%fnkpt
-        
+
         icprj = dtorbmag%cprjindex(ikpt,isppol)
 
         npw_k = npwarr(ikpt)
@@ -235,6 +234,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
            else
               bsigma = -1
            end if
+           ! index of neighbor 1..6
+           bdx = 2*bdir-2+bfor
+           ! index of ikpt viewed from neighbor
+           bdxc = 2*bdir-2+bfor+bsigma
 
            dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
            deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
@@ -251,9 +254,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                 & ikptb,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
                 & my_nspinor,dtset%nsppol,0)
 
-           if (.NOT. has_smat(ikpt,ikptb)) then
+           if (.NOT. has_smat_indx(ikpt,bdx,0)) then
 
-              call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
+              call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
+                   & dtorbmag%lmn_size,dtset%mband,&
                    & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
               sflag_k=0
@@ -263,15 +267,15 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
               do nn = 1, nband_k
                  do n1 = 1, nband_k
-                    smat_all(1,nn,n1,ikpt,ikptb) =  smat_kk(1,nn,n1)
-                    smat_all(2,nn,n1,ikpt,ikptb) =  smat_kk(2,nn,n1)
-                    smat_all(1,n1,nn,ikptb,ikpt) =  smat_kk(1,nn,n1)
-                    smat_all(2,n1,nn,ikptb,ikpt) = -smat_kk(2,nn,n1)
+                    smat_all_indx(1,nn,n1,ikpt,bdx,0) =  smat_kk(1,nn,n1)
+                    smat_all_indx(2,nn,n1,ikpt,bdx,0) =  smat_kk(2,nn,n1)
+                    smat_all_indx(1,n1,nn,ikptb,bdxc,0) =  smat_kk(1,nn,n1)
+                    smat_all_indx(2,n1,nn,ikptb,bdxc,0) = -smat_kk(2,nn,n1)
                  end do
               end do
 
-              has_smat(ikpt,ikptb) = .TRUE.
-              has_smat(ikptb,ikpt) = .TRUE.
+              has_smat_indx(ikpt,bdx,0) = .TRUE.
+              has_smat_indx(ikptb,bdxc,0) = .TRUE.
 
            end if
 
@@ -281,6 +285,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
               else
                  gsigma = -1
               end if
+              ! index of neighbor 1..6
+              gdx = 2*gdir-2+gfor
+              ! index of ikpt viewed from neighbor
+              gdxc = 2*gdir-2+gfor+gsigma
 
               dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
               deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
@@ -297,10 +305,11 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                    & ikptg,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
                    & my_nspinor,dtset%nsppol,0)
 
-              if (.NOT. has_smat(ikpt,ikptg)) then
+              if (.NOT. has_smat_indx(ikpt,gdx,0)) then
 
-                 call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-                      &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                 call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
+                      & dtorbmag%lmn_size,dtset%mband,&
+                      & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
                  sflag_k=0
                  call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgg,itrs,job,nband_k,&
@@ -309,27 +318,29 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
-                       smat_all(1,nn,n1,ikpt,ikptg) =  smat_kk(1,nn,n1)
-                       smat_all(2,nn,n1,ikpt,ikptg) =  smat_kk(2,nn,n1)
-                       smat_all(1,n1,nn,ikptg,ikpt) =  smat_kk(1,nn,n1)
-                       smat_all(2,n1,nn,ikptg,ikpt) = -smat_kk(2,nn,n1)
+                       smat_all_indx(1,nn,n1,ikpt,gdx,0) =  smat_kk(1,nn,n1)
+                       smat_all_indx(2,nn,n1,ikpt,gdx,0) =  smat_kk(2,nn,n1)
+                       smat_all_indx(1,n1,nn,ikptg,gdxc,0) =  smat_kk(1,nn,n1)
+                       smat_all_indx(2,n1,nn,ikptg,gdxc,0) = -smat_kk(2,nn,n1)
                     end do
                  end do
 
-                 has_smat(ikpt,ikptg) = .TRUE.
-                 has_smat(ikptg,ikpt) = .TRUE.
+                 has_smat_indx(ikpt,gdx,0) = .TRUE.
+                 has_smat_indx(ikptg,gdxc,0) = .TRUE.
 
               end if
 
               dkbg = dkg - dkb
 
-              if (.NOT. has_smat(ikptb,ikptg)) then
+              if (.NOT. has_smat_indx(ikpt,bdx,gdx)) then
 
-                 call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-                      &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                 call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
+                      & dtorbmag%lmn_size,dtset%mband,&
+                      & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
-                 call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,dtorbmag%indkk_f2ibz,ikptb,ikptg,&
-                      &             kg,dtorbmag%kgindex,mpi_enreg,npw_kb,pwind_bg,symrec)
+                 call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                      & dtorbmag%indkk_f2ibz,ikptb,ikptg,&
+                      & kg,dtorbmag%kgindex,mpi_enreg,npw_kb,pwind_bg,symrec)
 
                  sflag_k=0
                  call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icgb,icgg,itrs,job,nband_k,&
@@ -338,35 +349,35 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
-                       smat_all(1,nn,n1,ikptb,ikptg) =  smat_kk(1,nn,n1)
-                       smat_all(2,nn,n1,ikptb,ikptg) =  smat_kk(2,nn,n1)
-                       smat_all(1,n1,nn,ikptg,ikptb) =  smat_kk(1,nn,n1)
-                       smat_all(2,n1,nn,ikptg,ikptb) = -smat_kk(2,nn,n1)
+                       smat_all_indx(1,nn,n1,ikpt,bdx,gdx) =  smat_kk(1,nn,n1)
+                       smat_all_indx(2,nn,n1,ikpt,bdx,gdx) =  smat_kk(2,nn,n1)
+                       smat_all_indx(1,n1,nn,ikpt,gdx,bdx) =  smat_kk(1,nn,n1)
+                       smat_all_indx(2,n1,nn,ikpt,gdx,bdx) = -smat_kk(2,nn,n1)
                     end do
                  end do
 
-                 has_smat(ikptb,ikptg) = .TRUE.
-                 has_smat(ikptg,ikptb) = .TRUE.
+                 has_smat_indx(ikpt,bdx,gdx) = .TRUE.
+                 has_smat_indx(ikpt,gdx,bdx) = .TRUE.
 
               end if
 
               do nn = 1, nband_k
                  do n1 = 1, nband_k
 
-                    t1A = cmplx(smat_all(1,nn,n1,ikpt,ikptb),smat_all(2,nn,n1,ikpt,ikptb))
+                    t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
                     t1B = t1A
 
                     do n2 = 1, nband_k
 
-                       t2A = cmplx(smat_all(1,n1,n2,ikptb,ikptg),smat_all(2,n1,n2,ikptb,ikptg))
-                       t3A = conjg(cmplx(smat_all(1,nn,n2,ikpt,ikptg),smat_all(2,nn,n2,ikpt,ikptg)))
+                       t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdx),smat_all_indx(2,n1,n2,ikpt,bdx,gdx))
+                       t3A = conjg(cmplx(smat_all_indx(1,nn,n2,ikpt,gdx,0),smat_all_indx(2,nn,n2,ikpt,gdx,0)))
 
-                       t2B = conjg(cmplx(smat_all(1,n2,n1,ikpt,ikptb),smat_all(2,n2,n1,ikpt,ikptb)))
+                       t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0)))
 
                        do n3 = 1, nband_k
 
-                          t3B = cmplx(smat_all(1,n2,n3,ikpt,ikptg),smat_all(2,n2,n3,ikpt,ikptg))
-                          t4B=conjg(cmplx(smat_all(1,nn,n3,ikpt,ikptg),smat_all(2,nn,n3,ikpt,ikptg)))
+                          t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0))
+                          t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0)))
 
                           tprodB = t1B*t2B*t3B*t4B
                           IB = IB - epsabg*bsigma*gsigma*tprodB/(2.0*deltab*2.0*deltag)
@@ -400,7 +411,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
- 
+
  write(message,'(a)')' Chern number C from orbital magnetization '
  call wrtout(ab_out,message,'COLL')
  write(message,'(a,a)')'----C is a real vector, given along Cartesian directions----',ch10
@@ -418,7 +429,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 !  ! =======================================
 !  ! code to test orthonormality of cg_k
 !  ! =======================================
- 
+
 !  ikpt = 2
 !  npw_k = npwarr(ikpt)
 !  isppol = 1
@@ -438,7 +449,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 !        ket_end = ket_start + npw_k*my_nspinor - 1
 !        ket(1:2,1:npw_k*my_nspinor) = cg(1:2,ket_start:ket_end)
 
-!        tot_r = 0.0; tot_i = 0.0     
+!        tot_r = 0.0; tot_i = 0.0
 !        do ispinor = 1, my_nspinor
 !           ovlp_r = 0.0; ovlp_i = 0.0
 !           spnshft = (ispinor-1)*npw_k
@@ -513,8 +524,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_DEALLOCATE(pwind_bg)
  ABI_DEALLOCATE(pwnsfac_k)
 
- ABI_DEALLOCATE(has_smat)
- ABI_DEALLOCATE(smat_all)
+ ABI_DEALLOCATE(has_smat_indx)
+ ABI_DEALLOCATE(smat_all_indx)
 
 end subroutine chern_number
 !!***

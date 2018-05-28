@@ -10,7 +10,8 @@ module m_tdep_latt
  use m_profiling_abi
  use m_errors
 
- use m_geometry,  only : metric
+ use m_symtk,            only : matr3inv
+ use m_geometry,         only : metric
  use m_tdep_readwrite,   only : Input_Variables_type
 
  implicit none
@@ -91,7 +92,6 @@ end subroutine
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_make_latt'
- use interfaces_32_util
 !End of the abilint section
 
   implicit none
