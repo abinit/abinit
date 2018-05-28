@@ -55,6 +55,7 @@ Install the python packages required to build the website with:
 
 ```sh
 pip install -r requirements.txt
+cd abimkdocs_plugin ; pip install -e . ; cd ..
 ```
 
 !!! note
