@@ -10,7 +10,7 @@
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (B.Amadon, J. Denier and J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
