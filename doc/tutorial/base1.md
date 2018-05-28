@@ -77,7 +77,7 @@ Later, you will again modify these lines, to treat more cases.
 Make sure that the last line, gives the correct location of the pseudopotential file.
 Close `tbase1_x.files` then copy [[tests/tutorial/Input/tbase1_1.in]] in `Work`:  
 
-    cp ../tbase1_1.in
+    cp ../tbase1_1.in .
 
 Also later, we will look at this file, and learn about its content. 
 For now, you will try to run the code. Its name is `abinit`. 
