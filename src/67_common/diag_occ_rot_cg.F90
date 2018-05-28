@@ -92,7 +92,7 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 
   if(nband /= blocksize) then
     message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure &
-& that bandpp*npband = blocksize."
+& that bandpp*npband = nband."
     MSG_ERROR(message)
   end if
 
@@ -111,14 +111,14 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 
 ! Compute the optimal working array size
   ABI_ALLOCATE(work,(1))
-  work = zero
+  work = czero
   call zheev('V', 'U', blocksize, occ_nd_cpx, blocksize, occ_diag, work, -1, rwork, info)
   lwork = work(1)
   ABI_DEALLOCATE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
   ABI_ALLOCATE(work,(lwork))
-  work = zero
+  work = czero
 
   call zheev('V', 'U', blocksize, occ_nd_cpx, blocksize, occ_diag, work, lwork, rwork, info)
 ! occ_nd_cpx is now the eigen vectors (P) of the occ_nd matrix
