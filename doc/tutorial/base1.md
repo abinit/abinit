@@ -373,7 +373,7 @@ Could you answer the following questions?
     experimental excitation energies! (Well, more is to be said later about this ...).
 
 
-??? note "Q5. Can you insert [[prtvol]] = 2 in the input file, run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?"
+??? note "Q5. Can you set [[prtvol]] to 2 in the input file, run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?"
 
     The maximum electronic density in electron per Bohr cube is reached at the mid-point between the two H atoms: 
     
@@ -618,7 +618,7 @@ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -0.11112
 ```
 
-If you run again, while having inserted in the input file [[prtvol]] 2, because [[occopt]], 
+If you run again, while having set [[prtvol]] to 2 in the input file, because [[occopt]], 
 the charge density and spin polarisation at each point of the FFT grid is also analyzed: 
     
 ```
