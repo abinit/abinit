@@ -959,7 +959,7 @@ SUBROUTINE GreenHyboffdiag_setN(op,N)
   IF ( op%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_setN: green op%operator not set                ")
   DO iflavor=1, op%nflavors
-    write(6,*) "iflavor",-N(iflavor)*op%signvaluemeas ,2*op%oper(op%samples,iflavor,iflavor),(N(iflavor)-1.d0)*op%signvaluemeas
+   ! write(6,*) "iflavor",-N(iflavor)*op%signvaluemeas ,2*op%oper(op%samples,iflavor,iflavor),(N(iflavor)-1.d0)*op%signvaluemeas
     ! the mulplication by signvaluemeas is necessary because N is
     ! exactly the number of electrons in the flavor iflavor whereas
     ! op%oper is not exact, because it still has to be divided by
@@ -1055,7 +1055,7 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
     op%Mk(iflavor,iflavor2,2) = 0.d0
   endif
   op%setMk = op%setMk + 1
-write(6,*) "mom1",op%Mk(iflavor,iflavor2,:)
+!write(6,*) "mom1",op%Mk(iflavor,iflavor2,:)
 END SUBROUTINE GreenHyboffdiag_setMuD1
 !!***
 
@@ -1126,7 +1126,7 @@ SUBROUTINE GreenHyboffdiag_setMoments(op,iflavor1,iflavor1b,u1,u2,u3)
     op%Mk(iflavor1,iflavor1b,2) = u3
     op%Mk(iflavor1,iflavor1b,3) = 0.d0
   endif
-write(6,*) "mom",iflavor1,iflavor1b, op%Mk(iflavor1,iflavor1b,:)
+!write(6,*) "mom",iflavor1,iflavor1b, op%Mk(iflavor1,iflavor1b,:)
 
   op%setMk = op%setMk + 1
 
@@ -1716,7 +1716,7 @@ include 'mpif.h'
 
   DO iflavor1 = 1, nflavors
     DO iflavor2 = 1, nflavors
-    write(6,*) "   Moments:",op%Mk(iflavor1,iflavor2,:),iflavor1,iflavor2
+   ! write(6,*) "   Moments:",op%Mk(iflavor1,iflavor2,:),iflavor1,iflavor2
   
 ! construct the B vector from A.Xm=B
       XM(1) = 4.d0*op%Mk(iflavor1,iflavor2,3)

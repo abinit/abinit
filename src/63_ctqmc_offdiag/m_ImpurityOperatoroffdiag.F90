@@ -172,7 +172,7 @@ SUBROUTINE ImpurityOperatoroffdiag_init(op, flavors, beta)
   FREEIF(op%overlaps)
   MALLOC(op%overlaps,(1:flavors,1:flavors))
   op%overlaps = 0.d0
-  if(.NOT.ALLOCATED(op%updates)) write(6,*) "NOT ALLOCATED"
+ ! if(.NOT.ALLOCATED(op%updates)) write(6,*) "NOT ALLOCATED"
   !FREEIF(op%updates)
   IF(ALLOCATED(op%updates)) THEN 
     write(6,*) "ALLOCATED",size(op%updates)

@@ -3335,7 +3335,7 @@ include 'mpif.h'
 !sui!write(6,*) "getresults"
   CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
   CALL GreenHyboffdiag_getHybrid(op%Greens)
-  write(6,*) "op%measN",op%measN(1,:)
+ ! write(6,*) "op%measN",op%measN(1,:)
   MALLOC(measN_1,(flavors))
   do iflavor=1,flavors
     measN_1(iflavor)=op%measN(1,iflavor)
@@ -3358,7 +3358,7 @@ include 'mpif.h'
       !sui!write(6,*) "greens2"
     fullempty=0.d0
     buffer2 = op%Greens%oper
-    write(6,*) "buffer2",(op%Greens%oper(1,n1,n1),n1=1,flavors)
+    !write(6,*) "buffer2",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     buffer2s= 0.d0
     do iflavor=1,flavors
       do itau=1,sizeoper
@@ -3597,11 +3597,11 @@ include 'mpif.h'
    !   op%Greens(iflavor)%oper          = buffer(1:sp1          , iflavor)
    ! END DO
     op%Greens%oper = buffer2s/float(nbprocs)
-    write(6,*) "buffer2s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
+   ! write(6,*) "buffer2s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     op%Greens%signvaluemeas = signvaluemeassum/float(nbprocs)
     !sui!write(6,*) "nbprocs",nbprocs,op%Greens%signvaluemeas
     op%Greens%oper = op%Greens%oper / op%Greens%signvaluemeas
-    write(6,*) "buffer3s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
+   ! write(6,*) "buffer3s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     IF ( op%opt_order .GT. 0 ) THEN
       op%meas_fullemptylines= fullempty/float(nbprocs)
     ENDIF
@@ -3831,7 +3831,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
         u2 = u2 + UUnn 
       END DO
     END DO  
-      write(6,*) "u1,u2",u1,u2
+     ! write(6,*) "u1,u2",u1,u2
 
     DO iflavor1b = 1, flavors
       u3 =-(op%Impurity%mat_U(iflavor1,iflavor1b))*op%Greens%oper(1,iflavor1,iflavor1b)

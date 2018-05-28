@@ -251,7 +251,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  integer :: im1,im2,im3,info,lwork,im4,im5,indice_formax,shift
  character(len=500) :: message
  real(dp):: tmpx,maxvalue
- integer(dp):: tmpi,newstarting,current_dege
+ integer(dp):: tmpi,newstarting,current_dege,prtopt
 !arrays
  real(dp),allocatable :: rwork(:)
  real(dp),allocatable :: work(:)
@@ -288,6 +288,8 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
    Permutcol(im1,im1)=1.d0
  end do
 
+ prtopt=1
+
  ABI_ALLOCATE(nonnul,(tndim))
  do im1=1,tndim
    if(im1==1) nonnul(im1)=0
@@ -310,17 +312,21 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
      endif
    enddo
  enddo
- write(std_out,*) "MATRIX AFTER COLUMN PERMUT"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
- write(std_out,*) "Permutcol MATRIX AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Permutcol(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "MATRIX AFTER COLUMN PERMUT"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+   write(std_out,*) "Permutcol MATRIX AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Permutcol(im1,im2),im2=1,tndim)
+   end do
+ endif
 
  ABI_ALLOCATE(Apermutcol,(tndim,tndim))
- write(std_out,*) "Check product of original matrix by permutation matrix "
+ if(prtopt==1) then
+   write(std_out,*) "Check product of original matrix by permutation matrix "
+ endif 
  Apermutcol=zero
  do im1=1,tndim
   do im2=1,tndim
@@ -331,10 +337,12 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
    end do
   end do
  end do
- write(std_out,*) "Asave*Permutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "Asave*Permutcol"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
+   end do
+ endif
  
 
 
@@ -367,16 +375,20 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
      endif
    enddo
  enddo
- write(std_out,*) "matrix AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
- write(std_out,*) "Permutline MATRIX AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Permutline(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "matrix AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+   write(std_out,*) "Permutline MATRIX AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Permutline(im1,im2),im2=1,tndim)
+   end do
+ endif
 
- write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
+ if(prtopt==1) then
+   write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
+ endif
  ABI_ALLOCATE(Apermutline,(tndim,tndim))
  Apermutline=zero
  do im1=1,tndim
@@ -388,23 +400,27 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
    end do
   end do
  end do
- write(std_out,*) "Permutline*Apermutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutline(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "Permutline*Apermutcol"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutline(im1,im2),im2=1,tndim)
+   end do
+ endif
  work=0.d0
  call dsyev('v','u',tndim,matrix_save,tndim,eig,work,lwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (dsyev) ! - '
   MSG_ERROR(message)
  end if
- write(std_out,*) 'output',INFO
- write(std_out,*) "Eigenvalues"
- write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
- write(std_out,*) "Eigenvectors"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix_save(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) 'output',INFO
+   write(std_out,*) "Eigenvalues"
+   write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
+   write(std_out,*) "Eigenvectors"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix_save(im1,im2),im2=1,tndim)
+   end do
+ endif
 
 
 ! call dsyev('v','u',tndim,A,LDA,W,WORKTMP,LWORK,INFO)
@@ -416,13 +432,15 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
   message = 'Error in diagonalization of matrix (dsyev) ! - '
   MSG_ERROR(message)
  end if
- write(std_out,*) 'output',INFO
- write(std_out,*) "Eigenvalues"
- write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
- write(std_out,*) "Eigenvectors"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+  write(std_out,*) 'output',INFO
+  write(std_out,*) "Eigenvalues"
+  write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
+  write(std_out,*) "Eigenvectors"
+  do im1=1,tndim
+     write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
+  end do
+ endif
 
 
 !! REORDER EIGENVECTORS
@@ -440,7 +458,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
   else 
    !new set of degenerate state: reorder it: put it into block diagonal
    !form for column
-     write(6,*) "newstarting, current_dege",newstarting, current_dege
+     if(prtopt==1) write(std_out,*) "newstarting, current_dege",newstarting, current_dege
      shift=0
      do im1=1,tndim ! balaye les premiers coefficients puis les autres
 
@@ -470,21 +488,27 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
        !end do
 
      enddo
-     write(std_out,*) "Eigenvectors after set of dege"
-     do im2=1,tndim
-        write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im2,im3),im3=1,tndim)
-     end do
+     if(prtopt==1) then
+       write(std_out,*) "Eigenvectors after set of dege"
+       do im2=1,tndim
+          write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im2,im3),im3=1,tndim)
+       end do
+     endif
      newstarting=im4
      current_dege=1
   endif
  enddo
  ABI_DEALLOCATE(nonnuldege)
- write(std_out,*) "Ordered Eigenvectors"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "Ordered Eigenvectors"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+ endif
 
- write(std_out,*) "inverse operation: reconstitute original matrix: only the line here"
+ if(prtopt==1) then
+   write(std_out,*) "inverse operation: reconstitute original matrix: only the line here"
+ endif
  ABI_ALLOCATE(Apermutlineback,(tndim,tndim))
  Apermutlineback=zero
  do im1=1,tndim
@@ -497,31 +521,35 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
   end do
  end do
  matrix=Apermutlineback
- write(std_out,*) "t(Permutline)*Apermutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "t(Permutline)*Apermutcol"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+ endif
 
 ! Now, set the first coefficient of eigenvectors positive.
 
  do im2=1,tndim ! loop over eigenvectors
-  do im1=1,tndim ! loop over components
-   if(abs(matrix(im1,im2))>tol8) then
-    if(matrix(im1,im2)<0) then
-     do im3=1,tndim
-      if(abs(matrix(im3,im2))>tol8) then
-        matrix(im3,im2)=-matrix(im3,im2)
-      endif
-     enddo
-     exit
-    endif
-   endif
-  enddo
+   do im1=1,tndim ! loop over components
+     if(abs(matrix(im1,im2))>tol8) then
+       if(matrix(im1,im2)<0) then
+         do im3=1,tndim
+           if(abs(matrix(im3,im2))>tol8) then
+             matrix(im3,im2)=-matrix(im3,im2)
+           endif
+         enddo
+       endif
+       exit
+     endif
+   enddo
  enddo
- write(std_out,*) "Impose first component of eigenvectors is positive"
- do im1=1,tndim
-    write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
+ if(prtopt==1) then
+   write(std_out,*) "Impose first component of eigenvectors is positive"
+   do im1=1,tndim
+      write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+ endif
 ! write(std_out,*) "inverse operation: reconstitute original matrix: then the column"
 ! Apermutcolback=zero
 ! do im1=1,tndim

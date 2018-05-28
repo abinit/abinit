@@ -336,8 +336,8 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
                            opt_spectra=op%opt_spectra, &
                            opt_gMove=op%opt_gMove)
 
-  write(6,*) "op%Hybrid%stats",op%Hybrid%stats
-  write(6,*) "opt_gMove",op%opt_gMove
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+ ! write(6,*) "opt_gMove",op%opt_gMove
 
   CALL Ctqmcoffdiag_getResult(op%Hybrid)
 
@@ -345,7 +345,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
     CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)
   END IF
 
-  write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
 
   IF ( PRESENT(Gtau) .AND. PRESENT(Gw) ) THEN
     CALL Ctqmcoffdiag_getGreen(op%Hybrid, Gtau=Gtau, Gw=Gw)
@@ -358,13 +358,13 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
     CALL Ctqmcoffdiag_getGreen(op%Hybrid, Gw=Gw)
   END IF
 
-  write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
 
   IF ( PRESENT(D) ) &
   CALL Ctqmcoffdiag_getD(op%Hybrid, D)
   Docc=op%Hybrid%measDE
 
-  write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
 
   IF ( PRESENT(E) .AND. PRESENT(Noise) ) &
   CALL Ctqmcoffdiag_getE(op%Hybrid, E, Noise)
@@ -467,7 +467,7 @@ SUBROUTINE CtqmcoffdiagInterface_finalize(op)
 
   !IF ( op%Hybrid%init .EQV. .TRUE. ) THEN
 !    CALL Ctqmcoffdiag_printAll(op%Hybrid)
-         write(6,*) "before ctqmc_destroy in Ctqmcoffdiaginterface_finalize"
+         !write(6,*) "before ctqmc_destroy in Ctqmcoffdiaginterface_finalize"
     CALL Ctqmcoffdiag_destroy(op%Hybrid)
   !END IF
 
