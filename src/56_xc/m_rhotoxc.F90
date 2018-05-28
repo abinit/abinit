@@ -41,6 +41,7 @@ module m_rhotoxc
  use m_xcpositron,       only : xcpositron
  use m_drivexc,          only : size_dvxc, drivexc_main, xcmult, mkdenpos
  use m_xclda,            only : xctfw
+ use m_xctk,             only : xcden, xcpot
 
  implicit none
 
@@ -265,7 +266,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotoxc'
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

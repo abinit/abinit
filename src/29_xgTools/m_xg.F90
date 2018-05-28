@@ -353,14 +353,14 @@ module m_xg
         ABI_FREE(xg%vecR)
       end if
       ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-      !xg%vecR(:,:) = 0.d0
+      xg%vecR(:,:) = 0.d0
       xg%trans = 't'
     case (SPACE_C)
       if ( allocated(xg%vecC) ) then
         ABI_FREE(xg%vecC)
       end if
       ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-      !xg%vecC(:,:) = dcmplx(0.d0)
+      xg%vecC(:,:) = dcmplx(0.d0)
       xg%trans = 'c'
     case default
       MSG_ERROR("Invalid space")
