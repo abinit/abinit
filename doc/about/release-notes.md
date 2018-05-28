@@ -37,6 +37,9 @@ A.4 Replaced *tribes* by *relevance* in doc/topics.
 A.5 Replace `EELF` file extension by `ELF`. See [[prtelf]].
     By Guido Petretto.
 
+A.6 Definition of a maximal value for dilatmx, at 1.15 , than can be bypassed by setting chkdilatmx=0.
+    This is to prevent users slowing down ABINIT too much inadvertantly.
+
 * * *
 
 ### B. Most noticeable achievements
@@ -52,7 +55,7 @@ B.1 The whole ABINIT documentation has been placed under the control of [mkdocs]
     The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
     central bibliographic database.
     Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
-    By M. Giantomassi, with some help from X. Gonze
+    By M. Giantomassi, with some help from X. Gonze.
 
 B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
     for the ddk, electric field and atomic displacement perturbations,
@@ -109,6 +112,12 @@ C.5 Upgrade Abinit to PSML API 1.1.
 
 C.6 Allowed for free-form link flags statements in configure options
     By Y. Pouillon
+
+C.7 Intel 18.0 is now officially supported (one bot using it is present in the test farm).
+    The situation is not perfect though, as  in mrgscr and mrgdv, the ADVANCE='NO' specification for the write instruction does not work, but
+   it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
+   Namely, v3#87-91, vv67mbpt#37-39, v7#86-88, v8#41-44, v8#63
+   Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
 
 * * *
 

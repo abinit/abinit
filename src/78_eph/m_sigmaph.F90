@@ -62,6 +62,7 @@ module m_sigmaph
  use m_occ,            only : occ_fd, occ_be
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -351,7 +352,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

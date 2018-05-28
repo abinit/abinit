@@ -80,12 +80,12 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  use m_xc_noncoll
 
  use m_time,      only : timab
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc_noncoll'
- use interfaces_56_xc, except_this_one => dfpt_mkvxc_noncoll
 !End of the abilint section
 
  implicit none

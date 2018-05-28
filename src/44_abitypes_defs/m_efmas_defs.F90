@@ -29,21 +29,26 @@ module m_efmas_defs
  !Put eventual module variables here...
 !!***
 
-!!****t* m_efmas_defs/efmasfr_type
+!!****t* m_efmas_defs/efmasval_type
 !! NAME
-!! efmasfr_type
+!! efmasval_type
 !!
 !! FUNCTION
-!! The efmasfr_type structured datatype
+!! The efmasval_type structured datatype
 !!
 !! SOURCE
 
- type efmasfr_type
+ type efmasval_type
 
    !For k-point
-   complex(dpc),allocatable :: ch2c(:,:,:,:)
+   complex(dpc),allocatable :: ch2c(:,:,:,:) ! ch2c(1:ndeg,1:ndeg,mdim,mdim) 
+                                             ! See Eq.(50) of Laflamme2016 : 2nd-order Hamiltonian contribution
+                                             ! Two first indices are for band indices within degenerate subspace
+                                             ! Two last indices are for number of directions
+   complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(1:ndeg,1:ndeg,mdim,mdim) 
+                                             ! See Eq.(50) of Laflamme2016 : full second-order derivative
 
- end type efmasfr_type
+ end type efmasval_type
 !!***
 
 !!****t* m_efmas_defs/efmasdeg_type

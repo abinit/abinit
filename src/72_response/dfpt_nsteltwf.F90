@@ -85,12 +85,13 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
  use m_kg,          only : mkkin, kpgstr
+ use m_mkffnl,      only : mkffnl
+ use m_nonlop,      only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nsteltwf'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

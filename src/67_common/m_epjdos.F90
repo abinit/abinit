@@ -59,6 +59,7 @@ module m_epjdos
  use m_pawrad,         only : pawrad_type, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_initylmg,       only : initylmg
 
  implicit none
 
@@ -2032,9 +2033,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -2520,7 +2518,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions_paw'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

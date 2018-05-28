@@ -150,6 +150,10 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
  use m_pawtab,      only : pawtab_type
  use m_rf2,         only : rf2_getidir
+ use m_initylmg,    only : initylmg
+ use m_atm2fft,     only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
+ use m_dfpt_rhotov,   only : dfpt_rhotov
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -158,7 +162,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_72_response
 !End of the abilint section
@@ -320,9 +323,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i2pert,(0))
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i3pert,(0))
  end if
- 
+
  mcg=mpw*nspinor*mband*mkmem*nsppol
- 
+
 !Allocations/initializations for PAW only
  if(psps%usepaw==1) then
    usexcnhat=maxval(pawtab(:)%usexcnhat)

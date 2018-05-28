@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@ MODULE m_numeric_tools
  public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
+ public :: pack_matrix           ! Packs a matrix into hermitian format
  public :: print_arr             ! Print a vector/array
  public :: pade, dpade           ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
@@ -94,7 +95,6 @@ MODULE m_numeric_tools
  public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
-
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -4152,6 +4152,67 @@ subroutine symmetrize_dpc(mat,uplo)
  end select
 
 end subroutine symmetrize_dpc
+!!***
+
+!!****f* m_numeric_tools/pack_matrix
+!! NAME
+!! pack_matrix
+!!
+!! FUNCTION
+!! Packs a matrix into hermitian format
+!!
+!! INPUTS
+!! N: size of matrix
+!! cplx: is the matrix complex
+!! mat_in(2, N*N)= matrix to be packed
+!!
+!! OUTPUT
+!! mat_out(N*N+1)= packed matrix
+!!
+!! PARENTS
+!!      rayleigh_ritz
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pack_matrix(mat_in, mat_out, N, cplx)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pack_matrix'
+!End of the abilint section
+
+ implicit none
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pack_matrix'
+!End of the abilint section
+
+ integer, intent(in) :: N, cplx
+ real(dp), intent(in) :: mat_in(cplx, N*N)
+ real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+ integer :: isubh, i, j
+
+ ! *************************************************************************
+
+ isubh = 1
+ do j=1,N
+   do i=1,j
+     mat_out(isubh)    = mat_in(1, (j-1)*N+i)
+     ! bad for vectorization, but it's not performance critical, so ...
+     if(cplx == 2) then
+       mat_out(isubh+1)  = mat_in(2, (j-1)*N+i)
+     end if
+     isubh=isubh+cplx
+   end do
+ end do
+
+end subroutine pack_matrix
 !!***
 
 !----------------------------------------------------------------------

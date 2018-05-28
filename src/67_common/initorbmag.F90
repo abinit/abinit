@@ -65,17 +65,17 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_symtk,   only : symatm
  use m_fftcore, only : kpgsph
  use m_kpts,    only : listkk, smpbz
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
+ use m_pawang,  only : pawang_type
+ use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initorbmag'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
@@ -642,19 +642,19 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  ! =======================================================================================
 
  ! term 2b: from vhnzc - vthnzc
- do itypat=1, dtset%ntypat
-    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
-       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
-       MSG_ERROR(message)
-    end if
- end do
+ ! do itypat=1, dtset%ntypat
+ !    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
+ !       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
+ !       MSG_ERROR(message)
+ !    end if
+ ! end do
 
- ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
- call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+ ! ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
+ ! call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
- dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
+ ! dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
 
- ABI_DEALLOCATE(calc_twdij)
+ ! ABI_DEALLOCATE(calc_twdij)
 
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)

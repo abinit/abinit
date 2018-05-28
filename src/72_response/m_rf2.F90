@@ -28,8 +28,16 @@
 MODULE m_rf2
 
  use defs_basis
+ use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_hamiltonian
+ use m_cgtools
+
+ use m_getgh1c,     only : getgh1c
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
+ use m_getghc,      only : getghc
+ use m_nonlop,      only : nonlop
 
  implicit none
 
@@ -286,10 +294,6 @@ end subroutine rf2_getidirs
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
                                  jband,debug_mode,vi,v1j,v2j)
 
- use defs_basis
- use defs_abitypes
- use m_hamiltonian
- use m_cgtools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -363,7 +367,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
       write(op2,'(2a,i1,a)')      '     dS/',pert2,idir2,'    '
    end select
    dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise
-   dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise 
+   dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise
    write(msg,'(3a,2(a,es17.8E3))') bra_i,op1,ket_j,' = ',dot2r,',',dot2i
    call wrtout(std_out,msg)
  end if
@@ -374,7 +378,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
    if(debug_mode/=0) then
-     dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise 
+     dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise
      dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise
      write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dot2r,',',dot2i
      call wrtout(std_out,msg)
@@ -465,20 +469,12 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_hamiltonian
- use m_cgtools
-
- use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_output
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_apply_hamiltonian'
  use interfaces_14_hidewrite
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -579,10 +575,11 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
  if (debug_mode/=0) then
    if (ipert/=0) then
-     write(msg,'(4(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
+     write(msg,'(5(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,' isppol =',isppol,&
      & ' ikpt = ',ikpt,' jband = ',jband
    else
-     write(msg,'(2(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert =    0 idir =    0 ikpt = ',ikpt,' jband = ',jband
+     write(msg,'(3(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert =    0 idir =    0 isppol =',isppol,&
+     & ' ikpt = ',ikpt,' jband = ',jband
    end if
    call wrtout(std_out,msg)
  end if
@@ -811,7 +808,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    return
 
  end if
- 
+
  DBG_EXIT("COLL")
 
 end subroutine rf2_apply_hamiltonian

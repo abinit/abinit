@@ -52,7 +52,7 @@ module m_fock
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
-
+ use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 
@@ -197,9 +197,8 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
-
  end type fock_common_type
-!--------------------------------------------------------------------
+
  type, public :: fock_BZ_type
 
   integer :: mcprj
@@ -496,7 +495,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1715,7 +1713,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -2439,7 +2436,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 end subroutine bare_vqg
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/strfock
 !!
 !! NAME
@@ -2447,13 +2444,6 @@ end subroutine bare_vqg
 !!
 !! FUNCTION
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
@@ -2485,13 +2475,6 @@ end subroutine bare_vqg
 !!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
@@ -2643,8 +2626,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
 end subroutine strfock
 !!***
-
-
 
 end module m_fock
 !!***

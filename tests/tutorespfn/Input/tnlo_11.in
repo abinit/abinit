@@ -112,7 +112,7 @@ nbdbuf 0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Veithen
-#%% keywords = NC, DFPT 
+#%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
 #%%   Linear and nonlinear response calculation for AlAs
 #%%   Perturbations: electric fields & atomic displacements

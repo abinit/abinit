@@ -50,6 +50,7 @@ MODULE m_eig2d
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_double_grid,only : kptfine_av
+ use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
  implicit none
 
@@ -906,8 +907,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2stern'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -1408,8 +1407,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2tot'
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
