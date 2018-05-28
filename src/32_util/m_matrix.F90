@@ -233,8 +233,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'invsqrt_matrix'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'blockdiago_fordsyev'
 !End of the abilint section
 
  implicit none
@@ -603,8 +602,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'invsqrt_matrix'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'blockdiago_forzheev'
 !End of the abilint section
 
  implicit none
