@@ -276,9 +276,9 @@ endif
     type(LIL_mat), intent(inout) :: ll
     integer :: s(2), irow, icol
     s=shape(mat)
-    if ( s(1) /= ll%nrow .or. s(2)/=ll%ncol ) then
-       print *, "mat_to_LIL_mat: nrow or ncol not equal."
-    endif
+    !if ( s(1) /= ll%nrow .or. s(2)/=ll%ncol ) then
+       !print *, "mat_to_LIL_mat: nrow or ncol not equal."
+    !endif
     do icol=1, ll%ncol, 1
        do irow=1, ll%nrow, 1
           call LIL_mat_insert(ll,irow,icol,mat(irow, icol),0)
@@ -303,7 +303,8 @@ endif
     do irow=1, self%nrow
        call llist_iter_restart(self%rows(irow))
        do while(associated(self%rows(irow)%iter))
-          print*, "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
+          !print*, "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
+          !TODO print with wrtout
           self%rows(irow)%iter=>self%rows(irow)%iter%next
        enddo
     enddo
@@ -429,9 +430,9 @@ endif
 !End of the abilint section
 
     class(CSR_mat), intent(in) :: csr
-    print *, "Val: ", csr%val
-    print *, "iCol: ", csr%icol
-    print *, "row_shift:", csr%row_shift
+    !print *, "Val: ", csr%val
+    !print *, "iCol: ", csr%icol
+    !print *, "row_shift:", csr%row_shift
   end subroutine CSR_mat_print
 
 

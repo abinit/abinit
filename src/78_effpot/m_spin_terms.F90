@@ -672,7 +672,6 @@ contains
     class(spin_terms_t), intent(inout):: self
     integer::  err
     if (allocated(self%ms)) deallocate(self%ms, stat=err)
-    if (err /= 0) print *, ":self%ms Deallocation request denied"
 
     if (allocated(self%pos)) deallocate(self%pos, stat=err)
     if (allocated(self%spinat)) deallocate(self%spinat, stat=err)
@@ -690,12 +689,9 @@ contains
 
 
     if (allocated(self%gyro_ratio)) deallocate(self%gyro_ratio, stat=err)
-    if ( err/= 0) print *, "self%gyro_ratio: Deallocation request denied"
     if (allocated(self%external_hfield)) deallocate(self%external_hfield, stat=err)
     if (allocated(self%k1)) deallocate(self%k1, stat=err)
-    if ( err/= 0) print *, "self%k1: Deallocation request denied"
     if (allocated(self%k1dir)) deallocate(self%k1dir, stat=err)
-    if ( err/= 0) print *, "self%k1dir: Deallocation request denied"
     if (allocated(self%gilbert_damping)) deallocate(self%gilbert_damping, stat=err)
     if (allocated(self%gamma_l)) deallocate(self%gamma_l, stat=err)
 

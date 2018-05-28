@@ -171,7 +171,7 @@ contains
     hist%natom=0
     hist%has_latt=has_latt
 
-    print *, "initialize HIST spin"
+    !print *, "initialize HIST spin"
     ABI_ALLOCATE(hist%heff, (3, nmatom, mxhist))
     ABI_ALLOCATE(hist%snorm, (nmatom, mxhist))
     ABI_ALLOCATE(hist%S, (3, nmatom, mxhist))
@@ -196,7 +196,7 @@ contains
     hist%S(:,:,1)=zero
     hist%dSdt(:,:,1)=zero
     hist%snorm(:,1)=zero
-    print *, "Initialization spin hist finished"
+    !print *, "Initialization spin hist finished"
   end subroutine spin_hist_t_init
 
   ! set atomic structure. 

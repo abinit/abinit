@@ -223,14 +223,20 @@ contains
        S(3,:)=1.0d0
     else if (mode==1) then
        ! randomize S using uniform random number
-       print *, "Initial spin set to random value"
+       ! print *, "Initial spin set to random value"
+   write(msg,*) "Initial spin set to random value."
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
        call random_number(S)
        S=S-0.5
        do i=1, self%nmatoms
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
     else
-       print *, "Error: Set initial spin: mode should be 0 (FM) or 1 (random)"
+      write(msg,*) "Error: Set initial spin: mode should be 0 (FM) or 1 (random)"
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
+
     end if
     !call self%spin_hist%insert(S)
     !call spin_hist_t_insert(self%spin_hist, S)

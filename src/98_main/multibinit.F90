@@ -226,7 +226,7 @@ if (inp%spin_dynamics>0) then
 endif
 
 !Read the model (from DDB or XML)
-if (inp%dynamics/=0) then
+if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
  
  !Read the coefficient from fit
