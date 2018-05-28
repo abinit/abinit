@@ -110,8 +110,8 @@ Now, you are ready to run ABINIT and prepare the needed file.
 
 Copy the files ttddft_x.files and ttddft_1.in in "Work_tddft":
 
-    cp ../ttddft_x.files
-    cp ../ttddft_1.in
+    cp ../ttddft_x.files .
+    cp ../ttddft_1.in .
 
 So, issue now:
 

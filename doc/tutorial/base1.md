@@ -56,7 +56,7 @@ Change the working directory of windows 2 to `Work`:
 You will do most of the actions of this tutorial in this working directory.
 Copy `tbase1_x.files` in `Work`:
 
-    cp ../tbase1_x.files
+    cp ../tbase1_x.files .
 
 Edit the `tbase1_x.files`. It is not very long (only 6 lines). 
 It gives the information needed for the code to build other file names.

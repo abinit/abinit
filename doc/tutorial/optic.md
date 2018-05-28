@@ -216,8 +216,8 @@ We will focus on the energy range from 0 eV to 8 eV, for which only 5 unoccupied
 
 Copy the files toptic_3.files and toptic_3.in in "Work_optic":
 
-    cp ../toptic_3.files
-    cp ../toptic_3.in
+    cp ../toptic_3.files .
+    cp ../toptic_3.in .
 
 {% dialog tests/tutorespfn/Input/toptic_3.files tests/tutorespfn/Input/toptic_3.in %}
 
@@ -235,8 +235,8 @@ When the run is finished (it is only 8 secs on a 2.8 GHz PC), you can process
 the WFK files and obtain the linear optic spectra. 
 Copy the files toptic_4.files and toptic_4.in in "Work_optic":
 
-    cp ../toptic_4.files
-    cp ../toptic_4.in
+    cp ../toptic_4.files .
+    cp ../toptic_4.in .
 
 Examine the toptic_4.in file: only the linear optic spectra will be build.
 
