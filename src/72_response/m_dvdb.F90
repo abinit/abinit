@@ -45,13 +45,16 @@ MODULE m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
+ use m_symtk,         only : mati3inv, littlegroup_q
+ use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
- use m_kpts,          only : kpts_ibz_from_kptrlatt
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
+ use m_spacepar,      only : symrhg, setsym
 
  implicit none
 
@@ -232,7 +235,8 @@ MODULE m_dvdb
 
  public :: dvdb_init              ! Initialize the object.
  public :: dvdb_open_read         ! Open the file in read-only mode.
- public :: dvdb_free              ! Close the file and release the memory allocated.
+ public :: dvdb_close             ! Close file.
+ public :: dvdb_free              ! Release the memory allocated and close the file.
  public :: dvdb_print             ! Release memory.
  public :: dvdb_findq             ! Returns the index of the q-point.
  public :: dvdb_read_onev1        ! Read and return the DFPT potential for given (idir, ipert, iqpt).
@@ -287,8 +291,6 @@ subroutine dvdb_init(db, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_init'
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -561,6 +563,50 @@ end subroutine dvdb_open_read
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_close
+!! NAME
+!!  dvdb_close
+!!
+!! FUNCTION
+!! Close the file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_close(db)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_close'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(dvdb_t),intent(inout) :: db
+
+!************************************************************************
+
+ select case (db%iomode)
+ case (IO_MODE_FORTRAN)
+   close(db%fh)
+ case default
+   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
+ end select
+
+ db%rw_mode = DVDB_NOMODE
+
+end subroutine dvdb_close
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/dvdb_free
 !! NAME
 !!  dvdb_free
@@ -635,13 +681,7 @@ subroutine dvdb_free(db)
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
-
- select case (db%iomode)
- case (IO_MODE_FORTRAN)
-   close(db%fh)
- case default
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
- end select
+ call dvdb_close(db)
 
 end subroutine dvdb_free
 !!***
@@ -694,7 +734,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -713,10 +753,26 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
- write(std_out,"(a)")"List of q-points:"
- do iq=1,db%nqpt
+ write(std_out,"(a)")"List of q-points: min(10, nqpt)"
+ do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
+ if (db%nqpt > 10) write(std_out,"(a)")"..."
+
+ write(std_out,"(a)")sjoin("Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
+ if (db%has_dielt_zeff) then
+   write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
+     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
+     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
+     db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
+   write(std_out, '(a)') ' Effectives Charges: '
+   do iatom=1,db%natom
+     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ',iatom, &
+       db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
+       db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
+       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
+   end do
+ end if
 
  if (my_prtvol > 0) then
    call crystal_print(db%cryst, header="Crystal structure in DVDB file")
@@ -727,7 +783,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
    end do
 
-   write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
+   write(std_out, "(a)")"q-point, idir, ipert, rhog1(q,G=0)"
    do iv1=1,db%numv1
      idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
@@ -843,7 +899,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1111,7 +1166,6 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_complete'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1451,7 +1505,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1588,9 +1641,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_symmetrize'
- use interfaces_41_geometry
- use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1809,8 +1859,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -2183,7 +2231,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2318,7 +2365,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_get_v1scf_rpt'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -2677,7 +2723,6 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_get_v1scf_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3154,8 +3199,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_list_perts'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3657,7 +3700,6 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1rsym'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3806,8 +3848,6 @@ subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1complete'
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -4101,7 +4141,6 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -4256,9 +4295,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_interpolate_and_write'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

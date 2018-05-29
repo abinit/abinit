@@ -55,14 +55,15 @@ The following schema should help you to understand these dependencies.
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v6.png" usemap="#map1"/>
 </center>
 
-In blue, one has the basic lessons. The blocks in red represents additional lessons related 
+The "base" lessons are presented at the top, in orange. The blocks in red represents additional lessons related 
 to ground-state features. Response-function features are explained
-in the lessons in the green blocks. Finally, the Many-Body Perturbation Theory
-capabilities are demonstrated in the lessons belonging to the violet blocks.
+in the lessons in the light brown blocks. Finally, the Many-Body Perturbation Theory
+capabilities are demonstrated in the lessons belonging to the dark brown blocks.
 The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
 
 Before following the tutorials, you should have read the 
-[[help:new_user|new user's guide]], as well as the pages
+[new user's guide](..),
+as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
 [[cite:Martin2008|this book]] by R. M. Martin.

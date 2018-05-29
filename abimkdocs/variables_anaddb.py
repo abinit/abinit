@@ -155,7 +155,7 @@ Variable(
 Allow setting the target band gap, in eV. ([[elphflag@anaddb]]=1).
 
 NOTE XG20170811: apparently no effective test for this input variable. Also,
-the descirption is strange ...!
+the description is strange ...!
 """,
 ),
 
@@ -176,11 +176,23 @@ generate a grid of special q points.
   * 3 --> specific for Body Centered lattices
   * 4 --> specific for the Hexagonal lattice
 
-Note that in the latter case, the rprim of the unit cell have to be 1.0 0.0
-0.0 -.5 sqrt(3)/2 0.0 0.0 0.0 1.0 in order for the code to work properly.
+Note that in the latter case, the [[rprim]] of the unit cell has to be
+
+  1.0 0.0 0.0
+  -.5 sqrt(3)/2 0.0
+  0.0 0.0 1.0
+
+in order for the code to work properly.
 
 Warning: the generation of q-points in anaddb is rather old-fashioned, and
 should be replaced by routines used by the main abinit code.
+
+Warning:
+The value [[brav@anaddb]] = -1 is also possible. It is used for backwards compatibility:
+it corresponds to [[brav@anaddb]] = 1, with the weights for the
+interpolation of the phonon band structure determined by another (now obsolete) algorithm
+than the default [[brav@anaddb]] = 1 algorithm
+based on Wigner-Seitz cells (new as v8.7). The default algorithm has a correct treatment of symmetries.
 """,
 ),
 

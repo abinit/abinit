@@ -184,27 +184,27 @@ class Netcdf_MD(QtGui.QWidget):
         
         self.VAF = QtGui.QPushButton('VACF', self)
         self.VAF.setStatusTip('Show graphic of Velocity autocorrelation function')
-        self.connect(self.VAF, QtCore.SIGNAL('clicked()'), self.showVAF)        
+#        self.connect(self.VAF, QtCore.SIGNAL('clicked()'), self.showVAF)        
         
         self.DOS = QtGui.QPushButton('VDOS', self)
         self.DOS.setStatusTip('Show graphic of Vibrational Density Of States')
-        self.connect(self.DOS, QtCore.SIGNAL('clicked()'), self.showDOS)
+#        self.connect(self.DOS, QtCore.SIGNAL('clicked()'), self.showDOS)
                         
         self.RDF = QtGui.QPushButton('Topology', self)
         self.RDF.setStatusTip('Show graphic of Radial Distribution Function')
-        self.connect(self.RDF, QtCore.SIGNAL('clicked()'), self.showRDF)        
+#        self.connect(self.RDF, QtCore.SIGNAL('clicked()'), self.showRDF)        
                 
         self.position = QtGui.QPushButton('Positions', self)
         self.position.setStatusTip('Show positions of all the particules for all the step in 2D ')
-        self.connect(self.position, QtCore.SIGNAL('clicked()'), self.showPosition)
+#        self.connect(self.position, QtCore.SIGNAL('clicked()'), self.showPosition)
 
         self.MSD = QtGui.QPushButton('MSD(beta)', self)
         self.MSD.setStatusTip('Show graphic of Means Squared Displacement(beta)')
-        self.connect(self.MSD, QtCore.SIGNAL('clicked()'), self.showMSD)        
+#        self.connect(self.MSD, QtCore.SIGNAL('clicked()'), self.showMSD)        
 
         self.netcdf = QtGui.QPushButton('save netcdf', self)
         self.netcdf.setStatusTip('Save molecular dynamics in necdf format')
-        self.connect(self.netcdf, QtCore.SIGNAL('clicked()'), self.showNetcdf)
+#        self.connect(self.netcdf, QtCore.SIGNAL('clicked()'), self.showNetcdf)
 
         self.xyz = QtGui.QPushButton('save .xyz', self)
         self.xyz.setStatusTip('Save position in .xyz format')

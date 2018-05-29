@@ -14,20 +14,22 @@ It will be easier to discover the present file with the help of the [[lesson:rf1
 ABINIT can compute the response to different perturbations, and provide access
 to quantities that are second derivatives of total energy (2DTE) with respect
 to these perturbations. 
-Presently, they can be of three types: 
+Presently, they can be of four types: 
 
-1. phonons,
+1. phonons 
 2. static homogeneous electric field
-3. strain. 
+3. strain  
+4. magnetic field (coupling to the spin, not the orbital motion)
 
 The physical properties connected to 2DTE with respect to perturbations (1) and (2) are the phonon
 dynamical matrices, the dielectric tensor, and the Born effective charges,
 while the additional strain perturbation (3), mixed with phonon and electric
 field leads to elastic constant, internal strain, and piezoelectricity.
+The magnetic field perturbation is a recent addition to ABINIT, and will not be detailed at present.
+
 
 More functionalities of the computation of responses should be implemented
-sooner or later. The alchemical perturbation is one of the candidates, as well
-as the homogeneous magnetic field perturbation. Some third derivatives of the
+sooner or later. Some third derivatives of the
 total energy (3DTE) are also implemented. The 3DTE might give phonon-phonon
 coupling, non-linear electric response, anharmonic elastic constants, Gruneisen parameters,...
 
@@ -105,7 +107,7 @@ field, and *idir* being 1, 2 or 3, as for phonon perturbations. Although the
 possibility of electric field characterized by a non-zero wavevector is
 envisioned for a future version of the code, at present only homogeneous
 fields are considered. So the wavevector of the electric field type
-perturbations is Gamma (q=0).
+perturbations is $\Gamma$ (q=0).
 
 The perturbations of the **strain** type are either an uniaxial strain or a
 shear strain. The strain perturbations are considered in cartesian coordinates
@@ -152,7 +154,7 @@ perturbations, will be characterized by two sets of (idir,ipert), or by two
 pertcase numbers, while 3DTE will need three such sets or pertcase numbers.
 In addition they will depend on one wavevector (for 2DTE) or two wavevectors (for 3DTE).
 
-In the present (non-stationary) implementation of the 2DTE, the first pertcase
+In the non-stationary implementation of the 2DTE, used for off-diagonal elements in ABINIT, the first pertcase
 corresponds to the perturbation that gives the derivative of the potential,
 and the second pertcase corresponds to the perturbation that gives the
 derivative of the wavefunctions.
@@ -160,7 +162,7 @@ derivative of the wavefunctions.
 <a id="2"></a>
 ## 2 Filenames and input of ground-state wavefunctions
   
-The same 'files' file as for GS calculations is used for RF calculations.
+The **same** 'files' file as for GS calculations is used for RF calculations.
 Actually, in the multi-dataset mode, one will be able to make in one ABINIT
 run, ground-state computations as well as response-function computations, so
 that the 'files' file must be the same.... The 'input' file will have many
@@ -168,7 +170,7 @@ common input variables for these different cases, but also some separate ones.
 
 Two ground-state wavefunction files might be needed:
 
-  * the file of ground-state wavefunctions at a set of special points k,
+  * the file of ground-state wavefunctions at a set of wavevectors, named k-points
   * the file of ground-state wavefunctions at the corresponding k+q, where q is the wavevector of the perturbation
 
 These files also contain the corresponding eigenvalues.
@@ -185,7 +187,7 @@ root names provided in the 'files' file. In the multi-dataset mode, the
 following input variables will be relevant: [[getwfk]], and [[getwfq]]. The
 file names of the ground-state wavefunction file follow the same convention as
 for the ground-state case. Thus, the corresponding section of the 
-[[help:abinit#files-file|corresponding section]] fof the abinit help file, if needed.
+[[help:abinit#files-file|corresponding section]] of the abinit help file, if needed.
 
 In the case of an electric field perturbation, the output 1WF of the
 corresponding ddk perturbation is needed as input. If the option [[rfelfd]]=1
@@ -193,9 +195,10 @@ is used, then the code will take care of doing first the derivative dk
 perturbation calculation, then write the 1WF at the correct place, as an
 output file, then begin the homogeneous field perturbation calculation.
 Usually, the use of [[rfelfd]]=1 is not recommended, as the ddk computation is
-the most often done with different parameters as the electric field perturbation.
+the most often done with different parameters as the electric field perturbation,
+a dataset with [[rfelfd]]=2 being followed with a dataset with [[rfelfd]]=3.
 
-The nomenclature of first-order wavefunction files is also given in the
+The nomenclature for first-order wavefunction files is also given in the
 [[help:abinit#files-file|abinit help]] file, but it is worth to specify it in more
 detail here. The root name is formed from the string of character in the third
 line of the 'files' file (for an input file) or the fourth line of the 'files'
@@ -253,78 +256,78 @@ cases can be distinguished.
 When one considers the response to an atomic displacement with q=0, the
 following procedure is suggested:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, a self-consistent response-function computation with the atomic displacement perturbation, 
-    with the half set of special points (with [[kptopt]]=2)
+    with the half set of k-points (with [[kptopt]]=2)
 
 When one considers the response to an electric field (with q=0), the following
 procedure is suggested:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, a non-self-consistent response-function computation of the d/dk perturbation, 
-    with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+    with the half set of k-points (with [[kptopt]]=2, and [[iscf]]=-3)
 
   * third, a self-consistent response-function computation of the electric field perturbation, 
-    with the half set of special points (with [[kptopt]]=2)
+    with the half set of k-points (with [[kptopt]]=2)
 
 When one considers the response to an atomic displacement in the special case
 where q connects k-points that both belong to the special k-point grid, the
 following procedure is suggested:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, a self-consistent response-function computation of the atomic displacement perturbation, 
-    with the full set of special points (with [[kptopt]]=3)
+    with the full set of k-points (with [[kptopt]]=3)
 
 When one considers the response to an atomic displacement for a general q
 point, the following procedure is suggested:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, a non-self-consistent ground-state run with the set of k+q points, that might be 
     reduced thanks to symmetries (with [[kptopt]]=1)
 
   * third, a self-consistent response-function computation of the atomic displacement perturbation, 
-    with the full set of special points (with [[kptopt]]=3)
+    with the full set of k-points (with [[kptopt]]=3)
 
 Of course, these different steps can be combined when a set of responses is
 looked for. In particular, the computations of responses at gamma, in the case
 where the full dynamical matrix as well as the dielectric tensor and the Born
 effective charges are needed, can be combined as follows:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, the three non-self-consistent response-function computations (one for each direction) 
-    of the d/dk perturbation, with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+    of the d/dk perturbation, with the half set of k-points (with [[kptopt]]=2, and [[iscf]]=-3)
 
   * third, all the self-consistent response-function computations of the electric field perturbations 
-    and of the atomic displacements, with the half set of special points (with [[kptopt]]=2)
+    and of the atomic displacements, with the half set of k-points (with [[kptopt]]=2)
 
 Still, computations of perturbations at different q wavevectors cannot be
 mixed. But they can follow the other computations. Supposing that
 perturbations at q=0 and a general q point are to be performed, they will be combined as follows:
 
-  * first, a self-consistent ground-state computation with the restricted set of special points 
+  * first, a self-consistent ground-state computation with the restricted set of k-points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
 
   * second, the three non-self-consistent response-function computations (one for each direction) 
-    of the d/dk perturbation, with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+    of the d/dk perturbation, with the half set of k-points (with [[kptopt]]=2, and [[iscf]]=-3)
 
   * third, all q=0 self-consistent response-function computations of the electric field perturbations 
-    and of the atomic displacements, with the half set of special points (with [[kptopt]]=2)
+    and of the atomic displacements, with the half set of k-points (with [[kptopt]]=2)
 
   * fourth, a non-self-consistent ground-state computation with the set of k+q points, 
     that might be reduced thanks to symmetries (with [[kptopt]]=1)
 
   * fifth, the self-consistent response-function computations of the atomic displacement perturbations 
-    with a q wavevector, with the full set of special points (with [[kptopt]]=3)
+    with a q wavevector, with the full set of k-points (with [[kptopt]]=3)
 
 Note that the error in the 2DTE is **linear** in the **ground-state**
 wavefunction error (unlike the error due to the 1WFs). Moreover, a large
@@ -388,7 +391,7 @@ Output from the code goes to several places listed below.
 **6.1. The log file**
 
 This file is the same as the log file of the abinit code when computing ground
-state (GS) results. Eventually, the output of datasets related to response
+state (GS) results. Possibly, the output of datasets related to response
 functions will be intertwined with those concerned with ground-state case. The
 purpose of this file is the same as in the GS case, and the use of error messages is unchanged.
 
@@ -396,12 +399,12 @@ purpose of this file is the same as in the GS case, and the use of error message
 **6.2. The main output file**
 
 This file is the same as the main output file of the abinit code when
-computing ground state (GS) results. Eventually, the output of datasets
+computing ground state (GS) results. Possibly, the output of datasets
 related to response functions will be intertwined with those concerned with
 ground-state case. We explain here the parts related to the RF computation.
 
 The initialisation part is the same as for the GS. So, the reader is advised
-to read [[help:abinit#outputfile|section 6.2]] the abinit help file,
+to read the [[help:abinit#outputfile|section 6.2]] of the abinit help file,
 as well as the first paragraph of the section [[help:abinit#6.3|6.3]] of
 this file. Afterwards, the content of the main output file differs a bit...
 
@@ -505,7 +508,7 @@ the run that has generated the DDB, while the second part contains the 2DTE,
 grouped by blocks of data.
 
 Note that the DDB output of the ABINIT code can be merged with other DDBs as
-described in the Mrgddb help file.
+described in the [[help:mrgddb|Mrgddb help file]].
 
 The first part contains:
 
@@ -514,7 +517,8 @@ The first part contains:
     ([[natom]], [[nkpt]], [[nsppol]], [[nsym]], [[ntypat]], [[occopt]], and [[nband]] - 
     or the array [[nband]] ([[nkpt]]* [[nsppol]]) if [[occopt]]=2)
   * different information on the run that generated the 2DTE 
-    (acell,amu,ecut,iscf,ixc,kpt,kptnrm, ngfft,occ,rprim,sciss,symrel,xred,tnons,typat,tolwfr,wtk,zion, 
+    ([[acell]],[[amu]],[[ecut]],[[iscf]],[[ixc]],[[kpt]],[[kptnrm]], 
+     [[ngfft]],[[occ]],[[rprim]],[[dfpt_sciss]],[[symrel]],[[xred]],[[tnons]],[[typat]],[[tolwfr]],[[wtk]],[[ziontypat]], 
     as well as information on the pseudopotentials by means of their Kleinman-Bylander energies). 
     These values are simply a transcription of the input data, or other simple internal parameters.
 
@@ -542,7 +546,7 @@ _If you follow the tutorial, you should go back to the tutorial window now._
   
 It is possible to get from the RF calculations essentially EXACT derivatives
 of the total energy with respect to perturbations. There is a published
-account of this fact in Phys. Rev. A 52, 1096 (1995). An agreement of 8 digits
+account of this fact in [[cite:Gonze1995]]. An agreement of 8 digits
 or more was obtained in the comparison with finite-difference derivatives of GS data.
 
 The accuracy of these calculations are thus entirely determined by the input
@@ -564,7 +568,7 @@ k-wavevectors, as well as the related variables have to be the SAME in the
 ground-state calculations that go before a RF run and this RF run.
 
 Namely: do not try to use ground-state wavefunction files produced with
-ecut=10Ha for a RF run with ecut=20Ha. In some cases, the code will complain
+[[ecut]]=10Ha for a RF run with [[ecut]]=20Ha. In some cases, the code will complain
 and stop, but in other cases, it might simply produce garbage !
 
 If the value of [[ngfft]] is input by hand, its value must also be equal in
@@ -574,7 +578,7 @@ small as 1.5 could be allowed in some cases. It is not allowed with RF
 calculations, because they are more sensitive to that error.
 
 The convergence tests with respect to [[ecut]], and the k-point grid should be
-done carefully. This was already emphasized in the abinit help file and is re-
+done carefully. This was already emphasized in the [[help:abinit]] and is re-
 emphasized here. The user should test the convergence DIRECTLY on the property
 he or she is interested in. For example, if the user wants a phonon frequency
 accurate to 10 cm^-1, he/she could be lead to do a full calculation (GS+RF) of

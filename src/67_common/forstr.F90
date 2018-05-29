@@ -189,6 +189,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_efield
  use m_errors
 
+ use m_time,             only : timab
+ use m_geometry,         only : xred2xcart, metric
  use m_electronpositron, only : electronpositron_type
  use m_energies,         only : energies_type
  use m_pawang,           only : pawang_type
@@ -201,15 +203,15 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_getdim,pawcprj_alloc
  use m_fock,             only : fock_type
  use libxc_functionals,  only : libxc_functionals_is_hybrid
+ use m_stress,           only : stress
+ use m_forces,           only : forces
+ use m_initylmg,         only : initylmg
+ use m_xchybrid,         only : xchybrid_ncpp_cc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
- use interfaces_18_timing
- use interfaces_41_geometry
- use interfaces_56_recipspace
- use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -315,7 +317,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    if(dtset%usefock==1 .and. associated(fock)) then
 !     if((dtset%optstress/=0).and.(psps%usepaw==1)) then
      if((psps%usepaw==1).and.((dtset%optstress/=0).or.(dtset%optforces==2))) then
-       if(dtset%optstress==0) then 
+       if(dtset%optstress==0) then
          ctocprj_choice=2
          ncpgr=3
        end if
@@ -477,7 +479,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  if (allocated(vxc_hf)) then
    ABI_DEALLOCATE(vxc_hf)
  end if
- 
+
 
  call timab(914,2,tsec)
  call timab(910,2,tsec)

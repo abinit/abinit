@@ -2,6 +2,7 @@
 description: How to perform an effective mass calculation
 authors: JLaflamme
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform an effective mass calculation with the ABINIT package.
 
@@ -34,7 +35,7 @@ Spin-polarized systems ([[nspden]] = 2) as well as spinors ([[nspinor]] = 2)
 can be treated, although the spin-orbit interaction can only be treated in the
 PAW case.
 
-The treatment of degenerescences is limited to the extremal points of the band
+The treatment of degeneracies is limited to the extremal points of the band
 structure (which are the most relevant in any case).
 
 By the way, the first derivative of the eigenenergies is also computed and

@@ -47,7 +47,6 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_xmpi
 
@@ -160,7 +159,7 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
      dtpawuj(iuj+1)%iuj=iuj+1
    end if
 
-   ! TODO: check that this is correct: this point is passed several times 
+   ! TODO: check that this is correct: this point is passed several times
    ! for a given value of iuj - should the stuff be accumulated instead of replaced?
    if(allocated(dtpawuj(iuj)%vsh))  then
      ABI_DEALLOCATE(dtpawuj(iuj)%vsh)

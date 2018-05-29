@@ -33,7 +33,7 @@
       ifcana         0
       ifcout         0
  Description of grid 1 :
-        brav         1
+        brav        -1
        ngqpt         1         1         1
       nqshft         4
       q1shft

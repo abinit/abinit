@@ -2,6 +2,7 @@
 description: How to build an input file for a ground state calculation
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to build an input file for a ground state calculation with the ABINIT package.
 

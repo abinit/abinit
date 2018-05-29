@@ -277,7 +277,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    mbandc  = paw_dmft%mbandc
    natom   = cryst_struc%natom
    nspinor = paw_dmft%nspinor
-   pawprtvol=2
+   pawprtvol=3
    diag=0
 
    if(nkpt/=1.and.present(jkpt)) then

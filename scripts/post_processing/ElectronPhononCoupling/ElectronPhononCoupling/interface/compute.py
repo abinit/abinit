@@ -29,6 +29,8 @@ def compute(
         smearing_eV = 0.01,
         temp_range = [0, 600, 50],
         omega_range = [-0.1, 0.1, 0.001],
+        fermi_level = None,
+        amu = None,
 
         # File names
         rootname = 'epc.out',
@@ -142,8 +144,15 @@ def compute(
     omega_range: ([0,0,1])
         Minimum, maximum and step frequency for the self-energy.
 
+    fermi_level:
+        The fermi energy, in Hartree.
+        Will be read from the files if not specified.
 
-    File names
+    amu: [ntypat]
+        The atomic masses, in amu.
+        Will be read from the files if not specified.
+
+    Film names
     ----------
 
     rootname: ('epc.out')
@@ -210,6 +219,8 @@ def compute(
         temp_range=temp_range,
         omega_range=omega_range,
         smearing=smearing_Ha,
+        fermi_level=fermi_level,
+        amu=amu,
 
         write=write,
         rootname=rootname,
@@ -255,7 +266,13 @@ def compute(
                 else:
                     epca.compute_dynamical_td_renormalization()
             else:
-                epca.compute_dynamical_zp_renormalization()
+                if double_grid:
+
+                   if mode:
+                       epca.compute_dynamical_zp_renormalization_modes_double_grid()
+
+                else: 
+                   epca.compute_dynamical_zp_renormalization()
 
         if broadening:
 

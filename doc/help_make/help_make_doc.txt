@@ -1,0 +1,6 @@
+==============================================================================
+Specific keywords for the ~/doc "make"
+
+pdf-docs       Create PDF files for the theory documents and the presentation
+==============================================================================
+[This file can be found at doc/help_make/help_make_doc.txt]

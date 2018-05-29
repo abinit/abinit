@@ -61,13 +61,13 @@ for the other lessons. Why not "Work_w90"?*
 
 Copy the files tw90_1.files, tw90_1.in and wannier90.win from the tests/tutoplug directory to "Work_w90":
 
-    cp ../tw90_1.files
-    cp ../tw90_1.in
+    cp ../tw90_1.files .
+    cp ../tw90_1.in .
 
 Wannier90 also uses a secondary input file which is called wannier90.win.
 Therefore, you must include this file in the folder:
 
-    cp ../wannier90.win
+    cp ../wannier90.win .
 
 Now you are ready to run abinit. Please type in:
 
@@ -187,8 +187,8 @@ An example has already been prepared.
 
 Just copy the files tw90_2.files and tw90_2.in into "Work_w90":
 
-    cp ../tw90_2.files
-    cp ../tw90_2.in
+    cp ../tw90_2.files .
+    cp ../tw90_2.in .
 
 We are going to reuse the wannier90.win of the previous example. 
 Now, just run abinit again
@@ -213,9 +213,9 @@ a very accurate starting guess to get the MLWF.
 We are going to extract the sp3 hybrid orbitals of Silane SiH4. You can start
 by copying from the tests/tutoplug directory the following files:
 
-    cp ../tw90_3.files
-    cp ../tw90_3.in
-    cp ../tw90_3o_DS2_w90.win
+    cp ../tw90_3.files .
+    cp ../tw90_3.in .
+    cp ../tw90_3o_DS2_w90.win .
 
 Now run abinit
 
@@ -257,9 +257,9 @@ Now we will going to redo the silicon case but defining different initial projec
 This calculation will be more time consuming, so you can start by running the
 calculation while reading:
 
-    cp ../tw90_4.in
-    cp ../tw90_4.files
-    cp ../tw90_4o_DS3_w90.win
+    cp ../tw90_4.in .
+    cp ../tw90_4.files .
+    cp ../tw90_4o_DS3_w90.win .
 
 **Initial projections:**
 

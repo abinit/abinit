@@ -56,7 +56,7 @@ to get the documentation of `COMMAND`.
 ## Notes
 
 topics are still in Yaml format
-wikilink syntax: [[names|text]] will become [[text|namespace]]
+wikilink syntax: <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [names|text] &#93; </span> will become <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [text|namespace] &#93; </span>.
 
 ## Troubleshooting
 

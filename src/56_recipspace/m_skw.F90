@@ -218,6 +218,9 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  lpratio = abs(params(1))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym) / two) ** third)
+ if (new%has_inversion) then
+   rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym / 2) / two) ** third)
+ end if
  nrwant = lpratio * new%nkpt
 
  call cwtime(cpu, wall, gflops, "start")

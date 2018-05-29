@@ -3,19 +3,19 @@ authors: MG, XG
 ---
 
 This page describes the details of the documentation system of Abinit and how to contribute to it. 
-A *Proof of concept* website is available at <https://gmatteo.github.io/test_abidocs>.
 
 Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki/Markdown)
 a lightweight markup language with plain text 
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit lessons, the topics, the release notes
 as well as the pages with the [input variables](../variables/) and the [bibliographic references](../theory/bibliography.md)
-that are generated *automatically* in python from the information reported in `abinit_vars.yml` and the bibtex 
-entries given in the `abiref.bib` file.
+that are generated *automatically* in python from the information reported in 
+`~abinit/mkdocs/variables_abinit.py` (and similar files in the same directory for other main executables) and the bibtex 
+entries given in the `~abinit/doc/abiref.bib` file.
 
 The website is automatically generated with [MkDocs](http://www.mkdocs.org/)
 a static site generator geared towards project documentation.
-MkDocs employs [Python-Markdown](https://pythonhosted.org/Markdown) to parse the Markdown documentation
+MkDocs employs [Python-Markdown](https://pypi.python.org/pypi/Markdown) to parse the Markdown documentation
 and use a single [YAML](http://en.wikipedia.org/wiki/YAML) configuration file (`mkdocs.yml`) 
 defining the organization of the pages on the website.
 Navigation bars, header and footer are generated *automatically* by the framework
@@ -27,7 +27,7 @@ MkDocs includes a couple built-in themes as well as various third party themes,
 all of which can easily be customized with extra CSS or JavaScript or overridden from the theme directory. 
 The Abinit website uses [Mkdocs-Material](http://squidfunk.github.io/mkdocs-material/), a theme
 built using Google's [Material Design](https://www.google.com/design/spec/material-design) guidelines.
-We also use [fontawesome icons](http://fontawesome.io/) and
+We also use [fontawesome icons](https://fontawesome.com/) and
 [Bootstrap](http://getbootstrap.com/) a popular HTML, CSS, and Javascript framework 
 for developing responsive, mobile first projects on the web 
 (shrink the browser window to see how the menu and the navigation bars react).
@@ -39,7 +39,7 @@ In addition to the basic markdown syntax, the Abinit documentation supports exte
 to ease the writing of hyperlinks and the inclusion of bibliographic citations.
 A detailed description of *our markdown dialect* is given in [our markdown page](markdown).
 Also [MathJax](https://www.mathjax.org/) for equations in LaTeX is activated, 
-and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#MathJax).
+and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#mathjax).
 
 As a net result, Abinit developers can write nice-looking documentation and release notes without having to use 
 HTML explicitly while working in an environment that is well-integrated with the Abinit ecosystem 
@@ -50,23 +50,25 @@ and finally regenerate the website with MkDocs.
 
 ## Getting started
 
+Make sure you are in the top ABINIT directory.
 Install the python packages required to build the website with:
 
 ```sh
-cd ~abinit/docs
-pip install -r requirements.txt
+pip install -r requirements.txt --user
 ```
 
 !!! note
     Python 3.6 is strongly recommended although the code works with python2.7 as well.
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
 
+!!! note
+    If you have root privileges, suppress the `--user` in the command
+
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Make sure you are in `~abinit/docs`, and then start *our customized* server 
-by running the `mksite.py serve` command:
+Then start *our customized* server 
+by running the `./mksite.py serve` command:
 
 ```sh
-cd ~abinit/docs
 ./mksite.py serve
 
 Regenerating database...
@@ -88,32 +90,41 @@ The web server, indeed, reloads automatically the source files that are modified
 so that one can easily change the documentation and inspect the changes in the corresponding HTML files.
 
 !!! tip
-    Use `mksite.py serve --dirtyreload` to enable the live reloading in the development server, 
+    Use `./mksite.py serve --dirtyreload` to enable the live reloading in the development server, 
     but only re-build files that have changed. 
     This option is designed for site development purposes and is **much faster** than the default live reloading.
 
+!!! warning
+    The server re-builds automatically the pages generated from changed `.md` files, 
+    but not the ones from changed `~abinit/doc/abiref.bib`
+    neither from changed `~abinit/abimkdocs/\*.py` . This means that the upgrade of the description of an input variable 
+    or a bibtex reference is done by closing the server and reissue the adequate `./mksite.py` command.
+    Also, the case of the `.md` files in the `~abinit/doc/topics` directory is similar, as the `.md` source files, 
+    prepended with an underscore, must be preprocessed by `./mksite.py` to deliver the `.md` files, without underscore, 
+    that are live reloaded.
 
-`mksite serve` builds the website in a temporary directory. If you need to inspect the HTML files produced 
+`./mksite serve` builds the website in a temporary directory. If you need to inspect the HTML files produced 
 by the script, use:
 
-    mksite.py build
+    ./mksite.py build
 
 The HTML pages will be available in the `site` directory.
 It's also possible to validate all the HTML documents in `site` by using:
 
-    mksite.py validate
+    ./mksite.py validate
 
 This command will connect to the [W3C validator service](https://validator.w3.org/) and possible 
 errors are printed to the terminal.
 To validate a given list of HTML files use:
 
-    mksite.py validate site/index.html site/variables/index.html
+    ./mksite.py validate site/index.html site/variables/index.html
 
+At present (v8.7.7), many html files are not compliant with the strict html syntax, so this procedure is ==not yet operational==.
 
 Note that the HTML files are produced in a temporary directory, thus they **are not under revision control**.
 The real source is represented by the `.md` files and the other `.yml` files, these are the files that can be 
 changed by the developers and are therefore under revision control).
-The Markdown pages generated by `mksite.py` are automatically listed in `~abinit/doc/.gitignore` 
+The Markdown pages generated by `./mksite.py` are automatically listed in `~abinit/doc/.gitignore` 
 and are thus ignored by git.
 
 The `~abinit/doc/mksite.py` script generates the website by converting markdown files into HTML.
@@ -121,12 +132,12 @@ The script:
 
 * Starts by creating python objects using the information reported in 
     - the python files in abimkdocs with the input variables,
-    - the `abiref.bib` for the list of Bibliographic references,
-    - the input files contained in `tests/*/Input`. 
+    - the `~abinit/doc/abiref.bib` for the list of Bibliographic references,
+    - the input files contained in `~abinit/tests/*/Input`. 
 * Performs initial consistency checks.
 * Generate the markdown files for variables, citations, etc.  
 * Invoke `mkdocs` to parse the markdown files declared in `mkdocs.yml`
-* Expands special strings, of the form `[[namespace:name#section|text]]` to create HTML links.
+* Expands special strings, of the form <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93; </span> to create HTML links.
 * Creates the needed HMTL files 
 
 The expansion of special strings is documented in the [links section](markdown.md#links). 
@@ -245,7 +256,7 @@ to the HTML meta section.
   Writing in all caps is like shouting so use all caps sparingly.
 
 
-## How to add/modify an nput variables
+## How to add/modify an input variable 
 
 The yaml database has been replaced by python modules.
 The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
@@ -260,45 +271,29 @@ Note that input variables for the executables other than the main abinit (e.g. a
 denoted `input_variable_name@executable`, e.g. `dipdip@anaddb`
 (this allows to waive the ambiguity with the dipdip input variable used in the main abinit).
 
-After having edited the python modules you **must rerun** `mksite serve` to see the changes.
+After having edited the python modules you **must rerun** `./mksite serve` to see the changes.
 
 !!! important
 
-    Use ```pytest abimkdocs-tests/test_variables.py``` to validate your changes
+    Use ```pytest abimkdocs_tests/test_variables.py``` to validate your changes
     before rebuilding the documentation.
+
+    Well, at present (v8.7.7) this script detect too many problems for this procedure to be useful. So this is (==not yet operational==).
+
 
 ## How to add a bibliographic reference
 
-Citations must be in bibtex format and provide enough information so that the python code
-can generate appropriated links in the website.
-For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
-(there are units tests to enforce the presence of particular entries in the bibtex document and
-your bibtex may not fullfill these requirements).
+Bibliographic references must be in bibtex format and should provide enough information so that the python code
+can generate appropriate links in the website.
+The central bibliography database is presently located in `~abinit/doc/abiref.bib`.
 
-A much better solution is to use BetterBib and the DOI of the article to fetch data 
-from Crossref and produce the bibtex entry. 
-BetterBib is available from the Python Package Index, so simply type:
+For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your own bibtex file
+to the central bibliography database. Indeed,
+there are units tests to enforce the presence of particular entries in the bibtex document and
+your bibtex may not fullfill these requirements.
 
-    pip install betterbib
-
-and then use doi2bibtex from the command line:
-
-    doi2bibtex 10.1103/PhysRevLett.96.066402
-
-Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
-(make sure it's not a duplicated entry).
-Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
-(start with an uppercase letter, then lower case, then four-digit year). 
-Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
-Then, build the HTML pages using `mksite.py serve`.
-
-Run the tests with:
-
-    pytest ./tests/test_bibtex.py
-    
-with pytest to validate your changes.
-
-If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
+Providing bibtex data from the publisher site is a better method.
+If you know the DOI of the article, it is also possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
 BetterBib is available from the Python Package Index, so simply type:
 
@@ -307,7 +302,7 @@ BetterBib is available from the Python Package Index, so simply type:
 and then use `doi2bibtex` from the command line:
 
 ```text
-doi2bibtex 10.1103/PhysRevLett.96.066402
+betterbib-doi2bibtex 10.1103/PhysRevLett.96.066402
 
 @article{bibtex,
   author = {Amadon, B. and Biermann, S. and Georges, A. and Aryasetiawan, F.},
@@ -325,6 +320,21 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 }
 ```
 
+Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key
+(make sure it's not a duplicated entry).
+Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008"
+(start with an uppercase letter, then lower case, then four-digit year).
+Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
+Then, build the HTML pages using `./mksite.py serve`.
+
+Run the tests with:
+
+    pytest abimkdocs_tests/test_bibtex.py
+
+with pytest to validate your changes.
+
+In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wiki-links) with the "cite" namespace.
+
 ## Topics
 
 The topic files are written in Markdown and can be found in ~abinit/doc/topics.
@@ -341,33 +351,33 @@ These are template files with text and two variables:
 {{ selected_input_files }}
 ```
 
-that will be filled by `mksite.py` by inspecting the database of variables and the tests of the test suite..
+that will be filled by `./mksite.py` by inspecting the database of variables and the tests of the test suite..
 A new Markdown file without underscore will be generated and included in `mkdocs.yml`.
 
 !!! important
 
     You are supposed to edit the version with the underscore and provide enough
     information in the declaration of the variable and in the `TEST_INFO` section
-    so that `mksite.py` can fill the complete the templated.
-    Remmber to restart `mksite.py` to see the changes.
+    so that `./mksite.py` can fill the template.
+    Remember to restart `./mksite.py` to see the changes.
 
 ## How to a add a new document
 
 In order to add a new lesson, create a new Markdown file in doc/tutorial and 
 register it in `mkdocs.yml` 
 
-Then, build the HTML using `mksite.py serve` and start to enjoy the Markdown syntax.
+Then, build the HTML using `./mksite.py serve` and start to enjoy the Markdown syntax.
 
 The structuration for help files and theory documents is very similar to the one for the lessons of the tutorial.
 
-### Topics and tribes
+### Topics and relevances
 
 Since the beginning of the ABINIT HTML documentation, every input variable 
 has been required to belong to a **varset** (set of variables, e.g. `varbas`, `varfil`).
 However, starting in Summer 2017, we require every input variable to be also mentioned in at least one of the
-documentation "topics" and, for such topic, to be characterized by a "tribe".
+documentation "topics" and, for such topic, to be characterized by a "relevance".
 
-The allowed list of tribes (a generic list, irrespective of the topic) is declared in
+The allowed list of relevances (a generic list, irrespective of the topic) is declared in
 `~abinit/abimkdocs/variables.py`. 
 Standard names are:
 
@@ -376,12 +386,12 @@ Standard names are:
 - `useful` (when the default value is used most of the time)
 - `expert` (when only expert users should use other values than the default)
 
-Other tribe names have been allowed for specific topics, in which such a classification 
+Other relevance names have been allowed for specific topics, in which such a classification 
 (compulsory/basic/useful/expert) is not a relevant one.
 
-In order to specify the (possibly several) combinations of topic+tribe to which an input variable is attached,
-the field "topics" is used inside the `~abinit/doc/input_variables/generated_doc/abinit_vars.yml` file
-(and can be filled thanks to the use of the Abivars.jar GUI).
+In order to specify the (possibly several) combinations of topic+relevance to which an input variable is attached,
+the field "topics" is used inside the `~abinit/abimkdocs/variables_abinit.py` file
+(and similar files in the same directory for the other executables).
 
 Some examples:
 
@@ -389,7 +399,7 @@ Some examples:
 * for mdwall: "MolecularDynamics_expert"
 * for gwpara: "parallelism_useful, GW_basic"
 
-The latter is a case where one input variable is associated to two topics, with a different tribe 
+The latter is a case where one input variable is associated to two topics, with a different relevance
 for topic "parallelism" and topic "GW".
 
 
@@ -407,6 +417,9 @@ See the new input variables [[einterp]], [[nkpath]], and [[prtebands]],
 and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
+B.2
+Added subsuite syntax [[test:gspw_01]]
+
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:
 
@@ -420,11 +433,15 @@ Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
 
 produces a nice report with links to the features available in the new version:
 
+
 B.1   
 Implementation of algorithms to interpolate the electronic band structure.
 See the new input variables [[einterp]], [[nkpath]], and [[prtebands]], 
 and the new tests [[test:v8_04]], [[test:libxc_41]].
-Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
+Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
+
+B.2
+Added subsuite syntax [[test:gspw_01]]
 
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:
@@ -434,7 +451,7 @@ New versions of Fortran compilers have been integrated in the test farm:
 - IBM xlf compiler 14.1
 - NAG 5.3
 
-Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
+Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]].
 
 !!! important
     We are already using Markdown on gitlab to document our merge requests.
@@ -479,7 +496,7 @@ text
 : Free text describing the input variable
 
 topics
-: A string, specified in [topics_and_tribes](#topics-and-tribes)
+: A string, specified in [topics_and_relevances](#topics-and-relevances)
 
 varset
 : a unique "set of variables" to which the variable belong. 
@@ -537,7 +554,7 @@ As condition, please use strings with the most basic expressions,
 containing <, < =, >, >=, ==, !=, +, -, *, /, etc to allow for further simple parsing !
 
 As a convention, we use "pythonic" way for expressions, so you can use "or", "and" and "in" 
-also as `[[varname]] in [1,2,5]` for example ...
+also as <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [varname] &#93; in [1,2,5]</span> for example ...
 
 
 ### ValueWithUnit object
@@ -565,5 +582,5 @@ the CONDITION to be fulfilled.
 
 Pay attention to strings. If it is recognized as string directly, you don't need ticks (' ').
 Otherwise, you need to put ticks. 
-For example, if you want to use a link as a value, use a link shortcut like `[[abivarname]]`. 
+For example, if you want to use a link as a value, use a link shortcut like <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [abivarname] &#93; </span>. 
 See the doc about link shortcuts at [links shortcuts](markdown.md#links). 

@@ -40,7 +40,7 @@
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  fatvshift=factor to multiply dtset%atvshift
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)= # atoms of each type.
@@ -171,7 +171,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use defs_parameters
  use defs_rectypes
  use m_xmpi
  use m_profiling_abi
@@ -186,12 +185,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_hdr
  use m_xcdata
 
+ use m_dtfil,            only : status
+ use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
+ use m_symtk,            only : symmetrize_xred
+ use m_geometry,         only : metric
+ use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_abi_etsf,         only : abi_etsf_init
- use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
- use m_ioarr,            only : ioarr, fftdatar_write_from_hdr
+ use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar, initmpi_seq, proc_distrb_cycle
+ use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
  use m_energies,         only : energies_type, energies_init, energies_copy
@@ -199,48 +202,55 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
- use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify,&
-&                               paw_an_reset_flags
+ use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_pawfgrtab,        only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder, pawcprj_getdim
  use m_pawdij,           only : pawdij, symdij,pawdijhat
  use m_pawfgr,           only : pawfgr_type
- use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
-&                               paw_ij_reset_flags
+ use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
-&                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
- use gwls_hamiltonian,   only : build_vxc
+ use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
+                                fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
+ use m_gwls_hamiltonian, only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
- use m_io_kss,             only : gshgg_mkncwrite
+ use m_io_kss,           only : gshgg_mkncwrite
+ use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
+ use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_vtorhorec,        only : first_rec, vtorhorec
+ use m_vtorhotf,         only : vtorhotf
+ use m_outscfcv,         only : outscfcv
+ use m_afterscfloop,     only : afterscfloop
+ use m_extraprho,        only : extraprho
+ use m_spacepar,         only : setsym
+ use m_newrho,           only : newrho
+ use m_newvtr,           only : newvtr
+ use m_vtorho,           only : vtorho
+ use m_setvtr,           only : setvtr
+ use m_mkrho,            only : mkrho
+ use m_rhotov,           only : rhotov
+ use m_forces,           only : fresid
+ use m_dft_energy,       only : energy
+ use m_initylmg,         only : initylmg
+ use m_rhotoxc,          only : rhotoxc
+ use m_drivexc,          only : check_kxc
+ use m_odamix,           only : odamix
+ use m_common,           only : scprqt, prtene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_56_xc
- use interfaces_57_iovars
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_recursion
- use interfaces_68_rsprc
- use interfaces_79_seqpar_mpi
  use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section
 
@@ -335,6 +345,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  logical :: recompute_cprj=.false.,reset_mixing=.false.
  logical,save :: tfw_activated=.false.
  logical :: wvlbigdft=.false.
+ logical :: non_magnetic_xc
 !type(energies_type),pointer :: energies_wvl  ! TO BE ACTIVATED LATER
 !arrays
  integer :: ngfft(18),ngfftdiel(18),ngfftf(18),ngfftmix(18),npwarr_diel(1)
@@ -368,6 +379,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
+ real(dp),allocatable :: tauresid(:,:)
  type(scf_history_type) :: scf_history_wf
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -391,6 +403,9 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
    write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !######################################################################
 !Initializations - Memory allocations
@@ -473,6 +488,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  dielop=0 ; strsxc=zero
  deltae=zero ; elast=zero ;
  vpotzero(:)=zero
+ ! JWZ April 12 2018: Intel 18 compiler seems to require maxfor initialized,
+ ! else it dies in scprqt in some scenarios
+ maxfor=zero
+ !
  results_gs%residm=zero;results_gs%res2=zero
  results_gs%deltae=zero;results_gs%diffor=zero
  call energies_init(energies)
@@ -598,7 +617,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
 
  wfmixalg=dtset%fockoptmix/100
- use_hybcomp=0 
+ use_hybcomp=0
  if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
  ABI_ALLOCATE(vxc_hybcomp,(nfftf,dtset%nspden*use_hybcomp))
 
@@ -651,7 +670,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
@@ -727,7 +746,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_ALLOCATE(nvresid,(nfftf,dtset%nspden))
-   if (nstep==0) nvresid=zero
+   ABI_ALLOCATE(tauresid,(nfftf,dtset%nspden*dtset%usekden))
+   if (nstep==0) then
+     nvresid=zero
+     tauresid=zero
+   end if
    ABI_ALLOCATE(dtn_pc,(3,dtset%natom))
 !  The next arrays are needed if iscf==5 and ionmov==4,
 !  but for the time being, they are always allocated
@@ -772,6 +795,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    end if
  else
    ABI_ALLOCATE(nvresid,(0,0))
+   ABI_ALLOCATE(tauresid,(0,0))
    ABI_ALLOCATE(dtn_pc,(0,0))
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
@@ -1134,7 +1158,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
              ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
              ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
 !          write(std_out,*) "mkrhogstate"
-           !From this call, rho does not include the compensation density 
+           !From this call, rho does not include the compensation density
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
              call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
@@ -1148,7 +1172,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 !          3-Symetrize rhoij, compute nhat and add it to rhor
 !          Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij cannot be distributed over different atomic sites.
              cplex=1;ipert=0;idir=0;qpt(:)=zero
-             call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+             call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &             my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &             dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &             symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
@@ -1176,7 +1200,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
-       ! Possibly (re)compute the ACE operator 
+       ! Possibly (re)compute the ACE operator
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
@@ -1185,11 +1209,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
        end if
 
-       !Should place a test on whether there should be the final exit of the istep loop. 
-       !This test should use focktoldfe. 
-       !This should update the info in fock%fock_common%fock_converged. 
+       !Should place a test on whether there should be the final exit of the istep loop.
+       !This test should use focktoldfe.
+       !This should update the info in fock%fock_common%fock_converged.
        !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
-       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc) 
+       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc)
        !work fine.
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
        if(fock%fock_common%nnsclo_hf==1)then
@@ -1512,7 +1536,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
-&     susmat,symrec,taug,taur,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
+&     susmat,symrec,taug,taur,tauresid,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
 &     ylm,ylmgr,ylmdiel)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
@@ -1585,6 +1609,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
      end if
 !    If the density mixing is required, compute the total energy here
+! TODO: add taur taug tauresid if needed
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
 &     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1648,7 +1673,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
-&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,n3xccc,&
+&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         optxc,dtset%paral_kgb,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau)
        else if(.not. wvlbigdft) then
@@ -1670,7 +1695,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
 &     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
-&     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred)
+&     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,&
+&     taug=taug,taur=taur,tauresid=tauresid)
    end if   ! iscf>=10
 
    call timab(68,2,tsec)
@@ -1746,6 +1772,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
      optene=2*optres;if(psps%usepaw==1) optene=2
 
+! TODO: check if tauresid is needed here too for potential residual in the future for MGGA potential mixing
      call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
@@ -1790,6 +1817,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
      end if
 
      if (.not.wvlbigdft) then
+! TODO: add taur taug tauresid if needed
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
 &       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1833,6 +1861,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 !    If criteria in scprqt say to quit, then exit the loop over istep.
      if (quit==1) then
        do ispden=1,dtset%nspden
+! TODO: if we add potential mixing for the MGGA generalize the tauresid to vtauresid and add in here
          vtrial(:,ispden)=vtrial(:,ispden)+nvresid(:,ispden)+vres_mean(ispden)
        end do
        call timab(244,2,tsec) ! Due to the exit instruction, two timab calls are needed
@@ -1910,7 +1939,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          fildata=trim(dtfil%fnametmp_app_den)//'_'//trim(tag)
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          call fftdatar_write_from_hdr("density",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-         dtset%nspden,rhor,mpi_enreg,eigen=eigen)
+&          dtset%nspden,rhor,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -1924,7 +1953,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          ! output the Laplacian of density
          call fftdatar_write_from_hdr("kinedr",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-         dtset%nspden,taur,mpi_enreg,eigen=eigen)
+&          dtset%nspden,taur,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -2156,6 +2185,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  ABI_DEALLOCATE(dtn_pc)
  ABI_DEALLOCATE(grhf)
  ABI_DEALLOCATE(nvresid)
+ ABI_DEALLOCATE(tauresid)
 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)
@@ -2206,7 +2236,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%fock_common%use_ACE/=0) then     
+   if (fock%fock_common%use_ACE/=0) then
      call fock_ACE_destroy(fock%fockACE)
    end if
    call fock_common_destroy(fock%fock_common)
@@ -2231,4 +2261,1016 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  DBG_EXIT("COLL")
 
 end subroutine scfcv
+!!***
+
+!!****f* ABINIT/etotfor
+!! NAME
+!! etotfor
+!!
+!! FUNCTION
+!! This routine is called to compute the total energy and various parts of it.
+!! The routine computes -if requested- the forces.
+!!
+!! INPUTS
+!!  atindx1(natom)=index table for atoms, inverse of atindx
+!!  dtefield <type(efield_type)> = variables related to Berry phase
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!   | berryopt  = 4: electric field is on -> add the contribution of the
+!!   |                - \Omega E.P term to the total energy
+!!   |          /= 4: electric field is off
+!!   | bfield = cartesian coordinates of magnetic field in atomic units
+!!   | efield = cartesian coordinates of the electric field in atomic units
+!!   | iatfix(3,natom)=1 for frozen atom along some direction, 0 for unfrozen
+!!   | ionmov=governs the movement of atoms (see help file)
+!!   | densfor_pred=governs the mixed electronic-atomic part of the preconditioner
+!!   | natom=number of atoms in cell.
+!!   | nconeq=number of atomic constraint equations
+!!   | nspden=number of spin-density components
+!!   | nsym=number of symmetry elements in space group
+!!   | occopt=option for occupancies
+!!   | prtvol=integer controlling volume of printed output
+!!   | tsmear=smearing energy or temperature (if metal)
+!!   | typat(natom)=type integer for each atom in cell
+!!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
+!!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
+!!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=grads of spatially-varying chemical potential energy (hartree)
+!!  grewtn(3,natom)=grads of Ewald energy (hartree)
+!!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
+!!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
+!!  indsym(4,nsym,natom)=indirect indexing array for atom labels
+!!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
+!!  mgfft=maximum size of 1D FFTs
+!!  mpi_enreg=information about MPI parallelization
+!!  my_natom=number of atoms treated by current processor
+!!  nattyp(ntypat)=number of atoms of each type
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
+!!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
+!!  ntypat=number of types of atoms in unit cell.
+!!  nvresid(nfft,nspden)=potential or density residual
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  n3xccc=dimension of the xccc3d array (0 or nfft).
+!!  optene=option for the computation of total energy
+!!         (-1=no computation; 0=direct scheme; 1=double-counting scheme)
+!!  optforces=option for the computation of forces
+!!  optres=0 if residual array (nvresid) contains the potential residual
+!!        =1 if residual array (nvresid) contains the density residual
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim phase (structure factor) information.
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  rhog(2,nfft)=array for Fourier transform of electron density
+!!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  symrec(3,3,nsym)=symmetry operations in reciprocal space
+!!  ucvol=unit cell volume
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  vhartr(nfft)=array for holding Hartree potential
+!!  vpsp(nfft)=array for holding local psp
+!!  vxc(nfft,nspden)=array for holding XC potential
+!!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!  deltae=change in total energy between the previous and present SCF cycle
+!!  etotal=total energy (hartree)
+!!  ===== if optforces==1
+!!   diffor=maximum absolute change in component of forces between present and previous SCF cycle.
+!!   favg(3)=mean of fcart before correction for translational symmetry
+!!   fcart(3,natom)=cartesian forces from fred (hartree/bohr)
+!!   fred(3,natom)=symmetrized form of grtn (grads of Etot) (hartree)
+!!   gresid(3,natom)=forces due to the residual of the density/potential
+!!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
+!!   grxc(3,natom)=d(Exc)/d(xred) derivatives (0 without core charges)
+!!   maxfor=maximum absolute value of force
+!!   synlgr(3,natom)=symmetrized form of grads of Enl (hartree)
+!!
+!! SIDE EFFECTS
+!! Input/Output:
+!!  elast=previous value of the energy,
+!!        needed to compute deltae, then updated.
+!!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
+!!  energies <type(energies_type)>=all part of total energy.
+!!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
+!!   | e_localpsp(IN)=local psp energy (hartree)
+!!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
+!!   | e_ewald(IN)=Ewald energy (hartree)
+!!   | e_vdw_dftd(IN)=VdW DFT-D energy
+!!   | e_hartree(IN)=Hartree part of total energy (hartree units)
+!!   | e_corepsp(IN)=psp core-core energy
+!!   | e_hybcomp_E0(IN)=energy compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v0(IN)=potential compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
+!!   | e_kinetic(IN)=kinetic energy part of total energy.
+!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_xc(IN)=exchange-correlation energy (hartree)
+!!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
+!!   | e_paw(IN)=PAW spherical part energy
+!!   | e_pawdc(IN)=PAW spherical part double-counting energy
+!!   | e_elecfield(OUT)=the term of the energy functional that depends explicitely
+!!   |                  on the electric field:  enefield = -ucvol*E*P
+!!   | e_magfield(OUT)=the term of the energy functional that depends explicitely
+!!   |                  on the magnetic field:  e_magfield = -ucvol*E*P
+!!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
+!!   |                this value is %entropy * dtset%tsmear (hartree).
+!!  ===== if optforces==1
+!!   forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
+!!   grnl(3*natom)=gradients of Etot due to nonlocal contributions
+!!                 Input for norm-conserving psps, output for PAW
+!!  ===== if psps%usepaw==1
+!!   pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
+!!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
+!!
+!! NOTES
+!!  In case of PAW calculations:
+!!    All computations are done on the fine FFT grid.
+!!    All variables (nfft,ngfft,mgfft) refer to this fine FFT grid.
+!!    All arrays (densities/potentials...) are computed on this fine FFT grid.
+!!  ! Developpers have to be careful when introducing others arrays:
+!!      they have to be stored on the fine FFT grid.
+!!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
+!!
+!! PARENTS
+!!      scfcv
+!!
+!! CHILDREN
+!!      forces,nres2vres,pawgrnl,timab
+!!
+!! SOURCE
+
+subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
+&  elast,electronpositron,energies,&
+&  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
+&  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
+&  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
+&  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
+&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_efield
+ use m_profiling_abi
+
+ use m_time,             only : timab
+ use m_fock,             only : fock_type
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type
+ use m_pawfgrtab,        only : pawfgrtab_type
+ use m_pawrhoij,         only : pawrhoij_type
+ use m_energies,         only : energies_type
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_forces,           only : forces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'etotfor'
+ use interfaces_65_paw
+ use interfaces_67_common
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: my_natom,mgfft,n1xccc,n3xccc,nfft,ngrvdw,nkxc,ntypat,optene,optforces
+ integer,intent(in) :: optres,usepaw
+ real(dp),intent(in) :: gsqcut
+ real(dp),intent(inout) :: elast,ucvol
+ real(dp),intent(out) :: deltae,diffor,etotal,maxfor
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(efield_type),intent(in) :: dtefield
+ type(dataset_type),intent(in) :: dtset
+ type(electronpositron_type),pointer :: electronpositron
+ type(energies_type),intent(inout) :: energies
+ type(pawang_type),intent(in) :: pawang
+ type(pseudopotential_type),intent(in) :: psps
+ type(wvl_internal_type), intent(in) :: wvl
+ type(wvl_denspot_type), intent(inout) :: wvl_den
+ type(fock_type),pointer, intent(inout) :: fock
+!arrays
+ integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
+ integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
+ real(dp),intent(in) :: gmet(3,3),grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
+ real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),red_ptot(3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: xccc3d(n3xccc)
+ real(dp),intent(inout) :: forold(3,dtset%natom),grnl(3*dtset%natom)
+ real(dp),intent(inout) :: nhat(nfft,dtset%nspden*psps%usepaw)
+ real(dp),intent(inout),target :: nvresid(nfft,dtset%nspden)
+ real(dp),intent(inout) :: xred(3,dtset%natom)
+ real(dp),intent(out) :: favg(3),fred(3,dtset%natom)
+ real(dp),intent(inout) :: fcart(3,dtset%natom)
+ real(dp),intent(out) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
+ real(dp),intent(inout) :: grxc(3,dtset%natom)
+ real(dp),intent(out) :: synlgr(3,dtset%natom)
+ type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
+ type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
+ type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr
+ logical :: apply_residual
+ real(dp) :: eenth,ucvol_
+!arrays
+ real(dp),parameter :: k0(3)=(/zero,zero,zero/)
+ real(dp) :: tsec(2),A(3,3),A1(3,3),A_new(3,3),efield_new(3)
+ real(dp) :: dummy(0),nhat_dum(0,0)
+ real(dp),allocatable :: vlocal(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
+
+! *********************************************************************
+
+ call timab(80,1,tsec)
+
+ ipositron=electronpositron_calctype(electronpositron)
+
+ if (optene>-1) then
+
+!  When the finite-temperature VG broadening scheme is used,
+!  the total entropy contribution "tsmear*entropy" has a meaning,
+!  and gather the two last terms of Eq.8 of VG paper
+!  Warning : might have to be changed for fixed moment calculations
+   if(dtset%occopt>=3 .and. dtset%occopt<=8) then
+     if (abs(dtset%tphysel) < tol10) then
+       energies%e_entropy = - dtset%tsmear * energies%entropy
+     else
+       energies%e_entropy = - dtset%tphysel * energies%entropy
+     end if
+   else
+     energies%e_entropy = zero
+   end if
+
+!  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009),
+!    the missing volume is added here
+   energies%e_elecfield=zero
+   if ((dtset%berryopt==4.or.dtset%berryopt==14).and.ipositron/=1) then
+     energies%e_elecfield=-dot_product(dtset%red_efieldbar,red_ptot)  !!ebar_i p_i
+     eenth=zero
+     do iir=1,3
+       do jjr=1,3
+         eenth=eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)  !!g^{-1})_ij ebar_i ebar_j
+       end do
+     end do
+     energies%e_elecfield=energies%e_elecfield-eenth*ucvol/(8._dp*pi)
+   end if
+
+!  Turn it into an internal energy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009),
+!    but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
+   if ((dtset%berryopt==6.or.dtset%berryopt==16).and.ipositron/=1) then
+     energies%e_elecfield=zero
+     eenth=zero
+     do iir=1,3
+       do jjr=1,3
+         eenth=eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)  !! g^{-1})_ij ebar_i ebar_j
+       end do
+     end do
+     energies%e_elecfield=energies%e_elecfield+eenth*ucvol/(8._dp*pi)
+   end if
+
+!  Calculate internal energy and electric enthalpy for mixed BC case.
+   if (dtset%berryopt==17.and.ipositron/=1) then
+     energies%e_elecfield=zero
+     A(:,:)=(four_pi/ucvol)*rmet(:,:)
+     A1(:,:)=A(:,:) ; A_new(:,:)=A(:,:)
+     efield_new(:)=dtset%red_efield(:)
+     eenth=zero
+     do kkr=1,3
+       if (dtset%jfielddir(kkr)==1) then    ! fixed ebar direction
+!        step 1 add -ebar*p
+         eenth=eenth-dtset%red_efieldbar(kkr)*red_ptot(kkr)
+!        step 2  chang to e_new (change e to ebar)
+         efield_new(kkr)=dtset%red_efieldbar(kkr)
+!        step 3  chang matrix A to A1
+         do iir=1,3
+           do jjr=1,3
+             if (iir==kkr .and. jjr==kkr) A1(iir,jjr)=-1.0/A(kkr,kkr)
+             if ((iir==kkr .and. jjr/=kkr) .or.  (iir/=kkr .and.  jjr==kkr)) &
+&             A1(iir,jjr)=-1.0*A(iir,jjr)/A(kkr,kkr)
+             if (iir/=kkr .and. jjr/=kkr) A1(iir,jjr)=A(iir,jjr)-A(iir,kkr)*A(kkr,jjr)/A(kkr,kkr)
+           end do
+         end do
+         A(:,:)=A1(:,:) ; A_new(:,:)=A1(:,:)
+       end if
+     end do  ! end fo kkr
+     do iir=1,3
+       do jjr=1,3
+         eenth= eenth+half*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)
+       end do
+     end do
+     energies%e_elecfield=energies%e_elecfield+eenth
+   end if   ! berryopt==17
+
+!  Turn it into a magnetic enthalpy, by adding orbital electronic contribution
+   energies%e_magfield = zero
+!  if (dtset%berryopt == 5 .and. ipositron/=1) then
+!  emag = dot_product(mag_cart,dtset%bfield)
+!  energies%e_magfield = emag
+!  end if
+
+!  Compute total (free)- energy by direct scheme
+   if (optene==0) then
+     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
+&     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
+&     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
+&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+     if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
+     if (usepaw/=0) etotal = etotal + energies%e_paw
+   end if
+
+!  Compute total (free) energy by double-counting scheme
+   if (optene==1) then
+     etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
+&     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
+&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
+&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+     if (usepaw/=0) etotal = etotal + energies%e_pawdc
+   end if
+
+!  Additional stuff for electron-positron
+   if (dtset%positron/=0) then
+     if (ipositron==0) then
+       energies%e_electronpositron  =zero
+       energies%edc_electronpositron=zero
+     else
+       energies%e_electronpositron  =electronpositron%e_hartree+electronpositron%e_xc
+       energies%edc_electronpositron=electronpositron%e_hartree+electronpositron%e_xcdc
+       if (usepaw==1) then
+         energies%e_electronpositron  =energies%e_electronpositron  +electronpositron%e_paw
+         energies%edc_electronpositron=energies%edc_electronpositron+electronpositron%e_pawdc
+       end if
+     end if
+     if (optene==0) electronpositron%e0=etotal
+     if (optene==1) electronpositron%e0=etotal-energies%edc_electronpositron
+     etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
+   end if
+
+!  Compute energy residual
+   deltae=etotal-elast
+   elast=etotal
+ end if !optene/=-1
+
+ call timab(80,2,tsec)
+
+!------Compute forces-----------------------------------------------------
+
+ if (optforces==1) then
+
+!  PAW: add gradients due to Dij derivatives to non-local term
+   if (usepaw==1) then
+     ABI_ALLOCATE(vlocal,(nfft,dtset%nspden))
+     do ispden=1,min(dtset%nspden,2)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vhartr,vlocal,vpsp,vxc)
+       do ifft=1,nfft
+         vlocal(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)
+       end do
+     end do
+
+     if(dtset%nspden==4)then
+       do ispden=3,4
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vlocal,vxc)
+         do ifft=1,nfft
+           vlocal(ifft,ispden)=vxc(ifft,ispden)
+         end do
+       end do
+     end if
+     ucvol_=ucvol
+#if defined HAVE_BIGDFT
+     if (dtset%usewvl==1) ucvol_=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
+#endif
+     dimnhat=0;optgr=1;optgr2=0;optstr=0;optstr2=0
+     comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
+     call pawgrnl(atindx1,dimnhat,dummy,1,dummy,grnl,gsqcut,mgfft,my_natom, &
+&     dtset%natom, nattyp,nfft,ngfft,nhat_dum,dummy,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
+&     pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred, &
+&     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=mpi_enreg%comm_fft,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,paral_kgb=mpi_enreg%paral_kgb)
+     ABI_DEALLOCATE(vlocal)
+   end if
+
+   apply_residual=(optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
+&   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
+
+!  If residual is a density residual (and forces from residual asked),
+!  has to convert it into a potential residual before calling forces routine
+   if (apply_residual) then
+     ABI_ALLOCATE(resid,(nfft,dtset%nspden))
+     option=0; if (dtset%densfor_pred<0) option=1
+     optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
+     call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
+&     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
+&     rhor,rprimd,usepaw,resid,xccc3d,xred,vxc)
+   else
+     resid => nvresid
+   end if
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
+&   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
+&   n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
+&   pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
+&   electronpositron=electronpositron)
+   if (apply_residual) then
+     ABI_DEALLOCATE(resid)
+   end if
+
+!  Returned fred are full symmetrized gradients of Etotal
+!  wrt reduced coordinates xred, d(Etotal)/d(xred)
+!  Forces are contained in array fcart
+
+ else   ! if optforces==0
+   fcart=zero
+   fred=zero
+   favg=zero
+   diffor=zero
+   gresid=zero
+   grhf=zero
+   maxfor=zero
+   synlgr=zero
+ end if
+
+ call timab(80,2,tsec)
+
+end subroutine etotfor
+!!***
+
+!!****f* ABINIT/wf_mixing
+!! NAME
+!! wf_mixing
+!!
+!! FUNCTION
+!! Mixing of wavefunctions in the outer loop of a double loop SCF approach.
+!! Different algorithms are implemented, depending on the value of wfmixalg.
+!!
+!! INPUTS
+!!  atindx1(dtset%natom)=index table for atoms, inverse of atindx
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!  istep=number of call the routine (usually the outer loop in the SCF double loop)
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcprj=size of cprj array
+!!  mpi_enreg=information about MPI parallelization
+!!  nattyp(dtset%ntypat)=number of atoms of each type in cell.
+!!  npwarr(nkpt)=number of planewaves in basis at this k point
+!!  pawtab(dtset%ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)= plane wave wavefunction coefficient
+!!                          Value from previous SCF cycle is input and stored in some form
+!!                          Extrapolated value is output
+!!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
+!!                          Value from previous SCF cycle is input and stored in some form
+!!                          Extrapolated value is output
+!!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
+!!
+!! PARENTS
+!!      scfcv
+!!
+!! CHILDREN
+!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
+!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
+!!
+!! SOURCE
+
+subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
+& nattyp,npwarr,pawtab,scf_history_wf)
+
+ use defs_basis
+ use defs_abitypes
+ use m_scf_history
+ use m_xmpi
+ use m_profiling_abi
+ use m_errors
+ use m_cgtools
+
+ use m_time,    only : timab
+ use m_pawtab,  only : pawtab_type
+ use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
+&                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'wf_mixing'
+ use interfaces_66_wfs
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istep,mcg,mcprj
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
+ type(scf_history_type),intent(inout) :: scf_history_wf
+!arrays
+ integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
+ integer,intent(in) :: npwarr(dtset%nkpt)
+ real(dp), intent(inout) :: cg(2,mcg)
+ type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: hermitian
+ integer :: ibdmix,ibdsp,ibg,ibg_hist,icg,icg_hist
+ integer :: ierr,ikpt,indh,ind_biorthog,ind_biorthog_eff,ind_newwf,ind_residual,inplace
+ integer :: iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
+ integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
+ integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
+ real(dp) :: alpha,beta
+ complex(dpc) :: sum_coeffs
+!arrays
+ integer,allocatable :: ipiv(:),dimcprj(:)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: al(:,:),mmn(:,:,:)
+ real(dp),allocatable :: dotprod_res(:,:,:),dotprod_res_k(:,:,:),res_mn(:,:,:),smn(:,:,:)
+ complex(dpc),allocatable :: coeffs(:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)
+!write(std_out,*)' wf_mixing : enter, istep= ',istep
+!call flush(std_out)
+!write(std_out,*)' istep,scf_history_wf%alpha=',istep,scf_history_wf%alpha
+!write(std_out,*)' cg(1,1)=',cg(1,1)
+!write(std_out,*)' scf_history_wf%cg(1,1,1:5)=',scf_history_wf%cg(1,1,1:5)
+!ABI_ALLOCATE(cg_ref,(2,mcg))
+!cg_ref(:,:)=cg(:,:)
+!ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
+!cprj_ref(:,:)=cprj(:,:)
+!      write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+!&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+!       call flush(std_out)
+!ENDDEBUG
+
+ if (istep==0) return
+
+ ntypat=dtset%ntypat
+ usepaw=dtset%usepaw
+ wfmixalg=scf_history_wf%wfmixalg
+ nbdmix=dtset%nbandhf
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me_distrb=mpi_enreg%me_kpt
+ spaceComm_band=xmpi_comm_self
+
+ spare_mem=0
+ if(scf_history_wf%history_size==wfmixalg-1)spare_mem=1
+
+!scf_history_wf%alpha contains dtset%wfmix
+ alpha=scf_history_wf%alpha
+ beta=one-scf_history_wf%alpha
+
+ icg=0
+ icg_hist=0
+ ibg=0
+ ibg_hist=0
+
+!Useful array
+ ABI_ALLOCATE(dimcprj,(dtset%natom))
+ if (usepaw==1) then
+   call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
+ end if
+
+ if(istep==1)then
+   do indh=1,scf_history_wf%history_size
+     call pawcprj_alloc(scf_history_wf%cprj(:,:,indh),0,dimcprj)
+   end do
+ end if
+
+ ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,my_nspinor*nbdmix))
+ ABI_DATATYPE_ALLOCATE(cprj_kh,(dtset%natom,my_nspinor*nbdmix))
+ if(usepaw==1) then
+   call pawcprj_alloc(cprj_k,0,dimcprj)
+   call pawcprj_alloc(cprj_kh,0,dimcprj)
+ end if
+ ABI_ALLOCATE(smn,(2,nbdmix,nbdmix))
+ ABI_ALLOCATE(mmn,(2,nbdmix,nbdmix))
+
+ if(wfmixalg>2)then
+   nset1=1
+   nset2=min(istep-1,wfmixalg-1)
+   ABI_ALLOCATE(dotprod_res_k,(2,1,nset2))
+   ABI_ALLOCATE(dotprod_res,(2,1,nset2))
+   ABI_ALLOCATE(res_mn,(2,wfmixalg-1,wfmixalg-1))
+   dotprod_res=zero
+   if(istep==1)then
+     scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
+   end if
+ end if
+
+!Explanation for the index for the wavefunction stored in scf_history_wf
+!The reference is the cg+cprj output after the wf optimization at istep 1.
+!It comes as input to the present routine as cgcprj input at step 2, and is usually found at indh=1.
+
+!In the simple mixing case (wfmixalg==1), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
+!previous input (that was stored in indh=1), then generate the next input, which is stored again in indh=1
+
+!When the storage is not spared:
+!- the values of indh from 2 to wfmixalg store the (computed here) biorthogonalized input cgcprj, then the residual
+!- the values of indh from wfmixalg+1 to 2*wfmixalg-1 store the biorthogonalized output cgcprj (coming as argument)
+
+!First step
+ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
+
+   indh=2   ! This input wavefunction is NOT the reference
+   if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1
+
+!  Simply store the wavefunctions and cprj. However, nband_k might be different from nbandhf...
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       npw_k=npwarr(ikpt)
+
+       scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       if(usepaw==1) then
+!        scf_history_wf%cprj(:,ibg_hist+1:ibg_hist+my_nspinor*nbdmix,1)=cprj(:,ibg+1:ibg+my_nspinor*nbdmix)
+         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+&         dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+!      Update the counters
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+     end do
+   end do
+
+ else
+!  From istep==2
+
+!  First part of the computation : biorthogonalization, and computation of the residual (possibly, prediction of the next input in the case of simple mixing)
+!  Index for the wavefunctions stored in scf_history_wf whose scalar products with the argument cgcprj will have to be computed.
+   indh=1   ! This input wavefunction is the reference
+   if(wfmixalg/=2 .and. istep==2)indh=2 ! except for istep=2 in the rmm-diis
+
+   if(wfmixalg>2)then
+!    istep inside the cycle defined by wfmixalg, and next index. Then, indices of the wavefunction sets.
+     istep_cycle=mod((istep-2),wfmixalg-1)
+     istep_new=mod((istep-1),wfmixalg-1)
+     ind_biorthog=1+wfmixalg+istep_cycle
+     ind_residual=2+istep_cycle
+     ind_newwf=2+istep_new
+     shift_set1=ind_residual-1
+     shift_set2=1
+   end if
+
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       istwf_k=dtset%istwfk(ikpt)
+       npw_k=npwarr(ikpt)
+
+!      Biorthogonalization
+
+       if(usepaw==1) then
+         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+&         dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         call pawcprj_get(atindx1,cprj_kh,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+       end if  !end usepaw=1
+
+       hermitian=0
+       if(wfmixalg==2 .or. istep==2)then
+         call dotprod_set_cgcprj(atindx1,cg,scf_history_wf%cg(:,:,indh),cprj_k,cprj_kh,dimcprj,hermitian,&
+&         0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       else
+         call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),cg,cprj_kh,cprj_k,dimcprj,hermitian,&
+&         0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       end if
+
+!      Invert S matrix, that is NOT hermitian.
+!      Calculate M=S^-1
+       mmn=zero
+       do kk=1,nbdmix
+         mmn(1,kk,kk)=one
+       end do
+
+       ABI_ALLOCATE(ipiv,(nbdmix))
+!      The smn is destroyed by the following inverse call
+       call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,mmn,nbdmix,ierr)
+       ABI_DEALLOCATE(ipiv)
+!DEBUG
+       if(ierr/=0)then
+         MSG_ERROR(' The call to cgesv general inversion routine failed')
+       end if
+!ENDDEBUG
+
+!      The M matrix is used to compute the biorthogonalized set of wavefunctions, and to store it at the proper place
+       if(wfmixalg==2 .or. istep==2)then
+         inplace=1
+         call lincom_cgcprj(mmn,scf_history_wf%cg(:,:,indh),cprj_kh,dimcprj,&
+&         icg_hist,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw)
+       else
+         inplace=0
+         call lincom_cgcprj(mmn,cg,cprj_k,dimcprj,&
+&         icg,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw,&
+&         cgout=scf_history_wf%cg(:,:,ind_biorthog),cprjout=scf_history_wf%cprj(:,:,ind_biorthog),icgout=icg_hist)
+       end if
+
+!      The biorthogonalised set of wavefunctions is now stored at the proper place
+
+!      Finalize this first part of the computation, depending on the algorithm and the step.
+
+       if(wfmixalg==2)then
+
+!        Wavefunction extrapolation, simple mixing case
+!        alpha contains dtset%wfmix, beta contains one-alpha
+         cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=&
+&         alpha*cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)&
+&         +beta*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             call pawcprj_axpby(beta,alpha,cprj_kh(:,ibdmix:ibdmix),cprj_k(:,ibdmix:ibdmix))
+           end do ! end loop on ibdmix
+         end if
+
+!        Back to usual orthonormalization
+         call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nband_k,dtset%mkmem,&
+&         mpi_enreg,dtset%natom,nattyp,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+
+!        Store the newly extrapolated wavefunctions, orthonormalized, in scf_history_wf
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&             nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&             mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+           end do ! end loop on ibdmix
+         end if
+
+       else  !  wfmixalg/=2
+!        RMM-DIIS
+
+         if (istep==2)then
+!          Store the argument wf as the reference for all future steps, in scf_history_wf with index 1.
+           scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+           if(usepaw==1) then
+             do ibdmix=1,nbdmix
+               call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&               nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&               mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+             end do ! end loop on ibdmix
+           end if
+         end if
+
+         ind_biorthog_eff=ind_biorthog
+         if(istep==2)ind_biorthog_eff=1 ! The argument wf has not been stored in ind_biorthog
+
+!        Compute the residual of the wavefunctions for this istep,
+!        that replaces the previously stored set of (biorthogonalized) input wavefunctions
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
+&         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)&
+&         -scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff),&
+&             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual))
+           end do ! end loop on ibdmix
+         end if
+
+!        Compute the new scalar products to fill the res_mn matrix
+         call dotprodm_sumdiag_cgcprj(atindx1,scf_history_wf%cg,scf_history_wf%cprj,dimcprj,&
+&         ibg,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
+&         mpi_enreg,scf_history_wf%history_size,dtset%natom,nattyp,nbdmix,npw_k,nset1,nset2,my_nspinor,dtset%nsppol,ntypat,&
+&         shift_set1,shift_set2,pawtab,dotprod_res_k,usepaw)
+
+         dotprod_res=dotprod_res+dotprod_res_k
+
+!        scf_history_wf for index ind_biorthog will contain the extrapolated wavefunctions (and no more the output of the SCF loop).
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)=&
+&         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)+&
+&         (alpha-one)*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             if(ind_biorthog/=ind_biorthog_eff)then
+               scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog)=scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff)
+             end if
+             call pawcprj_axpby((alpha-one),one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual),&
+&             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog))
+           end do ! end loop on ibdmix
+         end if
+
+       end if
+
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+!      End big k point loop
+     end do
+!    End loop over spins
+   end do
+
+ end if ! istep>=2
+
+ if(wfmixalg>2 .and. istep>1)then
+
+!DEBUG
+!      write(std_out,*)' '
+!      write(std_out,*)' Entering the residual minimisation part '
+!      write(std_out,*)' '
+!      call flush(std_out)
+!ENDDEBUG
+
+   call timab(48,1,tsec)
+   call xmpi_sum(dotprod_res,mpi_enreg%comm_kpt,ierr)
+   call timab(48,2,tsec)
+
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set1,1+shift_set2:nset2+shift_set2)=dotprod_res(:,1,1:nset2)
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(1,1+shift_set2:nset2+shift_set2,1+shift_set1)=dotprod_res(1,1,1:nset2)
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(2,1+shift_set2:nset2+shift_set2,1+shift_set1)=-dotprod_res(2,1,1:nset2)
+
+ end if ! wfmixalg>2 and istep>1
+
+ if(wfmixalg>2 .and. istep>2)then
+
+!  Extract the relevant matrix R_mn
+   res_mn(:,1:nset2,1:nset2)=&
+&   scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set2:nset2+shift_set2,1+shift_set2:nset2+shift_set2)
+
+!DEBUG
+!      write(std_out,*)' The matrix res_mn(:,1:nset2,1:nset2) is :'
+!      write(std_out,*)res_mn(:,1:nset2,1:nset2)
+!      call flush(std_out)
+!ENDDEBUG
+
+!  Solve R_mn \alpha_n = 1_m
+   ABI_ALLOCATE(ipiv,(nset2))
+   ABI_ALLOCATE(coeffs,(nset2))
+   coeffs(:)=cone
+!  The res_mn is destroyed by the following inverse call
+   call zgesv(nset2,1,res_mn,wfmixalg-1,ipiv,coeffs,nset2,ierr)
+   ABI_DEALLOCATE(ipiv)
+!  The coefficients must sum to one
+   sum_coeffs=sum(coeffs)
+   coeffs=coeffs/sum_coeffs
+
+!DEBUG
+!      write(std_out,*)' The coefficients that minimize the residual have been found'
+!      write(std_out,*)' coeffs =',coeffs
+!      call flush(std_out)
+!ENDDEBUG
+ end if ! wfmixalg>2 and istep>2
+
+ if(wfmixalg>2 .and. istep>1)then
+
+!  Find the new "input" wavefunction, bi-orthogonalized, and store it replacing the adequate "old" input wavefunction.
+
+   icg=0
+   icg_hist=0
+   ibg=0
+   ibg_hist=0
+   ABI_ALLOCATE(al,(2,nset2))
+   if(istep>2)then
+     do iset2=1,nset2
+       al(1,iset2)=real(coeffs(iset2)) ; al(2,iset2)=aimag(coeffs(iset2))
+     end do
+   else
+     al(1,1)=one ; al(2,1)=zero
+   end if
+
+!DEBUG
+!      write(std_out,*)' Overload the coefficients, in order to simulate a simple mixing with wfmix '
+!      write(std_out,*)' Set al(1,ind_biorthog-3)=one, for ind_biorthog=',ind_biorthog
+!      write(std_out,*)' This will feed scf_history for set ind_biorthog-3+wfmixalg=',ind_biorthog-3+wfmixalg
+!      al(:,:)=zero
+!      al(1,ind_biorthog-3)=one
+!      call flush(std_out)
+!ENDDEBUG
+
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       istwf_k=dtset%istwfk(ikpt)
+       npw_k=npwarr(ikpt)
+
+       if(istep>2)then
+!        Make the appropriate linear combination (from the extrapolated wfs)
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=zero
+         do iset2=1,nset2
+           cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&           +al(1,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&
+&           -al(2,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+           cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&           +al(1,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&
+&           +al(2,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+         end do
+       else ! One needs a simple copy from the extrapolated wavefunctions
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1+wfmixalg)
+       end if
+!      Note the storage in cprj_k. By the way, a simple copy might also be used in case istep=2.
+       if(usepaw==1) then
+         do ibdsp=1,my_nspinor*nbdmix
+           call pawcprj_lincom(al,scf_history_wf%cprj(:,ibdsp,1+wfmixalg:nset2+wfmixalg),cprj_k(:,ibdsp:ibdsp),nset2)
+         end do
+       end if
+
+!      Store the newly extrapolated wavefunctions for this k point, still bi-orthonormalized, in scf_history_wf
+       scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_newwf)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       if(usepaw==1) then
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,ind_newwf),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+!      Back to usual orthonormalization for the cg and cprj_k
+       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nband_k,dtset%mkmem,&
+&       mpi_enreg,dtset%natom,nattyp,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+
+!      Need to transfer cprj_k to cprj
+       if(usepaw==1) then
+         call pawcprj_put(atindx1,cprj_k,cprj,dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+     end do ! End big k point loop
+   end do ! End loop over spins
+
+   if(istep>2)then
+     ABI_DEALLOCATE(coeffs)
+   end if
+   ABI_DEALLOCATE(al)
+
+ end if ! wfmixalg>2 and istep>1
+
+!DEBUG
+! write(std_out,*)' wf_mixing : exit '
+!      write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+!&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+! write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+! write(std_out,*)' scf_history_wf%cg(1:2,1:2,1)=',scf_history_wf%cg(1:2,1:2,1)
+! ABI_DEALLOCATE(cg_ref)
+! ABI_DATATYPE_DEALLOCATE(cprj_ref)
+!ENDDEBUG
+
+ if(usepaw==1) then
+   call pawcprj_free(cprj_k)
+   call pawcprj_free(cprj_kh)
+ end if
+ ABI_DATATYPE_DEALLOCATE(cprj_k)
+ ABI_DATATYPE_DEALLOCATE(cprj_kh)
+ ABI_DEALLOCATE(dimcprj)
+ ABI_DEALLOCATE(mmn)
+ ABI_DEALLOCATE(smn)
+ if(wfmixalg>2)then
+   ABI_DEALLOCATE(dotprod_res_k)
+   ABI_DEALLOCATE(dotprod_res)
+   ABI_DEALLOCATE(res_mn)
+ end if
+
+end subroutine wf_mixing
 !!***

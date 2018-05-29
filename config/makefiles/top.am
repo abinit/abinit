@@ -65,10 +65,10 @@ tests_in:
 
 # Help
 help:
-	@more $(top_srcdir)/doc/help_make/help_make_top
+	@more $(top_srcdir)/doc/help_make/help_make_top.txt
 
 help_dev dev_help dev:
-	@more $(top_srcdir)/doc/help_make/help_make_top_dev
+	@more $(top_srcdir)/doc/help_make/help_make_top_dev.txt
 
 # ---------------------------------------------------------------------------- #
 
@@ -147,8 +147,6 @@ infos_html:
 	cp -fr tests/v7/Input tmp-infos-$(VERSION)/tests/v7/Input
 	cp -fr tests/v8/Input tmp-infos-$(VERSION)/tests/v8/Input
 	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/tests/vdwxc/Input
-	-rm -f tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
-	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	tar -cvf infos_html-$(VERSION).tar                \
           tmp-infos-$(VERSION)/variables \
           tmp-infos-$(VERSION)/tests \
@@ -157,7 +155,6 @@ infos_html:
           tmp-infos-$(VERSION)/tutorial \
           tmp-infos-$(VERSION)/guide \
           tmp-infos-$(VERSION)/known_problems \
-          tmp-infos-$(VERSION)/release_notes/release_notes.html \
           tmp-infos-$(VERSION)/presentation/presentation.pdf
 	gzip infos_html-$(VERSION).tar
 	-rm -fr tmp-infos-$(VERSION)

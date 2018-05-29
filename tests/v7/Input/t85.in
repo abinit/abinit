@@ -77,6 +77,7 @@ znucl  13
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = atlas_intel_18.0_openmpi
 #%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in
 #%% [files]
 #%% files_to_test = 

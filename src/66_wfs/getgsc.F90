@@ -68,21 +68,20 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  use m_xmpi
  use m_errors
 
+ use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_nonlop,      only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgsc'
- use interfaces_18_timing
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
-!This type is defined in defs_mpi
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
@@ -98,7 +97,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !scalars
  integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: enlout_dum(1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),scwavef(:,:)
@@ -111,12 +110,10 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Compatibility tests
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
  if(gs_ham%usepaw==0) then
-   msg='Only compatible with PAW (usepaw=1) !'
-   MSG_BUG(msg)
+   MSG_BUG('Only compatible with PAW (usepaw=1) !')
  end if
  if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
-   msg='Invalid value for mcg, mgsc or mcprj !'
-   MSG_BUG(msg)
+   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
  end if
 
 !Keep track of total time spent in getgsc:
@@ -127,9 +124,11 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Prepare some data
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
  ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
- if (mcprj>0) then
+ if (gs_ham%usecprj==1) then
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
    call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
+ else
+   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
  end if
  dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
  choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
@@ -187,8 +186,8 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  ABI_DEALLOCATE(scwavef)
  if (gs_ham%usecprj==1) then
    call pawcprj_free(cwaveprj)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj)
  end if
+ ABI_DATATYPE_DEALLOCATE(cwaveprj)
 
  call timab(565,2,tsec)
 

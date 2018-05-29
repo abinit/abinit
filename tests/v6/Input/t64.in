@@ -119,7 +119,7 @@ nbdbuf 0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Da Pieve
-#%% keywords = NC, DFPT
+#%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
 #%%   Si diatomic molecule
 #%%   Test of linear and non-linear response in the non-spin-polarized case.

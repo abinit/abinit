@@ -381,7 +381,7 @@ end subroutine get_proc_atmtab
 !!  natom=total number of atoms
 !!
 !! OUTPUT
-!! proc_list(:) = index of procs 
+!! proc_list(:) = index of procs
 !!
 !! NOTES
 !!  The atoms are distributed contigously by egal part; the rest is distributed
@@ -411,7 +411,7 @@ end subroutine get_proc_atmtab
 !arrays
  integer, intent(in) :: atom_list(:)
  integer, intent(out) :: proc_list(:)
- 
+
 !Local variables ---------------------------------------
 !scalars
  integer :: nb_atom,dn,dn1,iatom,natomlim,iatm,jproclim,nmod

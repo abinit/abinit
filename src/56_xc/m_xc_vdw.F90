@@ -16,12 +16,6 @@
 !!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
 !!  RS09 = doi:10.1103/PhysRevLett.103.096102
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -37,15 +31,14 @@ module m_xc_vdw
  use iso_c_binding
  use m_profiling_abi
  use m_errors
-
  use libxc_functionals
  use m_splines
- use m_numeric_tools,only : simpson_int
-
- use m_io_tools,only : flush_unit, open_file
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+
+ use m_io_tools, only : flush_unit, open_file
+ use m_numeric_tools, only : simpson_int, cspint
 
  implicit none
 
@@ -134,7 +127,7 @@ module m_xc_vdw
     real(dp) :: aratio = 30.0_dp
     ! Ratio between highest and lowest a !DEBUG this definition has to
     ! be corrected since its use in the code is different.
- 
+
     real(dp) :: damax = 0.5_dp
     ! Maximum variation in the angular mesh
 
@@ -221,7 +214,7 @@ module m_xc_vdw
 
   ! Unsoftened representation of Phi
   real(dp),allocatable,save :: phir_u(:,:,:)
- 
+
   type(libxc_functional_type) :: vdw_funcs(2)
 
 ! ----------------------------------------------------------------------
@@ -233,7 +226,7 @@ module m_xc_vdw
 
 ! vdW-DF main switch
   logical :: vdw_switch = .false.
- 
+
 ! ----------------------------------------------------------------------
 
 contains
@@ -250,12 +243,6 @@ contains
 !! FUNCTION
 !!  Aggregates the various quantities calculated by the other vdW routines and
 !!  produces energy, potential and stress tensor.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  volume= the volume of the cell
@@ -328,7 +315,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   real(dp),allocatable :: t3dr(:,:,:,:)
   complex(dp),allocatable :: t3dg(:,:,:,:)
   real(dp),allocatable :: ptmp(:,:,:),ttmp(:,:),utmp(:),wtmp(:)
- 
+
 ! *************************************************************************
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
@@ -373,7 +360,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 &   nr1 * nr2 * nr3,"times"
   MSG_COMMENT(msg)
 #endif
-   
+
   ip1 = 1
   ip2 = 1
   do ir3=1,nr3
@@ -390,7 +377,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 &         ex,ec,vx,vc,theta,eps_vdw)
         t3dr(ir1,ir2,ir3,1:nqpts) = theta(1:nqpts,1,1)
         rho_tmp = sum(rho_grho(ip1,1:nspden,1))
-        deltae_uns = deltae_uns + rho_tmp * eps_vdw * dvol   
+        deltae_uns = deltae_uns + rho_tmp * eps_vdw * dvol
         ip1 = ip1 + 1
       end do
     end do
@@ -567,10 +554,10 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     deltae_vdw = deltae_vdw + rho_tmp * exc_tmp * dvol
     exc_vdw = exc_vdw + rho_tmp * &
 &     ( half * ( sum(ttmp(:,ip1) * theta(:,1,1)) / &
-&       (rho_tmp + tiny(rho_tmp)) ) * dvol ) * dvol 
+&       (rho_tmp + tiny(rho_tmp)) ) * dvol ) * dvol
     !Correctness of multiplication by dvol above depends on how fftw3 deals
-    !with the volume element in direct or inverse FFT. Here it was assumed 
-    !that fftw3 does not multiply by the volume upon FFT^-1 
+    !with the volume element in direct or inverse FFT. Here it was assumed
+    !that fftw3 does not multiply by the volume upon FFT^-1
     do is1=1,nspden
       decdrho_vdw(is1) = decdrho_vdw(is1) + decdrho_tmp(is1) + &
 &       sum(ttmp(:,ip1) * theta(:,is1,2))
@@ -646,12 +633,6 @@ end subroutine xc_vdw_aggregate
 !!  Calculates the exchange-correlation energy correction due to
 !!  van der Waals interactions at one point.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nspden= number of spin components
 !!  rho= electronic density
@@ -707,7 +688,7 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   real(dp) :: dq(3),ptmp(2),q0(5),qtmp(2)
   real(dp) :: ztmp(my_vdw_params%nqpts,my_vdw_params%nqpts)
   real(dp) :: qpoly(my_vdw_params%nqpts,3)
- 
+
 ! *************************************************************************
 
   ! Init
@@ -758,7 +739,7 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
     q0(1) = qcut
     q0(2:5)= zero
   end if
- 
+
   ! Smoothen q0 near qcut exponentially  eq. 5 RS09. (Saturation)
   !   * qtmp(1) = qs = qcut * (1 - exp(-Sum_i=1,ns 1/i (x/xc)**i))
   !   * qtmp(2) = dqs / dq |q=q0
@@ -787,7 +768,7 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 &    ((dq(2)**3 - dq(2)) * qpoly_basis(iq0,iq1,2) + &
 &    (dq(3)**3 - dq(3)) * qpoly_basis(iq0+1,iq1,2)) * dq(1)**2 / six
 
-   if ( calc_corrections ) then 
+   if ( calc_corrections ) then
     qpoly(iq1,2) = -(qpoly_basis(iq0,iq1,1) - &
 &     qpoly_basis(iq0+1,iq1,1)) / dq(1) - &
 &     ((three * dq(2)**2 - one) * qpoly_basis(iq0,iq1,2) - &
@@ -797,8 +778,8 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 
   ! Pre-compute integrand for vdW energy correction
   ! by cubic-spline interpolation and store it in
-  ! qpoly(:,3). This is done twice: one for the 
-  ! unsoftened kernel and other one for the 
+  ! qpoly(:,3). This is done twice: one for the
+  ! unsoftened kernel and other one for the
   ! softened kernel
   dr = my_vdw_params%rcut / nrpts
   ztmp(:,:) = zero
@@ -811,7 +792,7 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
        end do
      end do
    end do
-  else 
+  else
    do ir=1,nrpts
      do iq1=1,nqpts
        do iq2=1,iq1
@@ -839,10 +820,10 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
     theta(:,is,1) = qpoly(:,1) * (2 - nspden) * rho(is)
   end do
 
-  ! Calculate theta derivatives 
+  ! Calculate theta derivatives
   if ( calc_corrections ) then
     do is=1,nspden
-      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(is) 
+      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(is)
       do ix=3,5
         theta(:,is,ix) = qpoly(:,2) * q0(ix) * (2 - nspden) * rho(is)
       end do
@@ -853,7 +834,7 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
     eps = zero
     ptmp(1) = sum(qpoly(:,3) * qpoly(:,1))
     eps = ptmp(1) * rho_tmp
-  if ( calc_corrections ) then 
+  if ( calc_corrections ) then
      dexc(:) = zero
      dexcg(:,:) = zero
      ptmp(2) = two * sum(qpoly(:,2) * qpoly(:,3))
@@ -873,12 +854,6 @@ end subroutine xc_vdw_energy
 !! FUNCTION
 !!  Cleans-up the mess once van der Waals corrections to the energy are
 !!  not needed anymore.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  vdw_params= van der Waals parameters
@@ -908,7 +883,7 @@ subroutine xc_vdw_done(vdw_params)
 !Local variables ------------------------------
   character(len=512) :: msg
   integer :: i
- 
+
 ! *************************************************************************
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
@@ -922,7 +897,7 @@ subroutine xc_vdw_done(vdw_params)
   ABI_DEALLOCATE(phi_bicubic)
   ABI_DEALLOCATE(phi_u_bicubic)
   ABI_DEALLOCATE(phir)
-  ABI_DEALLOCATE(phir_u) 
+  ABI_DEALLOCATE(phir_u)
   ABI_DEALLOCATE(d2phidr2)
   ABI_DEALLOCATE(phig)
   ABI_DEALLOCATE(d2phidg2)
@@ -938,12 +913,6 @@ end subroutine xc_vdw_done
 !!
 !! FUNCTION
 !!  Exports internal vdW-DF parameters.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! OUTPUT
 !!  vdw_params= van der Waals parameters
@@ -972,7 +941,7 @@ subroutine xc_vdw_get_params(vdw_params)
 
 !Local variables ------------------------------
   character(len=512) :: msg
- 
+
 ! *************************************************************************
 
   vdw_params%functional = my_vdw_params%functional
@@ -1007,12 +976,6 @@ end subroutine xc_vdw_get_params
 !!
 !! FUNCTION
 !!  Calculates the van der Waals kernel.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  vdw_params= parameters for the van der Waals calculations
@@ -1202,7 +1165,7 @@ subroutine xc_vdw_init(vdw_params)
   ! phi(1,:,2:4)   = zero
   ! phi(:,1,2:4)   = zero
   ! Ar2 results show better convergence of E_vdW than when boundary conditions were used.
-  ! Kernel plot show that there are not dicontinuities as well. 
+  ! Kernel plot show that there are not dicontinuities as well.
 
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Building filtered kernel"
@@ -1259,7 +1222,7 @@ subroutine xc_vdw_init(vdw_params)
   ABI_DEALLOCATE(deltd)
   ABI_DEALLOCATE(xde)
 
-  ! Building of the unsoftened kernel  
+  ! Building of the unsoftened kernel
 
   ! Create unsoftened kernel and its derivatives
   ! Note: using 4 neighbours for derivatives
@@ -1325,7 +1288,7 @@ subroutine xc_vdw_init(vdw_params)
   ! phi(1,:,2:4)   = zero
   ! phi(:,1,2:4)   = zero
   ! Ar2 results show better convergence of E_vdW than when boundary conditions were used.
-  ! Kernel plot show that there are not dicontinuities as well. 
+  ! Kernel plot show that there are not dicontinuities as well.
 
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Building filtered kernel"
@@ -1341,47 +1304,47 @@ subroutine xc_vdw_init(vdw_params)
   ABI_ALLOCATE(phir_u,(nrpts,nqpts,nqpts))
   ! For the local correction we just need the kernel not its
   ! derivatives.
-  sofswt = 0  
+  sofswt = 0
   !ABI_ALLOCATE(d2phidr2,(nrpts,nqpts,nqpts))
   !ABI_ALLOCATE(phig,(nrpts,nqpts,nqpts))
   !ABI_ALLOCATE(d2phidg2,(nrpts,nqpts,nqpts))
   call vdw_df_filter(nqpts,nrpts,my_vdw_params%rcut,my_vdw_params%gcut,ngpts,sofswt)
   !  my_vdw_params%ngpts = ngpts already defined above
-   
-  ! The following is not needed for the local correction: 
+
+  ! The following is not needed for the local correction:
   ! Find closest indices in dmesh
   ! FIXME: something is missing or should be removed here
   ! ABI_ALLOCATE(kern_spline_der,(ndpts,ndpts,3))
   ! ABI_ALLOCATE(deltd,(2))
   ! ABI_ALLOCATE(xde,(2))
-  
+
   ! kern_spline_der(:,:,:) = zero
-  
+
   ! do jd1=1,ndpts
   !   do jd2=1,ndpts
-  
+
   !     d1 = dmesh(jd1)
   !     d2 = dmesh(jd2)
-  
+
   !     if ( (d1 < dcut) .or. (d2 < dcut) ) then
   !       id1 = vdw_df_indexof(dmesh,ndpts,d1)
   !       id2 = vdw_df_indexof(dmesh,ndpts,d2)
-  
+
   !       deltd(1) = dmesh(id1+1) - dmesh(id1)
   !       deltd(2) = dmesh(id2+1) - dmesh(id2)
-  
+
   !       xde(1) = (d1 - dmesh(id1)) / deltd(1)
   !       xde(2) = (d2 - dmesh(id2)) / deltd(2)
-  
+
   !       kern_spline_der(jd1,jd2,1) = phi_bicubic(2,1,id1,id2) / deltd(1)
   !       kern_spline_der(jd1,jd2,2) = phi_bicubic(1,2,id1,id2) / deltd(2)
   !       kern_spline_der(jd1,jd2,3) = &
   !&         phi_bicubic(2,2,id1,id2) / ( deltd(1)*deltd(2) )
   !     end if
-  
+
   !   end do
   ! end do
-  
+
   ! ABI_DEALLOCATE(kern_spline_der)
   ! ABI_DEALLOCATE(deltd)
   ! ABI_DEALLOCATE(xde)
@@ -1402,12 +1365,6 @@ end subroutine xc_vdw_init
 !! FUNCTION
 !!  Initializes LibXC parameters for the LDA-based part of vdW-DF
 !!  calculations.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  ixc_vdw= vdW-DF functional to apply
@@ -1472,7 +1429,7 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
     MSG_ERROR('[vdW-DF] unable to set LibXC parameters')
   end if
   ixc = -(ix * 1000 + ic)
- 
+
   ! Propagate to internal parameters
   my_vdw_params%functional = ixc_vdw
 
@@ -1490,12 +1447,6 @@ end subroutine xc_vdw_libxc_init
 !!
 !! FUNCTION
 !!  Estimates the memory to be used by the vdW-DF method.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  unt= unit to write the data to
@@ -1530,7 +1481,7 @@ subroutine xc_vdw_memcheck(unt,vp)
   integer :: napts,ndpts,nqpts,nrpts,id1,id2
   real(dp) :: dmax,dtmp,mem_perm,mem_temp
   type(xc_vdw_type) :: my_vp
- 
+
 ! *************************************************************************
 
   if ( present(vp) ) then
@@ -1613,17 +1564,11 @@ end subroutine xc_vdw_memcheck
 !! FUNCTION
 !!  Reads vdW-DF variables from disk.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  filename= file to read data from
 !!
 !! TODO
-!!  FIXME: design an extension for ETSF_IO
+!!  design an extension for ETSF_IO
 !!
 !! PARENTS
 !!      driver
@@ -1654,7 +1599,7 @@ subroutine xc_vdw_read(filename)
   integer :: ncid,dimids(4),varids(13)
   integer :: nderivs_id,npoly_id,ndpts_id,ngpts_id,nqpts_id,nrpts_id
   integer :: nderivs,npoly,ndpts,ngpts,nqpts,nrpts
- 
+
 ! *************************************************************************
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
@@ -1796,12 +1741,6 @@ end subroutine xc_vdw_read
 !! FUNCTION
 !!  Sets the vdW-DF parameters directly related to the functional.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  vdw_func= van der Waals functional
 !!  vdw_zab= Zab parameter to use for the calculations
@@ -1830,7 +1769,7 @@ subroutine xc_vdw_set_functional(vdw_func,vdw_zab)
 
 !Local variables ------------------------------
   character(len=512) :: msg
- 
+
 ! *************************************************************************
 
   my_vdw_params%functional = vdw_func
@@ -1847,12 +1786,6 @@ end subroutine xc_vdw_set_functional
 !!
 !! FUNCTION
 !!  Imports external vdW-DF parameters.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUT
 !!  vdw_params= van der Waals parameters
@@ -1881,7 +1814,7 @@ subroutine xc_vdw_set_params(vdw_params)
 
 !Local variables ------------------------------
   character(len=512) :: msg
- 
+
 ! *************************************************************************
 
   my_vdw_params%functional = vdw_params%functional
@@ -1917,12 +1850,6 @@ end subroutine xc_vdw_set_params
 !! FUNCTION
 !!  Displays the parameters in use for the vdW-DF corrections.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  unt= unit to write the data to
 !!  vp= van der Waals parameters
@@ -1954,7 +1881,7 @@ subroutine xc_vdw_show(unt,vp)
 !Local variables ------------------------------
   character(len=1536) :: msg
   type(xc_vdw_type) :: my_vp
- 
+
 ! *************************************************************************
 
   if ( present(vp) ) then
@@ -2004,12 +1931,6 @@ end subroutine xc_vdw_show
 !! FUNCTION
 !!  Returns the status of the main vdW-DF switch.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  None
 !!
@@ -2050,12 +1971,6 @@ end function xc_vdw_status
 !!
 !! FUNCTION
 !!  Switches on and off the calculation of vdW interactions.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  condition= boolean condition to trigger the calculations
@@ -2116,12 +2031,6 @@ end subroutine xc_vdw_trigger
 !!
 !! FUNCTION
 !!  Writes vdW-DF variables to disk.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  filename= file to write data to
@@ -2308,19 +2217,13 @@ end subroutine xc_vdw_write
 !!
 !! FUNCTION
 !!  Softens the kernel by applying a filter in reciprocal space.
-!!  
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  nqpts= number of q-mesh points
 !!  nrpts= number of mesh points in real space
 !!  rcut= cut-off in real space
 !!  gcut= cut-off in reciprocal space
-!!  sofswt= Driver of the softening in real space 
+!!  sofswt= Driver of the softening in real space
 !!
 !! OUTPUTS
 !!  ngpts= number of mesh points in reciprocal space
@@ -2363,7 +2266,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 ! *************************************************************************
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
- 
+
   ! Init
 
 
@@ -2390,10 +2293,10 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
       q1 = qmesh(iq1)
       q2 = qmesh(iq2)
 
-      if ( sofswt == 1 ) then  
+      if ( sofswt == 1 ) then
       ! Build kernel in real space
       ! Note: smoothly going to zero when approaching rcut
-      ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values. 
+      ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values.
        do ir=1,nrpts
          xr=rmesh(ir)
          phir(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
@@ -2453,7 +2356,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
       if ( sofswt == 0) then
       ! Build unsoftened kernel in real space
       ! Note: smoothly going to zero when approaching rcut
-      ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values. 
+      ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values.
        do ir=1,nrpts
          xr=rmesh(ir)
          phir_u(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
@@ -2461,7 +2364,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        end do
       ! Symmetrize unsoftened kernel
        phir_u(:,iq2,iq1) = phir_u(:,iq1,iq2)
-      end if ! sofswt == 0 
+      end if ! sofswt == 0
 
      end do
    end do
@@ -2482,12 +2385,6 @@ end subroutine vdw_df_filter
 !!  Decides whether to use direct integration of Eq.(14) of
 !!  Dion et al., PRL 92, 246401 (2004), or to return a 4th-order
 !!  polynomial for small distances.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  d1= first coordinate
@@ -2594,12 +2491,6 @@ end function vdw_df_kernel
 !!  Calculates the van der Waals kernel for specified d-coordinates. Uses
 !!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  d1= first coordinate
 !!  d2= second coordinate
@@ -2623,7 +2514,6 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_kernel_value'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
   implicit none
@@ -2655,9 +2545,9 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   ! Init
 
 !!  Testing the same way in which amesh is obtained in siesta:
-!!  napts = nint(max(acutmin,aratio*sqrt(d1**2+d2**2))) This is 
+!!  napts = nint(max(acutmin,aratio*sqrt(d1**2+d2**2))) This is
 !!  very different to the way the number of a-mesh points are determined
-!!  in Siesta.  Actually this almost corresponds to their definition of acut 
+!!  in Siesta.  Actually this almost corresponds to their definition of acut
 
   acut = max(acutmin,aratio*sqrt(d1**2+d2**2))
 
@@ -2669,7 +2559,7 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 
   if ( dain == damax ) then !Linear mesh
    metyp = 2
-   napts = nint( acut / damax ) 
+   napts = nint( acut / damax )
   else
    bb = acut * dain / (damax-dain)
    aa = log( 1 + dain/bb )
@@ -2696,8 +2586,8 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   ABI_ALLOCATE(work,(napts))
   ABI_ALLOCATE(eint,(napts))
   ! Init amesh
-  !FIXME: allow for other mesh types 
-  !Now intruducing metyp, setting mesh_cutoff to acut, removing 
+  !FIXME: allow for other mesh types
+  !Now intruducing metyp, setting mesh_cutoff to acut, removing
   !mesh_inc=damax and including mesh_ratio=
   call vdw_df_create_mesh(amesh,napts,metyp,acut,mesh_ratio=damax/dain)
 
@@ -2793,12 +2683,6 @@ end function vdw_df_kernel_value
 !! FUNCTION
 !!  Calculates LDA-based XC energy density for other vdW routines.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  ixc= functional to apply
 !!  nspden= number of spin components
@@ -2848,7 +2732,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
 
   is_gga=libxc_functionals_isgga(vdw_funcs)
- 
+
   ABI_ALLOCATE(rho_tmp,(npts_rho,nspden))
   if (is_gga) then
     ABI_ALLOCATE(grho2,(npts_rho,2*min(nspden,2)-1))
@@ -2921,12 +2805,6 @@ end subroutine vdw_df_ldaxc
 !!
 !! FUNCTION
 !!  Creates a 1D mesh following user specifications.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  npts= length of the mesh
@@ -3040,12 +2918,12 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         log_ofs = mesh_cutoff / (exp(log_inc*(npts - 1)) - 1)
 
 !!DEBUG
-!! Previous definition of log_ofs implies that the mesh 
+!! Previous definition of log_ofs implies that the mesh
 !! points are to be calculated as:
 !! x(i)=log_ofs( exp(log_inc*(npts - 1)) - 1 )
 !! which in turn means that x(0)=0 and is not consistent with the
-!! mesh(im) points given at line 3056. 
-!! If the latter is adopted mesh_ratio above should be computed as: 
+!! mesh(im) points given at line 3056.
+!! If the latter is adopted mesh_ratio above should be computed as:
 !! mesh_ratio=log ( (x(n)-x(n-1))/(x(2)-x(1)) ) and not merely as
 !! mesh_ratio= (x(n)-x(n-1))/(x(2)-x(1))
 !! in order to log_inc definition makes sense.
@@ -3069,7 +2947,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         do im = 1,npts
 !DEBUG
 !          mesh(im) = log_ofs * exp(log_inc * (im-1)) this is not consistent
-!       with definition of log_ofs at line 3025. 
+!       with definition of log_ofs at line 3025.
           mesh(im) = log_ofs * (exp(log_inc * (im-1)) - 1)
 !ENDDEBUG
         end do
@@ -3156,12 +3034,6 @@ end subroutine vdw_df_create_mesh
 !! FUNCTION
 !!  Returns the index of a specified value in a sorted array.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  list_1d= sorted array
 !!  npts= length of the sorted array
@@ -3224,16 +3096,10 @@ end function vdw_df_indexof
 !! FUNCTION
 !!  Calculates values of Phi(d1,d2) by interpolating the kernel.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  d1= first coordinate
 !!  d2= second coordinate
-!!  sofswt= switch for the kernel softening   
+!!  sofswt= switch for the kernel softening
 !!
 !! PARENTS
 !!  Will be filled automatically by the parent script
@@ -3288,7 +3154,7 @@ function vdw_df_interpolate(d1,d2,sofswt)
 
 
   select case ( sofswt )
-  
+
     case (1)
       do ix1=1,4
         do ix2=1,4
@@ -3319,12 +3185,6 @@ end function vdw_df_interpolate
 !!
 !! FUNCTION
 !!  Performs consistency checks of the vdW-DF kernel.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Camilo Espejo, Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  test_mode= bitfield to enable/disable tests
@@ -3368,7 +3228,7 @@ subroutine vdw_df_internal_checks(test_mode)
   ! delta=0 (see Fig. 1 of DRSLL04).
   ! The integration will be performed over a finer and linear d mesh,
   ! not dmesh, for which the kernel values will be obtained by both
-  ! interpolation and direct calculation. The range spanned by this mesh 
+  ! interpolation and direct calculation. The range spanned by this mesh
   ! is half of dmesh range. Introduced variables: delta_test, kern_test_c,
   ! kern_test_i, ntest, intg_calc, intg_int.
   if ( iand(test_mode,1) /= 0 ) then
@@ -3395,7 +3255,7 @@ subroutine vdw_df_internal_checks(test_mode)
     write(msg,'(a,4x,3(1x,a10),a)') ch10, "D","Calcul.","Interp.",ch10
     call wrtout(std_out,msg,'COLL')
 #endif
- 
+
     do id1 = 1,ntest
       d1=id1*delta_test
       kern_test_c(id1) = (four_pi * d1**2) * &
@@ -3409,7 +3269,7 @@ subroutine vdw_df_internal_checks(test_mode)
     end do
 
     call simpson_int(ntest,delta_test,kern_test_c,intg_calc)
-    call simpson_int(ntest,delta_test,kern_test_i,intg_int)  
+    call simpson_int(ntest,delta_test,kern_test_i,intg_int)
 
     write(msg,'(a,4x,a,2(a,4x,a,e10.3))') ch10, &
 &     "> Integrals over D", ch10, ">   calculated   :",intg_calc(ntest),ch10, &
@@ -3441,7 +3301,7 @@ end subroutine vdw_df_internal_checks
 !! FUNCTION
 !!  Reports errors occurring when allocating memory.
 !!
-!! INPUTS 
+!! INPUTS
 !!  array_name= name of the array not properly allocated.
 !!  array_size= size of the array.
 !!  file_name= name of the file where the allocation was performed.
@@ -3504,12 +3364,6 @@ end subroutine vdw_df_netcdf_ioerr
 !! FUNCTION
 !!  Expands user-specified tweaks for internal use.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  input_tweaks= condensed tweaks
 !!
@@ -3559,12 +3413,6 @@ end subroutine vdw_df_set_tweaks
 !!
 !! FUNCTION
 !!  Writes function names for debugging purposes.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  func_name= name of the function to print

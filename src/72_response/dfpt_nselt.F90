@@ -125,17 +125,18 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_geometry,   only : stresssym
+ use m_cgtools,    only : dotprod_vn
  use m_pawtab,     only : pawtab_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
+ use m_spacepar,   only : hartrestr
+use m_mpinfo,      only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_72_response, except_this_one => dfpt_nselt
 !End of the abilint section
 

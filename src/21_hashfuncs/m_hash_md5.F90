@@ -470,7 +470,7 @@ end subroutine hash_update
 
     character(len=*), intent(in) :: f_string
     character(kind=c_char,len=1), intent(out) :: c_string(len_trim(f_string)+1)
-        
+
     integer :: i, strlen
 
     strlen = len_trim(f_string)

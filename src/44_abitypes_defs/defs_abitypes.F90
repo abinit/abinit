@@ -300,6 +300,8 @@ type dataset_type
  integer :: gw_sctype
  integer :: gwmem
  integer :: gwpara
+ integer :: hmcsst
+ integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -395,6 +397,7 @@ type dataset_type
  integer :: nomegasf
  integer :: nomegasi
  integer :: nomegasrd
+ integer :: nonlinear_info
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -490,6 +493,7 @@ type dataset_type
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
+ integer :: prtfull1wf
  integer :: prtfsurf
  integer :: prtgsr=1
  integer :: prtgden
@@ -568,6 +572,7 @@ type dataset_type
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
+ integer :: usepead
  integer :: usepotzero
  integer :: userec
  integer :: useria=0
@@ -623,6 +628,7 @@ type dataset_type
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
  integer :: supercell(3)
+ integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
@@ -930,6 +936,7 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
+ real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
 
  end type dataset_type
 !!***
@@ -1290,10 +1297,12 @@ type dataset_type
   integer :: unscr   ! unit number for SCR file
   integer :: unwff1  ! unit number for wavefunctions, number one
   integer :: unwff2  ! unit number for wavefunctions, number two
+  integer :: unwff3  ! unit number for wavefunctions, number three
   integer :: unwffgs ! unit number for ground-state wavefunctions
   integer :: unwffkq ! unit number for k+q ground-state wavefunctions
   integer :: unwft1  ! unit number for wavefunctions, temporary one
   integer :: unwft2  ! unit number for wavefunctions, temporary two
+  integer :: unwft3  ! unit number for wavefunctions, temporary three
   integer :: unwftgs ! unit number for ground-state wavefunctions, temporary
   integer :: unwftkq ! unit number for k+q ground-state wavefunctions, temporary
   integer :: unylm   ! unit number for Ylm(k) data

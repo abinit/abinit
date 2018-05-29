@@ -2,6 +2,7 @@
 description: How to perform a Bethe-Salpeter calculation of neutral excitation energies and dielectric function
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a Bethe-Salpeter calculation of neutral excitation energies and
 dielectric function with the ABINIT package.

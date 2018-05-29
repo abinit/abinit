@@ -279,7 +279,7 @@ def parse_opt(opt,values):
       fi
     done
     if test "${opt_ok}" = "no"; then
-      AC_MSG_ERROR([invalid library statement in %s: ${v}])
+      AC_MSG_WARN([possible invalid library statement in %s: ${v}])
     fi
   fi
 """ % (opt,opt,opt)
