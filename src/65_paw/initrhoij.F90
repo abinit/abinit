@@ -162,7 +162,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
      ABI_DEALLOCATE(occ)
    end if
    lnspinat0=maxval(lnspinat)
-
+   lnspinat0=-1
 
 !  Determine Z (trace of rhoij0 or part of it)
    zz=zero
