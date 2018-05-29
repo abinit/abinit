@@ -37,8 +37,8 @@ working directory. You can also copy the file
 ~abinit/tests/tutorespfn/Input/teph_1.in to your working directory. 
 This is your input file.
 
-    cp ../teph_1.files
-    cp ../teph_1.in
+    cp ../teph_1.files .
+    cp ../teph_1.in .
 
 You can immediately start this run - the input files will be examined later...
     
