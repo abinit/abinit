@@ -1239,19 +1239,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
 !        call print_dmft(paw_dmft,dtset%pawprtvol)
-         if(dtset%paral_kgb==1) then
-           write(message,'(5a)')ch10,&
-&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
-&           ' Calculation of density does not taken into account non diagonal occupations',ch10
-           call wrtout(std_out,message,'COLL')
-           call wrtout(ab_out,message,'COLL')
-!          MSG_ERROR(message)
-           if(dtset%nstep>1) then
-             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
-             MSG_ERROR(message)
-           end if
-           residm=zero
-         end if
+!         if(dtset%paral_kgb==1) then
+!           write(message,'(5a)')ch10,&
+!&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
+!&           ' Calculation of density does not taken into account non diagonal occupations',ch10
+!           call wrtout(std_out,message,'COLL')
+!           call wrtout(ab_out,message,'COLL')
+!!          MSG_ERROR(message)
+!           if(dtset%nstep>1) then
+!             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
+!             MSG_ERROR(message)
+!           end if
+!           residm=zero
+!         end if
          if(dtset%nspinor==2) then
 !          call flush_unit(ab_out)
 !          write(message,'(3a)')&
