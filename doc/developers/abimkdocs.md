@@ -54,12 +54,15 @@ Make sure you are in the top ABINIT directory.
 Install the python packages required to build the website with:
 
 ```sh
-pip install -r requirements.txt
+pip install -r requirements.txt --user
 ```
 
 !!! note
     Python 3.6 is strongly recommended although the code works with python2.7 as well.
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
+
+!!! note
+    If you have root privileges, suppress the `--user` in the command
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
 Then start *our customized* server 
