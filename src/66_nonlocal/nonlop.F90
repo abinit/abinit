@@ -334,7 +334,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
+ real(dp), pointer :: enl_(:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
   integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
