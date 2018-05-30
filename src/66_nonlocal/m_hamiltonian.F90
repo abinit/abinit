@@ -365,7 +365,7 @@ module m_hamiltonian
 
 ! ===== Complex array points
 
-  complex(dpc), ABI_CONTIGUOUS pointer :: nucdipmom_k(:) => null()
+  complex(dpc), pointer :: nucdipmom_k(:) => null()
    ! nucdipmom_k(npw_k*(npw_k+1)/2)
    ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
    ! lower triangular part of Hermitian matrix
