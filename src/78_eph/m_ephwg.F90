@@ -597,7 +597,7 @@ subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_p
  end do
 
  ! Rescale weights so that caller can sum over the full BZ.
- if (use_bzsum_) deltaw_pm = deltaw_pm / (self%lgk%weights(iqlk) * self%nbz)
+ if (use_bzsum_) deltaw_pm = deltaw_pm / self%lgk%weights(iqlk)
 
 end subroutine ephwg_get_dweights
 !!***
@@ -726,7 +726,7 @@ subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweigh
  end do ! itetra
 
  ! Rescale weights so that the caller can sum over the full BZ.
- if (use_bzsum_) cweights = cweights / (self%lgk%weights(iqlk) * self%nbz)
+ if (use_bzsum_) cweights = cweights / self%lgk%weights(iqlk)
 
  call xmpi_sum(cweights, comm, ierr)
 

@@ -1020,7 +1020,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end if
            ! The Nstar(q) / N_qbz factor is already included in the weigths produced
            ! by the above routines so weigth_q must be set to one here.
-           weigth_q = one
+           ! weigth_q = one
          end if
 
          do nu=1,natom3
@@ -1118,10 +1118,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! Derivative of sigma
                ! TODO: should calculate this with the double grid as well
                if (.not. sigma%imag_only) then
-                 if (sigma%qint_method == 1) then
+                 !if (sigma%qint_method == 1) then
                    ! Have to rescale gkk2 before computing derivative (HM: why?)
-                   gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
-                 end if
+                 !  gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
+                 !end if
  
                  ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
                  !old derivative
@@ -1511,13 +1511,13 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, 
     if (sigma%imag_only) then
       ! Compute weigths for delta functions at the KS energies with tetra.
       call ephwg_get_dweights(sigma%ephwg, iqlk(jj), nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
-        use_bzsum=sigma%symsigma == 0)
+        use_bzsum=.true.)
     else
       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
       ABI_MALLOC(zvals, (nz, nbc))
       zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
       call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
-        use_bzsum=sigma%symsigma == 0)
+        use_bzsum=.true.)
       ABI_FREE(zvals)
     end if
   end do
@@ -3061,29 +3061,6 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  !weights_dense is array, ndiv is scalar
  eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
- !5.
-#if 0
- write(std_out,*) 'calculate scatering'
- !from any two k and k' find q such that k - k' = q (in bz) k -> k'+q
- do ii=1,eph_dg%dense_nbz !k'
-   do jj=1,eph_dg%dense_nbz !k
-     !calculate indexes of k and k'
-     indexes_jk = eph_dg%dense_to_indexes(:,jj) !k
-     indexes_ik = eph_dg%dense_to_indexes(:,ii) !k'
-     !calcualte indexes of q 
-     indexes_qq = indexes_jk - indexes_ik !q = k - k'
-     !bring to first bz
-     indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
-     indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
-     indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
-     !calculate given two indexes of k and k' give index of q such that k -> k'+q
-     eph_dg%scatter_dense(jj,ii) = eph_dg%indexes_to_dense(indexes_qq(1),&
-                                                           indexes_qq(2),&
-                                                           indexes_qq(3))
-   enddo
- enddo
-#endif
-
  !3.
  eph_dg%kpts_dense_ibz = ebands_dense%kptns
  eph_dg%dense_nibz = ebands_dense%nkpt
@@ -3164,6 +3141,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
                                          dksqmean/eph_dg%dense_nbz/maxfreq
  ABI_FREE(displ_cart)
 
+#endif
  open (unit = 2, file = "coarse2dense.dat")
  do ii=1,eph_dg%coarse_nbz
    write(2,*)
@@ -3187,7 +3165,6 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  end do
  close(2)
  !end debug
-#endif
 
 end function eph_double_grid_new
 !!***
