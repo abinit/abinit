@@ -317,7 +317,7 @@ module m_hamiltonian
    ! ffnl_kp(npw_fft_kp,2,dimffnl_kp,ntypat)
    ! nonlocal form factors at k_prime
 
-  real(dp), :: kinpw_k(:) => null()
+  real(dp), pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
 
