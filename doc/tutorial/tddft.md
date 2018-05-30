@@ -97,7 +97,7 @@ to see if it suits your needs, and read the recent literature ...
 ## 2 A first computation of electronic excitation energies and oscillator strengths, for N2
   
 We will now compute and analyse the excitation energies of the diatomic molecule N2. 
-This is a rather simple system, with cylindrical symmetry,
+This is a rather simple s.ystem, with cylindrical symmetry,
 allowing interesting understanding. Although we will suppose that you are
 familiarized with quantum numbers for diatomic molecules, this should not play
 an important role in the understanding of the way to use Abinit
