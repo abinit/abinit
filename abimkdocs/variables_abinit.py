@@ -17145,15 +17145,16 @@ Suggested acknowledgment:
 
 Variable(
     abivarname="usepotzero",
-    varset="paw",
+    varset="dev",
     vartype="integer",
     topics=['Coulomb_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE POTential ZERO",
     text="""
-  * [[usepotzero]]=0, the usual convention: the smooth potential is set to zero averarage value.
-  * [[usepotzero]]=1, the new convention: the physical potential is set to zero average value.
+Fix the convention for the choice of the average value of the Hartree potential, as described in [[cite:Bruneval2014]].
+  * [[usepotzero]]=0, the usual convention: the smooth potential is set to zero average value.
+  * [[usepotzero]]=1, the new convention: the all-electron physical potential is set to zero average value.
   * [[usepotzero]]=2, the PWscf convention: the potential of equivalent point charges is set to zero average value (convention also valid for NC pseudopotentials).
 """,
 ),
