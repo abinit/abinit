@@ -2344,9 +2344,6 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 end subroutine fit_polynomial_coeff_computeMSD
 !!***
 
-!!      m_fit_polynomial_coeff,multibinit
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_printSystemFiles
 !!
