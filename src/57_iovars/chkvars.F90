@@ -178,7 +178,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshftq'
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
