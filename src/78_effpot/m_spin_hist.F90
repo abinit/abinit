@@ -137,6 +137,7 @@ module m_spin_hist
      integer :: spin_nctime
      real(dp) :: spin_temperature
   end type spin_hist_t
+
   public :: spin_hist_t_init
   public :: spin_hist_t_free
   public :: spin_hist_t_get_S

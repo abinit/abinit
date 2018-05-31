@@ -8,7 +8,6 @@ module m_spin_ncfile
   use m_spin_model_primitive, only: spin_model_primitive_t
   use m_spin_terms , only: spin_terms_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-#define HAVE_NETCDF
 #if defined HAVE_NETCDF
   use netcdf
 #endif
