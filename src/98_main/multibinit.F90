@@ -190,7 +190,6 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- ! TODO hexu: remove the (nrpt cannot be read warning) if lattice part is not required.
  call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
 
 !Read the input file, and store the information in a long string of characters

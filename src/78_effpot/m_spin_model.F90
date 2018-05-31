@@ -76,7 +76,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    character(len=40), intent(in) :: xml_fname
+    character(len=*), intent(in) :: xml_fname
     integer :: sc_matrix(3,3)
     type(multibinit_dtset_type), intent(in) :: params
 
@@ -182,7 +182,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    character(len=40), intent(in) :: xml_fname
+    character(len=*), intent(in) :: xml_fname
     !call self%spin_primitive%read_xml(xml_fname)
     call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname)
   end subroutine spin_model_t_read_xml
