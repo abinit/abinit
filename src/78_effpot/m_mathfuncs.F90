@@ -1,7 +1,8 @@
 #include "abi_common.h"
 module m_mathfuncs
   use defs_basis, only: dp, PI
-  use ziggurat
+  !use ziggurat
+  use m_random_xoroshiro128plus
   implicit none
   !real(dp), parameter :: PI=4.D0*DATAN(1.D0)
 contains
@@ -47,7 +48,7 @@ contains
   end function outer_product
 
   subroutine set_random_seed(seed)
-      ! FIXME Not sure how does this work. One number for each thread?
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -63,13 +64,13 @@ contains
 
   ! Random number generator; Normal (Gaussian) dist.
   ! a is a array.
-  subroutine rand_normal(a)
+  subroutine rand_normal_builtin(a)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'rand_normal'
+#define ABI_FUNC 'rand_normal_builtin'
 !End of the abilint section
 
     real(dp), intent(out)::a(:,:)
@@ -86,28 +87,28 @@ contains
     !ABI_DEALLOCATE(b)
     !a(:,:)=1.0
     !a(:,1)=0.2
-  end subroutine rand_normal
+  end subroutine rand_normal_builtin
 
   ! wrapper of  normal random number generator using ziggurat method.
   ! rnor implemented in ziggruat.F90
   ! TODO hexu: implement a random number generator module which contains 
   ! all the related subroutines. & Move this one there.
-  subroutine rand_normal_ziggurat(a)
+  !  subroutine rand_normal_ziggurat(a)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_normal_ziggurat'
+!#undef ABI_FUNC
+!#define ABI_FUNC 'rand_normal_ziggurat'
 !End of the abilint section
 
-    real(dp), intent(out)::a(:,:)
-    integer :: i, j
-    do i=1, size(a, dim=2)
-      do j=1, size(a, dim=1)
-        a(j, i)=rnor()
-      end do
-    end do
-    end subroutine rand_normal_ziggurat
+!    real(dp), intent(out)::a(:,:)
+!    integer :: i, j
+!    do i=1, size(a, dim=2)
+!      do j=1, size(a, dim=1)
+!        a(j, i)=rnor()
+!      end do
+!    end do
+!    end subroutine rand_normal_ziggurat
   
 end module

@@ -5,7 +5,9 @@ module  m_spin_terms
   use m_mathfuncs
   use m_spin_terms_funcs
   use m_sparse_matrix
+  use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   implicit none
+  ! TODO move parameters to somewhere (where?)
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
      integer :: nmatoms, natoms
@@ -18,7 +20,8 @@ module  m_spin_terms
      integer, allocatable :: zion(:)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
      integer, allocatable :: spin_index(:)
-     integer :: seed
+     !integer :: seed
+     type(rng_t) :: rng 
      ! random seed
      ! has_xxx : which terms are included in hamiltonian
      ! use_bilinear_mat_form: if false, for each ij pair,
@@ -175,14 +178,16 @@ contains
 
     ABI_ALLOCATE( self%gyro_ratio, (nmatoms))
     ! Defautl gyro_ratio
+    ! TODO remove this, use gyroration from xml
     self%gyro_ratio(:)=gyromagnetic_ratio
 
     ABI_ALLOCATE( self%gilbert_damping, (nmatoms) )
     ABI_ALLOCATE( self%gamma_l, (nmatoms))
 
-    self%seed=1
     call LIL_mat_initialize(self%bilinear_lil_mat,self%nmatoms*3,self%nmatoms*3)
     ABI_ALLOCATE( self%Htmp, (nmatoms*3))
+
+    call set_seed(self%rng, [111111_dp, 2_dp])
   end subroutine spin_terms_t_initialize
 
   subroutine spin_terms_t_initialize_all(self,nmatoms, ms, &
@@ -252,6 +257,8 @@ contains
        ABI_ALLOCATE(self%gilbert_damping, (self%nmatoms))
        self%gilbert_damping=gilbert_damping
     endif
+
+    call set_seed(self%rng, [111111_dp, 2_dp])
   end subroutine spin_terms_t_initialize_all
 
   subroutine spin_terms_t_get_gamma_l(self)
@@ -581,7 +588,8 @@ contains
     real(dp) :: x(3, self%nmatoms), C
     integer :: i, j
     if ( temperature .gt. 1d-7) then
-       call rand_normal_ziggurat(x)
+       !call rand_normal_ziggurat(x)
+       call rand_normal_array(self%rng, x, 3*self%nmatoms)
        do i = 1, self%nmatoms
           C=sqrt(2.0*self%gilbert_damping(i)*boltzmann* temperature &
                &  /(self%gyro_ratio(i)* dt *self%ms(i)))

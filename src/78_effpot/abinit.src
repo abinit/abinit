@@ -35,6 +35,7 @@ sources = [
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_term.F90",
+    "m_random_xoroshiro128plus.F90",
     "m_sparse_matrix.F90",
     "m_spin_hist.F90",
     "m_spin_model.F90",
@@ -43,8 +44,7 @@ sources = [
     "m_spin_ncfile.F90",
     "m_spin_reciprocal.F90",
     "m_spin_terms.F90",
-    "m_spin_terms_funcs.F90", # TODO hexu: to be merged with m_spin_terms
-    "ziggurat.F90"
+    "m_spin_terms_funcs.F90" 
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

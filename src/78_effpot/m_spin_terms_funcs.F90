@@ -8,9 +8,9 @@
 
 module m_spin_terms_funcs
   use defs_basis
-  use m_mathfuncs, only: cross, outer_product, rand_normal, rand_normal_ziggurat
+  use m_mathfuncs, only: cross, outer_product 
   implicit none
-  real(dp), parameter :: boltzmann=1.38064852d-23
+  real(dp), parameter :: boltzmann=1.38064852d-23 ! TODO where is it in abinit.
 
 CONTAINS
 
@@ -125,52 +125,8 @@ CONTAINS
     do i = 1, Nint, 1
        iatom=ilist(i)
        jatom=jlist(i)
-       !write(*,*) "jatom", jatom
-       !write(*,*) "iatom", iatom
-       !write(*,*) "=================="
-       !write(*,*) "DMI value", vallist(:,i)
-       !write(*,*) "=================="
-       !write(*,*) "v:", v
-       !write(*,*) "=================="
-       !write(*,*) "S:", S(:, jatom)
-       !write(*,*) "=================="
        Heff(:,iatom) = Heff(:,iatom)+ cross(vallist(:,i),S(:,jatom))/ms(iatom)
     end do
   end subroutine DMI_Heff
-
-  ! Langevin term heat bath
-  subroutine langevin_term( n, gilbert_damping, T, gyro_ratio, ms, dt, Heff,seed)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'langevin_term'
-!End of the abilint section
-
-    integer, intent(in) :: n
-    real(dp), intent(in) :: gilbert_damping(:), T, gyro_ratio(:), ms(:), dt
-    real(dp), intent(out):: Heff(3,n)
-    real(dp) :: x(3,n), C
-    integer, intent(inout):: seed
-    integer :: i, j
-    !print*, "dtspin: ", dt
-    !print *, "damping:", gilbert_damping(1)
-    !print *, "gyro:", gyro_ratio(1)
-    !print *, "T", T
-    if (T .gt. 1e-15_dp) then
-       call rand_normal(x)
-       !x(:,:)=1.0d0
-       !call r8vec_normal_01(3*n, seed, x)
-       do i = 1,n
-          C=sqrt(2.0*gilbert_damping(1)*boltzmann*T/(gyro_ratio(1)*dt*ms(1)))
-          do j = 1, 3
-             Heff(j, i)= x(j,i)*C  !sqrt(2.0*gilbert_damping(i)*boltzmann*T/(gyro_ratio(i)*dt*ms(i)))
-          end do
-       end do
-    else
-       Heff(:,:)=0.0_dp
-    end if
-  end subroutine langevin_term
 
 end module m_spin_terms_funcs

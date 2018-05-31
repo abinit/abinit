@@ -111,7 +111,7 @@ contains
     !call spin_hist_t_set_atomic_structure(self%spin_hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
     !call self%set_initial_spin(mode=1)
-    call spin_model_t_set_initial_spin(self, mode=1)
+    call spin_model_t_set_initial_spin(self, mode=0)
 
     !call self%spin_mover%initialize(self%nmatoms, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=params%spin_dt, &
@@ -210,6 +210,7 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_set_initial_spin'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
