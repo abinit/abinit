@@ -178,7 +178,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq'
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshftq'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
@@ -208,7 +208,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'
