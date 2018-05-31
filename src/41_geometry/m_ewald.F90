@@ -143,8 +143,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    ng=ng+1
    newg=0
-!   Instead of this warning that no normal user understands, one should optimize this routine, in which
-!   lot of redundancy is present, and CPU time is lost ! But usually this is a very small fraction of any ABINIT run.
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations), 
+!   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
@@ -248,8 +248,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    nr=nr+1
    newr=0
-!   Instead of this warning that no normal user understands, one should optimize this routine, in which
-!   lot of redundancy is present, and CPU time is lost ! But usually this is a very small fraction of any ABINIT run.
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
+!   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (nr > 20 .and. mod(nr,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  nr = ", nr
