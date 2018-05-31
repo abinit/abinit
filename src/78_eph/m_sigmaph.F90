@@ -1064,7 +1064,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                      ! Phonon frequency
                      wqnu = phfrq_dense(nu,jj)
-                     if (wqnu < tol6) cycle
+                     !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                      
                      cfact = cfact + &
@@ -1089,7 +1089,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                      ! Phonon frequency
                      wqnu = phfrq_dense(nu,jj)
-                     if (wqnu < tol6) cycle
+                     !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                      
                      if (sigma%imag_only) then
@@ -2000,7 +2000,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do ii=1,ndeg
          cnt = degblock(2, ii) - degblock(1, ii) + 1
          ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii), degblock(2, ii))]
+         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii)-new%bstart_ks(ikcalc,spin)+1,&
+                                                           degblock(2, ii)-new%bstart_ks(ikcalc,spin)+1)]
        end do
        ABI_FREE(degblock)
      end do
