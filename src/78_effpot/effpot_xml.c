@@ -1690,7 +1690,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
                          double *damping_factors[],
                          double *positions[], double *spinat[]) 
 {
-	sprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
 	exit(1);
 	return 1;
 }
@@ -1718,7 +1718,7 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
                    int *bi_jlist[], int *bi_Rlist[],
                    double *bi_vallist[])
 {
-	sprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
 	exit(1);
 	return 1;
 }
