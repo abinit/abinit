@@ -8,6 +8,8 @@ module m_spin_model_primitive
   use m_dynmaic_array
   use m_mathfuncs
   use defs_basis
+  use m_profiling_abi
+  use m_errors
   use m_supercell
   use m_spin_terms
   implicit none

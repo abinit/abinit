@@ -5,10 +5,11 @@
 
 module m_mathfuncs
   use defs_basis, only: dp, PI
+  use m_errors
+  use m_profiling_abi
   !use ziggurat
   use m_random_xoroshiro128plus
   implicit none
-  !real(dp), parameter :: PI=4.D0*DATAN(1.D0)
 contains
 
   ! vector cross production

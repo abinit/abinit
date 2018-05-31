@@ -1720,6 +1720,5 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
 {
 	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
 	exit(1);
-	return 1;
 }
 #endif

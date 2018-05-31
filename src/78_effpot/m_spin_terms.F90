@@ -5,6 +5,8 @@
 #include "abi_common.h"
 module  m_spin_terms
   use defs_basis
+  use m_errors
+  use m_profiling_abi
   use m_mathfuncs
   use m_spin_terms_funcs
   use m_sparse_matrix

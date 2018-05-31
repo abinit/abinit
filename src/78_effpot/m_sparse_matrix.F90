@@ -18,6 +18,8 @@
 
 module m_sparse_matrix
   use defs_basis
+  use m_errors
+  use m_profiling_abi
   implicit none
 
   ! node of linked list, which will be one non-zero entry in LIL matrix
