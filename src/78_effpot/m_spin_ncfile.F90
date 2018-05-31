@@ -197,6 +197,8 @@ contains
     type(multibinit_dtset_type) :: params
     integer :: qpoint_id, temperature_id, dt_id, mfield_id, n_cell_id
     integer :: ncerr
+
+#if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
 
     ! dims 
@@ -214,6 +216,7 @@ contains
     ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature)
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt)
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field)
+#endif
   end subroutine spin_ncfile_t_write_parameters
 
   subroutine spin_ncfile_t_close(self)
