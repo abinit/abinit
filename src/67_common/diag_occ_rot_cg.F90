@@ -127,7 +127,7 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 
 !! Compute the corresponding wave functions if nothing wrong happened
   if(info == 0) then
-    ! c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]
+    ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
     do n=1,blocksize
       do np=1,blocksize
         cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + realpart(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:) &
@@ -137,10 +137,12 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
       end do
     end do
   else if (info > 0) then
-    message = " something wrong happened with the diagonalisation of the occupation matrix (did't converge)"
+    message=""
+    write(message, "(A99,I5)") " something wrong happened with the diagonalisation of the occupation matrix (did't converge), info=",info
     MSG_ERROR(message)
   else
-    message = " something wrong happened with the diagonalisation of the occupation matrix (bad input argument)"
+    message=""
+    write(message, "(A103,I5)") " something wrong happened with the diagonalisation of the occupation matrix (bad input argument), info=",info
     MSG_ERROR(message)
   end if
   
