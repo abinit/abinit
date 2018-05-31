@@ -1,3 +1,7 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 module m_spin_ncfile
   use defs_basis
   use m_profiling_abi

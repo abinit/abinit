@@ -1,3 +1,6 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 ! xoroshiro128plus method random number generator
 ! adapted by hexu for usage in Abinit (downgrade to Fortran 90 and added
 ! some functions )

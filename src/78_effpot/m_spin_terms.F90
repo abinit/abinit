@@ -1,4 +1,7 @@
 ! Self file implement the spin_terms_t class.
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
 module  m_spin_terms
   use defs_basis

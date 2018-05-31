@@ -11,7 +11,9 @@
 ! Dense<->LIL->CSR and LIL->COO translations are possible.
 
 ! A distributed counterpart of the module is m_sparse_matrix_distributed. (TODO: To be implemented)
-
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
 
 module m_sparse_matrix
@@ -777,23 +779,15 @@ endif
     !!$OMP END PARALLEL
   end subroutine CSR_mat_mv
 
-#ifdef DMKL
+!#ifdef DMKL
 ! wrapper to mkl CSR matrix mv mkl_dcsrgemv. For test only.
-  subroutine CSR_mat_mv_mkl(A, x, y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CSR_mat_mv_mkl'
-!End of the abilint section
-
-    type(CSR_mat), intent(in):: A
-    real(dp), intent(in) :: x(A%ncol)
-    real(dp), intent(out) :: y(A%nrow)
-    !call mkl_dcsrgemv(transa, m, a, ia, ja, x, y)
-    call mkl_dcsrgemv('N', A%nrow, A%val, A%row_shift, A%icol, x, y)
-  end subroutine CSR_mat_mv_mkl
-#endif
+!  subroutine CSR_mat_mv_mkl(A, x, y)
+!    type(CSR_mat), intent(in):: A
+!    real(dp), intent(in) :: x(A%ncol)
+!    real(dp), intent(out) :: y(A%nrow)
+!    !call mkl_dcsrgemv(transa, m, a, ia, ja, x, y)
+!    call mkl_dcsrgemv('N', A%nrow, A%val, A%row_shift, A%icol, x, y)
+!  end subroutine CSR_mat_mv_mkl
+!#endif
 
 end module m_sparse_matrix

@@ -1,10 +1,8 @@
-! Functions used in spin_terms.
-! Including the calculating of effective H field.
-! ds/dt= f(Heff)
-! Langevin
-
 !TODO hexu: merge this file with m_spin_terms.F90
 ! this file exists only for historical reasons.
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 module m_spin_terms_funcs
   use defs_basis

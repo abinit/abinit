@@ -4,7 +4,9 @@
 
 ! TODO hexu: Is this already implemented somewhere in abinit. 
 ! If not, should this file  be moved to the place to make it more general usable?
-
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
 module m_dynmaic_array
   use defs_basis

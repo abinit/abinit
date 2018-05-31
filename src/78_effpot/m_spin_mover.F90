@@ -1,3 +1,6 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 module m_spin_mover
   use defs_basis
   use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
