@@ -30,6 +30,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
+!!***
 
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
@@ -85,6 +86,7 @@ module m_spin_hist
   !! * has_latt (whether lattice dynamics is also present)
   !! * ihist_latt(mxhist): the corresponding lattice step. 0 if none.
   !! SOURCE
+  !!***
 
   type, public :: spin_hist_t
      ! scalars
