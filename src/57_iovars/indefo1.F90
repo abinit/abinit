@@ -81,6 +81,7 @@ subroutine indefo1(dtset)
  dtset%bfield(:)=zero
 !C
  dtset%cd_customnimfrqs=0
+ dtset%chkprim=1
 !D
  dtset%densty(:,:)=zero
  dtset%dfield(:)=zero    !!HONG

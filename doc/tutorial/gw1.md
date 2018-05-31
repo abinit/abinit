@@ -178,7 +178,7 @@ In dataset 4 the calculation of the Self-Energy matrix elements is performed.
 One needs to define the driver option, as well as the _WFK and _SCR files.
     
     optdriver4  4       # Self-Energy calculation
-    getwfk4    -2       # Obtain WFK file from dataset 1
+    getwfk4    -2       # Obtain WFK file from dataset 2
     getscr4    -1       # Obtain SCR file from previous dataset
     
 The [[getscr]] input variable is similar to other "get" input variables of ABINIT.

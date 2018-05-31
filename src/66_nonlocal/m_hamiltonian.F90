@@ -362,6 +362,13 @@ module m_hamiltonian
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
+! ===== Complex array points
+
+  complex(dpc), pointer :: nucdipmom_k(:) => null()
+   ! nucdipmom_k(npw_k*(npw_k+1)/2)
+   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+   ! lower triangular part of Hermitian matrix
+
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
