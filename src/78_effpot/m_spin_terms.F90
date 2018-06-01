@@ -1,4 +1,4 @@
-! Self file implement the spin_terms_t class.
+ 
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -684,11 +684,24 @@ contains
 
     class(spin_terms_t), intent(inout):: self
     integer::  err
-    if (allocated(self%ms)) deallocate(self%ms, stat=err)
+    if (allocated(self%ms))  then
+    ABI_DEALLOCATE(self%ms)
+    endif
 
-    if (allocated(self%pos)) deallocate(self%pos, stat=err)
-    if (allocated(self%spinat)) deallocate(self%spinat, stat=err)
-    if (allocated(self%zion)) deallocate(self%zion, stat=err)
+    if (allocated(self%pos))  then
+    ABI_DEALLOCATE(self%pos)
+    endif
+
+
+    if (allocated(self%spinat))  then
+     ABI_DEALLOCATE(self%spinat)
+    endif
+
+   
+    if (allocated(self%zion))  then
+    ABI_DEALLOCATE(self%zion)
+    endif
+
 
     if (allocated(self%spin_index)) then
        ABI_DEALLOCATE(self%spin_index)
@@ -701,34 +714,95 @@ contains
     endif
 
 
-    if (allocated(self%gyro_ratio)) deallocate(self%gyro_ratio, stat=err)
-    if (allocated(self%external_hfield)) deallocate(self%external_hfield, stat=err)
-    if (allocated(self%k1)) deallocate(self%k1, stat=err)
-    if (allocated(self%k1dir)) deallocate(self%k1dir, stat=err)
-    if (allocated(self%gilbert_damping)) deallocate(self%gilbert_damping, stat=err)
-    if (allocated(self%gamma_l)) deallocate(self%gamma_l, stat=err)
+    if (allocated(self%gyro_ratio)) then
+    ABI_DEALLOCATE(self%gyro_ratio)
+    endif
+
+
+    if (allocated(self%external_hfield)) then 
+    ABI_DEALLOCATE(self%external_hfield)
+    endif
+
+
+    if (allocated(self%k1))  then
+    ABI_DEALLOCATE(self%k1)
+    endif
+
+
+    if (allocated(self%k1dir)) then
+    ABI_DEALLOCATE(self%k1dir)
+    endif
+
+
+    if (allocated(self%gilbert_damping))  then
+    ABI_DEALLOCATE(self%gilbert_damping)
+    endif
+
+
+    if (allocated(self%gamma_l))  then
+    ABI_DEALLOCATE(self%gamma_l)
+    endif
+
+
 
     self%has_exchange=.False.
-    if (allocated(self%exchange_i)) deallocate(self%exchange_i, stat=err)
-    if (allocated(self%exchange_j)) deallocate(self%exchange_j, stat=err)
-    if (allocated(self%exchange_val)) deallocate(self%exchange_val, stat=err)
+    if (allocated(self%exchange_i))  then
+    ABI_DEALLOCATE(self%exchange_i)
+    endif
+
+
+    if (allocated(self%exchange_j))  then
+    ABI_DEALLOCATE(self%exchange_j)
+    endif
+
+
+    if (allocated(self%exchange_val))  then
+    ABI_DEALLOCATE(self%exchange_val)
+    endif
+
+
 
     self%has_DMI=.False.
-    if (allocated(self%DMI_i)) deallocate(self%DMI_i, stat=err)
-    if (allocated(self%DMI_j)) deallocate(self%DMI_j, stat=err)
-    if (allocated(self%DMI_val)) deallocate(self%DMI_val, stat=err)
+    if (allocated(self%DMI_i))  then
+    ABI_DEALLOCATE(self%DMI_i)
+    endif
+
+
+    if (allocated(self%DMI_j)) then
+    ABI_DEALLOCATE(self%DMI_j)
+    endif
+
+
+    if (allocated(self%DMI_val))  then
+    ABI_DEALLOCATE(self%DMI_val)
+    endif
+
+
 
     self%has_dipdip=.False.
-    if (allocated(self%dipdip_i)) deallocate(self%dipdip_i, stat=err)
-    if (allocated(self%dipdip_j)) deallocate(self%dipdip_j, stat=err)
-    if (allocated(self%dipdip_val)) deallocate(self%dipdip_val, stat=err)
+    !if (allocated(self%dipdip_i))  then
+    !ABI_DEALLOCATE(self%dipdip_i)
+    !endif
+
+
+    !if (allocated(self%dipdip_j))  then
+    !ABI_DEALLOCATE(self%dipdip_j)
+    !endif
+
+
+    !if (allocated(self%dipdip_val))  then
+    !ABI_DEALLOCATE(self%dipdip_val)
+    !endif
+
+
 
     !if (allocated(self%bilinear_i)) deallocate(self%bilinear_i, stat=err)
     !if (allocated(self%bilinear_j)) deallocate(self%bilinear_j, stat=err)
     !if (allocated(self%bilinear_val)) deallocate(self%bilinear_val, stat=err)
     self%has_bilinear=.False.
-    ! TODO destroy LIL an CSR
-    ! call CSR_mat_finalize()
+    ! destroy LIL an CSR
+    call CSR_mat_finalize(self%bilinear_csr_mat)
+    call LIL_mat_finalize(self%bilinear_lil_mat)
 
   end subroutine spin_terms_t_finalize
 

@@ -879,6 +879,10 @@ subroutine destroy_supercell (scell)
   if(allocated(scell%znucl))  then
     ABI_DEALLOCATE(scell%znucl)
   end if
+   if(allocated(scell%rvecs))  then
+    ABI_DEALLOCATE(scell%rvecs)
+  end if
+ 
 
 end subroutine destroy_supercell
 !!***

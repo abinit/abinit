@@ -231,7 +231,7 @@ endif
     ABI_ALLOCATE(self%rows, (nrow))
   end subroutine LIL_mat_initialize
 
-  subroutine LIL_mat_finalalize(self)
+  subroutine LIL_mat_finalize(self)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -241,14 +241,14 @@ endif
 !End of the abilint section
 
     type(LIL_mat) , intent(inout):: self
-    integer :: i, err
+    integer :: i
     do i=1, self%nrow, 1
        call llist_finalize(self%rows(i))
     end do
-    deallocate(self%rows, stat=err)
+    ABI_DEALLOCATE(self%rows)
     self%ncol=0
     self%nrow=0
-  end subroutine LIL_mat_finalalize
+  end subroutine LIL_mat_finalize
 
   subroutine LIL_mat_insert(self, irow, icol, val, mode)
 

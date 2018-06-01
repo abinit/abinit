@@ -220,6 +220,7 @@ contains
     ABI_ALLOCATE(hist%xred, (3, natom))
     ABI_ALLOCATE(hist%spin_index, (natom))
     ABI_ALLOCATE(hist%typat,(ntypat))
+    ABI_ALLOCATE(hist%znucl, (ntypat))
 
     hist%acell(:)=acell(:)
     hist%rprimd(:,:)=rprimd(:,:)

@@ -79,17 +79,13 @@ contains
 !End of the abilint section
 
     real(dp), intent(out)::a(:,:)
-    real(dp), allocatable, save :: b(:,:)
-    if (.not. allocated(b)) then
+    real(dp), allocatable :: b(:,:)
     ABI_ALLOCATE(b, (size(a,dim=1), size(a, dim=2)))
-    ! TODO: this will not be deallocated. should implement a RNG module,
-    ! and this will be reimplemented.
-    end if
     call random_number(a)
     b(:,:) = sqrt(-2*dlog(1.0-a(:,:)))
     call random_number(a)
     a(:,:)=b(:,:)*cos(PI*a(:,:))
-    !ABI_DEALLOCATE(b)
+    ABI_DEALLOCATE(b)
     !a(:,:)=1.0
     !a(:,1)=0.2
   end subroutine rand_normal_builtin
