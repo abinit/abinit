@@ -299,6 +299,7 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
+    integer :: req(2), status(MPI_STATUS_SIZE,2), ierr
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -335,9 +336,18 @@ module m_xgScalapack
 
     call timab(M__tim_heev,2,tsec)
 
-    call xgScalapack_scatter(xgScalapack,matrixA)
-    call xgScalapack_scatter(xgScalapack,eigenvalues)
-    call xmpi_barrier(xgScalapack%comms(M__WORLD))
+    req(1:2)=-1
+    call xgScalapack_scatter(xgScalapack,matrixA,req(1))
+    call xgScalapack_scatter(xgScalapack,eigenvalues,req(2))
+#ifdef HAVE_MPI
+    if ( any(req/=-1)  ) then
+      call MPI_WaitAll(2,req,status,ierr)
+      write(*,*) "I wait"
+      if ( ierr /= 0 ) then
+          MSG_ERROR("Error waiting data")
+      endif
+    end if
+#endif
 #else
    MSG_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
@@ -372,6 +382,7 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
+    integer :: req(2), status(MPI_STATUS_SIZE,2),ierr
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -412,9 +423,17 @@ module m_xgScalapack
 
     call timab(M__tim_hegv,2,tsec)
 
-    call xgScalapack_scatter(xgScalapack,matrixA)
-    call xgScalapack_scatter(xgScalapack,eigenvalues)
-    call xmpi_barrier(xgScalapack%comms(M__WORLD))
+    req(1:2)=-1
+    call xgScalapack_scatter(xgScalapack,matrixA,req(1))
+    call xgScalapack_scatter(xgScalapack,eigenvalues,req(2))
+#ifdef HAVE_MPI
+    if ( any(req/=-1)   ) then
+      call MPI_WaitAll(2,req,status,ierr)
+      if ( ierr /= 0 ) then
+          MSG_ERROR("Error waiting data")
+      endif
+    end if
+#endif
 #else
    MSG_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
@@ -426,7 +445,7 @@ module m_xgScalapack
   end subroutine xgScalapack_hegv
 
 
-  subroutine xgScalapack_scatter(xgScalapack,matrix)
+  subroutine xgScalapack_scatter(xgScalapack,matrix,req)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -437,10 +456,11 @@ module m_xgScalapack
 
     type(xgScalapack_t), intent(in   ) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrix
+    integer            , intent(  out) :: req
     double precision, pointer :: tab(:,:)
     double precision :: tsec(2)
     integer :: cols, rows
-    integer :: ierr,req
+    integer :: ierr
     integer :: sendto, receivefrom
     integer :: lap
 
@@ -457,6 +477,7 @@ module m_xgScalapack
       !do while ( sendto < xgScalapack%size(M__WORLD) )
         !call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
         call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
+        !write(*,*) xgScalapack%rank(M__WORLD), "sends to", sendto
         if ( ierr /= 0 ) then
           MSG_ERROR("Error sending data")
         end if
@@ -469,6 +490,7 @@ module m_xgScalapack
       if ( receivefrom >= 0 ) then
         !call xmpi_recv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),ierr)
         call xmpi_irecv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),req,ierr)
+        !write(*,*) xgScalapack%rank(M__WORLD), "receive from", receivefrom
         if ( ierr /= 0 ) then
           MSG_ERROR("Error receiving data")
         end if
