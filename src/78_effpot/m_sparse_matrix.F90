@@ -242,10 +242,15 @@ endif
 
     type(LIL_mat) , intent(inout):: self
     integer :: i
+
+    if (allocated(self%rows)) then
     do i=1, self%nrow, 1
-       call llist_finalize(self%rows(i))
+       if (allocated(self%rows(i))) then
+          call llist_finalize(self%rows(i))
+       endif
     end do
     ABI_DEALLOCATE(self%rows)
+    endif
     self%ncol=0
     self%nrow=0
   end subroutine LIL_mat_finalize

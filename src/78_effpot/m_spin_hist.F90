@@ -86,7 +86,6 @@ module m_spin_hist
   !! * has_latt (whether lattice dynamics is also present)
   !! * ihist_latt(mxhist): the corresponding lattice step. 0 if none.
   !! SOURCE
-  !!***
 
   type, public :: spin_hist_t
      ! scalars
@@ -139,6 +138,7 @@ module m_spin_hist
      integer :: spin_nctime
      real(dp) :: spin_temperature
   end type spin_hist_t
+  !!***
 
   public :: spin_hist_t_init
   public :: spin_hist_t_free
