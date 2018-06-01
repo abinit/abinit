@@ -963,11 +963,6 @@ contains
    nimagem(0)=tmpimg0
  end if
 
- intarr(1,:)=dtsets(:)%supercell(1)
- intarr(2,:)=dtsets(:)%supercell(2)
- intarr(3,:)=dtsets(:)%supercell(3)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'supercell','INT',0)
-
 !symafm
  intarr(:,0)=1
  narr=nsym ! default size for all datasets
