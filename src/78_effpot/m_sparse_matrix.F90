@@ -1,3 +1,55 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_sparse_matrix
+!!
+!! NAME
+!! m_sparse_matrix
+!!
+!! FUNCTION
+!!  This module implement several sparse matrix data structure and matrix-vector product
+!!  including LIL_mat: for constructing CSR matrix
+!!  CSR_mat : for m-v product.
+!!  dense matrix and COO_mat: for reference. Maybe dense matrix will be used if dipdip is considered?
+!! Datatypes:
+!!  * lnode: a node in linked list
+!!  * llist: linked list
+!!  * LIL_mat: linked list sparse matrix
+!!  * dense_mat: dense matrix (to have compatible syntax with sparse matrices so it's easy to test.)
+!!  * COO_mat : COO matrix
+!!  * CSR_mat : CSR matrix
+!! Subroutines:
+!!
+!!  * dense_mat_initialize
+!!  * dense_mat_finalize
+!!  * dense_mat_mv
+!!  * dense_mat_spmv 
+!!  * dense_mat_insert
+!!
+!!  * LIL_mat_initialize
+!!  * LIL_mat_finalize
+!!  * LIL_mat_insert : insert value to LIL matrix
+!!  * mat_to_LIL_mat: dense->LIL
+!!  * LIL_mat_to_mat: LIL->dense
+!!  * LIL_mat_to_COO: LIL->COO
+!!  * LIL_mat_to_CSR: LIL->CSR
+!!
+!!  * CSR_mat_initialize: 
+!!  * CSR_mat_finalize:
+!!  * CSR_mat_mv : matrix-vector product
+!!
+!!  * COO_mat_initialize
+!!  * COO_mat_finalize TODO hexu: not yet!
+!!  * COO_mat_mv
+!!
+!! COPYRIGHT
+!! Copyright (C) 2010-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public Licence, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 ! This file implement several sparse matrix format and matrix vector product.
 ! Dense matrix is also here for test.
 ! Dense_mat
@@ -21,6 +73,8 @@ module m_sparse_matrix
   use m_errors
   use m_profiling_abi
   implicit none
+
+  !!***
 
   ! node of linked list, which will be one non-zero entry in LIL matrix
   type lnode
@@ -746,7 +800,7 @@ endif
     real(dp), intent(out) :: y(A%nrow)
     real(dp)::ddot
     integer::irow, i1, i2, i
-    external ddot
+    !external ddot
     y(:)=0.0d0
     !!$OMP PARALLEL
     !$OMP PARALLEL DO private(i, i1, i2)
@@ -767,7 +821,7 @@ endif
 
 
         ! Comment hexu: The Champion of Speed, however, it relies on the optimization of compilers. need at least -O2 with both ifort &
-        ! gfortran. It may also depend on SIMD instructions the CPU support. Tested on a cpu with AVX2 support.
+        ! gfortran. It may also depend on SIMD instructions the CPU support. Tested on a cpu with AVX2.
         i1=A%row_shift(irow)
         i2=A%row_shift(irow+1)-1
         do i=i1, i2

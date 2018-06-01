@@ -1,3 +1,38 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_model
+!! NAME
+!! m_spin_model
+!!
+!! FUNCTION
+!! This module contains the manager of spin dynamics. It call other
+!! related modules to run spin dynamics. Itself does nothing in detail.
+!!
+!!
+!! Datatypes:
+!!
+!! * spin_model_t
+!!
+!! Subroutines:
+!!
+!! * spin_model_t
+!! * spin_model_t_run
+!! * spin_model_t_initialize
+!! * spin_model_t_set_initial_spin
+!! * spin_model_t_finalize
+!! * spin_model_t_read_xml
+!! * spin_model_t_make_supercell
+!! * spin_model_t_run_one_step
+!! * spin_model_t_run_time
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
 
 
 #if defined HAVE_CONFIG_H
@@ -28,6 +63,25 @@ module m_spin_model
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step
   implicit none
+!!***
+
+
+  !!****t* m_spin_model/spin_model_t
+  !! NAME
+  !! spin_model_t
+  !!
+  !! FUNCTION
+  !! This type contains all the data for spin dynamics.
+  !!
+  !! It contains:
+  !! spin_primitive = information of the primitive cell, which is a map to the xml file.
+  !! spin_calculator = the calculator for spin dynamics, include information of supercell.
+  !! spin_mover = include information for how to run spin dynamics
+  !! params = parameters from input file
+  !! spin_ncfile = wrapper for spin hist netcdf file.
+  !! nmatom= number of magnetic atoms
+  !! SOURCE
+
   type spin_model_t
      type(spin_model_primitive_t) :: spin_primitive
      type(spin_terms_t) :: spin_calculator
@@ -48,10 +102,30 @@ module m_spin_model
      !    procedure :: run_MvT => spin_model_t_run_MvT
      !    procedure :: run_MvH => spin_model_t_run_MvH
   end type spin_model_t
+  !!***
 contains
-  ! This is the main routine of all spin model.
+
+  !!****f* m_spin_model/spin_model_t_run
+  !!
+  !! NAME
+  !!  spin_model_t_run
+  !!
+  !! FUNCTION
+  !!  run the whole spin dynamics.
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!  currently it just call run_time.
+  !!  It will be able to call e.g. run_MvT to do other things.
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_run(self)
-    !TODO add input as parameters.
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -64,8 +138,28 @@ contains
     !call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist)
     call spin_model_t_run_time(self)
   end subroutine spin_model_t_run
+  !!***
 
-  ! initialize
+  !!****f* m_spin_model/spin_model_t_initialize
+  !!
+  !! NAME
+  !!  spin_model_t_initialize
+  !!
+  !! FUNCTION
+  !! initialize spin dynamics from input
+  !!
+  !! INPUTS
+  !!  xml_fname= file of xml file
+  !! params = multibinit dataset from input file
+  !! OUTPUT
+  !!  self <spin_model_t>
+  !! NOTES
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_initialize(self, xml_fname,  params)
 
 
@@ -125,8 +219,27 @@ contains
 
     call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
   end subroutine spin_model_t_initialize
+  !!***
 
-  ! finalize
+  !!****f* m_spin_model/spin_model_t_finalize
+  !!
+  !! NAME
+  !!  spin_model_t_finalize
+  !!
+  !! FUNCTION
+  !! clean memory for spin dynamics
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_finalize(self)
 
 
@@ -145,8 +258,27 @@ contains
     call spin_ncfile_t_close(self%spin_ncfile)
     ! TODO: finalize others
   end subroutine spin_model_t_finalize
+  !!***
 
-
+  !!****f* m_spin_model/spin_model_t_set_params
+  !!
+  !! NAME
+  !!  spin_model_t_set_params
+  !!
+  !! FUNCTION
+  !! set parameters for spin dynamics from input.
+  !!
+  !! INPUTS
+  !! 
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !! Most are already done in initialize. (should be moved to here or remove this function)
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_set_params(self)
 
 
@@ -168,10 +300,29 @@ contains
     ! params -> hist
           
   end subroutine
+  !!***
 
 
 
-  ! read xml file and set primitive cell parameters.
+  !!****f* m_spin_model/spin_model_t_read_xml
+  !!
+  !! NAME
+  !!  spin_model_t_read_xml
+  !!
+  !! FUNCTION
+  !! read xml file and set primitive cell parameters.
+  !!
+  !! INPUTS
+  !! 
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !! 
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_read_xml(self, xml_fname)
 
 
@@ -186,8 +337,28 @@ contains
     !call self%spin_primitive%read_xml(xml_fname)
     call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname)
   end subroutine spin_model_t_read_xml
+  !!***
 
-  ! from primitive cell parameter make supercell and prepare calculator
+
+  !!****f* m_spin_model/spin_model_t_make_supercell
+  !!
+  !! NAME
+  !!  spin_model_t_make_supercell
+  !!
+  !! FUNCTION
+  !!  make supercell and prepare calculator
+  !!
+  !! INPUTS
+  !!  sc_mat(3,3) = supercell matrix
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !! 
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_make_supercell(self, sc_mat)
 
 
@@ -202,7 +373,27 @@ contains
     !call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
     call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
+  !!***
 
+  !!****f* m_spin_model/spin_model_t_set_initial_spin
+  !!
+  !! NAME
+  !!  spin_model_t_set_initial_spin
+  !!
+  !! FUNCTION
+  !!  set initial spin state
+  !!
+  !! INPUTS
+  !!  mode= 0 : all along z. 1: random
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !! 
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_set_initial_spin(self, mode)
 
 
@@ -240,16 +431,33 @@ contains
       call wrtout(std_out,msg,'COLL')
 
     end if
-    !call self%spin_hist%insert(S)
-    !call spin_hist_t_insert(self%spin_hist, S)
 
-    ! spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
-    !TODO initialize lattice structure, spin_type, Snorm
     call spin_hist_t_set_vars(self%spin_hist, S=S, time=0.0_dp, ihist_latt=0, inc=.True.)
     !print *, "initial spin", self%spin_hist%current_S
   end subroutine spin_model_t_set_initial_spin
+  !!***
 
-  ! run one time step
+
+  !!****f* m_spin_model/spin_model_t_run_one_step
+  !!
+  !! NAME
+  !!  spin_model_t_run_one_step
+  !!
+  !! FUNCTION
+  !!  run one spin dynamics step
+  !!
+  !! INPUTS
+  !!  
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !!  This is not called by run_time. insted run_time call mover%run_time
+  !!  (in the spirit that this module should do nothing in detail!)
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_run_one_step(self)
 
 
@@ -265,8 +473,27 @@ contains
          spin_hist_t_get_S(self%spin_hist),S_tmp, etot)
     call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, etot=etot, inc=.False.)
   end subroutine spin_model_t_run_one_step
+  !!***
 
-  ! run all time step
+  !!****f* m_spin_model/spin_model_t_run_time
+  !!
+  !! NAME
+  !!  spin_model_t_run_time
+  !!
+  !! FUNCTION
+  !!  run all spin time step
+  !!
+  !! INPUTS
+  !!  
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !!  
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_run_time(self)
 
 
@@ -279,8 +506,28 @@ contains
     class(spin_model_t), intent(inout) :: self
     call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile)
   end subroutine spin_model_t_run_time
+  !!***
 
-  ! run spin .vs. temperature
+
+  !!****f* m_spin_model/spin_model_t_run_MvT
+  !!
+  !! NAME
+  !!  spin_model_t_run_MvT
+  !!
+  !! FUNCTION
+  !!  run spin vs temperature
+  !!
+  !! INPUTS
+  !!  
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !!  Not yet implemented.
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_run_MvT(self)
 
 
@@ -294,8 +541,27 @@ contains
     !TODO
     write(std_err, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvT
+  !!***
 
-  ! run spin .vs. external magnetic field.
+  !!****f* m_spin_model/spin_model_t_run_MvH
+  !!
+  !! NAME
+  !!  spin_model_t_run_MvT
+  !!
+  !! FUNCTION
+  !!  run spin vs external magnetic field
+  !!
+  !! INPUTS
+  !!  
+  !! OUTPUT
+  !! 
+  !! NOTES
+  !!  Not yet implemented.
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_model_t_run_MvH(self)
 
 
@@ -308,5 +574,6 @@ contains
     class(spin_model_t), intent(inout) :: self
     write(std_err, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
+  !!***
 
 end module m_spin_model

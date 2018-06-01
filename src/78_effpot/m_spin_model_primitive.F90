@@ -1,3 +1,34 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_model_primitive
+!! NAME
+!! m_spin_model_primitive
+!!
+!! FUNCTION
+!! This module contains the atomic structures and the spin hamiltonian inside the primitive cell
+!! which can be directly mapped to the xml file. It is not for the calculation, but for constructing
+!! the hamiltonian in supercell. It is also used as input for the magnon band structure calculation.
+!!
+!! Datatypes:
+!!  spin_model_primitive_t
+!!
+!! Subroutines:
+!! 
+!!  * spin_model_primitive_t_initialize
+!!  * spin_model_primitive_t_read_xml
+!!  * spin_model_primitive_t_make_supercell
+!!  * spin_model_primitive_t_finalize
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -13,6 +44,8 @@ module m_spin_model_primitive
   use m_supercell
   use m_spin_terms
   implicit none
+
+!!*** 
   interface
      ! C function:
      ! void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],

@@ -10,7 +10,7 @@
 !!
 !! Datatypes:
 !!
-!! * spin_hist_t: Historical record of spin orientations and amplitudes
+!! * spin_hist_t: history record of spin orientations and amplitudes
 !!
 !! Subroutines:
 !!
@@ -28,9 +28,9 @@
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! SOURCE
-!!***
 
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
@@ -51,7 +51,7 @@ module m_spin_hist
   implicit none
 
   private
-  !!***
+!!***
 
   !----------------------------------------------------------------------
 
@@ -153,6 +153,30 @@ module m_spin_hist
   !public :: get_dims_spinhist
 
 contains
+
+
+!!****f* m_spin_hist/spin_hist_t_init
+!!
+!! NAME
+!! spin_hist_t_init
+!!
+!! FUNCTION
+!! initialize spin hist
+!!
+!! INPUTS
+!! nmatom = number of magnetic atoms 
+!! mxhist = maximum number of hist steps
+!! has_latt = whether spin dynamics in with lattice dynamics
+!!
+!! OUTPUT
+!! hist <type(spin_hist_t)()> = spin hist type
+!! PARENTS
+!!      m_spin_hist
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
   subroutine spin_hist_t_init(hist, nmatom, mxhist, has_latt)
 
 
@@ -201,8 +225,34 @@ contains
     hist%snorm(:,1)=zero
     !print *, "Initialization spin hist finished"
   end subroutine spin_hist_t_init
+!!***
 
-  ! set atomic structure. 
+  !!****f* m_spin_hist/spin_hist_t_init
+  !!
+  !! NAME
+  !! spin_hist_t_init
+  !!
+  !! FUNCTION
+  !! 
+  !! set atomic structure 
+  !!
+  !! INPUTS
+  !! acell(3) = acell
+  !! rprimd(3, 3) = 
+  !! xred(3, natom) = positions in reduced coordinates
+  !! spin_index(3, natom) = index of atom in spin hamiltonian
+  !! ntypat = number of types of atoms
+  !! typat(ntypat)=types of atoms
+  !! znucl=z of atoms
+  !!
+  !! OUTPUT
+  !! hist <type(spin_hist_t)()> = spin hist type
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_hist_t_set_atomic_structure(hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
 
@@ -230,7 +280,32 @@ contains
     hist%typat(:)=typat(:)
     hist%znucl(:)=znucl(:)
   end subroutine spin_hist_t_set_atomic_structure
+  !!***
 
+
+  
+  !!****f* m_spin_hist/spin_hist_t_set_params
+  !!
+  !! NAME
+  !! spin_hist_t_set_params
+  !!
+  !! FUNCTION
+  !! 
+  !! set parameters for spin_hist_t
+  !!
+  !! INPUTS
+  !! spin_nctime=number of step between two write to netcdf hist file
+  !! spin_temperate= temperature of spin
+  !!
+  !! OUTPUT
+  !! hist <type(spin_hist_t)()> = spin hist type
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  
   subroutine spin_hist_t_set_params(hist, spin_nctime, spin_temperature)
 
 
@@ -246,7 +321,27 @@ contains
     hist%spin_nctime= spin_nctime
     hist%spin_temperature=spin_temperature
   end subroutine spin_hist_t_set_params
+!!***
 
+  !!****f* m_spin_hist/spin_hist_t_free
+  !!
+  !! NAME
+  !! spin_hist_t_free
+  !!
+  !! FUNCTION
+  !! 
+  !! free memory for spin_hist_t
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !! hist <type(spin_hist_t)()> = spin hist type
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_hist_t_free(hist)
 
 
@@ -301,8 +396,30 @@ contains
        ABI_DEALLOCATE(hist%ihist_latt)
     end if
   end subroutine spin_hist_t_free
+!!***
 
 
+  
+  !!****f* m_spin_hist/spin_hist_t_get_S
+  !!
+  !! NAME
+  !! spin_hist_t_get_S
+  !!
+  !! FUNCTION
+  !! 
+  !! get the S for step. step=0 is current. step=-1 is last...
+  !!
+  !! INPUTS
+  !! hist <type(spin_hist_t)()> = spin hist type
+  !! step = index of step. current step is 0. last step is -1. 
+  !! OUTPUT
+  !! S(3, nmatom)=spin orientations at step
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   function spin_hist_t_get_S(hist, step) result(S)
 
 
@@ -324,7 +441,27 @@ contains
     i=spin_hist_t_findIndex(hist,step=j)
     S(:,:)=hist%S(:,:,i)
   end function spin_hist_t_get_S
+  !!***
 
+  !!****f* m_spin_hist/spin_hist_t_inc
+  !!
+  !! NAME
+  !! spin_hist_t_get_inc
+  !!
+  !! FUNCTION
+  !! 
+  !! time counter increase
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!   hist <type(spin_hist_t)()> = spin hist type
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_hist_t_inc(hist)
 
 
@@ -343,7 +480,26 @@ contains
     hist%ihist_prev=hist%ihist
     hist%ihist=spin_hist_t_findIndex(hist, 1)
   end subroutine spin_hist_t_inc
+  !!***
 
+
+  !!***f* m_spin_hist/spin_hist_t_findIndex
+  !!
+  !! NAME
+  !! spin_hist_t_get_findIndex
+  !!
+  !! FUNCTION
+  !! get the index of the step in the hist%S array
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!   index: the index of the step in the hist%S array.
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   function spin_hist_t_findIndex(hist, step) result(index)
 
 
@@ -366,13 +522,40 @@ contains
     mxhist = hist%mxhist
     if ((mxhist ==1.and.step/=+1).or.&
          &    (mxhist /=1.and.abs(step) >=mxhist)) then
-       write(msg,'(a,I0,2a)')' The requested step must be lass than ',mxhist,ch10,&
+       write(msg,'(a,I0,2a)')' The requested step must be less than ',mxhist,ch10,&
             &                     'Action: increase the number of history store in the hist'
        MSG_BUG(msg)
     end if
     index= mod(hist%ihist+step, hist%mxhist)+1
   end function spin_hist_t_findIndex
+  !!***
 
+
+  !!***f* m_spin_hist/spin_hist_t_set_vars
+  !!
+  !! NAME
+  !! spin_hist_t_get_set_vars
+  !!
+  !! FUNCTION
+  !! put the data into hist
+  !! INPUTS
+  !! S(3, nmatoms)=spin orientation
+  !! Snorm(nmatoms)=spin amplitude
+  !! dSdt(3,nmatoms)= dS/dt
+  !! Heff(3, nmatoms) = effective magnetic field
+  !! etot = total energy
+  !! entropy = entropy
+  !! time = time (note: not index of time)
+  !! ihist_latt = index of lattice dynamics step.
+  !! inc = whether this step is finished. If true, increment counter.
+  !! OUTPUT
+  !!   index: the index of the step in the hist%S array.
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
 
 
@@ -418,5 +601,6 @@ contains
        hist%ihist_latt(ihist)=ihist_latt
     endif
   end subroutine spin_hist_t_set_vars
+  !!***
 
 end module m_spin_hist

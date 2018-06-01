@@ -1,5 +1,32 @@
-!TODO hexu: merge this file with m_spin_terms.F90
-! this file exists only for historical reasons.
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_terms_funcs
+!! NAME
+!! m_spin_terms_funcs
+!!
+!! FUNCTION
+!! This module contains the subroutines to calcuate Heff from spin Hamiltonian terms.
+!!
+!!
+!! Datatypes:
+!!
+!!
+!! Subroutines:
+!!
+!!
+!!TODO hexu: merge this file with m_spin_terms.F90
+!! this file exists only for historical reasons.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -13,6 +40,8 @@ module m_spin_terms_funcs
   real(dp), parameter :: boltzmann=1.38064852d-23 ! TODO where is it in abinit.
 
 CONTAINS
+
+  !!***
 
   ! External H field. (Too simple to be called?)
   subroutine Zeeman_Heff(N,Hext, Heff)

@@ -1,4 +1,38 @@
- 
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_terms
+!! NAME
+!! m_spin_terms
+!!
+!! FUNCTION
+!! This module contains the spin hamiltonian, and the methods for
+!! calculating effective magnetic field (torque), dS/dt, and total_energy
+!!
+!!
+!! Datatypes:
+!!
+!! * spin_terms_t
+!!
+!! Subroutines:
+!!
+!! * spin_terms_t_initialize
+!! * spin_terms_t_finalize
+!! * spin_terms_t_total_Heff : calculate total Heff (no Langevin term)
+!! * spin_terms_t_Heff_to_dSdt: 
+!!  * spin_terms_t_get_dSdt : dSdt, Langevin term is an input.
+!!  * spin_terms_t_get_Langevin_Heff
+
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (TO, hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -12,6 +46,8 @@ module  m_spin_terms
   use m_sparse_matrix
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   implicit none
+!!***
+
   ! TODO move parameters to somewhere (where?)
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t

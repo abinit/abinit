@@ -1,3 +1,34 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_mover
+!! NAME
+!! m_spin_mover
+!!
+!! FUNCTION
+!! This module contains the spin mover, which controls how the spin 
+!!
+!!
+!! Datatypes:
+!!
+!! * spin_mover_t
+!!
+!! Subroutines:
+!!
+!! * spin_mover_t_initialize
+!! * spin_mover_t_run_one_step
+!! * spin_mover_t_run_time
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -10,7 +41,24 @@ module m_spin_mover
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   implicit none
+  !!***
 
+
+  !!****t* m_spin_mover/spin_mover_t
+  !! NAME
+  !! spin_mover_t
+  !!
+  !! FUNCTION
+  !! this type contains the parameters for the spin mover.
+  !!
+  !! It contains:
+  !! dt: time step
+  !! total_time
+  !! temperature.
+  !! nmatoms number of magnetic atoms
+  !! SOURCE
+  
+  
   type spin_mover_t
      integer :: nmatoms
      real(dp) :: dt, total_time, temperature
@@ -19,8 +67,29 @@ module m_spin_mover
      !   procedure :: run_one_step => spin_mover_t_run_one_step
      !   procedure :: run_time => spin_mover_t_run_time
   end type spin_mover_t
+  !!***
 
 contains
+
+  !!****f* m_spin_mover/spin_mover_t_initialize
+  !!
+  !! NAME
+  !!  spin_mover_t_initialize
+  !!
+  !! FUNCTION
+  !!  initialize the spin mover
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_mover_t_initialize(self, nmatoms, dt, total_time, temperature)
     !class (spin_mover_t):: self
 
@@ -38,8 +107,32 @@ contains
     self%total_time=total_time
     self%temperature=temperature
   end subroutine spin_mover_t_initialize
+!!***
 
-  ! Heun's integration Method
+
+  !!****f* m_spin_mover/spin_mover_t_run_one_step
+  !!
+  !! NAME
+  !!  spin_mover_t_run_one_step
+  !!
+  !! FUNCTION
+  !! run one spin step
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!
+  !! Currently Heun's  (HeunP) integration Method is implemented
+  !! should be able to call multi method when implemented
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  
   subroutine spin_mover_t_run_one_step(self, calculator, S_in, S_out, etot)
     !class (spin_mover_t), intent(inout):: self
 
@@ -86,7 +179,29 @@ contains
     !print *, "dt: ",self%dt
     !print *, "S:", S_out
   end subroutine spin_mover_t_run_one_step
+  !!***
 
+
+  !!****f* m_spin_mover/spin_mover_t_run_time
+  !!
+  !! NAME
+  !!  spin_mover_t_run_time
+  !!
+  !! FUNCTION
+  !! run all spin step
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, hist, ncfile)
 
 
@@ -141,7 +256,29 @@ contains
     write(ab_out, *) msg
 
   end subroutine spin_mover_t_run_time
+!!***
 
+  
+  !!****f* m_spin_mover/spin_mover_t_finalize
+  !!
+  !! NAME
+  !!  spin_mover_t_finalize
+  !!
+  !! FUNCTION
+  !! finalize spin mover.
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!   does nothing. But it's better to preserve initialize-finalize symmetry.
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine spin_mover_t_finalize(self)
 
 
@@ -153,5 +290,6 @@ contains
 
     class(spin_mover_t), intent(inout):: self
   end subroutine spin_mover_t_finalize
+  !!***
 
 end module m_spin_mover

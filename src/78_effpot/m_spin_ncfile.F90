@@ -1,3 +1,37 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_ncfile
+!! NAME
+!! m_spin_ncfile
+!!
+!! FUNCTION
+!! This module contains the wrapper for writting spin hist netcdf file.
+!! Unlike the m_spin_terms, inside netcdf, there should be not only the
+!! data of magnetic atoms, but also the whole lattice (which do not move).
+!!
+!! Datatypes:
+!!  spin_ncfile_t
+!!
+!! Subroutines:
+!!  * spin_ncfile_t_init
+!!  * spin_ncfile_t_write_parameters (write parameters)
+!!  * spin_ncfile_t_def_sd (define spin dynamics related dimensions and ids)
+!!  * spin_ncfile_t_write_primitive_cell (write primitive cell information)
+!!  * spin_ncfile_t_write_supercell (write supercell information)
+!!  * spin_ncfile_t_write_one_step (write one step of spin dynamics)
+!!  * spin_ncfile_t_close (close and save netcdf file)
+!!
+!! TODO hexu: should consider carefully what to write.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -16,6 +50,8 @@ module m_spin_ncfile
   use netcdf
 #endif
   implicit none
+
+!!***
 
   type spin_ncfile_t
      ! dimensions
