@@ -291,7 +291,7 @@ endif
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'LIL_mat_finalalize'
+#define ABI_FUNC 'LIL_mat_finalize'
 !End of the abilint section
 
     type(LIL_mat) , intent(inout):: self

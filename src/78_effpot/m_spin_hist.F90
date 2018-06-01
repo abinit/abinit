@@ -227,10 +227,10 @@ contains
   end subroutine spin_hist_t_init
 !!***
 
-  !!****f* m_spin_hist/spin_hist_t_init
+  !!****f* m_spin_hist/spin_hist_t_set_atomic_structure
   !!
   !! NAME
-  !! spin_hist_t_init
+  !! spin_hist_t_set_atomic_structure
   !!
   !! FUNCTION
   !! 
