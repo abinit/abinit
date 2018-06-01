@@ -66,7 +66,9 @@ module m_nonlinear
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
  use m_rhotoxc,     only : rhotoxc
- use m_mpinfo,         only : proc_distrb_cycle
+ use m_mpinfo,      only : proc_distrb_cycle
+ use m_mklocl,      only : mklocl
+ use m_common,      only : setup1
 
  implicit none
 
@@ -153,7 +155,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw
- use interfaces_67_common
  use interfaces_95_drive
 !End of the abilint section
 

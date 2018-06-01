@@ -26,6 +26,27 @@
 
 module m_vtowfk
 
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_efield
+ use m_linalg_interfaces
+ use m_cgtools
+
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_paw_dmft,    only : paw_dmft_type
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
+ use m_paw_dmft,    only : paw_dmft_type
+ use m_gwls_hamiltonian, only : build_H
+ use m_cgwf,        only : cgwf
+ use m_lobpcgwf,    only : lobpcgwf2
+ use m_spacepar,    only : meanvalue_g
+ use m_chebfi,      only : chebfi
+ use m_nonlop,      only : nonlop
+
  implicit none
 
  private
@@ -134,24 +155,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & mpw,natom,nband_k,nkpt,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
 
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
- use m_efield
- use m_linalg_interfaces
- use m_cgtools
-
- use m_time,        only : timab
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_paw_dmft,    only : paw_dmft_type
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
- use m_paw_dmft,    only : paw_dmft_type
- use m_gwls_hamiltonian, only : build_H
- use m_cgwf,        only : cgwf
- use m_lobpcgwf,    only : lobpcgwf2
- use m_spacepar,    only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -159,7 +162,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #define ABI_FUNC 'vtowfk'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_79_seqpar_mpi
 !End of the abilint section

@@ -40,7 +40,7 @@ module m_setvtr
  use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
- use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
+ use m_electronpositron,  only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,   only : libxc_functionals_is_hybrid
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type
@@ -51,6 +51,8 @@ module m_setvtr
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
  use m_rhotoxc,           only : rhotoxc
+ use m_mklocl,            only : mklocl
+ use m_xchybrid,          only : xchybrid_ncpp_cc
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -1076,6 +1078,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 #endif
 
  use m_geometry,    only : xred2xcart
+ use m_mklocl,      only : mklocl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

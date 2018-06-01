@@ -46,6 +46,9 @@ module m_forces
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft
+ use m_mklocl,           only : mklocl
+ use m_predtk,           only : prtxvf
+ use m_xchybrid,         only : xchybrid_ncpp_cc
 
  implicit none
 
@@ -1525,7 +1528,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'constrf'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

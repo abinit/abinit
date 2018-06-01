@@ -158,6 +158,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_mkffnl,     only : mkffnl
  use m_getgh1c,    only : rf_transgrid_and_pack
  use m_mpinfo,     only : proc_distrb_cycle
+ use m_nonlop,     only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -228,12 +229,12 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  integer,parameter :: level=52,tim_nonlop=0
  integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr,iexit
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
- integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ilm,isppol,istwf_k,jband
+ integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,debug_mode
  integer :: signs,size_wf,size_cprj,spaceComm,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
- real(dp) :: rho2r_re,rho2r_im,rho3r_re,rho3r_im
+ real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
  real(dp) :: sumi,sum_psi1H1psi1,sum_psi1H1psi1_i
  real(dp) :: sum_lambda1psi1psi1,sum_lambda1psi1psi1_i
  real(dp) :: sum_psi0H2psi1a,sum_psi0H2psi1a_i,sum_psi0H2psi1b,sum_psi0H2psi1b_i
@@ -340,11 +341,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &     (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
-   if(dtset%nsppol==1) then
-     call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
-   else
-     MSG_ERROR("nonlinear not implemented yet for nsppol>1...")
-   end if
+   call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
@@ -438,7 +435,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
    do ikpt = 1, nkpt
 
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,-1,mpi_enreg%me)) then
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,isppol,mpi_enreg%me)) then
        cycle ! Skip the rest of the k-point loop
      end if
 
@@ -579,28 +576,30 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 ! **************************************************************************************************
 
      do iband = 1,nband_k
+       if (occ_k(iband)>tol10) then
 
-!      Read dude file
-       call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-!      Copy eig1_k_i2pert in "eig1_k_stored"
-       eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
+!        Read dude file
+         call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+!        Copy eig1_k_i2pert in "eig1_k_stored"
+         eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
 
-       if (i2pert==natom+2) then
-!        Read dudk file
-         call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-         offset_cgi = (iband-1)*size_wf+icg0
-         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-!        Copy cwave_right in "dudk"
-         dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+         if (i2pert==natom+2) then
+!          Read dudk file
+           call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           offset_cgi = (iband-1)*size_wf+icg0
+           cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+!          Copy cwave_right in "dudk"
+           dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
-!        Read dudkde file
-         call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-         offset_cgi = (iband-1)*size_wf+icg0
-         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-!        Copy cwave_right in "dudkde"
-         dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+!          Read dudkde file
+           call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           offset_cgi = (iband-1)*size_wf+icg0
+           cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+!          Copy cwave_right in "dudkde"
+           dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+         end if
+
        end if
-
      end do
 
      ABI_ALLOCATE(cgj,(2,size_wf))
@@ -932,6 +931,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 ! **************************************************************************************************
 !      Compute E_xc^(3) (NOTE : E_H^(3) = 0)
 ! **************************************************************************************************
+! This term is equal to the term "exc3" in pead_nl_loop.F90. However, we treat the nonlinear xc core correction in
+! a slightly different way, in order to keep the symmetry between pert1,pert2 and pert3. It helps for debugging.
 
  ABI_ALLOCATE(xc_tmp,(cplex*nfftf,nspden))
  ABI_ALLOCATE(rho1r1_tot,(cplex*nfftf,nspden))
@@ -940,112 +941,93 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    if (cplex==1) then
      do ifft=1,nfftf
        rho1r1_tot(ifft,1) = rho1r1(ifft,1) + xccc3d1(ifft)
-       rho2r_re = rho2r1(ifft,1)+xccc3d2(ifft)
-       rho3r_re = rho3r1(ifft,1)+xccc3d3(ifft)
-       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2r_re*rho3r_re
+       rho2ur = rho2r1(ifft,1)+xccc3d2(ifft)
+       rho3ur = rho3r1(ifft,1)+xccc3d3(ifft)
+       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur
      end do
    else
-     do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-       rho1r1_tot(2*ifft-1,1) = rho1r1(2*ifft-1,1) + xccc3d1(2*ifft-1)
-       rho1r1_tot(2*ifft  ,1) = rho1r1(2*ifft  ,1) + xccc3d1(2*ifft  )
-       rho2r_re = rho2r1(2*ifft-1,1)+xccc3d2(2*ifft-1)
-       rho2r_im = rho2r1(2*ifft  ,1)+xccc3d2(2*ifft  )
-       rho3r_re = rho3r1(2*ifft-1,1)+xccc3d3(2*ifft-1)
-       rho3r_im = rho3r1(2*ifft  ,1)+xccc3d3(2*ifft  )
-       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*(rho2r_re*rho3r_re-rho2r_im*rho3r_im)
-       xc_tmp(2*ifft  ,1)= k3xc(ifft,1)*(rho2r_re*rho3r_im+rho2r_im*rho3r_re)
+     do ifft=1,nfftf
+       ifft_re = 2*ifft-1 ! Real part
+       ifft_im = 2*ifft   ! Imaginary part
+       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1) + xccc3d1(ifft_re)
+       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1) + xccc3d1(ifft_im)
+       rho2ur = rho2r1(ifft_re,1)+xccc3d2(ifft_re)
+       rho2ui = rho2r1(ifft_im,1)+xccc3d2(ifft_im)
+       rho3ur = rho3r1(ifft_re,1)+xccc3d3(ifft_re)
+       rho3ui = rho3r1(ifft_im,1)+xccc3d3(ifft_im)
+       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui)
+       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur)
      end do
    end if
 
+ else if (nspden==2) then
+
+!  Remember : rhor(...,1) = total density  ( n_up(r) + n_down(r) )
+!             rhor(...,2) =    up density  ( n_up(r) )
+!       But :  pot(...,1) =   up potential ( v_up(r) )
+!              pot(...,2) = down potential ( v_down(r) )
+
+   if (cplex==1) then
+     do ifft=1,nfftf
+       rho1r1_tot(ifft,1) = rho1r1(ifft,1)    + xccc3d1(ifft)      ! 1 tot
+       rho1r1_tot(ifft,2) = rho1r1(ifft,2)    + xccc3d1(ifft)*half ! 1 up
+       rho2ur = rho2r1(ifft,2)                + xccc3d2(ifft)*half ! 2 up
+       rho2dr = rho2r1(ifft,1)-rho2r1(ifft,2) + xccc3d2(ifft)*half ! 2 down
+       rho3ur = rho3r1(ifft,2)                + xccc3d3(ifft)*half ! 3 up
+       rho3dr = rho3r1(ifft,1)-rho3r1(ifft,2) + xccc3d3(ifft)*half ! 3 down
+!                      uuu                          uud
+       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur + k3xc(ifft,2)*rho2ur*rho3dr + &
+!                      udu                          udd
+&                      k3xc(ifft,2)*rho2dr*rho3ur + k3xc(ifft,3)*rho2dr*rho3dr
+!                      duu                          dud
+       xc_tmp(ifft,2)= k3xc(ifft,2)*rho2ur*rho3ur + k3xc(ifft,3)*rho2ur*rho3dr + &
+!                      ddu                          ddd
+&                      k3xc(ifft,3)*rho2dr*rho3ur + k3xc(ifft,4)*rho2dr*rho3dr
+     end do
+
+   else ! cplex = 2
+
+     do ifft=1,nfftf
+       ifft_re = 2*ifft-1 ! Real part
+       ifft_im = 2*ifft   ! Imaginary part
+       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1)    + xccc3d1(ifft_re)      ! 1 tot re
+       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1)    + xccc3d1(ifft_im)      ! 1 tot im
+       rho1r1_tot(ifft_re,2) = rho1r1(ifft_re,2)    + xccc3d1(ifft_re)*half ! 1 up re
+       rho1r1_tot(ifft_im,2) = rho1r1(ifft_im,2)    + xccc3d1(ifft_im)*half ! 1 up im
+       rho2ur = rho2r1(ifft_re,2)                   + xccc3d2(ifft_re)*half ! 2 up re
+       rho2ur = rho2r1(ifft_im,2)                   + xccc3d2(ifft_im)*half ! 2 up im
+       rho2dr = rho2r1(ifft_re,1)-rho2r1(ifft_re,2) + xccc3d2(ifft_re)*half ! 2 down re
+       rho2dr = rho2r1(ifft_im,1)-rho2r1(ifft_im,2) + xccc3d2(ifft_im)*half ! 2 down im
+       rho3ur = rho3r1(ifft_re,2)                   + xccc3d3(ifft_re)*half ! 3 up re
+       rho3ur = rho3r1(ifft_im,2)                   + xccc3d3(ifft_im)*half ! 3 up im
+       rho3dr = rho3r1(ifft_re,1)-rho3r1(ifft_re,2) + xccc3d3(ifft_re)*half ! 3 down re
+       rho3dr = rho3r1(ifft_im,1)-rho3r1(ifft_im,2) + xccc3d3(ifft_im)*half ! 3 down im
+!      Real part:
+!                         uuu                                          uud
+       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,2)*(rho2ur*rho3dr-rho2ui*rho3di) + &
+!                         udu                                          udd
+&                         k3xc(ifft,2)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,3)*(rho2dr*rho3dr-rho2di*rho3di)
+!                         duu                                          dud
+       xc_tmp(ifft_re,2)= k3xc(ifft,2)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,3)*(rho2ur*rho3dr-rho2ui*rho3di) + &
+!                         ddu                                          ddd
+&                         k3xc(ifft,3)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,4)*(rho2dr*rho3dr-rho2di*rho3di)
+!      Imaginary part:
+!                         uuu                                          uud
+       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,2)*(rho2ur*rho3di+rho2ui*rho3dr) + &
+!                         udu                                          udd
+&                         k3xc(ifft,2)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,3)*(rho2dr*rho3di+rho2di*rho3dr)
+!                         duu                                          dud
+       xc_tmp(ifft_im,2)= k3xc(ifft,2)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,3)*(rho2ur*rho3di+rho2ui*rho3dr) + &
+!                         ddu                                          ddd
+&                         k3xc(ifft,3)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,4)*(rho2dr*rho3di+rho2di*rho3dr)
+     end do
+
+   end if
+
  else
-   MSG_BUG('NONLINEAR with nspden==2 is not implemented yet')
+   MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
  end if
-
-!!                  fab: modifications for the spin polarized raman part:
-!!                  in the spin polarized case xc_tmp has 2 components
-!!                  note that now the non linear core correction is divided by 2
-!                   if (nspden==2) then
-
-!                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,2))
-
-!                     if (cplex==1) then
-!                       do ifft=1,nfft
-!                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-!&                         k3xc(ifft,2)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-!                         xc_tmp(ifft,2)= k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,3)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,4)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-!                       end do
-
-!                     else
-!                       do ifft=1,nfft
-!!                        These sections should be rewritten, to be easier to read ... (defining intermediate scalars)
-!                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-!&                         k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-!&                         k3xc(ifft,2)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-!&                         k3xc(ifft,3)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-!                         xc_tmp(2*ifft,1)=k3xc(ifft,1)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-!&                         k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-!&                         k3xc(ifft,2)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-!&                         k3xc(ifft,3)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-!!                        fab: now the spin down component
-!                         xc_tmp(2*ifft-1,2)= k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft-1,2)- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-!                         xc_tmp(2*ifft,2)=k3xc(ifft,1)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft,2)+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft,2)+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-!                       end do
-
-!!                      fab: this is the end if over cplex
-!                     end if
-!!                    fab: this is the enf if over nspden
-!                   end if
-
-
+ 
  call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
  ABI_DEALLOCATE(rho1r1_tot)

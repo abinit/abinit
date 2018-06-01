@@ -197,9 +197,8 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
-
  end type fock_common_type
-!--------------------------------------------------------------------
+
  type, public :: fock_BZ_type
 
   integer :: mcprj
@@ -2437,7 +2436,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 end subroutine bare_vqg
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/strfock
 !!
 !! NAME
@@ -2445,13 +2444,6 @@ end subroutine bare_vqg
 !!
 !! FUNCTION
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
@@ -2483,13 +2475,6 @@ end subroutine bare_vqg
 !!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
@@ -2641,8 +2626,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
 end subroutine strfock
 !!***
-
-
 
 end module m_fock
 !!***

@@ -667,7 +667,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
 !  R
-   dtsets(idtset)%random_atpos=zero
+   dtsets(idtset)%random_atpos=0
    dtsets(idtset)%ratsph_extra=two
    dtsets(idtset)%recefermi=zero
    dtsets(idtset)%recgratio=1

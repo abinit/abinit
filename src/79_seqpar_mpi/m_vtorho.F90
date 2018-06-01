@@ -51,10 +51,10 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian,&
-&                                 load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
- use m_bandfft_kpt,        only : bandfft_kpt,bandfft_kpt_type,bandfft_kpt_set_ikpt,&
-&                                 bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+ use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian, &
+                                  load_spin_hamiltonian, load_k_hamiltonian, gs_hamiltonian_type
+ use m_bandfft_kpt,        only : bandfft_kpt,bandfft_kpt_type,bandfft_kpt_set_ikpt, &
+                                  bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
@@ -72,6 +72,7 @@ module m_vtorho
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
+ use m_common,             only : prteigrs
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif

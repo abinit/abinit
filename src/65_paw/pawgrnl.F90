@@ -111,12 +111,12 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_atm2fft,      only : dfpt_atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawgrnl'
- use interfaces_64_psp
  use interfaces_65_paw, except_this_one => pawgrnl
 !End of the abilint section
 
@@ -169,7 +169,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  integer,parameter :: mu9(9)=(/1,2,3,4,5,6,4,5,6/)
  integer,allocatable :: atindx(:),atm_indx(:),mu4(:)
  integer,allocatable,target :: ifftsph_tmp(:)
- integer,ABI_CONTIGUOUS pointer :: ffti3_local(:),fftn3_distrib(:),ifft_jatom(:),my_atmtab(:)
+ integer,ABI_CONTIGUOUS pointer :: ffti3_local(:),fftn3_distrib(:),ifft_jatom(:)
+ integer, pointer :: my_atmtab(:)
  real(dp) :: gmet(3,3),gprimd(3,3),hatstr(6),rdum(1),rdum2(1),rmet(3,3),tmp(12)
  real(dp) :: work1(dyfr_cplex,3,3),work2(dyfr_cplex,3,3)
  real(dp),allocatable :: buf(:,:),buf1(:),dyfr(:,:,:,:,:),eltfr(:,:)

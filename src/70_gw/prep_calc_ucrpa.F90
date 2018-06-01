@@ -715,7 +715,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
                  write(std_out,*) "Warning: precision is low, oscillator strengh should be one and is :",rhotwg_ki(1,jb)
                !else
                !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
-               endif 
+               endif
              endif
            endif
            if (Psps%usepaw==1.and.pawcross==1) then ! Add paw cross term
