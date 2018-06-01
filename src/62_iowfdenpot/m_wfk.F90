@@ -85,7 +85,7 @@ MODULE m_wfk
  use m_cgtk,         only : cgtk_rotate
  use m_fftcore,      only : get_kg, ngfft_seq
  use m_distribfft,   only : init_distribfft_seq
- use m_mpinfo,       only : destroy_mpi_enreg
+ use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
  use m_rwwf,         only : rwwf
 
  implicit none
@@ -4463,7 +4463,6 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_prof'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

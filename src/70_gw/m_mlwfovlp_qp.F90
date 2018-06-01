@@ -33,7 +33,7 @@ module m_mlwfovlp_qp
  use m_errors
  use m_profiling_abi
 
- use m_mpinfo,         only : destroy_mpi_enreg
+ use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free
  use m_numeric_tools,  only : isordered
@@ -120,7 +120,6 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

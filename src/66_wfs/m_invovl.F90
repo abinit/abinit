@@ -16,10 +16,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -40,7 +36,11 @@ MODULE m_invovl
  use m_xmpi
  use m_profiling_abi
 
- use m_time,              only : timab
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
+ use m_nonlop,      only : nonlop
 
  implicit none
 
@@ -62,6 +62,7 @@ MODULE m_invovl
 !! Contains information needed to invert the overlap matrix S
 !!
 !! SOURCE
+
  type, public :: invovl_kpt_type
 
    integer :: nprojs
@@ -105,8 +106,9 @@ CONTAINS
 !!      dsymm,zhemm
 !!
 !! SOURCE
+
  subroutine init_invovl(nkpt)
-  use m_profiling_abi
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -128,7 +130,6 @@ CONTAINS
  end subroutine init_invovl
 !!***
 
-
 !!****f* m_invovl/destroy_invovl
 !! NAME
 !! destroy_invovl
@@ -147,7 +148,7 @@ CONTAINS
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt)
-  use m_profiling_abi
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -178,7 +179,6 @@ CONTAINS
  end subroutine destroy_invovl
 !!***
 
-
 !!****f* m_invovl/make_invovl
 !! NAME
 !! make_invovl
@@ -195,14 +195,10 @@ CONTAINS
 !!      dsymm,zhemm
 !!
 !! SOURCE
+
 subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
- use defs_basis
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
+
  use m_abi_linalg
- use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -449,8 +445,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 end subroutine make_invovl
 !!***
 
-
-
 !!****f* m_invovl/apply_invovl
 !! NAME
 !! apply_invovl
@@ -467,21 +461,14 @@ end subroutine make_invovl
 !!      dsymm,zhemm
 !!
 !! SOURCE
+
  subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
- use defs_basis
- use defs_abitypes
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
- use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'apply_invovl'
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -615,8 +602,6 @@ end subroutine make_invovl
 end subroutine apply_invovl
 !!***
 
-
-
 !!****f* m_invovl/solve_inner
 !! NAME
 !! solve_inner
@@ -634,12 +619,7 @@ end subroutine apply_invovl
 !!
 !! SOURCE
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj)
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
- use m_hamiltonian, only : gs_hamiltonian_type
+
  use m_abi_linalg
 
 !This section has been created automatically by the script Abilint (TD).
@@ -718,7 +698,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
      convergence_rate = -LOG(1e-10) / i
      additional_steps_to_take = CEILING(-LOG(precision/1e-10)/convergence_rate) + 1
    else if(additional_steps_to_take > 0) then
-     if(previous_maxerr<maxerr)exit 
+     if(previous_maxerr<maxerr)exit
      additional_steps_to_take = additional_steps_to_take - 1
    end if
    previous_maxerr=maxerr
@@ -741,7 +721,6 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 end subroutine solve_inner
 !!***
 
-
 !!****f* m_invovl/apply_block
 !! NAME
 !! apply_block
@@ -759,9 +738,7 @@ end subroutine solve_inner
 !!
 !! SOURCE
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
-  use defs_basis
-  use defs_abitypes
-  use m_hamiltonian, only : gs_hamiltonian_type
+
   use m_abi_linalg
 
 !This section has been created automatically by the script Abilint (TD).

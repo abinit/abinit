@@ -52,7 +52,7 @@ MODULE m_fft
  use m_blas,          only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
 &                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
- use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
  implicit none
@@ -1552,7 +1552,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -3633,17 +3632,13 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
     !use the fact that (j-1)=i1 + n1l*(j2l-1 + n2l*(j3l-1))
    proc_dest= fftn2l_distrib( modulo((j_global-1)/n1l,n2l) + 1)
    siz_slice(proc_dest+1)=siz_slice(proc_dest+1)+1
-!DEBUG
 !write(std_out,*) 'in indirect proc',proc_dest,siz_slice(proc_dest+1)
-!ENDDEBUG
   end if
  end do
  siz_slice_max=maxval(siz_slice) !This value could be made smaller by looking locally
 !and performing a allgather with a max
-!DEBUG
 !write(std_out,*) 'siz_slice,sizeindex,siz_slice',siz_slice(:),sizeindex,siz_slice_max
 !write(std_out,*) 'sizeindex,nright,nleft',sizeindex,nright,nleft
-!ENDDEBUG
  ABI_ALLOCATE(right_send,(2,nproc_fft*siz_slice_max))
  ABI_ALLOCATE(index_send,(nproc_fft*siz_slice_max))
  siz_slice(:)=0; index_send(:)=0; right_send(:,:)=zero
@@ -3659,9 +3654,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
    siz_slice(proc_dest+1)=siz_slice(proc_dest+1)+1
    right_send(:,proc_dest*siz_slice_max+siz_slice(proc_dest+1))=right(:,iright)
    index_send(proc_dest*siz_slice_max+siz_slice(proc_dest+1))=jleft_local
-!DEBUG
-!   write(std_out,*) 'loop ir',jleft_local,jleft_global,iright_global,iright
-!ENDDEBUG
+!write(std_out,*) 'loop ir',jleft_local,jleft_global,iright_global,iright
   end if
  end do
  ABI_ALLOCATE(right_recv,(2,nproc_fft*siz_slice_max))
@@ -3679,9 +3672,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
   endif
 #endif
  do ileft=1,siz_slice_max*nproc_fft
-!DEBUG
 !write(std_out,*)index_recv(ileft)
-!ENDEBUG
  if(index_recv(ileft) /=0 ) left(:,index_recv(ileft))=right_recv(:,ileft)
  end do
  ABI_DEALLOCATE(right_recv)

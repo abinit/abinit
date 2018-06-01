@@ -4,6 +4,7 @@
  ndtset 3       getwfk -1
 
  dilatmx: 1.0    dilatmx+ 0.2
+ chkdilatmx 0
 
  acell 3*10.00d0
  diemac 12.0d0

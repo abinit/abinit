@@ -32,13 +32,14 @@ module m_efmas
  private
 
 !public procedures.
- public :: efmasfr_free
- public :: efmasfr_free_array
+ public :: efmasval_free
+ public :: efmasval_free_array
  public :: efmasdeg_free
  public :: efmasdeg_free_array
  public :: check_degeneracies
  public :: print_efmas
  public :: efmas_main
+ public :: efmas_analysis 
 
 !private procedures.
  private :: MATMUL_ ! Workaround to make tests pass on ubu/buda slaves
@@ -52,12 +53,12 @@ module m_efmas
 CONTAINS
 !===========================================================
 
-!!****f* m_efmas/efmasfr_free
+!!****f* m_efmas/efmasval_free
 !! NAME
-!! efmasfr_free
+!! efmasval_free
 !!
 !! FUNCTION
-!! This routine deallocates an efmasdeg_type.
+!! This routine deallocates an efmasval_type.
 !!
 !! INPUTS
 !!
@@ -67,42 +68,43 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
- subroutine efmasfr_free(efmasfr)
+ subroutine efmasval_free(efmasval)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmasfr_free'
+#define ABI_FUNC 'efmasval_free'
 !End of the abilint section
 
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasfr_type),intent(inout) :: efmasfr
+   type(efmasval_type),intent(inout) :: efmasval
 
    ! *********************************************************************
 
-   if(allocated(efmasfr%ch2c)) then
-     ABI_FREE(efmasfr%ch2c)
+   if(allocated(efmasval%ch2c)) then
+     ABI_FREE(efmasval%ch2c)
+   end if
+   if(allocated(efmasval%eig2_diag)) then
+     ABI_FREE(efmasval%eig2_diag)
    end if
 
- end subroutine efmasfr_free
+ end subroutine efmasval_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/efmasfr_free_array
+!!****f* ABINIT/efmasval_free_array
 !! NAME
-!! efmasfr_free_array
+!! efmasval_free_array
 !!
 !! FUNCTION
-!! This routine deallocates an efmasfr_type or, optionally, an array of efmasfr_type.
+!! This routine deallocates an efmasval_type or, optionally, an array of efmasval_type.
 !!
 !! INPUTS
 !!
@@ -112,41 +114,39 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
- subroutine efmasfr_free_array(efmasfr)
+ subroutine efmasval_free_array(efmasval)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmasfr_free_array'
+#define ABI_FUNC 'efmasval_free_array'
 !End of the abilint section
 
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasfr_type),allocatable,intent(inout) :: efmasfr(:,:)
+   type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
 
    !!!Local variables-------------------------------
    integer :: i,j,n(2)
 
    ! *********************************************************************
 
-   if(allocated(efmasfr)) then
-     n=shape(efmasfr)
+   if(allocated(efmasval)) then
+     n=shape(efmasval)
      do i=1,n(1)
        do j=1,n(2)
-         call efmasfr_free(efmasfr(i,j))
+         call efmasval_free(efmasval(i,j))
        end do
      end do
-     ABI_DATATYPE_DEALLOCATE(efmasfr)
+     ABI_DATATYPE_DEALLOCATE(efmasval)
    end if
 
- end subroutine efmasfr_free_array
+ end subroutine efmasval_free_array
 !!***
 
 !----------------------------------------------------------------------
@@ -166,8 +166,6 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -226,8 +224,6 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -278,8 +274,6 @@ CONTAINS
 !!      d2frnl
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -421,8 +415,6 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -600,9 +592,8 @@ CONTAINS
 !! efmas_main
 !!
 !! FUNCTION
-!! This routine calculates the effective mass tensor
-!! (inverse of hessian of eigenvalues with respect to the wavevector)
-!! in cartesian coordinates.
+!! This routine calculates the band curvature double tensor, Eq.50 of Laflamme2016,
+!! in reduced coordinates.
 !!
 !! INPUTS
 !!  cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%nsppol*nkpt_rbz)=pw coefficients of GS wavefunctions at k.
@@ -612,6 +603,7 @@ CONTAINS
 !!  dim_eig2rf = 1 if cg1_pert, gh0c1_pert and gh1c_pert are allocated.
 !!               0 otherwise.
 !!  dtset = dataset structure containing the input variable of the calculation.
+!!  efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
 !!  eigen0(nkpt_rbz*dtset%mband*dtset%nsppol) = 0-order eigenvalues at all K-points:
 !!            <k,n'|H(0)|k,n'> (hartree).
 !!  eigen1(nkpt_rbz*2*dtset%nsppol*dtset%mband**2,3,mpert) = matrix of first-order:
@@ -623,7 +615,6 @@ CONTAINS
 !!            orthogonal to the active space.
 !!  istwfk_pert(nkpt_rbz,3,mpert) = integer for choice of storage of wavefunction at
 !!            each k point for each perturbation.
-!!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
 !!  mpi_enreg = informations about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
@@ -631,6 +622,11 @@ CONTAINS
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
+!!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution double tensor
+!!    efmasval(:,:)%eig2_diag OUTPUT : band curvature double tensor
 !!
 !! PARENTS
 !!      dfpt_looppert
@@ -641,9 +637,8 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasfr,eigen0,&
-&   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,&
-&   kpt_rbz,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
+ subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
+&   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
 
   use m_cgtools
   use m_gaussian_quadrature, only : cgqf
@@ -653,6 +648,7 @@ CONTAINS
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'efmas_main'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -672,25 +668,22 @@ CONTAINS
   real(dp), intent(in) :: eigen1(nkpt_rbz*2*dtset%nsppol*dtset%mband**2,3,mpert)
   real(dp), intent(in) :: rprimd(3,3)
   real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%nsppol*nkpt_rbz)
-  real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
   type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
-  type(efmasfr_type),  allocatable,intent(in) :: efmasfr(:,:)
+  type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
 
  !Local variables-------------------------------
   logical :: degenerate
   logical :: debug
-  logical :: print_fsph
-  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
-  integer :: info
   integer :: ipert
   integer :: isppol
   integer :: icg2   !TODOM : Reactivate the sections for icg2 / allow choice of k-point other than the first in the list.
   integer :: npw_k
   integer :: nband_k
   integer :: nspinor
-  integer :: ideg,jdeg
+  integer :: ideg
   integer :: ikpt
   integer :: istwf_k
+  integer :: master,me,spaceworld
   integer :: band2tot_index
   integer :: bandtot_index
   integer :: iband, jband, kband
@@ -698,138 +691,52 @@ CONTAINS
   integer :: deg_dim
   integer :: degl
   integer :: lwork
-  integer :: itheta, iphi
-  integer :: ntheta, nphi
-  integer :: mdim
-  integer :: cdirs, ndirs
-  integer :: ipiv(3)
-  integer :: io_unit
-  character(len=500) :: message, filename
+  character(len=500) :: msg
   real(dp) :: deltae
-  real(dp) :: cosph,costh,sinph,sinth
   real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
-  real(dp) :: f3d_scal
-  real(dp) :: weight
-  real(dp) :: gprimd(3,3)
-  !real(dp) :: A, B, C, R
   real(dp), allocatable :: cg0(:,:)
   real(dp), allocatable :: cg1_pert2(:,:),cg1_pert1(:,:)
   real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
-  real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
-  real(dp), allocatable :: eigenval(:), rwork(:), eigen1val(:,:)
-  real(dp), allocatable :: eigf3d(:)
-  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:),m_cart(:,:)
-  real(dp), allocatable :: deigf3d_dth(:), deigf3d_dph(:)
-  real(dp), allocatable :: unit_speed(:,:), transport_tensor(:,:,:)
-  real(dp), allocatable :: cart_rotation(:,:), transport_tensor_eig(:)
-  real(dp), allocatable :: transport_eqv_m(:,:,:), transport_eqv_eigval(:,:), transport_eqv_eigvec(:,:,:)
-  real(dp), allocatable :: transport_tensor_scale(:)
-  real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
-  real(dp), allocatable :: gq_points_ph(:),gq_points_cosph(:),gq_points_sinph(:),gq_weights_ph(:)
-  real(dp), allocatable :: dirs(:,:)
-  real(dp),allocatable :: prodr(:,:)
-  !real(dp), allocatable :: f3dfd(:,:,:)
   complex(dpc) :: eig2_part(3,3)
-  complex(dpc) :: eig2_gh2c(3,3)
+  complex(dpc) :: eig2_ch2c(3,3)
   complex(dpc) :: eig2_paral(3,3)
   complex(dpc) :: eig2_gauge_change(3,3)
   complex(dpc) :: eig1a, eig1b, g_ch
-  complex(dpc) :: matr2d(2,2)
-  complex(dpc), allocatable :: eigen1_deg(:,:), identity(:,:), eigenvec(:,:), work(:), eigen1vec(:,:,:), dotprod(:,:)
-  complex(dpc), allocatable :: eig2_diag(:,:,:,:), unitary_tr_test(:,:,:,:)
-  complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
-  complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
-  complex(dpc),allocatable :: prodc(:,:)
+  complex(dpc), allocatable :: eigen1_deg(:,:)
+  complex(dpc), allocatable :: eig2_diag(:,:,:,:)
+  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
 
- ! *********************************************************************
+! *********************************************************************
 
   debug = .false. ! Prints additional info to std_out
-  print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi) 
-                       ! for each band & kpts treated; 1 file per degenerate ensemble of bands. 
-                       ! Angles are those used in the numerical integration.
 
-  if(mpi_enreg%me/=0) return
+! Init parallelism
+  master =0
+  spaceworld=mpi_enreg%comm_cell
+  me=mpi_enreg%me_kpt
 
-  write(std_out,'(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(a)' ) &
-&   ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
+  write(msg,'(4a)') ch10,&
+&  ' CALCULATION OF EFFECTIVE MASSES',ch10,&
+&  ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
 
   if(dtset%nsppol/=1)then
-    write(message,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
-    MSG_ERROR(message)
+    write(msg,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
+    MSG_ERROR(msg)
   end if
   if(dtset%nspden/=1)then
-    write(message,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
-    MSG_ERROR(message)
+    write(msg,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
+    MSG_ERROR(msg)
   end if
   if(dtset%efmas_deg==0) then
-    write(message,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
-    MSG_WARNING(message)
-    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(message),ch10,'---'
+    write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
+    MSG_WARNING(msg)
+    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
   end if
 
   ipert = dtset%natom+1
   isppol = 1
-
-  mdim = dtset%efmas_dim
-  ABI_ALLOCATE(eff_mass,(mdim,mdim))
-
-  gprimd = rprimd
-  call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
-  ABI_ALLOCATE(rwork,(3))
-  call dgetri(mdim,gprimd,mdim,ipiv,rwork,3,info)
-  ABI_DEALLOCATE(rwork)
-  gprimd = two_pi*transpose(gprimd)
-
-  cdirs = dtset%efmas_calc_dirs
-  ndirs = mdim
-  if(cdirs/=0) ndirs = dtset%efmas_n_dirs
-  ABI_ALLOCATE(dirs,(3,ndirs))
-  if(cdirs==0) then
-    dirs = zero
-    do adir=1,ndirs
-      dirs(adir,adir)=1.0_dp
-    end do
-  elseif(cdirs==1) then
-    dirs(:,:) = dtset%efmas_dirs(:,1:ndirs)
-    do adir=1,ndirs
-      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
-    end do
-  elseif(cdirs==2) then
-    dirs(:,:) = matmul(gprimd,dtset%efmas_dirs(:,1:ndirs))
-    do adir=1,ndirs
-      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
-    end do
-  elseif(cdirs==3) then
-    dirs(1,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*cos(dtset%efmas_dirs(2,1:ndirs)*pi/180)
-    dirs(2,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*sin(dtset%efmas_dirs(2,1:ndirs)*pi/180)
-    dirs(3,:) = cos(dtset%efmas_dirs(1,1:ndirs)*pi/180)
-  end if
-
-  !!! Initialization of integrals for the degenerate case.
-  ntheta   = dtset%efmas_ntheta
-  nphi     = 2*ntheta
-  ABI_ALLOCATE(gq_points_th,(ntheta))
-  ABI_ALLOCATE(gq_points_costh,(ntheta))
-  ABI_ALLOCATE(gq_points_sinth,(ntheta))
-  ABI_ALLOCATE(gq_weights_th,(ntheta))
-  ABI_ALLOCATE(gq_points_ph,(nphi))
-  ABI_ALLOCATE(gq_points_cosph,(nphi))
-  ABI_ALLOCATE(gq_points_sinph,(nphi))
-  ABI_ALLOCATE(gq_weights_ph,(nphi))
-  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
-  !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable, 
-  !since the function to be integrated is periodic...
-  call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
-  do itheta=1,ntheta
-    gq_points_costh(itheta)=cos(gq_points_th(itheta))
-    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
-  enddo
-  do iphi=1,nphi
-    gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
-    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
-  enddo
 
   icg2 = 0
   band2tot_index=0
@@ -852,20 +759,7 @@ CONTAINS
       degl       = efmasdeg(ikpt)%degl(ideg)
       deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 
-      !!! Allocations
-      ABI_ALLOCATE(identity,(deg_dim,deg_dim))
       ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
-      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
-      ABI_ALLOCATE(eigenval,(deg_dim))
-      ABI_ALLOCATE(eigen1vec,(deg_dim,deg_dim,3))
-      ABI_ALLOCATE(eigen1val,(deg_dim,3))
-      ABI_ALLOCATE(dotprod,(deg_dim,deg_dim))
-
-      identity = zero
-      do iband=1,deg_dim
-        identity(iband,iband) = one
-      end do
-
       !!! If treated band degenerate at 0th order, check that we are at extrema.
       if(degenerate) then
         do adir=1,3
@@ -876,26 +770,26 @@ CONTAINS
             end do
           end do
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
-            write(message,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
+            write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
 &            'but gradient of band(s) was found to be nonzero.'
-            MSG_ERROR(message)
+            MSG_ERROR(msg)
           end if
         end do !adir=1,3
       end if !degenerate(1)
+      ABI_DEALLOCATE(eigen1_deg)
 
       ABI_ALLOCATE(eig2_diag,(deg_dim,deg_dim,3,3))
+      ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
       eig2_diag = zero
-      ABI_ALLOCATE(unitary_tr_test,(deg_dim,deg_dim,3,3))
 
       do iband=1,deg_dim
         write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
         cg0(:,:) = cg(:,1+(degl+iband-1)*npw_k*nspinor+icg2:(degl+iband)*npw_k*nspinor+icg2)
         do jband=1,deg_dim
           eig2_part = zero
-          eig2_gh2c = zero
+          eig2_ch2c = zero
           eig2_paral = zero
           eig2_gauge_change = zero
-          eff_mass = zero
           do adir=1,3
             istwf_k = istwfk_pert(ikpt,adir,ipert)
             do bdir=1,3
@@ -948,31 +842,279 @@ CONTAINS
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_gh2c(adir,bdir) = efmasfr(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasval(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
 
             end do !bdir
           end do  !adir
 
           do adir=1,3
             do bdir=1,3
-              eig2_paral(adir,bdir) = eig2_part(adir,bdir) + eig2_part(bdir,adir) + eig2_gh2c(adir,bdir)
-              !eig2_paral(adir,bdir) = 0.5*(eig2_part(adir,bdir) + eig2_part(bdir,adir)) + eig2_gh2c(adir,bdir)   !DEBUG
-              !eig2_paral(adir,bdir) = eig2_part(adir,bdir) + conjg(eig2_part(adir,bdir)) + eig2_gh2c(adir,bdir)  !DEBUG
+              eig2_paral(adir,bdir) = eig2_part(adir,bdir) + eig2_part(bdir,adir) + eig2_ch2c(adir,bdir)
             end do
           end do
 
           eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
+          efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
 
-          eig2_diag(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
-          eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
-          eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
-          eig2_gh2c                  = matmul(matmul(rprimd,eig2_gh2c),                 transpose(rprimd))/two_pi**2
-          eig2_part                  = matmul(matmul(rprimd,eig2_part),                 transpose(rprimd))/two_pi**2
+          !!! Decomposition of the hessian in into its different contributions.
+          if(debug) then
+
+            eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+            eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
+            eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
+            eig2_ch2c                  = matmul(matmul(rprimd,eig2_ch2c),                 transpose(rprimd))/two_pi**2
+            eig2_part                  = matmul(matmul(rprimd,eig2_part),                 transpose(rprimd))/two_pi**2
+
+            write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
+            do adir=1,3
+              write(std_out,'(3f12.8,2(a,3f12.8))')&
+&               real(eig2_diag_cart(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
+            end do
+            write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
+            do adir=1,3
+              write(std_out,'(3f12.8,2(a,3f12.8))') real(eig2_paral(adir,:),dp),' |',real(eig2_ch2c(adir,:),dp),' |', &
+&                                                   real(eig2_part(adir,:),dp)
+            end do
+          end if !debug
+
+          if(.not. degenerate .and. iband==jband) then
+            write(std_out,'(a,3f20.16)') 'Gradient of eigenvalues = ',&
+&            matmul(rprimd,eigen1(2*(degl+iband)-1+(degl+iband-1)*2*nband_k+band2tot_index,:,ipert))/two_pi
+          end if !.not.degenerate
+
+        end do !jband
+      end do !iband
+
+      ABI_DEALLOCATE(eig2_diag)
+      ABI_DEALLOCATE(eig2_diag_cart)
+
+    end do !ideg
+
+    ABI_DEALLOCATE(cg1_pert2)
+    ABI_DEALLOCATE(cg1_pert1)
+    ABI_DEALLOCATE(gh1c_pert2)
+    ABI_DEALLOCATE(gh1c_pert1)
+    ABI_DEALLOCATE(gh0c1_pert1)
+    ABI_DEALLOCATE(cg0)
+
+    icg2=icg2+npw_k*dtset%nspinor*nband_k
+    bandtot_index=bandtot_index+nband_k
+    band2tot_index=band2tot_index+2*nband_k**2
+  end do ! ikpt
+
+ end subroutine efmas_main
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_efmas/efmas_analysis
+!! NAME
+!! efmas_analysis
+!!
+!! FUNCTION
+!! This routine analyzes the band curvature double tensor and compute the effective mass tensor
+!! (inverse of hessian of eigenvalues with respect to the wavevector)
+!! in cartesian coordinates.
+!!
+!! INPUTS
+!!  dtset = dataset structure containing the input variable of the calculation.
+!!  efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
+!!    efmasval(:,:)%eig2_diag band curvature double tensor
+!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
+!!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
+!!  mpert = maximum number of perturbations.
+!!  mpi_enreg = informations about MPI parallelization.
+!!  nkpt_rbz = number of k-points for each perturbation.
+!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      dfpt_looppert
+!!
+!! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      zgetri,zheev
+!!
+!! SOURCE
+
+ subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
+
+  use m_cgtools
+  use m_gaussian_quadrature, only : cgqf
+  use m_io_tools, only : get_unit
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'efmas_analysis'
+!End of the abilint section
+
+  implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+  integer,            intent(in)    :: nkpt_rbz
+  type(dataset_type), intent(in)    :: dtset
+  type(MPI_type),     intent(in) :: mpi_enreg
+ !arrays
+  real(dp), intent(in) :: rprimd(3,3)
+  real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
+  type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
+  type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
+
+ !Local variables-------------------------------
+  logical :: degenerate
+  logical :: debug
+  logical :: print_fsph
+  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
+  integer :: info
+  integer :: ipert
+  integer :: isppol
+  integer :: nband_k
+  integer :: ideg,jdeg
+  integer :: ikpt
+  integer :: master,me,spaceworld
+  integer :: iband, jband
+  integer :: adir,bdir
+  integer :: deg_dim
+  integer :: degl
+  integer :: lwork
+  integer :: itheta, iphi
+  integer :: ntheta, nphi
+  integer :: mdim
+  integer :: cdirs, ndirs
+  integer :: ipiv(3)
+  integer :: io_unit
+  character(len=500) :: msg, filename
+  real(dp) :: cosph,costh,sinph,sinth
+  real(dp) :: f3d_scal
+  real(dp) :: weight
+  real(dp) :: gprimd(3,3)
+  real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
+  real(dp), allocatable :: eigenval(:), rwork(:)
+  real(dp), allocatable :: eigf3d(:)
+  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:),m_cart(:,:)
+  real(dp), allocatable :: deigf3d_dth(:), deigf3d_dph(:)
+  real(dp), allocatable :: unit_speed(:,:), transport_tensor(:,:,:)
+  real(dp), allocatable :: cart_rotation(:,:), transport_tensor_eig(:)
+  real(dp), allocatable :: transport_eqv_m(:,:,:), transport_eqv_eigval(:,:), transport_eqv_eigvec(:,:,:)
+  real(dp), allocatable :: transport_tensor_scale(:)
+  real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
+  real(dp), allocatable :: gq_points_ph(:),gq_points_cosph(:),gq_points_sinph(:),gq_weights_ph(:)
+  real(dp), allocatable :: dirs(:,:)
+  real(dp),allocatable :: prodr(:,:)
+  !real(dp), allocatable :: f3dfd(:,:,:)
+  complex(dpc) :: matr2d(2,2)
+  complex(dpc), allocatable :: eigen1_deg(:,:), eigenvec(:,:), work(:)
+  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+  complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
+  complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
+  complex(dpc),allocatable :: prodc(:,:)
+
+! *********************************************************************
+
+  debug = .false. ! Prints additional info to std_out
+  print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi)
+                       ! for each band & kpts treated; 1 file per degenerate ensemble of bands.
+                       ! Angles are those used in the numerical integration.
+
+! Init parallelism
+  master =0
+  spaceworld=mpi_enreg%comm_cell
+  me=mpi_enreg%me_kpt
+
+  isppol = 1
+
+  mdim = dtset%efmas_dim
+
+!HERE ALLOCATE
+
+  gprimd = rprimd
+  call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
+  ABI_ALLOCATE(rwork,(3))
+  call dgetri(mdim,gprimd,mdim,ipiv,rwork,3,info)
+  ABI_DEALLOCATE(rwork)
+  gprimd = two_pi*transpose(gprimd)
+
+  cdirs = dtset%efmas_calc_dirs
+  ndirs = mdim
+  if(cdirs/=0) ndirs = dtset%efmas_n_dirs
+  ABI_ALLOCATE(dirs,(3,ndirs))
+  if(cdirs==0) then
+    dirs = zero
+    do adir=1,ndirs
+      dirs(adir,adir)=1.0_dp
+    end do
+  elseif(cdirs==1) then
+    dirs(:,:) = dtset%efmas_dirs(:,1:ndirs)
+    do adir=1,ndirs
+      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
+    end do
+  elseif(cdirs==2) then
+    dirs(:,:) = matmul(gprimd,dtset%efmas_dirs(:,1:ndirs))
+    do adir=1,ndirs
+      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
+    end do
+  elseif(cdirs==3) then
+    dirs(1,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*cos(dtset%efmas_dirs(2,1:ndirs)*pi/180)
+    dirs(2,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*sin(dtset%efmas_dirs(2,1:ndirs)*pi/180)
+    dirs(3,:) = cos(dtset%efmas_dirs(1,1:ndirs)*pi/180)
+  end if
+
+  !!! Initialization of integrals for the degenerate case.
+  ntheta   = dtset%efmas_ntheta
+  nphi     = 2*ntheta
+  ABI_ALLOCATE(gq_points_th,(ntheta))
+  ABI_ALLOCATE(gq_points_costh,(ntheta))
+  ABI_ALLOCATE(gq_points_sinth,(ntheta))
+  ABI_ALLOCATE(gq_weights_th,(ntheta))
+  ABI_ALLOCATE(gq_points_ph,(nphi))
+  ABI_ALLOCATE(gq_points_cosph,(nphi))
+  ABI_ALLOCATE(gq_points_sinph,(nphi))
+  ABI_ALLOCATE(gq_weights_ph,(nphi))
+  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
+  !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable,
+  !since the function to be integrated is periodic...
+  call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
+  do itheta=1,ntheta
+    gq_points_costh(itheta)=cos(gq_points_th(itheta))
+    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
+  enddo
+  do iphi=1,nphi
+    gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
+    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
+  enddo
+
+  ABI_ALLOCATE(eff_mass,(mdim,mdim))
+
+  do ikpt=1,dtset%nkpt
+    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
+
+     degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
+     degl       = efmasdeg(ikpt)%degl(ideg)
+     deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+ 
+     !!! Allocations
+     ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
+     ABI_ALLOCATE(eigenval,(deg_dim))
+
+     ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+
+     do iband=1,deg_dim
+        write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
+        do jband=1,deg_dim
+
+          eff_mass=zero
+
+          eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)          
+          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag_cart(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+
 
           if(.not. degenerate .and. iband==jband) then
 
             !Compute effective mass tensor from second derivative matrix. Simple inversion.
-            eff_mass(:,:) = eig2_diag(iband,jband,1:mdim,1:mdim)
+            eff_mass(:,:) = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
             ABI_ALLOCATE(work,(3))
             call zgetri(mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,work,3,info)
@@ -987,26 +1129,9 @@ CONTAINS
             lwork=-1
             ABI_ALLOCATE(rwork,(1))
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
-            lwork=int(rwork(1)) ! MG: OK but mkl does not like it see below.
-
-            ! The following line is needed for ubu_gnu_5.3_openmpi to avoid the following error in v7[80]
-            !    Program received signal SIGFPE: Floating-point exception - erroneous arithmetic operation.
-            !    Backtrace for this error:
-            !    #0 0x7F789ABBDE48
-            !    #1 0x7F789ABBCFD0
-            !    #2 0x7F7899E912EF
-            !    #3 0x7F789C09D4AC
-            !    #4 0x7F789E122E08
-            !    #5 0x6C9043 in __m_efmas_MOD_efmas_main at m_efmas.F90:927 (discriminator 26)
-            !    #6 0x4F99B7 in dfpt_looppert_ at dfpt_looppert.F90:1945 (discriminator 3)
-            !    #7 0x4553C4 in respfn_ at respfn.F90:1249
-            !    #8 0x4263D0 in driver_ at driver.F90:691 (discriminator 10)
-            !    #9 0x4146FC in MAIN__ at abinit.F90:475 (discriminator 12)
-            !    /usr/bin/timeout: the monitored command dumped core
-            !    Floating point exception
             lwork = max(1, 3*mdim-1) ! lwork >= max(1, 3*mdim-1)
-
             ABI_DEALLOCATE(rwork)
+
             ABI_ALLOCATE(rwork,(lwork))
             rwork=zero
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
@@ -1036,7 +1161,7 @@ CONTAINS
                   unit_r(2)=sinth*sinph
                   unit_r(3)=costh
 
-                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag(iband,jband,:,:),dp),unit_r(:))) 
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),unit_r(:))) 
                   m_avg = m_avg + weight*sinth*f3d_scal
                   m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
@@ -1058,7 +1183,7 @@ CONTAINS
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
             do adir=1,ndirs
-              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag(iband,jband,:,:),dp),dirs(:,adir)))
+              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),dirs(:,adir)))
             end do
 
             !PRINTING RESULTS
@@ -1076,23 +1201,6 @@ CONTAINS
             ABI_DEALLOCATE(unit_r)
             ABI_DEALLOCATE(saddle_warn)
             ABI_DEALLOCATE(start_eigf3d_pos)
-
-            write(std_out,'(a,3f20.16)') 'Gradient of eigenvalues = ',&
-&            matmul(rprimd,eigen1(2*(degl+iband)-1+(degl+iband-1)*2*nband_k+band2tot_index,:,ipert))/two_pi
-
-            !!! Decomposition of the hessian in into its different contributions.
-            if(debug) then
-              write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
-              do adir=1,3
-                write(std_out,'(3f12.8,2(a,3f12.8))')&
-&                real(eig2_diag(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
-              end do
-              write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
-              do adir=1,3
-                write(std_out,'(3f12.8,2(a,3f12.8))') real(eig2_paral(adir,:),dp),' |',real(eig2_gh2c(adir,:),dp),' |', &
-&                                                     real(eig2_part(adir,:),dp)
-              end do
-            end if !debug
 
           end if !.not.degenerate
         end do !jband
@@ -1148,10 +1256,10 @@ CONTAINS
 
         !Hack to print f(theta,phi) & weights to a file
         if(print_fsph) then
-          write(message,*) degl+1
-          filename='f_band_'//TRIM(ADJUSTL(message))//'-'
-          write(message,*) degl+deg_dim
-          filename=TRIM(filename)//TRIM(ADJUSTL(message))//'.dat'
+          write(msg,*) degl+1
+          filename='f_band_'//TRIM(ADJUSTL(msg))//'-'
+          write(msg,*) degl+deg_dim
+          filename=TRIM(filename)//TRIM(ADJUSTL(msg))//'.dat'
           io_unit = get_unit()
           open(io_unit,file=TRIM(filename),status='replace')
           write(io_unit,*) 'ntheta=',ntheta,', nphi=',nphi
@@ -1178,11 +1286,11 @@ CONTAINS
 
             do iband=1,deg_dim
               do jband=1,deg_dim
-                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),unit_r))
-                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),dr_dth))
-                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),dr_dph))
+                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))
+                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dth))
+                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dph))
               end do
             end do
             !DIAGONALIZATION
@@ -1292,10 +1400,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1439,7 +1547,7 @@ CONTAINS
 
           do iband=1,deg_dim
             do jband=1,deg_dim
-              matr2d = eig2_diag(iband,jband,1:mdim,1:mdim)
+              matr2d = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
               f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(matr2d,unit_r))
               df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(matr2d,unit_r))+&
 &              DOT_PRODUCT(unit_r,MATMUL(matr2d,dr_dph))
@@ -1511,10 +1619,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1617,7 +1725,7 @@ CONTAINS
         m_avg_frohlich=zero
         saddle_warn=.false.
 
-        f3d(:,:) = eig2_diag(:,:,1,1)
+        f3d(:,:) = eig2_diag_cart(:,:,1,1)
 
         !DIAGONALIZATION
         eigenvec = f3d        !IN
@@ -1642,7 +1750,7 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
           eigenvec = f3d        !IN
@@ -1679,57 +1787,13 @@ CONTAINS
 
       end if !(degenerate)
 
- !     !!! DEBUG
- !     write(std_out,*) '2nd order eigenvalues, analysis of unitary transform for diagonalization.'
- !     write(std_out,*) 'adir, bdir, equivalent'
- !     do adir=1,9
- !       lwork=-1
- !       ABI_ALLOCATE(work,(1))
- !       call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
- !       lwork=int(work(1))
- !       ABI_DEALLOCATE(work)
- !
- !       eigenvec = eig2_diag(:,:,(adir-1)/3+1,MOD(adir-1,3)+1)
- !       eigenval = zero
- !       ABI_ALLOCATE(work,(lwork))
- !       work=zero; rwork=zero
- !       call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
- !       ABI_DEALLOCATE(work)
- !       unitary_tr_test(:,:,(adir-1)/3+1,MOD(adir-1,3)+1) = eigenvec
- !       do bdir=1,adir-1
- !         dotprod = MATMUL(CONJG(TRANSPOSE(eigenvec)),unitary_tr_test(:,:,(bdir-1)/3+1,MOD(bdir-1,3)+1))
- !           write(std_out,'(1x,a,i1,a,i1,a,2x,a,i1,a,i1,a,l12)') '(',(adir-1)/3+1,',',MOD(adir-1,3)+1,')','(',(bdir-1)/3+1,',',&
- !    &          MOD(bdir-1,3)+1,')',ALL(ABS(dotprod)<tol5.or.ABS(dotprod-one)<tol5)
- !           do iband=1,deg_dim
- !             write(std_out,'(26x,3f7.3)') ABS(dotprod(iband,:))
- !           end do
- !       end do !bdir
- !     end do !adir
- !     !!! END DEBUG
+      ABI_DEALLOCATE(eig2_diag_cart)
 
-      ABI_DEALLOCATE(eig2_diag)
-      ABI_DEALLOCATE(unitary_tr_test)
-
-      ABI_DEALLOCATE(eigen1_deg)
       ABI_DEALLOCATE(eigenval)
-      ABI_DEALLOCATE(identity)
-      ABI_DEALLOCATE(dotprod)
 
-      ABI_DEALLOCATE(eigen1vec)
-      ABI_DEALLOCATE(eigen1val)
       ABI_DEALLOCATE(eigenvec)
     end do !ideg
 
-    ABI_DEALLOCATE(cg1_pert2)
-    ABI_DEALLOCATE(cg1_pert1)
-    ABI_DEALLOCATE(gh1c_pert2)
-    ABI_DEALLOCATE(gh1c_pert1)
-    ABI_DEALLOCATE(gh0c1_pert1)
-    ABI_DEALLOCATE(cg0)
-
-    icg2=icg2+npw_k*dtset%nspinor*nband_k
-    bandtot_index=bandtot_index+nband_k
-    band2tot_index=band2tot_index+2*nband_k**2
   end do !ikpt
 
   ABI_DEALLOCATE(eff_mass)
@@ -1746,7 +1810,7 @@ CONTAINS
   write(std_out,'(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
   write(ab_out, '(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
 
- end subroutine efmas_main
+ end subroutine efmas_analysis
 !!***
 
 !----------------------------------------------------------------------

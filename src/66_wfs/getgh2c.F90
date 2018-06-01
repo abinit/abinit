@@ -80,12 +80,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_nonlop,      only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh2c'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -120,7 +120,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !real(dp) :: tsec(2)
  real(dp) :: svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: nonlop_out(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: gvnl2_(:,:)
+ real(dp), pointer :: gvnl2_(:,:)
  real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:)
  real(dp),allocatable,target :: enl_temp(:,:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)

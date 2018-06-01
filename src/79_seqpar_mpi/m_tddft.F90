@@ -45,6 +45,7 @@ module m_tddft
  use m_time,     only : timab
  use m_fftcore,  only : sphereboundary
  use m_spacepar, only : hartre
+ use m_mpinfo,   only : proc_distrb_cycle
 
  implicit none
 
@@ -137,7 +138,6 @@ contains
 #undef ABI_FUNC
 #define ABI_FUNC 'tddft'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 

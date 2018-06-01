@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of ABINIT 
+.Version 8.8.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 22 Nov 2016.
-- ( at 19h12 )
+.Starting date : Mon 14 May 2018.
+- ( at 17h45 )
   
 - input  file    -> t21.in
 - output file    -> t21.out
@@ -35,7 +35,7 @@
        mpw =         127          nfft =        4096          nkpt =           2
   nimage =         6
 ================================================================================
-P This job should need less than                       2.526 Mbytes of memory.
+P This job should need less than                       2.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -58,6 +58,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
        acell_5img1     1.0666666667E+01  1.0666666667E+01  1.0666666667E+01
        acell_6img1     1.1000000000E+01  1.1000000000E+01  1.1000000000E+01
               amu      2.08980370E+02
+       chkdilatmx           0
      densfor_pred           1
           dilatmx      1.25000000E+00
              ecut      2.00000000E+00 Hartree
@@ -171,8 +172,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -190,7 +191,7 @@ P           mkmem           2
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -530,8 +531,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -549,7 +550,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -668,8 +669,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -687,7 +688,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -805,8 +806,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -824,7 +825,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -957,8 +958,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -976,7 +977,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -1313,8 +1314,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1332,7 +1333,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -1451,8 +1452,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1470,7 +1471,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -1590,8 +1591,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1609,7 +1610,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -1745,8 +1746,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1764,7 +1765,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2101,8 +2102,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2120,7 +2121,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2238,8 +2239,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2257,7 +2258,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2375,8 +2376,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2394,7 +2395,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2530,8 +2531,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2549,7 +2550,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2884,8 +2885,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2903,7 +2904,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3020,8 +3021,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3039,7 +3040,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3155,8 +3156,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3174,7 +3175,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3310,8 +3311,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3329,7 +3330,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3664,8 +3665,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3683,7 +3684,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3799,8 +3800,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3818,7 +3819,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -3933,8 +3934,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3952,7 +3953,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -4084,8 +4085,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4103,7 +4104,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -4437,8 +4438,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4456,7 +4457,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -4573,8 +4574,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4592,7 +4593,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -4707,8 +4708,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4726,7 +4727,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -4860,8 +4861,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4879,7 +4880,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -5213,8 +5214,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5232,7 +5233,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -5349,8 +5350,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5368,7 +5369,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -5483,8 +5484,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5502,7 +5503,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -5636,8 +5637,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5655,7 +5656,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -5989,8 +5990,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6008,7 +6009,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -6125,8 +6126,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6144,7 +6145,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -6259,8 +6260,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6278,7 +6279,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -6412,8 +6413,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6431,7 +6432,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -6765,8 +6766,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6784,7 +6785,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -6901,8 +6902,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6920,7 +6921,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7035,8 +7036,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7054,7 +7055,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7188,8 +7189,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7207,7 +7208,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7541,8 +7542,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7560,7 +7561,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7677,8 +7678,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7696,7 +7697,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7811,8 +7812,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7830,7 +7831,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -7964,8 +7965,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7983,7 +7984,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -8315,8 +8316,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8334,7 +8335,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -8451,8 +8452,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8470,7 +8471,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -8585,8 +8586,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__dilatmx115/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8604,7 +8605,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -8724,6 +8725,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
        acell_5img1     1.0666666667E+01  1.0666666667E+01  1.0666666667E+01
        acell_6img1     1.1000000000E+01  1.1000000000E+01  1.1000000000E+01
               amu      2.08980370E+02
+       chkdilatmx           0
      densfor_pred           1
           dilatmx      1.25000000E+00
              ecut      2.00000000E+00 Hartree
@@ -8908,10 +8910,10 @@ P           mkmem           2
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.4
+- Proc.   0 individual time (sec): cpu=         11.4  wall=         11.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and 121 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         10.4
+.Delivered  66 WARNINGs and 122 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.4  wall=         11.4

@@ -64,6 +64,7 @@
  mdtemp    500 500
  ecutsm    0.5
  dilatmx   1.5
+ chkdilatmx   0
  dtion     0.05
  ntime     9
  nnos 3

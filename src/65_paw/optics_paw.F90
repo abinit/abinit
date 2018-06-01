@@ -78,12 +78,12 @@
  use m_pawtab,    only : pawtab_type
  use m_pawcprj,   only : pawcprj_type, pawcprj_alloc, pawcprj_get, &
 &                        pawcprj_free,pawcprj_mpi_allgather
+ use m_mpinfo,    only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optics_paw'
- use interfaces_32_util
  use interfaces_65_paw, except_this_one => optics_paw
 !End of the abilint section
 

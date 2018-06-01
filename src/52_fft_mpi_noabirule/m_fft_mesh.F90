@@ -9,7 +9,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS)
+!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,7 @@ MODULE m_fft_mesh
  use defs_fftdata,     only : size_goed_fft
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
  use m_symtk,          only : mati3inv
+ use m_geometry,       only : xred2xcart
  use m_crystal,        only : crystal_t
 
  implicit none
@@ -56,6 +57,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
+ public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -1751,7 +1753,75 @@ subroutine phase(ngfft,ph)
 end subroutine phase
 !!***
 
-!----------------------------------------------------------------------
+!!****f* ABINIT/mkgrid_fft
+!! NAME
+!!  mkgrid_fft
+!!
+!! FUNCTION
+!!  It sets the grid of fft (or real space) points to be treated.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      mkcore_paw,mklocl_realspace
+!!
+!! CHILDREN
+!!      xred2xcart
+!!
+!! SOURCE
+
+subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkgrid_fft'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nfft
+ integer,intent(in) :: ngfft(18)
+ integer, dimension(*), intent(in) :: ffti3_local,fftn3_distrib
+ real(dp), dimension(3,nfft), intent(out) :: gridcart
+ real(dp),intent(in) :: rprimd(3,3)
+
+!Local variables-------------------------------
+ integer :: ind,i1,i2,i3,i3loc,me,nproc
+ integer :: n1,n2,n3
+ real(dp), dimension(3) :: coord
+ real(dp), dimension(3,nfft) :: gridred
+
+! *************************************************************************
+
+ n1    = ngfft(1)
+ n2    = ngfft(2)
+ n3    = ngfft(3)
+ nproc = ngfft(10)
+ me    = ngfft(11)
+
+ do i3 = 1, n3, 1
+   if(fftn3_distrib(i3) == me) then !MPI
+     i3loc=ffti3_local(i3)
+     coord(3) = real(i3 - 1, dp) / real(n3, dp)
+     do i2 = 1, n2, 1
+       coord(2) = real(i2 - 1, dp) / real(n2, dp)
+       do i1 = 1, n1, 1
+         ind=i1+(i2-1)*n1+(i3loc-1)*n1*n2
+         coord(1) = real(i1 - 1, dp) / real(n1, dp)
+         gridred(:, ind) = coord(:)
+       end do
+     end do
+   end if
+ end do
+ call xred2xcart(nfft, rprimd, gridcart, gridred)
+
+end subroutine mkgrid_fft
+!!***
 
 END MODULE m_fft_mesh
 !!***

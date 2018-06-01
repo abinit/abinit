@@ -110,14 +110,16 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
  use m_dtfil,        only : dtfil_init, dtfil_init_img, status
-
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
  use m_bethe_salpeter,   only : bethe_salpeter
  use m_eph_driver,       only : eph
  use m_wfk_analyze,      only : wfk_analyze
+ use m_gstateimg,        only : gstateimg
  use m_gwls_sternheimer, only : gwls_sternheimer
+ use m_nonlinear,        only : nonlinear
+ use m_drivexc,          only : echo_xc_name
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -129,9 +131,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_95_drive, except_this_one => driver
 !End of the abilint section
 
  implicit none
