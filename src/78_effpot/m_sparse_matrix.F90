@@ -245,9 +245,7 @@ endif
 
     if (allocated(self%rows)) then
     do i=1, self%nrow, 1
-       if (allocated(self%rows(i))) then
           call llist_finalize(self%rows(i))
-       endif
     end do
     ABI_DEALLOCATE(self%rows)
     endif
