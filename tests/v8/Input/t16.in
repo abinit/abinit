@@ -20,7 +20,7 @@ prt_model = 0
 #Monte carlo / molecular dynamics
 #--------------------------------------------------------------
 dynamics =  0
-n_cell =   6 6 6
+ncell =   6 6 6
 temperature = 600
 #ntime  = 50
 #optcell = 2

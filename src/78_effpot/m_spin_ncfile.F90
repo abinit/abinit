@@ -234,7 +234,7 @@ contains
 
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
-    integer :: qpoint_id, temperature_id, dt_id, mfield_id, n_cell_id
+    integer :: qpoint_id, temperature_id, dt_id, mfield_id, ncell_id
     integer :: ncerr
 
 #if defined HAVE_NETCDF
@@ -243,7 +243,7 @@ contains
     ! dims 
     ! vars
     ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%xyz_dimid], qpoint_id)
-    ncerr=nf90_def_var(self%ncid, "n_cell", NF90_INT, [self%xyz_dimid], n_cell_id)
+    ncerr=nf90_def_var(self%ncid, "ncell", NF90_INT, [self%xyz_dimid], ncell_id)
     ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,  temperature_id)
     ncerr=nf90_def_var(self%ncid, "spin_dt", NF90_DOUBLE,  dt_id)
     ncerr=nf90_def_var(self%ncid, "spin_mag_field", NF90_DOUBLE, [self%xyz_dimid],  mfield_id)
@@ -251,7 +251,7 @@ contains
     ncerr=nf90_enddef(self%ncid)
     ! put vars
     ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
-    ncerr=nf90_put_var(self%ncid, n_cell_id, params%n_cell)
+    ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
     ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature)
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt)
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field)

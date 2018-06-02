@@ -186,9 +186,9 @@ contains
 
     ! make supercell
     sc_matrix(:,:)=0.0_dp
-    sc_matrix(1,1)=params%n_cell(1)
-    sc_matrix(2,2)=params%n_cell(2)
-    sc_matrix(3,3)=params%n_cell(3)
+    sc_matrix(1,1)=params%ncell(1)
+    sc_matrix(2,2)=params%ncell(2)
+    sc_matrix(3,3)=params%ncell(3)
     !call self%make_supercell(sc_matrix)
     call spin_model_t_make_supercell(self, sc_matrix)
 

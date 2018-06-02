@@ -2025,7 +2025,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
 !The flags
  if(multibinit_dtset%ifcflag/=0)then
-   write(nunit,'(a)')' Flags :'
+   write(nunit,'(a)')' Flags : '
    if(multibinit_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',multibinit_dtset%ifcflag
    if(multibinit_dtset%prt_model/=0)write(nunit,'(3x,a9,3i10)')'prt_model',multibinit_dtset%prt_model
    if(multibinit_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',multibinit_dtset%prt_phfrq
@@ -2060,7 +2060,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(2x,a16,3I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
     write(nunit,'(a18,3es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
     write(nunit,'(3x,a15,3I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
-    write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%n_cell !TODO hexu: duplicate but dynamics can be 0.
+    write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
     write(nunit,'(3x,a15,3es15.5)')  'spin_dt',multibinit_dtset%spin_dt
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
