@@ -116,6 +116,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_crystal
  use m_crystal_io
  use m_ebands
+ use m_efmas_defs
  use m_ddk
  use m_ddb
  use m_dvdb
@@ -141,6 +142,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
+ use m_efmas,           only : efmasdeg_free_array, efmasval_free_array
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
@@ -205,6 +207,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
+ type(efmasdeg_type),allocatable :: efmasdeg(:)
+ type(efmasval_type),allocatable :: efmasval(:,:)
  !real(dp) :: tsec(2)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
@@ -244,8 +248,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
  use_wfk = (dtset%eph_task /= 5)
- use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
- use_dvdb = (dtset%eph_task /= 0)
+ use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
+ use_dvdb = (dtset%eph_task /= 0  .and. dtset%eph_frohlichm/=1)
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -596,23 +600,36 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if
 
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
- call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
- gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
+ if(dtset%eph_frohlichm/=1)then
 
- call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+   ! TODO Recheck getng, should use same trick as that used in screening and sigma.
+   call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
+   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- ! Fake MPI_type for the sequential part.
- call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+   call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
+   call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+
+   ! Fake MPI_type for the sequential part.
+   call initmpi_seq(mpi_enreg)
+   call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
+   call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+
+ else
+
+   call efmas_ncread(efmasdeg,efmasval,kpt,ncid)
+
+ endif
 
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
-& pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+
+ if(dtset%eph_frohlichm/=1)then
+
+   call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
+&   pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+
+ endif
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
@@ -653,6 +670,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 &   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
 &   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
 
+ case (6)
+   ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
+   call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
+
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
  end select
@@ -669,6 +690,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
+ call efmasdeg_free_array(efmasdeg)
+ call efmasval_free_array(efmasval)
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

@@ -40,6 +40,7 @@ module m_efmas
  public :: efmasval_free_array
  public :: efmasdeg_free
  public :: efmasdeg_free_array
+ public :: efmas_ncread
  public :: check_degeneracies
  public :: print_tr_efmas
  public :: print_efmas
@@ -528,15 +529,75 @@ CONTAINS
  ABI_FREE(degs_bounds_arr)
  ABI_FREE(eig2_diag_arr)
 
-
-!HERE
-
 end subroutine print_efmas
 !!***
 
 !----------------------------------------------------------------------
 
+!!****f* m_efmas/efmas_ncread
+!! NAME
+!! efmas_ncread
+!!
+!! FUNCTION
+!! This routine reads from an EFMAS NetCDF file the information needed 
+!! to compute rapidly the band effective masses,
+!! namely, the generalized second-order k-derivatives of the eigenenergies,
+!! see Eq.(66) of Laflamme2016.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
+ subroutine read_efmas(efmasdeg,efmasval,kpt,ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'print_efmas'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,            intent(in) :: ncid
+!arrays
+ real(dp),            intent(in) :: kpt(:,:)
+ type(efmasdeg_type), allocatable, intent(out) :: efmasdeg(:)
+ type(efmasval_type), allocatable, intent(out) :: efmasval(:,:)
+
+!Local variables-------------------------------
+ integer :: deg_dim,eig2_diag_arr_dim
+ integer :: iband,ideg,ideg_tot,ieig,ikpt
+ integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
+ integer, allocatable :: ndegs_arr(:)
+ integer, allocatable :: degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:)
+ integer, allocatable :: degs_bounds_arr(:,:)
+ real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
+ character(len=500) :: msg
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
+!----------------------------------------------------------------------
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt))
+ NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
+ NCF_CHECK(nctk_get_dim(ncid, "total_number_of_degenerate_sets", ndegs_tot))
+ NCF_CHECK(nctk_get_dim(ncid, "eig2_diag_arr_dim", eig2_diag_arr_dim))
+
+ ABI_DATATYPE_ALLOCATE(efmasdeg,(nkpt))
+ ABI_DATATYPE_ALLOCATE(efmasval,(mband,nkpt))
+
+!----------------------------------------------------------------------
 
 !!****f* m_efmas/print_tr_efmas
 !! NAME
