@@ -65,6 +65,8 @@ module m_supercell
    integer, allocatable :: uc_indexing(:,:)         ! (3, natom) indexes unit cell atom is in:
    integer, allocatable :: typat(:)                 ! (3, natom) positions of atoms
    real(dp), allocatable :: znucl(:)                ! (ntypat) nuclear charges of species
+   integer, allocatable :: rvecs(:,:)               ! supercell vectors
+
  end type supercell_type
 
  public :: init_supercell_for_qpt
@@ -234,7 +236,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
 !local
 !scalars
- integer :: iatom_supercell, i1,i2,i3, iatom
+ integer :: iatom_supercell, i1,i2,i3, iatom, icell
 
 !arrays
 
@@ -247,7 +249,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
  scell%ntypat = size(znucl)
  ABI_ALLOCATE(scell%znucl,(scell%ntypat))
- scell%znucl = znucl
+ scell%znucl(:) = znucl(:)
 
 !number of atoms in full supercell
  scell%natom= natom_primcell*scell%ncells
@@ -256,11 +258,18 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  ABI_ALLOCATE(scell%typat,(scell%natom))
  ABI_ALLOCATE(scell%atom_indexing,(scell%natom))
  ABI_ALLOCATE(scell%uc_indexing,(3,scell%natom))
+ ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
 
  iatom_supercell = 0
+ icell =0
  do i1 = 1, rlatt(1,1)
    do i2 = 1, rlatt(2,2)
      do i3 = 1, rlatt(3,3)
+
+       icell=icell+1
+       scell%rvecs(:,icell)=(/i1-1, i2-1, i3-1/)
+
+
        do iatom = 1, natom_primcell
          iatom_supercell = iatom_supercell + 1
          scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
@@ -274,6 +283,11 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  end do
 
  ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
+ if(iatom_supercell /= scell%natom) then
+    print *, "iatom_supercell /= scell%natom"
+ endif
+
+
 
  scell%xcart = scell%xcart_ref
  scell%qphon = zero
@@ -865,6 +879,10 @@ subroutine destroy_supercell (scell)
   if(allocated(scell%znucl))  then
     ABI_DEALLOCATE(scell%znucl)
   end if
+   if(allocated(scell%rvecs))  then
+    ABI_DEALLOCATE(scell%rvecs)
+  end if
+ 
 
 end subroutine destroy_supercell
 !!***

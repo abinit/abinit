@@ -55,6 +55,7 @@ program multibinit
  use m_fit_polynomial_coeff
  use m_multibinit_dataset
  use m_effective_potential_file
+ use m_spin_model
  use m_abihist
  use m_ab7_invars
 
@@ -97,6 +98,9 @@ program multibinit
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
+
+!TODO hexu: add types for spin here.
+ type(spin_model_t) :: spin_model
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -216,13 +220,23 @@ program multibinit
 
 ! Read and treat the reference structure
 !****************************************************************************************
+if (inp%spin_dynamics>0) then
+ if (iam_master) then
+
+    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     & 'reading spin terms.'
+   call spin_model_t_initialize(spin_model, filnam(3), inp )
+ endif
+endif
 
 !Read the model (from DDB or XML)
+if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-
-!Read the coefficient from fit
+ 
+ !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
+   ! TODO hexu: filetype==(33?) 
    if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
@@ -246,6 +260,8 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  end if
+
+ endif
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences
@@ -389,6 +405,7 @@ program multibinit
 
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
+! TODO hexu: add print spin model.
  if(iam_master) then
    if (inp%prt_model >= 1) then
      write(message, '(a,(80a),a)' ) ch10,&
@@ -436,7 +453,19 @@ program multibinit
  if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
  end if
-!****************************************************************************************
+
+!****************************************************************************************    
+
+
+! Run spin dynamics
+!****************************************************************************************    
+ if(inp%spin_dynamics>0) then
+  ! TODO hexu: no mpi yet.
+   if(iam_master) then
+      call spin_model_t_run(spin_model)
+   endif
+ endif
+!****************************************************************************************    
 
 
 !Free the effective_potential and dataset
@@ -444,6 +473,7 @@ program multibinit
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
  call abihist_free(hist)
+ call spin_model_t_finalize(spin_model)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
