@@ -905,10 +905,16 @@ type dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl 
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
+ integer :: ph_
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl) 
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)

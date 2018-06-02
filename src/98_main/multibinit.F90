@@ -70,6 +70,7 @@ program multibinit
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
+ use interfaces_57_iovars
  use interfaces_78_effpot
  use interfaces_95_drive
 !End of the abilint section
@@ -195,6 +196,10 @@ program multibinit
    call instrng (filnam(1),lenstr,option,strlen,string)
    !To make case-insensitive, map characters to upper case:
    call inupper(string(1:lenstr))
+
+   !Check whether the string only contains valid keywords
+   call chkvars(string)
+
  end if
 
  call xmpi_bcast(string,master, comm, ierr)
@@ -252,7 +257,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_coeff/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -263,7 +268,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -276,20 +281,31 @@ program multibinit
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
          MSG_ERROR(message)
-       else if(inp%confinement==2) then
-         write(message, '(3a)' )&
+       else
+         if (inp%bound_model/=0) then
+           write(message, '(3a)' )&
+&         'There is no MD file to bound the model ',ch10,&
+&         'Action: add MD file'
+           MSG_ERROR(message)           
+         else if(inp%confinement==2) then
+           write(message, '(3a)' )&
 &         'There is no MD file to compute the confinement',ch10,&
 &         'Action: add MD file'
-         MSG_ERROR(message)
+           MSG_ERROR(message)
+         end if
        end if
      end if
    end if
-
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
    call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
+
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+! stop
+!TEST_AM
 
 !Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
@@ -316,9 +332,6 @@ program multibinit
    end select
  end if
 
-!TEST_AM
-! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
-!TEST_AM
 
 !Fit the coeff
  if (inp%fit_coeff/=0)then
@@ -339,9 +352,10 @@ program multibinit
      else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       initialize_data=inp%fit_initializeData==1,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&
@@ -359,8 +373,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%bound_coeff>0.and.inp%bound_coeff<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_coeff,comm,hist=hist)
+ if(inp%bound_model>0.and.inp%bound_model<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
  end if
 
 !****************************************************************************************
@@ -396,7 +410,7 @@ program multibinit
 ! Print the Phonon dos/spectrum
 ! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
-!&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
+!&           inp%ncell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
 !Intialisation of the effective potential type

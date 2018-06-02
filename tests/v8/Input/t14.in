@@ -10,7 +10,8 @@ dipdip_prt = 1
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
-fit_generateTerm = 0
+fit_generateCoeff = 0
+fit_initializeData = 0
 fit_coeff = 1
 fit_ncoeff = 2
 fit_nfixcoeff  = 2 
