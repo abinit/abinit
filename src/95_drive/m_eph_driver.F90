@@ -186,7 +186,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,efmas_path,path
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -247,10 +247,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
+ efmas_path = dtfil%fnameabi_efmas
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
  use_dvdb = (dtset%eph_task /= 0  .and. dtset%eph_frohlichm/=1)
+
+ if(dtset%eph_frohlichm/=1)then
+   efmas_path = dtfil%fnameabi_efmas
+ endif
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -302,6 +307,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ddk_init(ddk, ddk_path, comm)
    ! TODO: Should perform consistency check
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
+ end if
+ if (dtset%eph_frohlichm/=1) then
+   call xmpi_bcast(efmas_path,master,comm,ierr)
+   call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", efmas_path) )
  end if
 
  ! autoparal section
@@ -616,8 +625,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
  else
-
+   
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_read(ncid, efmas_path))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
+   NCF_CHECK(nf90_close(ncid))
+#else
+   MSG_ERROR("netcdf support not enabled")
+#endif
 
  endif
 

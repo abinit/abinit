@@ -1454,12 +1454,13 @@ type dataset_type
 !The following filenames do not depend on itimimage, iimage and itime loops.
 !Note the following convention:
 !  fnameabo_* are filenames used for ouput results (writing)
-!  fnameabi_* are filenames used for data the should be read by the code.
+!  fnameabi_* are filenames used for data that should be read by the code.
 !  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
 !
 !If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
 !that particular file is only used for writing or for reading results, respectively.
 
+  character(len=fnlen) :: fnameabi_efmas
   character(len=fnlen) :: fnameabi_hes
   character(len=fnlen) :: fnameabi_phfrq
   character(len=fnlen) :: fnameabi_phvec
