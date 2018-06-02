@@ -207,6 +207,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
+ real(dp),allocatable :: kpt_efmas(:,:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  !real(dp) :: tsec(2)
@@ -672,7 +673,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
-   call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
+
+!  call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -692,6 +694,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call destroy_mpi_enreg(mpi_enreg)
  call efmasdeg_free_array(efmasdeg)
  call efmasval_free_array(efmasval)
+ if(allocated(kpt_efmas))then
+   ABI_DEALLOCATE(kpt_efmas)
+ endif
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then
