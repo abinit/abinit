@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2017 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2018 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -41,12 +41,10 @@
 program vdw_kernelgen
 
 #if defined DEV_YP_VDWXC
-
  use defs_basis
  use defs_abitypes
  use m_build_info
  use m_errors
- use m_io_tools, only : flush_unit
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
@@ -54,12 +52,14 @@ program vdw_kernelgen
  use mpi
 #endif
 
+ use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_io_tools,    only : flush_unit
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_kernelgen'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -121,6 +121,9 @@ program vdw_kernelgen
 !* Init fake MPI type with values for sequential case.
  call initmpi_seq(MPI_enreg_seq)
 
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
+& ch10
+ MSG_ERROR(message)
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)

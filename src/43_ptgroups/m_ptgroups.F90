@@ -4,11 +4,11 @@
 !! m_ptgroups
 !!
 !! FUNCTION
-!!  This module contains the irreducible representations and the 
-!!  character tables of the 32 point groups. 
+!!  This module contains the irreducible representations and the
+!!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MG)
+!! Copyright (C) 2010-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,13 +23,48 @@
 module m_ptgroups
 
  use defs_basis
- use m_defs_ptgroups  
+ use m_defs_ptgroups
  use m_errors
  use m_profiling_abi
 
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
+ use m_symtk,          only : mati3inv
+
+! Import group tables
+ use m_ptg_C1
+ use m_ptg_Ci
+ use m_ptg_C2
+ use m_ptg_Cs
+ use m_ptg_C2h
+ use m_ptg_D2
+ use m_ptg_C2v
+ use m_ptg_D2h
+ use m_ptg_C4
+ use m_ptg_S4
+ use m_ptg_C4h
+ use m_ptg_D4
+ use m_ptg_C4v
+ use m_ptg_D2d
+ use m_ptg_D4h
+ use m_ptg_C3
+ use m_ptg_C3i
+ use m_ptg_D3
+ use m_ptg_C3v
+ use m_ptg_D3d
+ use m_ptg_C6
+ use m_ptg_C3h
+ use m_ptg_C6h
+ use m_ptg_D6
+ use m_ptg_C6v
+ use m_ptg_D3h
+ use m_ptg_D6h
+ use m_ptg_T
+ use m_ptg_Th
+ use m_ptg_O
+ use m_ptg_Td
+ use m_ptg_Oh
 
  implicit none
 
@@ -72,7 +107,7 @@ CONTAINS  !===========================================================
 !! nsym=Number of symmetries in the point group.
 !! nclass=Number of classes.
 !! sym(3,3,nsym)=Elements of the point group ordered by classe.
-!! class_ids(2,nclass)=Initial and final index in sym, for each 
+!! class_ids(2,nclass)=Initial and final index in sym, for each
 !! Irreps(nclass)=Datatype gathering data on the different irreducible representations.
 !!
 !! PARENTS
@@ -90,7 +125,6 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_point_group'
- use interfaces_43_ptgroups
 !End of the abilint section
 
  implicit none
@@ -100,7 +134,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
  integer,intent(out) :: nclass,nsym
  character(len=5),intent(in) :: ptg_name
 !arrays
- integer,allocatable,intent(out) :: sym(:,:,:),class_ids(:,:) 
+ integer,allocatable,intent(out) :: sym(:,:,:),class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irreps(:)
 
@@ -108,7 +142,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !scalars
  integer :: irp,isym
  !character(len=500) :: msg
- 
+
 ! *************************************************************************
 
  SELECT CASE (TRIM(ADJUSTL(ptg_name)))
@@ -207,12 +241,12 @@ end subroutine get_point_group
 !!
 !! OUTPUT
 !! nclass=The number of classes
-!! nelements(1:nclass)=For each class, the number of elements 
-!! elements_idx(ii,1:nclass)=For each class, this table gives the index 
+!! nelements(1:nclass)=For each class, the number of elements
+!! elements_idx(ii,1:nclass)=For each class, this table gives the index
 !!   of its elements (ii=1,..,nelements(iclass))
 !!
 !! NOTES
-!!  * A class is defined as the set of distinct elements obtained by 
+!!  * A class is defined as the set of distinct elements obtained by
 !!    considering for each element, S, of the group all its conjugate
 !!    elements X^-1 S X where X range over all the elements of the group.
 !!
@@ -235,7 +269,6 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_classes'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -260,19 +293,19 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 !************************************************************************
 
  ! === Check if identity is present in the first position ===
- identity=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)); found_identity=.FALSE. 
+ identity=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)); found_identity=.FALSE.
 
  do isym=1,nsym
-   if (ALL(sym(:,:,isym)==identity)) then 
+   if (ALL(sym(:,:,isym)==identity)) then
      found_identity=.TRUE.; identity_idx=isym; EXIT
    end if
- end do 
- if (.not.found_identity.or.identity_idx/=1) then 
+ end do
+ if (.not.found_identity.or.identity_idx/=1) then
   write(msg,'(3a)')&
 &  'Either identity is not present or it is not the first operation ',ch10,&
 &  'check set of symmetry operations '
   MSG_ERROR(msg)
- end if 
+ end if
  !
  ! Is it a group? Note that I assume that AFM sym.op (if any) have been pruned in the caller.
  !dummy_symafm=1
@@ -281,7 +314,7 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
  nclass=0; nelements(:)=0; elements_idx(:,:)=0; found(:)=.FALSE.
  do isym=1,nsym
-   if (.not.found(isym)) then 
+   if (.not.found(isym)) then
      nclass=nclass+1
      ss(:,:)=sym(:,:,isym)
 
@@ -291,7 +324,7 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
        cjg(:,:)=MATMUL(xxm1,MATMUL(ss,xx))
        do ksym=1,nsym ! Is it already found?
          test(:,:)=sym(:,:,ksym)
-         if (.not.found(ksym).and.(ALL((test-cjg)==0))) then 
+         if (.not.found(ksym).and.(ALL((test-cjg)==0))) then
            found(ksym)=.TRUE.
            nelements(nclass)=nelements(nclass)+1
            elements_idx(nelements(nclass),nclass)=ksym
@@ -356,7 +389,7 @@ subroutine show_character_tables(unit)
  do igrp=1,SIZE(ptgroup_names)
    ptg_name = ptgroup_names(igrp)
    call point_group_init(Ptg,ptg_name)
-   call point_group_print(Ptg,unit=my_unt) 
+   call point_group_print(Ptg,unit=my_unt)
    !allocate(nelements(Ptg%nsym),elements_idx(Ptg%nsym,Ptg%nsym))
    !call get_classes(Ptg%nsym,Ptg%sym,nclass,nelements,elements_idx)
    !deallocate(nelements,elements_idx)
@@ -458,7 +491,7 @@ subroutine point_group_init(Ptg,ptg_name)
 !scalars
  character(len=5),intent(in) :: ptg_name
  type(point_group_t),intent(inout) :: Ptg
-! ********************************************************************* 
+! *********************************************************************
 
  !@point_group_t
  !call wrtout(std_out," Retrieving point group data for: "//TRIM(ptg_name),"COLL")
@@ -489,7 +522,7 @@ end subroutine point_group_init
 !!
 !! SOURCE
 
-subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol) 
+subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -504,7 +537,7 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  type(point_group_t),target,intent(in) :: Ptg
 
@@ -512,12 +545,12 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
  integer :: my_unt,my_prtvol,irp,icls,sidx
  complex(dpc) :: trace
  character(len=4) :: my_mode
- character(len=500) :: msg      
+ character(len=500) :: msg
  type(irrep_t),pointer :: Row
-! ********************************************************************* 
+! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Point Group Table ==== '
@@ -527,14 +560,14 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
  write(std_out,*)REPEAT("=",80)
  write(std_out,*)" Point group : ",TRIM(Ptg%gname)," Number of symmetries ",Ptg%nsym," Number of classes    ",Ptg%nclass
 
- write(std_out,"(a6)",advance="no")"Class " 
+ write(std_out,"(a6)",advance="no")"Class "
  do icls=1,Ptg%nclass
    write(std_out,"('|',a10)",advance="no")Ptg%class_names(icls)
  end do
  write(std_out,"('|')",advance="no")
  write(std_out,*)" "
 
- write(std_out,"(a6)",advance="no")"Mult  " 
+ write(std_out,"(a6)",advance="no")"Mult  "
  do icls=1,Ptg%nclass
    write(std_out,"('|',i10)",advance="no")Ptg%class_ids(2,icls)-Ptg%class_ids(1,icls) + 1
  end do
@@ -571,7 +604,7 @@ end subroutine point_group_print
 !!  locate_sym
 !!
 !! FUNCTION
-!!  Given a symmetry operation asym, this routine returns its index in the Ptg%sym 
+!!  Given a symmetry operation asym, this routine returns its index in the Ptg%sym
 !!  array and the index of the class it belongs to.
 !!
 !! INPUTS
@@ -612,7 +645,7 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 
 ! *********************************************************************
 
- sym_idx = 0 
+ sym_idx = 0
  do isym=1,Ptg%nsym
    if (ALL(asym == Ptg%sym(:,:,isym) )) then
      sym_idx = isym
@@ -652,7 +685,7 @@ end subroutine locate_sym
 !! mult_table
 !!
 !! FUNCTION
-!!  Given a set of nsym 3x3 operations which are supposed to form a group, 
+!!  Given a set of nsym 3x3 operations which are supposed to form a group,
 !!  this routine constructs the multiplication table of the group.
 !!
 !! INPUTS
@@ -689,19 +722,19 @@ subroutine mult_table(nsym,sym,mtab)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym 
+ integer :: isym,jsym,ksym
  !character(len=500) :: msg
 !arrays
  integer :: prod_ij(3,3),found(nsym)
 
 !************************************************************************
 
- do jsym=1,nsym 
+ do jsym=1,nsym
    found(:)=0 ! Each symmetry should compare only once in a given (row|col).
 
    do isym=1,nsym
      prod_ij = MATMUL(sym(:,:,isym),sym(:,:,jsym))
-     do ksym=1,nsym 
+     do ksym=1,nsym
        if ( ALL(prod_ij == sym(:,:,ksym)) ) then
          found(ksym)=found(ksym)+1
          mtab(isym,jsym) = ksym
@@ -709,7 +742,7 @@ subroutine mult_table(nsym,sym,mtab)
      end do
    end do ! jsym
 
-   if ( ANY(found /= 1)) then  
+   if ( ANY(found /= 1)) then
      write(std_out,*)"found = ",found
      MSG_ERROR("Input elements do not form a group")
    end if
@@ -725,7 +758,7 @@ end subroutine mult_table
 !!  groupk_from_file
 !!
 !! FUNCTION
-!!  Initialize the group_k_t datatype from an external database retrieved from 
+!!  Initialize the group_k_t datatype from an external database retrieved from
 !!  the Bilbao server via the ptg.py script.
 !!
 !! INPUTS
@@ -759,7 +792,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spgroup
- integer,intent(out) :: ierr,nkpt 
+ integer,intent(out) :: ierr,nkpt
  character(len=fnlen),intent(in) :: fname
 !arrays
  type(group_k_t),target,allocatable :: Lgrps(:)
@@ -778,14 +811,14 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  integer,allocatable :: nelements(:),elements_idx(:,:)
  real(dp) :: kpt(3)
  character(len=10),allocatable :: kname(:)
- type(irrep_t),pointer :: OneIrr 
- 
+ type(irrep_t),pointer :: OneIrr
+
 ! *************************************************************************
 
  ierr=0
  if (open_file(fname,msg,newunit=unt,form="formatted") /=0) then
    MSG_ERROR(msg)
- end if 
+ end if
 
  read(unt,*,ERR=10)          ! Skip the header.
  read(unt,*,ERR=10) fvers    ! File version.
@@ -821,9 +854,9 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  ! * Read tables for each k-point
  do ik=1,nkpt
 
-   read(unt,*,ERR=10) kpt 
+   read(unt,*,ERR=10) kpt
    read(unt,*,ERR=10) nsym_ltgk
-   Gk  => Lgrps(ik)  
+   Gk  => Lgrps(ik)
 
    Gk%spgroup = ita_spgroup
    Gk%nsym    = nsym_ltgk
@@ -831,7 +864,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
    ABI_MALLOC(Gk%sym,(3,3,nsym_ltgk))
    ABI_MALLOC(Gk%tnons,(3,nsym_ltgk))
 
-   do isym=1,nsym_ltgk ! Read symmetries of the little group. 
+   do isym=1,nsym_ltgk ! Read symmetries of the little group.
      read(unt,*,ERR=10) Gk%sym(:,:,isym)
      read(unt,*,ERR=10) Gk%tnons(:,isym)
    end do
@@ -851,7 +884,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
          write(msg,"(2(a,i0))")&
 &          " Symmetries on file are not ordered in classes. icls= ",icls,", isym= ",isym
          MSG_ERROR(msg)
-       else 
+       else
          prev = now
        end if
      end do
@@ -871,7 +904,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
    read(unt,*,ERR=10) nirreps_k
    ABI_CHECK(Gk%nclass == nirreps_k,"Gk%nclass /= nirreps_k")
 
-   !$$ allocate(Gk%class_names(Gk%nclass)) 
+   !$$ allocate(Gk%class_names(Gk%nclass))
    ABI_DT_MALLOC(Gk%Irreps,(nirreps_k))
 
    do irp=1,nirreps_k
@@ -881,7 +914,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
      do isym=1,nsym_ltgk
        read(unt,*,ERR=10) sym_idx, OneIrr%mat(:,:,isym)
        ABI_CHECK(sym_idx==irp,"sym_idx/=irp!")
-       ! Matrix elements on file are in the form (rho, theta) with theta given in degrees. 
+       ! Matrix elements on file are in the form (rho, theta) with theta given in degrees.
        call cmplx_sphcart(OneIrr%mat(:,:,isym),from="Sphere",units="Degrees")
        OneIrr%trace(isym) = get_trace(OneIrr%mat(:,:,isym))
      end do
@@ -992,7 +1025,7 @@ end subroutine irrep_free_1d
 !!  copy_irrep
 !!
 !! FUNCTION
-!!  Perform a copy of a set of irrep_t datatypes. Optionally one can multiply 
+!!  Perform a copy of a set of irrep_t datatypes. Optionally one can multiply
 !!  by a phase factor.
 !!
 !! PARENTS
@@ -1036,7 +1069,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
  end if
 
  my_phase_fact=cone
- if (PRESENT(phase_fact)) then 
+ if (PRESENT(phase_fact)) then
    my_phase_fact=phase_fact
    if (SIZE(phase_fact) /= In_irreps(1)%nsym) then
      msg = " irreps to be copied have different dimension"
@@ -1045,7 +1078,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
  end if
 
  do irp=1,dim1
-   in_dim  = In_irreps(irp)%dim 
+   in_dim  = In_irreps(irp)%dim
    in_nsym = In_irreps(irp)%nsym
    call init_irrep(Out_irreps(irp),in_nsym,in_dim)
    Out_irreps(irp)%name = In_irreps(irp)%name
@@ -1065,7 +1098,7 @@ end subroutine copy_irrep
 !!  alloc_irrep
 !!
 !! FUNCTION
-!!  Initialize an instance of the irrep_t datatype. 
+!!  Initialize an instance of the irrep_t datatype.
 !!
 !! INPUTS
 !!  nsym=The number of symmetries.
@@ -1093,7 +1126,7 @@ subroutine init_irrep(Irrep,nsym,irr_dim,irr_name)
  implicit none
 
 !Arguments ------------------------------------
-!scalars 
+!scalars
  integer,intent(in) :: nsym
 !arrays
  integer,intent(in) :: irr_dim
@@ -1149,7 +1182,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
  implicit none
 
 !Arguments ------------------------------------
-!scalars 
+!scalars
  integer,intent(in) :: ii,jj,kk,ll
 !arrays
  type(irrep_t),intent(in) :: Irrep1,Irrep2
@@ -1175,7 +1208,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
  end if
 
  if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
-&    kk>Irrep1%dim .or. ll>Irrep1%dim) then 
+&    kk>Irrep1%dim .or. ll>Irrep1%dim) then
    MSG_WARNING("Wrong indeces")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
@@ -1219,10 +1252,10 @@ subroutine groupk_free(Gk)
 
 !Arguments ------------------------------------
  type(group_k_t),intent(inout) :: Gk
- 
+
 ! *************************************************************************
 
-! integer 
+! integer
  if (allocated(Gk%class_ids))   then
    ABI_FREE(Gk%class_ids)
  end if

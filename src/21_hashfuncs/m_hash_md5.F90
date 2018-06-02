@@ -7,7 +7,7 @@
 !!  This module provides resources to calculate MD5 checksums.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2017 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2016-2018 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -470,7 +470,7 @@ end subroutine hash_update
 
     character(len=*), intent(in) :: f_string
     character(kind=c_char,len=1), intent(out) :: c_string(len_trim(f_string)+1)
-        
+
     integer :: i, strlen
 
     strlen = len_trim(f_string)

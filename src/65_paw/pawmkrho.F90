@@ -10,13 +10,15 @@
 !! Build occupation matrix (packed storage)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MT)
+!! Copyright (C) 2010-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
+!!  compute_rhor_rhog: if 1: set the computation of rhor and rhog in addition to the compensating charge.
+!!                     if 0: compute only the compensating charge
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!         1 for GS calculations
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1).
@@ -72,7 +74,7 @@
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
+!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,scfcv,vtorho
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked
@@ -86,7 +88,7 @@
 
 #include "abi_common.h"
 
-subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
@@ -97,6 +99,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,     only : timab
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type
@@ -108,7 +111,6 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrho'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmkrho
 !End of the abilint section
@@ -117,7 +119,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawprtvol
+ integer,intent(in) :: compute_rhor_rhog,cplex,idir,ipert,my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawprtvol
  integer,intent(in) :: usewvl
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: compch_fft
@@ -130,9 +132,9 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gprimd(3,3),qphon(3),rprimd(3,3),xred(3,natom)
  real(dp),intent(inout),target,optional :: pawnhat(cplex*pawfgr%nfft,nspden) !vz_i
- real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden)
- real(dp),intent(out),optional :: rhog(2,pawfgr%nfft)
- real(dp),intent(inout) :: rhopsg(2,pawfgr%nfftc),rhopsr(cplex*pawfgr%nfftc,nspden)
+ real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden*compute_rhor_rhog)
+ real(dp),intent(out),optional :: rhog(2,pawfgr%nfft*compute_rhor_rhog)
+ real(dp),intent(inout) :: rhopsg(2,pawfgr%nfftc*compute_rhor_rhog),rhopsr(cplex*pawfgr%nfftc,nspden*compute_rhor_rhog)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
  type(pawrhoij_type),intent(inout),target :: pawrhoij(:)
  type(pawrhoij_type),intent(inout) :: pawrhoij_unsym(:)
@@ -166,7 +168,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
    msg='  pawrhoij0 must be present when ipert>0 !'
    MSG_BUG(msg)
  end if
-
+ 
 !Symetrize PAW occupation matrix and store it in packed storage
  call timab(557,1,tsec)
  option=1;choice=1
@@ -215,13 +217,20 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 & comm_fft=mpi_enreg%comm_fft,paral_kgb=paral_kgb,me_g0=mpi_enreg%me_g0,&
 & distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl) 
 
-!Transfer pseudo density from coarse grid to fine grid
- if(usewvl==0) then
-   call transgrid(cplex,mpi_enreg,nspden,+1,1,0,paral_kgb,pawfgr,rhopsg,rhodum,rhopsr,rhor)
- end if
+ if (compute_rhor_rhog/=0) then
+!  Transfer pseudo density from coarse grid to fine grid
+   if(usewvl==0) then
+     call transgrid(cplex,mpi_enreg,nspden,+1,1,0,paral_kgb,pawfgr,rhopsg,rhodum,rhopsr,rhor)
+   end if
 
-!Add pseudo density and compensation charge density (on fine grid)
- rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+!  Add pseudo density and compensation charge density (on fine grid)
+   rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+
+!  Compute compensated pseudo density in reciprocal space
+   if (present(rhog)) then
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+   end if
+ end if
 
 !Free temporary memory spaces
  if (.not.present(pawnhat)) then
@@ -233,11 +242,6 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  end if
  nullify(pawnhat_ptr)
  nullify(pawrhoij_ptr)
-
-!Compute compensated pseudo density in reciprocal space
- if (present(rhog)) then
-   call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
- end if
 
  call timab(556,2,tsec)
 

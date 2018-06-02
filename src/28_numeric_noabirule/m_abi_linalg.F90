@@ -8,7 +8,7 @@
 !! with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (LNguyen,FDahm)
+!!  Copyright (C) 2012-2018 ABINIT group (LNguyen,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,8 @@ module m_abi_linalg
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
+ use m_time,  only : timab
+ 
 
  implicit none
 

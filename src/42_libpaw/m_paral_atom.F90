@@ -8,7 +8,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2018 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -369,7 +369,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MD)
+!! Copyright (C) 2012-2018 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -381,7 +381,7 @@ end subroutine get_proc_atmtab
 !!  natom=total number of atoms
 !!
 !! OUTPUT
-!! proc_list(:) = index of procs 
+!! proc_list(:) = index of procs
 !!
 !! NOTES
 !!  The atoms are distributed contigously by egal part; the rest is distributed
@@ -411,7 +411,7 @@ end subroutine get_proc_atmtab
 !arrays
  integer, intent(in) :: atom_list(:)
  integer, intent(out) :: proc_list(:)
- 
+
 !Local variables ---------------------------------------
 !scalars
  integer :: nb_atom,dn,dn1,iatom,natomlim,iatm,jproclim,nmod

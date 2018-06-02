@@ -1,105 +1,88 @@
-# Test sigma driver with nspinor == 2. Use screening computed with nspinor 1 and nspden 1
-ndtset 6
+# C in diamond structure.
+ ndtset 4
 
-nspinor 1 nspden 1 so_psp *0
-nband    14
-ecut     8 ecutsigx 8  ecuteps  2
-tolwfr   1e-16
+ istwfk *1
+ ecut 10
+ ecutsm 0.5
+ #nband 50
+ nband 4
+ tolvrs 1.0e-10
+ diemac 6.0d0
 
-kptopt   4
-nshiftk  1
-shiftk   0 0 0
-ngkpt    2 2 2 
+# Kpoints
+ ngkpt    2 2 2
+ nshiftk  1
+ shiftk   0.0 0.0 0.0
 
-awtr      0
-gwpara    1
-symchi    0
-inclvkb   0
+########################################
+# Dataset 1 (GS run to get WFK0 and DEN)
+########################################
+ tolwfr1   1e-20
+ # Cancel default values
+ getwfk1   0
+ nqpt1     0
+ rfphon1   0
+ kptopt1   1
 
-nkptgw     1
-kptgw      0 0 0 
-bdgw       1 14
-symsigma   0
+##################################################
+# Dataset 2 (NSCF run to get WFK with empty states
+##################################################
+ getden2  1
+ getwfk2  0
+ iscf2   -2
+ nband2   24
+ nbdbuf2  4
+ tolwfr2  1e-16
+ # Cancel default values
+ nqpt2     0
+ rfphon2   0
+ kptopt2   1
+ 
+##############################
+# DFPT runs on a single q-point
+#############################
+ getwfk     2
+ nqpt       1
+ rfphon     1 
+ rfatpol    1 1 
+ rfdir      1 0 0
+ kptopt     3
 
-
-#################
-### DATASET 1 ###
-#################
-
-#################
-### DATASET 2 ###
-#################
-nspinor2 2 nspden2 4 nband2  28
-getwfk2 1
-
-#################
-### DATASET 3 ###
-#################
-# Screening with nsppol 1
-optdriver3 3
-getwfk3    1
-gwcalctyp3 2 # CD
-nfreqre    10
-nfreqim    5
-freqremax  20 eV
-
-#################
-### DATASET 4 ###
-#################
-# G0W0 with nspinor 2 and plasmon-pole
-optdriver4 4
-nspinor4 2 nspden4 4 nband4  28 getwfk4  2
-#nspinor4 1 nspden4 1 nband4  14 getwfk4  1   # Activate this line to test compare with collinear case
-getscr4    3
-
-#################
-### DATASET 5 ###
-#################
-# G0W0 with nspinor 2 and COHSEX
-optdriver5 4
-gwcalctyp5 7  # COH
-nspinor5 2 nspden5 4 nband5  28 getwfk5  2
-#nspinor5 1 nspden5 1 nband5  14 getwfk5  1  # Activate this line to test compare with collinear case
-getscr5    3
-
-#################
-### DATASET 6 ###
-#################
-# G0W0 with nspinor 2 and CD
-optdriver6 4
-gwcalctyp6 2  # CD
-nspinor6 2 nspden6 4 nband6  28 getwfk6  2
-#nspinor6 1 nspden6 1 nband6  14 getwfk6  1  # Activate this line to test compare with collinear case
-getscr6    3
+ qpt 5.00000000E-01  0.00000000E+00  0.00000000E+00
 
 
-######################################################################################
-# Definition of the unit cell: fcc
-acell  3*10.217        
-rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
-       0.5  0.0  0.5
-       0.5  0.5  0.0
+##################################################
+# Dataset 3 NSCF calculation and printing of 1WF
+##################################################
+ iscf4          -2
+ tolwfr4        1e-16
+ get1den4       3
+ nband4         24
+ nbdbuf4        4
+ prtfull1wf4    1
 
-# Definition of the atom types
-ntypat 1 znucl 14         
-natom 2 typat 1 1         
-xred              
-   0.0  0.0  0.0
-   0.25 0.25 0.25
 
+# Structure 
+ acell 3*6.70346805
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ ntypat  1
+ znucl 6
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test =
-#%%  t81.out, tolnlines = 26, tolabs = 1.1e-2, tolrel = 4.0e-2;
-#%% psp_files = Si_r.psp8
+#%% files_to_test = 
+#%%   t81.out, tolnlines = 50, tolabs = 1.1e-3, tolrel = 1.10
+#%% psp_files = 6c.pspnc
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = M. Giantomassi
-#%% keywords = NC, GW, SOC
+#%% authors = G. Antonius
+#%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   Test sigma driver with nspinor == 2. Use screening computed with nspinor 1 and nspden 1
+#%%   Test printing out the full perturbed wavefunction
 #%%<END TEST_INFO>

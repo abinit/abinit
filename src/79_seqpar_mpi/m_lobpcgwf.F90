@@ -11,7 +11,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (JB)
+!! Copyright (C) 1998-2018 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,7 @@
 #include "abi_common.h"
 
 module m_lobpcgwf
+
  use defs_abitypes
  use defs_basis
  use m_profiling_abi
@@ -40,12 +41,13 @@ module m_lobpcgwf
  use m_time
  use m_xomp
  use m_fstrings
-
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_pawcprj,     only : pawcprj_type
-
  use m_xg
  use m_lobpcg2
+
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_pawcprj,     only : pawcprj_type
+ use m_nonlop,      only : nonlop
 
  private
 
@@ -79,8 +81,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf2'
- use interfaces_18_timing
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

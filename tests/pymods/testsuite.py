@@ -1717,6 +1717,56 @@ class BaseTest(object):
         else:
             raise ValueError("wrong mode %s" % mode)
 
+    def get_varname_set(self):
+        """
+        Return set of variables used by this test.
+        Mainly used to check if all variables in the doc are documented/tested.
+
+        .. note:
+
+            Dataset index (if any) is removed.
+        """
+        # See abio.abivars.AbinitInputParser
+        import io
+        lines = []
+        with io.open(self.inp_fname, "rt", encoding="utf-8") as fh:
+            for line in fh:
+                line.strip()
+                # Remove comments from lines.
+                i = line.find("#")
+                if i != -1: line = line[:i]
+                i = line.find("!")
+                if i != -1: line = line[:i]
+                if line: lines.append(line)
+
+        vnames = []
+        # 1) Build string of the form "var1 value1 var2 value2"
+        tokens = " ".join(lines).split()
+        for pos, tok in enumerate(tokens):
+            if tok[0].isalpha():
+                # TODO
+                # Either new variable, string defining the unit or operator e.g. sqrt
+                #if is_abiunit(tok) or tok in ABI_OPERATORS or "?" in tok:
+                #    continue
+
+                # Have new variable
+                if tok[-1].isdigit(): # and "?" not in tok:
+                    # Handle dataset index.
+                    l = []
+                    for i, c in enumerate(tok[::-1]):
+                        if c.isalpha(): break
+                        #l.append(c)
+                    else:
+                        raise ValueError("Cannot find dataset index in token: %s" % tok)
+                    tok = tok[:len(tok) - i]
+                    #l.reverse()
+                    #print("tok", tok, l)
+                    #tok = l
+                vnames.append(tok)
+
+        #print(vnames)
+        return set(v.lower() for v in vnames)
+
     def has_variables(self, ivars, mode="any"):
         """True if test has the input variables ivars (dict {varname:varvalue})"""
         found, d = input_file_has_vars(self.inp_fname, ivars, mode=mode)

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (DCA,YP,MJV,MG)
+!! Copyright (C) 2006-2018 ABINIT group (DCA,YP,MJV,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ module m_abi_etsf
 #ifdef HAVE_ETSF_IO
  use etsf_io
 #endif
- 
+
  use m_fstrings,   only : endswith
 
  implicit none
@@ -42,7 +42,7 @@ module m_abi_etsf
  private
 
 #ifdef HAVE_ETSF_IO
- public :: abi_etsf_dims_init   
+ public :: abi_etsf_dims_init
 #endif
  public :: abi_etsf_init
 
@@ -93,7 +93,7 @@ subroutine etsf_dims_nullify(Dims,dimlen)
   my_dimlen = 3; if (PRESENT(dimlen)) my_dimlen = dimlen
 
   Dims%max_number_of_angular_momenta                 = etsf_no_dimension
-  Dims%max_number_of_basis_grid_points               = etsf_no_dimension 
+  Dims%max_number_of_basis_grid_points               = etsf_no_dimension
   Dims%max_number_of_coefficients                    = etsf_no_dimension
   Dims%max_number_of_projectors                      = etsf_no_dimension
   Dims%max_number_of_states                          = etsf_no_dimension
@@ -106,7 +106,7 @@ subroutine etsf_dims_nullify(Dims,dimlen)
   Dims%number_of_grid_points_vector1                 = etsf_no_dimension
   Dims%number_of_grid_points_vector2                 = etsf_no_dimension
   Dims%number_of_grid_points_vector3                 = etsf_no_dimension
-  Dims%number_of_kpoints                             = etsf_no_dimension 
+  Dims%number_of_kpoints                             = etsf_no_dimension
   Dims%number_of_localization_regions                = etsf_no_dimension
   Dims%number_of_qpoints_dielectric_function         = etsf_no_dimension
   Dims%number_of_qpoints_gamma_limit                 = etsf_no_dimension
@@ -202,7 +202,7 @@ subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
  dims%number_of_atoms        = dtset%natom
  dims%number_of_atom_species = dtset%ntypat
  dims%number_of_components   = dtset%nspden
-                                                     
+
  dims%number_of_kpoints              = dtset%nkpt
  dims%number_of_spinor_components    = dtset%nspinor
  dims%number_of_spins                = dtset%nsppol
@@ -327,7 +327,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  character(len=fnlen),intent(in) :: filapp
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
- type(wvl_wf_type),intent(in) :: wfs
+ type(wvl_wf_type),optional,intent(in) :: wfs
 !arrays
  integer,intent(in) :: lmn_size(psps%npsp)
 
@@ -341,9 +341,11 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  type(etsf_dims) :: dims
  type(etsf_groups_flags) :: flags
  type(etsf_io_low_error) :: error
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
  call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
@@ -418,9 +420,16 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 ! Add the main part as last variables in the ETSF file.
  call etsf_io_main_def(ncid, ok, error, flags = var_main)
  ETSF_CHECK_ERROR(ok, error)
- 
+
 ! Close the file.
  NCF_CHECK(nf90_close(ncid))
+#else
+ ABI_UNUSED(dtset%ntypat)
+ ABI_UNUSED(filapp)
+ ABI_UNUSED(itype)
+ ABI_UNUSED(kdep)
+ ABI_UNUSED(lmn_size)
+ if(.false. .and. present(wfs))write(std_out,*)' OK'
 #endif
 
 end subroutine abi_etsf_init
@@ -442,7 +451,7 @@ end subroutine abi_etsf_init
 !!  ntypat=number of types of atoms in cell.
 !!  ncid=the unit of the open NetCDF file.
 !!
-!! SIDE EFFECTS 
+!! SIDE EFFECTS
 !!  New dimensions and variables are added to the initial NetCDF file.
 !!
 !! PARENTS
@@ -472,9 +481,11 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 !Local variables-------------------------------
 #ifdef HAVE_ETSF_IO
  integer :: ncerr
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_ETSF_IO
 !Define dimensions.
  ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 6),nctkdim_t("psptitlen", 132)])
  NCF_CHECK(ncerr)
@@ -487,11 +498,11 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 !Define scalars.
 !If variables already exist, it will check that definitions are coherent.
  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-&   "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"]) 
+&   "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"]) 
+&  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"])
  NCF_CHECK(ncerr)
 
 !Multi-dimensional variables.
@@ -516,11 +527,14 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
    ncerr = nctk_def_arrays(ncid, nctkarr_t("number_of_wavelets", "i", "number_of_wavelet_resolutions"))
    NCF_CHECK(ncerr)
  end if
-#endif
+#else
 
 !if ETSF_IO is undefined, do nothing
+ ABI_UNUSED(ncid)
  ABI_UNUSED(ntypat)
  ABI_UNUSED(lmn_size)
+ ABI_UNUSED(usewvl)
+#endif
 
 end subroutine ini_wf_etsf
 !!***

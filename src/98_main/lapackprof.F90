@@ -7,7 +7,7 @@
 !!  Utility for profiling the (Sca)Lapack libraries supported by abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MG)
+!! Copyright (C) 2004-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +50,7 @@ program lapackprof
  use m_abilasi
 
  use m_fstrings,      only : lower, itoa, strcat
+ use m_specialmsg,    only : specialmsg_getcount, herald
  use m_time,          only : cwtime
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
@@ -60,8 +61,6 @@ program lapackprof
 #undef ABI_FUNC
 #define ABI_FUNC 'lapackprof'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -89,7 +88,7 @@ program lapackprof
  logical :: debug_mode=.FALSE.
  character(len=500) :: tasks="all"
  integer :: size_arth(2) = (/1000,2000/)
- namelist /CONTROL/ tasks, debug_mode,nthreads 
+ namelist /CONTROL/ tasks, debug_mode,nthreads
  namelist /SYSTEM/ ncalls,nband,nsizes,size_arth
 
 ! *************************************************************************
@@ -198,7 +197,7 @@ program lapackprof
      routname = strcat(" pw_orthon, ortalgo = ",itoa(ortalgo))
      header = strcat("BEGIN_BENCHMARK: ",routname)
      write(std_out,'(a)')TRIM(header)
-!    
+!
      do isz=1,nsizes
        npw = sizes(isz)
        mcg  = npw * nband
@@ -208,7 +207,7 @@ program lapackprof
 
        ABI_MALLOC(gsc,(2,mgsc))
 
-       if (istwfk/=1) then 
+       if (istwfk/=1) then
          do band=1,nband
            g0 = 1 + (band-1)*npw
            cg(2,g0) = zero
@@ -229,7 +228,7 @@ program lapackprof
          if (istwfk/=1) then
            do band=1,nband
              g0 = 1 + (band-1)*npw
-             cg(:,g0) = half * cg(:,g0) 
+             cg(:,g0) = half * cg(:,g0)
            end do
          end if
 
@@ -256,14 +255,14 @@ program lapackprof
 
 !copy
  if (test_copy) then
-!  
+!
    do step=1,2
-!    
+!
      if (step==1) routname = " f90_zcopy"
      if (step==2) routname = " cg_zcopy"
      header = strcat("BEGIN_BENCHMARK: ",routname)
      write(std_out,'(a)')TRIM(header)
-!    
+!
      do isz=1,nsizes
        npw  = sizes(isz)
        ABI_MALLOC(cg1,(2,npw))
@@ -279,7 +278,7 @@ program lapackprof
              cg2(2,jj) = cg1(2,jj)
            end do
          end do
-       else 
+       else
          do ii=1,ncalls
            call cg_zcopy(npw,cg1,cg2)
          end do
@@ -298,9 +297,9 @@ program lapackprof
 
 !zdotc
  if (test_dotc) then
-!  
+!
    do step=1,2
-!    
+!
      if (step==1) routname = " f90_zdotc"
      if (step==2) routname = " cg_zdotc"
      header = strcat("BEGIN_BENCHMARK: ",routname)
@@ -323,7 +322,7 @@ program lapackprof
              dot(2) = dot(2) + cg1(1,ii)*cg2(2,ii) - cg1(2,ii)*cg2(1,ii)
            end do
          end do
-       else 
+       else
          do ii=1,ncalls
            dot = cg_zdotc(npw,cg1,cg2)
          end do
@@ -341,10 +340,10 @@ program lapackprof
 
 !axpy
  if (test_axpy) then
-!  alpha = (/one,zero/) 
+!  alpha = (/one,zero/)
    alpha = (/one,two/)
    do step=1,2
-!    
+!
      if (step==1) routname = " f90_axpy"
      if (step==2) routname = " cg_axpy"
      header = strcat("BEGIN_BENCHMARK: ",routname)
@@ -357,7 +356,7 @@ program lapackprof
        cg2 = zero
 
        do jj=1,npw
-         cg1(:,jj) = jj 
+         cg1(:,jj) = jj
        end do
 
        call cwtime(ctime,wtime,gflops,"start")
@@ -373,7 +372,7 @@ program lapackprof
              cg2(2,ii) = alpha(1)*cg1(2,ii) + alpha(2)*cg1(1,ii) + cg2(2,ii)
            end do
          end do
-       else 
+       else
          do icall=1,ncalls
 !          call random_number(cg1)
 !          call random_number(cg2)
@@ -410,7 +409,7 @@ program lapackprof
        ABI_MALLOC(cg3,(2,npw))
 
        do jj=1,npw*npw
-         cg1(:,jj) = jj 
+         cg1(:,jj) = jj
        end do
        cg2 = one
        cg3 = zero
@@ -426,13 +425,13 @@ program lapackprof
 !        direc(1,ipw)=direc(1,ipw)-ar*cg_re+ai*cg_im
 !        direc(2,ipw)=direc(2,ipw)-ar*cg_im-ai*cg_re
 !        end do
-!        end do 
+!        end do
 !        end do
 !        !cg3(1,ii) = alpha(1)*cg1(1,ii) - alpha(2)*cg1(2,ii) + cg2(1,ii)
 !        !cg3(2,ii) = alpha(1)*cg1(2,ii) + alpha(2)*cg1(1,ii) + cg2(2,ii)
 !        end do
 !        end do
-       else 
+       else
          do icall=1,ncalls
            call cg_zgemv("N",npw,npw,cg1,cg2,cg3)
          end do
@@ -518,7 +517,7 @@ program lapackprof
              end do
            end do
          end do
-       else 
+       else
          do jj=1,ncalls
            zmat = czero
            call XGERC(npw,npw,(1._dp,0._dp),zvec,1,zvec,1,zmat,npw)
@@ -562,11 +561,11 @@ program lapackprof
 !  do_check = .TRUE.
    do ii=1,nsizes
      npw  = sizes(ii)
-     call test_xginv(npw,skinds,do_check,Tres,comm) 
+     call test_xginv(npw,skinds,do_check,Tres,comm)
 
      if (my_rank==master) then
        write(std_out,'(a,i0,3f9.3)')&
-&       " routine = xginv, size, cpu_time, wall_time, max_abserr ",Tres%msize,Tres%ctime,Tres%wtime,Tres%max_abserr 
+&       " routine = xginv, size, cpu_time, wall_time, max_abserr ",Tres%msize,Tres%ctime,Tres%wtime,Tres%max_abserr
      end if
    end do
  end if
@@ -574,7 +573,7 @@ program lapackprof
 !xhpev vs xheev
  if (.FALSE.) then
    do step=1,2
-!    
+!
      do isz=1,nsizes
        npw = sizes(isz)
        ABI_MALLOC(ene,(npw))
@@ -593,7 +592,7 @@ program lapackprof
        if (step==1) then
          call cwtime(ctime,wtime,gflops,"start")
          call xhpev("V","U",npw,zpmat,ene,evec,npw)
-       else 
+       else
          ABI_MALLOC(zmat,(npw,npw))
          do jj=1,npw
            do ii=1,jj

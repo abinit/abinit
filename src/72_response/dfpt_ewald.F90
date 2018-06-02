@@ -8,12 +8,12 @@
 !! Compute ewald contribution to the dynamical matrix, at a given q wavevector.
 !! Note: the q=0 part should be subtracted, by another call to
 !! the present routine, with q=0. The present routine correspond
-!! to the quantity C_bar defined in Eq.(24) or (27) in Phys. Rev. B 55, 10355 (1997). 
+!! to the quantity C_bar defined in Eq.(24) or (27) in Phys. Rev. B 55, 10355 (1997).
 !! The two calls correspond to Eq.(23) of the same paper.
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,6 +62,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
  use m_special_funcs,  only : abi_derfc
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
 
@@ -69,7 +70,6 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_ewald'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -206,7 +206,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
        arg=-two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
        c1r=cos(arg)*reta3m
        c1i=sin(arg)*reta3m
-       do ia0=1,my_natom 
+       do ia0=1,my_natom
          ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
          do ib=1,ia
            r1=dble(ir1)+xred(1,ia)-xred(1,ib)
@@ -271,7 +271,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 
 !Take account of the charges
 !write(std_out,*)' '
- do ia0=1,my_natom     
+ do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
    do ib=1,ia
      do mu=1,3

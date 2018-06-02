@@ -9,7 +9,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2018 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ MODULE m_pawfgr
  use m_xmpi
 
  use defs_abitypes, only : dataset_type
+ use m_kg,       only : getcut
 
  implicit none
 
@@ -173,7 +174,6 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 #undef ABI_FUNC
 #define ABI_FUNC 'pawfgr_init'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -404,7 +404,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

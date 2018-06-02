@@ -1,0 +1,214 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+June 2013 and January 2014. These release notes
+are relative to improvements of ABINITv7.6 with respect to v7.4.
+
+The list of contributors includes :
+B. Amadon, G. Antonius, T. Applencourt, A. Berger, J.-M. Beuken, J. Bieder, F. Bottin, J. Bouchet, F. Bruneval, D. Caliste, 
+M. Delaveau, B. Dorado, C. Espejo, A. Garcia, L. Genovese, M. Giantomassi, Y. Gillet, X. Gonze, N. Holzwarth,
+F. Jollet, G. Jomard, J. Junquera, A. Martin, C. Martins, Renato Miceli, 
+Takeshi Nishimatsu, S. Ponce, Y. Pouillon, T. Rangel, M. Stengel, M. Torrent, M. Verstraete, J. Wiktor, B. Xu
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.6, released on January 13, 2014.
+
+Changes with respect to version 7.4 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+(nothing for this version)
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 A large set of PAW atomic data files, covering 71 elements (=all except lanthanides or Z>85, with nevertheless Rn and Lu),
+    with the GGA PBE functional, has been generated and tested. 
+    See https://www.abinit.org/downloads/PAW2/JTH-TABLE/index.html .
+    These atomic data files have been validated in ABINIT against all-electron calculations using the delta package, http://molmod.ugent.be/deltacodesdft.
+    A paper has been written, and is available on arXiv : http://arxiv.org/abs/1309.7274 . 
+    These files are written in the XML format (that can also be read by GPAW). 
+    In the above-mentioned paper, this new JTH table is also compared with two other sets of PAW atomic pseudopotentials,
+    from GPAW, and also from K.F. Garrity, J.W. Bennet, K.M. Rabe, D. Vanderbilt, arXiv:1305.5973v1
+    See the Test v7#64 . Other tests using the PAW XML format : tests v7#60, 61, 63.
+    Work by F. Jollet, M. Torrent and N. Holzwarth.
+
+B.2 The Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Carlo solver is available and fully parallelised.
+    New input variables : dmft_t2g dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka 
+     dmftctqmc_mov dmftctqmc_order dmftqmc_l dmftqmc_n dmft_seed dmftqmc_therm
+    See also input variables usedmft and dmft_solv
+    New tests v7#27, 28, 29 and paral #92.
+    Work by J. Bieder and B. Amadon
+
+B.3 Introduction of the new input variable usepotzero, allowing to change the definition of the average of the
+    local potential. The convention of PW-SCF can now be used (as well as the usual convention of ABINIT).
+    The cross validation of the results between the two codes can be made much stronger than previously, especially 
+    in the charged supercell case.
+    A paper has been accepted in Phys. Rev. B :
+    "Consistent treatment of charged systems within periodic boundary conditions:
+    The Projector Augmented-Wave and pseudopotential methods revisited"
+    See the test v7#26 .
+    F. Bruneval, JP Crocombette, X. Gonze, M. Torrent and F. Jollet
+
+B.4 The parallelism on the atomic site, in case of PAW, has been finalised, both in the case of ground-state calculations
+    and DFPT (dielectric tensor and phonons - not Z*).
+    See test mpiio#62
+    Work by M. Delaveau and M. Torrent
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 A new nightly bot has been added : milou_g95_snofbfpe
+    This bot is activated with a whole set of debugging options, -ffpe-trap=invalid,zero,overflow -finit-real=snan
+    allowing to trap invalid operations, divide-by-zero, overflows. Activated nightly.
+    The accompanying cleaning of the code has been performed, so that all tests(non-parallel) execute now without detecting any error of that kind.
+    Other bots (no nightly) : tikal_intel14 ( with openmpi 1.6.5 )
+    Work by J.-M. Beuken
+
+C.2 PLASMA and ELPA are now detected automatically by the build system.
+    In parallel, some tests are going on for multi-core architecture, and some adaptation on MIC (e.g. nonlop.F90).
+    Work by M. Torrent
+
+C.3 The doc subsystem has been enabled.
+    Work by Y. Pouillon
+
+C.4 There has been a deep cleaning of exception treatment. 
+    E.g. Now, the "PERS" mode is used for WARNINGs, COMMENTs and ERRORs, while leave_test is not used anymore,
+    and abinit_comm_leave is not used anymore (now we **always** call MPI_ABORT is something goes wrong).
+    Work by M. Giantomassi
+    
+C.5 The creation of sections of output written in YAML (see e.g. http://en.wikipedia.org/wiki/YAML ) has started 
+    The build system supports YAML, and The YAML library has been integrated in the build system  (TRIO connector for YAML)
+    Work by M. Giantomassi and Y. Pouillon
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Introduction of the new input variable "accuracy", currently under tuning.
+    See test v7#64
+    Work by F. Jollet
+
+D.2 Work on the autoparal of the GW code
+    The new input variable max_ncpus has been created, allowing to diagnose the most efficient proc distribution.
+     (same meaning as -paral_kgb but more general and safer)
+    See test tutoparal#gspw_01
+    Work by M. Giantomassi
+
+D.3 Work on the zero-point motion and temperature dependence of the gap (and electronic structure) is going on :
+    - introduction of the new input variable use_nonscf_gkk , to allow correct and fast calculation of the contribution
+            of the k points outside of the irreducible part of the Brillouin zone ;
+    - parallelisation, see test paral#60
+    Work by S. Poncé
+
+D.4 Work on the VdW-DF and VdW-WF function is going on :
+    introduction of several new input variable (vdw_df_damin, vdw_df_ngpts, vdw_df_phisoft, vdw_df_rsoft, vdw_df_tolerance, vdw_df_tweaks),
+    see test vdwxc#03 .
+    Corrections for the VdW-WF .
+    Work by Y. Pouillon + C. Espejo
+
+D.5 PAW + Bigdft project 
+    The ABINIT PAW library (libpaw) is in progress, see src/42_libpaw.
+    It contains:
+      - all the PAW object definitions and associated methods and functions,
+      - all the tool to read the PAW datasets (pseudo potential files)
+    It is now possible to perform wavelet-based PAW calculations ; the sequential
+    and parallel versions are available. However this feature is in beta stage.
+    It is also possible to follow the ABINIT path for the potential/density mixing, noticeably
+    with the DIIS algorithm, both with norm-conserving pseudopotentials and PAW atomic data.
+    See tests bigdft#33 and 34, and bigdft_paral#01 and 02
+    Work by T. Rangel + M Torrent, with the help of Luigi Genovese, Damien Caliste, and J.-M. Beuken
+
+D.6 The partial DOS can now be computed in case of spinorial calculations.
+    Test v7#06 exercices this capability, and also address the case of spin DOS.
+    Work done by M. Verstraete
+
+D.7 On-going efforts for the computation of elastic tensor within PAW.
+    Work done by A. Martin and M. Torrent
+
+D.8 On-going efforts on the development of Hartree-Fock.
+    Hartree-Fock calculations are now coded within Norm-Conserving PSP formalism,
+    with the use of symetries and parallelism (not included in v7.6, though - developments to be merged in v7.7). 
+    Still in the testing phase.
+    PAW + Hartree-Fock under development
+    From C. Martins (helped by M. Torrent and B. Amadon)
+
+D.9 On-going efforts for the computation of U within RPA.  The current implementation is restricted to static U, for non entangled correlated bands.
+    Work by B. Amadon, and T. Applencourt.
+
+D.10 On-going work on PAW+DFPT : improving the stability, the parallelism has been fully tested and improved.
+    See test mpiio#62
+    Work by M. Torrent and B. Dorado.
+
+D.11 Work on the use of the PLASMA library.
+     by M. Torrent.
+
+D.12 Continued efforts on the development of the abipy library
+    Soon to be alpha tested (watch the anouncement on the forum).
+    From M. Giantomassi 
+
+D.13 Allow for the use of different ngfft in DFPT and GS.
+     From M. Torrent
+
+D.14 On-going work on the computation of electron-phonon based transport properties.
+     By B. Xu and M. Verstraete
+
+D.15 Work towards k-centred G-spheres
+     By A. Berger (+ M. Giantomassi)
+
+D.16 Reading of NC pseudopotential common with SIESTA, using a XML format (with FOC as library for reading).
+     See tests fox#01 and 02
+     A paper is currently under writing.
+     By A. Garcia, J. Junquera, M. Verstraete, X. Gonze
+
+D.17 Doppler broadening of positron annihilation spectroscopy
+     Sequential version is available with full PAW. The parallel version in progress
+     Gives information on the electron momentum distribution in the sample = defect signature
+     Work by M. Torrent, Julia Wiktor, Gerald Jomard
+
+D.18 Post-process : Response function from Molecular Dynamics
+     To be included in APPA
+     Phonon spectrum obtained from trajectories (with a minimal set of coeffs)
+     Work by Francois Bottin, Johann Bouchet, and Alexandre Martin
+
+D.19 Output of phonon isosurface is working
+     Should provide a test ?
+     By Bin Xu      
+
+D.20 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
+     including patches for the fallbacks), and improvements of documentation by :
+    B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bruneval, C. Espejo,
+    M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, Renato Miceli, 
+    Takeshi Nishimatsu, Y. Pouillon, T. Rangel, M. Stengel, M. Torrent, M. Verstraete, B. Xu
+
+</pre>
+</body>

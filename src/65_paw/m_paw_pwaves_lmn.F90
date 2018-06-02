@@ -11,7 +11,7 @@
 !!  inside the spheres around each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,6 +45,7 @@ MODULE m_paw_pwaves_lmn
  use m_sort
 
  use m_numeric_tools, only : wrap2_zero_one
+ use m_geometry,      only : xcart2xred
  use m_pawrad,        only : pawrad_type, nderiv_gen, pawrad_deducer0
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
@@ -92,7 +93,7 @@ MODULE m_paw_pwaves_lmn
   ! tphi (nfgd,lmn_size)
   ! \tphi_{nlm}(ifgd) for each point of the FFT mesh located inside the PAW sphere (see pawfgrtab_type).
 
-  real(dp),allocatable :: phi_gr(:,:,:) 
+  real(dp),allocatable :: phi_gr(:,:,:)
   ! phi_gr (3,nfgd,lmn_size)
   ! gradient, in cartesian coordinates, of \phi_{nlm}(ifgd) for each point of the FFT mesh
   ! located inside the PAW sphere (see pawfgrtab_type).
@@ -141,7 +142,6 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_pwaves_lmn_init'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -166,7 +166,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  real(dp) :: phj,rR,tphj,ybcbeg,ybcend
 !arrays
  integer, allocatable :: iperm(:)
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:) 
+ integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: yvals(4),red(3),shift(3)
  real(dp),allocatable :: ff(:),nrm(:),nrm_sort(:),phigrd(:,:),tphigrd(:,:),ylm_tmp(:,:),ylm(:,:),ylm_gr(:,:,:)
@@ -223,7 +223,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
 
    ! The points in the PAW sphere might belong to a different unit cell, in this case one has to
    ! reconstruct the contribution to the AE psi_k given by the lattice-symmetric atom in another sphere.
-   ! Here I wrap rr back into the first unit cell keeping trace of the lattice vector L 
+   ! Here I wrap rr back into the first unit cell keeping trace of the lattice vector L
    ! needed so that rr = rr_first_ucell + L
    ! The contribution to the AE u(r) in the first unit cell has to be multiplied by e^{-ikL}.
 

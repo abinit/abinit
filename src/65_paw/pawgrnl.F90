@@ -11,7 +11,7 @@
 !! Remember: Vnl=Sum_ij[|p_i>Dij<p_j|]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT, AM)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_xmpi
  use m_errors
 
+ use m_geometry,     only : metric, stresssym
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -110,13 +111,12 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_atm2fft,      only : dfpt_atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawgrnl'
- use interfaces_41_geometry
- use interfaces_64_psp
  use interfaces_65_paw, except_this_one => pawgrnl
 !End of the abilint section
 
@@ -169,7 +169,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  integer,parameter :: mu9(9)=(/1,2,3,4,5,6,4,5,6/)
  integer,allocatable :: atindx(:),atm_indx(:),mu4(:)
  integer,allocatable,target :: ifftsph_tmp(:)
- integer,ABI_CONTIGUOUS pointer :: ffti3_local(:),fftn3_distrib(:),ifft_jatom(:),my_atmtab(:)
+ integer,ABI_CONTIGUOUS pointer :: ffti3_local(:),fftn3_distrib(:),ifft_jatom(:)
+ integer, pointer :: my_atmtab(:)
  real(dp) :: gmet(3,3),gprimd(3,3),hatstr(6),rdum(1),rdum2(1),rmet(3,3),tmp(12)
  real(dp) :: work1(dyfr_cplex,3,3),work2(dyfr_cplex,3,3)
  real(dp),allocatable :: buf(:,:),buf1(:),dyfr(:,:,:,:,:),eltfr(:,:)
@@ -1337,7 +1338,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end do
    iatshft=iatshft+nattyp(itypat)
  end do
- 
+
 !Reduction in case of parallelisation over atoms
  if (paral_atom) then
    bufsiz=3*natom*optgr+6*optstr

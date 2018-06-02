@@ -8,7 +8,7 @@
 !! Used in PAW calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@
 !!
 !! PARENTS
 !!      dfpt_looppert,energy,fourier_interpol,getgh1c,gstate,ks_ddiago,m_io_kss
-!!      pawmkrho,respfn,vtorho,vtorhorec
+!!      pawmkrho,respfn,scfcv,vtorho,vtorhorec
 !!
 !! CHILDREN
 !!      fourdp,indirect_parallel_fourier,zerosym
@@ -76,12 +76,12 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
  use m_errors
 
  use m_pawfgr, only : pawfgr_type
+ use m_fft,    only : zerosym, indirect_parallel_Fourier
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'transgrid'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
 !End of the abilint section
 

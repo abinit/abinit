@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,13 +18,14 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "contistr01.F90",
- "contistr03.F90",
- "contistr12.F90",
- "contstr21.F90",
- "contstr23.F90",
- "contstr25.F90",
- "contstr25a.F90",
- "contstr26.F90"]
+ "m_contistr01.F90",
+ "m_contistr03.F90",
+ "m_contistr12.F90",
+ "m_contstr21.F90",
+ "m_contstr23.F90",
+ "m_contstr25.F90",
+ "m_contstr25a.F90",
+ "m_contstr26.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -1,8 +1,8 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Sep 2017.
-- ( at 06h08 )
+.Starting date : Wed 21 Feb 2018.
+- ( at 17h01 )
   
 - input  file    -> t14.in
 - output file    -> t14.out
 - root for input  files -> t14i
 - root for output files -> t14o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     4
 - psxml2ab: ps_Projector_L     0
@@ -37,11 +37,11 @@
 - psxml2ab: Atomic Label:                      Au
 - psxml2ab: Atomic Number:                         79.00000
 - psxml2ab: Valence charge:                        11.00000
-- psxml2ab: Pseudopotential generator code :    psop-1.1
-- psxml2ab: Date of pseudopotential generation: 2017-07-31
+- psxml2ab: Pseudopotential generator code :    ATM4.2.6
+- psxml2ab: Date of pseudopotential generation:        0
 - psxml2ab: Pseudopotential flavor:             Troullier-Martins
-- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X
-- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ
+- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X (   1)
+- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ (   9)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   dirac
 - psxml2ab: Spin-polarized pseudopotential:     no
 - psxml2ab: No core corrections.
@@ -317,10 +317,10 @@ P           mkmem         110
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_atom.psml
-- Au    psop-1.1
-- 79.00000  11.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_atom.psml
+- Au    ATM4.2.6
+- 79.00000  11.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
@@ -726,10 +726,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.6
+- Proc.   0 individual time (sec): cpu=         16.4  wall=         16.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.5  wall=         15.6
++Overall time at end (sec) : cpu=         16.4  wall=         16.5

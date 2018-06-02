@@ -7,7 +7,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2017 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2018 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ module m_wfutils
  use m_errors
 
  use m_cgtools,  only : cg_to_reim, cg_from_reim
+ use m_time,     only : timab
 
  implicit none
 
@@ -224,7 +225,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfcopy'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

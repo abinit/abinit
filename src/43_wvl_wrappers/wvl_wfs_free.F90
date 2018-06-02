@@ -8,7 +8,7 @@
 !! Freeing routine.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +73,7 @@ subroutine wvl_wfs_free(wfs)
    ABI_DEALLOCATE(wfs%ks%orbs%eval)
  end if
  ABI_DATATYPE_DEALLOCATE(wfs%ks%confdatarr)
- 
+
  if (associated(wfs%ks%psi)) then
    call f_free_ptr(wfs%ks%psi)
  end if

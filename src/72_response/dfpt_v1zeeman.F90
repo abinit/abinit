@@ -4,12 +4,12 @@
 !!  dfpt_v1zeeman
 !!
 !! FUNCTION
-!!  Calculate 1st order Zeeman potential = -vec{\sigma}.\vec{b}, where 
-!!  sigma is the vector of Pauli matrices and \vec{b} is the unit 
+!!  Calculate 1st order Zeeman potential = -vec{\sigma}.\vec{b}, where
+!!  sigma is the vector of Pauli matrices and \vec{b} is the unit
 !!  vector indicating the perturbing field direction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@
 
 
 subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
@@ -68,16 +68,16 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
 
 !Arguments ------------------------------------
  integer , intent(in)    :: idir,nfft,cplex,nspden
- real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)                       
+ real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)
 
 !Local variables-------------------------------
- integer :: ifft                                
-!character(len=500) :: msg                   
- 
+ integer :: ifft
+!character(len=500) :: msg
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 ! if (option/=1 .and. option/=2 ) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
@@ -97,7 +97,7 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  select case(cplex)
  case(1)
    if (nspden==4) then
-     if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
+     if(idir==3)then       ! Zeeman field along the 3rd axis (z)
        v1zeeman(:,1)=-0.5d0
        v1zeeman(:,2)=+0.5d0
        v1zeeman(:,3)= 0.0d0

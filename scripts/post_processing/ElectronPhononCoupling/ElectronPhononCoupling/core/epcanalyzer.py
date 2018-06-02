@@ -46,6 +46,12 @@ class EpcAnalyzer(object):
     temperature_dependent_broadening = None
     zero_point_renormalization_modes = None
 
+    self_energy = None
+    self_energy_T = None
+    self_energy_static = None
+    self_energy_static_T = None
+    self_energy_fan_active = None
+
 
     split_fan_ddw = False
     renormalization_is_dynamical = False
@@ -71,6 +77,12 @@ class EpcAnalyzer(object):
                  omega_range=[0,0,1],
                  smearing=0.00367,
                  fermi_level = None,
+                 amu = None,
+
+                 double_smearing = False,
+                 smearing_width = 0.0367,
+                 smearing_above = 0.00367,
+                 smearing_below = 0.00367,
 
                  # File names
                  rootname='epc.out',
@@ -94,9 +106,6 @@ class EpcAnalyzer(object):
         # Check that the minimum number of files is present
         if not eigk_fname:
             raise Exception('Must provide a file for eigk_fname')
-
-        if not eigr2d_fnames:
-            raise Exception('Must provide at least one file for eigr2d_fnames')
 
         if not ddb_fnames:
             raise Exception('Must provide at least one file for ddb_fnames')
@@ -127,6 +136,7 @@ class EpcAnalyzer(object):
 
         # Initialize a single QptAnalyzer for q=0
 
+        # Select first gkk file
         if self.gkk_fnames:
             gkk0 = self.gkk_fnames[0]
         elif self.gkk_fine_fnames:
@@ -134,19 +144,37 @@ class EpcAnalyzer(object):
         else:
             gkk0 = None
 
+        # Select first fan file
         if self.fan_fnames:
             fan0 = self.fan_fnames[0]
         else:
             fan0 = None
 
+        # Select first eigr2d file
+        if self.eigr2d_fnames:
+            eigr2d0 = self.eigr2d_fnames[0]
+        else:
+            eigr2d0 = None
+
+        # Select first ddb file
+        if self.ddb_fnames:
+            ddb0 = self.ddb_fnames[0]
+        else:
+            ddb0 = None  # I suppose other things will break...
+
         self.qptanalyzer = QptAnalyzer(
             wtq=self.wtq[0],
             eigk_fname=self.eig0_fname,
-            ddb_fname=self.ddb_fnames[0],
-            eigr2d0_fname=self.eigr2d_fnames[0],
+            ddb_fname=ddb0,
+            eigr2d0_fname=eigr2d0,
             fan0_fname=fan0,
             gkk0_fname=gkk0,
             asr=asr,
+            amu=amu,
+            double_smearing = double_smearing,
+            smearing_width = smearing_width,
+            smearing_above = smearing_above,
+            smearing_below = smearing_below,
             )
 
         # Read the first DDB and check that it is Gamma
@@ -155,20 +183,14 @@ class EpcAnalyzer(object):
         # Read other files at q=0 and broadcast the data
         self.read_zero_files()
 
-        # Get arrays dimensions
-        self.nkpt = self.qptanalyzer.eigr2d0.nkpt
-        self.nband = self.qptanalyzer.eigr2d0.nband
-        self.natom = self.qptanalyzer.eigr2d0.natom
-        self.kpts = self.qptanalyzer.eigr2d0.kpt[:,:]
-
         # Set parameters
         self.set_temp_range(temp_range)
         self.set_omega_range(omega_range)
         self.set_smearing(smearing)
-        self.set_output(rootname)
+        self.set_rootname(rootname)
 
         # Split the workload between workers
-        # (needed to find the fermi level)
+        # (needed here to find the fermi level)
         self.distribute_workload()
 
         # Set the fermi level
@@ -181,15 +203,15 @@ class EpcAnalyzer(object):
 
     @property
     def nc_output(self):
-        return str(self.output) + '_EP.nc'
+        return str(self.rootname) + '_EP.nc'
 
     @property
     def ren_dat(self):
-        return str(self.output) + '_REN.dat'
+        return str(self.rootname) + '_REN.dat'
 
     @property
     def BRD_dat(self):
-        return str(self.output) + '_BRD.dat'
+        return str(self.rootname) + '_BRD.dat'
 
     @master_only
     def check_gamma(self):
@@ -208,6 +230,30 @@ class EpcAnalyzer(object):
         # Broadcast
         self.qptanalyzer.broadcast_zero_files()
 
+    @property
+    def nkpt(self):
+        return self.qptanalyzer.nkpt
+
+    @property
+    def nband(self):
+        return self.qptanalyzer.nband
+
+    @property
+    def natom(self):
+        return self.qptanalyzer.natom
+
+    @property
+    def kpts(self):
+        return self.qptanalyzer.kpts
+
+    @property
+    def nomegase(self):
+        return len(self.omegase)
+
+    @property
+    def ntemp(self):
+        return len(self.temperatures)
+
     def set_temp_range(self, temp_range=(0, 0, 1)):
         """Set the minimum, maximum and step temperature."""
         args = list(temp_range)
@@ -217,7 +263,6 @@ class EpcAnalyzer(object):
             if (maximum - minimum) % step == 0:
                 maximum += 1
         self.temperatures = np.arange(minimum, maximum, step, dtype=float)
-        self.ntemp = len(self.temperatures)
         self.qptanalyzer.temperatures = self.temperatures
 
     def check_temperatures(self):
@@ -229,7 +274,6 @@ class EpcAnalyzer(object):
     def set_omega_range(self, omega_range=(0, 0, 1)):
         """Set the minimum, makimum and step frequency for the self-energy."""
         self.omegase = np.arange(*omega_range, dtype=float)
-        self.nomegase = len(self.omegase)
         self.qptanalyzer.omegase = self.omegase
 
     def set_smearing(self, smearing_Ha):
@@ -237,9 +281,9 @@ class EpcAnalyzer(object):
         self.smearing = smearing_Ha
         self.qptanalyzer.smearing = smearing_Ha
     
-    def set_output(self, root):
+    def set_rootname(self, root):
         """Set the root for output names."""
-        self.output = root
+        self.rootname = root
 
     def set_weights(self, wtq, normalize=True):
         """Set the q-points weights."""
@@ -369,12 +413,22 @@ class EpcAnalyzer(object):
     def active_worker(self):
         return bool(self.my_iqpts)
 
-    def get_active_ranks(self):
+    def get_active_ranks(self,fine=False):
         """Get the ranks of all active workers."""
-        max_nqpt_per_worker = (self.nqpt // size
-                               + min(self.nqpt % size, 1))
-        n_active_workers = (self.nqpt // max_nqpt_per_worker
-                            + min(self.nqpt % max_nqpt_per_worker, 1))
+    
+        if fine:
+           nqpt = self.nqpt_fine
+        else:
+           nqpt = self.nqpt
+ 
+        #max_nqpt_per_worker = (self.nqpt // size
+        #                       + min(self.nqpt % size, 1))
+        #n_active_workers = (self.nqpt // max_nqpt_per_worker
+        #                    + min(self.nqpt % max_nqpt_per_worker, 1))
+        max_nqpt_per_worker = (nqpt // size
+                               + min(nqpt % size, 1))
+        n_active_workers = (nqpt // max_nqpt_per_worker
+                            + min(nqpt % max_nqpt_per_worker, 1))
         return np.arange(n_active_workers)
 
     @mpi_watch
@@ -386,7 +440,8 @@ class EpcAnalyzer(object):
 
         if i_am_master:
             total = partial_sum
-            active_ranks = self.get_active_ranks()
+            #active_ranks = self.get_active_ranks()
+            active_ranks = self.get_active_ranks(fine)
             if len(active_ranks) > 1:
                 for irank in active_ranks[1:]:
                     partial_sum = comm.recv(source=irank, tag=irank)
@@ -580,7 +635,7 @@ class EpcAnalyzer(object):
         sum_coarse = self.sum_qpt_function(func_coarse, fine=False)
 
         self.distribute_workload(fine=True)
-        self.read_zero_files()
+        #self.read_zero_files()
         sum_fine = self.sum_qpt_function(func_fine, fine=True)
 
         if i_am_master:
@@ -637,6 +692,17 @@ class EpcAnalyzer(object):
         self.zero_point_renormalization = (
             self.sum_qpt_functions_double_grid('get_zpr_static_sternheimer',
                                                'get_zpr_dynamical_active'))
+        self.renormalization_is_dynamical = True
+
+    def compute_dynamical_zp_renormalization_modes_double_grid(self):
+        """
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
+        """
+        self.check_temperatures()
+        self.zero_point_renormalization_modes = (
+            self.sum_qpt_functions_double_grid('get_zpr_static_sternheimer_modes',
+                                               'get_zpr_dynamical_active_modes'))
         self.renormalization_is_dynamical = True
 
     def compute_dynamical_zp_renormalization(self):
@@ -758,9 +824,20 @@ class EpcAnalyzer(object):
             self.sum_qpt_function('get_zpr_static_modes'))
         self.renormalization_is_dynamical = False
 
+    def compute_dynamical_zp_renormalization_modes(self):
+        """
+        Compute the zero-point renormalization in a static scheme
+        with the transitions split between active and sternheimer.
+        Retain the mode decomposition of the zpr.
+        """
+        self.distribute_workload()
+        self.zero_point_renormalization_modes = (
+            self.sum_qpt_function('get_zpr_dynamical_modes'))
+        self.renormalization_is_dynamical = True
+
     def compute_zp_self_energy(self):
         """
-        Compute the zp frequency-dependent self-energy from one q-point.
+        Compute the zero-point frequency-dependent self-energy.
     
         The self-energy is evaluated on a frequency mesh 'omegase'
         that is shifted by the bare energies, such that, what is retured is
@@ -773,7 +850,7 @@ class EpcAnalyzer(object):
 
     def compute_td_self_energy(self):
         """
-        Compute the td frequency-dependent self-energy from one q-point.
+        Compute the temperature-dependent frequency-dependent self-energy.
     
         The self-energy is evaluated on a frequency mesh 'omegase'
         that is shifted by the bare energies, such that, what is retured is
@@ -860,16 +937,141 @@ class EpcAnalyzer(object):
           self.sum_qpt_functions_double_grid('get_td_self_energy_sternheimer',
                                              'get_td_self_energy_active'))
 
+    def compute_zp_self_energy_static(self):
+        """
+        Compute the static part of the zero-point self-energy.
+        This includes the Fan and DDW contribution of the Sternheimer space
+        and the DDW contribution of the active space.
+    
+        """
+        self.distribute_workload()
+        ddw_active = self.sum_qpt_function('get_zpr_ddw_active')
+        sternheimer = self.sum_qpt_function('get_zpr_static_sternheimer')
+
+        if i_am_master:
+            self.self_energy_static = ddw_active + sternheimer
+        else:
+            self.self_energy_static = None
+
+        return self.self_energy_static
+
+    def compute_td_self_energy_static(self):
+        """
+        Compute the static part of the zero-point self-energy.
+        This includes the Fan and DDW contribution of the Sternheimer space
+        and the DDW contribution of the active space.
+        """
+        self.distribute_workload()
+        ddw_active = self.sum_qpt_function('get_tdr_ddw_active')
+        sternheimer = self.sum_qpt_function('get_tdr_static_sternheimer')
+
+        if i_am_master:
+            self.self_energy_static_T = ddw_active + sternheimer
+        else:
+            self.self_energy_static_T = None
+
+        return self.self_energy_static_T
+            
+    def compute_zp_self_energy_static_double_grid(self):
+        """
+        Compute the static part of the zero-point self-energy.
+        This includes the Fan and DDW contribution of the Sternheimer space
+        and the DDW contribution of the active space.
+    
+        """
+        self.self_energy_static = (
+            self.sum_qpt_functions_double_grid('get_zpr_static_sternheimer',
+                                               'get_zpr_ddw_active'))
+
+        return self.self_energy_static
+        
+    def compute_td_self_energy_static_double_grid(self):
+        """
+        Compute the static part of the td self-energy.
+        This includes the Fan and DDW contribution of the Sternheimer space
+        and the DDW contribution of the active space.
+    
+        """
+        self.self_energy_static_T = (
+            self.sum_qpt_functions_double_grid('get_tdr_static_sternheimer',
+                                               'get_tdr_ddw_active'))
+
+        return self.self_energy_static_T
+    
+    def compute_td_self_energy_active(self):
+        """
+        Compute the temperature-dependent frequency-dependent self-energy
+        from the active part only (GKK), neglecting the Sternheimer part
+        (EIGR2D).
+    
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+    
+            Simga'_kn(omega,T) = Sigma_kn(omega + E^0_kn,T)
+    
+        """
+        self.distribute_workload()
+        self.self_energy_T = self.sum_qpt_function('get_td_self_energy_active')
+
+    def compute_zp_self_energy_active(self):
+        """
+        Compute the zero-point frequency-dependent self-energy from the active
+        part only (GKK), neglecting the Sternheimer part (EIGR2D).
+    
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+    
+            Simga'_kn(omega,T) = Sigma_kn(omega + E^0_kn,T)
+    
+        """
+        self.distribute_workload()
+        self.self_energy = self.sum_qpt_function('get_zp_self_energy_active')
+
+    def compute_td_self_energy_static_double_grid(self):
+        """
+        Compute the static part of the td self-energy.
+        This includes the Fan and DDW contribution of the Sternheimer space
+        and the DDW contribution of the active space.
+    
+        """
+        self.self_energy_static_T = (
+            self.sum_qpt_functions_double_grid('get_tdr_static_sternheimer',
+                                               'get_tdr_ddw_active'))
+
+        return self.self_energy_static_T
+
+    def compute_zp_self_energy_fan_active(self):
+        """
+        Compute only the active part of Fan term for check.
+
+        """
+        self.self_energy_fan_active = (
+            self.sum_qpt_function('get_zp_fan_active'))
+
+        return self.self_energy_fan_active
+
     @master_only
     def write_netcdf(self):
         """Write all data to a netCDF file."""
+
+        if self.eigr2d_fnames:
+            dim_fname = self.eigr2d_fnames[0]
+        elif self.gkk_fnames:
+            dim_fname = self.gkk_fnames[0]
+        elif self.fan_fnames:
+            dim_fname = self.fan_fnames[0]
+        else:
+            raise Exception('Need at least one file to read the dimensions: ' +
+                            'EIGR2D, GKK, or FAN. ' +
+                            'How did you even get there?')
+
         create_directory(self.nc_output)
 
         # Write on a NC files with etsf-io name convention
         with nc.Dataset(self.nc_output, 'w') as ds:
 
             # Read dim from first EIGR2D file
-            dim = nc.Dataset(self.eigr2d_fnames[0], 'r')
+            dim = nc.Dataset(dim_fname, 'r')
 
             # Determine nsppol from reading occ
             nsppol = len(dim.variables['occupations'][:,0,0])
@@ -1027,6 +1229,27 @@ class EpcAnalyzer(object):
                 self_energy[0,:,:,:,0] = self.self_energy[:,:,:].real
                 self_energy[0,:,:,:,1] = self.self_energy[:,:,:].imag
 
+            # ZSE fan active
+            self_energy_fan_active = ds.createVariable('self_energy_fan_active','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_frequencies', 'cplex'))
+
+            if self.self_energy_fan_active is not None:
+
+                # FIXME number of spin
+                self_energy_fan_active[0,:,:,:,0] = self.self_energy_fan_active[:,:,:].real
+                self_energy_fan_active[0,:,:,:,1] = self.self_energy_fan_active[:,:,:].imag
+
+            # ZSE static
+            data = ds.createVariable(
+                'self_energy_static','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states'))
+
+            if self.self_energy_static is not None:
+                # FIXME number of spin
+                data[0,:,:] = self.self_energy_static[:,:].real
+
             # TSE
             self_energy_T = ds.createVariable(
                 'self_energy_temperature_dependent','d',
@@ -1038,6 +1261,16 @@ class EpcAnalyzer(object):
                 # FIXME number of spin
                 self_energy_T[0,:,:,:,:,0] = self.self_energy_T[:,:,:,:].real
                 self_energy_T[0,:,:,:,:,1] = self.self_energy_T[:,:,:,:].imag
+
+            # TSE static
+            data = ds.createVariable(
+                'self_energy_static_T','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_temperature'))
+
+            if self.self_energy_static_T is not None:
+                # FIXME number of spin
+                data[0,:,:,:] = self.self_energy_static_T[:,:,:].real
 
             # ZSF
             spectral_function = ds.createVariable(
@@ -1096,6 +1329,8 @@ class EpcAnalyzer(object):
                     .real * Ha2eV)
                     f.write("{:>8.1f}  {:>12.8f}\n".format(T, ren))
 
+        return
+
     @master_only
     def write_broadening(self):
         """Write the computed broadening in a text file."""
@@ -1128,3 +1363,4 @@ class EpcAnalyzer(object):
                            .real * Ha2eV)
                     f.write("{:>8.1f}  {:>12.8f}\n".format(T, brd))
 
+        return

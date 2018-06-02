@@ -1,0 +1,252 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+March 2013 and August 2013. These release notes
+are relative to improvements of ABINITv7.4 with respect to v7.2.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, G. Antonius, J.-M. Beuken, F. Bottin, E. Bousquet, F. Bruneval, D. Caliste,
+C. Espejo, L. Genovese, M. Giantomassi, Y. Gillet, X. Gonze, I. Lukacevic, M. Mancini,
+A. Martin, C. Martins, S. Ponce, Y. Pouillon, A. Romero, M. Torrent, Bin Xu, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.4, released on August 10, 2013.
+
+Changes with respect to version 7.2 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The new methodology for the test suite has been activated, and the old one has been disabled.. 
+    In practice, this means that a command like "make tests_acc" issued in the ~abinit/tests directory will not work anymore.
+    One should now use the script runtests.py . See runtests.py --help for the documentation about this new script.
+    See B.1 .
+
+A.2 After the v7.4.1 was frozen, and released, two bugs in optics have been identified, and fixed.
+    They are related to the case when kptopt/=3 has been used in the ABINIT run before calling optics.
+    On one side, there was a misuse of the symmetries in case rprimd was not symmetric (the transpose of it should
+    have been used), which was e.g. very noticeable in case of the hexagonal crystalline system (but not, e.g. FCC).
+    On the other side, there was, if symmetry were used to decrease the number of k points, wrongly computed
+    weights for k points. The relative impact of the latter error was decreasing with the number of k point, so that
+    the converged calculation was correct. 
+    Bug identified and fixed by Y. Gillet
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The scripts for the automatic testing of ABINIT have been completely rewritten, with largely improved capabilities.
+    In particular, a subset of tests can be readily selected and executed, by using keywords.
+    Also, the number of threads can be varied, in order to obtain smaller wall clock time to full completion of the test suite.
+    The documentation is present in tests/doc and
+    http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-test-suite
+    The main script for testing is now called "runtests.py".
+    Get help with "runtests.py --help" , that provides a description of options, and typical examples.
+    The documentation has been updated.
+    Work by M. Giantomassi
+
+B.2 The ABINIT GUI can be used in production.
+    The whole GUI is actually delivered now outside of the ABINIT package (it was too heavy).
+    The AbinitGUI binaries (but also sources) of the last stable version as well as additional material can be found at:
+    http://flavio.be/AbinitGUI.php
+    There you can download the pseudo-potential filetree organized for AbinitGUI (PSP.zip) 
+    and other external post-processing libraries adapted for AbinitGUI (abipy.tar.gz & pymatgen.tar.gz)
+    Work by F. Abreu and Y. Gillet.
+
+B.3 The APPA post-processor, dedicated to the analysis of Molecular Dynamics output files (trajectories),
+    has been made available. 
+    Output files from large scale molecular dynamics simulations are not easy to manage.
+    All the data can be extracted from output files in NetCDF or ACSCII(text) formats.
+    APPA is a graphical tool written in python (PyQt4 library) able to read ABINIT output,
+    easy to use in order to follow a trajectory from molecular dynamics simulation
+    (total energy, pressure...).
+    It is also possible to calculate velocity autocorrelation function from the simulation,
+    radial pair distribution, vibrational density of states, etc....
+    See script/post-processing/appa, in particuler the README file 
+    Work by A. Martin and F. Bottin (helped by M. Torrent)
+
+B.4 The computation of orbital magnetism (also the Chern number) is now completed,
+    for use with PAW, with or without spin-orbit interaction.
+    Testing and debugging is underway.
+    By J. Zwanziger
+
+B.5 icoulomb > 1 can be used with plane waves and PAW.
+    This has been tested.
+    This works in parallel (but only on FFTs).
+    Work in progress to use it within the KGB parallelization.
+    See test bigdft#23.
+    Work by T. Rangel + M Torrent, with the help of Luigi Genovese, Damien Caliste, and J.-M. Beuken
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 The abipy and gui projects have been transferred to GitHUB .
+    Please, see doc/gui/README and doc/abipy/README.
+    For abipy, see https://github.com/gmatteo/abipy .
+    For the AbinitGUI, see https://github.com/abinitgui/abinitgui.git
+    Work by F. Abreu, Y. Gillet, and M. Giantomassi
+
+C.2 The new test scripts, see B.1, are now used for the test farm.
+    This means that the metadata (tolerances, launch commands, and documentation) 
+    for each test are now present in the input file, and no more in the README, report.in or *.cnf files.
+    Most of the  report.in and *.cnf files have been suppressed (not those in tests/buildsys and tests/abirules,
+    that still rely on old perl scripts.)
+    See the documentation at http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-test-suite
+    Work by M. Giantomassi, J.-M. Beuken, Y. Pouillon, and X. Gonze
+
+C.3 Linked to B.1 and C.2, there has been a complete renaming of the tests 
+    in the tests/mpiio, tests/paral, tests/seq directories, in order for the usual naming convention to be followed
+    with possibilities to address them one by one, or as a subset.
+    Other tests have been renamed or modified as well for this purpose, e.g. tdfpt_03, elphon (became eph), 
+    Also, many obsolete keywords of the "make" command in ~abinit/tests have been disabled (e.g. make tests_acc has been disabled).
+    The documentatino has been updated accordingly.
+    Work by X. Gonze
+
+C.4 The content of the util(/maintainers,/developers...) directory has been transferred 
+    to the tests/Scripts or developers(/various or /maintainers) directory (or a few other relevant directories)
+    Work by Y. Pouillon
+
+C.5 Created a new build subsystem for the doc .
+    Work by Y. Pouillon
+
+C.6 New bots were added : coba2_intel13, green_gcc48, yquem_gcc47, yquem_gcc48, yquem_gcc47_mpich3, and yquem_g95
+    Work by J.-M. Beuken
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 New version of libraries are now interfaced with ABINIT :
+    libxc-2.0.2
+    bigdft-abi-1.0.4 
+    atompaw-3.1.0.2
+    Work by J.-M. Beuken
+
+D.2 New unitary tests have been developed for FFT libraries :
+    - for the FFTW3 library (seq and threaded version)
+    - for the MKL library
+    - for the SG library
+    See the tests in the tests/unitary directory : tfftfftw3, tfftmkl, tfftsg.
+    Work by M. Giantomassi
+
+D.3 The zero-point motion and temperature dependence of the gap (and electronic structure)
+    has been validated by cross comparison with PWSCF+YAMBO (after removing a bug in the latter,
+    both ABINIT and PWSCF+YAMBO agree for the temperature dependance of the gap of diamond, within a few meV).
+    The dynamical corrections to these effects has now been coded. 
+    The postprocessing utility temperature.py is to be used for this purpose.
+    See Tv7#55 and 56.
+    Work by S. Ponce.
+
+D.4 PAW + Bigdft project (beta version).
+    The new input variable wvl_ngauss has been created.
+    New Tests bigdft#32 and bigdft_paral#tbig_1 to test has been created to test wvl_ngauss.
+    A few patches have been added to the bigdft lib (bigdft-abi-1.0.5) to correct PAW + wavelets routines.
+    The creation of the ABINIT PAW library (libpaw) is going on, see src/42_libpaw .
+    Work by T. Rangel + M Torrent, with the help of Luigi Genovese, Damien Caliste, and J.-M. Beuken
+
+D.5 The vdW-DF1 and DF2 are in debugging phase.
+    New input variables have been introduced : 
+    vdw_df_damin, vdw_df_phisoft, vdw_df_ngpts, 
+    vdw_df_rsoft, vdw_df_tolerance, vdw_df_tweaks .
+    There is also a new test to insure abirules compliance of VdW-DF input variables, see tests/vdwxc#03 .
+    From Y. Pouillon and C. Espejo
+
+D.6 Work on BSE part of ABINIT, trying to improve the scaling, by Y. Gillet.
+
+D.7 A new tutorial, describing the computation of properties at the nuclear site (EFG, NMR, NQR),
+    has been initialized. At present, the EFG part is available.
+    See doc/tutorials/lesson_nuc.html .
+    See also the new test tutorial#tnuc_1
+    Work by J. Zwanziger.
+
+D.8 The application of magnetization constraints (the magnetization within a sphere must equal a predefined value)
+    is progressing. New input variables : magconon and magcon_lambda .
+    New test : v7#05 .
+    Work by M. Verstraete, I. Lukacevic and E. Bousquet.
+
+D.9 Work on the implementation of the LOTF "Learn-On-The-Fly" technique.
+    The scheme is based on the idea of augmenting a unique, 
+    simple parametrized force model by incorporating in it, at run time, 
+    the quantum-mechanical information necessary to ensure accurate trajectories.
+    At present, only the glue model for gold is available.
+    Input variables : lotf_classic, lotf_nitex, lotf_nneigx, lotf_version.
+    Parallelism is working.
+    See test/paral#41 . 
+    Work by M. Mancini
+
+D.10 A new test for parallelism with BSE has been created, tests/paral#76 .
+     By Matteo Giantomassi
+
+D.11 Comment lines are now unchanged by abiauty.pl
+     By X. Gonze .
+
+D.12 Continued efforts on the development of Hartree-Fock
+     Hartree-Fock calculations are now available within Norm-Conserving PSP formalism
+     with the use of symetries and parallelism (beta version)
+     PAW + Hartree-Fock under development
+     From C. Martins (helped by M. Torrent and B. Amadon)
+
+D.13 The Silvestrelli VdW approach has been further developed, with the coding of the
+     new flavor VdW-WF2 (A. Ambrosetti and P. L. Silvestrelli, doi:10.1103/PhysRevB.85.073101). 
+     Amalgamation of close MLWFs and splitting of p-like Wannier functions (L. Andrinopoulos, N. D. M. Hine, 
+     and A. A. Mostofi, doi:10.1063/1.3647912 JChemPhys.135.154105) have been enabled.  
+     See the input variable vdw_xc=11 
+     From C. Espejo and A. Romero
+
+D.14 For the genetic algorithm, the coordinates can now be fixed.
+     Work by A. Romero
+
+D.15 Make usexcnhat=0 work with non-collinear magnetism
+     Work by M. Torrent
+
+D.16 icutcoul=6 (auxiliary function integration for 3D systems from P. Carrier et al., PRB 75, 205126 (2007))
+     is now the default for GW calculations.
+     Work by X. Gonze
+
+D.17 The Krack table of norm-conserving HGH pseudopotentials for GGA has been added in psps/tables/NC_GGA_HGHK .
+     By M. Giantomassi
+
+D.18 J. Zwanziger has provided a document about how to get a Crystal Structure into Abinit.
+     See doc/users/xtalinput.pdf .
+
+D.19 Working on e-p Doppler broadening, by M. Torrent, J. Wiktor and  G. Jomard.
+
+D.20 Patch from Shauna Story in Rehr group, for output to file of the IFC and real space atomic positions
+     Incorporated by M. Verstraete
+     
+D.21 Continued efforts on the development of the abipy library
+    From M. Giantomassi and G. Antonius
+
+D.22 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
+     including patches for the fallbacks), and improvements of documentation by :
+     F. Abreu, G. Antonius, J.-M. Beuken, E. Bousquet, F. Bruneval, C. Espejo,
+     M. Giantomassi, Y. Gillet, X. Gonze, Y. Pouillon, M. Torrent, Bin Xu, J. Zwanziger
+
+</pre>

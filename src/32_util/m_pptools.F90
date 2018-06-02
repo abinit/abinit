@@ -7,7 +7,7 @@
 !!  Helper functions used for simple post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MG,ZL, MJV, BXu)
+!! Copyright (C) 2002-2018 ABINIT group (MG,ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,6 @@ MODULE m_pptools
  use m_errors
  use m_profiling_abi
  use m_kptrank
-
 
  use m_io_tools,        only : open_file
  use m_fstrings,        only : sjoin, itoa

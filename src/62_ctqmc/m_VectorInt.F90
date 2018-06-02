@@ -10,7 +10,7 @@
 !!  Manage an integer vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,7 +131,7 @@ END SUBROUTINE VectorInt_init
 !!  impose size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,7 +189,7 @@ END SUBROUTINE VectorInt_setSize
 !!  enlarge memory size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -256,7 +256,7 @@ END SUBROUTINE VectorInt_enlarge
 !!  push an element at the end
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -315,7 +315,7 @@ END SUBROUTINE VectorInt_pushBack
 !!  Clear vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -360,7 +360,7 @@ END SUBROUTINE VectorInt_clear
 !!  print vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -421,7 +421,7 @@ END SUBROUTINE VectorInt_print
 !!  Destroy vector 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !! Renormalize psichi.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +277,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    mbandc  = paw_dmft%mbandc
    natom   = cryst_struc%natom
    nspinor = paw_dmft%nspinor
-   pawprtvol=2
+   pawprtvol=3
    diag=0
 
    if(nkpt/=1.and.present(jkpt)) then

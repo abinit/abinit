@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,13 +26,13 @@
 
 
 !---------------------------------------------------------------------
-!  Utility modules, which are not directly related to the 
+!  Utility modules, which are not directly related to the
 !  problem to be solved.
 !---------------------------------------------------------------------
 
 module m_gwls_utility
 !----------------------------------------------------------------------------------------------------
-! This module contains useful functions and subroutines, which are not necessarily numerical 
+! This module contains useful functions and subroutines, which are not necessarily numerical
 ! in nature, for timing, opening files, etc...
 !----------------------------------------------------------------------------------------------------
 
@@ -52,8 +52,8 @@ complex(dpc), public, parameter :: cmplx_1 = (1.0_dp,0.0_dp)
 complex(dpc), public, parameter :: cmplx_0 = (0.0_dp,0.0_dp)
 
 logical, public  :: master_debug
-character(len=100), public :: files_status_new='new'  
-character(len=100), public :: files_status_old='unknown'  
+character(len=100), public :: files_status_new='new'
+character(len=100), public :: files_status_old='unknown'
 
 public :: driver_invert_positive_definite_hermitian_matrix
 public :: ritz_analysis_general, orthogonalize
@@ -73,10 +73,10 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -222,9 +222,9 @@ end subroutine orthogonalize
 subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
 !----------------------------------------------------------------------------------------------------
 !        This is a utility-type subroutine, which encapsulates the many Lapack steps necessary
-!        to invert a positive definite hermitian matrix, and returns the full inverse to avoid 
+!        to invert a positive definite hermitian matrix, and returns the full inverse to avoid
 !        errors!
-!        
+!
 !        The subroutine overwrites the input.
 !----------------------------------------------------------------------------------------------------
 
@@ -293,7 +293,7 @@ subroutine ritz_analysis_general(mpi_communicator,matrix_function,lmax,Hsize,Lba
 ! This subroutine is mostly for testing purposes.
 !
 ! Given a matrix A_{NxN} which undergoes Lanczos analysis to yield
-! a trigonal matrix T_{k x k}, for k lanczos steps, it is useful to 
+! a trigonal matrix T_{k x k}, for k lanczos steps, it is useful to
 ! test how well the eivenalues of T reproduce the eigenvalues of A.
 !
 ! Following Matrix computations by Golub and Van Loan, define
@@ -312,12 +312,12 @@ subroutine ritz_analysis_general(mpi_communicator,matrix_function,lmax,Hsize,Lba
 !        Ri = || A.yi - di yi ||.
 !
 !        INPUTS:
-!                     matrix_function    : the function which yields the action 
+!                     matrix_function    : the function which yields the action
 !                                        of the implicit matrix on a vector
 !                        lmax            : the total number of Lanczos steps
 !                        Hsize           : the dimension of the Hilbert space
 !                        Lbasis          : the Y matrix
-!                       eigenvalues      : the computed approximate eigenvalues 
+!                       eigenvalues      : the computed approximate eigenvalues
 !                                        of the matrix
 !----------------------------------------------------------------------
 
@@ -341,8 +341,8 @@ interface
 end interface
 
 
-integer,      intent(in)    :: Hsize, lmax , mpi_communicator 
-complex(dpc), intent(in)    :: Lbasis(Hsize,lmax)  
+integer,      intent(in)    :: Hsize, lmax , mpi_communicator
+complex(dpc), intent(in)    :: Lbasis(Hsize,lmax)
 real(dp),     intent(in)    :: eigenvalues(lmax)
 
 
@@ -368,7 +368,7 @@ logical        :: head_node
 
 ABI_ALLOCATE(check_matrix,(lmax,lmax))
 ABI_ALLOCATE(yl,(Hsize))
-ABI_ALLOCATE(rl,(Hsize)) 
+ABI_ALLOCATE(rl,(Hsize))
 ABI_ALLOCATE(Ayl,(Hsize))
 
 mpi_rank  = xmpi_comm_rank(mpi_communicator)
@@ -380,7 +380,7 @@ if (head_node) then
 
   i = 0
   file_exists = .true.
-  do while (file_exists) 
+  do while (file_exists)
   i = i+1
   write(filename,'(A,I0.4,A)') "General_Ritz_Analisis_",i,".log"
   inquire(file=filename,exist=file_exists)
@@ -400,7 +400,7 @@ if (head_node) then
   write(io_unit,10) '#===================================================================================================='
   write(io_unit,10) ''
   flush(io_unit)
-end if 
+end if
 
 ! NEVER use MATMUL! It stores temp arrays on stack, which kills executables compiled with intel!
 ! check_matrix(:,:) = matmul(transpose(conjg(Lbasis)),Lbasis)
@@ -423,13 +423,13 @@ call xmpi_sum(check_matrix,mpi_communicator,ierr) ! sum on all processors workin
 
 do l = 1, lmax
 check_matrix(l,l) =  check_matrix(l,l) - cmplx_1
-end do 
+end do
 check_norm = sqrt(sum(abs(check_matrix(:,:))**2))
 
 
 if (head_node) then
   write(io_unit,10) '#'
-  write(io_unit,11) '#  Is the basis orthonormal?   || I - Y^H . Y || = ',check_norm 
+  write(io_unit,11) '#  Is the basis orthonormal?   || I - Y^H . Y || = ',check_norm
   write(io_unit,10) '#'
   flush(io_unit)
 
@@ -451,7 +451,7 @@ call matrix_function(Ayl,yl,Hsize)
 rl       = Ayl - lambda_l*yl
 
 norm_ritz_squared = sum(abs(rl(:))**2)
-call xmpi_sum(norm_ritz_squared ,mpi_communicator,ierr) 
+call xmpi_sum(norm_ritz_squared ,mpi_communicator,ierr)
 
 norm_ritz = sqrt(norm_ritz_squared )
 

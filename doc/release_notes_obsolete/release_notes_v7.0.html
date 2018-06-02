@@ -1,0 +1,385 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+February 2012 and November 2012. These release notes
+are relative to improvements of ABINITv7.0 with respect to v6.12.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, G. Antonius, T. Applencourt, A. Berger,
+J.M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, D. Caliste, R. Cohen, F. Dahm, M. Delaveau,
+G. Franco, G. Geneste, M. Giantomassi, Y. Gillet, Jiawang Hong, A. Jacques, F. Jollet,
+M. Mancini, M. Marques, C. Martins, L. Nguyen, S. Poncé, Y. Pouillon, T. Rangel, A.H. Romero, 
+M. Stankovski, M. Stengel, M. Torrent, D. Vanderbilt, M. Verstraete,  D. Waroquiers,
+Bin Xu, J. Zwanziger.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.0, released on November 26, 2012.
+
+Changes with respect to version 6.12 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The GW part of ABINIT uses now k-centered sets of wavefunctions (_WFK files),
+    except for GW_EET formalism.
+    This implies some numerical differences with respect to calculations with ABINITv6, for GW only.
+    They should be smaller than 0.1 eV, though.
+    All the GW reference files have been updated.
+
+A.2 The input variable cd_customimfrqs has been renamed cd_customnimfrqs
+
+A.3 The input variable fixmom has been renamed spinmagntarget
+
+A.4 The capabilities of pawprtden haven been transferred to prtden .
+    Work by D. Waroquiers
+
+A.5 The input variables npwwfn and nshwfn are not supported anymore (use ecutwfn instead)
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1. Fixed electric field calculations : other flavours than simply fixing the electric field 
+     are now available, and the geometry can be relaxed (non-zero optcell) in these calculations, 
+     following M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009). 
+     One can do e.g. calculations with fixed E/D-field or fixed reduced ebar/d field 
+     or mixed electric boundary condition (such as fixed D/d in one direction and fixed E/ebar 
+     in other directions which is useful for the calculation of sandwiched capacitor).  
+     The implementation supports fixed three-dimensional E/ebar or D/d. 
+     The variables to be used in finite field calculations have been 
+     gathered in a new html file doc/input_variables/varrf.html.
+     New input variables : dfield, red_efieldbar, red_dfield, red_efield,
+     as well as jfielddir, ddamp, polcen, and maxestep
+     See the new options in berryopt input variable.
+     New test cases : seq/v6_121, v6_122, v6_123, v6_124, v6_125, v6_126
+
+     More implementation notes can be found in doc/theory/fixd_theory.pdf, 
+     tests of the current ABINIT implementation were presented in J Hong and D Vanderbilt, Phys. Rev. B 84, 115107 (2011).
+
+     Other improvements for finite electric field calculations include the possibility to keep the same "branch"
+     from one iteration to the next one, thanks to the input variable berrysav, 
+     and for finite electric field calculations
+     starting from a centrosymmetric geometry with non-zero polarization (like AlAs), the
+     non-zero polarization should be specified thanks to the input variable polcen.
+     Contribution by Jiawang Hong (+D. Vanderbilt, M. Stengel, R. Cohen).
+
+B.2. Hybrid functional calculations can now be performed, at fixed geometry.
+     This is implemented in the GW part of ABINIT : either perturbatively (like a G0_W0) calculation,
+     or with self-consistency (like scQPGW).
+     Three functionals are available : HSE06, PBE0, and B3LYP.
+     However, with the current production version of libxc (as of Sept 30, 2012, libxc 1.1.0), only the 
+     B3LYP functional is available. HSE06 and PBE0 are available with the development version of libxc, not yet
+     delivered on the Web, but only from the repository.
+     Related input variable : gwcalctyp=105, 125, 205, 225, 305 and 325 , but also icutcoul and rcut.
+     Related test case : libxc#41 and 42.
+     Contributed by F. Bruneval (also with help by M. Marques).
+
+     Another implementation, more similar to usual ABINIT ground-state calculations is now in progress.
+     This will allow to compute forces and stresses, and thus, to perform geometry optimizations.
+
+B.3. For DFT+DMFT calculations, the combined parallelization over k-point, plane waves and bands is now available,
+     and tested, but only without self-consistency of electronic density. Also MPIIO can be used.
+     Spin-orbit coupling has been implemented.
+     One can read/write occupations (including non-diagonal ones) as computed in DMFT,
+     using the input variable dmft_read_occnd.
+     The tolerance on variation of local charge during iterations can now be specified,
+     using the input variable dmft_tollc.
+     See also the new input variables f4of2_sla and f6of2_sla.
+     Related test case : mpiio#AG , paral#AF , v7#21.
+     Contributed by B. Amadon 
+
+B.4. Parallelisation of the response-function part over different perturbations is now available.   
+     A good balancing scheme is however not yet worked out.
+     Related input variables : paral_rf, nppert
+     Related test case : mpiio#AI .
+     Contributed by F. Jollet (with help of M. Torrent).
+
+B.5  The GW part of ABINIT is able to start from _WFK files instead of _KSS files (except the EET).
+     Such _WFK files can be generated in parallel, and written/read using MPIIO. Thus there is no 
+     more such a sequential bottleneck for GW calculations.
+     Work by M. Giantomassi.
+
+B.6. New integration methods and grid options for the integral
+     along the imaginary axis in GW contour deformation calculations are available.
+     This is especially useful for very accurate convergence studies.
+     See the input variable cd_frqim_method : histogram method, trapezoid method, 
+     natural spline, Gauss-Kronrod with different orders.
+     See also the input variables freqim_alpha, gw_frqim_inzgrid, gw_frqre_inzgrid,
+     gw_freqre_tangrid. gw_customnfreqsp, nfreqsp, gw_freqsp.
+     New test : Tv67mbpt#22 .
+     From M. Stankovski.
+
+B.7 Calculation of polarization and computation under finite electric field are now available
+    with spinors and spin-orbit coupling.
+    Test for norm-conserving pseudopotentials : Tv7#03 .
+    From J. Zwanziger.
+
+B.8 The U value for DFT+U calculations can now be computed in the cRPA method,
+    for non entangled correlated bands.
+    Test Tv7#22,23,24,25 (for SrVO3), and new input variables ucrpa and ucrpa_bands.
+    Contributed by T. Applencourt and B. Amadon.
+
+B.9 The nudged-elastic band (NEB) method to find path between local minima has been coded.
+    This include also the "Climbing-image nudged elastic nband" method.
+    Different solvers are available for the solution for the corresponding ordinary differential equation.
+    Local and (highly experimental) global BFGS for NEB Variable spring constants for the NEB. 
+    Related work on the string method. Runge-Kutta 4 available for both NEB and string method.
+    The string methods with equal arc length, and with energy-weighted arc lengths
+    are available, thanks to the input variable string_algo, with values 1 and 2.
+    Previously, only equal arc length method was available.
+    No test available yet for string_algo=2 .
+    See the input variables : imgmov=5, neb_algo (CI_NEB with neb_algo=2), neb_spring,
+                              mep_mxstep, mep_solver.
+    Contributed by M. Torrent
+
+B.10 The genetic algorithm to find global optima thanks to a search based on a population
+    of images, has been implemented.
+    Call the genetic algorithm with imgmov=4 . 
+    Related input variables : ga_rules, ga_n_rules, ga_opt_percent, ga_fitness.  Also,
+    random_atpos.
+    Contributed by A.H. Romero and X. Gonze
+
+B.11 The vdW-DFT-D2 (Grimme) semi-empirical potential to mimick the Van De Waals interaction is available.
+    See Tvdwxc#04, and input variable vdw_xc (that must be equal to 5) and vdw_tol.
+    From M. Torrent 
+    The Ambrosetti and Silvestrelli http://arxiv.org/abs/1111.6737  van der waals functional
+    is available, see Tv7#11 .
+    From C. Espejo, Y. Pouillon and A. Romero.
+    The tests in tests/vdwxc have been activated (they were not previously).
+
+B.12 Significant progresses have been done for the usage of OpenMP, especially for FFTs.
+     In particular, using OpenMP for the FFT for GW allows to bypass
+     memory problems for the largest calculations on massively parallel machines.
+     [Vnl,r] is parallelized using OpenMP, Hilbert method as well..
+     Work by M. Giantomassi
+     Activation of openMP for non-local operation in the ground-state part of ABINIT
+     in the PAW case (useylm=1).
+     Activation of openMP in the linear algebra of the LOBPCG algorithm.
+     Work by L. Nguyen, M. Torrent.
+
+B.13 MPI_IO can be used for the writing/reading of the SCR files.
+     Work by M. Giantomassi
+
+B.14 Mixalch and amu are now evolving variables . This means that
+     they can differ in different images. All the images algorithm might
+     be combined with such possibility.
+
+B.15 The new input variable paral_atom has been introduced, to control
+     the parallel distribution of memory of PAW on-site data over atomic sites. 
+     It is now activated by default.  Calculations are
+     also distributed using the "kpt-band" communicator.
+     Only compatible for the time being with ground-state calculations.
+     No test activates it, however.
+     Work by M. Delaveau, M. Torrent, F. Jollet.
+
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 The directory tests/gwdp has been removed : the duplication of tests was costly to maintain, and
+    did not appear interesting at present.
+
+C.2 The directory tests/v6 has been split in tests/v6, tests/v67mbpt and tests/v7, for more flexibility in the execution
+    of tests, and because ABINITv7 had been started.
+
+C.3 Two DFPT tests have been activated in tutoparal, with 24 and 32 processors, on the Cronos machine, that is dedicated
+    to parallel tests with more than 10 procs. More tests from the Bruyeres 2011 tutorial should be activated in the future ...
+
+C.4 There have been many improvements for the test farm.
+    Among other developments :
+    - new nightly builders :
+        - cronos, to test parallel runs with up to 32 cores
+        - toum gcc46 to test openmp
+        - buda_gcc44_cuda to test GPU : 4 different tests have been activated
+        - bigmac_gcc47_sl for testing scalapack 2.0.2 (no yet nightly)
+        - petrus_gcc47 under openSUSE 12.1
+    - switch of the reference compiler from gcc44 to gcc47, on testf.
+    - splitting of all the tasks previously done by the shiva builder in two different builders : shiva and vishnu.
+         this is for faster execution of this large set of tests.
+    The tests in the tests/vdwxc have been activated .
+    The U determination tutorial is now automatically tested.
+    Work by JM Beuken and X. Gonze
+
+C.5 Fox4.1.2 works on intel 12 (tikal and coba2)
+
+C.6 NetCDF+ETSF_IO have been activated on all machines, except Fock. Should soon become mandatory.
+
+C.7 Split of test-farm and examples config files generation
+    Work by  Y. Pouillon
+
+C.8 The implementation of parallelism in ABINIT has been considerably cleaned.
+    As an exemple,  routines xme_init and xcomm_world have been removed. File xdef_comm has been removed.
+    Work by F. Jollet
+
+C.9 Fully activated OpenMP support in the build system
+    Work by Y. Pouillon
+
+C.10 The old, unused, "newsp" utility has been removed.
+
+C.12 Memory profiling has been coded, see m_profiling module.
+     Tested automatically on max2_gcc46 .
+     Work by D. Waroquiers.
+
+C.13 Dead project "rdm" routines have been suppressed.
+     By M. Giantomassi.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Cleaned the tutorial basic paral. Removed t_paral#03
+    Cleaned the following tutorials : spin, PAW1, PAW2, elastic, ffield
+    Work by M. Torrent, X. Gonze, J. Zwanziger
+
+D.2 Creation of the library abipy-0.1.0.dev .
+    From M. Giantomassi
+
+D.3 New tests for Bigdft tests/bigdft#06,07,14 : surfaces , also test the diagonalisation scheme with wavelets
+    From D. Caliste
+
+D.4 Test of parallelisation when a processor is unoccupied, paral#AH
+    From F. Jollet
+
+D.5 Calculation of quasi-particle energies  using the effective energy technique (EET) for metals.
+    Creation of Tv67mbpt#28, for aluminum.
+    Test contributed by A. Berger.
+
+D.6 Printing the geometry in the POSCAR format. 
+    Input variable prtposcar. Test v7#01.
+    From M. Verstraete.
+
+D.7 An include mechanism is now defined for the input file.
+    See Tv7#02
+    From M. Torrent
+
+D.8 Continued work on GPU (see point B.1 of release notes for ABINITv6.12),
+    including MAGMA.
+    Introduction of the new input variable gpu_linalg_limit.
+    From M. Torrent and F. Dahm
+
+D.9 The new input variable np_slk has been introduced, to control the
+    use of scalapack calls in the paral_kgb=1 and LOBPCG algorithm case.
+    Not all MPI processors should be used together for the linear algebra.
+    From M.Torrent and F. Dahm
+
+D.10 The distance (in configuration space) used is the String Method has been
+     changed. A true L2 norm is now used.
+     Contributed by A. Romero
+
+D.11 Added Entropy record in MOLDYN and HIST files.
+     Work by M. Mancini. 
+
+D.12 One can have a finer control on the conjugate-gradient algorithm used to minimize the residual
+     of the wavefunction, thanks to the input variable tolrde. Previously, it was implicitly
+     set to 0.005, while it is now adjustable.
+     See test atompaw#04.
+
+D.13 Implementation of the path-integral molecular dynamics with the (N,P,T) ensemble
+     is going on. Velocities of the cell parameters can be specified with vel_cell (evolving variables).. 
+     From G. Geneste and M. Torrent.
+
+D.14 The c parameter in the meta-GGA TB09 functional can be fixed, instead of adjusted, like in the original
+     functional. Use the input variable xc_tb09_c to do this.
+     See test Tlibxc#13.
+     From D. Waroquiers.
+
+D.15 Many minor fixes of the Web tutorial have been made, thanks to problems identified by
+     the tutors and the students at the CECAM school Zurich 22-26 October 2012
+     (E. Bousquet, M. Torrent, J. Zwanziger).
+
+D.16 Development af a completely new set of scripts for the test suite, by M. Giantomassi.
+
+D.17 Development of the Continuous Time - Quantum Monte Carlo and its interfacing with DMFT.
+     This work by J. Bieder and B. Amadon is going on, and has not yet been merged in the trunk.
+
+D.18 The ability to read XML PAW data has been implemented (still to be tuned, though).
+     Work by F. Jollet
+
+D.19 The new input variable mdf_epsinf has been introduced, to specify the longwavelength of the
+     model dielectric function for BSE calculations.
+     Work by M. Giantomassi
+
+D.20 Continued work on the recursion method (high-temperature DFT), by M. Mancini
+
+D.21 Interfaced fourdp and fourwf with DFTI wrappers (fftalg=512)
+     Work by M. Giantomassi
+
+D.22 Developed the polyfit script to plot GW full band structures, starting from DFT band structure
+     + a few GW corrections.
+     Also for the spin band structures.
+     Work by D. Waroquiers
+
+D.23 Switch to atompaw 3.1.0.9
+     From Y. Pouillon and M. Torrent
+
+D.24 The size of DDK files can be decreased (no storing of the wavefunctions !), to initialize optic runs.
+     This is activated by the use of prtwf=3 .
+
+D.25 Introduced diagonalisation scheme for wavelets.
+     Update BigDFT version : now bigdft-1.7-dev.12
+     Work by D. Caliste.
+
+D.26 Work on the electron-phonon coupling part of ABINIT:
+     decomposition with spin; tetrahedron weights for computation of transport properties ;
+     elastic LOVA : computation of electron life time ;
+     beyond LOVA : computation of electrical resistivity (with Fermi-smearing) ;
+     parallelism of elphon computation over k points.
+     Still buggy, should not be used in production.
+     Work by Bin Xu and M. Verstraete.
+
+D.27 Implementation of the monopole correction for charged supercells.
+     This correction is automatically computed whenever the input variable "charge"
+     is non-zero. It is printed in the output file, and proposed to the user, to be
+     included as a correction to the total energy.
+     Such correction is computed in tests v2#42, v3#54, v5#42, v6#67.
+     Work by F. Bruneval
+
+D.28 New option enable_mpi2_inplace to enable in-place MPI_ALLREDUCE
+     Work by M. Giantomassi
+
+D.29 Further work on the ABINIT GUI. Drag and drop graphics utility,
+     more windows, correction of bugs. Not committed though.
+     Work by F. Abreu and Y. Gillet.
+
+D.30 With prtfsurf=1 in ANADDB, an additional output of eigen energies and velocities is written in the VTK format, 
+     which allows the visualization of Fermi velocities on the Fermi surface
+     Work by Bin Xu
+
+D.31 The capability to compute M-resolved partial DOS with prtdosm=2 is now available.
+     Work by B. Amadon
+
+D.32 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including patches for the fallbacks),
+     and improvements of documentation by
+     G. Antonius, J.M. Beuken, E. Bousquet, F. Bruneval, D. Caliste, M. Delaveau, 
+     G. Franco, M. Giantomassi, Y. Gillet, A. Jacques, F. Jollet,
+     S. Poncé, T. Rangel, A.H. Romero, M. Stankovski, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger, D. Waroquiers.
+</pre>

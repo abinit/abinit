@@ -1,0 +1,248 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+November 2012 and March 2013. These release notes
+are relative to improvements of ABINITv7.2 with respect to v7.0.
+
+The list of contributors includes :
+F. Abreu, J. Alberdi, B. Amadon, G. Antonius, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, F. Dahm, 
+M. Delaveau, T. Deutsch, C. Espejo, M. Giantomassi,
+Y. Gillet, G. Huhs, F. Jollet, M. Oliveira, S. Ponce, Y. Pouillon, T. Rangel,
+G.-M. Rignanese, D. Sangalli, M. Torrent, M. Verstraete, D. Waroquiers, B. Xu, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.2, released on March 25, 2013.
+
+Changes with respect to version 7.0 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 With the replacement of LibXC1.1 by LibXC2.0, numerical bugs have been eliminated (thus changing the references) : 
+    - in the evaluation of the Langreth-Mehl 
+     correlation energy (ixc -137 , the error was on the order of 0.1Ha in test libxc#04 and 0.5Ha in test libxc#05 ),
+    - in the evaluation of exchange in modified form of PW91 by Adamo and Barone (ixc -119, the error was on the order 
+     of 6 mHa in test libxc#04, and 3 mHa in test libxc#05),
+    - in the Vosko-Wilk-Nussair functional, spin-polarized (ixc -007, the error was on the order of 2 mHa in test libxc#05).
+    - in the MPWLYP1W functional [EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005)] (ixc  -174, 6 mHa in test libxc#06,
+       and 4 mHa in test libxc#07)
+    - in the OPTPBE_VDW, ixc -141  ,PBE reparametrization for vdW 
+            [J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010)
+            (40 mHa in test libxc#17, 4 mHa in test libxc#18)
+    - in the XC_GGA_XC_KT2, ixc -146  ! Keal and Tozer version 2 [TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003)
+            (7 mHa in test libxc#17, 100 mHa in test libxc#18))
+    Small numerical differences are to be expected when using some of the other functionals, 
+    as changes were introduced in Libxc2.0 in the 
+    evaluation of the functionals in the limit of vanishing densities (the new version should be more accurate).
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The ability to read XML PAW data has been implemented and tested.
+    It allows ABINIT to access all the PAW atomic data prepared for the GPAW code, and to do cross-checkings.
+    In particular, for the PBE function, there has been an extensive comparison versus all-electron WIEN2K calculations,
+    whose result is reported in http://molmod.ugent.be/DeltaCodesDFT .
+    See automatic tests v7#60 to 63.
+    By the way, the Atompaw software is also able to produce such XML PAW data. In the present version
+    some restrictions exist. In the next version (3.1.x), XML PAW data produced by AtomPAW will be fully
+    compatible with ABINIT.
+    Work by F. Jollet and M. Torrent
+
+B.2 Libxc 2.0.1 is now linked to ABINIT.
+    Many additional functionals are thus available (compared to v7.0, where LibXC1.1 only was available).
+    This includes the hybrid functionals HSE06, PBE0, and B3LYP (see the release notes of v7.0).
+    6 LDA and 39 GGAs have been added and are portable. More GGAs, mGGAs and hybrid should still
+    be either activated, or tested.
+    Work by M. Oliveira and Y. Pouillon
+
+B.3 One can compute the STS signal for an STM tip atom placed at a given position, 
+    according to the chemical nature of the tip (s- p- d- wave etc...),
+    thanks to the combination of new input variables natsph_extra, ratsph_extra, and xredsph_extra. 
+    At the end of a normal GS run this produces the l-decomposed
+    partial DOS at the point xredsph_extra.
+    Previously, STM signal analysis was done for a fixed voltage by computing the total density 
+    at the different points where the tip was located,
+    no partial decomposition was allowed and only limited sets of voltages could be used (no spectroscopic STS mode).
+    See new test v7#04. 
+    Work by M. Verstraete 
+
+B.4 Automatic determination of the best processor repartition is now available for ground-state
+    and response function calculation: 
+     - by means of a simple heuristics
+     - by means of a series of small benchmarks using the scheme applied for the LOBPCG algorithm.
+    The size of communicators for parallel matrix algebra routines can be optimized, as well
+    as the use (or not) of matrix algebra on GPU.
+    See the description in the input variable autoparal, values 1, 2 or 3..
+    Automatic tests should still be written. 
+    Work by F. Dahm, M. Torrent and F. Jollet.
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 Pruned the build-system support for long-obsolete compilers and added GCC 4.7. Reviewed build-system makefile snippets
+    Work by Y. Pouillon
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 PAW + Bigdft project (still in development)
+    PAW pseudos are now fitted to Gaussians in case of use on a wavelet basis
+    (wavelet-based PAW calculations are now available; in a beta stage)
+    Also, icoulomb > 1 can be used with plane waves and PAW (also in parallel).
+    New Tests bigdft#23 and 31
+    Work by T. Rangel + M Torrent, with the help of Luigi Genovese, Damien Caliste
+
+D.2 Large improvement of parallelism (over bands and k points) in the response function part of ABINIT (and corresponding testing)
+    In particular, MPI-IO can be used with DFPT.
+    However, one should still set up a test of this feature.
+    By Matteo Giantomassi (and G. Huhs for the testing)
+
+D.3 Continuing the development of orbital magnetism.
+     In particular, the Chern number calculation now works in both nspinor=1 and nspinor=2 cases.
+     Updated documentation for bfield, add documentation for orbmag variable
+     By J. Zwanziger
+
+D.4 Continued development af a completely new set of scripts for the test suite, by M. Giantomassi.
+
+D.5 Continue to work on the FFTs.
+
+    * Including the interface fourdp and fourwf with DFTI wrappers (fftalg=512)
+      Added unitary tests #fourwf06 to #fourwf13
+      Added support for DFTI FFT library in the build system (seq and threaded version)
+      Rationalization of the different FFT wrappers.
+      Introduction of fftalg 5XX (e.g. 511 or 512)
+      Code the missing fallbacks in GW FFTs when fftalg=112
+      Continue to work on MKL FFT interfacing (+FFTW3).
+      By M. Giantomassi
+
+    * Now FFTW3 wrappers can be used with MPI (and MPI+opemMP)
+      Introduction of fftalg 314
+      LOBPCG algorithm can now use fftalg=31X (e.g. 312 or 314) (FFTW3+MPI)
+      in addition to fftalg=40X
+      By F. Dahm and M. Torrent
+
+D.6 Improvement of the ground-state calculations on massively parallel architectures
+    (LOBPCG algorithm on several hundreds of processors)
+     - ELPA library can be used (Eigenvalue soLvers for Petaflop Applications)
+       See : http://elpa-lib.fhi-berlin.mpg.de/wiki/index.php/Main_Page
+       The build system has to be adapted (with-linalg-flavor="elpa" does not exist)
+     - Load balancing over bands has been improved in the LOBPCG algorithm
+     - Load balancing over plane waves has been improved in the LOBPCG algorithm
+       (only available with fftalg=314)
+     - The use of linear algebra libraries has been rationnalized in the LOBPCG
+       algorithm in order to make it easier to incorporate new libraries.
+     - openMP is now available for PAW calculations (non-local operator
+       has been adapted)
+     By F. Dahm, L. NGuyen and M. Torrent
+
+D.7 Continued efforts on the development of the abipy library
+     Abitools project from G. Antonius has been merged in abipy
+     From M. Giantomassi and G. Antonius
+
+D.8 Continued work on GPU and hybrid architecture (see point B.1 of release notes for ABINITv6.12,
+    and point D.8 or release notes for ABINITv7.0),
+     - Now ABINIT+Cuda works on Fermi and Kepler NVidia GPU.
+     - Interfaces for PLASMA library (matrix algebra)
+       (Parallel Linear Algebra for Scalable Multi-core Architectures, http://icl.cs.utk.edu/plasma/)
+       Plasma is usuable but not yet efficient because it misses the computation of eigenvectors
+       (for this, standard CPU routines are used).
+       Also, the user must be careful in the distribution of nodes and cores (one full node must be
+       reserved for PLASMA)
+     By F. Dahm, L. NGuyen and M. Torrent
+
+D.9 A patch for improved KSS files (allowing to treat pseudopotentiels
+     with several projectors, and also spin-orbit coupling), readable by YAMBO,
+     has been produced by Davide Sangalli.  See patch.Yambo and patch.YamboHowTo
+     in the top abinit directory.
+
+D.10 Further work on the ABINIT GUI. Drag and drop graphics utility,
+    more windows, correction of bugs. Not committed though.
+    Work by F. Abreu and Y. Gillet.
+
+D.11 Added outphbtrap to output BoltzTraP format file of frequencies on a regular grid for interpolation and transport.
+    Also tests the *atprj_bs variables, for atomic projections of the phonon band structure
+    Test v6#76 (not entirely new, but changed).
+    By M. Verstraete
+
+D.12 Introduction of a double grid integration, for the computation of the temperature dependence of the electronic structure.
+    New input variables and values : thmflag=7, getkfine, irdwfkfine
+    Tests v7#50 to 54
+    Work by S. Ponce
+
+D.13 The vdW-DF1 and DF2 are now in debugging phase.
+    Many new input variables have been introduced : irdvdw, prtvdw, 
+    vdw_df_acutmin, vdw_df_aratio, vdw_df_damax,
+    vdw_df_dcut, vdw_df_dratio, vdw_df_dsoft,
+    vdw_df_gcut, vdw_df_ndpts, vdw_df_nqpts, vdw_df_nrpts,
+    vdw_df_nsmooth, vdw_df_qcut, vdw_df_qratio,
+    vdw_df_rcut, vdw_df_threshold, vdw_df_zab .
+    From Y. Pouillon and C. Espejo
+
+D.14 Upgrade the Python parser bindings, enable to use MPI compiled code with bindings
+     From D. Caliste
+
+D.15 Pspio library in development, interfaced with ABINIT.
+     From M. Oliveira, Y. Pouillon, M. Verstraete, J. Alberdi
+     Interfacing by Y. Pouillon
+
+D.16 Update atompaw lib : ABINIT is now interfaced with version 3.0.1.9
+     Work by J.-M. Beuken
+
+D.17 Fixed misconfiguration of the build system for external dependencies
+     From Y. Pouillon
+
+D.18 Update bigdft lib : ABINIT is now interfaced with bigdft-abi-1.0.4
+     Work by T. Rangel, J.-M. Beuken
+
+D.19 Further work on the parallelisation over atomic sites of DFPT calculation within PAW
+     Many improvements / bug fixes for DFPT + PAW
+     From M. Torrent and M. Delaveau
+
+D.20 Work on abilint by T. Deutsch.
+
+D.21 Work on BSE part of ABINIT, trying to improve the scaling, by Y. Gillet.
+
+D.22 Parallelisation of the computation of the Bader charge computation
+     By X. Gonze
+
+D.23 Added writing/reading of polyfits.
+     By D. Waroquiers
+
+D.24 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, 
+     including patches for the fallbacks), and improvements of documentation by :
+     B. Amadon, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste,
+     F. Dahm, M. Delaveau, M. Giantomassi, 
+     Y. Gillet, F. Jollet, Y. Pouillon, G.-M. Rignanese, 
+     M. Torrent, M. Verstraete, D. Waroquiers, B. Xu
+</pre>

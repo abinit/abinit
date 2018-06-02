@@ -141,7 +141,7 @@ contains
       ENDIF
 
       ZBQLU01 = X/B2
-      
+
       RETURN;X=DUMMY
 
       END FUNCTION ZBQLU01

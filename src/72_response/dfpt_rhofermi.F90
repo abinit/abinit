@@ -11,7 +11,7 @@
 !! at each step in the iteration process.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR, AR, MB, MT, SPr)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR, AR, MB, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -147,7 +147,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_errors
  use m_wfk
 
+ use m_dtfil,       only : status
+ use m_time,        only : timab
  use m_io_tools,    only : get_unit, iomode_from_fname
+ use m_occ,         only : occeig
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawtab,      only : pawtab_type
@@ -159,19 +162,17 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
+ use m_kg,          only : mkkin, kpgstr, mkkpg
+ use m_fft,         only : fftpac
+ use m_spacepar,    only : symrhg
+ use m_mkffnl,      only : mkffnl
+use m_mpinfo,       only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section
 
@@ -226,7 +227,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=17
  integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
- integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq,ipw
+ integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
  integer :: icg,icgq,ider,idir0,ierr,iexit,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
@@ -354,9 +355,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
    call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-!  call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+!  call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -612,7 +613,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end do
 
    call timab(125,2,tsec)
-   
+
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Also take into account the spin.
    if (nspden/=4) then
@@ -630,7 +631,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end if
 
  end do ! End loop over spins
- 
+
  !if(xmpi_paral==1)then
  !  call timab(166,1,tsec)
  !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')
@@ -749,13 +750,13 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Compute and add the compensation density to rhowfr to get the total density
  if (psps%usepaw == 1) then
    if (size(nhatfermi)>0) then
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&
 &     dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=nhatfermi)
    else
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&

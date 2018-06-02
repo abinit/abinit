@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon,AGerossier)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,7 +14,7 @@
 !! PARENTS
 !!
 !! NOTES
-!!  
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -30,10 +30,11 @@ MODULE m_plowannier
  use m_profiling_abi
 
  use m_io_tools,  only : open_file
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 
- private 
+ private
 
  public :: init_plowannier
  public :: copy_orbital
@@ -70,7 +71,7 @@ end type latom_wan_type
 !!  projector_wan_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -88,7 +89,7 @@ end type projector_wan_type
 !!  position_wan_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -105,7 +106,7 @@ end type position_wan_type
 !!  lorbital_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -117,7 +118,7 @@ type, public :: lorbital_type
   real(dp), allocatable :: ph0phiint(:)
   ! stocks the values for each projector of the l considered
   ! size(total number of projectors for this l)
- 
+
 end type lorbital_type
 !!***
 
@@ -126,7 +127,7 @@ end type lorbital_type
 !!  orbital_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -145,7 +146,7 @@ end type orbital_type
 !!  lorbital2_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -166,7 +167,7 @@ end type lorbital2_type
 !!  operwan_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -183,7 +184,7 @@ end type operwan_type
 !!  operwan_realspace_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -200,7 +201,7 @@ end type operwan_realspace_type
 !!  plowannier_type
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! SOURCE
 
@@ -217,10 +218,10 @@ type, public :: plowannier_type
 
   integer :: natom_wan
   ! number of atoms in a cell
-  
+
   integer :: size_wan
   ! sum of all the m possible for every atom considered
-  
+
   integer, allocatable :: iatom_wan(:)
   ! array of each atom's type
 
@@ -229,7 +230,7 @@ type, public :: plowannier_type
 
   type(latom_wan_type), allocatable :: latom_wan(:)
   ! for each atom, it contains an array of the l we are interested in
-  
+
   integer, allocatable :: nbproj_atom_wan(:)
   ! array of the number of projectors considered for each atom
 
@@ -238,19 +239,19 @@ type, public :: plowannier_type
 
   type(position_wan_type), allocatable :: nposition(:)
   ! array of the number of position considered for each atom
-  
+
   integer :: nsppol
   ! number of polarization
 
   integer :: nspinor
   ! number of spinorial components
-  
+
   type(orbital_type), allocatable :: psichi(:,:,:)
   ! arrays of psichi
 
   integer, allocatable :: position(:,:)
   ! size natom,3, gives the position of the cell for this atom (rprim coordinates)
-  
+
   real,allocatable :: kpt(:,:)
   ! gives the coordinates in the BZ of the kpoint
   ! size (3,nkpt)
@@ -274,7 +275,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !!  initialize the variables useful for the computation
-!! 
+!!
 !! INPUTS
 !! dtset : gives every information needed
 !!
@@ -312,7 +313,7 @@ subroutine init_plowannier(dtset,wan)
 
  implicit none
 
- 
+
 !Arguments ----------------------------------
 !scalars
  type(dataset_type), intent(in) :: dtset
@@ -329,7 +330,7 @@ subroutine init_plowannier(dtset,wan)
  wan%bandf_wan = dtset%plowan_bandf
  wan%nsppol = dtset%nsppol
  wan%nspinor = dtset%nspinor
- 
+
  !! for this case
  wan%natom_wan = dtset%plowan_natom
 
@@ -354,7 +355,7 @@ subroutine init_plowannier(dtset,wan)
  wan%acell(3) = dtset%acell_orig(3,1)
 
  ! If we want to study twice the same atom (but at different positions), use the same iatom and modify the positions below.
- ! In this case, the Wannier functions will be orthonormalized for one atom. 
+ ! In this case, the Wannier functions will be orthonormalized for one atom.
  ! For this particular reason, if we use the study twice the same atom at different position, each of them should have exactly the same projectors (it could be improved though by rewriting the normalization routine).
 
 
@@ -400,7 +401,7 @@ subroutine init_plowannier(dtset,wan)
      ib=iband-wan%bandi_wan+1
      do iatom = 1,wan%natom_wan
        ABI_DATATYPE_ALLOCATE(wan%psichi(ikpt,ib,iatom)%atom,(wan%nbl_atom_wan(iatom)))
-       do il = 1,wan%nbl_atom_wan(iatom) 
+       do il = 1,wan%nbl_atom_wan(iatom)
          nn=(2*wan%latom_wan(iatom)%lcalc(il)+1)
          ABI_ALLOCATE(wan%psichi(ikpt,ib,iatom)%atom(il)%matl,(nn,wan%nsppol,wan%nspinor))
          wan%psichi(ikpt,ib,iatom)%atom(il)%matl = zero
@@ -409,7 +410,7 @@ subroutine init_plowannier(dtset,wan)
    end do
  end do
  do iatom = 1,wan%natom_wan
-   do il = 1,wan%nbl_atom_wan(iatom) 
+   do il = 1,wan%nbl_atom_wan(iatom)
      ABI_ALLOCATE(wan%psichi(1,1,iatom)%atom(il)%ph0phiint,(10)) ! max number of proj for l =10..
    end do
  end do
@@ -499,11 +500,11 @@ subroutine copy_orbital(orbital1,orbital2,n1,n2,n3)
  integer,intent(in) :: n1,n2,n3
  type(orbital_type), intent(in) :: orbital1(n1,n2,n3)
  type(orbital_type),intent(inout) :: orbital2(n1,n2,n3)
- 
+
  !Local variable-----------
  integer :: n4,n5,n6,n7
  integer :: i,j,k,l,m,p,q
- 
+
  do i = 1,n1
    do j = 1,n2
      do k = 1,n3
@@ -526,7 +527,7 @@ subroutine copy_orbital(orbital1,orbital2,n1,n2,n3)
 
 end subroutine copy_orbital
 !!***
-               
+
 !!****f* m_plowannier/allocate_orbital
 !! NAME
 !!  allocate_orbital
@@ -564,11 +565,11 @@ subroutine allocate_orbital(orbital1,orbital2,n1,n2,n3)
  integer,intent(in) :: n1,n2,n3
  type(orbital_type), intent(in) :: orbital1(n1,n2,n3)
  type(orbital_type),intent(inout) :: orbital2(n1,n2,n3)
- 
+
  !Local variable-----------
  integer :: n4,n5,n6,n7
  integer :: i,j,k,l
- 
+
  do i = 1,n1
    do j = 1,n2
      do k = 1,n3
@@ -587,7 +588,7 @@ subroutine allocate_orbital(orbital1,orbital2,n1,n2,n3)
 end subroutine allocate_orbital
 !!***
 
-               
+
 !!****f* m_plowannier/destroy_orbital
 !! NAME
 !!  destroy_orbital
@@ -624,11 +625,11 @@ subroutine destroy_orbital(orbital2,n1,n2,n3)
  !Arguments----------------
  integer,intent(in) :: n1,n2,n3
  type(orbital_type),intent(inout) :: orbital2(n1,n2,n3)
- 
+
  !Local variable-----------
  integer :: n4
  integer :: i,j,k,l
- 
+
  do i = 1,n1
    do j = 1,n2
      do k = 1,n3
@@ -645,7 +646,7 @@ end subroutine destroy_orbital
 !!***
 
 
-!!***f* m_plowannier/compute_coeff_plowannier 
+!!***f* m_plowannier/compute_coeff_plowannier
 !! NAME
 !!  compute_coeff_plowannier
 !!
@@ -721,14 +722,13 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_coeff_plowannier'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- 
+
  type(plowannier_type),intent(inout) :: wan
  integer,intent(in) :: unpaw,usecprj
  real(dp),intent(in) :: fermie
@@ -751,7 +751,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  integer :: iatom,iatom1,iatom2,iband,ibandc,ibg,ierr,ikpt
  integer :: iband1,owrunt
  integer :: ilmn,iorder_cprj,ispinor,isppol,itypat,ilmn2
- integer :: lmn_size 
+ integer :: lmn_size
  integer :: m1,maxnproju,me,natom,nband_k,nband_k_cprj
  integer :: nnn,nprocband,spaceComm,n1,n2
  integer :: plowan_greendos,plowan_hybrid,plowan_inter,plowan_computegreen
@@ -813,8 +813,8 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  owrfile = "__operwan_realspace__"
 
  dos = 0
- if(plowan_greendos>0) dos=plowan_greendos 
- if(plowan_hybrid>0)   dos=-plowan_hybrid 
+ if(plowan_greendos>0) dos=plowan_greendos
+ if(plowan_hybrid>0)   dos=-plowan_hybrid
  if(plowan_hybrid>0.and.plowan_greendos>0) then
    write(message,*) " plowan_hybrid and plowan_greendos cannot be both >0"
    MSG_ERROR(message)
@@ -829,9 +829,9 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  wbase = cmplx(wmin/27.2107,0.001,kind=dp) ! most negative value of frequency
  wincrease = resolution/27.2107  ! step
  number_of_frequencies = int((wmax-wmin)/resolution)
- 
 
- 
+
+
  ! Select the way of diagonalisation
  !===================================
  whole_diag = 1! 1 for diagonalization of the whole matrix, 0 for each orbital
@@ -843,7 +843,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  !===================================
  prtocc = 0 ! occupations have no meaning for a k-point path so the default is 0
  if(dtset%kptopt>0.and.dtset%plowan_realspace>=1) prtocc = 1  !1 to print the occupation in real space
-               
+
 
  ! Select if computation of interactions is done
  !===================================
@@ -898,7 +898,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  lprojchi=.false.
  lprojchi=.true.
- natom=cryst_struc%natom 
+ natom=cryst_struc%natom
 
 
  write(message,'(2a)') ch10,&
@@ -1185,8 +1185,8 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
   !!   end do
  !!  end do
 !! end do
-   
-     
+
+
 
 
 
@@ -1214,7 +1214,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  ! Initialize an empty Wannier operator
  ABI_DATATYPE_ALLOCATE(operwan,(wan%nkpt,wan%natom_wan,wan%natom_wan))
  call initialize_operwan(wan,operwan)
- 
+
  ! Creation of the KS occupation operator
  ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
  operks = czero
@@ -1226,7 +1226,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end do
    end do
  end do
- 
+
  ! Compute the energy in wannier basis
  do ikpt = 1,wan%nkpt
    call compute_oper_ks2wan(wan,operks,operwan,ikpt)
@@ -1256,7 +1256,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 
-     
+
  !! -------------------------------------------------------------
  !! Transform the Wannier operator in real space (in eV)
  !! 1) allocate operwan_realspace
@@ -1319,7 +1319,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end do
      end do
    end do
- 
+
 
 
  !! -------------------------------------------------------------
@@ -1370,8 +1370,8 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    end if
  end if
 
-   
-   
+
+
 
 
  !!========================================================================================
@@ -1462,7 +1462,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      MSG_ERROR(message)
    end if
 
-   rewind(owrunt)  
+   rewind(owrunt)
    do isppol = 1,wan%nsppol
      do iatom1 = 1,wan%natom_wan
        do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
@@ -1479,7 +1479,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end do
    end do
    close(owrunt)
-  
+
    !-----------------------------------------------------------------
    !Set the xx' interaction to 0
    ! In order to do a Wannier interpolation without a given number of
@@ -1500,9 +1500,9 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      write(message,'(2a)') '  == Block suppressed in the real space Wannier hamiltonian'
      call wrtout(std_out,message,'COLL')
    endif
-  
-  
-  
+
+
+
    !-----------------------------------------------------------------
    ! Perform Wannier transform from real space to reciprocal space
    !-----------------------------------------------------------------
@@ -1538,7 +1538,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end do
      end do
    end do
-  
+
  end if ! plowan_realspace==2 (Wannier interpolation)
 
  !! -------------------------------------------------------------
@@ -1562,7 +1562,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  end do
  ABI_DATATYPE_DEALLOCATE(operwan_realspace)
 
-                       
+
  ! ----------------------------------------------------------------------------------------
  ! Here each block of the hamiltonian matrix in Wannier basis is diagonalized separately
  ! ----------------------------------------------------------------------------------------
@@ -1641,7 +1641,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
            end do ! im1
          end do ! il1
        end do !iatom1
-       
+
        !Then, invert the matrix
       call zheev('v','u',count,matrix_to_diag,count,eig,zwork,lwork,rwork,info)
        if (info .eq. 0) then ! Correct diagonalization
@@ -1685,7 +1685,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  ! Warning:  In the case of the diagonalisation of the whole hamltonien
  ! the band structure is separated in as many files as atoms.
  !------------------------------------------------------------------------
- if (band_struct .eq. 1) then 
+ if (band_struct .eq. 1) then
 
    write(message,'(3a)') ch10,&
 &   ' == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis'
@@ -1726,7 +1726,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end do
        close(unt)
      else if (wan%nsppol .eq. 2) then
-       if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCTUP"//trim(x1),message,newunit=unt) /= 0) then 
+       if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCTUP"//trim(x1),message,newunit=unt) /= 0) then
          MSG_ERROR(message)
        end if
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCTDN"//trim(x1),message,newunit=unt2) /= 0) then
@@ -1768,7 +1768,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
  !! ----------------------------------------------
- !! GREEN STUDY 
+ !! GREEN STUDY
  !! ----------------------------------------------
 
  !!Here we only study the first atom
@@ -1780,7 +1780,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end if
      write(dos_unt,'(a)') "#DOS function for the first atom computed with the Green function"
      write(dos_unt,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(dos)," bands ; nsppol = ",wan%nsppol
-     write(dos_unt,'(a)') "# frequency, DOS, isppol" 
+     write(dos_unt,'(a)') "# frequency, DOS, isppol"
 
      if(wan%nsppol>=2) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_dosfromgreen_b",message,newunit=dos_unt2) /= 0) then
@@ -1788,7 +1788,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end if
        write(dos_unt2,'(a)') "#DOS function for the first atom computed with the Green function"
        write(dos_unt2,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(dos)," bands ; nsppol = ",wan%nsppol
-       write(dos_unt2,'(a)') "# frequency, DOS, isppol" 
+       write(dos_unt2,'(a)') "# frequency, DOS, isppol"
      endif
    end if
 
@@ -1821,7 +1821,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      do ikpt = 1,wan%nkpt
        do m1 = 1,sizem
          energies(m1,isppol) = energies(m1,isppol) +&
- &                real(operwan(ikpt,1,1)%atom(abs(dos),abs(dos))%matl(m1,m1,isppol,1,1))*wan%wtk(ikpt) 
+ &                real(operwan(ikpt,1,1)%atom(abs(dos),abs(dos))%matl(m1,m1,isppol,1,1))*wan%wtk(ikpt)
        end do
      end do
    end do
@@ -1840,7 +1840,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    !-----------------------------------------------------------
    ! Loop over the frequencies to compute DOS or Hybridization
    !-----------------------------------------------------------
-   do iw = 1,number_of_frequencies 
+   do iw = 1,number_of_frequencies
      ABI_DATATYPE_ALLOCATE(operwan,(wan%nkpt,wan%natom_wan,wan%natom_wan))
      call initialize_operwan(wan,operwan)
      !!creation of the Green operator
@@ -1862,18 +1862,18 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
          end do
        end do
      end do
-       
+
      ! Compute Green's function in wannier basis in recip space.
      !----------------------------------------------------------
      do ikpt = 1,wan%nkpt
        call compute_oper_ks2wan(wan,operks,operwan,ikpt) !in reciprocal space
      end do
      ABI_DEALLOCATE(operks)
-    
 
-     ! Transform the operwan into a better shape for inversion 
+
+     ! Transform the operwan into a better shape for inversion
      !----------------------------------------------------------
-     ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan)) 
+     ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
      operwansquare = czero
      do ikpt = 1,wan%nkpt
        do isppol = 1,wan%nsppol
@@ -1918,7 +1918,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end do
      end do
      ABI_DEALLOCATE(operwansquare)
-     
+
      if (dos .ge. 1) then ! either we compute the DOS (-imaginary part/Pi of the green function in the Wannier basis)
        ! Compute the dos
        !-------------------------------------------------------------------------
@@ -1930,7 +1930,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
          if(isppol==1) write(dos_unt,'(F8.3,E15.6)') real(27.2101*wcurrent),sum/(27.2107*3.14159)
          if(isppol==2) write(dos_unt2,'(F8.3,E15.6)') real(27.2101*wcurrent),sum/(27.2107*3.14159)
        end do
-       
+
      else ! either we compute the F part (the residual part) of the invert of the green functions
        ! Compute the hybridization
        !-------------------------------------------------------------------------
@@ -1987,7 +1987,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    !----------------------
    do iw = 1,number_of_frequencies
 
-     ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan)) 
+     ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
      operwansquare = czero
      wcurrent = wbase + (iw-1)*wincrease
      Ffftable = czero
@@ -2019,7 +2019,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
            end do
          end do
        end do
-       
+
      ! Create inverse of Green's function
      !-----------------------------------
        do isppol = 1,wan%nsppol
@@ -2033,7 +2033,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
            end do
          end do
        end do
-       
+
 
      ! Create Green's function
      !-----------------------------------
@@ -2071,9 +2071,9 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !!         end if
 !!       end do
 !!     end do
-       
+
      end do !!loop ikpt
-     
+
      ABI_ALLOCATE(operwansquarereal,(wan%nsppol,size(operwansquare,3),size(operwansquare,4)))
      operwansquarereal = czero
 
@@ -2090,7 +2090,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end do
      end do
 
-     ! Inverse Local Correlated Green's function 
+     ! Inverse Local Correlated Green's function
      !--------------------------------------------
      if (dos < 0) then
        !select f bands
@@ -2142,7 +2142,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        xsum=czero
        do isppol = 1,wan%nsppol
          Ffftable(1,isppol) = Ffftable(1,isppol)+Ffftable(2,isppol)+Ffftable(3,isppol)+Ffftable(4,isppol)&
-           &      +Ffftable(5,isppol)+Ffftable(6,isppol)+Ffftable(7,isppol)        
+           &      +Ffftable(5,isppol)+Ffftable(6,isppol)+Ffftable(7,isppol)
          if (wan%nsppol .eq. 2) then
            write(std_out,*)'green',isppol,27.2107*wcurrent,Ffftable(1,isppol)/(27.2107*3.14159)
          else
@@ -2166,7 +2166,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call destroy_operwan(wan,operwan)
    ABI_DATATYPE_DEALLOCATE(operwan)
  end if !! choice of the plowan_computegreen
-   
+
  !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
@@ -2206,7 +2206,7 @@ end subroutine compute_coeff_plowannier
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments-------------------------------------
  type(plowannier_type), intent(inout) :: wan
 !Local variables-------------------------------
@@ -2218,14 +2218,14 @@ end subroutine compute_coeff_plowannier
    ABI_DEALLOCATE(wan%nposition(iatom)%pos)
  enddo
  do iatom = 1,wan%natom_wan
-   do il = 1,wan%nbl_atom_wan(iatom) 
+   do il = 1,wan%nbl_atom_wan(iatom)
      ABI_DEALLOCATE(wan%psichi(1,1,iatom)%atom(il)%ph0phiint)
    end do
  end do
  do ikpt = 1,wan%nkpt
    do iband = wan%bandi_wan,wan%bandf_wan
      do iatom = 1,wan%natom_wan
-       do il = 1,wan%nbl_atom_wan(iatom) 
+       do il = 1,wan%nbl_atom_wan(iatom)
         ABI_DEALLOCATE(wan%psichi(ikpt,iband-wan%bandi_wan+1,iatom)%atom(il)%matl)
        end do
        ABI_DATATYPE_DEALLOCATE(wan%psichi(ikpt,iband-wan%bandi_wan+1,iatom)%atom)
@@ -2421,7 +2421,7 @@ end subroutine compute_coeff_plowannier
 !End of the abilint section
 
    implicit none
-   
+
    !Arguments--------------------------
    type(plowannier_type), intent(in) :: wan
    type(operwan_type), intent(inout) :: operwan(:,:,:)
@@ -2430,7 +2430,7 @@ end subroutine compute_coeff_plowannier
 
    !Local variables--------------------
    integer :: iatom1, iatom2, il1, il2, isppol, ispinor1, ispinor2, iband1, iband2, im1, im2
-   
+
    ! ----------------------------------
    !Transformation KS2WAN
    ! ----------------------------------
@@ -2540,24 +2540,24 @@ subroutine normalization_plowannier(wan)
       end if
     end do
   end do
-  
+
 
   !Allocation of operwan
   ABI_DATATYPE_ALLOCATE(operwan,(wan%nkpt,wan%natom_wan,wan%natom_wan))
   call initialize_operwan(wan,operwan)
 
-  
+
 
   !Computation of the overlap
   do ikpt = 1,wan%nkpt
     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
   end do
-  
+
 
 
   !transform the operwan into an inversible matrix
-  !!operwansquare is the overlap square matrix (wan%size_wan * wan%size_wan)  
-  ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan)) 
+  !!operwansquare is the overlap square matrix (wan%size_wan * wan%size_wan)
+  ABI_ALLOCATE(operwansquare,(wan%nkpt,wan%nsppol,wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
 
   operwansquare = czero
 
@@ -2611,7 +2611,7 @@ subroutine normalization_plowannier(wan)
 !    end do
 
 
-  
+
   !take the square root inverse of operwansquare for normalization purposes
   ABI_ALLOCATE(tmp_operwansquare,(wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
   do isppol = 1,wan%nsppol
@@ -2672,7 +2672,7 @@ subroutine normalization_plowannier(wan)
   call copy_orbital(psichinormalized,wan%psichi,n1,n2,n3)
   call destroy_orbital(psichinormalized,n1,n2,n3)
   ABI_DATATYPE_DEALLOCATE(psichinormalized)
-  
+
   call destroy_operwan(wan,operwan)
   ABI_DATATYPE_DEALLOCATE(operwan)
 
@@ -2799,7 +2799,7 @@ end subroutine normalization_plowannier
 !!  wan, operwan, name
 !!
 !! OUTPUT
-!!  
+!!
 !!
 !! PARENTS
 !!      m_plowannier
@@ -2833,7 +2833,7 @@ subroutine print_operwan(wan,operwan,name,convert)
     MSG_ERROR(msg)
   end if
 
-  write(unt,'(a)') '\documentclass[11pt,a4paper,landscape]{article}' 
+  write(unt,'(a)') '\documentclass[11pt,a4paper,landscape]{article}'
  write(unt,'(a)') '\usepackage[T1]{fontenc}'
   write(unt,'(a)') '\usepackage{geometry,tabularx,graphicx}'
   write(unt,'(a)') '\geometry{left=0.5cm,right=0.5cm}'
@@ -2907,11 +2907,11 @@ do isppol = 1,wan%nsppol
       end do
     end do
   end do
-                
+
 
 
   write(unt,'(a)') '\end{array} \right) $ }'
-  
+
   if (name(len_trim(name)-2:len(trim(name))) == 'gen') then
     write(unt,'(a,i0,a,F7.3,a)')     "\caption{Energy matrix in real space for isppol = ", &
 &    isppol," in a ",wan%acell(1), " a.u. cell}"
