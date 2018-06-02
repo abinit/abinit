@@ -253,9 +253,9 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 &          dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
 &          dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
      write(message, '(5a)' )&
-&     'supercell_latt must have positif parameters and diagonal part',ch10,&
+&     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
-&     'Action : modify supercell_lat in the input file.'
+&     'Action : modify supercell_latt in the input file.'
      MSG_ERROR(message)     
    end if
 !  Compute the multiplicity of the supercell   

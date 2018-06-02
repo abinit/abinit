@@ -8,11 +8,22 @@
 !!
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
+!! amplitudes(namplitude) = list of the amplitudes of the unstable phonons
+!!                          amplitudes(1:3,iamplitude) = qpt
+!!                          amplitudes(4,iamplitude)   = mode
+!!                          amplitudes(5,iamplitude)   = amplitude
 !! natom= Number of atoms in the supercell
 !! nconfig = Number of configuration to generate
 !! hist<type(abihist)> = The history of the MD
+!! namplitude = number of amplitude provided by the user
 !! ngqpt(3)= Grid of qpoint in the DDB
 !! nqshft=number of shift vectors in the repeated cell
+!! option = option to deal with negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+!!          several philosophies to be implemented for the unstable modes:
+!!          option == 1 =>  ignore
+!!          option == 2 =>  populate them according to a default amplitude
+!!          option == 3 =>  populate according to their modulus squared
+!!          option == 4 =>  USER defined value(s), require namplitude and amplitude
 !! qshft(3,nqshft)=vectors that will be used to determine
 !! rlatt(3,3)= size of the supercell
 !! rprimd(3,3)=dimensional primitive translations (bohr)
@@ -39,13 +50,14 @@
 
 #include "abi_common.h"
 
-subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift,qshift,rlatt,rprimd,&
-&                                temperature_k,xred,comm,DEBUG)
+subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom,namplitude,nconfig,&
+&                                ngqpt,nqshift,option,qshift,rlatt,rprimd,temperature_k,xred,comm,DEBUG)
 
  use defs_basis
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_strain
  use m_abihist, only : abihist,var2hist,abihist_findIndex
  use m_ifc, only : ifc_type,ifc_init_fromFile,ifc_free
  use m_crystal,     only : crystal_t,crystal_free
@@ -64,12 +76,15 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 
 !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: natom,nconfig,nqshift,comm
+  integer,intent(in) :: natom,nconfig,nqshift,option,comm
   logical,intent(in) :: DEBUG
   real(dp),intent(in):: temperature_k
+  integer,intent(in) :: namplitude
+  logical,intent(in) :: add_strain
   !arrays
   integer,intent(in) :: ngqpt(3)
   integer,intent(in) :: rlatt(3,3)
+  real(dp),intent(in) :: amplitudes(5,namplitude)
   real(dp),intent(in) :: qshift(3,nqshift)
   real(dp),intent(in) :: acell(3)
   real(dp), intent(in) :: rprimd(3,3)
@@ -78,8 +93,10 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   type(abihist),intent(inout) :: hist
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ia,iconfig,mu,nu,natom_uc
+  real(dp):: delta,rand
+  integer :: ii,iconfig,natom_uc,direction
   character(len=500) :: message
+
 !arrays
   real(dp) :: dielt(3,3)
   real(dp),allocatable :: zeff(:,:,:)
@@ -87,6 +104,7 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   type(ifc_type) :: ifc
   type(crystal_t) :: crystal
   type(supercell_type),allocatable :: thm_scells(:)
+  type(strain_type) :: strain
 
 ! *************************************************************************
 
@@ -107,20 +125,32 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   call wrtout(ab_out,message,'COLL')
 
   ABI_DATATYPE_ALLOCATE(thm_scells,(nconfig))
-  call thermal_supercell_make(crystal, Ifc, nconfig,int(rlatt), temperature_K, thm_scells)
-  
+
+  call thermal_supercell_make(amplitudes,crystal, Ifc,namplitude, nconfig, option,int(rlatt),&
+&                             temperature_K, thm_scells)
+
   do iconfig = 1,nconfig
 !   Get the atomic position for the new configuration
     call xcart2xred(thm_scells(iconfig)%natom,thm_scells(iconfig)%rprimd,&
 &                   thm_scells(iconfig)%xcart,xred_next)
-    
 !   Just fill acell with the reference value, we apply strain on rprimd    
     acell_next(:) = acell(:)
     
 !   Get the rprim for the new configuration
-    rprimd_next(:,:) = thm_scells(iconfig)%rprimd(:,:)
+    if(.not.add_strain)then
+      rprimd_next(:,:) = thm_scells(iconfig)%rprimd(:,:)
+    else
+      call random_number(rand)
+      direction = int(rand*6+1)
+      call random_number(rand)
+      delta = rand/500
+      call random_number(rand)
+      delta = delta*(two*rand-1)
 
-    
+      call strain_init(strain,delta=delta,direction=direction)
+      call strain_apply(thm_scells(iconfig)%rprimd,rprimd_next,strain)
+    end if
+
 !   Fill history with the values of xred, acell and rprimd
     call var2hist(acell_next,hist,natom,rprimd_next,xred_next,DEBUG)
     hist%ihist = abihist_findIndex(hist,+1)
@@ -129,7 +159,6 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 
 ! Restart ihist before to leave
   hist%ihist = 1
-
 
   call ifc_free(ifc)
   call crystal_free(crystal)

@@ -3,8 +3,9 @@
 ##############################################################################
 prt_model = 1
 dipdip_prt = 1
-n_cell =   2 2 2
-dynamics =  12
+ncell =   2 2 2
+dynamics =  13
+optcell = 2
 temperature = 1000
 ntime  = 50
 
