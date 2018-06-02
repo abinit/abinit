@@ -301,6 +301,7 @@ CONTAINS
 
    !!! Determine sets of degenerate states in eigen0, i.e., at 0th order.
    efmasdeg%ndegs=1
+   efmasdeg%nband=nband
    ABI_MALLOC(degs_bounds,(2,nband))
    ABI_MALLOC(efmasdeg%ideg, (nband))
    degs_bounds=0; degs_bounds(1,1)=1
@@ -423,10 +424,12 @@ CONTAINS
  integer :: deg_dim,eig2_diag_arr_dim
  integer :: iband,ideg,ideg_tot,ieig,ikpt 
  integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ integer, allocatable :: nband_arr(:)
  integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
  integer, allocatable :: degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:)
  real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
@@ -463,19 +466,23 @@ CONTAINS
  enddo
 
 !Allocate the arrays to be nc-written
+ ABI_MALLOC(nband_arr, (nkpt) )
  ABI_MALLOC(ndegs_arr, (nkpt) )
  ABI_MALLOC(degs_range_arr, (2,nkpt) )
  ABI_MALLOC(ideg_arr, (mband,nkpt) )
  ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
+ ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
  ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
 
 !Prepare the arrays to be nc-written
  ideg_tot=1
  ieig=1
  do ikpt=1,nkpt
+   nband_arr(ikpt)=efmasdeg(ikpt)%nband
    ndegs_arr(ikpt)=efmasdeg(ikpt)%ndegs
    degs_range_arr(:,ikpt)=efmasdeg(ikpt)%deg_range(:)
-   ideg_arr(:,ikpt)=efmasdeg(ikpt)%ideg(:)
+   ideg_arr(:,ikpt)=0
+   ideg_arr(1:efmasdeg(ikpt)%nband,ikpt)=efmasdeg(ikpt)%ideg(:)
    do ideg=1,efmasdeg(ikpt)%ndegs
      degs_bounds_arr(:,ideg_tot)=efmasdeg(ikpt)%degs_bounds(:,ideg)
      ideg_tot=ideg_tot+1
@@ -484,6 +491,8 @@ CONTAINS
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
      do jband=1,deg_dim
        do iband=1,deg_dim
+         ch2c_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
+         ch2c_arr(2,:,:,ieig+iband-1)=imag(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
          eig2_diag_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
          eig2_diag_arr(2,:,:,ieig+iband-1)=imag(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
        enddo
@@ -509,6 +518,7 @@ CONTAINS
 & nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
+& nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
 & nctkarr_t("eig2_diag_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
   ]) 
  NCF_CHECK(ncerr)
@@ -516,10 +526,12 @@ CONTAINS
  ! Write data.
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_states"), nband_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
 
 !Deallocate the arrays 
@@ -527,6 +539,7 @@ CONTAINS
  ABI_FREE(degs_range_arr)
  ABI_FREE(ideg_arr)
  ABI_FREE(degs_bounds_arr)
+ ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
 
 end subroutine print_efmas
@@ -554,7 +567,7 @@ end subroutine print_efmas
 !!
 !! SOURCE
 
- subroutine read_efmas(efmasdeg,efmasval,kpt,ncid)
+ subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -569,33 +582,103 @@ end subroutine print_efmas
 !scalars
  integer,            intent(in) :: ncid
 !arrays
- real(dp),            intent(in) :: kpt(:,:)
+ real(dp), allocatable,            intent(out) :: kpt(:,:)
  type(efmasdeg_type), allocatable, intent(out) :: efmasdeg(:)
  type(efmasval_type), allocatable, intent(out) :: efmasval(:,:)
 
 !Local variables-------------------------------
  integer :: deg_dim,eig2_diag_arr_dim
  integer :: iband,ideg,ideg_tot,ieig,ikpt
- integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
+ integer :: jband,mband,ndegs_tot,nkpt
  integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
  integer, allocatable :: degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:)
  real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
- character(len=500) :: msg
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
 !----------------------------------------------------------------------
 
+#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt))
  NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
  NCF_CHECK(nctk_get_dim(ncid, "total_number_of_degenerate_sets", ndegs_tot))
  NCF_CHECK(nctk_get_dim(ncid, "eig2_diag_arr_dim", eig2_diag_arr_dim))
 
- ABI_DATATYPE_ALLOCATE(efmasdeg,(nkpt))
- ABI_DATATYPE_ALLOCATE(efmasval,(mband,nkpt))
+!Allocate the arrays to be read from NetCDF file
+ ABI_MALLOC(kpt, (3,nkpt) )
+ ABI_MALLOC(nband_arr, (nkpt) )
+ ABI_MALLOC(ndegs_arr, (nkpt) )
+ ABI_MALLOC(degs_range_arr, (2,nkpt) )
+ ABI_MALLOC(ideg_arr, (mband,nkpt) )
+ ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
+ ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
+
+!Read from NetCDF file
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "number_of_states"), nband_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+
+!Prepare the efmas* datastructures
+ ABI_DT_MALLOC(efmasdeg,(nkpt))
+ ABI_DT_MALLOC(efmasval,(mband,nkpt))
+
+ ideg_tot=1
+ ieig=1
+ do ikpt=1,nkpt
+   efmasdeg(ikpt)%deg_range(:)=degs_range_arr(:,ikpt)
+   nband=nband_arr(ikpt)   
+   efmasdeg(ikpt)%nband=nband
+   ABI_MALLOC(efmasdeg%ideg, (nband))
+   efmasdeg(ikpt)%ideg=ideg_arr(1:nband)
+   ndegs=ndegs_arr(ikpt) 
+   efmasdeg(ikpt)%ndegs=ndegs
+   ABI_MALLOC(degs_bounds,(2,nband))
+   do ideg=1,ndegs
+     efmasdeg(ikpt)%degs_bounds(:,ideg)=degs_bounds_arr(:,ideg_tot)
+     ideg_tot=ideg_tot+1
+     if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
+       deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+       ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(3,3,deg_dim,deg_dim))
+       ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(3,3,deg_dim,deg_dim))
+       efmasval(ideg,ikpt)%ch2c=zero
+       efmasval(ideg,ikpt)%eig2_diag=zero
+       do jband=1,deg_dim
+         do iband=1,deg_dim
+           efmasval(ideg,ikpt)%ch2c(:,:,iband,jband)=&
+&           cplx(ch2c_arr(1,:,:,ieig+iband-1),ch2c_arr(2,:,:,ieig+iband-1))
+           efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=& 
+&           cplx(eig2_diag_arr(1,:,:,ieig+iband-1),eig2_diag_arr(2,:,:,ieig+iband-1))
+         enddo
+         ieig=ieig+deg_dim
+       enddo
+     else
+       ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(0,0,0,0))
+       ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(0,0,0,0))
+     end if
+   end do
+ enddo
+
+!Deallocate the arrays
+ ABI_FREE(nband_arr)
+ ABI_FREE(ndegs_arr)
+ ABI_FREE(degs_range_arr)
+ ABI_FREE(ideg_arr)
+ ABI_FREE(degs_bounds_arr)
+ ABI_FREE(ch2c_arr)
+ ABI_FREE(eig2_diag_arr)
+#endif
+
+ end subroutine efmas_ncread
 
 !----------------------------------------------------------------------
 
@@ -824,8 +907,8 @@ end subroutine print_efmas
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order derivatives of eigenvalues
-!!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution double tensor
+!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order k-derivatives of eigenvalues
+!!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution to generalized 2nd order k-derivatives of eigenenergy
 !!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
 !!
 !! PARENTS

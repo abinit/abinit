@@ -616,7 +616,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  else
 
-   call efmas_ncread(efmasdeg,efmasval,kpt,ncid)
+   call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
 
  endif
 

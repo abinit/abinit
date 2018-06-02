@@ -65,6 +65,7 @@ module m_efmas_defs
  type efmasdeg_type
 
    !For k-point
+   integer :: nband                           ! Number of bands (related to one specific k point)
    integer :: ndegs                           ! Number of (degenerate) sets of eigenvalues (related to one specific k point)
    integer, allocatable :: degs_bounds(:,:)   ! degs_bounds(2,ndegs) 
                                               ! Minimal and maximal band indices for each possibly degenerate set of eigenvalues
