@@ -189,6 +189,7 @@ type dataset_type
  integer :: chksymbreak
  integer :: cineb_start
  integer :: delayperm
+ integer :: densfor_pred
  integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
@@ -311,13 +312,13 @@ type dataset_type
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
- integer :: densfor_pred
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
  integer :: irdddk
  integer :: irdden
+ integer :: irdefmas
  integer :: irdhaydock
  integer :: irdpawden
  integer :: irdqps

@@ -618,6 +618,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%irdddb             = dtin%irdddb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
+ dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
  dtout%irdpawden          = dtin%irdpawden
  dtout%irdqps             = dtin%irdqps

@@ -140,7 +140,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'

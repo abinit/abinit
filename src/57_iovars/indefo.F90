@@ -393,6 +393,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%irdddb=0
    dtsets(idtset)%irdddk=0
    dtsets(idtset)%irdden=0
+   dtsets(idtset)%irdefmas=0
    dtsets(idtset)%irdhaydock=0
    dtsets(idtset)%irdpawden=0
    dtsets(idtset)%irdqps=0
