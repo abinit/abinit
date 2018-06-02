@@ -56,6 +56,7 @@ module m_mover
  use m_xfpack,             only : xfh_update
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
+ use m_pred_fire,          only : pred_fire
  use m_pred_isokinetic,    only : pred_isokinetic
  use m_pred_diisrelax,     only : pred_diisrelax
  use m_pred_nose,          only : pred_nose

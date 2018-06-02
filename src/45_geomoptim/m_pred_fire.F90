@@ -1,10 +1,44 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/pred_verlet
+!!****m* ABINIT/m_pred_fire
 !! NAME
-!! pred_verlet
+!!  m_pred_fire
 !!
 !! FUNCTION
 !! Ionmov predictors (15) FIRE algorithm
+!! The fast inertial relaxation engine (FIRE) method for relaxation.
+!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz Gähler, 
+!! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (hexu)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+
+!!***
+
+!!****f* m_pred_fire/pred_fire
+!! NAME
+!! pred_fire
+!!
+!! FUNCTION
 !!
 !! IONMOV 15:
 !! Given a starting point xred that is a vector of length 3*natom
@@ -26,14 +60,6 @@
 !! (coming from dtset).
 !! Returned quantities are xred, and eventually acell and rprimd
 !! (new ones!).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XHe)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
 !!
 
 !! INPUTS
@@ -58,18 +84,7 @@
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
