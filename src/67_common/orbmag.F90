@@ -112,7 +112,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
  use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -474,16 +473,16 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
              end if
 
-             if (.NOT. has_cprj_k_kb(bdx)) then
+             ! if (.NOT. has_cprj_k_kb(bdx)) then
 
-                call ctocprjb(atindx1,cg,cprj_k_kb(:,:,bdx),dtorbmag,icgb,bdir,bfor,ikgb,&
-                     & ikptb,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
-                     & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
-                     & pawang,pawrad,pawtab,dtset%typat,ylm)
+             !    call ctocprjb(atindx1,cg,cprj_k_kb(:,:,bdx),dtorbmag,icgb,bdir,bfor,ikgb,&
+             !         & ikptb,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+             !         & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+             !         & pawang,pawrad,pawtab,dtset%typat,ylm)
 
-                has_cprj_k_kb(bdx) = .TRUE.
+             !    has_cprj_k_kb(bdx) = .TRUE.
                 
-             end if
+             ! end if
              
              do gfor = 1, 2
                 if (gfor .EQ. 1) then
@@ -541,16 +540,16 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 end if
 
-                if (.NOT. has_cprj_k_kb(gdx)) then
+                ! if (.NOT. has_cprj_k_kb(gdx)) then
 
-                   call ctocprjb(atindx1,cg,cprj_k_kb(:,:,gdx),dtorbmag,icgg,gdir,gfor,ikgg,&
-                        & ikptg,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
-                        & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
-                        & pawang,pawrad,pawtab,dtset%typat,ylm)
+                !    call ctocprjb(atindx1,cg,cprj_k_kb(:,:,gdx),dtorbmag,icgg,gdir,gfor,ikgg,&
+                !         & ikptg,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+                !         & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+                !         & pawang,pawrad,pawtab,dtset%typat,ylm)
 
-                   has_cprj_k_kb(gdx) = .TRUE.
+                !    has_cprj_k_kb(gdx) = .TRUE.
                 
-                end if
+                ! end if
 
                 dkbg = dkg - dkb
 
