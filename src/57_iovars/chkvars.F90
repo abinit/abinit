@@ -223,7 +223,10 @@ subroutine chkvars (string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp'
- list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
+ list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics spin_mag_field spin_nctime spin_ntime'
+ list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint spin_temperature spin_tolavg spin_tolvar'
+ list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
 !T
