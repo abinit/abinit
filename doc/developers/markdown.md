@@ -715,9 +715,9 @@ G(12) = -i \langle \Theta^N_0|T\bigl[\Psi(1)\Psi^\dagger(2)\bigr]|\Theta^N_0 \ra
 
 Equations can be referenced with:
 
-    The propagator in Eq.\ref{eq:GreenDef}
+    The propagator in Eq.(\ref{eq:GreenDef})
 
-that produces: The propagator in Eq.\ref{eq:GreenDef}
+that produces: The propagator in Eq.(\ref{eq:GreenDef})
 
 Note that MathJax is configured with Latex macros to facilitate the insertion of symbols
 commonly used in our domain:

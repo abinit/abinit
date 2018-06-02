@@ -55,6 +55,7 @@ program multibinit
  use m_fit_polynomial_coeff
  use m_multibinit_dataset
  use m_effective_potential_file
+ use m_spin_model
  use m_abihist
  use m_ab7_invars
 
@@ -70,6 +71,7 @@ program multibinit
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
+ use interfaces_57_iovars
  use interfaces_78_effpot
  use interfaces_95_drive
 !End of the abilint section
@@ -96,6 +98,9 @@ program multibinit
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
+
+!TODO hexu: add types for spin here.
+ type(spin_model_t) :: spin_model
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -195,6 +200,10 @@ program multibinit
    call instrng (filnam(1),lenstr,option,strlen,string)
    !To make case-insensitive, map characters to upper case:
    call inupper(string(1:lenstr))
+
+   !Check whether the string only contains valid keywords
+   call chkvars(string)
+
  end if
 
  call xmpi_bcast(string,master, comm, ierr)
@@ -211,13 +220,23 @@ program multibinit
 
 ! Read and treat the reference structure
 !****************************************************************************************
+if (inp%spin_dynamics>0) then
+ if (iam_master) then
+
+    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     & 'reading spin terms.'
+   call spin_model_t_initialize(spin_model, filnam(3), inp )
+ endif
+endif
 
 !Read the model (from DDB or XML)
+if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-
-!Read the coefficient from fit
+ 
+ !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
+   ! TODO hexu: filetype==(33?) 
    if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
@@ -241,6 +260,8 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  end if
+
+ endif
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences
@@ -252,7 +273,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_coeff/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -263,7 +284,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -276,20 +297,31 @@ program multibinit
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
          MSG_ERROR(message)
-       else if(inp%confinement==2) then
-         write(message, '(3a)' )&
+       else
+         if (inp%bound_model/=0) then
+           write(message, '(3a)' )&
+&         'There is no MD file to bound the model ',ch10,&
+&         'Action: add MD file'
+           MSG_ERROR(message)           
+         else if(inp%confinement==2) then
+           write(message, '(3a)' )&
 &         'There is no MD file to compute the confinement',ch10,&
 &         'Action: add MD file'
-         MSG_ERROR(message)
+           MSG_ERROR(message)
+         end if
        end if
      end if
    end if
-
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
    call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
+
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+! stop
+!TEST_AM
 
 !Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
@@ -316,9 +348,6 @@ program multibinit
    end select
  end if
 
-!TEST_AM
-! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
-!TEST_AM
 
 !Fit the coeff
  if (inp%fit_coeff/=0)then
@@ -339,9 +368,10 @@ program multibinit
      else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       initialize_data=inp%fit_initializeData==1,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&
@@ -359,8 +389,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%bound_coeff>0.and.inp%bound_coeff<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_coeff,comm,hist=hist)
+ if(inp%bound_model>0.and.inp%bound_model<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
  end if
 
 !****************************************************************************************
@@ -375,6 +405,7 @@ program multibinit
 
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
+! TODO hexu: add print spin model.
  if(iam_master) then
    if (inp%prt_model >= 1) then
      write(message, '(a,(80a),a)' ) ch10,&
@@ -396,7 +427,7 @@ program multibinit
 ! Print the Phonon dos/spectrum
 ! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
-!&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
+!&           inp%ncell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
 !Intialisation of the effective potential type
@@ -422,7 +453,19 @@ program multibinit
  if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
  end if
-!****************************************************************************************
+
+!****************************************************************************************    
+
+
+! Run spin dynamics
+!****************************************************************************************    
+ if(inp%spin_dynamics>0) then
+  ! TODO hexu: no mpi yet.
+   if(iam_master) then
+      call spin_model_t_run(spin_model)
+   endif
+ endif
+!****************************************************************************************    
 
 
 !Free the effective_potential and dataset
@@ -430,6 +473,7 @@ program multibinit
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
  call abihist_free(hist)
+ call spin_model_t_finalize(spin_model)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
