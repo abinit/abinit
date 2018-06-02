@@ -788,6 +788,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symchi',tread,'INT')
  if(tread==1) dtset%symchi=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getefmas',tread,'INT')
+ if(tread==1) dtset%getefmas=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
 

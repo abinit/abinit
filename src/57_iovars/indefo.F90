@@ -318,6 +318,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%getdkdk =0
    dtsets(idtset)%getdkde =0
    dtsets(idtset)%getden  =0
+   dtsets(idtset)%getefmas=0
    dtsets(idtset)%getgam_eig2nkq  =0
    dtsets(idtset)%gethaydock=0
    dtsets(idtset)%getocc  =0

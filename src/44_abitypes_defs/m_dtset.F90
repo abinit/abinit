@@ -543,6 +543,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%getdkdk            = dtin%getdkdk
  dtout%getdkde            = dtin%getdkde
  dtout%getden             = dtin%getden
+ dtout%getefmas           = dtin%getefmas
  dtout%getgam_eig2nkq     = dtin%getgam_eig2nkq
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc

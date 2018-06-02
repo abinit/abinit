@@ -247,6 +247,7 @@ type dataset_type
  integer :: getdkdk
  integer :: getdkde
  integer :: getden
+ integer :: getefmas
  integer :: getgam_eig2nkq
  integer :: getocc
  integer :: getpawden

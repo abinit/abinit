@@ -116,7 +116,7 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getefmas getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine'
  list_vars=trim(list_vars)//' getsuscep '
