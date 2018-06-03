@@ -665,35 +665,36 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    MSG_ERROR(message)
  end if
 
+! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
 ! Do some checks
- if (natom < 1) then
-   write(message, '(a,a,a,a,a)' )&
-&   ' Unable to read the number of atom from ',trim(filename),ch10,&
-&   'This file  is not compatible with multibinit',ch10
-   MSG_ERROR(message)
- end if
-
- if (filetype==2 .or. filetype==23) then
-
-   if (natom < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of atom from ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (nrpt < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of rpt points ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (ntypat < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
- end if
+! if (natom < 1) then
+!   write(message, '(a,a,a,a,a)' )&
+!&   ' Unable to read the number of atom from ',trim(filename),ch10,&
+!&   'This file  is not compatible with multibinit',ch10
+!   MSG_ERROR(message)
+! end if
+!
+! if (filetype==2 .or. filetype==23) then
+!
+!   if (natom < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of atom from ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (nrpt < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of rpt points ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (ntypat < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of type of atoms ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+! end if
 
 end subroutine effective_potential_file_getDimSystem
 !!***
@@ -2396,6 +2397,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
+
   call crystal_init(ddb%amu,effective_potential%crystal,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
@@ -2404,7 +2406,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &                   .FALSE.,crystal%title,&
 &                   symrel=symrel,tnons=tnons,&
 &                   symafm=symafm)
-
+  
   ABI_DEALLOCATE(spinat)
   ABI_DEALLOCATE(ptsymrel)
   ABI_DEALLOCATE(symafm)
