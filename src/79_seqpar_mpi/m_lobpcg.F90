@@ -38,6 +38,8 @@ MODULE m_lobpcg
  use m_abi_linalg
  use m_cgtools
 
+ use m_time,              only : timab
+
  implicit none
 
  private
@@ -103,7 +105,6 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xprecon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -64,11 +64,12 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,      only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fxphas'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -220,6 +221,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
      if (mpi_enreg%paral_spinor==1) then
        call xmpi_sum(buffer2,mpi_enreg%comm_spinor,ierr)
      end if
+     call timab(48,2,tsec)
      creb(:)=buffer2(:,1)
      cimb(:)=buffer2(:,2)
    end if

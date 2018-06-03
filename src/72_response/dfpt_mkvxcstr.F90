@@ -70,12 +70,13 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  use m_errors
  use m_profiling_abi
 
+ use m_time,      only : timab
+ use m_symtk,     only : matr3inv
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxcstr'
- use interfaces_18_timing
- use interfaces_32_util
  use interfaces_72_response, except_this_one => dfpt_mkvxcstr
 !End of the abilint section
 
@@ -89,7 +90,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),target,intent(in) :: nhat(nfft,nspden)
- real(dp),target,intent(in) :: nhat1(cplex*nfft,nspden) 
+ real(dp),target,intent(in) :: nhat1(cplex*nfft,nspden)
  real(dp),intent(in) :: kxc(nfft,nkxc),qphon(3)
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3)
@@ -105,7 +106,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  real(dp) :: gprimd(3,3),tsec(2)
  real(dp),allocatable :: rhor1tmp(:,:),rhowk1(:,:)
  real(dp),pointer :: rhor_(:,:),rhor1_(:,:)
- 
+
 ! *************************************************************************
 
  call timab(181,1,tsec)

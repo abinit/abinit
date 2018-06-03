@@ -55,6 +55,7 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,         only : timab
  use m_geometry,     only : xred2xcart
  use m_pawtab,       only : pawtab_type
  use m_pawfgrtab,    only : pawfgrtab_type
@@ -64,7 +65,6 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nhatgrid'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

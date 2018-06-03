@@ -58,18 +58,18 @@ program multibinit
  use m_abihist
  use m_ab7_invars
 
+ use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
  use m_fstrings,   only : replace, inupper
- use m_time,       only : asctime
+ use m_time,       only : asctime, timein
  use m_parser,     only : instrng
+ use m_dtfil,      only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
  use interfaces_78_effpot
  use interfaces_95_drive
 !End of the abilint section
@@ -252,7 +252,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%fit_bound/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_coeff/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -340,7 +340,7 @@ program multibinit
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
-&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
+&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
@@ -359,8 +359,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%fit_bound>0.and.inp%fit_bound<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%fit_bound,comm,hist=hist)
+ if(inp%bound_coeff>0.and.inp%bound_coeff<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_coeff,comm,hist=hist)
  end if
 
 !****************************************************************************************

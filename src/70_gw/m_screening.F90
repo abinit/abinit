@@ -50,13 +50,14 @@ MODULE m_screening
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item, box_len
  use m_fft_mesh,        only : g2ifft
+ use m_fftcore,         only : kgindex
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -2860,7 +2861,6 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_mdielf'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -3423,8 +3423,6 @@ subroutine lwl_free(lwl)
 
 end subroutine lwl_free
 !!***
-
-!----------------------------------------------------------------------
 
 END MODULE m_screening
 !!***

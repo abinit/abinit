@@ -61,7 +61,7 @@ MODULE m_results_respfn
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
 ! Integer scalar
-  integer :: gam_jdtset  
+  integer :: gam_jdtset
   ! jdtset if the results from a q=gamma wavevector calculation, with dataset jdtset have been stored
   ! -jdtset if the results from a q=gamma wavevector calculation, with dataset jdtset should be stored
   ! 0 if no q=gamma wavevector calculation should be stored

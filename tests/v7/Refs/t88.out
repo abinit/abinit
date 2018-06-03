@@ -355,6 +355,13 @@ Values initialized with zeros
 -                                 =     0.6318015238E+01 (THz)
 -Debye temperature from partial sums:     0.3032165488E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS1_PHDOS
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
@@ -587,6 +594,13 @@ Values initialized with zeros
 -                                 =     0.6318015238E+01 (THz)
 -Debye temperature from partial sums:     0.3032165488E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -797,6 +811,13 @@ Values initialized with zeros
  Debye frequency from partial sums:     0.9602308127E-03 (Ha)
 -                                 =     0.6318015238E+01 (THz)
 -Debye temperature from partial sums:     0.3032165488E+03 (K)
+
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS3_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file

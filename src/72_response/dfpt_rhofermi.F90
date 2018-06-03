@@ -147,6 +147,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_errors
  use m_wfk
 
+ use m_dtfil,       only : status
+ use m_time,        only : timab
  use m_io_tools,    only : get_unit, iomode_from_fname
  use m_occ,         only : occeig
  use m_pawang,      only : pawang_type
@@ -160,18 +162,17 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
- use m_kg,          only : mkkin, kpgstr
+ use m_kg,          only : mkkin, kpgstr, mkkpg
+ use m_fft,         only : fftpac
+ use m_spacepar,    only : symrhg
+ use m_mkffnl,      only : mkffnl
+use m_mpinfo,       only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section
 
@@ -749,13 +750,13 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Compute and add the compensation density to rhowfr to get the total density
  if (psps%usepaw == 1) then
    if (size(nhatfermi)>0) then
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&
 &     dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=nhatfermi)
    else
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&

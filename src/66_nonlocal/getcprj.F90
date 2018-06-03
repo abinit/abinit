@@ -90,7 +90,7 @@
  use m_profiling_abi
  use m_errors
 
- use m_kg,       only : ph1d3d
+ use m_kg,       only : ph1d3d, mkkpg
  use m_pawcprj,  only : pawcprj_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -124,7 +124,7 @@
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
  real(dp),allocatable :: d2gxdt(:,:,:,:,:),dgxdt(:,:,:,:,:),ffnl_typ(:,:,:)
  real(dp),allocatable :: gx(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: kpg_(:,:),ph3d_(:,:,:)
+ real(dp), pointer :: kpg_(:,:),ph3d_(:,:,:)
 
 ! *********************************************************************
 

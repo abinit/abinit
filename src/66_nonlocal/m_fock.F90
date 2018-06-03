@@ -45,12 +45,14 @@ module m_fock
  use m_pawcprj
  use m_cgtools
 
- use m_mpinfo,          only : ptabs_fourdp
+ use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_symtk,           only : mati3inv, matr3inv
+ use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
- use m_paw_ij,          only : paw_ij_type
-
+ use m_kpts,            only : listkk
+ use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 
@@ -195,9 +197,8 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
-
  end type fock_common_type
-!--------------------------------------------------------------------
+
  type, public :: fock_BZ_type
 
   integer :: mcprj
@@ -351,7 +352,7 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -364,7 +365,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_A
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -494,10 +495,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -692,7 +689,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1595,7 +1592,6 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
    ! Select only the occupied states (such that fock%occ_bz > 10^-8)
    if (abs(occ(iband))>tol8) then
-      fock_energy=fock_energy
 !     fock_energy=fock_energy + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
      !* Sum the contribution of each occupied states at point k_i
      !* No need to multiply %wtk by ucvol since there is no factor 1/ucvol in the definition of %wtk
@@ -1717,8 +1713,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_18_timing
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -2442,7 +2436,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 end subroutine bare_vqg
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/strfock
 !!
 !! NAME
@@ -2451,13 +2445,6 @@ end subroutine bare_vqg
 !! FUNCTION
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
@@ -2465,7 +2452,7 @@ end subroutine bare_vqg
 !!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ
@@ -2489,13 +2476,6 @@ end subroutine bare_vqg
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
@@ -2505,7 +2485,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strfock'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -2647,8 +2626,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
 end subroutine strfock
 !!***
-
-
 
 end module m_fock
 !!***

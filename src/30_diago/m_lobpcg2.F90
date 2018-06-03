@@ -5,6 +5,7 @@
 #include "abi_common.h"
 
 module m_lobpcg2
+
   use m_xg
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
@@ -13,6 +14,8 @@ module m_lobpcg2
 #ifdef HAVE_OPENMP
   use omp_lib
 #endif
+
+  use m_time, only : timab
 
   implicit none
 
@@ -33,7 +36,7 @@ module m_lobpcg2
   integer, parameter :: EIGENPV = 6
   integer, parameter :: EIGENEVD = 7
   integer, parameter :: EIGENEV = 8
-  integer, parameter :: EIGENPEVD = 9 
+  integer, parameter :: EIGENPEVD = 9
   integer, parameter :: EIGENPEV = 10
   integer, parameter :: EIGENSLK = 11
   logical, parameter :: EIGPACK(11) = &
@@ -76,7 +79,7 @@ module m_lobpcg2
     type(xgBlock_t) :: X0 ! Block of initial and final solution.
                                              ! Dim is (cplx*spacedim,neigenpair)
     !double precision, allocatable :: eig(:)  ! Actual eigen values
-                                             
+
     ! Some denomination here
     ! X, W, P are the shifts where their block vectors starts.
     ! X is the current block we are solving
@@ -134,7 +137,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_init'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
@@ -154,7 +156,7 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
-    
+
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs = neigenpairs
     lobpcg%spacedim    = spacedim
@@ -217,10 +219,10 @@ module m_lobpcg2
 
     spacedim = lobpcg%spacedim
     blockdim = lobpcg%blockdim
-    
+
     call lobpcg_free(lobpcg) ! Make sure everything is not allocated and
     ! pointer point to null()
-    
+
     call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom)
     call xg_setBlock(lobpcg%XWP,lobpcg%X,1,spacedim,blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%W,blockdim+1,spacedim,blockdim)
@@ -304,11 +306,11 @@ module m_lobpcg2
     memeigenvalues3N = kind(1.d0) * 3*blockdim
 
     ! Temporary arrays
-    membufferBOrtho = cplx * kind(1.d0) * 2*blockdim * 2*blockdim ! For the moment being, only Bortho with X or WP at the same time 
-    memsubA = cplx * kind(1.d0) * 3*blockdim * 3*blockdim 
-    memsubB = cplx * kind(1.d0) * 3*blockdim * 3*blockdim 
-    memsubBtmp = cplx * kind(1.d0) * spacedim * blockdim 
-    memvec = cplx * kind(1.d0) * 3*blockdim * blockdim 
+    membufferBOrtho = cplx * kind(1.d0) * 2*blockdim * 2*blockdim ! For the moment being, only Bortho with X or WP at the same time
+    memsubA = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubB = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubBtmp = cplx * kind(1.d0) * spacedim * blockdim
+    memvec = cplx * kind(1.d0) * 3*blockdim * blockdim
     memRR = max(memsubA+memsubB+memvec,memsubBtmp+memvec)
 
     maxmemTmp = max( membufferBOrtho,memRR,membufferOrtho )
@@ -326,7 +328,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_run'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -344,7 +345,7 @@ module m_lobpcg2
     integer :: iline, nline
     integer :: rows_tmp, cols_tmp
     integer :: RR_var
-    type(xgBlock_t) :: eigenBlock   ! 
+    type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
     double precision :: maxResidu, minResidu, average, deviation
@@ -447,12 +448,12 @@ module m_lobpcg2
         call pcond(lobpcg%W)
         call timab(tim_pcond,2,tsec)
 
-        ! Compute residu norm here ! 
+        ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax,&
                                                        min_val=minResidu,min_elt=eigResiduMin)
         call timab(tim_maxres,2,tsec)
-        if ( prtvol == 4 ) then 
+        if ( prtvol == 4 ) then
           write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
             "(",minResidu,",",maxResidu, ") for eigen vectors (", &
             eigResiduMin,",",eigResiduMax,")"
@@ -486,7 +487,7 @@ module m_lobpcg2
         ! DO RR in the correct subspace
         ! if residu starts to be too small, there is an accumulation error in
         ! P with values such as 1e-29 that make the eigenvectors diverge
-        if ( iline == 1 .or. minResidu < 1e-27) then 
+        if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
           call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW
@@ -498,13 +499,13 @@ module m_lobpcg2
             MSG_COMMENT("This is embarrasing. Let's pray")
           end if
         else
-          ! B-orthonormalize P, BP 
+          ! B-orthonormalize P, BP
           call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr) ! Do rotate AWP
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
             RR_eig = eigenvalues3N%self
-          else 
+          else
             call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
             RR_var = VAR_XW
             RR_eig = eigenvalues2N
@@ -513,9 +514,9 @@ module m_lobpcg2
             call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
           end if
-          !RR_eig = eigenvalues3N%self 
+          !RR_eig = eigenvalues3N%self
         end if
-        !RR_eig = eigenvalues3N%self 
+        !RR_eig = eigenvalues3N%self
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
           MSG_ERROR_NOSTOP("I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide",ierr)
@@ -528,7 +529,7 @@ module m_lobpcg2
       call lobpcg_getResidu(lobpcg,eigenvaluesN)
       ! Apply preconditioner
       call pcond(lobpcg%W)
-      ! Recompute residu norm here ! 
+      ! Recompute residu norm here !
       call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax, &
                                                      min_val=minResidu,min_elt=eigResiduMin)
 
@@ -620,7 +621,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_orthoXwrtBlocks'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -662,7 +662,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_Borthonormalize'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
@@ -721,18 +720,18 @@ module m_lobpcg2
     end if
 
 !!$omp parallel default(shared)
-!!$omp single 
-!!$omp task 
+!!$omp single
+!!$omp task
     ! Solve YU=X
     call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
 !!$omp end task
 
-!!$omp task 
+!!$omp task
     ! Solve BYU=BX
     call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
 !!$omp end task
 
-!!$omp task 
+!!$omp task
     if ( BorthoA .eqv. .true. ) then
       ! Solve AYU=AX
       call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
@@ -756,7 +755,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_rayleighRitz'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -780,9 +778,9 @@ module m_lobpcg2
     type(xgBlock_t) :: AX
     type(xgBlock_t) :: BX
     type(xgBlock_t) :: Cwp
-    type(xgBlock_t) :: WP 
-    type(xgBlock_t) :: AWP 
-    type(xgBlock_t) :: BWP 
+    type(xgBlock_t) :: WP
+    type(xgBlock_t) :: AWP
+    type(xgBlock_t) :: BWP
     type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -809,7 +807,7 @@ module m_lobpcg2
         eigenSolver = EIGENEV
 #ifdef HAVE_LINALG_MKL_THREADS
       end if
-#endif 
+#endif
     case(VAR_XW)
       subdim = blockdim*2
       X = lobpcg%XW
@@ -827,7 +825,7 @@ module m_lobpcg2
         eigenSolver = EIGENVX
 #ifdef HAVE_LINALG_MKL_THREADS
       end if
-#endif 
+#endif
     case (VAR_XWP)
       subdim = blockdim*3
       X = lobpcg%XWP%self
@@ -846,7 +844,7 @@ module m_lobpcg2
         eigenSolver = EIGENVX
 #ifdef HAVE_LINALG_MKL_THREADS
       end if
-#endif 
+#endif
     case default
       MSG_ERROR("RR")
     end select
@@ -890,7 +888,7 @@ module m_lobpcg2
     if ( var /= VAR_X ) then
       call xg_setBlock(subB,subsub,1,blockdim,blockdim)
       call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
-    endif 
+    endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
       ! subA
@@ -924,7 +922,7 @@ module m_lobpcg2
 
     ! Compute X*BX subspace matrix
     !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
-    !---end 
+    !---end
 
     call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
@@ -933,16 +931,16 @@ module m_lobpcg2
       select case (eigenSolver)
       case (EIGENEVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heevd"
-        call xgBlock_heevd('v','u',subA%self,eigenvalues,info) 
+        call xgBlock_heevd('v','u',subA%self,eigenvalues,info)
       case (EIGENEV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heev"
-        call xgBlock_heev('v','u',subA%self,eigenvalues,info) 
+        call xgBlock_heev('v','u',subA%self,eigenvalues,info)
       case (EIGENPEVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpevd"
-        call xgBlock_hpevd('v','u',subA%self,eigenvalues,vec%self,info) 
+        call xgBlock_hpevd('v','u',subA%self,eigenvalues,vec%self,info)
       case (EIGENPEV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpev"
-        call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info) 
+        call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
         call xgScalapack_heev(scalapack,subA%self,eigenvalues)
@@ -956,23 +954,23 @@ module m_lobpcg2
       case (EIGENVX)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvx"
         call xgBlock_hegvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
-          eigenvalues,vec%self,info) 
+          eigenvalues,vec%self,info)
       case (EIGENVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
-        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info) 
+        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info)
       case (EIGENV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegv"
-        call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info) 
+        call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info)
       case (EIGENPVX)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvx"
         call xgBlock_hpgvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
-          eigenvalues,vec%self,info) 
+          eigenvalues,vec%self,info)
       case (EIGENPVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvd"
-        call xgBlock_hpgvd(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
+        call xgBlock_hpgvd(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
       case (EIGENPV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgv"
-        call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
+        call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
         call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues)
@@ -999,40 +997,40 @@ module m_lobpcg2
 
     if ( info == 0 ) then
       call xg_init(subB,space(X),spacedim,blockdim)
-  
+
       !/* Easy basic solution */
       !/* Compute first part of X here */
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
       call xgBlock_gemm(lobpcg%X%normal,Cwp%normal,1.0d0,lobpcg%X,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%X) 
-  
+      call xgBlock_copy(subB%self,lobpcg%X)
+
       !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_gemm(lobpcg%AX%normal,Cwp%normal,1.0d0,lobpcg%AX,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%AX) 
-  
+      call xgBlock_copy(subB%self,lobpcg%AX)
+
       !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%BX) 
-  
+      call xgBlock_copy(subB%self,lobpcg%BX)
+
       if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
-  
+
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
         call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%P) 
-  
+        call xgBlock_copy(subB%self,lobpcg%P)
+
         !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
         call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%AP) 
-  
+        call xgBlock_copy(subB%self,lobpcg%AP)
+
         !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
         call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%BP) 
-        
+        call xgBlock_copy(subB%self,lobpcg%BP)
+
         !/* Maybe faster solution
         ! * Sum previous contribution plus P direction
         ! */
@@ -1059,7 +1057,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_getResidu'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -1091,7 +1088,7 @@ module m_lobpcg2
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
 
-    !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim) 
+    !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,Xtmp,(iblock-1)*blockdim+1,spacedim,blockdim)
     call xgBlock_copy(lobpcg%X,Xtmp)
   end subroutine lobpcg_setX0
@@ -1155,7 +1152,7 @@ module m_lobpcg2
 #ifdef HAVE_OPENMP
     lobpcg%is_nested = omp_get_nested()
     call omp_set_nested(.true.)
-#else 
+#else
     lobpcg%is_nested = .false.
 #endif
   end subroutine lobpcg_allowNested

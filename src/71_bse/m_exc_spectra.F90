@@ -24,8 +24,8 @@
 
 MODULE m_exc_spectra
 
- use defs_basis 
- use defs_datatypes   
+ use defs_basis
+ use defs_datatypes
  use m_bs_defs
  use m_profiling_abi
  use iso_c_binding
@@ -41,10 +41,10 @@ MODULE m_exc_spectra
  use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
- use m_numeric_tools,   only : simpson_int
+ use m_numeric_tools,   only : simpson_int, simpson_cplx
  use m_blas,            only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
- use m_crystal,         only : crystal_t 
+ use m_crystal,         only : crystal_t
  use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
@@ -55,11 +55,11 @@ MODULE m_exc_spectra
 
  implicit none
 
- private 
+ private
 
  public :: build_spectra           ! Driver routine for the computation of optical spectra.
- public :: exc_write_data          ! This routine drives the writing of the files produced by the Bethe-Salpeter code. 
- public :: exc_eps_rpa             ! Build epsilon within RPA and GW. 
+ public :: exc_write_data          ! This routine drives the writing of the files produced by the Bethe-Salpeter code.
+ public :: exc_eps_rpa             ! Build epsilon within RPA and GW.
  public :: mdfs_ncwrite            ! Writes the MDF.nc file with the final results.
  public :: exc_write_tensor        ! Write of complex dielectric tensor
  !public :: exc_eps_resonant       ! Build the macroscopic dielectric function with excitonic effects.
@@ -112,7 +112,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #define ABI_FUNC 'build_spectra'
  use interfaces_14_hidewrite
  use interfaces_69_wfdesc
- use interfaces_71_bse
 !End of the abilint section
 
  implicit none
@@ -132,7 +131,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
- 
+
 !Local variables ------------------------------
 !scalars
  integer :: my_rank,master,iq,io,nsppol,lomo_min,max_band,ncid
@@ -149,7 +148,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  real(dp),allocatable :: dos_exc(:),dos_gw(:),dos_ks(:)
  complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
  complex(dpc),allocatable :: eps_exc(:,:),opt_cvk(:,:,:,:,:)
-      
+
 !************************************************************************
 
  my_rank = Wfd%my_rank
@@ -170,7 +169,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  lomo_min=Bsp%lomo_min; max_band=Bsp%nbnds
  ABI_MALLOC(opt_cvk,(lomo_min:max_band,lomo_min:max_band,BSp%nkbz,nsppol,BSp%nq))
 
- do iq=1,BSp%nq 
+ do iq=1,BSp%nq
    call calc_optical_mels(Wfd,Kmesh,KS_BSt,Cryst,Psps,Pawtab,Hur,BSp%inclvkb,Bsp%lomo_spin,lomo_min,max_band,&
 &                         BSp%nkbz,BSp%q(:,iq),opt_cvk(:,:,:,:,iq))
  end do
@@ -192,7 +191,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
    do itemp = 1, ntemp
 
      call int2char4(itemp,ts)
- 
+
      if(do_ep_renorm) then
        prefix = TRIM("_T") // ts
      else
@@ -207,14 +206,14 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
      if (BS_files%in_eig /= BSE_NOFILE) then
        filbseig = strcat(BS_files%in_eig,prefix)
-     else 
+     else
        filbseig = strcat(BS_files%out_eig,prefix)
      end if
 
      if(do_ep_renorm) then
        ! No scissor with KSBST
        call renorm_bst(Epren, EPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.TRUE.)
-      
+
        call renorm_bst(Epren, EP_QPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.FALSE.)
      end if
 
@@ -241,7 +240,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ! =========================
      ! === Write out Epsilon ===
      ! =========================
-     !this is just for the automatic tests, It will be removed when fldiff 
+     !this is just for the automatic tests, It will be removed when fldiff
      !will be able to compare two optical spectral
      write(ab_out,*)" "
      write(ab_out,*)"Macroscopic dielectric function:"
@@ -262,7 +261,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,prefix=prefix,dos=dos_gw)
 
      call exc_write_data(BSp,BS_files,"EXC_MDF",eps_exc,prefix=prefix,dos=dos_exc)
- 
+
      call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
      call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
 
@@ -274,7 +273,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
      call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
 
-     if (BSp%exchange_term>0) then 
+     if (BSp%exchange_term>0) then
        MSG_COMMENT(' f-sum rule should be checked without LF')
      end if
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
@@ -327,7 +326,7 @@ end subroutine build_spectra
 !!  exc_write_data
 !!
 !! FUNCTION
-!!  This routine drives the writing of the files produced by the Bethe-Salpeter code. 
+!!  This routine drives the writing of the files produced by the Bethe-Salpeter code.
 !!
 !! INPUTS
 !! BSp<excparam>=Bethe-Salpeter Parameters.
@@ -374,13 +373,13 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
 !Local variables ------------------------------
 !scalars
- integer :: io,iq,funt 
+ integer :: io,iq,funt
  real(dp) :: omegaev,step
  !real(dp),parameter :: SMALL=5.0d-99
 !arrays
  real(dp) :: int_dos(BSp%nomega)
  real(dp) :: tmp_eps(2,BSp%nq)
- character(len=500) :: lf_type,block_type,wgg_type,frm,str_type,msg 
+ character(len=500) :: lf_type,block_type,wgg_type,frm,str_type,msg
  character(len=fnlen) :: fname
 
 !************************************************************************
@@ -434,9 +433,9 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  !
  ! Paramaters common to the different calculations.
  if (BSp%algorithm /= BSE_ALGO_HAYDOCK) then
-   write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates    
+   write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates
  end if
- 
+
  if (BSp%algorithm == BSE_ALGO_HAYDOCK) then
    write(funt,'(a,2f7.4)')'# Tolerance = ',BSp%haydock_tol
  end if
@@ -471,7 +470,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
      write(funt,frm) omegaev,(tmp_eps(:,iq), iq=1,BSp%nq)
    end do
 
- else 
+ else
    write(funt,'(a)')"# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... DOS   IDOS"
    step = DBLE(BSp%omega(2) - BSp%omega(1))
    if ( ABS( step - DBLE((BSp%omega(BSp%nomega) - BSp%omega(BSp%nomega-1)))) > tol6 ) then
@@ -504,10 +503,10 @@ end subroutine exc_write_data
 !!  exc_eps_rpa
 !!
 !! FUNCTION
-!!  Build epsilon within RPA and GW. 
+!!  Build epsilon within RPA and GW.
 !!
 !! INPUTS
-!! nkbz=Number of points in the BZ 
+!! nkbz=Number of points in the BZ
 !! nbnds=Number of bands
 !! lomo_spin(nsppol)
 !! lomo_min=Lowest occupied state
@@ -566,7 +565,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
 !************************************************************************
 
- ! TODO: four_pi comes from the bare Coulomb term hence the 
+ ! TODO: four_pi comes from the bare Coulomb term hence the
  ! present implementation is not compatible with the cutoff technique.
  fact=four_pi/(ucvol*Kmesh%nbz)
  if (nsppol==1) fact=two*fact ! two accounts for the occupation factors.
@@ -606,7 +605,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)        
+             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)
            end do
          else
            do iq=1,nq
@@ -624,7 +623,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,broad)        
+             dos(iw) = dos(iw) + dirac_delta(arg,broad)
            end do
          end if
          !
@@ -651,7 +650,7 @@ end subroutine exc_eps_rpa
 !! INPUTS
 !! Bsp
 !! lomo_min,max_band
-!! nkbz=Number of points in the BZ 
+!! nkbz=Number of points in the BZ
 !! nsppol=Number of independent polarizations.
 !! nomega=Number of frequencies
 !! omega(nomega)=frequency mesh (complex shift is already included)
@@ -718,7 +717,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
    MSG_WARNING("nsppol==2 still under development")
  end if
 
- exc_size = SUM(BSp%nreh) 
+ exc_size = SUM(BSp%nreh)
  nstates  = BSp%nstates
 
  do_ep_lifetime = .FALSE.
@@ -731,8 +730,8 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
    MSG_WARNING(msg)
  end if
  !
- ! TODO: 
- ! four_pi comes from the bare Coulomb term hence the 
+ ! TODO:
+ ! four_pi comes from the bare Coulomb term hence the
  ! present implementation is not compatible with the cutoff technique.
  fact=four_pi/(ucvol*nkbz); if (nsppol==1) fact=two*fact ! two to account for the occupation numbers.
 
@@ -740,7 +739,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
    MSG_ERROR(msg)
  end if
- 
+
  read(eig_unt, err=10, iomsg=errmsg) file_do_lifetime
 
  if(do_ep_lifetime .and. .not. file_do_lifetime) then
@@ -761,7 +760,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  !
  ! Read eigenvalues, ignore possibly small imaginary part.
  ABI_MALLOC(exc_ene_cplx,(neig_read))
- read(eig_unt, err=10, iomsg=errmsg) exc_ene_cplx 
+ read(eig_unt, err=10, iomsg=errmsg) exc_ene_cplx
 
  ABI_MALLOC(exc_ene,(neig_read))
  exc_ene = DBLE(exc_ene_cplx)
@@ -777,15 +776,15 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      read(eig_unt, err=10, iomsg=errmsg) exc_state(:) ! Righteigenvector
      read(eig_unt, err=10, iomsg=errmsg) exc_state2(:) ! Lefteigenvector
 
-     ! Here assuming that eigenvectors are such as Xl_i' Xr_j = delta_ij 
+     ! Here assuming that eigenvectors are such as Xl_i' Xr_j = delta_ij
      ! Otherwise, I need to invert the overlap matrix !
 
      ! Rescale the vectors so that they are "normalized" with respect to the other one !
      dotprod = xdotc(exc_size,exc_state2(:),1,exc_state(:),1)
      exc_state2(:) = exc_state2(:)/CONJG(dotprod)
 
-     ctemp(:) = czero 
-     dtemp(:) = czero 
+     ctemp(:) = czero
+     dtemp(:) = czero
      do spin=1,nsppol
        spad=(spin-1)*BSp%nreh(1) ! Loop over spin channels.
        do it=1,BSp%nreh(spin)    ! Loop over resonant transition t = (k,v,c,s)
@@ -806,7 +805,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      read(eig_unt, err=10, iomsg=errmsg) exc_state(:)
      if(file_do_lifetime) read(eig_unt, err=10, iomsg=errmsg)
 
-     ctemp(:) = czero 
+     ctemp(:) = czero
      do spin=1,nsppol
        spad=(spin-1)*BSp%nreh(1) ! Loop over spin channels.
        do it=1,BSp%nreh(spin)    ! Loop over resonant transition t = (k,v,c,s)
@@ -877,7 +876,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
  write(ost_unt,*)"# E_lambda [eV]     ostrength(q=1) ostrength(q=2) .... "
  write(frm,*)'(f8.4,',BSp%nq,'es12.4)'
- do ll=1,neig_read 
+ do ll=1,neig_read
    write(ost_unt,frm)exc_ene(ll)*Ha_eV,(ostrength(ll,iq), iq=1,BSp%nq)
  end do
 
@@ -893,7 +892,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  return
 
  ! Handler IO-error
-10 continue 
+10 continue
  MSG_ERROR(errmsg)
 
 end subroutine exc_eps_resonant
@@ -910,7 +909,7 @@ end subroutine exc_eps_resonant
 !!
 !! INPUTS
 !! Bsp
-!! nkbz=Number of points in the BZ 
+!! nkbz=Number of points in the BZ
 !! lomo_min,max_band
 !! nomega=Number of frequencies
 !! omega(nomega)=frequency mesh.
@@ -973,22 +972,22 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  call wrtout(std_out," Calculating absorption strength with full coupling","COLL")
 
- if (nsppol==2) then 
+ if (nsppol==2) then
    MSG_WARNING("nsppol==2 is still under development")
  end if
 
  ! Rank of the entire excitonic Hamiltonian including the coupling block.
- exc_size = 2*SUM(BSp%nreh); if (nsppol==2) exc_size = 2*(SUM(BSp%nreh) + BSp%nreh(2)) 
+ exc_size = 2*SUM(BSp%nreh); if (nsppol==2) exc_size = 2*(SUM(BSp%nreh) + BSp%nreh(2))
  nstates  = BSp%nstates
 
- ! TODO: four_pi comes from the bare Coulomb term hence the 
+ ! TODO: four_pi comes from the bare Coulomb term hence the
  ! present implementation is not compatible with the cutoff technique.
  ! factor two is due to the occupation factors.
  fact=four_pi/(ucvol*nkbz); if (nsppol==1) fact=two*fact
 
  if (BS_files%in_eig /= BSE_NOFILE) then
    filbseig = BS_files%in_eig
- else 
+ else
    filbseig = BS_files%out_eig
  end if
 
@@ -996,7 +995,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
    MSG_ERROR(msg)
  end if
- 
+
  read(eig_unt, err=10, iomsg=errmsg) do_lifetime
 
  if (do_lifetime) then
@@ -1186,7 +1185,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
    end if
 
    write(funt,'(a,f7.4,a)')'# Scissor operator energy = ',BSp%mbpt_sciss*Ha_eV,' [eV]'
- 
+
  case ("EXC_TSR_RED")
    write(funt,'("# Complex dielectric tensor (red. coord.) obtained with the BS equation.")')
 
@@ -1227,9 +1226,9 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
  !
  ! Paramaters common to the different calculations.
  if (BSp%algorithm /= BSE_ALGO_HAYDOCK) then
-   write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates    
+   write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates
  end if
- 
+
  if (BSp%algorithm == BSE_ALGO_HAYDOCK) then
    write(funt,'(a,2f7.4)')'# Tolerance = ',BSp%haydock_tol
  end if
@@ -1299,7 +1298,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid 
+ integer,intent(in) :: ncid
  type(excparam),intent(in) :: BSp
 !arrays
  complex(dpc),target,intent(in) :: eps_exc(BSp%nomega,BSp%nq)
@@ -1314,7 +1313,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 ! *************************************************************************
  ! =========================
- ! === Write the dimensions 
+ ! === Write the dimensions
  ! =========================
 
  ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
@@ -1366,12 +1365,12 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
  call c_f_pointer(c_loc(eps_gwnlf(1,1)), rvals, shape=[2, bsp%nomega, bsp%nq])
  NCF_CHECK(nf90_put_var(ncid, vid("gwnlf_mdf"), rvals))
 
-#else 
+#else
  MSG_ERROR("ETSF-IO support is not activated.")
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1387,7 +1386,256 @@ contains
 end subroutine mdfs_ncwrite
 !!***
 
+!!****f* m_exc_spectra/check_kramerskronig
+!! NAME
+!!  check_kramerskronig
+!!
+!! FUNCTION
+!!   check Kramers Kronig
+!!   \int_0^\infty d\omega' frac{\omega'}{\omega'^2 - \omega^2}
+!!   Im \epsilon(\omega') = Re \epsilon(\omega)
+!!
+!! INPUTS
+!!  n=Number of frequency points.
+!!  eps(n)=Dielectric function.
+!!  o(n)=Frequency mesh.
+!!
+!! OUTPUT
+!!  Only checking.
+!!
+!! PARENTS
+!!      m_exc_spectra
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine check_kramerskronig(n,o,eps)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'check_kramerskronig'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+!arrays
+ complex(dpc),intent(in) :: eps(n)
+ real(dp),intent(in) :: o(n)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii,ip
+ real(dp) :: omega,omegap,domega,kk,kkrms,eav
+ complex(dpc) c
+ character(len=500) :: msg
+!arrays
+ real(dp) :: e1kk(n)
+ complex(dpc) :: intg(n)
+
+!************************************************************************
+! init jmb
+ e1kk=zero
+ intg=(zero,zero)
+
+! calculate domega step and verify all
+ domega = (o(n) - o(1)) / (n-1)
+
+ do ii=2,n
+  if (domega-(o(ii)-o(ii-1)) > tol3) then
+    MSG_WARNING("Frequency mesh not linear. Returning")
+    return
+  end if
+ end do
+
+ if(o(1) > 0.1/Ha_eV) then
+   MSG_WARNING("First frequency is not zero. Returning")
+   return
+ end if
+
+ if (aimag(eps(n)) > 0.1) then
+   write(msg,'(a,f12.6,3a,f12.6,2a)')&
+&   ' Im epsilon for omega= ',o(n)*Ha_eV,'eV',ch10,&
+&   ' is not yet zero, epsilon_2= ',aimag(eps(n)),ch10,&
+&   ' Kramers Kronig test could give wrong results. '
+   MSG_WARNING(msg)
+ end if
+
+! Fill array for kramers kronig.
+ do ii=1,n
+   omega=o(ii)
+   c = (0.0,0.0)
+   do ip=1,n
+     if(ip == ii) cycle
+     omegap = o(ip)
+     c = c + omegap / (omegap**2-omega**2) * aimag(eps(ip))
+   end do
+   e1kk(ii) = one + two/pi * domega*real(c)
+ end do
+
+!perform kramers kronig with simpson integration
+ do ii=1,n
+   omega=o(ii)
+   do ip=1,n
+     if (ip==ii) cycle
+     omegap = o(ip)
+     intg(ip) = omegap / (omegap**2 - omega**2) * aimag(eps(ip))
+   end do
+   c = simpson_cplx(n,domega,intg)
+   e1kk(ii) = one + two/pi * real(c)
+ end do
+
+!verify kramers kronig
+ eav=zero; kk=zero; kkrms=zero
+ do ii=1,n
+   kk = kk + abs(real(eps(ii)) - e1kk(ii))
+   kkrms = kkrms +(real(eps(ii)) - e1kk(ii))*(real(eps(ii)) - e1kk(ii))
+   eav = eav + abs(real(eps(ii)))
+ end do
+
+ eav = eav/n
+ kk = (kk/n)/eav
+ kkrms = (kkrms/n) / (eav*eav)
+
+ kk = abs(real(eps(1)) - e1kk(1)) / real(eps(1))
+
+! write data
+ write(msg,'(a,f7.2,a)')" The Kramers-Kronig is verified within ",100*kk,"%"
+ call wrtout(std_out,msg,"COLL")
+
+! write(std_out,'("# Kramers Kronig calculation of epsilon1")')
+! write(std_out,'("# omega   epsilon1  epsilon1kk")')
+! do ii=1,n
+!   write(std_out,'(f7.3,2e15.7)') o(ii)*Ha_eV, real(eps(ii)), e1kk(ii)
+! end do
+
+end subroutine check_kramerskronig
+!!***
+
 !----------------------------------------------------------------------
 
-END MODULE m_exc_spectra
+!!****f* m_exc_spectra/check_fsumrule
+!! NAME
+!!  check_fsumrule
+!!
+!! FUNCTION
+!!   check f-sum rule
+!!   \int_0^\infty d\omega \omega Im \epsilon_GG'(q,\omega) =
+!!   = \frac{1}{2} \pi \omega_p^2  \frac{\rho(G-G')}{\rho(0)}
+!!   versor(q+G) \dot versor(q+G')
+!!   for q = G = G' = 0, it reads:
+!!   \int_0^\infty d\omega \omega Im \epsilon_00(q=0,\omega) =
+!!   = \pi \omega_p^2 / 2
+!!   calculate only the second one
+!!   calculate the integral to evaluate an omega_plasma^eff to compare with omega_plasma
+!!
+!! INPUTS
+!!  n=Number of frequencies.
+!!  o(n)=Frequency mesh.
+!!  e2(n)=imaginary part of epsilon_00
+!!  omegaplasma=Drude plasma frequency.
+!!
+!! OUTPUT
+!!  Only checking.
+!!
+!! PARENTS
+!!      m_exc_spectra
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine check_fsumrule(n,o,e2,omegaplasma)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'check_fsumrule'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+ real(dp),intent(in) :: omegaplasma
+!arrays
+ real(dp),intent(in) :: o(n),e2(n)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii,ip
+ real(dp) :: omegap,domega,integral,omegaplasmaeff,fsumrule
+ character(len=500) :: msg
+!arrays
+ complex(dpc) :: intg(n)
+
+!************************************************************************
+
+! calculate domega step and verify
+ domega = (o(n) - o(1)) / (n-1)
+
+ do ii=2,n
+   if (domega-(o(ii)-o(ii-1)) > tol3) then
+     MSG_WARNING("Frequency mesh not linear. Returning")
+     return
+   end if
+ end do
+
+ if (o(1) > 0.1/Ha_eV) then
+   MSG_WARNING("First frequency is not zero. Returning")
+   return
+ end if
+
+ if (e2(n) > 0.1) then
+   write(msg,'(a,f12.6,3a,f12.6,2a)')&
+&   ' Im epsilon for omega= ',o(n)*Ha_eV,' eV ',ch10,&
+&   ' is not yet zero, epsilon_2= ',e2(n),ch10,&
+&   ' f-sum rule test could give wrong results.'
+   MSG_WARNING(msg)
+ end if
+
+! integrate to obtain f-sum rule
+ integral=zero
+ do ip=1,n
+   omegap=o(ip)
+   integral = integral + omegap * e2(ip)
+ end do
+ integral = domega * integral
+
+!integrate with simpson to obtain f-sum rule
+ do ip = 1, n
+   omegap = o(ip)
+   intg(ip) = omegap * e2(ip)
+ end do
+
+ integral = real(simpson_cplx(n,domega,intg))
+ if(integral < 0) then
+   MSG_ERROR("The integral of the imaginary of dielectric function is negative !!!")
+ else
+   omegaplasmaeff = sqrt(integral*two/pi)
+ end if
+
+ fsumrule = abs((omegaplasmaeff - omegaplasma)) / omegaplasma
+
+! write data
+ write(msg,'(3(a,f6.2,2a))')&
+&  " omega_plasma     = ",omegaplasma*Ha_eV,   " [eV]",ch10,&
+&  " omega_plasma^eff = ",omegaplasmaeff*Ha_eV," [eV]",ch10,&
+&  " the f-sum rule is verified within ",fsumrule*100,"%",ch10
+ call wrtout(std_out,msg,"COLL")
+
+end subroutine check_fsumrule
 !!***
+
+END MODULE m_exc_spectra

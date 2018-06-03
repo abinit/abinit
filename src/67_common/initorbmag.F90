@@ -20,6 +20,8 @@
 !!  kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !!  npwarr(nkpt) = number of planewaves in basis and boundary at this k point
 !!  occ(mband*nkpt*nsppol) = occup number for each band at each k point
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3) = dimensional primitive vectors
@@ -48,7 +50,7 @@
 #include "abi_common.h"
 
 subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                     pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                     rprimd,symrec,xred)
 
  use defs_basis
@@ -59,19 +61,21 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_errors
  use m_xmpi
 
+ use m_time,    only : timab
+ use m_symtk,   only : symatm
  use m_fftcore, only : kpgsph
+ use m_kpts,    only : listkk, smpbz
+ use m_pawang,  only : pawang_type
+ use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initorbmag'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
 
@@ -83,6 +87,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
  type(orbmag_type),intent(out) :: dtorbmag
+ type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
@@ -91,6 +96,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),pointer :: pwnsfac(:,:)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
@@ -108,7 +114,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  integer :: iadum(3),iadum1(3),dg(3)
  integer,allocatable :: kg1_k(:,:)
  real(dp) :: diffk(3),dk(3),dum33(3,3),kpt1(3),tsec(2)
- real(dp),allocatable :: spkpt(:,:)
+ real(dp),allocatable :: calc_twdij(:,:,:,:),spkpt(:,:)
 
 ! *************************************************************************
 
@@ -211,6 +217,8 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_ALLOCATE(dtorbmag%cprjindex,(dtset%nkpt,dtset%nsppol))
  dtorbmag%cprjindex(:,:) = 0
+
+ ABI_ALLOCATE(dtorbmag%twdij0,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
 
  if (dtset%kptopt /= 3) then
    ABI_ALLOCATE(dtorbmag%atom_indsym,(4,dtset%nsym,dtorbmag%natom))
@@ -329,7 +337,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      nband_k = dtset%nband(ikpt + (isppol-1)*dtset%nkpt)
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-     
+
      dtorbmag%cgindex(ikpt,isppol) = icg
      npw_k = npwarr(ikpt)
      icg = icg + npw_k*dtorbmag%nspinor*nband_k
@@ -346,7 +354,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  do ikpt = 1, dtset%nkpt
    if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,1,me)).and.&
 &   (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,dtset%nsppol,me))) cycle
-   
+
    npw_k = npwarr(ikpt)
    dtorbmag%kgindex(ikpt) = ikg
    ikg = ikg + npw_k
@@ -436,7 +444,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
        !      treats k-points at different spin polarizations.
        !      In this case, it is not possible to address the elements of
        !      pwind correctly without making use of the kgindex array.
-     
+
      ikg = 0 ; ikpt_loc = 0 ; isppol = 1
      do ikpt = 1, dtorbmag%fnkpt
 
@@ -463,18 +471,18 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
           !        ji: fkgindex is defined here !
        dtorbmag%fkgindex(ikpt) = ikg
 
-          !        
+          !
           !        Deal with symmetry transformations
-          !        
+          !
 
           !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
           !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
           !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
-          !        
+          !
           !        For the ket k-point:
           !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
           !        where GBZ(k) takes k(k) to the BZ
-          !        
+          !
 
        isym  = dtorbmag%indkk_f2ibz(ikpt,2)
        isym1 = dtorbmag%indkk_f2ibz(ikpt1f,2)
@@ -585,7 +593,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
            ikpt1i = dtorbmag%indkk_f2ibz(ikpt1f,1)
 
            if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-           
+
            ikpt_loc = ikpt_loc + 1
            mpi_enreg%kptdstrb(me + 1,ifor+2*(idir-1),ikpt_loc) = &
 &           ikpt1i + (isppol - 1)*dtset%nkpt
@@ -599,7 +607,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
    end do           ! idir
  end if             ! nproc>1
 
-!build mpi_enreg%kpt_loc2fbz_sp 
+!build mpi_enreg%kpt_loc2fbz_sp
  ikpt_loc = 0
  do isppol = 1, dtset%nsppol
    do ikpt = 1, dtorbmag%fnkpt
@@ -608,7 +616,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      nband_k = dtset%nband(ikpti)
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-     
+
      ikpt_loc = ikpt_loc + 1
 
      mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 1) = ikpt
@@ -628,6 +636,25 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  call xmpi_sum(mpi_enreg%kpt_loc2fbz_sp,spaceComm,ierr)
 
  ABI_DEALLOCATE(kg1_k)
+
+ ! =======================================================================================
+ ! compute pawdij terms arising from <u_n1k1|H_k2|u_n3k3>
+ ! =======================================================================================
+
+ ! term 2b: from vhnzc - vthnzc
+ ! do itypat=1, dtset%ntypat
+ !    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
+ !       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
+ !       MSG_ERROR(message)
+ !    end if
+ ! end do
+
+ ! ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
+ ! call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+
+ ! dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
+
+ ! ABI_DEALLOCATE(calc_twdij)
 
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)

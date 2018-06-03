@@ -107,10 +107,6 @@ subroutine ga_init(dtset,ga_param)
 !scalars
  type(dataset_type),target,intent(in) :: dtset
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -120,7 +116,7 @@ subroutine ga_init(dtset,ga_param)
    ga_param%ga_fitness           = dtset%ga_fitness
    ga_param%ga_opt_percent       = dtset%ga_opt_percent
    ga_param%ga_algor             = dtset%ga_algor
-   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom)) 
+   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom))
    ga_param%ga_iatfix            = dtset%iatfix
  end if
 
@@ -142,7 +138,7 @@ end subroutine ga_init
 !!
 !! SIDE EFFECTS
 !!  ga_param=datastructure of type ga_type.
-!!            parameters for Genetic algorithm search. 
+!!            parameters for Genetic algorithm search.
 !!
 !! PARENTS
 !!      gstateimg
@@ -165,10 +161,6 @@ subroutine ga_destroy(ga_param)
 !Arguments ------------------------------------
 !scalars
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -218,10 +210,6 @@ subroutine ga_nullify(ga_param)
 !Arguments ------------------------------------
 !scalars
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -230,7 +218,7 @@ subroutine ga_nullify(ga_param)
 ! ga_param%ga_algor     = -1
  ga_param%ga_opt_percent  = zero
  ga_param%ga_rules(:) = -1
- 
+
 end subroutine ga_nullify
 !!***
 

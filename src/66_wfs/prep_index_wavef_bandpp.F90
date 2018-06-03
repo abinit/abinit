@@ -4,7 +4,7 @@
 !! prep_index_wavef_bandpp
 !!
 !! FUNCTION
-!! this routine sorts the waves functions by bandpp and by processors 
+!! this routine sorts the waves functions by bandpp and by processors
 !! after the alltoall
 !!
 !! COPYRIGHT
@@ -13,11 +13,11 @@
 !!  nproc_band = number of processors below the band
 !!  bandpp     = number of groups of couple of waves functions
 !!  nspinor    = number of spin
-!!  ndatarecv  = total number of values received by the processor and sended 
+!!  ndatarecv  = total number of values received by the processor and sended
 !!               by the other processors band
-!!  recvcounts = number of values sended by each processor band and received 
+!!  recvcounts = number of values sended by each processor band and received
 !!               by the processor
-!!  rdispls    = positions of the values received by the processor and  
+!!  rdispls    = positions of the values received by the processor and
 !!               sended by each processor band
 !!
 !! OUTPUT
@@ -70,8 +70,8 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
 !DEBUG
 !write(std_out,*)' prep_index_wavef_banpp : enter '
 !write(std_out,*) 'ndatarecv = ', ndatarecv
-!write(std_out,*) 'rdispls(:) = ', rdispls(:) 
-!write(std_out,*) 'recvcounts(:) = ', recvcounts(:) 
+!write(std_out,*) 'rdispls(:) = ', rdispls(:)
+!write(std_out,*) 'recvcounts(:) = ', recvcounts(:)
 !ENDDEBUG
 
 
@@ -80,24 +80,24 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
 !---------------------------------------------
  ABI_ALLOCATE(index_wavef_band ,(bandpp*nspinor*ndatarecv))
  index_wavef_band(:)   =0
- 
+
 !---------------------------------------------
 !Calcul : loops on bandpp and processors band
 !---------------------------------------------
  nb = sum(recvcounts(1:nproc_band))
  do kbandpp=1,bandpp
-   
+
    do iproc=1,nproc_band
-     
+
      idebe = (rdispls(iproc) + 1)  + (kbandpp-1) * ndatarecv*nspinor
      ifine = idebe + recvcounts(iproc) -1
 
      if (iproc==1) then
-       idebc =   (kbandpp-1)* recvcounts(iproc)*nspinor + 1  
+       idebc =   (kbandpp-1)* recvcounts(iproc)*nspinor + 1
      else
        idebc = (bandpp)  * sum(recvcounts(1:iproc-1))*nspinor &
        + (kbandpp-1)* recvcounts(iproc)*nspinor &
-       + 1 
+       + 1
      end if
      ifinc = idebc + recvcounts(iproc) -1
      index_wavef_band(idebe:ifine) = (/( iindex,iindex=idebc,ifinc)/)
