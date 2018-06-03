@@ -89,7 +89,7 @@ contains
 !!      mover
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      fcart2fred,hist2var,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
@@ -132,9 +132,10 @@ real(dp),save :: dtratio, alpha
 ! alphadec: decrement of alpha
 ! alpha0: initial value of alpha
 ! mixold: if energy goes up, linear mix old and new coordinates. mixold
-real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0, alphadec=0.99, alpha0=0.2, mixold=0.3
+real(dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0
+real(dp), parameter :: alphadec=0.99, alpha0=0.2, mixold=0.3
 ! v.dot.f
-real (dp) :: vf
+real(dp) :: vf
 ! number of v.dot.f >0
 integer, save :: ndownhill
 ! reset_lattice: whether to reset lattice if energy goes up.

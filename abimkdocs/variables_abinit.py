@@ -6518,9 +6518,9 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
 
-  * 15 --> Fase inertial relax engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in Phys. Rev. Lett. 97, 170201 (2005). This speed of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. It's efficiency is competible with bfgs, and is very robust. The initial time step is set with dtion. The suggested first guess of dtion is 0.03.
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in Phys. Rev. Lett. 97, 170201 (2005). This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with dtion. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
-**Cell optimization:** Yes 
+**Cell optimization:** Yes (if [[optcell]]1=0)
 **Related variables:** The initial time step [[dtion]]
 
   * 20 --> Direct inversion of the iterative subspace. Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates), and unit cell parameters ([[rprimd]]) this routine uses the DIIS (direct inversion of the iterative subspace) to minimize the gradient (forces) on atoms. The preconditioning used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm. This method is known to converge to the nearest point where gradients vanish. This is efficient to refine positions around a saddle point for instance.
