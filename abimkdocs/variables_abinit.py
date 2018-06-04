@@ -2254,17 +2254,6 @@ an increase of the number of planewaves by a factor (1.1)  3  =1.331, and a
 corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
-
-<<<<<<< HEAD
-=======
-When the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
-tentative new primitive vectors to a value that leads at most to 90% of the
-maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
-prevent the geometry optimization algorithms haveing to take large trial
-step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
-definition of an appropriate planewave basis, but will not lead to an exit
-when the threshold is exceeded.
->>>>>>> remotes/npike/beauty
 """,
 ),
 
