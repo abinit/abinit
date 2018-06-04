@@ -94,7 +94,7 @@ The corresponding adiabaticity parameter is given by [[adpimd_gamma]].
 If equal to 0, no adiabatic Path-Integral Molecular Dynamics (standard PIMD) is performed.
 If equal to 1, adiabatic Path-Integral Molecular Dynamics is activated.
 Only relevant with [[pitransform]]=1 (normal mode transformation). In that case,
-- the mass associated with to the zero-frequency mode is the true mass [[amu]],
+- the mass associated with the zero-frequency mode is the true mass [[amu]],
 - the mass associated to the other higher frequency modes of the polymer
 chains is equal to the normal mode mass divided by [[adpimd_gamma]] (adiabaticity parameter),
 - the equation of motion on the zero-frequency mode is not thermostated.
@@ -162,22 +162,22 @@ Variable(
     characteristics=['[[EVOLVING]]'],
     commentdefault="provided by a database of atomic masses.",
     text="""
-Gives the masses in atomic mass units for each kind of atom in cell. These
+Gives the masses in atomic mass units for each kind of atom in the input cell. These
 masses are used in performing molecular dynamical atomic motion if
-[[ionmov]]=1, 6, 7 or 8. They are also used in phonon calculations, in the
+[[ionmov]]=1, 6, 7 or 8. They are also used in phonon calculations during the
 diagonalization of the dynamical matrix. Note that one may set all masses to 1
 for certain cases in which merely structural relaxation is desired and not
 actual molecular dynamics.
 
-Using 1986 recommended values, 1 atomic mass unit = 1.6605402e-27 kg. In this
+Using the recommended values of [[cite:Martin1987]], 1 atomic mass unit = 1.6605402e-27 kg. In this
 unit the mass of Carbon 12 is exactly 12.
 
-A database of atomic masses is provided, giving default values. Note that the
+A database of atomic masses is provided which provides the default values. Note that the
 default database uses mixed isotope masses (for Carbon the natural occurrence
 of Carbon 13 is taken into account). The values are those recommended by the
 commission on Atomic Weights and Isotopic Abundances, Inorganic Chemistry
-Division, IUPAC, in _Pure Appl. Chem._ **60**, 841 (1988). For Tc, Pm, Po to
-Ac, Pa and beyond U, none of the isotopes has a half-life greater than 3.0d10
+Division, IUPAC [[cite:Martin1987]]. For Tc, Pm, Po to
+Ac, Pa and beyond U, none of the isotopes have a half-life greater than 3.0d10
 years, and the values provided in the database do not come from that source.
 
 For alchemical pseudoatoms, the masses of the constituents atoms are mixed,
@@ -1418,11 +1418,11 @@ Variable(
     defaultval=1,
     mnemonics="CHecK DILATMX",
     text="""
-If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded,
-but simply issue a warning. There will be no rescaling. If 1, after tentative
-rescaling as described in [[dilatmx]], will stop the execution.
+If 0, the code will not stop execution if the threshold of [[dilatmx]] is exceeded,
+it will simply issue a warning. There will be no rescaling. If 1, after tentative
+rescaling as described in [[dilatmx]], the code will stop execution.
 Also, the use of [[chkdilatmx]]=0 allows one to set [[dilatmx]] to a larger value than 1.15 ,
-otherwise forbidden, as being a waste of CPU and memory.
+otherwise forbidden as being a waste of CPU and memory.
 """,
 ),
 
@@ -1549,7 +1549,7 @@ The CI-NEB method constitutes a small modification to the NEB method allowing
 a rigorous convergence to the saddle point. As the image with the highest
 energy has to be identified, the calculation begins with several iterations of
 the standard NEB algorithm. The effective CI-NEB begins at the [[cineb_start]]
-iteration. See: J. Chem. Phys. 113, 9901 (2000).
+iteration. See [[cite:Henkelman2000a]] for additional details of this method.
 """,
 ),
 
@@ -1880,8 +1880,11 @@ Variable(
     mnemonics="DELAY between trials to PERMUTE atoms",
     text="""
 Delay (number of time steps) between trials to permute two atoms, in view of
-accelerated search of minima. Still in development. See the routine
-moldyn.F90. See also [[signperm]]. When [[delayperm]] is zero, there is not permutation trials.
+accelerated search of minima. Still in development. 
+
+See the routine moldyn.F90 and [[signperm]] for additional information.
+
+When [[delayperm]] is zero, there are no permutation trials.
 """,
 ),
 
@@ -2252,6 +2255,16 @@ corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
 
+<<<<<<< HEAD
+=======
+When the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
+tentative new primitive vectors to a value that leads at most to 90% of the
+maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
+prevent the geometry optimization algorithms haveing to take large trial
+step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
+definition of an appropriate planewave basis, but will not lead to an exit
+when the threshold is exceeded.
+>>>>>>> remotes/npike/beauty
 """,
 ),
 
@@ -3099,14 +3112,14 @@ cell shape and size without smoothing the total energy curve (a dangerous
 thing to do), use a very small [[ecutsm]], on the order of one microHartree.
 
 Technical information:
-See Bernasconi et al, J. Phys. Chem. Solids 56, 501 (1995) for a related method.
+See [[cite:Bernasconi1995]]for a related method using constant pressure molecular dynamics.
 [[ecutsm]] allows to define an effective kinetic energy for plane waves, close
 to, but lower than the maximal kinetic energy [[ecut]]. For kinetic energies
 less than [[ecut]]-[[ecutsm]], nothing is modified, while between
 [[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by:
 1.0 / ( x  2  (3+x-6x  2  +3x  3  ))
 where x = ([[ecut]] - kinetic_energy)/[[ecutsm]]
-Note that x  2  ( 3+x-6x  2  +3x  3  ) is 0 at x=0, with vanishing derivative,
+Note that x 2  ( 3+x-6x  2  +3x  3  ) is 0 at x=0, with vanishing derivative,
 and that at x=1, it is 1, with also vanishing derivative.
 If [[ecutsm]] is zero, the unmodified kinetic energy is used.
 [[ecutsm]] can be specified in Ha (the default), Ry, eV or Kelvin, since
@@ -4096,7 +4109,7 @@ The equation of motion is:
 
 where F_random  I  is a Gaussian random force with average zero, and variance 2 [[friction]] M  I  kT.
 The atomic unit of friction is hartrees*electronic mass*(atomic time
-units)/Bohr  2. See J. Chelikowsky, J. Phys. D: Appl Phys. 33(2000)R33.
+units)/Bohr  2. See [[cite:Chelikowsky2000]] for additional information.
 """,
 ),
 
@@ -4214,7 +4227,7 @@ cell. (b) Slice every one of the unit cell of the parents along a random
 direction and creating the spring offs from the pieces of the two parents.
 2) Vector flip mutation. From the coordinates from a given parent, a piece of
 it is inverted.
-3) random strain. A random anisotropic deformation is given to the unit cell.
+3) Random strain. A random anisotropic deformation is given to the unit cell.
 4) Coordinates mutation of 1/4 of the whole coordinates.
 """,
 ),
@@ -4407,13 +4420,13 @@ This variable is typically used to chain the calculations, in the multi-
 dataset mode ([[ndtset]]>0), since it describes from which dataset [[acell]]
 and [[rprim]] are to be taken, as input of the present dataset. The cell
 parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
-If ==0, no use of previously computed values must occur.
-If it is positive, its value gives the index of the dataset from which the
-data are to be used as input data. It must be the index of a dataset already
+If 0, no previously computed values are used.
+If >0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
 computed in the SAME run.
 If equal to -1, the output data of the previous dataset must be taken, which
 is a frequently occurring case. However, if the first dataset is treated, -1
-is equivalent to 0, since no dataset has yet been computed in the same run.
+is equivalent to 0, since no dataset has been computed in the same run.
 If another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
 equivalent to using a null get variable).
@@ -4740,20 +4753,18 @@ dataset mode ([[ndtset]]>0) since they describe from which dataset the
 corresponding output variables are to be taken, as input of the present
 dataset. The atomic positions and velocities are [[EVOLVING]] variables, for
 which such a chain of calculation is useful.
-Note that the use of **getxcart** and **getxred** differs when [[acell]] and
+Note that the use of [[getxcart]] and [[getxred]] differs when [[acell]] and
 [[rprim]] are different from one dataset to the other.
-If ==0, no use of previously computed values must occur.
-If it is positive, its value gives the index of the dataset from which the
-data are to be used as input data. It must be the index of a dataset already
-computed in the SAME run.
-If equal to -1, the output data of the previous dataset must be taken, which
+If 0, no previously computed values are used.
+If >0, the integer should correspond to the index of the dataset from which the VEL data should be used. It must be the index of a dataset already computed in the SAME run.
+If equal to -1, the output data of the previous dataset is taken, which
 is a frequently occurring case. However, if the first dataset is treated, -1
 is equivalent to 0, since no dataset has yet been computed in the same run.
 If another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
 equivalent to using a null get variable).
-Note: **getxred** and **getxcart** cannot be simultaneously non-zero for the
-same dataset. On the other hand the use of [[getvel]] with **getxred** is
+Note: [[getxred]] and [[getxcart]] cannot be simultaneously non-zero for the
+same dataset. On the other hand the use of [[getvel]] with [[getxred]] is
 allowed, despite the different coordinate system.
 """,
 ),
@@ -4924,10 +4935,10 @@ dataset mode ([[ndtset]]>0) since they describe from which dataset the
 corresponding output variables are to be taken, as input of the present
 dataset. The atomic positions and velocities are [[EVOLVING]] variables, for
 which such a chain of calculation is useful.
-Note that the use of [[getxcart]] and **getxred** differs when [[acell]] and
+Note that the use of [[getxcart]] and [[getxred]] differs when [[acell]] and
 [[rprim]] are different from one dataset to the other.
-If ==0, no use of previously computed values must occur.
-If it is positive, its value gives the index of the dataset from which the
+If 0, no previously computed values are used.
+If >0, the integer must correspond to the index of the dataset from which the
 data are to be used as input data. It must be the index of a dataset already
 computed in the SAME run.
 If equal to -1, the output data of the previous dataset must be taken, which
@@ -4936,8 +4947,8 @@ is equivalent to 0, since no dataset has yet been computed in the same run.
 If another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
 equivalent to using a null get variable).
-Note: **getxred** and [[getxcart]] cannot be simultaneously non-zero for the
-same dataset. On the other hand the use of **getvel** with **getxred** is
+Note: [[getxred]] and [[getxcart]] cannot be simultaneously non-zero for the
+same dataset. On the other hand the use of [[getvel]] with [[getxred]] is
 allowed, despite the different coordinate system.
 """,
 ),
@@ -4956,10 +4967,10 @@ dataset mode ([[ndtset]]>0) since they describe from which dataset the
 corresponding output variables are to be taken, as input of the present
 dataset. The atomic positions and velocities are [[EVOLVING]] variables, for
 which such a chain of calculation is useful.
-Note that the use of **getxcart** and [[getxred]] differs when [[acell]] and
+Note that the use of [[getxcart]] and [[getxred]] differs when [[acell]] and
 [[rprim]] are different from one dataset to the other.
-If ==0, no use of previously computed values must occur.
-If it is positive, its value gives the index of the dataset from which the
+If 0, no use of previously computed values must occur.
+If >0, the integer must correspond to the index of the dataset from which the
 data are to be used as input data. It must be the index of a dataset already
 computed in the SAME run.
 If equal to -1, the output data of the previous dataset must be taken, which
@@ -4968,8 +4979,8 @@ is equivalent to 0, since no dataset has yet been computed in the same run.
 If another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
 equivalent to using a null get variable).
-Note: [[getxred]] and **getxcart** cannot be simultaneously non-zero for the
-same dataset. On the other hand the use of **getvel** with [[getxred]] is
+Note: [[getxred]] and [[getxcart]] cannot be simultaneously non-zero for the
+same dataset. On the other hand the use of [[getvel]] with [[getxred]] is
 allowed, despite the different coordinate system.
 """,
 ),
@@ -6015,8 +6026,7 @@ Variable(
 Gives the indices of the atoms appearing in each of the [[nconeq]] independent
 equations constraining the motion of atoms during structural optimization or
 molecular dynamics (see [[nconeq]], [[natcon]], and [[wtatcon]]).
-(Note: combined with wtatcon to give internal representation of the latter -
-this should be described)
+(Note: combined with [[wtatcon]] to give internal representation of the latter)
 """,
 ),
 
@@ -6295,7 +6305,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
   * = 1 --> move images according to **Steepest Descent** following the (scaled) forces,
     the scaling factor being [[fxcartfactor]].
   * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting to minima
-    (see PRB 66, 052301 (2002)); the algorithm variant can be selected with the [[string_algo]] keyword
+    (see [[cite:Weinan2002]]); the algorithm variant can be selected with the [[string_algo]] keyword
     (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE)
     can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.
   * = 3 --> (tentatively, not yet coded) **Metadynamics**.
@@ -6304,7 +6314,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
-  * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]).
+  * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [[cite:Marx1996]]).
     Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[vis]])
     and 13 for **Nose-Hoover thermostat chains** (associated input variables are the number of thermostats in the chains,
     [[nnos]], and the masses of these thermostats [[qmass]]). [[nimage]] is the Trotter number
@@ -6448,8 +6458,7 @@ of atoms fixed [[iatfix]]
 **Related variables:**
 
   * 3 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS), modified to take into account the total energy as well as the gradients (as in usual BFGS).
-See the paper by [Schlegel, J. Comp. Chem. 3, 214 (1982)]. Might be better
-than [[ionmov]]=2 for few degrees of freedom (less than 3 or 4). Can be very
+See [[cite:Schlegel1982]]. Might be better than [[ionmov]]=2 for few degrees of freedom (less than 3 or 4). Can be very
 unstable - use with caution!
 **Purpose:** Structural optimization
 **Cell optimization:** Yes (if [[optcell]]/=0)
@@ -6465,7 +6474,7 @@ unstable - use with caution!
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
 
-  * 6 --> Molecular dynamics using the Verlet algorithm, see [Allen & Tildesley "Computer simulation of liquids" 1987, p 81]. The only related parameter is the time step ([[dtion]]).
+  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987]] p 81]. The only related parameter is the time step ([[dtion]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
@@ -6497,14 +6506,14 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)], as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)]. The conservation of the kinetic energy is obtained within machine precision, at each step.
+  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2002]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
 ~~Related parameters: the time step ([[dtion]]), the temperatures
 ([[mdtemp]]), and the friction coefficient ([[friction]]).~~
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
 
-  * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed by Martyna, Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
+  * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
 If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in
 addition.
 **Purpose:** Molecular dynamics
@@ -6513,7 +6522,7 @@ addition.
 ([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of
 thermostats ([[qmass]]).
 
-  * 14 --> Simple molecular dynamics with a symplectic algorithm proposed by S.Blanes and P.C.Moans [called SRKNa14 in Practical symplectic partitioned Runge--Kutta and Runge--Kutta--Nystrom methods, Journal of Computational and Applied Mathematics archive, volume 142, issue 2 (May 2002), pages 313 - 330] of the kind first published by H. Yoshida [Construction of higher order symplectic integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268]. This algorithm requires at least 14 evaluation of the forces (actually 15 are done within Abinit) per time step. At this cost it usually gives much better energy conservation than the verlet algorithm ([[ionmov]] 6) for a 30 times bigger value of [[dtion]]. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.
+  * 14 --> Simple molecular dynamics with a symplectic algorithm proposed in [[cite:Blanes2002]]  (called SRKNa14] of the kind first published in [[cite:Yoshida1990]]This algorithm requires at least 14 evaluation of the forces (actually 15 are done within Abinit) per time step. At this cost it usually gives much better energy conservation than the verlet algorithm ([[ionmov]] 6) for a 30 times bigger value of [[dtion]]. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
@@ -6543,12 +6552,12 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Related variables:** [[dtion]], [[lotf_classic]], [[lotf_nitex]],
 [[lotf_nneigx]], [[lotf_version]].
 
-  * 24 --> Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see e.g. [E. Hairer et al. Acta Numerica. 12, 399 (2003)]. The only related parameter is the time step ([[dtion]]).
+  * 24 --> Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]]. The only related parameter is the time step ([[dtion]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** time step [[dtion]]
 
-  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemle). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
 **Purpose:** Monte Carlo sampling
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
@@ -8590,7 +8599,7 @@ Relevant only when [[imgmov]]=1 (Steepest-Descent), 2 (String Method) or 5
 The optimizer used to solve the Ordinary Differential Equation (ODE) can be
 constrained with a maximum allowed step size for each image. By default this
 feature is only activated for Nudged Elastic Band (NEB) and the value is
-inspired by _J. Chem. Phys. 128, 134106 (2008)_.
+inspired by [[cite:Sheppard2008]].
 Note that the step size is defined for each image as _step = SQRT[SUM(R_i dot
 R_i)]_ where the _R_i_ are the positions of the atoms in the cell.
 """,
@@ -8614,22 +8623,22 @@ Compatible with all MEP search methods.
 
   * 1 --> **Quick-min optimizer** following the (scaled) forces, the scaling factor being [[fxcartfactor]]. The "quick minimizer" improves upon the steepest-descent method by accelerating the system in the direction of the forces. The velocity (of the image) is projected long the force and cancelled if antiparallel to it.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
-_See, for instance: J. Chem. Phys. 128, 134106 (2008)._
+See [[cite:Sheppard2008]].
 
   * 2 --> **Local Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) algorithm**; each image along the band is minimized with a different instance of the BFGS optimizer.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
-_See, for instance: J. Chem. Phys. 128, 134106 (2008)._
+See [[cite:Sheppard2008]].
 IN [[DEVELOP]]PMENT - NOT RELIABLE
 
   * 3 --> **Global Broyden-Fletcher-Goldfarb-Shanno (GL-BFGS) algorithm**; all images along the band are minimized with a single instance of the BFGS optimizer.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
-_See, for instance: J. Chem. Phys. 128, 134106 (2008)._
+See [[cite:Sheppard2008]].
 IN [[DEVELOP]]PMENT - NOT RELIABLE
 
   * 4 --> **Fourth-order Runge-Kutta method**; the images along the band are moved every four steps (1 <=istep<=[[ntimimage]]) following the Runge-Kutta algorithm, the time step being [[fxcartfactor]].
 Compatible only with Simplified String Method ([[imgmov]]=2 and
 [[string_algo]]=1 or 2).
-_See: J. Chem. Phys. 126, 164103 (2007)._
+See [[cite:Weinan2007]].
 
 All of the optimizers can be constrained with a maximum allowed step size for
 each image; see [[mep_mxstep]]. This is by default the case of the Nudged
@@ -9337,14 +9346,13 @@ Variable(
 Gives the variant of the NEB method used. Possible values can be:
 
   * 0 --> **Original NEB method**.
-_See: Classical and Quantum Dynamics in Condensed Phase Simulations, edited by
-Berne, Ciccotti, Coker (World Scientific, Singapore, 1998), pp. 385-404_
+See [[cite:Berne1998]] pp. 385-404
 
   * 1 --> **NEB + improved tangent**.
 The Improved Tangent Method builds on the NEB with an improved estimate of the
 tangent direction and a resulting change of the component of the spring force
 acting on the images.
-_See: J. Chem. Phys. 113, 9978 (2000)._
+See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
 The CI-NEB method constitutes a small modification to the NEB method.
@@ -9353,7 +9361,7 @@ to a saddle point is also obtained. By default the spring constants are
 variable (see [[neb_spring]]). As the image with the highest energy has to be
 identified, the calculation begins with several iterations of the standard NEB
 algorithm. The effective CI-NEB begins at the [[cineb_start]] iteration.
-_See: J. Chem. Phys. 113, 9901 (2000)._
+See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
@@ -9376,7 +9384,7 @@ for the NEB method.
 In the standard "Nudged Elastic Band" method, the spring constant is constant
 along the path, but, in order to have higher resolution close to the saddle
 point, it can be better to have stronger springs close to it.
-_See: J. Chem. Phys. 113, 9901 (2000)._
+See [[cite:Henkelman2000a]]
 """,
 ),
 
@@ -9880,9 +9888,8 @@ Variable(
     defaultval=0,
     mnemonics="Number of NOSe masses",
     text="""
-Gives the number of thermostats in the Martyna et al. chain of oscillators
-thermostats. The thermostat chains can be used either to perform Molecular
-Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics
+Gives the number of thermostats in the chain of oscillators
+thermostats as proposed in [[cite:Martyna1996]]. The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics
 (PIMD) ([[imgmov]]=13).
 The mass of these thermostats is given by [[qmass]].
 """,
@@ -12364,9 +12371,7 @@ Variable(
     requires="[[imgmov]]=9 or 13",
     text="""
 Only relevant if [[imgmov]]=9 or 13 (Path-Integral Molecular Dynamics).
-Gives the fictitious masses ( _D. Marx and M. Parrinello, J. Chem. Phys. 104,
-4077 (1996)_ ) in atomic mass units for each kind of atom in cell. These
-masses are the inertial masses used in performing Path Integral Molecular
+Gives the fictitious masses ( [[cite:Marx1996]]) in atomic mass units for each kind of atom in cell. These masses are the inertial masses used in performing Path Integral Molecular
 Dynamics (PIMD), they are different from the true masses ([[amu]]) used to
 define the quantum spring that relates the different beads in PIMD. They can
 be chosen arbitrarily, but an appropriate choice will lead the different
@@ -12389,9 +12394,10 @@ Variable(
     text="""
 Only relevant for Path-Integral Molecular Dynamics.
 Selects a constraint to be applied during the PIMD trajectory. The constraint
-is holonomic (it is a relation between the position variables).In practice,
+is holonomic (it is a relation between the position variables). In practice,
 the total forces applied to the atomic positions are modified so as to respect
-the constraint.
+the constraint. 
+
 To date, the available constraints are:
 
   * **0**: no constraint
@@ -12403,8 +12409,7 @@ The X_i are the coordinates of the atomic centroids. The weights W_i have to
 be specified with the [[wtatcon]](3,[[natcon]],[[nconeq]]),
 [[iatcon]]([[natcon]]) and [[natcon]] input parameters (where [[nconeq]] is
 fixed to 1).
-More details on the implementation in: [Y. Komeiji,Chem-Bio Informatics
-Journal 7, 12-23 (2007)](http://doi.org/10.1273/cbij.7.12).
+More details on the implementation in [[cite:Komeiji2007]].
 """,
 ),
 
@@ -12424,8 +12429,7 @@ appropriate choice of fictitious masses ([[pimass]]), is used to force the
 different modes to move on the same time scale, and thus optimize the
 efficiency of the statistical sampling in the corresponding statistical
 ensemble. Available with a Langevin thermostat ([[imgmov]]=9) or with Nose-
-Hoover chains ([[imgmov]]=13). See M. Tuckerman et al, J. Chem. Phys. 104,
-5579 (1996).
+Hoover chains ([[imgmov]]=13). See [[cite:Tuckerman1996]].
 
 If equal to 0, no transformation is applied (primitive coordinates).
 If equal to 1, normal mode transformation (in that case, [[nimage]] must be
@@ -15901,19 +15905,19 @@ Possible values can be:
 
   * 0 -->  **Original String Method**.
 NOT YET IMPLEMENTED
-_See: Phys. Rev. B 66, 052301 (2002)_
+See [[cite:Weinan2002]]
 
   * 1 --> **Simplified String Method** with parametrization by **equal arc length**.
 Instead of using the normal force (wr the band), the full force is used; the
 reparametrization is enforced by keeping the points of the string equally
 spaced.
-_See: J. Chem. Phys. 126, 164103 (2007)_
+See [[cite:Weinan2007]]
 
   * 2 --> **Simplified String Method** with parametrization by **energy-weighted arc length**.
 A variant of the Simplified String Method (like 2-); the reparametrization is
 done by using energy-weight arc-lengths, giving a finer distribution near the
 saddle point..
-_See: J. Chem. Phys. 126, 164103 (2007) and J. Chem. Phys. 130, 244108 (2009)_
+See [[cite:Weinan2007]] and [[cite:Goodrow2009]]
 """,
 ),
 
