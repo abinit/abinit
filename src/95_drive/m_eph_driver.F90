@@ -142,7 +142,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
- use m_efmas,           only : efmasdeg_free_array, efmasval_free_array
+ use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
@@ -627,7 +627,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  else
    
 #ifdef HAVE_NETCDF
-   NCF_CHECK(nctk_open_read(ncid, efmas_path))
+   NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
    NCF_CHECK(nf90_close(ncid))
 #else

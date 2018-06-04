@@ -26,10 +26,11 @@ module m_efmas
  use defs_abitypes
  use m_errors
 #ifdef HAVE_NETCDF
- use netcdf, only : nf90_noerr, nf90_put_var
+ use netcdf, only : nf90_noerr, nf90_put_var, nf90_get_var
 #endif
  use m_efmas_defs
- use m_nctk, only : nctkarr_t, nctkdim_t, nctk_def_arrays, nctk_def_dims, nctk_idname, nctk_set_datamode
+ use m_nctk, only : nctkarr_t, nctkdim_t, nctk_def_arrays, nctk_get_dim, &
+& nctk_def_dims, nctk_idname, nctk_set_datamode
 
  implicit none
 
@@ -425,7 +426,7 @@ CONTAINS
  integer :: iband,ideg,ideg_tot,ieig,ikpt 
  integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
  integer, allocatable :: nband_arr(:)
- integer, allocatable :: ndegs_arr(:)
+integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
  integer, allocatable :: degs_bounds_arr(:,:)
@@ -518,7 +519,7 @@ CONTAINS
 & nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
-& nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
+& nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim"),  &
 & nctkarr_t("eig2_diag_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
   ]) 
  NCF_CHECK(ncerr)
@@ -573,7 +574,7 @@ end subroutine print_efmas
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'print_efmas'
+#define ABI_FUNC 'efmas_ncread'
 !End of the abilint section
 
  implicit none
@@ -589,7 +590,8 @@ end subroutine print_efmas
 !Local variables-------------------------------
  integer :: deg_dim,eig2_diag_arr_dim
  integer :: iband,ideg,ideg_tot,ieig,ikpt
- integer :: jband,mband,ndegs_tot,nkpt
+ integer :: jband,mband,nband,ndegs,ndegs_tot,nkpt
+ integer, allocatable :: nband_arr(:)
  integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:)
@@ -638,11 +640,11 @@ end subroutine print_efmas
    efmasdeg(ikpt)%deg_range(:)=degs_range_arr(:,ikpt)
    nband=nband_arr(ikpt)   
    efmasdeg(ikpt)%nband=nband
-   ABI_MALLOC(efmasdeg%ideg, (nband))
-   efmasdeg(ikpt)%ideg=ideg_arr(1:nband)
+   ABI_MALLOC(efmasdeg(ikpt)%ideg, (nband))
+   efmasdeg(ikpt)%ideg=ideg_arr(1:nband,ikpt)
    ndegs=ndegs_arr(ikpt) 
    efmasdeg(ikpt)%ndegs=ndegs
-   ABI_MALLOC(degs_bounds,(2,nband))
+   ABI_MALLOC(efmasdeg(ikpt)%degs_bounds,(2,nband))
    do ideg=1,ndegs
      efmasdeg(ikpt)%degs_bounds(:,ideg)=degs_bounds_arr(:,ideg_tot)
      ideg_tot=ideg_tot+1
@@ -655,9 +657,9 @@ end subroutine print_efmas
        do jband=1,deg_dim
          do iband=1,deg_dim
            efmasval(ideg,ikpt)%ch2c(:,:,iband,jband)=&
-&           cplx(ch2c_arr(1,:,:,ieig+iband-1),ch2c_arr(2,:,:,ieig+iband-1))
+&           dcmplx(ch2c_arr(1,:,:,ieig+iband-1),ch2c_arr(2,:,:,ieig+iband-1))
            efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=& 
-&           cplx(eig2_diag_arr(1,:,:,ieig+iband-1),eig2_diag_arr(2,:,:,ieig+iband-1))
+&           dcmplx(eig2_diag_arr(1,:,:,ieig+iband-1),eig2_diag_arr(2,:,:,ieig+iband-1))
          enddo
          ieig=ieig+deg_dim
        enddo

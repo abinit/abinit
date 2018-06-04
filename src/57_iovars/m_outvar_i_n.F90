@@ -391,7 +391,7 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdden','INT',0)
 
- intarr(1,:)=dtsets(:)%irefmasd
+ intarr(1,:)=dtsets(:)%irdefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdefmas','INT',0)
 
  intarr(1,:)=dtsets(:)%irdhaydock
