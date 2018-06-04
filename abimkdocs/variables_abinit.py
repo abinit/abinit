@@ -14052,7 +14052,7 @@ Flag used to indicate that either the Wannier90 or the WanT interfaces will be u
   * [[prtwant]]=1 --> Use the **ABINIT- WanT** interface.
 
 Provide an output file that can be used by the WanT postprocessing program
-(see http://www.wannier-transport.org). The value of the prtwant indicates the
+(see [http://www.wannier-transport.org](http://www.wannier-transport.org)). The value of the prtwant indicates the
 version of the WanT code that can read it. Currently only the value
 [[prtwant]]=1 is implemented, corresponding to WanT version 1.0.1, available
 since Oct. 22, 2004.
@@ -14093,7 +14093,7 @@ ABINIT will produce the input files required by Wannier90 and it will run
 Wannier90 to produce the Maximally-locallized Wannier functions (see [
 http://www.wannier.org ](http://www.wannier.org) ).
 
-Notes:
+!!! Notes
 
     * The files that are created can also be used by Wannier90 in stand-alone mode.
     * In order to use Wannier90 as a postprocessing program for ABINIT you might have to recompile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
@@ -14105,7 +14105,7 @@ ABINIT will produce the input files required by Wannier90 and it will run
 Wannier90 to produce the Maximally-localized Wannier functions (see [
 http://www.wannier.org ](http://www.wannier.org) ).
 
-Additional Notes:
+!!! Notes
 
     * An input file of LDA wave functions is required which is completely consistent with the _KSS file used in the self-consistent GW calculation. This means that [[kssform]] 3 must be used to create the _KSS file and the output _WFK file from the same run must be used as input here.
     * Wannier90 requires [[nshiftk]]=1, and [[shiftk]]= 0 0 0 is recommended. The k-point set used for the GW calculation, typically the irreducible BZ set created using [[kptopt]]=1, and that for the Abinit- Wannier90 interface must be consistent.
@@ -18153,16 +18153,15 @@ Variable(
 In order to find the Maximally Localized Wannier Functions, the user has to
 provide an initial guess. A set of localized trial orbitals is chosen
 corresponding to some rough initial guess at the Wannier Functions, and these
-are projected onto the Bloch eigenstates. See Ivo Souza, Nicola Marzari, and
-David Vanderbilt. Phys. Rev. B, 65, 035109 (2001).
-These initial projections are stored in a file.amn and the variable
+are projected onto the Bloch eigenstates. See [[cite:Souza2002a]].
+These initial projections are stored in a file **.amn** and the variable
 **w90iniprj** is used to construct them:
 
   * **w90iniprj** =1: Random projections.
 
   * **w90iniprj** =2: The initial projections will be a linear combination of hydrogenic atomic orbitals.
 The user has to define the projections in the secondary input file
-wannier90.win
+wannier90.win.
 Information about how to define them can be found in the manual of Wannier90.
 See [www.wannier.org](http://www.wannier.org)
 """,
@@ -18187,7 +18186,7 @@ Defines whether or not the UNKp.s file will be printed.
 
   * [[w90prtunk]]>1: Print the UNKp.s files on a coarse grid
 
-Instead of printing every record we will print every w90prtunk records. This
+Instead of printing every record we will print every [[w90prtunk]] records. This
 is useful to reduce the size of the UNKp.s files, but, the quality is also reduced.
 
 These files contain the periodic part of the bloch states represented on a
@@ -18208,16 +18207,16 @@ These files are written in the following way for the coarse grid:
 
 ```fortran
      write(iun_plot) n1/w90prtunk,n2/w90prtunk,n3/w90prtunk,ikpt,nband
-    write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
+     write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
     &      jj1=1,n1,w90prtunk),jj2=1,n2,w90prtunk),jj3=1,n3,w90prtunk)
 ```
 
 Where **fofr** is a double precision variable which contains the wavefunctions
 in real space. Note that in order to reduce the size of the UNK files we are
-just including records in the wavefunctions for 1/(w90prtunk^3) of the grid
-points. That is why we divide n1, n2 and n3 by prtunk. The output .xsf files
+just including records in the wavefunctions for 1/(w90prtunk$^3$) of the grid
+points. That is why we divide **n1**, **n2** and **n3** by [[w90prtunk]]. The output .xsf files
 for plotting with XCrysDen will also be on the coarse grid. When this does not
-produce an acceptable plot, prtunk can be set to 1 to output every grid point.
+produce an acceptable plot, [[w90prtunk]] can be set to 1 to output every grid point.
 (You should try spline interpolation in XCrysDen first.)
 """,
 ),
