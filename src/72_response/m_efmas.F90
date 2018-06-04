@@ -515,6 +515,7 @@ integer, allocatable :: ndegs_arr(:)
 
  ncerr = nctk_def_arrays(ncid, [ &
 & nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), &
+& nctkarr_t("number_of_states", "int", "number_of_kpoints"), &
 & nctkarr_t("number_of_degenerate_sets", "int", "number_of_kpoints"), &
 & nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
