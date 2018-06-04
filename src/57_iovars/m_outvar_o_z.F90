@@ -882,7 +882,7 @@ contains
  intarr(1,:)=dtsets(:)%slk_rankpp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'slk_rankpp','INT',0)
 
- dprarr(1,:)=dtsets(:)%smdelta
+ intarr(1,:)=dtsets(:)%smdelta
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
 
  do idtset=0,ndtset_alloc
