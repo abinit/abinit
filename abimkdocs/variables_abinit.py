@@ -1164,20 +1164,24 @@ user reads the description of the input variables [[freqim_alpha]],
 The integration to be performed for each matrix element of the self energy
 along the imaginary axis is of the form:
 
-![](variables_assets/self_energy_cd.png)
+$$ \langle i|\Sigma(\omega)|j \rangle  \propto
+   \sum_s C_s \int_0^\infty d(i\omega^\prime)
+   \frac{(\omega - \epsilon_s)}{(\omega-\epsilon_s)^2 + i{\omega^\prime}^2}
+   f(i\omega^\prime), 
+$$
 
-Where  _ ω _ is the frequency point along the real axis,  _ ε s  _ is an
-eigenvalue, and  _i ω' _ is the variable along the imaginary axis. Thus the
+where  $\omega$ is the frequency point along the real axis, $\epsilon_s$ is an
+eigenvalue, and  $i\omega^\prime$ is the variable along the imaginary axis. Thus the
 function to be integrated is a Lorentzian weight function centred on the
-origin (whose FWHM is decided by |  _ ω \- ε s  _ |), times a function. The
+origin (whose FWHM is decided by $|\omega-\epsilon_s|$), times a function. The
 function is related to the inverse dielectric matrix. It might have a peaked
 structure near the origin and is very smooth otherwise. the function decays
-asymptotically as  1 / _i ω' _, so the whole integral converges as this to
+asymptotically as  $1/i\omega^\prime$, so the whole integral converges as this to
 the third power.
 
-  * **cd_frqim_method = 1 - Histogram:** This is the **default** method where the function  _f(i ω') _ is approximated by a histogram, and the Lorentzian is integrated analytically in each sub-interval. See the section on grids below for a description of the default grid. This method combined with the default grid is the fastest and optimised for the use of few points along the imaginary axis.
-  * **cd_frqim_method = 2 - Trapezoid:** The next step up from the histogram approximation in the previous method. The integration region is transformed  _[0, ∞[ -> [0,1] _ with a proper weight depending on the width of the Lorentzian. In this space  _f(i ω') _ is approximated by a linear function between grid points (trapezoids), and the integrand is integrated analytically in each sub-interval. This method tends to slightly overestimate contributions while the default method tends to slightly underestimate them, so the results from methods 1 and 2 should bracket the converged values. The asymptotic behaviour is explicitly taken into account by a fit using the last two grid points.
-  * **cd_frqim_method = 3, 4, 5 - Natural Spline:** The function is transformed  _[0, ∞[ -> [0,1] _ . In this space  _f(i ω') _ is approximated by a natural spline function whose starting and ending sections are linear. This transform is chosen so that the function should approach a linear function asymptotically as the integration interval approaches 1, so that the asymptotic behaviour is automatically taken into account. For each Lorentzian width (determined by |  _ ω \- ε s  _ |) the integrand is appropriately scaled in the interval  _[0,1]_, and a nested Gauss-Kronrod (GK) numerical integration rule is performed. The integrand is evaluated at the GK nodes by means of a spline-fit. The order of the GK rule is controlled by the index of the method:
+  * **cd_frqim_method = 1 - Histogram:** This is the **default** method where the function  $f(i\omega^\prime)$ is approximated by a histogram, and the Lorentzian is integrated analytically in each sub-interval. See the section on grids below for a description of the default grid. This method combined with the default grid is the fastest and optimised for the use of few points along the imaginary axis.
+  * **cd_frqim_method = 2 - Trapezoid:** The next step up from the histogram approximation in the previous method. The integration region is transformed  $[0, \infty] \rightarrow [0,1]$ with a proper weight depending on the width of the Lorentzian. In this space  $f(i\omega^\prime)$ is approximated by a linear function between grid points (trapezoids), and the integrand is integrated analytically in each sub-interval. This method tends to slightly overestimate contributions while the default method tends to slightly underestimate them, so the results from methods 1 and 2 should bracket the converged values. The asymptotic behaviour is explicitly taken into account by a fit using the last two grid points.
+  * **cd_frqim_method = 3, 4, 5 - Natural Spline:** The function is transformed  $[0, \infty] \rightarrow [0,1]$. In this space  $f(i\omega^\prime)$ is approximated by a natural spline function whose starting and ending sections are linear. This transform is chosen so that the function should approach a linear function asymptotically as the integration interval approaches 1, so that the asymptotic behaviour is automatically taken into account. For each Lorentzian width (determined by $|\omega-\epsilon_s|$) the integrand is appropriately scaled in the interval $[0,1]$, and a nested Gauss-Kronrod (GK) numerical integration rule is performed. The integrand is evaluated at the GK nodes by means of a spline-fit. The order of the GK rule is controlled by the index of the method:
     * **3 --> Gauss 7 point, Kronrod 15 point rule **
     * **4 --> Gauss 11 point, Kronrod 23 point rule **
     * **5 --> Gauss 15 point, Kronrod 31 point rule **
@@ -1196,30 +1200,30 @@ the **Mrgscr** utility and plotting them for visual inspection.
 
   * **Default** - The default grid is an exponentially increasing grid given by the formula:
 
-![](variables_assets/cd_default_grid.png)
+$$ i\omega^\prime_k = \frac{\omega_p}{\alpha-2}\left[ e^{\frac{2k}{N+1} \ln(\alpha-1)} -1 \right]. $$
 
-Here  _ ω p  _ is the plasma frequency (by default determined by the average
-density of the system, but this can be overridden by setting [[ppmfrq]]).  _N_
-is the total number of grid points (set by [[nfreqim]]).  _ α _ is a parameter
+Here  $\omega_p$ is the plasma frequency (by default determined by the average
+density of the system, but this can be overridden by setting [[ppmfrq]]).  $N$
+is the total number of grid points (set by [[nfreqim]]). $\alpha$ is a parameter
 which determines how far out the final grid point will lie. The final point
-will be at  _ α*ω p  _ (the default is  _ α = 5 _, and was hard-coded in
+will be at  $\alpha*\omega_p$ (the default is  $\alpha = 5$, and was hard-coded in
 older versions of ABINIT). This grid is designed so that approximately half
 the grid points are always distributed to values lower than the plasma
 frequency, in order to resolve any peaked structure. If one seeks to increase
 the outermost reach by increasing [[ppmfrq]] one must simultaneously take care
 to increase [[nfreqim]] in order to have the appropriate resolution for the
 low-frequency region. In more recent versions of ABINIT one can also simply
-adjust the parameter  _ α _ by using [[freqim_alpha]]. This grid is optimised
+adjust the parameter  $\alpha$ by using [[freqim_alpha]]. This grid is optimised
 for speed and accurate results with few grid points for **cd_frqim_method = 1**.
 
   * **Inverse z transform** - This grid is activated by the use of the variable [[gw_frqim_inzgrid]].
-    This is the standard  _[0, ∞[ -> [0,1] _ transform using the formula:
+    This is the standard  $[0, \infty] \rightarrow [0,1]$ transform using the formula:
 
-![](variables_assets/cd_inzgrid.png)
+$$ i\omega^\prime = \omega_p \frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The grid points are then picked by an equidistant grid (number of
-points set by [[nfreqim]]) in the interval  _z ⊂ [0,1] _ . This grid can
+points set by [[nfreqim]]) in the interval  $z \subset [0,1]$ . This grid can
 easily be uniquely converged by just increasing [[nfreqim]]. Again the points
 are distributed so that approximately half of them lie below the plasma
 frequency.
@@ -3864,7 +3868,7 @@ Variable(
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
 
-< **k-q**, b1 | e^{-i ( **q+G** ). **r** } | **k** b2  >
+$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
 
 In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
@@ -3990,11 +3994,10 @@ Variable(
 ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
 [[freqim_alpha]] determines the location of the maximum frequency point along
 the imaginary axis if the default grid is used in Contour Deformation
-(numerical integration) calculations. It is set as  _ α*ω p  _, where  _ ω p
-_ is the plasma frequency determined by the average density of the system
+(numerical integration) calculations. It is set as  $\alpha*\omega_p$, where $\omega_p$
+is the plasma frequency determined by the average density of the system
 (this can be set by hand by using the variable [[ppmfrq]]). See the section on
 grids in the descriptive text for [[cd_frqim_method]] for a detailed
-description of the formula.
 """,
 ),
 
@@ -5117,13 +5120,13 @@ Variable(
     mnemonics="GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid",
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
-[[gw_frqim_inzgrid]] creates gridpoints along the **imaginary** frequency axis
-by using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
+[[gw_frqim_inzgrid]] creates grid points along the **imaginary** frequency axis
+by using an equidistant grid in the variable  $z \subset [0,1]$ where the transform
 is:
 
-![](variables_assets/cd_inzgrid.png)
+$$ i\omega^\prime = w_p \frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here  $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqim]])
 and the points are distributed so that half of them lie below the plasma frequency.
 """,
@@ -5140,16 +5143,16 @@ Variable(
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[gw_frqre_inzgrid]] creates grid points along the **real** frequency axis by
-using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
+using an equidistant grid in the variable  $z \subset [0,1]$ where the transform
 is:
 
-![](variables_assets/cd_inzgrid_re.png)
+$$ \omega = \omega_p \frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqre]] )
 and the points are distributed so that half of them lie below the plasma
 frequency. This is useful in conjuction with [[gw_frqim_inzgrid]] if one needs
-to use a grid which maps  _[0, ∞[ -> [0,1] _. Note that typically _many_ more
+to use a grid which maps $[0, \infty] \rightarrow [0,1]$. Note that typically _many_ more
 points are needed along the real axis in order to properly resolve peak
 structures. In contrast, both the screening and self-energy are very smooth
 along the imaginary axis. Also, please note that this is **not** an efficient
@@ -5171,10 +5174,10 @@ Variable(
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[gw_frqre_tangrid]] defines a nonuniform grid to be used in frequency, with
-stepsize increasing proportional to tan(x). This makes the grid approximately
+stepsize increasing proportional to $\tan(x)$. This makes the grid approximately
 linear to start with, with a rapid increase towards the end. Also, this is the
 grid which gives equal importance to each point used in the integration of a
-function which decays as 1/x^2. To be used in conjunction with [[nfreqre]],
+function which decays as $1/x^2$. To be used in conjunction with [[nfreqre]],
 [[cd_max_freq]] and [[cd_halfway_freq]] which determine the parameters of the
 transformed grid.
 """,
