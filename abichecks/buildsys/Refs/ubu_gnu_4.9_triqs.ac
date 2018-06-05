@@ -106,7 +106,7 @@
 
 # C preprocessor (should not be set in most cases)
 #
-#CPP="/usr/bin/cpp"
+CPP="cpp"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#CXXFLAGS="-O2"
+CXXFLAGS="-std=c++1y"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -315,7 +315,7 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -705,33 +705,33 @@ with_mpi_prefix="${MPI_HOME}"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+psml"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.0/include -I${FALLBACKS_PATH}/libpsml/1.1.5/include"
+#with_psml_incs="-I/usr/local/include/psml"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.5/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.0/lib -lxmlf90"
+#with_psml_libs="-L/usr/local/lib/psml -lpsml"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_netcdf_incs="-I/usr/local/netcdf/include -I/usr/local/hdf5_mpich/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lnetcdf"
+with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdff -lnetcdf -L/usr/local/hdf5_mpich/lib -lhdf5_hl -lhdf5"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
 # change the default values of accesswff)   
 #
-#enable_netcdf_default="no"
+enable_netcdf_default="yes"
 
                        # ------------------------------ #
 
@@ -769,7 +769,7 @@ with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lnetcdf"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -777,7 +777,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_s
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="mkl"
+with_linalg_flavor="netlib"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/usr/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L/usr/lib -llapack -lblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -923,21 +923,21 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmk
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+#with_atompaw_bins="/usr/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_atompaw_incs="-I/usr/local/include/atompaw"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -latompaw"
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
 
                        # ------------------------------ #
 
@@ -963,15 +963,15 @@ with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+#with_wannier90_bins="/usr/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_wannier90_incs="-I/usr/local/include/wannier90"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lwannier90"
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -992,15 +992,15 @@ with_wannier90_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lwannier90"
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
 #
-#enable_triqs="no"
+enable_triqs="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #
-#with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+with_triqs_incs="-I${CTHYB_BUILD_PATH}/c++ -I${CTHYB_SOURCE_PATH}/c++ -I${TRIQS_PATH}/include -I${BOOST_PATH}/include -I/usr/include/python2.7 -I/usr/include/hdf5/serial"
 
 # Link flags for the TRIQS library (default is unset)
 #
-#with_triqs_libs="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
+with_triqs_libs="-L${TRIQS_PATH}/lib -lcthyb_c -ltriqs -L${BOOST_PATH}/lib -lboost_mpi -lboost_mpi_python -lboost_python -L/usr/local/hdf5_mpich/lib -lhdf5 -L/usr/lib/x86_64-linux-gnu -lpython2.7 -lmpicxx -lstdc++"
 
 # ---------------------------------------------------------------------------- #
 # Fallbacks                                                                    #

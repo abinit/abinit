@@ -34,18 +34,18 @@
    prt_model         1
      strcpli        -1
  Fit the coefficients :
-        fit_coeff  1
- fit_generateTerm  0
-       fit_cutoff  0.00000000E+00
-       fit_option  0
-       fit_ncoeff  0
-         fit_grid  1  1  1
-    fit_ts_option  0
-   fit_rangePower  3  4
-   fit_anhaStrain  0
-   fit_SPCoupling  1
-    fit_nfixcoeff -1
-     fit_fixcoeff
+         fit_coeff  1
+ fit_generateCoeff  0
+        fit_cutoff  0.00000000E+00
+        fit_option  0
+        fit_ncoeff  0
+          fit_grid  1  1  1
+         ts_option  0
+    fit_rangePower  3  4
+    fit_anhaStrain  0
+    fit_SPCoupling  1
+     fit_nfixcoeff -1
+      fit_fixcoeff
  Bound the coefficients :
  bound_anhaStrain  0
  bound_SPCoupling  1
@@ -216,7 +216,7 @@ dipdip_range         1         1         1
 
  The coefficients present in the effective potential will be used for the fit
 
- The coefficients for the fit must  will be generate
+ The coefficients for the fit will be generated
  1654 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/atm):
