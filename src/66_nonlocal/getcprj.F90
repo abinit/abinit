@@ -124,7 +124,7 @@
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
  real(dp),allocatable :: d2gxdt(:,:,:,:,:),dgxdt(:,:,:,:,:),ffnl_typ(:,:,:)
  real(dp),allocatable :: gx(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: kpg_(:,:),ph3d_(:,:,:)
+ real(dp), pointer :: kpg_(:,:),ph3d_(:,:,:)
 
 ! *********************************************************************
 
