@@ -1,5 +1,5 @@
 ---
-authors: VOlevano, XG
+authors: VOlevano, FBruneval, XG
 ---
 
 # First lesson on GW  

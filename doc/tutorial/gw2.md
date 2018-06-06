@@ -11,7 +11,7 @@ Kohn-Sham eigenvalues within the GW approximation, in the metallic case,
 without the use of a plasmon-pole model. 
 The band width and Fermi energy of Aluminum will be computed.  
 
-The user may read the paper
+The user may read the papers
 
   * F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006), 
 for some information and results about the GW treatment of Aluminum. He will
@@ -21,7 +21,7 @@ Abinit). The description of the contour deformation technique that bypasses
 the use of a plasmon-pole model to calculate the frequency convolution of G
 and W can be found in
 
-  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B 67, 155208 (2003), 
+  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B **67**, 155208 (2003), 
 
 with the relevant formulas. We will refer to these papers as the [[cite:Bruneval2006]] 
 and the [[cite:Lebegue2003]] papers.
@@ -59,17 +59,16 @@ Then (supposing abinit is the proper alias), issue:
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
 functional is used ([[occopt]]=3), with a large smearing ([[tsmear]]=0.05 Ha).
-The k point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid (64 k
-points in the full Brillouin Zone, folding to 8 k points in the Irreducible
+The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid (64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
 wedge, [[ngkpt]]=4 4 4). Converged results would need a 4x4x4 grid with 4
-shifts (256 k points in the full Brillouin zone). This grid contains the Gamma
+shifts (256 **k**-points in the full Brillouin zone). This grid contains the $\Gamma$
 point, at which the valence band structure reaches its minimum.
 
 The output file presents the Fermi energy
     
      Fermi (or HOMO) energy (eV) =   7.14774   Average Vxc (eV)=  -9.35982
 
-as well as the lowest energy, at the Gamma point
+as well as the lowest energy, at the $\Gamma$ point
     
      Eigenvalues (   eV  ) for nkpt=   8  k points:
      kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -84,7 +83,7 @@ In order not to lose time, let us start the calculation of the screening file
 before the examination of the corresponding input file. So, copy the file
 tgw2_2.in, and modify the tgw2_x.files file as usual (replace occurrences of
 twg2_x by tgw2_2). Also, copy the WFK file (tgw2_1o_WFK) to tgw2_2i_WFK. Then
-run the calculation (it should take about 30 seconds on a 3 GHz PC).
+run the calculation (it should take about 30 seconds).
 
 {% dialog tests/tutorial/Input/tgw2_2.in %}
 
@@ -108,7 +107,7 @@ new contour of integration. The method is extensively described in [[cite:Lebegu
 
 Examine the input file tgw2_2.in. The ten first lines contain the important
 information. There, you find some input variables that you are already
-familiarized with, like [[optdriver]], [[ecuteps]], [[ecutwfn]], but also new
+familiarized with, like [[optdriver]], [[ecuteps]], but also new
 input variables: [[gwcalctyp]], [[nfreqim]], [[nfreqre]], and [[freqremax]].
 The purpose of this run is simply to generate the screening matrices. Unlike
 for the plasmon-pole models, one needs to compute these at many different
@@ -127,10 +126,10 @@ the tgw3_x.files file as usual (replace occurrences of twg2_x by tgw2_3).
 Also, copy the WFK file (tgw2_1o_WFK) to tgw2_3i_WFK, and the screening file
 (tgw2_2o_SCR) to tgw2_3i_SCR. Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
-The computation of the GW quasi-particle energy at the Gamma point of Aluminum
-does not differ from the one of quasi-particle in Silicon. However, the
+The computation of the GW quasiparticle energy at the $\Gamma$ point of Aluminum
+does not differ from the one of quasiparticle in Silicon. However, the
 determination of the Fermi energy raises a completely new problem: one should
-sample the Brillouin Zone, to get new energies (quasi-particle energies) and
+sample the Brillouin Zone, to get new energies (quasiparticle energies) and
 then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
 Examine the input file tgw2_3.in:
@@ -143,18 +142,18 @@ already familiarized with, like [[optdriver]], [[ecutsigx]], [[ecutwfn]].
 Then, comes the input variable [[gwcalctyp]]=12. The value _x2_ corresponds to
 a contour integration. The value _1x_ corresponds to a self-consistent
 calculation with update of the energies only. Then, one finds the list of k
-points and bands for which a quasi-particle correction will be computed:
-[[nkptgw]], [[kptgw]], and [[bdgw]]. The number and list of k points is simply
-the same as [[nkpt]] and [[kpt]]. One might have specified less k points,
+points and bands for which a quasiparticle correction will be computed:
+[[nkptgw]], [[kptgw]], and [[bdgw]]. The number and list of **k**-points is simply
+the same as [[nkpt]] and [[kpt]]. One might have specified less **k**-points,
 though (only those needing an update). The list of band ranges [[bdgw]] has
 been generated on the basis of the LDA eigenenergies. We considered only the
 bands in the vicinity of the Fermi level: bands much below or much above are
 likely to remain much or much above the Fermi region. In the present run, we
 are just interested in the states that may cross the Fermi level, when going
-from LDA to GW. For commodity, one could have selected an homogeneous range
+from LDA to GW. Of course, it would have been easier to select an homogeneous range
 for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.
 
-In the output file, one finds the quasi-particle energy at Gamma, for the lowest band:
+In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowest band:
     
     k =    0.000   0.000   0.000
      Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
@@ -166,7 +165,7 @@ In the output file, one finds the quasi-particle energy at Gamma, for the lowest
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
-Combining the quasi-particle energy at Gamma and the Fermi energy, gives the
+Combining the quasiparticle energy at $\Gamma$ and the Fermi energy, gives the
 band width, 10.404 eV. Using converged parameters, the band width will be
 10.54 eV (see Bruneval[2006]). This is in excellent agreement with the experimental value of 10.6 eV.
 
@@ -177,14 +176,14 @@ has additional benefit, e.g. an accurate spectral function can be computed,
 see [[cite:Lebegue2003]]. You may be interested to see the plasmon satellite of
 Aluminum, which can be accounted for within the GW approximation. 
 
-Remember that the spectral function is almost (except some matrix elements) the spectrum which
+Remember that the spectral function is proportional to (with some multiplicative matrix elements) the spectrum which
 is measured in photoemission spectroscopy (PES). In PES, a photon impinges the
 sample and extracts an electron from the material. The difference of energy
 between the incoming photon and the obtained electron gives the binding energy
 of the electron in the solid, or in other words the quasiparticle energy or
 the band structure. In simple metals, an additional process can take place
-easily: the impinging photon can **extract an electron together with a global
-charge oscillation in the sample**. The extracted electron will have a kinetic
+easily: the impinging photon can *extract an electron together with a global
+charge oscillation in the sample*. The extracted electron will have a kinetic
 energy lower than in the direct process, because a part of the energy has gone
 to the plasmon. The electron will appear to have a larger binding energy...
 You will see that the spectral function of Aluminum consists of a main peak
@@ -202,7 +201,7 @@ Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
 Compared to the previous file (tgw2_3.in), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
-the GW self-energy is done only at the Gamma point.
+the GW self-energy is done only at the $\Gamma$ point.
 
 The spectral function is written in the file tgw2_4o_SIG. It is a simple text
 file. It contains, as a function of the frequency (eV), the real part of the
@@ -217,6 +216,5 @@ GW energy (-3.7 eV) and some additional features in the vicinity of the GW
 eigenvalue minus a plasmon energy (-3.7 eV - 15.8 eV = -19.5 eV).
 
 Another file, tgw2_4o_GW, is worth to mention: it contains information to be
-used for the subsequent calculation of excitonic effects by the EXC code
-(usually available at http://theory.polytechnique.fr/codes/exc; if not, see
-the [ETSF software page](http://www.etsf.eu/resources/software/codes) and further links).
+used for the subsequent calculation of excitonic effects within the Bethe-Salpeter Equation with ABINIT or with other codes from
+the [ETSF software page](http://www.etsf.eu/resources/software/codes).
