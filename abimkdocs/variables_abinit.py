@@ -735,24 +735,25 @@ Variable(
     mnemonics="Bethe-Salpeter ALGORITHM",
     requires="[[optdriver]] == 99",
     text="""
-The bs_algorithm input variable defines the algorithm employed to calculate
-the macroscopic dielectric function. Possible values are 1, 2 or 3:
+This input variable defines the algorithm employed to calculate the macroscopic dielectric function.
+Possible values are 1, 2 or 3:
 
 * 1 --> The macroscopic dielectric is obtained by performing a direct diagonalization
   of the excitonic Hamiltonian. Advantages: It gives direct access to the excitonic eigenvalues
   as well as to the oscillator strengths. Drawbacks: It is a very CPU- and memory-consuming approach
   as the size of the Hamiltonian scales as (nk*nc*nv)**2 where nk is the number of k-point
-  in the FULL Brillouin zone, and nc and nv are the number of conduction and valence states, respectively.
+  in the **full** Brillouin zone, and nc and nv are the number of conduction and valence states, respectively.
   Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
 
 * 2 --> Haydock iterative method. The macroscopic dielectric function is obtained by iterative applications
   of the Hamiltonian on a set of vectors in the electron-hole space.
   Advantages: It is less memory demanding and usually faster than the direct diagonalization provided
   that [[zcut]] is larger than the typical energy spacing of the eigenvalues. Drawbacks:
-  It is an iterative method therefore the convergence with respect to bs_haydock_niter should be checked.
+  It is an iterative method therefore the convergence with respect to [[bs_haydock_niter]] should be checked.
   It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
-  For the time being [[bs_algorithm]]=2 cannot be used for calculations in which the coupling
+  For the time being [[bs_algorithm]] = 2 cannot be used for calculations in which the coupling
   term is included (Tamm-Dancoff approximation).
+
 * 3 --> Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
   Only available for resonant calculations (Tamm-Dancoff approximation).
 """,
@@ -768,10 +769,10 @@ Variable(
     mnemonics="Bethe-Salpeter CALCulation TYPE",
     requires="[[optdriver]] == 99",
     text=r"""
-Possible values are 1,2,3.
+Possible values are 1, 2, 3.
 
-* 1 --> use the KS eigenvalues and wave functions stored in the KSS file to construct the transition space
-* 2 --> The transition space is constructed with Kohn-Sham orbitals but the energies are read from the external GW file
+* 1 --> use the KS eigenvalues and wave functions stored in the WFK file to construct the transition space
+* 2 --> The transition space is constructed with Kohn-Sham orbitals but the energies are read from an external GW file
 * 3 --> QP amplitudes and energies will be read from the QPS file and used to construct H_ex.
   Not coded yet because <\psi|r|\psj>^QP should be calculated taking into account the non-locality
   of the self-energy in the commutator [H,r].
@@ -787,23 +788,27 @@ Variable(
     defaultval=11,
     mnemonics="Bethe-Salpeter COULOMB TERM",
     requires="[[optdriver]] == 99",
-    text="""
+    text=r"""
 This variable governs the choice among the different options that are
 available for the treatment of Coulomb term of the Bethe-Salpeter Hamiltonian.
-[[bs_coulomb_term]] is the concatenation of two digits, labelled (A) and (B).
+**bs_coulomb_term** is the concatenation of two digits, labelled (A) and (B).
 
-The first digit (A) can assume the values 0,1,2:
+The first digit (A) can assume the values 0, 1, 2:
 
   * 0 --> The Coulomb term is not computed. This choice is equivalent to computing the RPA spectrum
     but using the representation in transition space instead of the more efficient approach based on the sum over states.
-  * 1 --> The Coulomb term is computed using the screened interaction read from an external SCR file (standard excitonic calculation).
+
+  * 1 --> The Coulomb term is computed using the screened interaction read
+    from an external SCR file (standard excitonic calculation).
+
   * 2 --> The Coulomb term is computed using a model screening function
     (useful for convergence studies or for reproducing published results).
 
 The second digit (B) can assume the values 0,1:
 
-  * 0 --> Use a diagonal approximation for W_GG' (mainly used for accelerating convergence studies).
-  * 1 --> The Coulomb term is correctly evaluated using the truly non-local W(r,r').
+  * 0 --> Use a diagonal approximation for $W_{\GG\GG'}$ (mainly used for accelerating convergence studies).
+
+  * 1 --> The Coulomb term is correctly evaluated using the truly non-local screening $W(\rr,\rr')$.
 """,
 ),
 
@@ -817,13 +822,14 @@ Variable(
     mnemonics="Bethe-Salpeter COUPLING",
     requires="[[optdriver]] == 99",
     text=r"""
-The [[bs_coupling]] input variable defines the treatment of the coupling block
-of the Bethe-Salpeter Hamiltonian. Possible values are 0,1.
+The **bs_coupling** input variable defines the treatment of the coupling block
+of the Bethe-Salpeter Hamiltonian. Possible values are 0, 1.
 
   * 0 --> The coupling block is neglected (the so-called Tamm-Dancoff approximation).
     The code runs faster and the Hamiltonian matrix requires less memory (factor 4).
-    It is a good approximation for the absorption spectrum which only requires the knowledge of Im(\epsilon).
+    It is a good approximation for the absorption spectrum which only requires the knowledge of $\Im(\epsilon)$.
     The reliability of this approximation should be tested in the case of EELF calculations.
+
   * 1 --> The coupling term is included (non Tamm-Dancoff approximation).
 """,
 ),
@@ -838,8 +844,8 @@ Variable(
     mnemonics="Bethe-Salpeter Electron-Hole CUTOFF",
     requires="[[optdriver]] == 99",
     text="""
-It is used to define a cutoff in the e-h basis set. Only those transitions
-whose energy is between bs_eh_window(1) and bs_eh_window(2) will be considered
+Used to define a cutoff in the e-h basis set. Only those transitions
+whose energy is between bs_eh_cutoff(1) and bs_eh_cutoff(2) will be considered
 in the construction of the e-h Hamiltonian.
 """,
 ),
@@ -876,8 +882,7 @@ Variable(
 **bs_freq_mesh(2)** gives the last frequency for the calculation of the
 macroscopic dielectric function. If zero, **bs_freq_mesh(2)** is set automatically to MAX(resonant_energy) + 10%.
 
-**bs_freq_mesh(3)** gives the step of the linear mesh used for evaluating the
-macroscopic dielectric function.
+**bs_freq_mesh(3)** gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
 """,
 ),
 
@@ -889,16 +894,16 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter HAYdock TERMinator",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text="""
-Defines how to terminate the continued fraction expression for the dielectric
-function. The terminator reduces the number of iterations needed to converge
+Defines how to terminate the continued fraction expression for the dielectric function.
+The terminator reduces the number of iterations needed to converge
 by smoothing the oscillation in the high energy part of the spectrum
 
   * 0 --> No terminator. The contribution given by the terms missing in the Lanczos chain are set to zero.
   * 1 --> Use the terminator function. The particular expression depends on the type of calculation:
     In the resonant-only case, the a_i and b_i coefficients for i > niter, are replaced by their values at i=niter.
-    Even the coupling block is included, the terminator function described in
+    If the coupling block is included, the terminator function described in
     D. Rocca, R. Gebauer, Y. Saad, S. Baroni, J. Chem. Phys. 128, 154105 (2008) is used.
 """,
 ),
@@ -911,12 +916,12 @@ Variable(
     dimensions="scalar",
     defaultval=100,
     mnemonics="Bethe-Salpeter HAYDOCK Number of ITERations",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text="""
-[[bs_haydock_niter]] defines the maximum number of iterations used to
-calculate the macroscopic dielectric function. The iterative algorithm stops
-when the difference between two consecutive evaluations of the optical spectra
-is less than [[bs_haydock_tol]].
+**bs_haydock_niter** defines the maximum number of iterations used to
+calculate the macroscopic dielectric function.
+The iterative algorithm stops when the difference between two consecutive
+evaluations of the optical spectra is less than [[bs_haydock_tol]].
 """,
 ),
 
@@ -928,14 +933,14 @@ Variable(
     dimensions=[2],
     defaultval=[0.02, 0],
     mnemonics="Bethe-Salpeter HAYDOCK TOLerance",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text="""
-Defines the convergence criterion for the Haydock iterative method. The
-iterative algorithm stops when the difference between two consecutive
-evaluations of the macroscopic dielectric function is less than
-**bs_haydock_tol(1)**. The sign of **bs_haydock_tol(1)** defines how to
-estimate the convergence error. A negative value signals that the converge
-should be reached for each frequency (strict criterion), while a positive
+Defines the convergence criterion for the Haydock iterative method.
+The iterative algorithm stops when the difference between two consecutive
+evaluations of the macroscopic dielectric function is less than **bs_haydock_tol(1)**.
+The sign of **bs_haydock_tol(1)** defines how to estimate the convergence error.
+
+A negative value signals that the converge should be reached for each frequency (strict criterion), while a positive
 value indicates that the converge error is estimated by averaging over the
 entire frequency range (mild criterion).
 
@@ -955,11 +960,10 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Bethe-Salpeter INTERPolation K-point MULTiplication factors",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_kmult]] defines the number of divisions used to generate the dense
-mesh in the interpolation. [[ngkpt]] of the dense mesh =
-**bs_interp_kmult(:)** * [[ngkpt]] of the coarse mesh.
+**bs_interp_kmult** defines the number of divisions used to generate the dense mesh in the interpolation.
+[[ngkpt]] of the dense mesh = **bs_interp_kmult(:)** * [[ngkpt]] of the coarse mesh.
 """,
 ),
 
@@ -971,7 +975,7 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="Bethe-Salpeter INTERPolation Method3 WIDTH",
-    requires="[[bs_interp_mode]] ==3 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
+    requires="[[bs_interp_mode]] == 3 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 Defines the width of the region where divergence treatment is applied for BSE interpolation
 """,
@@ -985,7 +989,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter INTERPolation METHOD",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 [[bs_interp_method]] selects the method of interpolation:
 
@@ -1023,9 +1027,8 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation PREParation",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_prep]] allows to trigger the preparation of the interpolation with
-method 2 or method 3. It generates the decomposition of BSR in a,b,c
-coefficients used for the interpolation.
+**bs_interp_prep* allows to trigger the preparation of the interpolation with method 2 or method 3.
+It generates the decomposition of BSR in a, b, c coefficients used for the interpolation.
 """,
 ),
 
@@ -1037,7 +1040,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
     text="""
 Gives the index of the neighbour that is used for Rohlfing & Louie method
 """,
@@ -1055,8 +1058,8 @@ Variable(
     text="""
 This variable defines the index of the lowest occupied band used for the
 construction of the electron-hole basis set. For spin polarized calculations,
-one must provide two separated indices for spin up and spin down. An
-additional cutoff energy can be applied by means of the bs_eh_window input variable.
+one must provide two separated indices for spin up and spin down.
+An additional cutoff energy can be applied by means of the [[bs_eh_cutoff]] input variable.
 """,
 ),
 
@@ -1070,9 +1073,9 @@ Variable(
     mnemonics="Bethe-Salpeter Number of STATES",
     requires="[[optdriver]] == 99 and [[bs_algorithm]] in [2, 3]",
     text="""
-[[bs_nstates]] defines the maximum number of excitonic states calculated in
-the direct diagonalization of the excitonic matrix or in the conjugate-
-gradient method. The number of states should be sufficiently large for a
+**bs_nstates** defines the maximum number of excitonic states calculated in
+the direct diagonalization of the excitonic matrix or in the conjugate-gradient method.
+The number of states should be sufficiently large for a
 correct description of the optical properties in the frequency range of interest.
 """,
 ),
@@ -1880,7 +1883,7 @@ Variable(
     mnemonics="DELAY between trials to PERMUTE atoms",
     text="""
 Delay (number of time steps) between trials to permute two atoms, in view of
-accelerated search of minima. Still in development. 
+accelerated search of minima. Still in development.
 
 See the routine moldyn.F90 and [[signperm]] for additional information.
 
@@ -2225,19 +2228,19 @@ Variable(
 on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
 Usefull only when [[ionmov]]==2 and [[optcell]]/=0, that is, cell optimization.
 
-In the default mode ([[chkdilatmx]]=1), when the [[dilatmx]] threshold is exceeded, 
+In the default mode ([[chkdilatmx]]=1), when the [[dilatmx]] threshold is exceeded,
 ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
 step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
-booking of a larger planewave basis, but will not rescale the tentative new primitive vectors 
+booking of a larger planewave basis, but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] treshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
 this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0 .
 
-Detailed explanation : The memory space for the planewave basis set is defined 
+Detailed explanation : The memory space for the planewave basis set is defined
 by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
 internally "ecut_eff". Other uses of [[ecut]] are not modified when [[dilatmx]]>1.0.
 Still, operations (like scalar products) are taking into account these fake non-used planewaves,
@@ -3269,8 +3272,8 @@ Variable(
     mnemonics="EFfective MASs, activate DEGenerate formalism",
     requires="[[efmas]] > 0",
     text="""
-Activate (==1) or not (==0) the treatment of degenerate bands 
-(criterion [[efmas_deg_tol]] is used to determine whether bands are degenerate). 
+Activate (==1) or not (==0) the treatment of degenerate bands
+(criterion [[efmas_deg_tol]] is used to determine whether bands are degenerate).
 Also compute the transport equivalent effective mass (see [[cite:Mecholsky2014]]).
 
 [[efmas]]=0 should only be used for testing purposes.
@@ -12385,7 +12388,7 @@ Only relevant for Path-Integral Molecular Dynamics.
 Selects a constraint to be applied during the PIMD trajectory. The constraint
 is holonomic (it is a relation between the position variables). In practice,
 the total forces applied to the atomic positions are modified so as to respect
-the constraint. 
+the constraint.
 
 To date, the available constraints are:
 

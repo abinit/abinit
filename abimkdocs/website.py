@@ -835,9 +835,34 @@ The bibtex file is available [here](../abiref.bib).
 
     def preprocess_mdlines(self, lines):
         """Preprocess markdown lines."""
+        lines = self._preprocess_aliases(lines)
+        lines = self._preprocess_include(lines)
+        return lines
+
+    def _preprocess_aliases(self, lines):
+        """
+        Handle aliases.
+        |token| will be replaced by value by the Markdown preprocessor
+        NB: white spaces in token are not allowed, `token` is ignored
+        """
+        def repl(matchobj):
+            key = matchobj.group(1)
+            print("key", key)
+            value = self.mkdocs_config["extra"]["abimkdocs_aliases"].get(key)
+            if value is not None:
+                print("Returning", value)
+                return value
+            else:
+                print("Triggered", matchobj.group(0))
+                return matchobj.group(0)
+
+        ALIAS_SYNTAX = re.compile(r"[^`]\|(\w+)\|[^`]")
+        return [re.sub(ALIAS_SYNTAX, repl, line) for line in lines]
+
+    def _preprocess_include(self, lines):
+        """Handle {action ...} syntax."""
         INC_SYNTAX = re.compile(r'^\{%\s*(.+?)\s*%\}')
         new_lines = []
-        #print(lines)
         for line in lines:
             m = INC_SYNTAX.search(line)
             if not m:
