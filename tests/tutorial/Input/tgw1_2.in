@@ -28,15 +28,14 @@ toldfe1  1.0d-6    # Will stop when this tolerance is achieved on total energy
 # Definition of the SCF procedure
 iscf2    -2             # Non self-consistent calculation
 getden2  -1             # Read previous density file
-tolwfr2  1.0d-18        # Still get it converged
+tolwfr2  1.0d-16        # Still get it converged
 nband2   260
-nbdbuf2   10
+nbdbuf2   40
 
 # Dataset3: Calculation of the screening (epsilon^-1 matrix)
 optdriver3  3
 getwfk3     -1
 nband3      25
-ecutwfn3    3.6
 ecuteps3    6.0
 ppmfrq3    16.7 eV
 
