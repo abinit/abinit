@@ -61,7 +61,7 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tgw1_2.in, tgw1_3.in, tgw1_4.in, tgw1_5.in, tgw1_6.in, tgw1_7.in, tgw1_8.in
+#%% test_chain = tgw1_2.in, tgw1_3.in, tgw1_4.in, tgw1_5.in
 #%% [files]
 #%% files_to_test = 
 #%%   tgw1_8.out,  tolnlines= 70, tolabs=  7.000e-02, tolrel=  7.000e-02
