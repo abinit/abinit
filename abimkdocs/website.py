@@ -851,7 +851,7 @@ The bibtex file is available [here](../abiref.bib).
             value = self.mkdocs_config["extra"]["abimkdocs_aliases"].get(key)
             if value is not None:
                 print("Returning", value)
-                return value
+                return " %s " % value
             else:
                 print("Triggered", matchobj.group(0))
                 return matchobj.group(0)

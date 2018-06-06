@@ -425,7 +425,7 @@ is already able to capture the most important physics.
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, use the |abiopen| script
+    If |AbiPy| in installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the dielectric function stored in the MDF.nc file:
 
         abiopen.py tbs_2o_MDF.nc --expose --seaborn
@@ -578,6 +578,17 @@ also report the results obtained in a separate calculation done with
 We therefore fix the number of bands for the transition space using the
 converged values [[bs_loband]] = 2, [[nband]] = 8, and we proceed to analyse the
 convergence of the spectrum with respect to the number of planewaves in the screening.
+
+!!! tip
+
+    If |AbiPy| in installed on your machine, you can use the |abicomp| script
+    with the `mdf` command and the `--expose` option to compare 
+    multiple dielectric functions:
+
+        abicomp.py mdf tbs_3o_DS*_MDF.nc --expose --seaborn
+
+    ![](bse_assets/abicomp_tbs_3o.png)
+
 
 ### Tips for expert users
 
@@ -736,6 +747,9 @@ agreement with the experiment.
 
 * Calculate the one-shot GW corrections for silicon following the [[lesson:gw1|first GW lesson]].
   Then use the `_GW` file produced by the code to calculate the absorption spectrum. 
+
+* Learn how to use AbiPy to automate BS calculations as described in this
+  [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/bse/lesson_bse.ipynb).
 
 ## Notes on the MPI implementation
   

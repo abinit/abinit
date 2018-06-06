@@ -8,17 +8,17 @@ This page gives hints on how to  with the ABINIT package.
 
 ## Introduction
 
-ABINIT is developed under the control of [[https://git-scm.com/|git]], a well-
-known Version Control System. There is an official
-[[https://github.com/abinit/abinit|github mirror]] of the Abinit repository.
-We welcome bug fixes and improvements. Note that most of the active
-developments are hosted on the [[https://gitlab.abinit.org/|Gitlab server]].
-Before embarking on making significant changes, please contact the Abinit
-group.
+ABINIT is developed under the control of [git](https://git-scm.com/) and 
+the development is based on the 
+[Gitflow branching model](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+There is an official [github mirror](https://github.com/abinit/abinit)
+where we welcome bug fixes and improvements. 
+Note, however, that most of the active developments are hosted on our 
+internal [Gitlab server]([https://gitlab.abinit.org/).
+Before embarking on making significant changes, please contact the Abinit group.
 
-See [[https://github.com/abinit|the many different projects linked to ABINIT on Github]], 
-actually gathered in the Github ABINIT organization.
-
+See the many different projects linked to ABINIT on Github
+actually gathered in the [Github ABINIT organization](https://github.com/abinit).
 
 
 ## Related Input Variables

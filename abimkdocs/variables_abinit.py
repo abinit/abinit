@@ -736,14 +736,14 @@ Variable(
     requires="[[optdriver]] == 99",
     text="""
 This input variable defines the algorithm employed to calculate the macroscopic dielectric function.
-Possible values are 1, 2 or 3:
+Possible values are in [1, 2, 3]:
 
 * 1 --> The macroscopic dielectric is obtained by performing a direct diagonalization
   of the excitonic Hamiltonian. Advantages: It gives direct access to the excitonic eigenvalues
   as well as to the oscillator strengths. Drawbacks: It is a very CPU- and memory-consuming approach
-  as the size of the Hamiltonian scales as (nk*nc*nv)**2 where nk is the number of k-point
-  in the **full** Brillouin zone, and nc and nv are the number of conduction and valence states, respectively.
-  Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
+  as the size of the Hamiltonian scales as $(n_k * n_c * n_v)^2$ where $n_k$ is the number of k-point
+  in the **full** Brillouin zone, and $n_c$ and $n_v$ are the number of conduction and valence states, respectively.
+  Pros: It can be used both for resonant-only and resonant + coupling calculations (non Tamm-Dancoff approximation).
 
 * 2 --> Haydock iterative method. The macroscopic dielectric function is obtained by iterative applications
   of the Hamiltonian on a set of vectors in the electron-hole space.
@@ -769,7 +769,7 @@ Variable(
     mnemonics="Bethe-Salpeter CALCulation TYPE",
     requires="[[optdriver]] == 99",
     text=r"""
-Possible values are 1, 2, 3.
+Possible values are in [1, 2, 3].
 
 * 1 --> use the KS eigenvalues and wave functions stored in the WFK file to construct the transition space
 * 2 --> The transition space is constructed with Kohn-Sham orbitals but the energies are read from an external GW file
@@ -895,16 +895,16 @@ Variable(
     defaultval=1,
     mnemonics="Bethe-Salpeter HAYdock TERMinator",
     requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
-    text="""
+    text=r"""
 Defines how to terminate the continued fraction expression for the dielectric function.
 The terminator reduces the number of iterations needed to converge
 by smoothing the oscillation in the high energy part of the spectrum
 
   * 0 --> No terminator. The contribution given by the terms missing in the Lanczos chain are set to zero.
   * 1 --> Use the terminator function. The particular expression depends on the type of calculation:
-    In the resonant-only case, the a_i and b_i coefficients for i > niter, are replaced by their values at i=niter.
-    If the coupling block is included, the terminator function described in
-    D. Rocca, R. Gebauer, Y. Saad, S. Baroni, J. Chem. Phys. 128, 154105 (2008) is used.
+    In the resonant-only case, the $a_i$ and $b_i$ coefficients for $i > \text{niter}$, are replaced
+    by their values at $i = \text{niter}$.
+    If the coupling block is included, the terminator function described in [[cite:Rocca2008]].
 """,
 ),
 
@@ -941,8 +941,7 @@ evaluations of the macroscopic dielectric function is less than **bs_haydock_tol
 The sign of **bs_haydock_tol(1)** defines how to estimate the convergence error.
 
 A negative value signals that the converge should be reached for each frequency (strict criterion), while a positive
-value indicates that the converge error is estimated by averaging over the
-entire frequency range (mild criterion).
+value indicates that the converge error is estimated by averaging over the entire frequency range (mild criterion).
 
 **bs_haydock_tol(2)** defines the quantity that will be checked for convergence:
 
@@ -991,10 +990,10 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation METHOD",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_method]] selects the method of interpolation:
+*bs_interp_method* selects the interpolation method::
 
-  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see Comput. Phys. Commun. 203, 83 (2016))
-  * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and Phys. Rev. B 62, 4927 (2000))
+  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2015]]).
+  * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and [[cite:Rohlfing2000]])
 """,
 ),
 
@@ -1008,7 +1007,7 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation MODE",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_mode]] selects the mode of interpolation:
+*bs_interp_mode* selects the mode of interpolation:
 
   * 0 --> No interpolation. Standard Bethe-Salpeter computation is performed
   * 1 --> Simple interpolation
@@ -1027,7 +1026,7 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation PREParation",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-**bs_interp_prep* allows to trigger the preparation of the interpolation with method 2 or method 3.
+*bs_interp_prep* allows to trigger the preparation of the interpolation with method 2 or method 3.
 It generates the decomposition of BSR in a, b, c coefficients used for the interpolation.
 """,
 ),
@@ -1042,7 +1041,7 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
     text="""
-Gives the index of the neighbour that is used for Rohlfing & Louie method
+Gives the index of the neighbour that is used in the Rohlfing and Louie method ([[cite:Rohlfing2000]])
 """,
 ),
 

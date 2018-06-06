@@ -5,7 +5,7 @@ authors: MT
 <!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute phonon frequencies and modes, IR and Raman spectra, Born effective
-charges, IR reflectivity ... with the ABINIT package.
+charges, IR reflectivity with the ABINIT package.
 
 ## Introduction
 
@@ -48,7 +48,13 @@ See [[topic:DFPT]] for the general information about DFPT, [[topic:q-points]]
 for the specification of q-points, and [[topic:PhononBands]] for the
 computation of full phonon bands.
 
+!!! important
 
+    More than 1500 phonon band structures for insulators, computed with ABINIT, are now available 
+    on the [Materials Project web site](https://materialsproject.org), accompanied with derived 
+    thermodynamic quantities, Born effective charges, and dielectric tensor [[cite:Petretto2018]].
+    The DDB file can be downloaded automatically with |AbiPy| starting from the materials project
+    identifier. For futher information, please consult the |DdbFileNb|.
 
 ## Related Input Variables
 
