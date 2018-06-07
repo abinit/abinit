@@ -9,7 +9,7 @@ Frequency dependent linear optical dielectric function and second order nonlinea
 This file explains the i/o parameters needed for the calculation of the
 frequency dependent linear optical dielectric function and second order
 nonlinear optical susceptibility, in the RPA approximation (sum over states
-using independent electronic states) thanks to the Optic utility of the ABINIT package.
+using independent electronic states) thanks to the Optic utility of the Abinit package.
 The user is advised to be familiar with the main [[help:abinit]] before reading the present file.
 
 A knowledge of the computation of the linear response d/dk perturbation,
@@ -55,7 +55,7 @@ Abinit program, four different files, corresponding to the physical system that 
     (actually, the derivative with respect to wavevector, which is closely related),
     one for each direction of space
 
-Supposing you have read the [[help:abinit|main ABINIT help file]], the
+Supposing you have read the [[help:abinit|main Abinit help file]], the
 production of the first file should not require any additional explanation.
 However, the way to obtain the matrix elements is worth explaining.  
 
@@ -126,7 +126,7 @@ FILES, PARAMETERS and COMPUTATIONS must be kept unaltered.
     /
 ```
 
-The list of input variables for the optic input file is presented in the topic [[topic:Optic]].
+The list of input variables for the optic input file is presented in [[topic:Optic]].
 
 <a id="output"></a>
 ## 4 Optic output files
@@ -157,7 +157,7 @@ KIND2:This can be Im, Re or abs
 Contains: column 1 - energy(eV), column 2, 3 inter and column 4, 5 intra band
 contributions to the imaginary (KIND2=Im), real (KIND2=Re) or absolute
 (KIND2=Abs) value of the abc component of the nonlinear optical
-susceptibility. These components are labeled as inter and intra in Eqs. 49-51 in Ref. 1.  
+susceptibility. These components are labeled as inter and intra in Eqs. 49-51 in [[cite:Sharma2004]]
 
 All the values are in electro-static units (esu). In the header of all the
 above files you can find information about the calculation. Some results of
