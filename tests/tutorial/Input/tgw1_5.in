@@ -64,7 +64,7 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%% test_chain = tgw1_2.in, tgw1_3.in, tgw1_4.in, tgw1_5.in
 #%% [files]
 #%% files_to_test = 
-#%%   tgw1_8.out,  tolnlines= 70, tolabs=  7.000e-02, tolrel=  7.000e-02
+#%%   tgw1_5.out,  tolnlines= 70, tolabs=  7.000e-02, tolrel=  7.000e-02
 #%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
