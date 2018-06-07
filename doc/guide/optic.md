@@ -140,8 +140,7 @@ Contains the following 3 data sets
   * 2) Column 1 - energy(eV), column 2 - real part of the ab component of the frequency dependent linear dielectric tensor.
   * 3) Column 1 - energy(eV), column 2 - absolute value of the ab component of the frequency dependent linear dielectric tensor.
 
-In the header of the file you can find information about the calculation. Some
-results for GaAs(LiF???) are presented in this document to show what can be expected.
+In the header of the file you can find information about the calculation. 
 
 #### **4.2. Non-linear optical response data files**
 
@@ -160,9 +159,7 @@ contributions to the imaginary (KIND2=Im), real (KIND2=Re) or absolute
 susceptibility. These components are labeled as inter and intra in Eqs. 49-51 in [[cite:Sharma2004]]
 
 All the values are in electro-static units (esu). In the header of all the
-above files you can find information about the calculation. Some results of
-nonlinear optical spectrum for GaAs(LiF???) are presented in this document to
-show what can be expected.
+above files you can find information about the calculation. 
 
 <a id="troubleshooting"></a>
 ## 5 Troubleshooting
