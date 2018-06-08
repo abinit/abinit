@@ -225,7 +225,13 @@ module defs_basis
 !Complex constants
  complex(dpc), parameter :: czero=(0._dp,0._dp)
  complex(dpc), parameter :: cone =(1._dp,0._dp)
- complex(dpc) ,parameter :: j_dpc=(0._dp,1.0_dp)
+ complex(dpc), parameter :: j_dpc=(0._dp,1.0_dp)
+
+!Pauli matrix
+ complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
+&                                                         czero,cone,cone,czero,&
+&                                                         czero,j_dpc,-j_dpc,czero,&
+&                                                         cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)
@@ -267,7 +273,6 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_FULLBZ    = 1
  integer,public,parameter :: WFK_TASK_CLASSIFY  = 2
  integer,public,parameter :: WFK_TASK_PAW_AEPSI = 3
- integer,public,parameter :: WFK_TASK_SHIRLEY   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
 
 ! Flags defining the method used for performing IO (input variable iomode)
@@ -558,10 +563,13 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_CLASSIFY
  case ("paw_aepsi")
    wfk_task = WFK_TASK_PAW_AEPSI
+<<<<<<< HEAD
  case ("shirley")
    wfk_task = WFK_TASK_SHIRLEY
  case ("wfk_ddk")
    wfk_task = WFK_TASK_DDK
+=======
+>>>>>>> trunk/develop
  case default
    wfk_task = WFK_TASK_NONE
  end select

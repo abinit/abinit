@@ -62,6 +62,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
  use m_ab7_symmetry
  use m_xmpi
 
+ use m_geometry,         only : xred2xcart
  use m_abi2big,          only : wvl_occ_abi2big,wvl_occopt_abi2big
 
 #if defined HAVE_BIGDFT
@@ -75,7 +76,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_scratch'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common
 !End of the abilint section
 
@@ -104,7 +104,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
   real(dp), allocatable :: rhor(:,:)
   real(dp), pointer     :: vpsp(:)
   real(dp):: elecfield(3)
-  type(gaussian_basis) :: Gvirt  
+  type(gaussian_basis) :: Gvirt
   type(input_variables) :: in  ! To be removed, waiting for BigDFT upgrade
 #endif
 

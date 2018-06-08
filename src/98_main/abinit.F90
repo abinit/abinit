@@ -94,7 +94,6 @@ program abinit
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use m_ab7_invars
  use m_build_info
  use m_cppopts_dumper
@@ -111,16 +110,25 @@ program abinit
  use mpi
 #endif
 
- use defs_time,     only : time_set_papiopt
- use m_time ,       only : asctime, sec2str
+ use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
- use m_specialmsg,  only : specialmsg_getcount
+ use m_specialmsg,  only : specialmsg_getcount, herald
  use m_exit,        only : get_timelimit_string
  use m_atomdata,    only : znucl2symbol
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
+ use m_memeval,     only : memory_eval
+ use m_chkinp,      only : chkinp
+ use m_dtfil,       only : iofn1, status
+ use m_outxml,      only : outxml_open, outxml_finalise
+ use m_parser,      only : parsefile
+ use m_out_acknowl, only : out_acknowl
+ use m_timana,      only : timana
+ use m_builtin_tests, only : testfi
+ use m_mpi_setup,     only : mpi_setup
+ use m_outvars,       only : outvars
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif
@@ -133,9 +141,6 @@ program abinit
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_51_manage_mpi
  use interfaces_57_iovars
  use interfaces_95_drive
 !End of the abilint section

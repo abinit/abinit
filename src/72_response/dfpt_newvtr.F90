@@ -108,16 +108,16 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  use m_ab7_mixing
  use m_errors
 
+ use m_time,     only : timab
+ use m_geometry, only : metric
  use m_pawrhoij, only : pawrhoij_type
+ use m_prcref,   only : moddiel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_newvtr'
- use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -166,13 +166,11 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !Compatibility tests
  if(usepaw==1) then
    if(dtset%nspden==4.and.dtset%pawoptmix==1) then
-     msg='pawoptmix=1 is not compatible with nspden=4 !'
-     MSG_ERROR(msg)
+     MSG_ERROR('pawoptmix=1 is not compatible with nspden=4 !')
    end if
    if (my_natom>0) then
      if (pawrhoij(1)%cplex<cplex) then
-       msg='pawrhoij()%cplex must be >=cplex !'
-       MSG_ERROR(msg)
+       MSG_ERROR('pawrhoij()%cplex must be >=cplex !')
      end if
    end if
  end if
@@ -360,8 +358,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 
  else if(iscf==5 .or. iscf==6)then
    if(ispmix/=1) then
-     msg = ' Mixing on reciprocal space not allowed with iscf=5 or 6.'
-     MSG_ERROR(msg)
+     MSG_ERROR('Mixing on reciprocal space not allowed with iscf=5 or 6.')
    end if
 !  PAW: apply a simple mixing to rhoij (this is temporary)
    if (usepaw==1.and.my_natom>0) then

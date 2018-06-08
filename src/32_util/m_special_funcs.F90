@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,9 @@ module m_special_funcs
  public :: gaussian          ! Normalized Gaussian distribution.
  public :: abi_derf          ! Evaluates the error function in real(dp).
  public :: abi_derfc         ! Evaluates the complementary error function in real(dp).
+ public :: gamma_function    ! Computes the gamma function
  public :: besjm             ! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
+ public :: sbf8              ! Computes set of spherical bessel functions using accurate algorithm
  public :: phim              ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
                              !                       Sqrt[2] sin[Abs(m) theta], if m<0
                              !                       1                        , if m=0
@@ -1008,6 +1010,157 @@ elemental function abi_derfc(yy) result(derfc_yy)
 end function abi_derfc
 !!***
 
+!!****f* ABINIT/GAMMA_FUNCTION
+!! NAME
+!!  GAMMA_FUNCTION
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      pspnl_hgh_rec,pspnl_operat_rec,vso_realspace_local
+!!
+!! CHILDREN
+!!      gsl_f90_sf_gamma
+!!
+!! SOURCE
+
+subroutine GAMMA_FUNCTION(X,GA)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'GAMMA_FUNCTION'
+!End of the abilint section
+
+  implicit none
+
+#ifdef HAVE_GSL
+! in case we have gsl, no need to use explicit function, just wrap the
+!  call to the GSL C function in 01_gsl_ext/
+
+  ! arguments
+
+  real(dp),intent(in) :: x
+  real(dp),intent(out) :: ga
+
+  call gsl_f90_sf_gamma(x,ga)
+
+#else
+!       ====================================================
+!       Purpose: This program computes the gamma function
+!                Gamma(x) using subroutine GAMMA
+!       Examples:
+!                   x          Gamma(x)
+!                ----------------------------
+!                  1/3       2.678938534708
+!                  0.5       1.772453850906
+!                 -0.5      -3.544907701811
+!                 -1.5       2.363271801207
+!                  5.0      24.000000000000
+!       ====================================================
+!
+!  This routine was downloaded from UIUC:
+!  http://jin.ece.uiuc.edu/routines/routines.html
+!
+!  The programs appear to accompany a book "Computation of Special
+!  Functions" (1996) John Wiley and Sons, but are distributed online
+!  by the authors. Exact copyright should be checked.
+!
+!  Authors / copyright:
+!     Shanjie Zhang and Jianming Jin
+!     Proposed contact is:  j-jin1@uiuc.edu
+!
+!  20 October 2008:
+!     Incorporated into ABINIT by M. Verstraete
+!
+!
+!
+!       ==================================================
+!       Purpose: Compute the gamma function Gamma(x)
+!       Input :  x  --- Argument of Gamma(x)
+!                       ( x is not equal to 0,-1,-2, etc )
+!       Output:  GA --- Gamma(x)
+!       ==================================================
+!
+
+  ! arguments
+
+  real(dp),intent(in) :: x
+  real(dp),intent(out) :: ga
+
+  ! local variables
+  integer :: k,m
+  real(dp) :: m1,z,r,gr
+  real(dp) :: G(26)
+
+  ! source code:
+
+  ! initialization of reference data
+  G=(/1.0D0,0.5772156649015329D0, &
+     &  -0.6558780715202538D0, -0.420026350340952D-1, &
+     &   0.1665386113822915D0,-.421977345555443D-1, &
+     &  -.96219715278770D-2, .72189432466630D-2, &
+     &  -.11651675918591D-2, -.2152416741149D-3, &
+     &   .1280502823882D-3, -.201348547807D-4, &
+     &  -.12504934821D-5, .11330272320D-5, &
+     &  -.2056338417D-6, .61160950D-8, &
+     &   .50020075D-8, -.11812746D-8, &
+     &   .1043427D-9, .77823D-11, &
+     &  -.36968D-11, .51D-12, &
+     &  -.206D-13, -.54D-14, .14D-14, .1D-15/)
+
+
+  ! for the integer case, do explicit factorial
+  if (X==int(X)) then
+    if (X > 0.0D0) then
+      GA=1.0D0
+      M1=X-1
+      do K=2,int(M1)
+        GA=GA*K
+      end do
+    else
+      GA=1.0D+300
+    end if
+  ! for the integer case, do explicit factorial
+  else
+    if (abs(X) > 1.0D0) then
+      Z=abs(X)
+      M=int(Z)
+      R=1.0D0
+      do K=1,M
+        R=R*(Z-K)
+      end do
+      Z=Z-M
+    else
+      Z=X
+    end if
+    GR=G(26)
+    do K=25,1,-1
+      GR=GR*Z+G(K)
+    end do
+    GA=1.0D0/(GR*Z)
+    if (abs(X) > 1.0D0) then
+      GA=GA*R
+      if (X < 0.0D0) GA=-PI/(X*GA*SIN(PI*X))
+    end if
+  end if
+  return
+
+#endif
+!  end preproc for presence of GSL
+
+end subroutine GAMMA_FUNCTION
+!!***
+
 !!****f* m_special_funcs/besjm
 !! NAME
 !! besjm
@@ -1248,6 +1401,95 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 end subroutine besjm
 !!***
 
+!!****f* m_special_funcs/sbf8
+!! NAME
+!! sbf8
+!!
+!! FUNCTION
+!! Computes set of spherical bessel functions using accurate algorithm
+!! based on downward recursion in order and normalization sum.
+!! Power series used at small arguments.
+!!
+!! INPUTS
+!!  nm=maximum angular momentum wanted + one
+!!  xx=argument of sbf
+!!
+!! OUTPUT
+!!  sb_out(nm)=values of spherical bessel functions for l=0,nm-1
+!!
+!! PARENTS
+!!      posdoppler,psp8nl,qijb_kk,qmc_prep_ctqmc,smatrix_pawinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sbf8(nm,xx,sb_out)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sbf8'
+!End of the abilint section
+
+ implicit none
+
+!Arguments----------------------------------------------------------
+!scalars
+ integer,intent(in) :: nm
+ real(dp),intent(in) :: xx
+!arrays
+ real(dp),intent(out) :: sb_out(nm)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nlim,nn
+ real(dp) :: fn,sn,xi,xn,xs
+!arrays
+ real(dp),allocatable :: sb(:)
+
+! *************************************************************************
+
+ if(xx<= 1.0e-36_dp) then
+!  zero argument section
+   sb_out(:)=zero
+   sb_out(1)=one
+ else if(xx<1.e-3_dp) then
+!  small argument section
+   xn=one
+   xs=half*xx**2
+   do nn=1,nm
+     sb_out(nn)=xn*(one - xs*(one - xs/(4*nn+6))/(2*nn+1))
+     xn=xx*xn/(2*nn+1)
+   end do
+ else
+!  recursion method
+   if(xx<one) then
+     nlim=nm+int(15.0e0_dp*xx)+1
+   else
+     nlim=nm+int(1.36e0_dp*xx)+15
+   end if
+   ABI_ALLOCATE(sb,(nlim+1))
+   nn=nlim
+   xi=one/xx
+   sb(nn+1)=zero
+   sb(nn)=1.e-18_dp
+   sn=dble(2*nn-1)*1.e-36_dp
+   do nn=nlim-1,1,-1
+     sb(nn)=dble(2*nn+1)*xi*sb(nn+1) - sb(nn+2)
+   end do
+   do nn=1,nlim-1
+     sn=sn + dble(2*nn-1)*sb(nn)*sb(nn)
+   end do
+   fn=1.d0/sqrt(sn)
+   sb_out(:)=fn*sb(1:nm)
+   ABI_DEALLOCATE(sb)
+ end if
+
+end subroutine sbf8
+!!***
+
 !!****f* m_special_funcs/phim
 !! NAME
 !! phim
@@ -1373,7 +1615,7 @@ end function fermi_dirac
 !!  bose_einstein
 !!
 !! FUNCTION
-!!  Returns the Bose Einstein distribution for T and energy 
+!!  Returns the Bose Einstein distribution for T and energy
 !!  presumes everything is in Hartree!!!! Not Kelvin for T
 !!
 !! INPUTS
@@ -1420,7 +1662,7 @@ function bose_einstein(energy, temperature)
    write(message,'(a)') 'No Bose Einstein for negative or 0 T'
    MSG_WARNING(message)
  end if
- 
+
 
 end function bose_einstein
 !!***

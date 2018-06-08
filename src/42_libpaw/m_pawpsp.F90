@@ -120,7 +120,7 @@ CONTAINS
 !!  lnmax=max number of (l,n) components
 !!  mqgrid=number of grid points for q grid
 !!  qgrid(mqgrid)=values at which form factors are returned
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  wfll(:,lnmax)=paw projector on radial grid
 !!
 !! OUTPUT
@@ -291,7 +291,7 @@ end subroutine pawpsp_nl
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  vloc(:)=V(r) on radial grid.
 !!  zion=nominal valence charge of atom.
 !!
@@ -469,7 +469,7 @@ end subroutine pawpsp_lo
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  nr(:)=n(r) on radial grid.
 !!
 !! OUTPUT
@@ -1796,7 +1796,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  integer,parameter :: reduced_mshsz=2501
  integer :: ib,il,ilm,ilmn,iln,ir,isnotzero,itest
  integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden
- logical :: has_dij0,reduced_ncor,reduced_nval,reduced_vloc,testval
+ logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
  real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,qcore,qq,rstep_tmp,yp1,ypn
  character(len=500) :: msg
@@ -1807,13 +1807,16 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  real(dp),allocatable :: ncorwk(:),nhat(:),nhatwk(:),nwk(:),r2k(:)
  real(dp),allocatable :: rtncor(:),rtnval(:),rvlocr(:)
  real(dp),allocatable :: vbare(:),vh(:),vhnzc(:)
- real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work2(:),work3(:),work4(:)
+ real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work1b(:),work2(:),work3(:),work4(:)
  logical :: tmp_lmselect(1)
 
 ! *************************************************************************
 
 !==========================================================
 !Perfom tests on meshes
+
+! initialise logical
+ non_magnetic_xc=.false.
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -2207,6 +2210,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc1,(msz*nspden))
        LIBPAW_ALLOCATE(vxc2,(msz*nspden))
        LIBPAW_ALLOCATE(work1,(msz))
+       LIBPAW_ALLOCATE(work1b,(msz))
        LIBPAW_ALLOCATE(work2,(msz*nspden))
        LIBPAW_ALLOCATE(work3,(msz*nspden))
        work2(1:msz)=nwk
@@ -2214,43 +2218,46 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
        if (nspden==2) work3(msz+1:2*msz)=half*nhatwk
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
+       LIBPAW_DEALLOCATE(work1b)
        LIBPAW_DEALLOCATE(work2)
        LIBPAW_DEALLOCATE(work3)
      else
        LIBPAW_ALLOCATE(vxc1,(msz))
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
+       LIBPAW_ALLOCATE(work1b,(msz))
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
+       LIBPAW_DEALLOCATE(work1b)
      endif
 !    Compute difference of XC potentials
      if (usexcnhat==0.and.pawtab%usexcnhat/=0)  vxc1(1:msz)=vxc2(1:msz)-vxc1(1:msz)
@@ -2283,14 +2290,14 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  end if
 
 !==========================================================
-! calculate the coefficient beta = \int { vH[nZc](r) - vloc(r) } 4pi r^2 dr
+! Calculate the coefficient beta = \int { vH[nZc](r) - vloc(r) } 4pi r^2 dr
 !
  LIBPAW_ALLOCATE(vhnzc,(core_mesh%mesh_size))
  LIBPAW_ALLOCATE(nwk,(core_mesh%mesh_size))
 ! get vH[nZc]
  call atompaw_vhnzc(ncore,core_mesh,vhnzc,znucl)
 
-! transpose vlocr mesh into core mesh
+!Transpose vlocr mesh into core mesh
  nwk(:)=zero
  if ((core_mesh%mesh_type/=vloc_mesh%mesh_type).or.&
 & (core_mesh%rstep    /=vloc_mesh%rstep)    .or.&
@@ -2308,11 +2315,11 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    nwk(1:msz)=vlocr(1:msz)
  end if
 
-! difference
+!Difference
  nwk(1:msz)=vhnzc(1:msz)-nwk(1:msz)
  if (msz<core_mesh%mesh_size) nwk(msz+1:core_mesh%mesh_size)=zero
 
-! perform the spherical integration
+!Perform the spherical integration
  nwk(1:msz)=nwk(1:msz)*four_pi*core_mesh%rad(1:msz)**2
 
  call simp_gen(pawtab%beta,nwk,core_mesh)
@@ -2487,18 +2494,20 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 #endif
 
  LIBPAW_ALLOCATE(work1,(core_mesh%mesh_size*nspden))
+ LIBPAW_ALLOCATE(work1b,(core_mesh%mesh_size*nspden))
  LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size*nspden))
  LIBPAW_ALLOCATE(work3,(1))
  LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
  work1(:)=zero
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,work1,1,0,work2,xclevel,xc_denpos)
  end if
  LIBPAW_DEALLOCATE(work1)
+ LIBPAW_DEALLOCATE(work1b)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
  LIBPAW_DEALLOCATE(work4)
@@ -2736,7 +2745,7 @@ subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
 !Calculate derivatives
  call nderiv_gen(dfdr(1:nr),vv,radmesh,der2=d2fdr(1:nr))
- 
+
  rho(2:nr)=d2fdr(2:nr) + 2._dp*dfdr(2:nr)/radmesh%rad(2:nr)
  call pawrad_deducer0(rho,nr,radmesh)
 
@@ -2975,14 +2984,14 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !scalars
  integer :: has_v_minushalf,ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh,ipsploc
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
- integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,sz10,usexcnhat,vlocopt
+ integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,shft,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
  real(dp) :: fourpi,occ,rc,yp1,ypn
  logical :: save_core_msz
  character(len=500) :: msg
  type(pawrad_type) :: core_mesh,shpf_mesh,tproj_mesh,vale_mesh,vloc_mesh
 !arrays
- integer,allocatable :: nprj(:)
+ integer,allocatable :: mesh_shift(:),nprj(:)
  real(dp),allocatable :: kij(:),ncore(:)
  real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
@@ -3059,14 +3068,18 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  nmesh=paw_setup(ipsploc)%ngrid
  LIBPAW_DATATYPE_ALLOCATE(radmesh,(nmesh))
+ LIBPAW_ALLOCATE(mesh_shift,(nmesh))
  do imsh=1,nmesh
    radmesh(imsh)%mesh_type=-1
    radmesh(imsh)%rstep=zero
    radmesh(imsh)%lstep=zero
+   mesh_shift(imsh)=0
    select case(trim(paw_setup(ipsploc)%radial_grid(imsh)%eq))
      case("r=a*exp(d*i)")
+       mesh_shift(imsh)=1
        radmesh(imsh)%mesh_type=3
-       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend-paw_setup(ipsploc)%radial_grid(imsh)%istart+2
+       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend &
+&                             -paw_setup(ipsploc)%radial_grid(imsh)%istart+1+mesh_shift(imsh)
        radmesh(imsh)%rstep=paw_setup(ipsploc)%radial_grid(imsh)%aa
        radmesh(imsh)%lstep=paw_setup(ipsploc)%radial_grid(imsh)%dd
      case("r=a*i/(1-b*i)")
@@ -3075,19 +3088,25 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &       'Action: check your psp file.'
        MSG_ERROR(msg)
      case("r=a*i/(n-i)")
+       mesh_shift(imsh)=0
        radmesh(imsh)%mesh_type=5
-       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend-paw_setup(ipsploc)%radial_grid(imsh)%istart+1
+       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend &
+&                             -paw_setup(ipsploc)%radial_grid(imsh)%istart+1+mesh_shift(imsh)
        radmesh(imsh)%rstep=paw_setup(ipsploc)%radial_grid(imsh)%aa
        radmesh(imsh)%lstep=dble(paw_setup(ipsploc)%radial_grid(imsh)%nn)
      case("r=a*(exp(d*i)-1)")
+       mesh_shift(imsh)=0
        radmesh(imsh)%mesh_type=2
-       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend-paw_setup(ipsploc)%radial_grid(imsh)%istart+1
+       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend &
+&                             -paw_setup(ipsploc)%radial_grid(imsh)%istart+1+mesh_shift(imsh)
        if(paw_setup(ipsploc)%radial_grid(imsh)%istart==1)radmesh(imsh)%mesh_size=radmesh(imsh)%mesh_size+1
        radmesh(imsh)%rstep=paw_setup(ipsploc)%radial_grid(imsh)%aa
        radmesh(imsh)%lstep=paw_setup(ipsploc)%radial_grid(imsh)%dd
      case("r=d*i")
+       mesh_shift(imsh)=0
        radmesh(imsh)%mesh_type=1
-       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend-paw_setup(ipsploc)%radial_grid(imsh)%istart+1
+       radmesh(imsh)%mesh_size=paw_setup(ipsploc)%radial_grid(imsh)%iend &
+&                             -paw_setup(ipsploc)%radial_grid(imsh)%istart+1+mesh_shift(imsh)
        if(paw_setup(ipsploc)%radial_grid(imsh)%istart==1)radmesh(imsh)%mesh_size=radmesh(imsh)%mesh_size+1
        radmesh(imsh)%rstep=paw_setup(ipsploc)%radial_grid(imsh)%dd
      case("r=(i/n+a)^5/a-a^4")
@@ -3248,7 +3267,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
          pawtab%mesh_size=pawrad_ifromr(pawrad,pawtab%rpaw)+5
          pawtab%mesh_size=min(pawtab%mesh_size,pawrad%mesh_size)
          imainmesh=imsh
-         cycle
+         exit
        end if
      end do
      LIBPAW_ALLOCATE(pawtab%phi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
@@ -3258,9 +3277,11 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &     'Action: check your pseudopotential file.'
      MSG_ERROR(msg)
    end if
-   pawtab%phi(1:pawtab%partialwave_mesh_size,ib)= &
-&         paw_setup(ipsploc)%ae_partial_wave(ib)%data(1:pawtab%partialwave_mesh_size) &
-&        *pawrad%rad(1:pawtab%partialwave_mesh_size)
+   shft=mesh_shift(imainmesh)
+   pawtab%phi(1+shft:pawtab%partialwave_mesh_size,ib)= &
+&         paw_setup(ipsploc)%ae_partial_wave(ib)%data(1:pawtab%partialwave_mesh_size-shft) &
+&        *pawrad%rad(1+shft:pawtab%partialwave_mesh_size)
+   if (shft==1) pawtab%phi(1,ib)=zero
  end do
  write(msg,'(a,i4)') &
 & ' mmax= ',mmax
@@ -3279,9 +3300,11 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &     'Action: check your pseudopotential file.'
      MSG_ERROR(msg)
    end if
-   pawtab%tphi(1:pawtab%partialwave_mesh_size,ib)=&
-&         paw_setup(ipsploc)%pseudo_partial_wave(ib)%data(1:pawtab%partialwave_mesh_size) &
-&        *pawrad%rad(1:pawtab%partialwave_mesh_size)
+   shft=mesh_shift(imainmesh)
+   pawtab%tphi(1+shft:pawtab%partialwave_mesh_size,ib)=&
+&         paw_setup(ipsploc)%pseudo_partial_wave(ib)%data(1:pawtab%partialwave_mesh_size-shft) &
+&        *pawrad%rad(1+shft:pawtab%partialwave_mesh_size)
+   if (shft==1) pawtab%tphi(1,ib)=zero
  end do
  write(msg,'(a,i1)') &
 & ' Radial grid used for partial waves is grid ',imainmesh
@@ -3332,7 +3355,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      do imsh=1,nmesh
        if(trim(paw_setup(ipsploc)%projector_function(1)%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
          iprojmesh=imsh
-         cycle
+         exit
        end if
      end do
      call pawrad_copy(radmesh(iprojmesh),tproj_mesh)
@@ -3343,8 +3366,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &     'Action: check your pseudopotential file.'
      MSG_ERROR(msg)
    end if
-   tproj(1:tproj_mesh%mesh_size,ib)=paw_setup(ipsploc)%projector_function(ib)%data(1:tproj_mesh%mesh_size)&
-&   *tproj_mesh%rad(1:tproj_mesh%mesh_size)
+   shft=mesh_shift(iprojmesh)
+   tproj(1+shft:tproj_mesh%mesh_size,ib)=paw_setup(ipsploc)%projector_function(ib)%data(1:tproj_mesh%mesh_size-shft)&
+&   *tproj_mesh%rad(1+shft:tproj_mesh%mesh_size)
+   if (shft==1) tproj(1,ib)=zero
  end do
  write(msg,'(a,i1)') &
 & ' Radial grid used for projectors is grid ',iprojmesh
@@ -3357,7 +3382,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  do imsh=1,nmesh
    if(trim(paw_setup(ipsploc)%ae_core_density%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
      icoremesh=imsh
-     cycle
+     exit
    end if
  end do
  call pawrad_copy(radmesh(icoremesh),core_mesh)
@@ -3371,7 +3396,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    MSG_ERROR(msg)
  end if
  LIBPAW_ALLOCATE(ncore,(core_mesh%mesh_size))
- ncore(1:core_mesh%mesh_size)=paw_setup(ipsploc)%ae_core_density%data(1:core_mesh%mesh_size)/sqrt(fourpi)
+ shft=mesh_shift(icoremesh)
+ ncore(1+shft:core_mesh%mesh_size)=paw_setup(ipsploc)%ae_core_density%data(1:core_mesh%mesh_size-shft)/sqrt(fourpi)
+ if (shft==1) call pawrad_deducer0(ncore,core_mesh%mesh_size,core_mesh)
 
 !Construct and save VH[z_NC] if requested
  if (pawtab%has_vhnzc==1) then
@@ -3394,7 +3421,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  do imsh=1,nmesh
    if(trim(paw_setup(ipsploc)%pseudo_core_density%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
      iread1=imsh
-     cycle
+     exit
    end if
  end do
  if (iread1/=icoremesh) then
@@ -3405,7 +3432,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    MSG_ERROR(msg)
  end if
  LIBPAW_ALLOCATE(tncore,(core_mesh%mesh_size))
- tncore(1:core_mesh%mesh_size)=paw_setup(ipsploc)%pseudo_core_density%data(1:core_mesh%mesh_size)/sqrt(fourpi)
+ shft=mesh_shift(icoremesh)
+ tncore(1+shft:core_mesh%mesh_size)=paw_setup(ipsploc)%pseudo_core_density%data(1:core_mesh%mesh_size-shft)/sqrt(fourpi)
+ if (shft==1) call pawrad_deducer0(tncore,core_mesh%mesh_size,core_mesh)
  if(save_core_msz)  then
    LIBPAW_ALLOCATE(pawtab%tcoredens,(pawtab%core_mesh_size,6))
  else
@@ -3434,13 +3463,15 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%blochl_local_ionic_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    ivlocmesh=iread1
    call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
-   vlocr(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%blochl_local_ionic_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   shft=mesh_shift(ivlocmesh)
+   vlocr(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%blochl_local_ionic_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(vlocr,vloc_mesh%mesh_size,vloc_mesh)
  else if((paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%tread).and.&
 &   (pawtab%usexcnhat==-1.or.pawtab%usexcnhat==1.or.(pawtab%usexcnhat==0.and.&
 &   (.not.paw_setup(ipsploc)%zero_potential%tread)))) then
@@ -3448,19 +3479,22 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    ivlocmesh=iread1
    call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
-   vlocr(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   shft=mesh_shift(ivlocmesh)
+   vlocr(1+shft:vloc_mesh%mesh_size)= &
+&   paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(vlocr,vloc_mesh%mesh_size,vloc_mesh)
  else if(paw_setup(ipsploc)%zero_potential%tread) then
    usexcnhat=0;vlocopt=0
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%zero_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    ivlocmesh=iread1
@@ -3472,7 +3506,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
    vlocr=zero
-   vlocr(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%zero_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   shft=mesh_shift(ivlocmesh)
+   vlocr(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%zero_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(vlocr,vloc_mesh%mesh_size,vloc_mesh)
  else
    write(msg, '(a,a,a,a,a)' )&
 &   'At least one local potential must be given',ch10,&
@@ -3491,7 +3527,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%LDA_minus_half_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    if(iread1/=ivlocmesh) then
@@ -3501,13 +3537,17 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    end if
    has_v_minushalf=1
    LIBPAW_ALLOCATE(pawtab%vminushalf,(vloc_mesh%mesh_size))
+   shft=mesh_shift(ivlocmesh)
    pawtab%vminus_mesh_size=vloc_mesh%mesh_size
-   pawtab%vminushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   pawtab%vminushalf(1+shft:vloc_mesh%mesh_size)= &
+&   paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(pawtab%vminushalf,vloc_mesh%mesh_size,vloc_mesh)
    write(msg,'(a,i1)') &
 &   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,  msg,'COLL')
  else
+   LIBPAW_ALLOCATE(pawtab%vminushalf,(0))
    has_v_minushalf=0
  end if
  if(has_v_minushalf==0.and.pawtab%has_vminushalf==1) then
@@ -3516,7 +3556,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    MSG_ERROR(msg)
  end if
 
-
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
  if (pawtab%shape_type==-1) then
@@ -3524,29 +3563,30 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%shape_function%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    call pawrad_copy(radmesh(iread1),shpf_mesh)
    ishpfmesh=iread1
    LIBPAW_ALLOCATE(shpf,(shpf_mesh%mesh_size,pawtab%l_size))
+   shft=mesh_shift(ishpfmesh)
    shpf(1,1)=one
    do ir=2,shpf_mesh%mesh_size
-     shpf(ir,1)=paw_setup(ipsploc)%shape_function%data(ir,1)
+     shpf(ir,1)=paw_setup(ipsploc)%shape_function%data(ir-shft,1)
    end do
    sz10=size(paw_setup(ipsploc)%shape_function%data,2)
    if(sz10>=2) then
      do il=2,pawtab%l_size
        shpf(1,il)=zero
        do ir=2,shpf_mesh%mesh_size
-         shpf(ir,il)=paw_setup(ipsploc)%shape_function%data(ir,il)
+         shpf(ir,il)=paw_setup(ipsploc)%shape_function%data(ir-shft,il)
        end do
      end do
    else
      do il=2,pawtab%l_size
        shpf(1,il)=zero
        do ir=2,shpf_mesh%mesh_size
-         shpf(ir,il)=paw_setup(ipsploc)%shape_function%data(ir,1)*shpf_mesh%rad(ir)**(il-1)
+         shpf(ir,il)=paw_setup(ipsploc)%shape_function%data(ir-shft,1)*shpf_mesh%rad(ir)**(il-1)
        end do
      end do
    end if
@@ -3585,13 +3625,15 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    do imsh=1,nmesh
      if(trim(paw_setup(ipsploc)%pseudo_valence_density%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
        iread1=imsh
-       cycle
+       exit
      end if
    end do
    ivalemesh=iread1
    call pawrad_copy(radmesh(iread1),vale_mesh)
    LIBPAW_ALLOCATE(tnvale,(vale_mesh%mesh_size))
-   tnvale(1:vale_mesh%mesh_size)=paw_setup(ipsploc)%pseudo_valence_density%data(1:vale_mesh%mesh_size)/sqrt(fourpi)
+   shft=mesh_shift(ivalemesh)
+   tnvale(1+shft:vale_mesh%mesh_size)=paw_setup(ipsploc)%pseudo_valence_density%data(1:vale_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(tnvale,vale_mesh%mesh_size,vale_mesh)
    pawtab%has_tvale=1
    write(msg,'(a,i1)') &
 &   ' Radial grid used for pseudo valence density is grid ',ivalemesh
@@ -3633,10 +3675,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      if (ilm==jlm) kij(klmn)=paw_setup(ipsploc)%kinetic_energy_differences%data(jln+(iln-1)*nval)
    end do
  end do
-
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
-   if (allocated(pawtab%vminushalf).and.pawtab%has_vminushalf==1) then
+   if (size(pawtab%vminushalf)>0.and.pawtab%has_vminushalf==1) then
      vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+pawtab%vminushalf(1:vloc_mesh%mesh_size)
    end if
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
@@ -3695,6 +3736,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  call pawrad_free(radmesh)
  LIBPAW_DATATYPE_DEALLOCATE(radmesh)
+ LIBPAW_DEALLOCATE(mesh_shift)
 
  call pawrad_free(tproj_mesh)
  call pawrad_free(core_mesh)
@@ -4732,7 +4774,7 @@ end subroutine pawpsp_bcast
 !!              (if density<xc_denpos, density=zero)
 !!
 !! OUTPUT
-!!  pawrad <type(pawrad_type)>=data containing PAW radial grid informations
+!!  pawrad <type(pawrad_type)>=data containing PAW radial grid information
 !!  pawtab <type(pawtab_type)>=data containing the PAW dataset (partial waves...)
 !!
 !! SIDE EFFECTS
@@ -4843,7 +4885,7 @@ subroutine pawpsp_main( &
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,  msg,'COLL')
 
-!    Return header informations
+!    Return header information
      call pawpsp_read_header_xml(lloc,lmax,pspcod,&
 &     pspxc,psxml,r2well,zion,znucl)
 !    Fill in pawpsp_header object:

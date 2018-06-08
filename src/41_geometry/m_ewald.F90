@@ -32,6 +32,7 @@ module m_ewald
  use m_splines
 
  use m_special_funcs,  only : abi_derfc
+ use m_symtk,          only : matr3inv
 
  implicit none
 
@@ -143,11 +144,13 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    ng=ng+1
    newg=0
-   if (ng > 20 .and. mod(ng,10)==0) then
-      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  ng = ", ng
-      MSG_WARNING(message)
-   end if
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations), 
+!   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
+!   if (ng > 20 .and. mod(ng,10)==0) then
+!      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
+!&       " If you have a metal consider setting dipdip 0.  ng = ", ng
+!      MSG_WARNING(message)
+!   end if
 
    do ig3=-ng,ng
      do ig2=-ng,ng
@@ -172,6 +175,10 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                term=exp(-arg)/gsq
                summr = 0.0_dp
                summi = 0.0_dp
+
+!              XG 20180531  : the two do-loops on ia should be merged, in order to spare
+!              the waste of computing twice the sin and cos.
+
 !              Note that if reduced atomic coordinates xred drift outside
 !              of unit cell (outside [0,1)) it is irrelevant in the following
 !              term, which only computes a phase.
@@ -242,17 +249,18 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    nr=nr+1
    newr=0
-   if (nr > 20 .and. mod(nr,10)==0) then
-      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  nr = ", nr
-      MSG_WARNING(message)
-   end if
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
+!   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
+!   if (nr > 20 .and. mod(nr,10)==0) then
+!      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
+!&       " If you have a metal consider setting dipdip 0.  nr = ", nr
+!      MSG_WARNING(message)
+!   end if
 !
    do ir3=-nr,nr
      do ir2=-nr,nr
        do ir1=-nr,nr
-         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr&
-&         .or. nr==1 )then
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
            do ia=1,natom
 !            Map reduced coordinate xred(mu,ia) into [0,1)
@@ -264,6 +272,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              drdta3=0.0_dp
 
              do ib=1,natom
+!              fraca and fracb should be precomputedi and become arrays with natom dimension. 
+!              Also the combination with dble(ir1), dble(ir2), dble(ir3) or fraca should be done outside of the ib loop.
                fracb1=xred(1,ib)-aint(xred(1,ib))+0.5_dp-sign(0.5_dp,xred(1,ib))
                fracb2=xred(2,ib)-aint(xred(2,ib))+0.5_dp-sign(0.5_dp,xred(2,ib))
                fracb3=xred(3,ib)-aint(xred(3,ib))+0.5_dp-sign(0.5_dp,xred(3,ib))
@@ -379,7 +389,6 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ewald2'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -651,7 +660,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ewald9'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

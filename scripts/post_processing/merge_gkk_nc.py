@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 #
 #    Copyright (C) 2003-2018 ABINIT group
@@ -139,5 +139,5 @@ def interactive_merge_gkk_nc():
 # =========================================================================== #
 
 if __name__ == '__main__':
-    interactive_merge_ddb_nc()
+    interactive_merge_gkk_nc()
 

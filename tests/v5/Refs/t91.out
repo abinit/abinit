@@ -185,12 +185,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 -                                 =    -0.3577529454E+01 (THz)
 -Debye temperature from partial sums:    -0.1716941307E+03 (K)
 
- Average speed of sound:     0.5989264382E-04 (at units) 
--                      =           0.1310 [km/s]
+ Average speed of sound:     0.2277736510E-04 (at units) 
+-                      =           0.0498 [km/s]
 
- Debye frequency from DOS:     0.4941011685E-04 (Ha) 
--                        =     0.3251029513E+00 (THz)
--Debye temperature from DOS:     0.1560246235E+02 (K)
+ Debye frequency from DOS:     0.1879082637E-04 (Ha) 
+-                        =     0.1236376981E+00 (THz)
+-Debye temperature from DOS:     0.5933666620E+01 (K)
 
 
 ================================================================================

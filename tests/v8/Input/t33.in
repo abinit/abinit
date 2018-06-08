@@ -29,6 +29,7 @@ optforces3 0
 optstress3 0
 pawcpxocc3 2
 
+usexcnhat 0
 
 kptopt 3
 nsym 1

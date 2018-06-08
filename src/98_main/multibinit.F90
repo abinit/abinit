@@ -55,21 +55,23 @@ program multibinit
  use m_fit_polynomial_coeff
  use m_multibinit_dataset
  use m_effective_potential_file
+ use m_spin_model
  use m_abihist
  use m_ab7_invars
- use m_io_tools,   only : get_unit, flush_unit,open_file
- use m_fstrings,   only : int2char4,replace
- use m_time ,      only : asctime
+
+ use m_specialmsg, only : specialmsg_getcount, herald
+ use m_io_tools,   only : flush_unit, open_file
+ use m_fstrings,   only : replace, inupper
+ use m_time,       only : asctime, timein
+ use m_parser,     only : instrng
+ use m_dtfil,      only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_42_parser
- use interfaces_51_manage_mpi
+ use interfaces_57_iovars
  use interfaces_78_effpot
  use interfaces_95_drive
 !End of the abilint section
@@ -96,6 +98,9 @@ program multibinit
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
+
+!TODO hexu: add types for spin here.
+ type(spin_model_t) :: spin_model
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -117,7 +122,7 @@ program multibinit
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
-!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired, 
+!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
@@ -144,7 +149,7 @@ program multibinit
 ! Call the parser from the parser module.
  filstat = trim("_STATUS")
  call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
- 
+
 !******************************************************************
 
  call timein(tcpu,twall)
@@ -178,7 +183,7 @@ program multibinit
  call wrtout(std_out,message,'COLL')
 
 
-!To automate a maximum calculation, multibinit reads the number of atoms 
+!To automate a maximum calculation, multibinit reads the number of atoms
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
@@ -187,7 +192,7 @@ program multibinit
  call wrtout(std_out,message,'COLL')
 
  call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
- 
+
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
  option=1
@@ -195,6 +200,10 @@ program multibinit
    call instrng (filnam(1),lenstr,option,strlen,string)
    !To make case-insensitive, map characters to upper case:
    call inupper(string(1:lenstr))
+
+   !Check whether the string only contains valid keywords
+   call chkvars(string)
+
  end if
 
  call xmpi_bcast(string,master, comm, ierr)
@@ -209,15 +218,25 @@ program multibinit
    call outvars_multibinit(inp,ab_out)
  end if
 
-! Read and treat the reference structure 
+! Read and treat the reference structure
 !****************************************************************************************
+if (inp%spin_dynamics>0) then
+ if (iam_master) then
+
+    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     & 'reading spin terms.'
+   call spin_model_t_initialize(spin_model, filnam(3), inp )
+ endif
+endif
 
 !Read the model (from DDB or XML)
+if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-
-!Read the coefficient from fit
+ 
+ !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
+   ! TODO hexu: filetype==(33?) 
    if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
@@ -233,7 +252,7 @@ program multibinit
 &     'there is no file for the coefficients ',ch10,&
 &     'Action: add coefficients.xml file'
      MSG_ERROR(message)
-     
+
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     ' There is no file for the coefficients from polynomial fitting'
@@ -241,18 +260,20 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  end if
+
+ endif
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences
 !****************************************************************************************
- if (inp%strcpling > 0) then 
+ if (inp%strcpling > 0) then
    call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%fit_bound/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -260,10 +281,10 @@ program multibinit
 &     '-Reading the file the HIST file :',ch10,&
 &     '-',trim(filnam(5)),ch10
 
-     call wrtout(std_out,message,'COLL') 
-     call wrtout(ab_out,message,'COLL') 
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -276,20 +297,31 @@ program multibinit
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
          MSG_ERROR(message)
-       else if(inp%confinement==2) then
-         write(message, '(3a)' )&
+       else
+         if (inp%bound_model/=0) then
+           write(message, '(3a)' )&
+&         'There is no MD file to bound the model ',ch10,&
+&         'Action: add MD file'
+           MSG_ERROR(message)           
+         else if(inp%confinement==2) then
+           write(message, '(3a)' )&
 &         'There is no MD file to compute the confinement',ch10,&
 &         'Action: add MD file'
-         MSG_ERROR(message)
+           MSG_ERROR(message)
+         end if
        end if
      end if
    end if
-
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
    call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
+
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+! stop
+!TEST_AM
 
 !Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
@@ -316,10 +348,7 @@ program multibinit
    end select
  end if
 
-!TEST_AM
-! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
-!TEST_AM
- 
+
 !Fit the coeff
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
@@ -327,7 +356,7 @@ program multibinit
      if (option==-1)then
 !      option == -1
 !      Print the file in the specific format for the script of carlos
-!      Born_Charges  
+!      Born_Charges
 !      Dielectric_Tensor
 !      harmonic.xml
 !      Reference_structure
@@ -339,9 +368,10 @@ program multibinit
      else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
-&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       initialize_data=inp%fit_initializeData==1,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&
@@ -359,8 +389,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%fit_bound>0.and.inp%fit_bound<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%fit_bound,comm,hist=hist)
+ if(inp%bound_model>0.and.inp%bound_model<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
  end if
 
 !****************************************************************************************
@@ -372,9 +402,10 @@ program multibinit
 !TEST_AM
 
 !****************************************************************************************
- 
+
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
+! TODO hexu: add print spin model.
  if(iam_master) then
    if (inp%prt_model >= 1) then
      write(message, '(a,(80a),a)' ) ch10,&
@@ -396,7 +427,7 @@ program multibinit
 ! Print the Phonon dos/spectrum
 ! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
-!&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
+!&           inp%ncell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
 !Intialisation of the effective potential type
@@ -410,26 +441,39 @@ program multibinit
 !      call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
 ! &                                           reference_effective_potential%supercell%natom_supercell,&
 ! &                                           int(reference_effective_potential%supercell%qphon),3)
- 
+
 !      ABI_DEALLOCATE(dynmat)
 !    end if
 ! end if
 !TEST_AM SECTION
 
 
-! Compute the monte carlo, molecular dynamics of compute specific energy 
+! Compute the monte carlo, molecular dynamics of compute specific energy
 !****************************************************************************************
  if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
  end if
+
+!****************************************************************************************    
+
+
+! Run spin dynamics
+!****************************************************************************************    
+ if(inp%spin_dynamics>0) then
+  ! TODO hexu: no mpi yet.
+   if(iam_master) then
+      call spin_model_t_run(spin_model)
+   endif
+ endif
 !****************************************************************************************    
 
 
 !Free the effective_potential and dataset
-!**************************************************************************************** 
+!****************************************************************************************
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
  call abihist_free(hist)
+ call spin_model_t_finalize(spin_model)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
@@ -479,13 +523,13 @@ program multibinit
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__multibinit")
- 
+
  call flush_unit(ab_out)
  call flush_unit(std_out)
 
  if (iam_master) close(ab_out)
 
  100 call xmpi_end()
- 
+
  end program multibinit
 !!***

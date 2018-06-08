@@ -26,6 +26,11 @@ module m_ab7_symmetry
   use defs_basis
   use m_profiling_abi
 
+  use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
+  use m_symfind,   only : symfind, symanal, symlatt
+  use m_geometry,  only : metric
+  use m_spgdata,   only : spgdata
+
   implicit none
 
   private
@@ -44,7 +49,7 @@ module m_ab7_symmetry
      real(dp) :: field(3)
 
      logical :: withJellium
- 
+
      integer :: nzchempot
 
      integer :: withSpin
@@ -393,7 +398,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_set_lattice'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in) :: id
@@ -765,7 +769,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_bravais'
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
@@ -833,7 +836,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_matrices'
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
@@ -883,7 +885,7 @@ contains
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
        call symfind(berryopt, sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, sym%bravSym, spinAt_, &
+            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
             & use_inversion, sym%xRed)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
@@ -1122,7 +1124,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_get_group'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in)            :: id
@@ -1172,8 +1173,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_equivalent_atoms'
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
@@ -1243,8 +1242,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_get_type'
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in)  :: id, iSym

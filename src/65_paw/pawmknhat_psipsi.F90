@@ -74,8 +74,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
  use defs_abitypes,    only : mpi_type
- use m_mpinfo,         only : set_mpi_enreg_fft,unset_mpi_enreg_fft
+ use m_mpinfo,         only : set_mpi_enreg_fft,unset_mpi_enreg_fft, initmpi_seq
  use m_lmn_indices,    only : klmn2ijlmn
  use m_pawang,         only : pawang_type
  use m_pawtab,         only : pawtab_type
@@ -83,6 +84,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  use m_pawcprj,        only : pawcprj_type
  use m_paw_finegrid,   only : pawgylm,pawexpiqr
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
+ use m_fft,            only : zerosym
  use m_distribfft,     only : distribfft_type, init_distribfft_seq, destroy_distribfft
 
 ! use m_lmn_indices,  only : klmn2ijlmn
@@ -91,8 +93,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat_psipsi'
- use interfaces_18_timing
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -131,7 +131,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),cpf(2),cpf_ql(2),tsec(2),ro(2),ro_ql(2),nhat12_atm(2,nfft,nspinor**2)
  real(dp),allocatable :: work(:,:), qijl(:,:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -153,7 +153,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  if (nspinor==2) then
    MSG_BUG('nspinor==2 not coded!')
  end if
- 
+
  compute_phonon=.false.;qeq0=.false.
  if (present(gprimd).and.present(qphon).and.present(xred)) compute_phonon=.true.
  if (compute_phonon) qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)

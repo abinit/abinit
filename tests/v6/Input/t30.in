@@ -18,6 +18,7 @@
   ionmov  2
  optcell  3
  dilatmx  1.40
+ chkdilatmx  0
   ecutsm  0.5
   getden  0
   getwfk  0

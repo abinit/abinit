@@ -2,6 +2,7 @@
 description: How to define frequency meshes (on the imaginary and real axes) for MBPT calculations
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to define frequency meshes (on the imaginary and real axes) 
 for MBPT calculations with the ABINIT package.

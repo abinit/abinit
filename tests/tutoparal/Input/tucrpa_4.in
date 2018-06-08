@@ -41,9 +41,9 @@ shiftk
 istwfk *1
 
 #For all the dataset
-nsym     0
+nsym     1
 icutcoul 6
-symchi   0
+#symchi   0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
@@ -89,7 +89,7 @@ tolwfr2   1.0d-18     # Will stop when this tolerance is achieved
 # == Compute Projected Wannier functions (as used in DMFT)
 usedmft2    1       # useful to compute Wannier functions.
 dmftbandi2 21       # Precise the definition of Wannier functions (also used for DMFT calculations)
-dmftbandf2 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+dmftbandf2 23       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
 #==================================================================================
 ############ THIRD DATASET:  Calculation of the screening (epsilon^-1 matrix)
@@ -106,7 +106,7 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
  nfreqim3   0
 
 # -- Ucrpa: screening
- ucrpa_bands3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
+ ucrpa_bands3  21 23  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
 
 # -- Parallelism
  gwpara3 1
@@ -133,4 +133,4 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
  mqgriddg4 300      # Reduced but fine at least for SrVO3
 
 # -- Parallelism
- gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
+ gwpara4 1        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2

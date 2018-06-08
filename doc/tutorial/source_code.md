@@ -44,9 +44,11 @@ files, and to comment the modifications and additions as much as possible, in
 order to facilitate the maintenance and the future modifications.
 
 A lot of information for the ABINIT developers can be found in the
-[developer's corner,](http://dev.abinit.org), especially, 
-[How to contribute](http://dev.abinit.org/doc/for-new-developers/how-to-contribute),
-and [Specificities](http://dev.abinit.org/doc/particulars),
+developer's corner of the [ABINIT wiki](https://wiki.abinit.org/doku.php), especially, 
+[an overview of ABINIT development](https://wiki.abinit.org/doku.php?id=developers:overview),
+[git(lab) specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit),
+[buildbot and the test farm](https://wiki.abinit.org/doku.php?id=bb:overview),
+as well as in [[https://docs.abinit.org/developers/abimkdocs|the ABINIT doc]].
 
 ## 2 Objectives
   
@@ -83,11 +85,9 @@ Once you have got the tarball, uncompress it by typing:
 
     tar xvzf abinit- _< version>_.tar.gz
 
-where _< version>_ is the version number you downloaded, e.g. "7.4.2". Then go
-into the newly-created _abinit- <version>_ directory and have a look at it. To
-get get more familiar with the source tree structure, have a closer look at
-the [Directories and files](http://dev.abinit.org/doc/for-adv-
-developers/source-tree) Web page. Then answer the following questions:
+where _< version>_ is the version number you downloaded, e.g. "8.6.3". Then go
+into the newly-created _abinit- <version>_ directory and have a look at it. 
+Then answer the following questions:
 
 Q1. If you need off-line documentation, in which directories will you look for?
 
@@ -194,8 +194,7 @@ R1. In _~abinit/doc/_ , of course.
 R2. In _~abinit/tests/_ , of course.
 
 R3. According to 
-[Directories and files](http://dev.abinit.org/doc/for-adv-developers/source-tree), 
-they correspond to a hierarchical structuring of the
+They correspond to a hierarchical structuring of the
 dependencies within ABINIT. The higher the level, the more the dependencies on lower levels.
 
 R4. They contain the list of source files to compile, and allow the developers
@@ -217,23 +216,20 @@ R8. The _~abinit/src/56_xc/drivexc.F90_ routine, for instance.
 R9. Look in _~abinit/src/14_hidewrite/wrtout.F90_ , the header contains
 detailed explanations.
 
-R10. You need to follow [ the Web documentation that describes how to add a
-new test](http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-
-the-test-suite)
+R10. You need to follow 
+[the wiki documentation that describes how to add a new test](https://wiki.abinit.org/doku.php?id=developers:addnewtest)
 
 R11. "-u -r -N".
 
-R12. Supposing that you have downloaded ABINIT 7.4.1, the following set of
+R12. Supposing that you have downloaded ABINIT 8.4.1, the following set of
 commands will do:
 
-  * `cd /path/to/my/source/dir/abinit-7.4.1`
+  * `cd /path/to/my/source/dir/abinit-8.4.1`
   * `make distclean`
   * `cd ..`
-  * `mv abinit-7.4.1 abinit-7.4.1-lesson`
-  * `tar xvzf /path/to/abinit/tarball/abinit-7.4.1.tar.gz`
-  * `mv abinit-7.4.1 abinit-7.4.1-orig`
-  * `diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson > abinit-7.4.1-lesson.patch`
-  * `gzip --best abinit-7.4.1-lesson.patch`
+  * `mv abinit-8.4.1 abinit-8.4.1-lesson`
+  * `tar xvzf /path/to/abinit/tarball/abinit-8.4.1.tar.gz`
+  * `mv abinit-8.4.1 abinit-8.4.1-orig`
+  * `diff -urN abinit-8.4.1-orig abinit-8.4.1-lesson > abinit-8.4.1-lesson.patch`
+  * `gzip --best abinit-8.4.1-lesson.patch`
 
-_Note: in case you are using Bazaar, you will have to exclude the '.bzr*'
-files from the diff by adding "` -x '.bzr*'`" to the other options._

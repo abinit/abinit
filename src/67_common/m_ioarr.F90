@@ -53,7 +53,8 @@ MODULE m_ioarr
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
  use m_fstrings,      only : sjoin, itoa, endswith
  use m_numeric_tools, only : interpolate_denpot
- use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
+ use m_geometry,      only : metric
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : init_distribfft_seq
 
  implicit none
@@ -142,7 +143,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 #undef ABI_FUNC
 #define ABI_FUNC 'ioarr'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1042,7 +1042,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 #undef ABI_FUNC
 #define ABI_FUNC 'read_rhor'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_65_paw
 !End of the abilint section
 

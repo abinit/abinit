@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_OurRng
 !! NAME
 !!  m_OurRng
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Random number generator module
 !!  Should be modify and merge with uniformrandom and zbq
 !!
@@ -30,6 +30,8 @@
 
 MODULE m_OurRng
 !! Implementation of various RNG with a small footprint
+
+ !use m_numeric_tools,  only : uniformrandom
 
 IMPLICIT NONE
 
@@ -88,11 +90,11 @@ SUBROUTINE OurRng(xn,rng)
   DOUBLE PRECISION, INTENT(  OUT) :: rng
   INTEGER(8), INTENT(INOUT) :: xn
   !
-  INTEGER(8) :: two31  ! 2 ** 31 
+  INTEGER(8) :: two31  ! 2 ** 31
   INTEGER(8) :: two31m ! 2 ** 31 -1
   INTEGER(8), PARAMETER :: mars   = 69069
   INTEGER(8) :: xn8
-  INTRINSIC MOD, REAL, IAND 
+  INTRINSIC MOD, REAL, IAND
 
   two31 = 1
   two31 = two31 * 65536   ! **16
