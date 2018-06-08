@@ -5,6 +5,7 @@ authors: XG, RC
 # First tutorial on DFPT:
 
 ## Dynamical and dielectric properties of AlAs
+<div class=text-justify>
 
 In this tutorial you will learn how to get the following physical properties (of an insulator) from density-functional perturbation theory (DFPT):
 
@@ -128,7 +129,7 @@ a DFPT calculation, we choose as a perturbation the displacement of the Al
 atom along the first axis of the reduced coordinates.
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_2.in in Work_rf1.
-This is your input file. You should edit it and briefly look at the two
+This is your input file. You should open it and briefly look at the two
 changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in:
 the change of [[xred]], and the reading of the wavefunction file, using the
 [[irdwfk]] input variable. 
@@ -286,7 +287,7 @@ in excellent agreement with the higher-order finite-difference values for the
 differences, and 5.007852 Hartree from the force differences.
 
 Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn_help file. 
-Then, you should also edit the trf1_3o_DDB file, and read the
+Then, you should also open the trf1_3o_DDB file, and read the
 corresponding [[help:respfn#ddb|section 6.5]] of the respfn_help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
@@ -297,7 +298,7 @@ DFPT approach calls for some accuracy considerations. These can be found in
   
 We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0). 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in
-Work_rf1. This is your input file. You should edit it. 
+Work_rf1. This is your input file.  
 
 As for test rf1_3, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
 all gathered in the first part of this file. Moreover, the changes with
@@ -311,7 +312,7 @@ So, one might think that the CPU time will raise accordingly.
 This is not true, as ABINIT is able to determine which perturbations are the symmetric of another perturbation, 
 see [[help:respfn#symmetries|section 3]] of the respfn_help file.
 
-Now, you can make the run. You edit the file trf1_4.out, and notice that the
+Now, you can make the run. You open the file trf1_4.out, and notice that the
 response to two perturbations were computed explicitly, while the response to
 the other four could be deduced from the two first by using the symmetries.
     
@@ -390,7 +391,7 @@ section of the present tutorial. The sections to be read are :
 You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
 including the coupling with an homogeneous electric field. 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_5.in in Work_rf1. 
-This is your input file. You should edit it. 
+This is your input file. 
 
 {% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
 
@@ -556,7 +557,7 @@ efficient than the real space frozen-phonon technique since the use of supercell
 completely avoided with DFPT. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_6.in in Work_rf1.
-This is your input file. You should edit it. 
+This is your input file.
 
 {% dialog tests/tutorespfn/Input/trf1_6.in tests/tutorespfn/Refs/trf1_6.out %}
 
@@ -589,3 +590,4 @@ close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
     This ABINIT tutorial is now finished. 
     You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
 
+</div>
