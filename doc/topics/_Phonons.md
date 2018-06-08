@@ -52,7 +52,7 @@ computation of full phonon bands.
 
     More than 1500 phonon band structures for insulators, computed with ABINIT, are now available 
     on the [Materials Project web site](https://materialsproject.org), accompanied with derived 
-    thermodynamic quantities, Born effective charges, and dielectric tensor [[cite:Petretto2018]].
+    thermodynamic quantities, Born effective charges, and dielectric tensor [[cite:Petretto2018a]].
     The DDB file can be downloaded automatically with |AbiPy| starting from the materials project
     identifier. For futher information, please consult the |DdbFileNb|.
 

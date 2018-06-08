@@ -91,7 +91,7 @@ performing convergence tests in the Bethe-Salpeter part.
 
 Note that, for efficiency reasons, only the static limit of W is computed:
     
-    nfreqre4  1     # Only the static limit of W is needed for standard BSE calculations.
+    nfreqre4  1   # Only the static limit of W is needed for standard BSE calculations.
     nfreqim4  0
 
 Indeed, in the standard formulation of the Bethe-Salpeter equation, only the
@@ -426,7 +426,7 @@ is already able to capture the most important physics.
 !!! tip
 
     If |AbiPy| in installed on your machine, you can use the |abiopen| script
-    with the `--expose` option to visualize the dielectric function stored in the MDF.nc file:
+    with the `--expose` option to visualize the dielectric functions stored in the MDF.nc file:
 
         abiopen.py tbs_2o_MDF.nc --expose --seaborn
 
