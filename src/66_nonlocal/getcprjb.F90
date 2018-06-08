@@ -187,7 +187,7 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
        end do ! end loop on ll
        
        cwaveprj(iatom,ispinor)%cp(1,ilmn) = real(cpc)            
-       cwaveprj(iatom,ispinor)%cp(2,ilmn) = imag(cpc)
+       cwaveprj(iatom,ispinor)%cp(2,ilmn) = aimag(cpc)
 
     end do ! end loop on ilmn
     
