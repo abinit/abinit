@@ -13,21 +13,28 @@ electrons placed in a repeated cell can be done using (1) plane waves and
 norm-conserving pseudopotentials, or, (2) so-called "Projector-Augmented
 Waves" (PAW method), with appropriate pseudoatomic data, or (3) wavelets. The
 wavelet framework is described [[topic:Wavelets|here]].  
+
 In the plane wave framework, the program admits many different types of
 pseudopotentials. There are several complete sets of norm-conserving
-pseudopotentials available for most elements of the periodic table. The
-recommended one (GGA) comes from the ONCVPSP generator (with spin-orbit
-coupling). For PAW calculation,the recommended one (GGA and LDA) is the JTH
-table in the PAW XML format. The choice between norm-conserving
+pseudopotentials available for most elements of the periodic table. 
+
+The recommended tables (GGA-PBE, GGA-PBEsol and LDA) come from the |pseudodojo| project 
+with ONCVPSP pseudopotentials ([[cite:Hamann2013]]) 
+both in scalar-relativistic format and fully-relativistic version with spin-orbit coupling. 
+For PAW calculation,the recommended one (GGA-PBE and LDA) is the JTH
+table in the PAW XML format (([cite:Jollet2014]]). 
+
+The choice between norm-conserving
 pseudopotentials or PAW is deduced automatically by the choice of the
 pseudopotential in the "files" file. An input file must specify the following
-items: the [[topic:crystal|crystalline structure and symmetries]]. the set of
-[[topic:k-points|k-points]] used. the [[topic:xc|exchange and correlation
-functional]]. the convergency settings. possibly [[topic:PAW|PAW]] special
-settings. possibly, input variables for [[topic:spinpolarisation|spin-
-polarized systems and spin orbit coupling]] calculations.
+items: 
 
-
+* the [[topic:crystal|crystalline structure and symmetries]]
+* the set of [[topic:k-points|k-points]] used
+* the [[topic:xc|exchange and correlation functional]]
+* the convergence settings
+* possibly [[topic:PAW|PAW]] special settings
+* possibly, input variables for [[topic:spinpolarisation|spin-polarized systems and spin orbit coupling]] calculations.
 
 ## Related Input Variables
 

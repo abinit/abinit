@@ -388,7 +388,7 @@ Could you answer the following questions?
 
 ## Computation of the interatomic distance (method 1)
   
-Starting from now, everytime a new input variable is mentioned, 
+Starting from now, every time a new input variable is mentioned, 
 you should read the corresponding descriptive section in the ABINIT help file.
 
 We will now complete the description of the meaning of each term: there are
