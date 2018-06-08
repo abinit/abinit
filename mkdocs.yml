@@ -314,6 +314,9 @@ extra:
         abistruct: "[abistruct](http://abinit.github.io/abipy/scripts/abistruct.html)"
         abiopen: "[abiopen](http://abinit.github.io/abipy/scripts/abiopen.html)"
         abicomp: "[abicomp](http://abinit.github.io/abipy/scripts/abicomp.html)"
+        abiview: "[abiview](http://abinit.github.io/abipy/scripts/abiview.html)"
+        abirun: "[abirun](http://abinit.github.io/abipy/scripts/abirun.html)"
+        abidoc: "[abidoc](http://abinit.github.io/abipy/scripts/abidoc.html)"
         # Links to abitutorials jupyter notebooks served at 
         # https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/index.ipynb?flush_cache=true
         AbipyStructureNb: "[AbiPy structure notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/structure.ipynb)"
@@ -332,9 +335,7 @@ extra:
         pseudodojo: "[pseudo-dojo](http://www.pseudo-dojo.org/)"
         pymatgen: "[pymatgen](http://www.pymatgen.org)"
         #fireworks: https://materialsproject.github.io/fireworks/
-        #mongodb: https://www.mongodb.com/
-        #mongoengine: http://mongoengine.org/
-        #`materials project`: https://materialsproject.org/
+        materials_project: "[materials project](https://materialsproject.org/)"
         #conda: https://conda.io/docs/
         #Anaconda: https://continuum.io/downloads
         #matsci: http://materials.sh/
@@ -342,12 +343,12 @@ extra:
         #pip: https://pypi.python.org/pypi/pip
         #ipython: https://ipython.org/index.html
         #jupyter: http://jupyter.org/
-        #Python: http://www.python.org/
+        Python: "[Python](http://www.python.org/)"
         #spglib: https://atztogo.github.io/spglib/
         #bader: http://theory.cm.utexas.edu/henkelman/code/bader/
         #ase: https://wiki.fysik.dtu.dk/ase/
         #COD: http://www.crystallography.net/cod/
-        #CIF: http://www.iucr.org/resources/cif
+        CIF: "[CIF](http://www.iucr.org/resources/cif)"
         vesta: "[vesta](http://jp-minerals.org/vesta/en/)"
         xcrysden: "[xcrysden](http://www.xcrysden.org/)"
         xmgrace: "[xmgrace](http://plasma-gate.weizmann.ac.il/Grace/)"
@@ -355,8 +356,8 @@ extra:
         ovito: "[ovito](https://ovito.org/)"
         v_sim: "[v_sim](http://inac.cea.fr/L_Sim/V_Sim/)"
         avogadro: "[avogadro](https://avogadro.cc/)"
-        #phononwebsite: http://henriquemiranda.github.io/phononwebsite/
-        #phonopy: https://atztogo.github.io/phonopy/
+        phononwebsite: "[phononwebsite](http://henriquemiranda.github.io/phononwebsite/)"
+        phonopy: "[phonopy](https://atztogo.github.io/phonopy/)"
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON

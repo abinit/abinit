@@ -326,6 +326,91 @@ Of course, one should make a convergence study, on the k and q point grids
 ... But this is left to the user ! You can have a look at the paper [[cite:Petretto2018]]
 for a careful analysis of phonon dispersion convergence with Abinit.
 
+### Plotting phonon bands with AbiPy
+
+If |AbiPy| in installed on your machine, you can use the |abiopen| script
+with the `--expose` option to visualize the phonon band structure stored in the PHBST.nc file.
+For instance:
+
+```sh
+abiopen.py trf2_5.out_PHBST.nc --expose --seaborn=talk
+```
+
+produces the following plot without LO-TO splitting:
+
+![](rf2_assets/abiopen_trf2_5_PHBST.png)
+:   (left) Phonon bands without LO-TO splitting
+    (right) Plot with band connection estimated from the overlap of the eigenvectors at adjacent q-points
+
+Alternatively, we can start from the DDB file and use the |abiview| script. 
+In this case, AbiPy will generate the anaddb input file
+with all the variables required to handle the plotting of the LO-TO splitting, 
+invoke anaddb for us and finally plot the results.
+All of this with just two lines:
+
+```sh
+# Copy the tutorial output file to have the correct file extension (DDB)
+# otherwise abiview does not know how to handle our file.
+cp trf2_3.ddb.out trf2_3_DDB  
+
+abiview.py ddb trf2_3_DDB -sns=talk
+```
+
+![](rf2_assets/abiview_ddb_trf2_3_DDB.png)
+
+We can also compare our results with the phonon band structure available on the |materials_project|.
+
+First of all, let's find the materials project identifier associated to this particular phase of AlAs.
+Of course, one could use the materials project web interface but we can also do it 
+from the shell by just passing our Abinit input file to the |abistruct| script:
+
+```shell
+abistruct.py mp_match trf2_1.in
+
+# Found 1 structures in Materials Project database (use `verbose` to get further info)
+
+######################### abivars input for mp-2172 #########################
+# Full Formula (Al1 As1)
+# Reduced Formula: AlAs
+# abc   :   4.054377   4.054377   4.054377
+# angles:  60.000000  60.000000  60.000000
+#
+# Spglib space group info (magnetic symmetries are not taken into account).
+# Spacegroup: F-43m (216), Hall: F -4 2 3, Abinit spg_number: None
+# Crystal_system: cubic, Lattice_type: cubic, Point_group: -43m
+#
+#   Idx  Symbol    Reduced_Coords              Wyck      EqIdx
+# -----  --------  --------------------------  ------  -------
+#     0  Al        +0.00000 +0.00000 +0.00000  a             0
+#     1  As        +0.25000 +0.25000 +0.25000  d             1
+
+ natom 2
+ ntypat 2
+ typat 1 2
+ znucl 13 33
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.2500000000    0.2500000000    0.2500000000
+ acell    1.0    1.0    1.0
+ rprim
+    6.6351943530    0.0000000000    3.8308312587
+    2.2117314510    6.2557212277    3.8308312587
+    0.0000000000    0.0000000000    7.6616624984
+```
+
+AbiPy found one entry in the MP database that matches the structure given in our input file
+and has generated the corresponding input file.
+Now we know that this phase of AlAs corresponds to `mp-2172` and we can 
+look at the phonon band structure computed by [[cite:Petretto2018a]] at
+<https://materialsproject.org/materials/mp-2172/>
+
+!!! tip
+
+    For further information on the AbiPy API, please consult the |DdbFileNb| .
+    To learn how to automate DFPT calculations with Python, see 
+    [this jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/dfpt/lesson_dfpt.ipynb).
+
+
 ## 6 Thermodynamical properties
   
 We will give only a very short example of the use of ANADDB to compute
