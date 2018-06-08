@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# First lesson on DFPT  
+# First tutorial on DFPT:
 
-## Dynamical and dielectric properties of AlAs.  
+## Dynamical and dielectric properties of AlAs
 
-This lesson aims at showing how to get the following physical properties, for an insulator:
+In this tutorial you will learn how to get the following physical properties (of an insulator) from density-functional perturbation theory (DFPT):
 
   * the phonon frequencies and eigenvectors at Gamma 
   * the dielectric constant 
@@ -14,10 +14,11 @@ This lesson aims at showing how to get the following physical properties, for an
   * the LO-TO splitting 
   * the phonon frequencies and eigenvectors at other q-points in the Brillouin Zone 
 
-You will learn to use of density-functional perturbation theory (DFPT) features of ABINIT. 
-In order to learn the use of the associated codes Mrgddb
-and Anaddb, to produce efficiently phonon band structures and the associated
-thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2 (labelled RF2)]]
+!!! seealso
+
+    In order to learn the use of the associated codes Mrgddb and Anaddb, 
+    to produce phonon band structures and the associated
+    thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2]]
 
 This lesson should take about 2 hours.
 
@@ -41,9 +42,8 @@ You can copy it in the Work_rf1 directory and, as usual, change its name to trf1
 and replace the occurences of trf1_x by trf1_1. 
 Note that two pseudopotentials are mentioned in this "files" file: one
 for the Aluminum atom, and one for the Arsenic atom. 
-The first to be mentioned, for Al, will define the first type of atom. 
-The second to be mentioned, for As, will define the second type of atom. 
-It might the first time that you encounter this situation (more than one type of atoms) in the
+The first listed in trf1_x.files (for Al) will define the first type of atom of the input file (see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
+It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the four "basic" lessons.
 
 You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in Work_rf1. 
@@ -54,37 +54,36 @@ This is your input file. You should read it carefully.
 
 {% dialog tests/tutorespfn/Input/trf1_1.in %}
 
-It drives a single self-consistent calculation of the total energy of AlAs, also generating the corresponding
-self-consistent charge density and wavefunctions, that will be used for later DFPT calculations.
-Because of the use of two types of atoms, have a look at the following input variables:
-
-* [[ntypat]] 
-* [[typat]] 
+It drives a single self-consistent calculation of the total energy of AlAs to generate the corresponding
+self-consistent charge density and wavefunctions, that will be used for the DFPT calculations.
 
 Note that the value of [[tolvrs]] is rather stringent. 
 This is because the wavefunctions determined by the present run will be used later as starting
 point of the DFPT calculation. 
 However, the number of steps, [[nstep]], in this example file has been set to 15, and 
 you will see that this is not enough to reach the target [[tolvrs]]. 
-In production runs, you should choose a larger value of [[nstep]], sufficient  to reach your target [[tolvrs]]. 
+In production runs, you should choose a large enough value of [[nstep]] to reach your [[tolvrs]] target. 
 In the present tutorial, due to portability concerns related to automatic testing, we could
 not allow a larger [[nstep]] value. 
 This minor problem with some tutorial examples was mentioned briefly in 
 a side note to the answer to question 1 of lesson 1 - just before [this section](base1#computation-of-the-interatomic-distance-method-1). 
-So, do not follow blindly all examples in the tutorials: check by yourself the convergence of your runs!
+
+!!! danger 
+
+    Do not follow blindly all examples of the tutorials: always check the convergence of your calculations while in production!
 
 You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid). 
-It is implicit that in *real life*, you should do a convergence test with respect to both parameters. 
+In *real life* you should do a convergence test with respect to both parameters. 
 We postpone the discussion of the accuracy of these choices and
 the choice of pseudopotential to the end of the [fifth section of this tutorial](#5-dfpt-calculation-of-the-effect-of-an-homogeneous-electric-field). 
-They give acceptable results, not very accurate, but, more important, the speed is reasonable for a tutorial.  
+They give acceptable but not very accurate results such that the running time is reasonable for a tutorial.  
 
-You should make the run (a few seconds). 
+You should make the run (a few seconds):
 
     ./abinit < trf1_1.files > trf1_1.stdout
 
 where ./abinit has to be replaced by the path to the abinit executable.
-The resulting main output file, trf1_1.out, should be similar to the one below.
+The resulting main output file, trf1_1.out, should be similar to the one below:
 
 {% dialog tests/tutorespfn/Refs/trf1_1.out %}
 
@@ -104,19 +103,19 @@ The output file also mentions that the forces on both atoms vanish.
 The run that you just made will be considered as defining a ground-state
 configuration, on top of which responses to perturbations will be computed.
 The main output of this ground-state run is the wavefunction file trf1_1o_WFK,
-that you can already rename as trf1_1i_WFK. Indeed, it will be used in the
-next runs, as an input file. 
+that you can already rename as trf1_1i_WFK to use it as input wave function for the
+next runs. 
 
 !!! warning
 
     So, in the corresponding "files" file for all the following runs, at third line, 
     pay attention **to keep** "trf1_1i". By contrast, for the second run, you 
-    should change the first line from "trf1_1"  
-    to "trf1_2", and do similarly for the second, fourth and fifth lines of this file.
+    should change the first line from "trf1_1" to "trf1_2", and do similarly for the second, 
+    fourth and fifth lines of this file.
 
 ## 2 Frozen-phonon calculation of a second derivative of the total energy
 
-We will now aim at computing the second derivative of the total energy with
+We will now compute the second derivative of the total energy with
 respect to an atomic displacement by different means. 
 For that purpose,  you must first read 
 [[help:respfn#intro|sections 0 and the first paragraph of section 1]]
@@ -152,22 +151,22 @@ reduced coordinate (dt):
         >>>>>>>>> Etotal= -9.76268124105767E+00
 
 The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
-rather small (1/1000), and we can make an estimate of the second derivative of
+rather small (1/1000=0.001), and we can make an estimate of the second derivative of
 the total energy with respect to the reduced coordinate thanks to finite-difference formulas.
 
 We start first from the total-energy difference. 
 The total energy is symmetric with respect to that perturbation, so that it has no linear term. 
-The difference between the ground-state value (-9.76268374500280E+00 hartree) of
-the previous run, and the perturbed value (-9.76268124105767E+00 hartree) of
+The difference between the ground-state value (-9.76268374500280E+00 Hartree) of
+the previous run, and the perturbed value (-9.76268124105767E+00 Hartree) of
 the present one, is thus one half of the square of the coordinate change
-(1/1000) times the second derivative of total energy (2DTE). 
-From these number, the 2DTE is 5.0078902589 hartree.
+(0.001) times the second derivative of total energy (2DTE). 
+From these number, the 2DTE is 5.0078902589 Hartree.
 
 Alternatively, we can start from the reduced gradients. The value of the
 reduced gradient with respect to a displacement of the Al atom along the first
-reduced axis is 0.005007937776 (hartree). At first order, this quantity is the
+reduced axis is 0.005007937776 (Hartree). At first order, this quantity is the
 product of the 2DTE by the reduced coordinate difference. The estimate of the
-2DTE is thus 5.007937776 hartree. The agreement with the other estimate is
+2DTE is thus 5.007937776 Hartree. The agreement with the other estimate is
 rather good (4.10^-5 Hartree).
 
 However, it is possible to do much better, thanks to the use of a higher-order finite-difference formula. 
@@ -183,8 +182,8 @@ calculation are as follows:
      ...
 
 From these data, taking into account that the perturbation was twice stronger,
-the same procedure as above leads to the values 5.00800219 hartree (from
-finite difference of energy) and 5.008153784 hartree (from finite difference
+the same procedure as above leads to the values 5.00800219 Hartree (from
+finite difference of energy) and 5.008153784 Hartree (from finite difference
 of forces, the value 0.010016307568 has to be multiplied by 1000/2). The
 combination of these data with the previous estimate can be done thanks to an
 higher-order finite-difference formula, in which the difference of estimations
@@ -193,8 +192,8 @@ then subtracted from the smallest estimation.
 
 As far as the total-energy
 estimation is concerned, the difference is 0.00011194 Ha, which divided by
-three, and subtracted from 5.00789025 hartree, gives 5.00785294 hartree. The
-same higher-order procedure for force estimates gives 5.0078657 hartree. So,
+three and subtracted from 5.00789025 Hartree, gives 5.00785294 Hartree. The
+same higher-order procedure for force estimates gives 5.0078657 Hartree. So,
 the agreement between total-energy estimate and force estimate of the 2DTE can
 be observed up to the 6th digit, inclusive.
 
@@ -207,7 +206,7 @@ but non-negligible difference between the two atoms. As an example, for the
 doubled perturbation, there is a difference in the absolute values of the
 first component of the reduced force, 0.010016307568 and -0.010016187598.
 Actually, the forces should cancel each other exactly if the translation
-symmetry were perfect. This is not the case, but the breaking of this symmetry
+symmetry is perfect. This is not the case, but the breaking of this symmetry
 can be shown to arise **only** from the presence of the exchange-correlation
 grid of points. This grid does not move when atoms are displaced, and so there
 is a very small variation of the total energy when the system is moved as a
@@ -221,16 +220,16 @@ output file for the small displacement:
         1     -0.00001684560079    -0.00094403841497    -0.00094403841497
         2      0.00001684560079     0.00094403841497     0.00094403841497
     
-This effect will be seen also at the level of 2DTE. The so-called "acoustic
-sum rule", imposing that the frequency of three modes (called acoustic modes)
+This effect will be seen also at the level of 2DTE. The so-called *acoustic
+sum rule*, which imposes that the frequency of three modes (called acoustic modes)
 tends to zero with vanishing wavevector, will also be slightly broken. In this
-case also, it will be rather easy to reimpose the acoustic sum rule. In any
+case, it will also be rather easy to reimpose the acoustic sum rule. In any
 case, taking a finer XC grid will allow one to reduce this effect.
 
 ## 3 DFPT calculation of a second derivative of the total energy
   
 We now compute the second derivative of the total energy with respect to the
-same atomic displacement, using the DFPT capabilities of ABINIT.
+same atomic displacement through the DFPT capabilities of ABINIT.
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_3.in in Work_rf1.
 This is your input file. You should examine it. The changes with respect to
@@ -283,8 +282,8 @@ for the minimisation (with respect to the unique perturbation) take place:
 
 From these data, you can see that the 2DTE determined by the DFPT technique is
 in excellent agreement with the higher-order finite-difference values for the
-2DTE, determined in the previous section: 5.007855 hartree from the energy
-differences, and 5.007852 hartree from the force differences.
+2DTE, determined in the previous section: 5.007855 Hartree from the energy
+differences, and 5.007852 Hartree from the force differences.
 
 Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn_help file. 
 Then, you should also edit the trf1_3o_DDB file, and read the
@@ -296,7 +295,7 @@ DFPT approach calls for some accuracy considerations. These can be found in
 
 ## 4 DFPT calculation of the dynamical matrix at Gamma
   
-We are now in the position to compute the full dynamical matrix at $\Gamma$ (q=0). 
+We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0). 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in
 Work_rf1. This is your input file. You should edit it. 
 
@@ -314,7 +313,7 @@ see [[help:respfn#symmetries|section 3]] of the respfn_help file.
 
 Now, you can make the run. You edit the file trf1_4.out, and notice that the
 response to two perturbations were computed explicitly, while the response to
-the other four could be deduced by using the symmetries.
+the other four could be deduced from the two first by using the symmetries.
     
      The list of irreducible perturbations for this q vector is:
         1)    idir= 1    ipert=   1
@@ -337,15 +336,15 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
 !!! tip
 
     You might wonder about the dash sign present in the first column of the two
-    lines giving the frequencies in $cm^{-1}$. The first column of the main ABINIT
+    lines giving the frequencies in cm$^{-1}$. The first column of the main ABINIT
     output files is always dedicated to signs needed to automatically treat the
-    comparison with respect to reference files. Except if you become a ABINIT
+    comparison with respect to reference files. Except if you become an ABINIT
     developer, you should ignore these signs. In the present case, they should not
     be interpreted as a minus sign for the floating numbers that follow them... 
 
-There is a good news about this result, and a bad news. The good news is that
+There are a good and a bad news about this result. The good news is that
 there are indeed three acoustic modes, with frequency rather close to zero
-(less than 1 cm^-1, which is rather good !). The bad news comes when the three
+(less than 1 cm$^{-1}$, which is rather good !). The bad news comes when the three
 other frequencies are compared with experimental results, or other theoretical
 results. Indeed, in the present run, one obtains three degenerate modes, while
 there should be a (2+1) splitting. This can be seen in the paper  Ab initio
@@ -377,16 +376,16 @@ more detailed information about this perturbation, closely related to the ABINIT
 There is also an extensive discussion of the Born
 effective charges by [[cite:Ghosez1998]].
 
-In order to compute the response of solids to an homogeneous electric field,
-as implemented in ABINIT, the remaining sections of the respfn_help file
+In order to compute the response of solids to an homogeneous electric field in ABINIT, 
+the remaining sections of the respfn_help file
 should be read. These sections also present the information needed to compute
 phonons with non-zero q wavevector, which will be the subject of the next
 section of the present tutorial. The sections to be read are :
 
   * the part of [[help:respfn#1|section 1]] that had not yet been read 
   * [[help:respfn#2|section 2]] 
-  * [[help:respfn#2|section 4]] 
-  * and, for completeness, [[help:respfn#2|section 5]]
+  * [[help:respfn#4|section 4]] 
+  * and, for completeness, [[help:respfn#5|section 5]]
 
 You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
 including the coupling with an homogeneous electric field. 
@@ -395,7 +394,7 @@ This is your input file. You should edit it.
 
 {% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
 
-As for the other RF tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered
+As for the other DFPT tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered
 in the first part of this file. 
 Unlike the other tests, however, the multi-dataset mode was used, computing from scratch 
 the ground-state properties, then computing the effect of the ddk perturbation, then the effect of all
@@ -519,32 +518,31 @@ The first few lines discard any effect of the homogeneous electric field,
 while the next sections consider it along the three cartesian coordinates.
 
 In the present material, the directionality of the electric field has no
-influence. We note that there are still three acoustic mode, below 1$cm^{-1}$,
-while the optic modes have the correct degeneracies: two TO modes at 344.3
-$cm^{-1}$, and one LO mode at 379.6 $cm^{-1}$.
+influence. We note that there are still three acoustic mode, below 1 cm$^{-1}$,
+while the optic modes have the correct degeneracies: two TO modes at 344.3 
+cm$^{-1}$, and one LO mode at 379.6 cm$^{-1}$.
 
-These values can be compared to experimental (361 $cm^{-1}$, 402 $cm^{-1}$) as well
-as theoretical (363 $cm^{-1}$, 400 $cm^{-1}$) values (again [[cite:Giannozzi1991]]). 
+These values can be compared to experimental (361 cm$^{-1}$, 402 cm$^{-1}$) as well
+as theoretical (363 cm$^{-1}$, 400 cm$^{-1}$) values (again [[cite:Giannozzi1991]]). 
 Most of the discrepancy comes from the too low value of
-[[ecut]]. Using ABINIT with [[ecut]]=6 hartree gives (358.8 $cm^{-1}$, 389.8 $cm^{-1}$). 
+[[ecut]]. Using ABINIT with [[ecut]]=6 Hartree gives (358.8 cm$^{-1}$, 389.8 cm$^{-1}$). 
 The remaining of the discrepancy may come partly from the
 pseudopotentials, that are particularly soft.
 
 The comparison of Born effective charges is also interesting. After imposition
-of the neutrality sum rule, the Al Born effective charge is 2.116 . The value
+of the neutrality sum rule, the Al Born effective charge is 2.116. The value
 from Gianozzi et al is 2.17, the experimental value is 2.18. 
-Increasing [[ecut]] to 6 hartree in ABINIT gives 2.168.
+Increasing [[ecut]] to 6 Hartree in ABINIT gives 2.168.
 
 For the dielectric tensor, it is more delicate. The value from Gianozzi et al
 is 9.2, while the experimental value is 8.2 . The agreement is not very good,
 a fact that can be attributed to the LDA lack of polarization-dependence [[cite:Gonze1995a]].
-Still, the agreement
-of our calculation with the theoretical result is not very good. With
-[[ecut]]=3 hartree, we have 9.76. Changing it to 6 hartree gives 10.40 . A
-better k point sampling (8x8x8), with [[ecut]]=6 hartree, reduces the value to
+Still, the agreement of our calculation with the theoretical result is not very good. With
+[[ecut]]=3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
+better k point sampling (8x8x8), with [[ecut]]=6 Hartree, reduces the value to
 9.89 . Changing pseudopotentials finally improves the agreement : with the
 much harder 13al.pspgth and 33as.psphgh pseudopotentials with adequate
-[[ecut]]=16 hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of
+[[ecut]]=16 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of
 9.37 . This illustrates that the dielectric tensor is a much more sensitive
 quantity than the others.
 
@@ -553,9 +551,9 @@ quantity than the others.
 The computation of phonon frequencies at non-zero q is actually simpler than the one at Gamma. 
 One must distinguish two cases. Either the q wavevector connects k points that belong 
 to the same grid, or the wavevector q is general. 
-In any case, the computation within the DFPT formalism is more
-efficient than using the frozen-phonon technique: the use of supercell is
-completely avoided. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
+In any case, the computation within the reciprocal space DFPT formalism is more
+efficient than the real space frozen-phonon technique since the use of supercells is
+completely avoided with DFPT. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_6.in in Work_rf1.
 This is your input file. You should edit it. 
@@ -564,27 +562,30 @@ This is your input file. You should edit it.
 
 As for the other RF tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
 all gathered in the first part of this file. 
-The multi-dataset mode is used, computing from scratch the ground-state properties, then computing different
-dynamical matrices. 
+The multi-dataset mode is used, computing from scratch the ground-state wave functions, then computing different
+dynamical matrices with DFPT. 
 The run is about 2 minutes on a 2.8 GHz machine. 
 So, you would better leave your computer running, and either read more of the ABINIT documentation 
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]), or make a walk).
 
-The results of this simulation can be compared to those provided in the Gianozzi et al paper. 
+The results of this simulation can be compared to those provided in the Gianozzi *et al* paper. 
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
 
-At X, they get 95$cm^{-1}$, 216$cm^{-1}$, 337$cm^{-1}$ and 393$cm^{-1}$, while we get
-92.5$cm^{-1}$, 204.6$cm^{-1}$, 313.9$cm^{-1}$ and 375.9$cm^{-1}$. 
-With [[ecut]]=6 hartree, we get 89.7$cm^{-1}$, 212.3$cm^{-1}$, 328.5$cm^{-1}$ and 385.8$cm^{-1}$.
+At X, they get 95 cm$^{-1}$, 216 cm$^{-1}$, 337 cm$^{-1}$ and 393 cm$^{-1}$, while we get
+92.5 cm$^{-1}$, 204.6 cm$^{-1}$, 313.9 cm$^{-1}$ and 375.9 cm$^{-1}$. 
+With [[ecut]]=6 Hartree, we get 89.7 cm$^{-1}$, 212.3 cm$^{-1}$, 328.5 cm$^{-1}$ and 385.8 cm$^{-1}$.
 
-At L, they get 71$cm^{-1}$, 212$cm^{-1}$, 352$cm^{-1}$ and 372$cm^{-1}$, while we get
-69.0$cm^{-1}$, 202.5$cm^{-1}$, 332.6$cm^{-1}$ and 352.3$cm^{-1}$. With [[ecut]]=6 hartree, we
-get 68.1$cm^{-1}$, 208.5$cm^{-1}$, 346.7$cm^{-1}$ and 362.6$cm^{-1}$.
+At L, they get 71 cm$^{-1}$, 212 cm$^{-1}$, 352 cm$^{-1}$ and 372 cm$^{-1}$, while we get
+69.0 cm$^{-1}$, 202.5 cm$^{-1}$, 332.6 cm$^{-1}$ and 352.3 cm$^{-1}$. With [[ecut]]=6 Hartree, we
+get 68.1 cm$^{-1}$, 208.5 cm$^{-1}$, 346.7 cm$^{-1}$ and 362.6 cm$^{-1}$.
 
-At q=(0.1 0 0), we get 31.6$cm^{-1}$, 63.6$cm^{-1}$, 342.0$cm^{-1}$ and 379.7$cm^{-1}$. The
+At q=(0.1 0 0), we get 31.6 cm$^{-1}$, 63.6 cm$^{-1}$, 342.0 cm$^{-1}$ and 379.7 cm$^{-1}$. The
 acoustic modes tends (nearly-)linearly to zero, while the optic modes are
-close to their values at Gamma : 344.3 $cm^{-1}$ and 379.6 $cm^{-1}$.
+close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 * * *
 
-This ABINIT tutorial is now finished. You are advised to read now the [[lesson:rf2|second tutorial on DFPT]]
+!!! note 
+    This ABINIT tutorial is now finished. 
+    You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
+
