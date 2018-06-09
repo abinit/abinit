@@ -2,7 +2,7 @@
 authors: XG, RC
 ---
 
-# First tutorial on DFPT:
+# First tutorial on DFPT
 
 ## Dynamical and dielectric properties of AlAs
 <div class=text-justify>
@@ -293,6 +293,15 @@ corresponding [[help:respfn#ddb|section 6.5]] of the respfn_help file.
 Finally, the excellent agreement between the finite-difference formula and the
 DFPT approach calls for some accuracy considerations. These can be found in 
 [[help:respfn#numerical-quality|section 7]] of the respfn_help file.
+
+!!! tip
+
+    With |AbiPy|, one can easily visualize the convergence of the DFPT cycle with the |abiopen| script
+    and the syntax:
+
+        abiopen.py trf1_3.out --expose -sns=talk
+
+    ![](rf1_assets/abiopen_trf1_3.out.png)
 
 ## 4 DFPT calculation of the dynamical matrix at Gamma
   
