@@ -20,6 +20,7 @@ variables/gw.md
 variables/internal.md
 variables/paral.md
 variables/paw.md
+variables/respfn.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
@@ -48,7 +49,7 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffMass.md
+topics/EffectiveMass.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md
