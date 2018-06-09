@@ -882,8 +882,8 @@ contains
  dprarr(1,:)=dtsets(:)%slabzend
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slabzend','DPR',0)
 
- dprarr(1,:)=dtsets(:)%smdelta
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
+ intarr(1,:)=dtsets(:)%smdelta
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
 
  do idtset=0,ndtset_alloc
    intarr(1:npsp,idtset)=dtsets(idtset)%so_psp(1:npsp)

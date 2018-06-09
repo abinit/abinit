@@ -71,7 +71,7 @@ and [[shiftk]], chosen for the calculations.
 
 Unfortunately, for the purpose of this tutorial, in order to limit the duration of the runs, 
 we have to work at an unusually low cutoff of 2.8 Ha for which the optimized lattice constant is
-equal to 7.45*0.707*2 Bohr=10.53 Bohr (instead of the converged value of 10.64
+equal to $7.45\times 2/\sqrt{2}=10.53~\mathrm{Bohr}$ (instead of the converged value of 10.64
 Bohr). For comparison, results with [[ecut]]=5 are also reported and, in that
 case, were obtained at the optimized lattice constant of 10.64 bohr. For those
 who would like to try later, convergence tests and structural optimizations
@@ -94,7 +94,7 @@ contains refer to tffield_1 rather than tffield_x).
 {% dialog tests/tutorespfn/Input/tffield_x.files tests/tutorespfn/Input/tffield_1.in %}
 
 Note that two pseudopotentials are mentioned in this "files" file: one for the
-Aluminum atom, and one for the Arsenic atom. The first to be mentioned, for
+aluminum atom, and one for the arsenic atom. The first to be mentioned, for
 Al, will define the first type of atom. The second to be mentioned, for As,
 will define the second type of atom. It might the first time that you
 encounter this situation (more than one type of atoms) in the tutorials, at
@@ -106,11 +106,11 @@ input variables present, in the "input" file:
   * [[ntypat]] 
   * [[typat]] 
 
-You can start the calculation. It should take 90 seconds on a PC 3GHz. Then,
-examine the tffield_1.in file. It is made of three datasets corresponding to
-the reference optimized structure (tau=0) and to structure with the Al atom
-displaced from 0.01 bohr right and left (referred to as tau = +0.01 and tau =
--0.01). This is typically the amplitude of atomic displacement to be
+You can start the calculation. It should take 90 seconds on a PC 3GHz. 
+Examine the tffield_1.in file. It is made of three datasets corresponding to
+the reference optimized structure ($\tau=0$) and to structure with the Al atom
+displaced from 0.01 bohr right and left (referred to as $\tau = +0.01$ and
+$\tau =-0.01$). This is typically the amplitude of atomic displacement to be
 considered in this kind of computations. Notice also that the displacements
 are given using [[xcart]], that is, explicitly in Cartesian directions, rather
 than the primitive cell axes (using [[xred]]). This makes the correspondence
@@ -118,13 +118,13 @@ with the polarization output in Cartesian directions much simpler to understand.
 
 There are two implementations of the Berry phase within ABINIT. One
 corresponds to positive values of [[berryopt]] and was implemented by Na Sai.
-The other one corresponds to negative values of [[berryopt]] was implemented
+The other one corresponds to negative values of [[berryopt]] and was implemented
 by Marek Veithen. Both are suitable to compute the polarization. Here we will
 focus on the implementation of Marek Veithen for two reasons. First, the
 results are directly provided in Cartesian coordinates at the end of the run
 (while the implementation of Na Sai reports them in reduced coordinates).
-Second the implementation of Marek Veithen is the one to be used for the
-finite electric field calculation as described in the next Section. Finally,
+Second, the implementation of Marek Veithen is the one to be used for the
+finite electric field calculation as described in the next section. Finally,
 note also that Veithen's implementation works with [[kptopt]] = 1 or 2 while
 Na Sai implementation is restricted to [[kptopt]] = 2, which is less convenient.
 
@@ -164,7 +164,7 @@ made different by this remapping. Cross-checking the polarization results by
 computing the Born effective charge, further multiplied by the displacements
 between the two geometries is an excellent way to estimate the amplitude of the polarization.
 
-Other subtleties of Berry phases, explained in [[cite:Vanderbilt1993]] also apply. 
+Other subtleties of Berry phases, explained in [[cite:Vanderbilt1993]], also apply. 
 First, note that neither the electronic Berry phase nor the ionic phase vanish in this highly
 symmetric case, contrary to intuition. Even though AlAs does not have
 inversion symmetry, it does have tetrahedral symmetry, which would be enough
@@ -174,9 +174,9 @@ point group. The ionic phase corresponds actually to a lattice-valued vector
 (-3/4 -3/4 -3/4). Concerning the electronic phase, it does not exactly vanish,
 unless the sampling of k points becomes continuous. If you go further in the
 file you will find the final results in cartesian coordinates. You can collect
-them for the different values of tau.
+them for the different values of $\tau$.
 
-tau = 0
+$\tau = 0$
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -191,7 +191,7 @@ tau = 0
          Total:                        -0.154382449E+01  -0.154382449E+01  -0.154382449E+01
     
 
-tau = +0.01
+$\tau = +0.01$
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -205,7 +205,7 @@ tau = +0.01
          Ionic:                        -0.154212551E+01  -0.154800587E+01  -0.154800587E+01  
          Total:                        -0.153977953E+01  -0.154382391E+01  -0.154382391E+01
 
-tau = -0.01
+$\tau = -0.01$
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -220,12 +220,11 @@ tau = -0.01
          Total:                        -0.154786828E+01  -0.154382391E+01  -0.154382391E+01
     
 From the previous data, we can extract the Born effective charge of Al. Values
-to be used are those in a.u., in order to find the charge in electron unit. It
-corresponds to (the volume of the primitive unit cell must be specified in Bohr too):
-    
-            Z* = \Omega_0  (P[tau=+0.01] - P[tau=-0.01]) / (2*tau)
-               =  291.89   (-0.269122773E-01 - -0.270536526E-01) / 0.02
-               = 2.06
+to be used are those in a.u., in order to find the charge in electron units. It
+corresponds to (the volume of the primitive unit cell must be specified in atomic units too):
+$$ Z^* = \Omega_0  \frac{P(\tau = +0.01) - P(\tau = -0.01)}{2\tau} $$
+$$=  291.89 \frac{ (-2.6912\times 10^{-2}) - (-2.7054\times 10^{-2})}{0.02} $$
+$$ = 2.06$$
   
 For comparison, the calculation using Density-Functional Perturbation Theory
 (DFPT) can be done by using the file ~abinit/tests/tutorespfn/Input/tffield_2.in. 
@@ -245,7 +244,7 @@ This level of agreement is fortuitous for unconverged calculations, though
 both methods (finite-difference and DFPT) will tend to the same value for
 better converged calculations.
 
-The DDB generated by ~abinit/tests/tutorespfn/Input/tffield_2.in can be fed in
+The DDB generated by ~abinit/tests/tutorespfn/Input/tffield_2.in can be used as input to
 anaddb, thanks to the ~abinit/tests/tutorespfn/Input/tffield_3.in input file
 and the tffield_3.files file. 
 
@@ -381,46 +380,45 @@ still be reached for k-point grids providing a reasonable degree of
 convergence. A compromise must however be found.
 
 As these calculations are quite long, the input file has been limited to very
-small fields. Three cases have been selected: E = 0, E = +0.0001 and E = -0.0001. 
+small fields. Three cases have been selected: $E = 0$, $E = +0.0001$ and $E = -0.0001$. 
 If you have time later, you can relax this constraint and perform a
 more exhaustive calculations for a larger set of fields.
 
 You can now start the run. Various quantities can be extracted from the finite
 field calculation at clamped ions using finite difference techniques: the Born
-Effective Charge Z* can be extracted from the forces, the optical dielectric
+effective charge $Z^*$ can be extracted from the forces, the optical dielectric
 constant can be deduced from the polarization, and the clamped ion
 piezoelectric tensor can be deduced from the stress tensor. As an illustration
-we will focus here on the computation of Z*.
+we will focus here on the computation of $Z^*$.
 
 You can look at your output file. For each field, the file contains various
 quantities that can be collected. For the present purpose, we can look at the
 evolution of the forces with the field and extract the following results from
 the output file:
 
-E=0
+$E=0$
     
     cartesian forces (hartree/bohr) at end:
         1      0.00000000000000     0.00000000000000     0.00000000000000
         2      0.00000000000000     0.00000000000000     0.00000000000000
     
 
-E = +0.0001
+$E = +0.0001$
     
     cartesian forces (hartree/bohr) at end:
         1      0.00020614766286     0.00020614766286     0.00020614766286
         2     -0.00020614766286    -0.00020614766286    -0.00020614766286
     
 
-E = -0.0001
+$E = -0.0001$
     
     cartesian forces (hartree/bohr) at end:
         1     -0.00020651242444    -0.00020651242444    -0.00020651242444
         2      0.00020651242444     0.00020651242444     0.00020651242444
     
 
-In a finite electric field, the force on atom A in direction i can be written as:
-    
-    F_Ai = Z*_A,ii * E + \Omega_0 dchi/dtau E^2
+In a finite electric field, the force on atom $A$ in direction $i$ can be written as:
+$$F_{A,i} = Z^*_{A,ii}E + \Omega_0 \frac{d\chi}{d\tau} E^2$$
 
 The value for positive and negative fields above are nearly the same, showing
 that the quadratic term is almost negligible. This clearly appears in the
@@ -430,21 +428,20 @@ electric fields is plotted.
 ![](nlo_assets/image001.gif)
 
 We can therefore extract with a good accuracy the Born effective charge as :
-    
-    Z*_Al    = (F_Al[E=+0.0001] - F_Al[E=-0.0001])/(2*0.0001)
-             = (0.00020614766286 + 0.00020651242444)/0.0002
-             = 2.06
+$$Z^*_{\mathrm Al}    = \frac{F_{\mathrm Al}(E=+0.0001) - F_{\mathrm Al}(E=-0.0001)}{2\times 0.0001}$$
+$$ = \frac{(2.0615\times 10^{-4}) - (-2.0651\times 10^{-4})}{0.0002}$$
+$$         = 2.06$$
     
 This value is similar to the value reported from DFPT. If you do calculations
 for more electric fields, fitting them with the general expression of the
-force above (including the E^2 term), you can find the dchi/dtau term. At
-[[ecut]]=5 you should get dchi/dtau for Al = -0.06169. This will be useful
+force above (including the $E^2$ term), you can find the $d\chi/d\tau$ term. At
+[[ecut]]=5 you should get $d\chi/d\tau$ for Al = -0.06169. This will be useful
 later for the [lesson on static Non-linear properties](nlo).
 
 Going back to the output file, you can also look at the evolution of the
 polarization with the field.
 
-E = 0
+$E = 0$
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -453,7 +450,7 @@ E = 0
          Total:      -0.269829752E-01  -0.269829752E-01  -0.269829752E-01
     
 
-E = +0.0001
+$E = +0.0001$
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -461,7 +458,7 @@ E = +0.0001
          Ionic:      -0.270560574E-01  -0.270560574E-01  -0.270560574E-01  
          Total:      -0.269261876E-01  -0.269261876E-01  -0.269261876E-01
 
-E = -0.0001
+$E = -0.0001$
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -471,9 +468,8 @@ E = -0.0001
     
 
 In a finite electric field, the polarization in terms of the linear and
-quadratic susceptibilities as
-
-    P = \chi * E + \chi(2)  E^2
+quadratic susceptibilities is
+$$P_i = \chi^{(1)}_{ij} E_j + \chi^{(2)}_{ijk}  E_jE_k$$
 
 The change of polarization for positive and negative fields above are nearly
 the same, showing again that the quadratic term is almost negligible. This
@@ -483,32 +479,32 @@ polarization for a larger range of electric fields is plotted.
 ![](ffield_assets/image004.gif)
 
 We can therefore extract with a good accuracy the linear optical dielectric susceptibility:
-    
-    \chi(l)_11 = (P[E=+0.0001] - P[E=-0.0001])/(2*0.0001)
-               = (-0.269261876E-01+ 0.270396999E-01)/0.0002
-               = 0.56756
+$$\chi_{11}^{(1)} = \frac{P_1(E=+0.0001) - P_1(E=-0.0001)}{2\times 0.0001}$$
+$$ = \frac{(-2.6926\times 10^{-2}) - (-2.70397\times 10^{-2})}{0.0002}$$
+$$ = 0.56756$$
 
 The optical dielectric constant is:
-    
-    \epsilon_11 = 1+ 4 \pi \chi(1)_11
-               = 8.13
+$$\epsilon_{11} = 1+ 4 \pi \chi^{(1)}_{11}$$
+$$           = 8.13$$
 
 This value underestimates the value of 9.20 obtained by DFPT. The agreement is
 not better at [[ecut]]=5. Typically, finite field calculations converge with
 the density of the k point grid more slowly than DFPT calculations.
 
 If you do calculations for more electric fields, fitting them with the general
-expression of the force above (including the E^2 term) you can find the non-
-linear optical susceptibilities \chi(2). At [[ecut]]=5 you should get \chi(2)
-= 29.769 pm/V. This result will be also be useful for the [lesson on static Non-linear properties](nlo).
+expression of the force above (including the $E^2$ term) you can find the non-
+linear optical susceptibilities $\chi^{(2)}$. At [[ecut]]=5 you should get
+$\chi^{(2)} = 29.769~\mathrm{pm/V}$.
+This result will be also be useful for the [lesson on static Non-linear properties](nlo).
 
 Looking at the evolution of the stress (see graphic below), you should also be
 able to extract the piezoelectric constants. You can try to do it as an
 exercise. As the calculation here was at clamped ions, you will get the
-clamped ion proper piezoelectric constants. At [[ecut]]=5, you should obtain -0.69088 C/m^2.
+clamped ion proper piezoelectric constants. At [[ecut]]=5, you should
+obtain -0.69088 C/m$^2$.
 
 ![](ffield_assets/image007.gif)
 
 Redoing the same kind of finite field calculation when allowing the ions to
 relax, one can access the relaxed ion proper piezoelectric constant. 
-At [[ecut]]=5 the result is -0.03259.
+At [[ecut]]=5 the result is -0.03259 C/m$^2$.
