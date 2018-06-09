@@ -521,7 +521,7 @@ integer, allocatable :: ndegs_arr(:)
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
 & nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim"),  &
-& nctkarr_t("eig2_diag_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")  &
+& nctkarr_t("eig2_diag_arr","dp","real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")&
   ]) 
  NCF_CHECK(ncerr)
 
