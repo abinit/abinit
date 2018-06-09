@@ -1,5 +1,5 @@
 
-.Version 8.7.6 of ABINIT 
+.Version 8.8.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 18 Mar 2018.
-- ( at 18h13 )
+.Starting date : Mon  4 Jun 2018.
+- ( at 13h40 )
   
 - input  file    -> tdepes_4.in
 - output file    -> tdepes_4.out
@@ -3530,6 +3530,54 @@ P          mk1mem86        85
            shiftk84    0.00000000E+00  0.00000000E+00  0.00000000E+00
            shiftk85    5.00000000E-01  5.00000000E-01  5.00000000E-01
            shiftk86    5.00000000E-01  5.00000000E-01  5.00000000E-01
+          smdelta11         0
+          smdelta12         0
+          smdelta13         0
+          smdelta14         1
+          smdelta15         0
+          smdelta16         1
+          smdelta21         0
+          smdelta22         0
+          smdelta23         0
+          smdelta24         1
+          smdelta25         0
+          smdelta26         1
+          smdelta31         0
+          smdelta32         0
+          smdelta33         0
+          smdelta34         1
+          smdelta35         0
+          smdelta36         1
+          smdelta41         0
+          smdelta42         0
+          smdelta43         0
+          smdelta44         1
+          smdelta45         0
+          smdelta46         1
+          smdelta51         0
+          smdelta52         0
+          smdelta53         0
+          smdelta54         1
+          smdelta55         0
+          smdelta56         1
+          smdelta61         0
+          smdelta62         0
+          smdelta63         0
+          smdelta64         1
+          smdelta65         0
+          smdelta66         1
+          smdelta71         0
+          smdelta72         0
+          smdelta73         0
+          smdelta74         1
+          smdelta75         0
+          smdelta76         1
+          smdelta81         0
+          smdelta82         0
+          smdelta83         0
+          smdelta84         1
+          smdelta85         0
+          smdelta86         1
           spgroup           1
            tolvrs11    1.00000000E-08
            tolvrs12    0.00000000E+00
@@ -4019,8 +4067,8 @@ P          mk1mem86        85
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8507,8 +8555,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -9060,8 +9108,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10143,8 +10191,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10622,8 +10670,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -11831,8 +11879,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -12382,8 +12430,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -13479,8 +13527,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -13958,8 +14006,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -15167,8 +15215,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -15719,8 +15767,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -16804,8 +16852,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -17283,8 +17331,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -18492,8 +18540,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -19045,8 +19093,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -20142,8 +20190,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -20621,8 +20669,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -21830,8 +21878,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -22385,8 +22433,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -23468,8 +23516,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -23947,8 +23995,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -25156,8 +25204,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -25701,8 +25749,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -26782,8 +26830,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.94054
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -27261,8 +27309,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -28470,8 +28518,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -29021,8 +29069,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -30115,8 +30163,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93769
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__gmatteo/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -33291,6 +33339,54 @@ P          mk1mem86        85
            shiftk84    0.00000000E+00  0.00000000E+00  0.00000000E+00
            shiftk85    5.00000000E-01  5.00000000E-01  5.00000000E-01
            shiftk86    5.00000000E-01  5.00000000E-01  5.00000000E-01
+          smdelta11         0
+          smdelta12         0
+          smdelta13         0
+          smdelta14         1
+          smdelta15         0
+          smdelta16         1
+          smdelta21         0
+          smdelta22         0
+          smdelta23         0
+          smdelta24         1
+          smdelta25         0
+          smdelta26         1
+          smdelta31         0
+          smdelta32         0
+          smdelta33         0
+          smdelta34         1
+          smdelta35         0
+          smdelta36         1
+          smdelta41         0
+          smdelta42         0
+          smdelta43         0
+          smdelta44         1
+          smdelta45         0
+          smdelta46         1
+          smdelta51         0
+          smdelta52         0
+          smdelta53         0
+          smdelta54         1
+          smdelta55         0
+          smdelta56         1
+          smdelta61         0
+          smdelta62         0
+          smdelta63         0
+          smdelta64         1
+          smdelta65         0
+          smdelta66         1
+          smdelta71         0
+          smdelta72         0
+          smdelta73         0
+          smdelta74         1
+          smdelta75         0
+          smdelta76         1
+          smdelta81         0
+          smdelta82         0
+          smdelta83         0
+          smdelta84         1
+          smdelta85         0
+          smdelta86         1
           spgroup           1
            strten11    3.3511334389E-03  3.3511334141E-03  3.3511334255E-03
                       -1.9640215332E-10  1.0489103566E-09 -1.4474353623E-10
@@ -33777,10 +33873,10 @@ P          mk1mem86        85
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        119.6  wall=        154.1
+- Proc.   0 individual time (sec): cpu=        122.6  wall=        138.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered 1003 WARNINGs and  192 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        119.6  wall=        154.1
+.Delivered 971 WARNINGs and 192 COMMENTs to log file.
++Overall time at end (sec) : cpu=        122.6  wall=        138.6
