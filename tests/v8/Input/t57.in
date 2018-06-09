@@ -115,11 +115,13 @@ nstep 100
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+## Exclude ibm8 because no NetCDF
+#%% exclude_hosts = ibm@ibm8
 #%% [shell]
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t57.out, tolnlines = 0, tolabs = 0.0e+0, tolrel = 0.0e+0, fld_options=-medium ;
+#%%   t57.out, tolnlines = 2, tolabs = 1.1e-6, tolrel = 7.0e-5, fld_options=-medium ;
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1

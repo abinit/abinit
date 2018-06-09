@@ -537,6 +537,7 @@ integer, allocatable :: ndegs_arr(:)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
 
 !Deallocate the arrays 
+ ABI_FREE(nband_arr)
  ABI_FREE(ndegs_arr)
  ABI_FREE(degs_range_arr)
  ABI_FREE(ideg_arr)
