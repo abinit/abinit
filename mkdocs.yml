@@ -340,8 +340,8 @@ extra:
         #matsci: http://materials.sh/
         #spack: https://github.com/LLNL/spack
         #pip: https://pypi.python.org/pypi/pip
-        #ipython: https://ipython.org/index.html
-        #jupyter: http://jupyter.org/
+        ipython: "[ipython](https://ipython.org/index.html)"
+        jupyter: "[jupyter](http://jupyter.org/)"
         Python: "[Python](http://www.python.org/)"
         #spglib: https://atztogo.github.io/spglib/
         #bader: http://theory.cm.utexas.edu/henkelman/code/bader/

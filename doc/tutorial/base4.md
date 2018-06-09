@@ -190,6 +190,26 @@ The associated total energy and accuracy can be deduced from
 
 **etotal** 24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha .
 
+
+!!! tip
+
+    To analyze the convergence of the total energy, one can use the |abicomp| script
+    provide by |AbiPy| and the `gsr` command that will start an interactive |ipython| session
+    so that we can interact directly with the AbiPy object.
+    To load all the GSR files produced by calculation, use the command 
+
+        abicomp.py gsr tbase4_3o_*_GSR.nc
+
+    then, inside the ipython terminal, execute the `plot_convergence` method of the `GsrRobot`:
+
+    ```ipython
+    In [1]: robot.plot_convergence("energy", sortby="nkpt", hue="tsmear")
+    ```
+
+    to produce this plot with the total energy in eV for different values of nkpt grouped by tsmear:
+
+    ![](base4_assets/abicomp_tbase4_3o.png)
+
 ## 4 Surface energy of aluminum (100): changing the orientation of the unit cell
 
 In order to study the Aluminum (100) surface, we will have to set up a supercell representing a slab. 
