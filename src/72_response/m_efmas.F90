@@ -29,8 +29,7 @@ module m_efmas
  use netcdf, only : nf90_noerr, nf90_put_var, nf90_get_var
 #endif
  use m_efmas_defs
- use m_nctk, only : nctkarr_t, nctkdim_t, nctk_def_arrays, nctk_get_dim, &
-& nctk_def_dims, nctk_idname, nctk_set_datamode
+ use m_nctk
 
  implicit none
 
@@ -441,6 +440,7 @@ integer, allocatable :: ndegs_arr(:)
 !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
 !To be reexamined/corrected at the time of parallelization.
 
+#ifdef HAVE_NETCDF
  nkptdeg=size(efmasdeg,1)
  nkptval=size(efmasval,2)
  if(nkptdeg/=nkptval) then
@@ -543,6 +543,7 @@ integer, allocatable :: ndegs_arr(:)
  ABI_FREE(degs_bounds_arr)
  ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
+#endif
 
 end subroutine print_efmas
 !!***
