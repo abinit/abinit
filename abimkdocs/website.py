@@ -846,17 +846,18 @@ The bibtex file is available [here](../abiref.bib).
         NB: white spaces in token are not allowed, `token` is ignored
         """
         def repl(matchobj):
-            key = matchobj.group(1)
-            print("key", key)
+            key = matchobj.group("key")
+            if self.verbose: print("Found possible alias:", key)
             value = self.mkdocs_config["extra"]["abimkdocs_aliases"].get(key)
             if value is not None:
-                print("Returning", value)
-                return " %s " % value
+                if self.verbose: print("Returning", value)
+                return value
             else:
-                print("Triggered", matchobj.group(0))
+                #print("Triggered", matchobj.group(0))
                 return matchobj.group(0)
 
-        ALIAS_SYNTAX = re.compile(r"[^`]\|(\w+)\|[^`]")
+        #ALIAS_SYNTAX = re.compile(r"[^`]\|(\w+)\|[^`]")
+        ALIAS_SYNTAX = re.compile(r"(?!`)\|(?P<key>\w+)\|")
         return [re.sub(ALIAS_SYNTAX, repl, line) for line in lines]
 
     def _preprocess_include(self, lines):

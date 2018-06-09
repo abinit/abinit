@@ -597,6 +597,7 @@ close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 !!! note 
     This ABINIT tutorial is now finished. 
-    You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
+    You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to 
+    make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
 
 </div>

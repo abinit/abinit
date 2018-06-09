@@ -81,7 +81,7 @@ constructed with the shifted k-mesh.
 
 After this lengthy discussion needed to clarify this rather technical point,
 we can finally proceed to analyze the screening computation performed in the
-last dataset of tbs_1.in.
+last dataset of *tbs_1.in*.
 
 The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha. 
 In the [[lesson:gw1|first GW lesson]], these
@@ -370,10 +370,11 @@ dielectric as a function of frequency for the different directions:
 .... .... ...
 ```
 
-You can visualize the data using your preferred software. For instance,
+You can visualize the data using your preferred software. For instance, with |gnuplot|
     
-    $ gnuplot
-    gnuplot>  p "tbs_2o_EXC_MDF" u 1:3 w l
+```gnuplot
+p "tbs_2o_EXC_MDF" u 1:3 w l
+```
 
 will plot the imaginary part of the macroscopic dielectric function (the
 absorption spectrum) for the first q-point. You should obtain a graphic
@@ -501,15 +502,13 @@ Before running the test take some time to read the input file *~abinit/tests/tut
 
 {% dialog tests/tutorial/Input/tbs_3.in %}
 
-The convergence in the number of transitions is performed by defining five
+The convergence in the number of transitions is performed by defining two
 datasets with different values for [[nband]] and [[bs_loband]]
     
-    ndtset     5
-    bs_loband1  4 nband1  5
-    bs_loband2  3 nband2  6
-    bs_loband3  2 nband3  7
-    bs_loband4  2 nband4  8
-    bs_loband5  1 nband5  8
+    ndtset     2
+    bs_loband1  3 nband1  6
+    bs_loband2  2 nband2  7
+
     
 The parameters defining how to build the excitonic Hamiltonian are similar to
 the ones used in tbs_2.in. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
@@ -526,14 +525,8 @@ symbolic links for each dataset:
 ```sh
 ln -s 444_SCR tbs_3i_DS1_SCR
 ln -s 444_SCR tbs_3i_DS2_SCR
-ln -s 444_SCR tbs_3i_DS3_SCR
-ln -s 444_SCR tbs_3i_DS4_SCR
-ln -s 444_SCR tbs_3i_DS5_SCR
 ln -s 444_shifted_WFK tbs_3i_DS1_WFK
 ln -s 444_shifted_WFK tbs_3i_DS2_WFK
-ln -s 444_shifted_WFK tbs_3i_DS3_WFK
-ln -s 444_shifted_WFK tbs_3i_DS4_WFK
-ln -s 444_shifted_WFK tbs_3i_DS5_WFK
 ```
     
 Now we can finally run the test with
@@ -550,22 +543,22 @@ Use the following sequence of |gnuplot| commands:
 ```gnuplot
 p   "tbs_3o_DS1_EXC_MDF" u 1:3 w l
 rep "tbs_3o_DS2_EXC_MDF" u 1:3 w l
-rep "tbs_3o_DS3_EXC_MDF" u 1:3 w l
-rep "tbs_3o_DS4_EXC_MDF" u 1:3 w l
-rep "tbs_3o_DS5_EXC_MDF" u 1:3 w l
 ```
 
 to plot on the same graphic the absorption spectrum obtained with different
-transition spaces. You should obtain a graphic similar to this one:
+transition spaces. You should obtain a graphic similar (but not equal) to this one 
 
 ![](bse_assets/tbs3.png)
+
+Note indeed that the above figure has been produced with more datasets in order 
+to highlight the convergence behaviour.
 
 The results obtained with ([[bs_loband]] = 4, [[nband]] = 5) are clearly
 unconverged as the basis set contains too few transitions that are not able to
 describe the frequency-dependence of the polarizability in the energy range
-under investigation. For a well converged spectrum, we have to include the
+under investigation. For a converged spectrum, we have to include the
 three higher occupied states and the first four conduction bands (the blue
-curve corresponding to [[bs_loband]] = 2, and [[nband]] = 8).
+curve corresponding to [[bs_loband]] = 2, and [[nband]] = 7).
 
 Note that adding the first occupied band, curve (1-8), gives results that are
 almost on top of (2,8). This is due to the fact that, in silicon, the bottom
@@ -575,8 +568,8 @@ the transition space in the frequency range [0, 8] eV. For completeness, we
 also report the results obtained in a separate calculation done with
 [[bs_loband]] = 2 [[nband]] = 9 to show that four empty states are enough to converge the spectrum.
 
-We therefore fix the number of bands for the transition space using the
-converged values [[bs_loband]] = 2, [[nband]] = 8, and we proceed to analyse the
+We therefore fix the number of bands for the transition space using 
+[[bs_loband]] = 2, [[nband]] = 7 and we proceed to analyse the
 convergence of the spectrum with respect to the number of planewaves in the screening.
 
 !!! tip
@@ -616,11 +609,11 @@ what is done in *~abinit/tests/tutorial/Input/tbs_4.in*.
 The structure of the input file is very similar to the one of *tbs_3.in*, the
 main difference is in the first section:
     
-    ndtset 4
-    ecuteps: 1 ecuteps+ 2 
+    ndtset    2
+    ecuteps: 2 ecuteps+ 1
     bs_coulomb_term 11
     
-that instructs the code to execute four calculations where the direct term is
+that instructs the code to execute two calculations where the direct term is
 constructed using different value of [[ecuteps]]. We also relax the diagonal-only 
 approximation for the screening by setting [[bs_coulomb_term]] = 11 so that
 the non-locality of $W(\rr, \rr')$ is correctly taken into account.
@@ -640,12 +633,8 @@ then we have to create a bunch of symbolic links for the input WFK and SCR files
     
     ln -s 444_SCR tbs_4i_DS1_SCR
     ln -s 444_SCR tbs_4i_DS2_SCR
-    ln -s 444_SCR tbs_4i_DS3_SCR
-    ln -s 444_SCR tbs_4i_DS4_SCR
     ln -s 444_shifted_WFK tbs_4i_DS1_WFK
     ln -s 444_shifted_WFK tbs_4i_DS2_WFK
-    ln -s 444_shifted_WFK tbs_4i_DS3_WFK
-    ln -s 444_shifted_WFK tbs_4i_DS4_WFK
     
 Now issue
     
@@ -659,10 +648,11 @@ Once the calculation is completed, plot the spectra obtained with different [[ec
     
 ```gnuplot
 p "tbs_4o_DS1_EXC_MDF" u 1:3 w l
-p "tbs_4o_DS2_EXC_MDF" u 1:3 w l
-p "tbs_4o_DS3_EXC_MDF" u 1:3 w l
-p "tbs_4o_DS4_EXC_MDF" u 1:3 w l
+rep "tbs_4o_DS2_EXC_MDF" u 1:3 w l
 ```
+
+Here we show the results of a convergence study done with *four* different values or `ecuteps`
+to highlight the convergence behavior:
 
 ![](bse_assets/tbs4.png)
 

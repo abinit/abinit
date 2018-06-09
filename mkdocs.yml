@@ -349,7 +349,7 @@ extra:
         #COD: http://www.crystallography.net/cod/
         CIF: "[CIF](http://www.iucr.org/resources/cif)"
         vesta: "[vesta](http://jp-minerals.org/vesta/en/)"
-        xcrysden: "[XCrysNen](http://www.xcrysden.org/)"
+        xcrysden: "[XCrysDen](http://www.xcrysden.org/)"
         xmgrace: "[xmgrace](http://plasma-gate.weizmann.ac.il/Grace/)"
         gnuplot: "[gnuplot](http://www.gnuplot.info/)"
         ovito: "[ovito](https://ovito.org/)"
