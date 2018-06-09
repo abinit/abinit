@@ -86,5 +86,5 @@ nstep 100
 #%% keywords = DFPT
 #%% description =
 #%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass.
-#%% topics = EffMass
+#%% topics = EffectiveMass
 #%%<END TEST_INFO>

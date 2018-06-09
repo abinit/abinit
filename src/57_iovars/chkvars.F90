@@ -102,7 +102,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift'
- list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
  list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
  list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_task eph_transport'
 !F

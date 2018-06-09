@@ -93,5 +93,5 @@ nstep 100
 #%%  From present calculation, electron effective mass is
 #%%  m*= 0.334 to be compared with Nery2018 Table I, -0.340.
 #%%  Setting kpt to 8 8 8 and ecut to 50 allows one to reproduce the published values.
-#%% topics = EffMass
+#%% topics = EffectiveMass
 #%%<END TEST_INFO>
