@@ -510,11 +510,15 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
-
+ 
+ dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
+ dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
+ dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
  dtout%ph_ndivsm          = dtin%ph_ndivsm
  dtout%ph_nqpath          = dtin%ph_nqpath
  dtout%ph_ngqpt           = dtin%ph_ngqpt
  if (allocated(dtin%ph_qpath)) call alloc_copy(dtin%ph_qpath, dtout%ph_qpath)
+ if(allocated(dtin%ph_freez_disp_ampl))call alloc_copy(dtin%ph_freez_disp_ampl,dtout%ph_freez_disp_ampl)
 ! end eph variables
 
  dtout%exchn2n3d          = dtin%exchn2n3d
@@ -946,7 +950,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rf2_pert1_dir(:)   = dtin%rf2_pert1_dir(:)
  dtout%rf2_pert2_dir(:)   = dtin%rf2_pert2_dir(:)
  dtout%supercell_latt(:,:)= dtin%supercell_latt(:,:)
- dtout%supercell(:)       = dtin%supercell(:)
  dtout%ucrpa_bands(:)     = dtin%ucrpa_bands(:)
  dtout%vdw_supercell(:)   = dtin%vdw_supercell(:)
  dtout%vdw_typfrag(:)     = dtin%vdw_typfrag(:)
@@ -1302,6 +1305,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%nband))       then
    ABI_DEALLOCATE(dtset%nband)
+ end if
+ if (allocated(dtset%ph_freez_disp_ampl)) then
+   ABI_DEALLOCATE(dtset%ph_freez_disp_ampl)
  end if
  if (allocated(dtset%ph_qpath)) then
    ABI_DEALLOCATE(dtset%ph_qpath)

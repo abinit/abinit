@@ -1150,7 +1150,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else
    if(rfelfd/=0 .or. rfstrs/=0 .or. rfddk /= 0  .or. rf2_dkdk /= 0 .or. rf2_dkde /= 0) then
 !    Temporarily, ...
-     write(message, '(a,a,a,3es16.6,a,a,6(a,i2),a,a,a)' )ch10,&
+     write(message, '(a,a,a,3es16.6,a,a,5(a,i2),a,a,a)' )ch10,&
 &     'The treatment of non-zero wavevector q is restricted to phonons.',&
 &     'However, the input normalized qpt is',qphon(:),',',ch10,&
 &     'while rfelfd=',rfelfd,', rfddk=',rfddk,', rf2_dkdk=',rf2_dkdk,', rf2_dkde=',rf2_dkde,&

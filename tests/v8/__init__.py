@@ -25,6 +25,7 @@ inp_files = [
 "t13.in",
 "t14.in",
 "t15.in",
+"t16.in",
 "t30.in",
 "t31.in",
 "t32.in",
@@ -72,4 +73,10 @@ inp_files = [
 #Nonlinear + Second order Sternheimer
 "t100.in",
 "t101.in",
+"t102.in",
+"t103.in",
+"t104.in",
+"t105.in",
+"t106.in",
+"t107.in"
 ]
