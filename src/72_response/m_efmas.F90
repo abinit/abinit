@@ -493,9 +493,9 @@ integer, allocatable :: ndegs_arr(:)
      do jband=1,deg_dim
        do iband=1,deg_dim
          ch2c_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
-         ch2c_arr(2,:,:,ieig+iband-1)=imag(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
+         ch2c_arr(2,:,:,ieig+iband-1)=aimag(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
          eig2_diag_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
-         eig2_diag_arr(2,:,:,ieig+iband-1)=imag(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
+         eig2_diag_arr(2,:,:,ieig+iband-1)=aimag(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
        enddo
        ieig=ieig+deg_dim
      enddo
