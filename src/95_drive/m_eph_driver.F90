@@ -698,6 +698,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  !==== Free memory ====
  !=====================
+
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
@@ -707,11 +708,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- call efmasdeg_free_array(efmasdeg)
- call efmasval_free_array(efmasval)
+ if(allocated(efmasdeg))then
+   call efmasdeg_free_array(efmasdeg)
+ endif
+ if( allocated (efmasval))then
+   call efmasval_free_array(efmasval)
+ endif
  if(allocated(kpt_efmas))then
    ABI_DEALLOCATE(kpt_efmas)
  endif
+
+!XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+ write(std_out,*)' eph : after free efmasval and kpt_efmas'
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

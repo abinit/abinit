@@ -1,6 +1,6 @@
 # Test for the calculation of Frohlich ZPR in CaO. Really underconverged calculation, for testing purposes.
   
-  ndtset 5
+  ndtset 6
   
     kptopt   1
 #   ngkpt    4 4 4   # for testing purposes
@@ -55,6 +55,7 @@
                                                                                                           
   # Response Function calculation : d/dk  at the specific points, with added bands.
     rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
+    iscf5    -2
   
     getden5   1
     getwfk5   4
@@ -85,11 +86,18 @@
     prtefmas5     1
 
   # Frohlich model calculation
+    iscf6     -2
     optdriver6 7
     getddb6    3
     getwfk6    4
     getefmas6  5
     eph_frohlichm6  1
+    eph_task6 6
+    kptopt6   0        # K-points can be specified in any way one want, they just need to be present in the
+    nkpt6     2        # ground state calc. too.
+    kpt6      0.00 0.00 0.00   # Gamma
+              0.00 0.50 0.50   # X
+
     ddb_ngqpt 1 1 1
 
 #######################################################################   

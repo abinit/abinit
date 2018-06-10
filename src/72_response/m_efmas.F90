@@ -142,6 +142,9 @@ CONTAINS
 
    ! *********************************************************************
 
+   !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+   write(std_out,*)' efmasval_free_array : enter '
+
    if(allocated(efmasval)) then
      n=shape(efmasval)
      do i=1,n(1)
@@ -190,14 +193,12 @@ CONTAINS
    type(efmasdeg_type),intent(inout) :: efmasdeg
 
    ! *********************************************************************
-
    if(allocated(efmasdeg%degs_bounds)) then
      ABI_FREE(efmasdeg%degs_bounds)
    end if
    if(allocated(efmasdeg%ideg)) then
      ABI_FREE(efmasdeg%ideg)
    end if
-
  end subroutine efmasdeg_free
 !!***
 
@@ -239,7 +240,6 @@ CONTAINS
    integer :: i,n
 
    ! *********************************************************************
-
    if(allocated(efmasdeg)) then
      n=size(efmasdeg)
      do i=1,n
@@ -247,7 +247,6 @@ CONTAINS
      end do
      ABI_DATATYPE_DEALLOCATE(efmasdeg)
    end if
-
  end subroutine efmasdeg_free_array
 !!***
 
