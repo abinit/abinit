@@ -88,9 +88,9 @@ Please see the [ABINIT gitlab Wiki section](http://wiki.abinit.org/doku.php?id=d
 
 Once you have got the tarball, uncompress it by typing:
 
-    tar xvzf abinit- _< version>_.tar.gz
+    tar xvzf abinit-<version> .tar.gz
 
-where _< version>_ is the version number you downloaded, e.g. "8.6.3". Then go
+where _<version>_ is the version number you downloaded, e.g. "8.6.3". Then go
 into the newly-created _abinit- <version>_ directory and have a look at it. 
 Then answer the following questions:
 
@@ -143,13 +143,13 @@ Q9. Where is the _wrtout_ subroutine? What is its purpose? How does it work?
 
 #### Add the new input variable and its associated routine
 
-Please examine the file _~abinit/doc/developers/programmer\_guide.txt_ and
-_~abinit/doc/developers/rules\_coding.txt_. This might help writing your own
+Please examine the file _~abinit/doc/developers/programmer_guide.txt_ and
+_~abinit/doc/developers/rules_coding.txt_. This might help writing your own
 subroutine. To actually start, go to the subdirectory you've identified before and type:
 
 sh ../../developers/various/mkroutine.sh handle_lesson
 
-This will create a file named _m\_handle\_lesson.F90_ , _handle\_lesson_ being the
+This will create a file named _m_handle_lesson.F90_ , _handle_lesson_ being the
 name of your subroutine. Note that since 2018 all routines in abinit must be contained
 in modules, to ensure interfaces will be generated and tested by the compiler.
 

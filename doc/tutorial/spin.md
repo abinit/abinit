@@ -1,5 +1,5 @@
 ---
-authors: GZ, MT
+authors: GZ, MT, EB, MJV
 ---
 
 # Lesson about the spin  
@@ -16,18 +16,18 @@ This lesson aims at showing how to get the following physical properties:
 * non-collinear magnetism (not yet)
 * spin-orbit coupling and magnetocristalline anisotropy (not yet)
 
-You will learn to use of  features of ABINIT which deal with spin.  
+You will learn to use features of ABINIT which deal with spin.  
 
 This lesson should take about 1.5 hour.
 
 ## 1 A ferromagnetic material: *bcc* Fe
   
-*Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_spin" (so ~abinit/tests/tutorial/Input/Work_spin)?*
+*Before beginning, you might consider to work in a different subdirectory, as
+for the other lessons. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
 
-The file ~abinit/tests/tutorial/Input/tspin_x.files lists the file names and root names. 
-You can copy it in the Work_spin directory (and change it, when needed, as usual).  
-You can also copy the file ~abinit/tests/tutorial/Input/tspin_1.in in Work_spin. 
+The file _~abinit/tests/tutorial/Input/tspin\_x.files_ lists the file names and root names. 
+You can copy it in the Work\_spin directory (and change it, when needed, as usual).  
+You can also copy the file _~abinit/tests/tutorial/Input/tspin\_1.in_ in Work\_spin. 
 
 {% dialog tests/tutorial/Input/tspin_x.files tests/tutorial/Input/tspin_1.in %}
 
@@ -38,20 +38,21 @@ Because we are going to perform magnetic calculations, there a two new types of 
 * [[nsppol]]
 * [[spinat]]
 
-Please, read their description in the help file.  
-You will work at fixed [[ecut]] (=18Ha) and k-point grid, defined by [[ngkpt]]
-(the 4x4x4 Monkhorst-Pack grid). 
-It is implicit that in *real life*, you should do a convergence test with respect to both convergence parameters.  
-This takes about 12 seconds on a modern PC (one needs a sufficiently large cut-off to exhibit magnetic effects).  
+You can read their description in the help file.  You will work at fixed
+[[ecut]] (=18Ha) and k-point grid, defined by [[ngkpt]] (the 4x4x4
+Monkhorst-Pack grid).  It is implicit that in *real life*, you should do a
+convergence test with respect to both convergence parameters (NB: one needs a
+minimal cut-off to exhibit magnetic effects).  This run takes about 12 seconds
+on a modern PC.
 
 We will compare the output with and without magnetization. (Hence, there are two datasets in the run)  
-We now look at the output file.  
-In the magnetic case, the electronic density is split in two parts, 
-the "Spin- up" and the "Spin-down" parts to which correspond different Kohn-Sham
-potentials and different sets of eigenvalues whose occupation are given by the
+We now look at the output file: 
+In the magnetic case, the electronic density is split into two parts, 
+the "Spin-up" and the "Spin-down" parts to which correspond different Kohn-Sham
+potentials and different sets of eigenvalues whose occupations are given by the
 Fermi-Dirac function (without the ubiquitous factor 2)  
   
-For the first k-point, we get for instance:  
+For the first k-point, for instance, we get:  
 
 ```
 (no magnetization)  
@@ -61,18 +62,18 @@ occ   1.00000   0.99999   0.99999   0.98396   0.98396   0.69467   0.00000   0.00
       1.00000   0.99730   0.99730   0.00898   0.00898   0.00224   0.00000   0.00000 (spin-down)  
 ```
   
-We note that the occupation are very different for up and down spins, which
-means that the eigenvalues are shifted which is in turn due to a shift of the
+We note that the occupations are very different for up and down spins, which
+means that the eigenvalues are shifted, which is in turn due to a shift of the
 exchange-correlation potential, and therefore of the effective potential. 
 You can indeed have a look at the output file to compare spin-up and down eigenvalues:  
 
     -0.48411  -0.38615  -0.38615  -0.30587  -0.30587  -0.27293   0.33747   0.33747 (up, kpt#1)  
     -0.46638  -0.32383  -0.32383  -0.21767  -0.21767  -0.20371   0.36261   0.36261 (dn, kpt#1)  
   
-The magnetization density (in unit of mu_B - Bohr's magneton) is the
+The magnetization density (in unit of $\mu_B$ - Bohr's magneton) is the
 difference between the up and down densities. The magnetization density,
-divided by the total density is noted "zeta". 
-This quantity "zeta" can vary between -1 and 1. It is everywhere zero in the non-magnetic case. 
+divided by the total density, is denoted "zeta". 
+This quantity "zeta" can vary between -1 and 1. It is zero everywhere in the non-magnetic case. 
 In the magnetic case, we can read for instance its minimal and maximal values in the output file:
   
     Min spin pol zeta= -4.8326E-02 at reduced coord.  0.7222  0.5000  0.2222  
@@ -80,7 +81,7 @@ In the magnetic case, we can read for instance its minimal and maximal values in
     Max spin pol zeta=  5.7306E-01 at reduced coord.  0.0000  0.8889  0.8889  
          next max=  5.7306E-01 at reduced coord.  0.8889  0.0000  0.8889  
   
-The total magnetization, its integral on the unit cell, is now in the magnetic case:  
+The total magnetization, i.e. the integrated in the unit cell, is now:  
   
     Magnetization (Bohr magneton)=  1.96743463E+00  
     Total spin up =  4.98371731E+00   Total spin down =  3.01628269E+00  
@@ -95,30 +96,30 @@ The energy is changed too, and we get:
   
 The energy of the magnetized system is the lowest and therefore energetically
 favoured, as expected since bcc iron is a ferromagnet.  
-Finally, one notes also that the stress tensor is affected by the
-magnetization. This would also be true for  the forces for a less symmetric material.  
+Finally, one also notes that the stress tensor is affected by the
+magnetization. This would also be true for the forces, for a less symmetric material.  
   
-It is interesting to consider in more details the distribution of eigenvalues
+It is interesting to consider in more detail the distribution of eigenvalues
 for each direction of magnetization, which is best done by looking at the
 respective densities of state.  
 To this end we have set [[prtdos]]= 1 in the input file, in order to obtain
 the density of states corresponding to spin-up and spin-down electrons (as soon as [[nsppol]]=2).  
 The values of the DOS are in the files tspin_1o_DS1_DOS and tspin_1o_DS2_DOS
-for the magnetic and non magnetic case respectively. We can extract the values
+for the magnetic and non-magnetic cases respectively. We can extract the values
 for use in a plotting software.  
-Traditionally, in order to enhance visibility, one affects with a negative
-sign the DOS of  minority  electrons. 
-If we compare the DOS of the magnetized] system 
+Traditionally, in order to enhance visibility, one plots 
+the DOS of minority spin electrons using negative values. 
+If we compare the DOS of the magnetized system 
 
 ![](spin_assets/bccfe_mag_dos2.jpg)
 
-and the non magnetized system
+and the non-magnetized system
 
 ![](spin_assets/bccfe_nonmag_dos2.jpg)
 
-we observe that the up and down DOS have been  "shifted" with respect each other.  
+we observe that the up and down DOS have been "shifted" with respect each other.  
 The integrated density of states yields the number of electrons for each spin
-direction and we see the magnetization which arises from the fact that there
+direction, and we see the magnetization which arises from the fact that there
 are more up than down electrons at the Fermi level.  
   
 That the magnetization points upwards is fortuitous, and we can get it
@@ -126,7 +127,9 @@ pointing downwards by changing the sign of the initial [[spinat]].
 Indeed, in the absence of spin-orbit coupling, there is no relation between
 the direction of magnetization and the cristal axes.  
 If we start with a [[spinat]] of 0, the magnetization remains 0. [[spinat]]
-gives indeed a way to initially break the spin symmetry.  
+serves two purposes: it is a way to initially break the spin symmetry (up/down), and also
+to start with a reasonable magnetic moment, close enough to the final one (in spin DFT,
+as opposed to the original flavor, there can be several local minima for the total energy).  
 
 ## 2 An antiferromagnetic example: *fcc* Fe
 
@@ -134,41 +137,45 @@ Well sort of....
   
 Actually, fcc Fe, displays many complicated structures, in particular spin spirals. 
 A spiral is characterized by a direction along an axis, an angle of
-the magnetization with respect to this axis and a step after which a rotation is complete.  
+the magnetization with respect to this axis and a step after which the magnetization comes full circle.  
 A very simple particular case is when the angle is 90°, the axis is <100> and
-the step is the unit cell side, spin directions are alternating in every two
-planes perpendicular to the <100> axis ("spiral stairway")  
+the step is the unit cell side: spin directions alternate between
+planes perpendicular to the <100> axis yielding a "spiral stairway":
+
+![](spin_assets/fe_fcc_conv.png)
+
 For instance, if the atom at [x,y,0] possesses an "up" magnetization, the atom
-at [x,y,1/2] would possess a down magnetization etc...  
-To describe such a structure, we merely need two atoms, [0,0,0] and
-[1/2,0,1/2] and a unit cell comprising those two atoms.  
-Also, each atom will be given opposite magnetization with the help of the variable [[spinat]].  
+at [x+1/2,y,1/2] would possess a down magnetization etc...  
+To describe such a structure, a unit cell with two atoms is sufficient, [0,0,0] and
+[1/2,0,1/2].  
+The atoms will be given opposite magnetization with the help of the variable [[spinat]].  
   
 You can copy the file ~abinit/tests/tutorial/Input/tspin_2.in in Work_spin.
-This is your input file.  Modify accordingly the tspin_x.files file. 
 
 {% dialog tests/tutorial/Input/tspin_2.in %}
 
+This is your input file. Modify the tspin_x.files file accordingly. 
+
 You can run the calculation, then you should edit the tspin_2.in file, and briefly
-look at the two changes with respect to the file tspin_1.in: the change of
-unit cell basis vectors [[rprim]], the new [[spinat]].  
+look at the two changes with respect to the file tspin_1.in: the 
+unit cell basis vectors [[rprim]], and the new [[spinat]].  
   
 Note also we use now [[nsppol]]=1 and [[nspden]]=2: this combination of values
-is only valid when performing an antiferromagnetic calculation (nspden=2 means
+is only valid when performing a strictly antiferromagnetic calculation: nspden=2 means
 that we have 2 independent components for the charge density while nsppol=1
-means that we have 1 independent component for the wave-functions).  
+means that we have 1 independent component for the wave-functions.  
 In that case, ABINIT uses the so-called Shubnikov symmetries, to perform
 calculations twice faster than with [[nsppol]]=2 and [[nspden]]=2. The
-symmetry of the crystal is not the full fcc symmetry anymore since the
+symmetry of the crystal is not the full fcc symmetry anymore, since the
 symmetry must now preserve the magnetization of each atom.  ABINIT is
 nevertheless able to detect such symmetry belonging to the Shubnikov groups
-and correctly detects that the cell is primitive, which would not be the case
-if we had the same value of [[spinat]] on each atom.  
+and correctly finds that the cell is primitive, which would not be the case
+if we had the same vector [[spinat]] on each atom.  
   
 If we now run again the calculation, this total computation time is
 approximately 30 seconds on a recent CPU.  
-If we look at the eigenvalues and occupations, they are again affected by a
-factor 2, which results from the symmetry considerations alluded to above, and
+If we look at the eigenvalues and occupations, they are again filled with a
+factor 2, which comes from the symmetry considerations alluded to above, and
 not from the "usual" spin degeneracy: the potential for spin-up is equal to
 the potential for spin-down, shifted by the antiferromagnetic translation
 vector. Eigenenergies are identical for spin-up and spin-down, but
@@ -184,10 +191,10 @@ kpt#   1, nband= 16, wtk=  0.05556, kpt=  0.0833  0.0833  0.1250 (reduced coord)
 ```
   
 How do we know we have a magnetic order?  
-The  density of state used for bcc Fe will not be useful since the net
+The density of states used for bcc Fe will not be useful since the net
 magnetization is zero and we have as many up and down electrons.  
-Though, the magnetization is reflected in the existence of an up and down
-electronic density whose sum is the total density and whose difference yields
+The magnetization is reflected in the existence of distinct up and down
+electronic densities, whose sum is the total density and whose difference yields
 the net magnetization density at each point in real space.  
   
 In particular, the integral of the magnetization around each atom will give an
@@ -241,10 +248,11 @@ like the one for fcc Fe, anticipating only that the two spin directions are goin
 We will not even assume that the initial spins are of the same magnitude.  
   
 You can copy the file ~abinit/tests/tutorial/Input/tspin_3.in in Work_spin.
-This is your input file. You can modify the file tspin_x.files and immediately
-start running the calculation. Then, you should edit it. 
 
 {% dialog tests/tutorial/Input/tspin_3.in %}
+
+This is your input file. You can modify the file tspin_x.files and immediately
+start running the calculation. Then, you should edit it. 
 
 Note the values of [[spinat]]. In this job, we wish again to characterize the magnetic structure.  
 We are not going to use zeta as in the preceding calculation, but we will here
@@ -272,11 +280,11 @@ The density of states will be in the files tspin_3o_DS2_DOS_AT0001 for the
 first atom, and tspin_3o_DS3_DOS_AT0002 for the second atom.  
 We can extract the density of d states, which carries most of the magnetic
 moment and whose integral up to the Fermi level will yield an estimate of the
-magnetization on each atom. We note the Fermi level (recalled in the file tspin_3o_DS1_DOS):  
+magnetization on each atom. We note the Fermi level (echoed the file tspin_3o_DS1_DOS):  
   
     Fermi energy :      -0.28270392  
   
-If we have a look at the integrated site projected density of states, we can
+If we have a look at the integrated site-projected density of states, we can
 compute the total moment on each atom. To this end, one can open the file
 tspin_3o_DS3_DOS_AT0002, which contains information pertaining to atom 2. This
 file is self-documented, and describes on each line, for spin up and spin down:  
@@ -314,7 +322,7 @@ Some materials can display a particular form of ferromagnetism, which also can
 be viewed as non compensated antiferromagnetism, called ferrimagnetism.  
 Some atoms possess up spin and other possess down spin, but the total spin magnetization is non zero.  
 This happens generally for system with different type of atoms, and sometimes
-in rather complicated structures such as the magnetite.  
+in rather complicated structures such as magnetite.  
 
 ## 5 The spin-orbit coupling
   
@@ -343,10 +351,11 @@ Replace the last line of the tspin_x.files by
     ../../../Psps_for_tests/73ta.hghsc  
 
 You can copy the file ~abinit/tests/tutorial/Input/tspin_5.in in Work_spin.
-Change accordingly the file names in tspin_x.files, then run the calculation.
-It takes about 20 secs on a recent computer.  
 
 {% dialog tests/tutorial/Input/tspin_5.in %}
+
+Change accordingly the file names in tspin_x.files, then run the calculation.
+It takes about 20 secs on a recent computer.  
 
 The input file contains one new variable:  
 
