@@ -13382,7 +13382,7 @@ The option prtefg is compatible with spin polarized calculations (see
 
 Variable(
     abivarname="prtefmas",
-    varset="respfn",
+    varset="dfpt",
     vartype="integer",
     topics=['printing_prngs', 'EffectiveMass_useful'],
     dimensions="scalar",
@@ -15132,7 +15132,7 @@ dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
 dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
 irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
 these routines, the developper should pay a particular attention to the rfpert
-array, defined in the routine respfn.F90, as well as to the ipert local
+array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
 variable.
 """,
 ),
