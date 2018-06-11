@@ -142,7 +142,7 @@ A very simple particular case is when the angle is 90°, the axis is <100> and
 the step is the unit cell side: spin directions alternate between
 planes perpendicular to the <100> axis yielding a "spiral stairway":
 
-![](spin_assets/fe_fcc_conv.png)
+![](spin_assets/fe_fcc_conv.jpg)
 
 For instance, if the atom at [x,y,0] possesses an "up" magnetization, the atom
 at [x+1/2,y,1/2] would possess a down magnetization etc...  
@@ -172,7 +172,7 @@ nevertheless able to detect such symmetry belonging to the Shubnikov groups
 and correctly finds that the cell is primitive, which would not be the case
 if we had the same vector [[spinat]] on each atom.  
   
-If we now run again the calculation, this total computation time is
+If we now run the calculation again, this total computation time is
 approximately 30 seconds on a recent CPU.  
 If we look at the eigenvalues and occupations, they are again filled with a
 factor 2, which comes from the symmetry considerations alluded to above, and
@@ -190,7 +190,7 @@ kpt#   1, nband= 16, wtk=  0.05556, kpt=  0.0833  0.0833  0.1250 (reduced coord)
  0.15660   0.04652   0.01574   0.00000   0.00000   0.00000   0.00000 0.00000  
 ```
   
-How do we know we have a magnetic order?  
+How do we know we have magnetic order?  
 The density of states used for bcc Fe will not be useful since the net
 magnetization is zero and we have as many up and down electrons.  
 The magnetization is reflected in the existence of distinct up and down
@@ -220,14 +220,14 @@ and obtain a rough estimation of the magnetic moment of each atom
 But here we want more precise results...  
 To perform the integration, we will use the utility cut3d which yields an
 interpolation of the magnetization at any point in space. cut3d is one of the
-executables of the ABINIT package and should be installed together with abinit.  
-As of now cut3d is interactive, we will use it through a very primitive script
+executables of the ABINIT package and is installed together with abinit.  
+For the moment cut3d is interactive, and we will use it through a very primitive script
 (written in Python) to perform a rough estimate of the magnetization on each atom.  
-You can have a look at the
-~abinit/doc/tutorial/documents/lesson_spin/magnetization.py program, and note
-(or believe) that it does perform an integration of magnetization on a cube of
-side acell/2 around each atom; if applicable, you might consider to adjust the
-value of "CUT3D" string in the Python script.  
+You can have a look at the ~abinit/doc/tutorial/documents/lesson_spin/magnetization.py
+program, and note
+(or believe) that it does perform an integration of the magnetization in a cube of
+side acell/2 around each atom; if applicable, you might consider adjusting the
+value of the "CUT3D" string in the Python script.  
   
 Copy it in your Work_spin directory. If you run the program, by typing 
 "python magnetization.py" , you will see the result:  
@@ -235,9 +235,9 @@ Copy it in your Work_spin directory. If you run the program, by typing
     magnetization of atom 1= 0.38212  
     magnetization of atom 2=-0.38203  
   
-which shows that the magnetization of each atom are actually opposite.  
+which shows that the magnetizations of the two atoms are really opposite.  
 With the next input file tspin_3.in, we will consider this same problem, but
-in a different way, and note, for future record that the total energy is:
+in a different way. We note, for future reference, that the total energy is:
 Etotal=-4.92489592898935E+01  
 
 ## 3 Another look at *fcc* Fe
@@ -247,21 +247,21 @@ not make any hypotheses on its magnetic structure, and run the calculation
 like the one for fcc Fe, anticipating only that the two spin directions are going to be different.  
 We will not even assume that the initial spins are of the same magnitude.  
   
-You can copy the file ~abinit/tests/tutorial/Input/tspin_3.in in Work_spin.
+You can copy the file ~abinit/tests/tutorial/Input/tspin_3.in to Work_spin.
 
 {% dialog tests/tutorial/Input/tspin_3.in %}
 
 This is your input file. You can modify the file tspin_x.files and immediately
-start running the calculation. Then, you should edit it. 
+start running the calculation. Then, you should edit it to understand its contents. 
 
 Note the values of [[spinat]]. In this job, we wish again to characterize the magnetic structure.  
 We are not going to use zeta as in the preceding calculation, but we will here
 use another feature of abinit: atom and angular momentum projected densities of state.  
-These are densities of state weighted by the projection of the wave functions
+These are densities of states weighted by the projection of the wave functions
 on angular momentum channels (that is spherical harmonics) centered on each atom of the system.  
-Note that theses DOS are computed with the tetrahedron method, which is rather
-time consuming and produces less smooth DOS than the smearing method. The time
-is strongly dependent on the number of kpoints and we use here only a reduced set.  
+Note that these DOS are computed with the tetrahedron method, which is rather
+time consuming and produces more accurate but less smooth DOS than the smearing method. The time
+is strongly dependent on the number of k-points, and we use here only a reduced set.  
 (This will take about 1.5 minutes on a modern computer)  
   
 To specify this calculation we need new variables, in addition to [[prtdos]] set now to 3:  
@@ -274,7 +274,7 @@ This will specify the atoms around which the calculation will be performed, and 
 We specifically select a new dataset for each atom, a non self-consistent
 calculation being run to generate the projected density of states.  
 First, we note that the value of the energy is: Etotal=-4.92489557316370E+01,
-which shows that we have attained presumably the same state as above.  
+which shows that we have attained essentially the same state as above.  
   
 The density of states will be in the files tspin_3o_DS2_DOS_AT0001 for the
 first atom, and tspin_3o_DS3_DOS_AT0002 for the second atom.  
@@ -287,7 +287,7 @@ magnetization on each atom. We note the Fermi level (echoed the file tspin_3o_DS
 If we have a look at the integrated site-projected density of states, we can
 compute the total moment on each atom. To this end, one can open the file
 tspin_3o_DS3_DOS_AT0002, which contains information pertaining to atom 2. This
-file is self-documented, and describes on each line, for spin up and spin down:  
+file is self-documented, and describes the line content, for spin up and spin down:  
 
 ```
 # energy(Ha)  l=0   l=1   l=2   l=3   l=4    (integral=>)  l=0   l=1   l=2 l=3   l=4  
@@ -302,8 +302,8 @@ There are apparently changes in the densities of states for all the channels,
 but besides the d-channels, these are indeed fluctuations. This is confirmed
 by looking at the integrated density of states which is different only for the
 d-channel. The difference between up and down is 0.68, in rough agreement
-(regarding our very rude methods of integration) with the previous
-calculation. Using a calculation with the same number of k points for the
+(regarding our very crude methods of integration) with the previous
+calculation. Using a calculation with the same number of k-points for the
 projected DOS, we can plot the up-down integrated dos difference for the d-channel. 
 
 ![](spin_assets/energy_diff_fccfe.jpg)
@@ -337,10 +337,10 @@ degeneracy is lifted according to the eigenvalues of the L+S operator
 After pseudization, the associated wave functions can be recovered by adding to usual pseudo-potential projectors a
 spin-orbit term of the generic form $v(r).|l,s\rangle L.S \langle l,s|$. 
 Not all potentials include this additional term, but it turns out that it is the case 
-for all the HGH type pseudopotentials.
+for the HGH type pseudopotentials.
 
-In a plane wave calculation, the wavefunctions will be two components
-spinors, that is will have a spin-up and a spin-down component but these
+In a plane wave calculation, the wavefunctions will be two component
+spinors, that is they will have a spin-up and a spin-down component, and these
 components will be coupled. This mean the size of the Hamiltonian matrix is quadrupled.
 
 We will consider here a heavier atom than Iron: *Tantalum*.  
