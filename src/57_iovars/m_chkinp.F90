@@ -812,6 +812,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
 
+     cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
+
    end if
 
 !  exchmix
@@ -2496,6 +2499,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%prtdosm==2.and.dt%pawprtdos/=2)then
      message = ' pawprtdos/=2  and prtdosm=2 are not compatible '
      MSG_ERROR(message)
+   end if
+
+!  prtefmas 
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
+   if(optdriver/=RUNL_RESPFN)then
+     cond_string(1)='optdriver' ; cond_values(1)=optdriver
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
    end if
 
 !  prtelf

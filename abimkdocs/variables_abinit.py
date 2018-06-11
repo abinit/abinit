@@ -3201,7 +3201,7 @@ Variable(
     abivarname="efmas",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_compulsory'],
+    topics=['EffectiveMass_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="EFfective MASs",
@@ -3225,7 +3225,7 @@ Variable(
     abivarname="efmas_bands",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_useful'],
+    topics=['EffectiveMass_useful'],
     dimensions=[2, '[[nkpt]]'],
     defaultval="The full range of band available in the calculation for each k-point.",
     mnemonics="EFfective MASs, BANDS to be treated.",
@@ -3241,7 +3241,7 @@ Variable(
     abivarname="efmas_calc_dirs",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_useful'],
+    topics=['EffectiveMass_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="EFfective MASs, CALCulate along DIRectionS",
@@ -3269,7 +3269,7 @@ Variable(
     abivarname="efmas_deg",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_expert'],
+    topics=['EffectiveMass_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="EFfective MASs, activate DEGenerate formalism",
@@ -3287,7 +3287,7 @@ Variable(
     abivarname="efmas_deg_tol",
     varset="dfpt",
     vartype="real",
-    topics=['EffMass_useful'],
+    topics=['EffectiveMass_useful'],
     dimensions="scalar",
     defaultval=1e-05,
     mnemonics="EFfective MASs, DEGeneracy TOLerance",
@@ -3303,7 +3303,7 @@ Variable(
     abivarname="efmas_dim",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_useful'],
+    topics=['EffectiveMass_useful'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="EFfective MASs, DIMension of the effective mass tensor",
@@ -3329,7 +3329,7 @@ Variable(
     abivarname="efmas_dirs",
     varset="dfpt",
     vartype="real",
-    topics=['EffMass_basic'],
+    topics=['EffectiveMass_basic'],
     dimensions=['3 or 2', '[[efmas_n_dirs]]'],
     defaultval=0,
     mnemonics="EFfective MASs, DIRectionS to be calculated",
@@ -3345,7 +3345,7 @@ Variable(
     abivarname="efmas_n_dirs",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_basic'],
+    topics=['EffectiveMass_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="EFfective MASs, Number of DIRectionS",
@@ -3359,7 +3359,7 @@ Variable(
     abivarname="efmas_ntheta",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_basic'],
+    topics=['EffectiveMass_basic'],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="EFfective MASs, Number of points for integration w/r to THETA",
@@ -3482,6 +3482,24 @@ Variable(
 This variable can be used to change the value of the Fermi level when
 performing electron-phonon calculations with [[optdriver]]==7. This variable
 has effect only if set to a non-zero value. See also [[eph_extrael]].
+""",
+),
+
+Variable(
+    abivarname="eph_frohlichm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electron-PHonon: FROHLICH Model",
+    text="""
+* If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian. 
+Then use it to compute the 
+change of electronic eigenvalues due to electron-phonon interaction, 
+using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation 
+as well as temperature dependence. 
 """,
 ),
 
@@ -13368,6 +13386,20 @@ The option prtefg is compatible with spin polarized calculations (see
 ),
 
 Variable(
+    abivarname="prtefmas",
+    varset="dfpt",
+    vartype="integer",
+    topics=['printing_prngs', 'EffectiveMass_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRint EFfective MASs data",
+    requires="[[efmas]]==1",
+    text="""
+  * If 1, at the end of an effective mass calculation ([[efmas]]=1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
+""",
+),
+
+Variable(
     abivarname="prteig",
     varset="files",
     vartype="integer",
@@ -14995,7 +15027,7 @@ Variable(
     abivarname="rfelfd",
     varset="dfpt",
     vartype="integer",
-    topics=['EffMass_compulsory', 'DFPT_basic'],
+    topics=['EffectiveMass_compulsory', 'DFPT_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Response Function with respect to the ELectric FielD",
@@ -15105,7 +15137,7 @@ dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
 dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
 irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
 these routines, the developper should pay a particular attention to the rfpert
-array, defined in the routine respfn.F90, as well as to the ipert local
+array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
 variable.
 """,
 ),
