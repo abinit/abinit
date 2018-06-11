@@ -132,6 +132,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_time,            only : cwtime
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
+ use m_frohlichmodel,   only : frohlichmodel
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -692,7 +693,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
 
-!  call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
+   call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
