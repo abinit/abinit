@@ -816,3 +816,9 @@ is very small.
 
 P890.1 (XG180504)
 Test v8#34 (Hybrid Monte-Carlo) from Serguei Prokhorenko gives randomly different results on nag@abiref.
+
+P890.2 (XG180609)
+Test v6_t52 (for electron-phonon).
+The tolerance is extremely large. Why is this test lacking so much portability ? Why is this not important ?
+At least this portability problem should be commented upon ?!
+

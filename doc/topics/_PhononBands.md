@@ -17,8 +17,7 @@ interpolation, the DOS can be produced (see [[cite:Lee1995]]), the phonon
 eigenenergies plotted along lines, the slope of the energy versus cristalline
 momentum evaluated (to give sound velocity).
 
-The two-phonon sum and difference spectra can also be obtained, see
-[[anaddb:dossum]].
+The two-phonon sum and difference spectra can also be obtained, see [[anaddb:dossum]].
 
 For the related computation of temperature-dependent properties, see [[topic:Temperature]].
 

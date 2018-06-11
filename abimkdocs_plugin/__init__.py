@@ -12,25 +12,34 @@ class AbiMkdocsPlugin(BasePlugin):
 
     def on_page_markdown(self, markdown, **kwargs):
         """
-        markdown: Markdown source text of page as string
-        page: mkdocs.nav.Page instance
-        config: global configuration object
-        site_navigation: global navigation object
+        The page_markdown event is called after the page's markdown is loaded from file
+        and can be used to alter the Markdown source text.
+        The meta-data has been stripped off and is available as page.meta at this point.
+
+        Args:
+            markdown: Markdown source text of page as string
+            page: mkdocs.nav.Page instance
+            config: global configuration object
+            site_navigation: global navigation object
 
         Returns:
             Markdown source text of page as string
         """
         page = kwargs["page"]
-        #print("page", page)
-        #print("input_path", page.input_path)
-        #print("page.meta", page.meta)
+        #print("page", page, "\ninput_path", page.input_path, "\npage.meta", page.meta)
         #if "authors" in page.meta:
         #    print("authors:", type(page.meta["authors"]), page.meta["authors"])
 
+        #config = kwargs["config"]
+        #for key, value in config["abimkdocs_links"].items():
+        #    markdown = markdown.replace(key, value)
+
+
+        # (Re)Add header with metadata and rpath
         mymeta = page.meta.copy()
         mymeta["rpath"] = "/" + page.input_path
 
-        header = "---\n" + "\n".join("%s: %s" % item for item in mymeta.items())  + "\n---\n\n"
+        header = "---\n" + "\n".join("%s: %s" % item for item in mymeta.items()) + "\n---\n\n"
         #print(header)
-        s =  header + markdown
-        return s
+
+        return header + markdown
