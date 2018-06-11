@@ -11,12 +11,12 @@ This lesson aims at showing how to get the following physical properties, for se
   * Frequency dependent linear dielectric tensor 
   * Frequency dependent second order nonlinear susceptibility tensor 
 
-in the simple "Random-Phase Approximation" or "Sum-over-states" approach. 
+in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of the [[help:optic]].
 
 This lesson should take about 1 hour.
 
-## 1 Computing the momentum matrix elements
+## Computing the momentum matrix elements
   
 *Before beginning, you might consider working in a different subdirectory from
 for the other lessons. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
@@ -37,9 +37,9 @@ We now examine the files.
 {% dialog tests/tutorespfn/Input/toptic_1.files tests/tutorespfn/Input/toptic_1.in %}
 
 The computation concerns a crystal of GaAs, in the zinc-blende structure (2 atoms per primitive cell).  
-The _toptic_1.files_ is a typical Abinit "files" file (nothing special). 
-By contrast, it is worthwhile to take some time to examine the input file _toptic_1.in_. 
-Examine it; it has six datasets. 
+The *toptic_1.files* is a typical Abinit *files file* (nothing special). 
+By contrast, it is worthwhile to take some time to examine the input file *toptic_1.in*. 
+Examine it, it has six datasets. 
 
 The first dataset is a quite standard self-consistent
 determination of the ground state for a fixed geometry. Only the occupied bands are treated. 
@@ -50,6 +50,7 @@ The k points are restricted to the Irreducible Brillouin Zone.
 The third dataset uses the result of the second one to produce the
 wavefunctions for all the bands, for the full Brillouin Zone 
 (this step could be skipped, but is included for later CPU time saving).  
+
 The fourth to sixth datasets correspond to the computation of the ddk matrix elements,
 that is, matrix elements of the $\partial/\partial k$ operators.
 Note that the number of bands is the same as for datasets 2 and 3.
@@ -78,7 +79,7 @@ $\partial/\partial k$ operators, one file for each Cartesian direction.
 Real preparation runs (with adequate k point sampling and cut-off energy) can
 last several hours (or even days) on such a PC.
 
-## 2 Computing the linear and nonlinear optical response
+## Computing the linear and nonlinear optical response
   
 The next step is to compute the linear and nonlinear optical response: once the
 momentum matrix elements are available, you are ready to determine the optical
@@ -95,7 +96,7 @@ help on various input parameters in this file, please see the [[help:optic]].
 {% dialog tests/tutorespfn/Input/toptic_2.in %}
 
 When you have read the input file, you can run the code, as usual, using the
-following command (assuming optic can be accessed thanks to "optic" - copy the
+following command (assuming optic can be accessed thanks to *optic* - copy the
 executable in the current directory if needed):
     
     optic < toptic_2.files > log &
@@ -105,18 +106,16 @@ Now, you can examine some of these output files.
 
 The headers contains information about the calculation. 
 See the [[help:optic#output|section 4]] of the Optic help file.
-These files can be plotted in xmgrace, please do so using the following
-command and look at the results. (If you do not have xmgrace installed on your
-computer, please get it from the Web, and install it, or alternatively, use
-your preferred plotting package).
+These files can be plotted in |xmgrace| or |gnuplot|. 
+If you do not have xmgrace installed on your computer, please get it from the Web, and install it, 
+or alternatively, use your preferred plotting package.
 
 We will first have a look at the linear optic file.
     
     xmgrace toptic_2_0001_0001-linopt.out
 
-This file contains the xx component of the dielectric tensor, and includes,
-as a function of energy, the magnitude, real, and imaginary parts of the tensor
-element.
+This file contains the *xx* component of the dielectric tensor, and includes,
+as a function of energy, the magnitude, real, and imaginary parts of the tensor element.
 On the graph, you should see three curves. One of them is positive, and always
 larger than the two others. It is the modulus of the dielectric function.
 Another one is also always positive, it is the imaginary part of the
@@ -127,9 +126,9 @@ in the very sparse k point sampling that we used in order to be able to perform
 the tutorial quickly.
 In the next section, we will improve this sampling, and start a convergence study.
 
-Concerning the non-linear optics, the graphs for the xyz components are also
-quite bad, with many isolated (but broadened) peaks. However, the yyy ones are
-"perfect" ... Indeed, they vanish due to symmetry reasons! 
+Concerning the non-linear optics, the graphs for the *xyz* components are also
+quite bad, with many isolated (but broadened) peaks. However, the *yyy* ones are
+*perfect*. Indeed, they vanish due to symmetry reasons! 
 Visualize the imaginary part with:
     
     xmgrace toptic_2_0002_0002_0002-ChiTotIm.out
@@ -138,21 +137,32 @@ and the Real part with:
     
     xmgrace toptic_2_0002_0002_0002-ChiTotRe.out
 
+
+!!! tip
+
+    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the results stored in the OPTIC.nc file:
+
+        abiopen.py toptic_2_OPTIC.nc --expose -sns=paper
+
+    ![](optic_assets/abiopen_toptic_2.png)
+
+
 This would be a good time to review [[help:optic#troubleshooting|section 5]] of the optic help file.
 
 For comparison, we have included in the tutorial, three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy
 and a number of bands that should be larger). You can visualize them as follows:
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/toptic_ref_0001_0001-linopt.out
+    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0001-linopt.out
 
 for the linear optics, obtained with a 28x28x28 grid (keeping everything else fixed), and
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/toptic_ref_0001_0002_0003-ChiTotIm.out
+    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
 
 as well as
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/toptic_ref_0001_0002_0003-ChiTotRe.out
+    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
 
 for the non-linear optics, obtained with a 18x18x18 grid (keeping everything else fixed).
 
@@ -160,11 +170,11 @@ Concerning the linear spectrum, we will now compare this (underconverged)
 result toptic_ref_0001_0001-linopt.out with experimental data and converged
 theoretical results.  
 
-The book by Cohen M.L. and Chelikowsky [[cite:cohen2012electronic]] presents a
+The book by Cohen M.L. and Chelikowsky [[cite:Cohen2012]] presents a
 comparison of experimental data with the empirical pseudopotential method
 spectrum. If you do not have access to this book, you can see an experimental
-spectrum in [[cite:philipp1963hr]],
-and a theoretical spectrum in [[cite:huang1993calculation]], as well as
+spectrum in [[cite:Philipp1963]],
+and a theoretical spectrum in [[cite:Huang1993]], as well as
 other sources.
 
 We discuss first the imaginary spectrum. Prominent experimental features of
@@ -188,7 +198,7 @@ approximate heights of 7 and 25. Some comments are in order:
     Still, trends should be correct (e.g. change of the peak positions with pressure, 
     comparison between different semiconductors, etc.). 
 
-  * In many early theoretical spectra (including the ones in [[cite:cohen2012electronic]]),
+  * In many early theoretical spectra (including the ones in [[cite:Cohen2012]]),
     the agreement between the theoretical and experimental band gap is artificially good. 
     In straight DFT, one cannot avoid the band gap problem. However, it is possible to 
     add an artificial "scissor shift", to make the theoretical band gap match the experimental one. 
@@ -211,7 +221,7 @@ increasing the cut-off energy, the k point sampling and the number of unoccupied
 
 Similar considerations apply to the non-linear spectra.
 
-## 3 Faster computation of the imaginary part of the linear optical response
+## Faster computation of the imaginary part of the linear optical response
   
 In the case of the imaginary part of the linear optical response, there are
 several points that make the calculation easier:

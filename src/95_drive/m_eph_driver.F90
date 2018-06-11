@@ -624,7 +624,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
    call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
- else
+ endif
+
+!I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
+ if(dtset%eph_frohlichm/=0)then
    
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))

@@ -309,6 +309,7 @@ Look at the `tbase1_1.out` file at the same time.
 
 You have read completely an output file! 
 Could you answer the following questions?
+(There might be numerical differences, from platform to platform, in the quoted results!)
 
 ??? note "Q1. How many SCF cycles were needed to have the [[toldfe]] criterion satisfied?"
 
@@ -381,14 +382,23 @@ Could you answer the following questions?
         ,     Maximum=    2.6907E-01  at reduced coord.    0.0000    0.0000    0.0000
 
 
-!!! warning
+!!! tip
 
-    There might be numerical differences, from platform to platform, in the quoted results!
+    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the SCF cycle from the main output file:
+
+        abiopen.py tbase1_1.out --expose --seaborn
+
+    ![](base1_assets/abiopen_tbase1_1.png)
+
+    For further info, please consult this 
+    [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/base1/lesson_base1.ipynb)
+    that reformulates the present tutorial using AbiPy.
 
 
 ## Computation of the interatomic distance (method 1)
   
-Starting from now, everytime a new input variable is mentioned, 
+Starting from now, every time a new input variable is mentioned, 
 you should read the corresponding descriptive section in the ABINIT help file.
 
 We will now complete the description of the meaning of each term: there are
@@ -537,6 +547,15 @@ often observed for a value converging to zero (remember, we ask the code to
 determine the equilibrium geometry, that is, forces should be zero) when the
 same computation is done on different platforms.
 
+!!! tip
+
+    With |AbiPy|, we can analyze easily the results of the structural relaxation 
+    with the |abiopen| script:
+
+        abiopen.py tbase1_3o_HIST.nc --expose --seaborn
+
+    ![](base1_assets/abiopen_tbase1_3o_HIST.png)
+
 ## Computation of the charge density
 
 The charge density has already been computed, for all geometries, in the
@@ -571,7 +590,14 @@ For further treatment, you might choose to select another option than 6. In
 particular, if you have access to MATLAB, choose option 5. With minor
 modifications (set ngx=ngy=ngz to 30) you will be able to use the file [dim.m](base1_assets/dim.m)
 to visualize the 3-Dimensional isosurfaces. 
-Another option might be to use the XCrysDen software, for which you need to use option 9.
+Another option might be to use the |xcrysden| software, for which you need to use option 9.
+
+If you have a density file in netcdf format, it's possibile to use |AbiPy| to
+export the data in different formats and invoke an external graphical tool. 
+This is, for example, the density isosurface produced with |vesta|
+as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/base1/lesson_base1.ipynb#Analysis-of-the-charge-density)
+
+![](https://github.com/abinit/abipy_assets/blob/master/h2_density.png?raw=true)
 
 ## Computation of the atomisation energy
   

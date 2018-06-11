@@ -481,10 +481,10 @@ Variable(
     mnemonics="BanDs for GW calculation",
     requires="[[optdriver]] in [4, 7]",
     text="""
-For each k-point with number *ikptgw* in the range (1:[[nkptgw]]) and each spin
-index isppol, **bdgw(1,ikptgw,isppol)** is the number of the lowest band for
+For each k-point with number `ikptgw` in the range (1:[[nkptgw]]) and each spin
+index `isppol`, [[bdgw]](1,`ikptgw`,`isppol`) is the number of the lowest band for
 which the self-energy computation must be done.
-**bdgw(2,ikptgw,isppol)** gives the index of the highest band for which the self-energy computation must be done.
+[[bdgw]](2,`ikptgw`,`isppol`) gives the index of the highest band for which the self-energy computation must be done.
 
 !!! note
 
@@ -499,7 +499,7 @@ When [[gwcalctyp]] >= 20, the quasiparticle wavefunctions are computed and
 represented as linear combination of Kohn-Sham wavefunctions. In this case
 [[bdgw]] designates the range of KS wavefunctions used as basis set. For each
 k-point, indeed, the quasiparticle wavefunctions are expanded considering only
-the KS states between **bdgw(1,ikptgw,isppol)** and **bdgw(2,ikptgw,isppol)**.
+the KS states between [[bdgw]](1,`ikptgw`,`isppol`) and [[bdgw]](2,`ikptgw`,`isppol`).
 
 For self-consistent calculations, on the other hand, the basis set used to
 expand the GW wavefunctions should include all the degenerate states belonging
@@ -735,24 +735,25 @@ Variable(
     mnemonics="Bethe-Salpeter ALGORITHM",
     requires="[[optdriver]] == 99",
     text="""
-The bs_algorithm input variable defines the algorithm employed to calculate
-the macroscopic dielectric function. Possible values are 1, 2 or 3:
+This input variable defines the algorithm employed to calculate the macroscopic dielectric function.
+Possible values are in [1, 2, 3]:
 
 * 1 --> The macroscopic dielectric is obtained by performing a direct diagonalization
   of the excitonic Hamiltonian. Advantages: It gives direct access to the excitonic eigenvalues
   as well as to the oscillator strengths. Drawbacks: It is a very CPU- and memory-consuming approach
-  as the size of the Hamiltonian scales as (nk*nc*nv)**2 where nk is the number of k-point
-  in the FULL Brillouin zone, and nc and nv are the number of conduction and valence states, respectively.
-  Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
+  as the size of the Hamiltonian scales as $(n_k * n_c * n_v)^2$ where $n_k$ is the number of k-point
+  in the **full** Brillouin zone, and $n_c$ and $n_v$ are the number of conduction and valence states, respectively.
+  Pros: It can be used both for resonant-only and resonant + coupling calculations (non Tamm-Dancoff approximation).
 
 * 2 --> Haydock iterative method. The macroscopic dielectric function is obtained by iterative applications
   of the Hamiltonian on a set of vectors in the electron-hole space.
   Advantages: It is less memory demanding and usually faster than the direct diagonalization provided
   that [[zcut]] is larger than the typical energy spacing of the eigenvalues. Drawbacks:
-  It is an iterative method therefore the convergence with respect to bs_haydock_niter should be checked.
+  It is an iterative method therefore the convergence with respect to [[bs_haydock_niter]] should be checked.
   It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
-  For the time being [[bs_algorithm]]=2 cannot be used for calculations in which the coupling
+  For the time being [[bs_algorithm]] = 2 cannot be used for calculations in which the coupling
   term is included (Tamm-Dancoff approximation).
+
 * 3 --> Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
   Only available for resonant calculations (Tamm-Dancoff approximation).
 """,
@@ -768,10 +769,10 @@ Variable(
     mnemonics="Bethe-Salpeter CALCulation TYPE",
     requires="[[optdriver]] == 99",
     text=r"""
-Possible values are 1,2,3.
+Possible values are in [1, 2, 3].
 
-* 1 --> use the KS eigenvalues and wave functions stored in the KSS file to construct the transition space
-* 2 --> The transition space is constructed with Kohn-Sham orbitals but the energies are read from the external GW file
+* 1 --> use the KS eigenvalues and wave functions stored in the WFK file to construct the transition space
+* 2 --> The transition space is constructed with Kohn-Sham orbitals but the energies are read from an external GW file
 * 3 --> QP amplitudes and energies will be read from the QPS file and used to construct H_ex.
   Not coded yet because <\psi|r|\psj>^QP should be calculated taking into account the non-locality
   of the self-energy in the commutator [H,r].
@@ -787,23 +788,27 @@ Variable(
     defaultval=11,
     mnemonics="Bethe-Salpeter COULOMB TERM",
     requires="[[optdriver]] == 99",
-    text="""
+    text=r"""
 This variable governs the choice among the different options that are
 available for the treatment of Coulomb term of the Bethe-Salpeter Hamiltonian.
-[[bs_coulomb_term]] is the concatenation of two digits, labelled (A) and (B).
+**bs_coulomb_term** is the concatenation of two digits, labelled (A) and (B).
 
-The first digit (A) can assume the values 0,1,2:
+The first digit (A) can assume the values 0, 1, 2:
 
   * 0 --> The Coulomb term is not computed. This choice is equivalent to computing the RPA spectrum
     but using the representation in transition space instead of the more efficient approach based on the sum over states.
-  * 1 --> The Coulomb term is computed using the screened interaction read from an external SCR file (standard excitonic calculation).
+
+  * 1 --> The Coulomb term is computed using the screened interaction read
+    from an external SCR file (standard excitonic calculation).
+
   * 2 --> The Coulomb term is computed using a model screening function
     (useful for convergence studies or for reproducing published results).
 
 The second digit (B) can assume the values 0,1:
 
-  * 0 --> Use a diagonal approximation for W_GG' (mainly used for accelerating convergence studies).
-  * 1 --> The Coulomb term is correctly evaluated using the truly non-local W(r,r').
+  * 0 --> Use a diagonal approximation for $W_{\GG\GG'}$ (mainly used for accelerating convergence studies).
+
+  * 1 --> The Coulomb term is correctly evaluated using the truly non-local screening $W(\rr,\rr')$.
 """,
 ),
 
@@ -817,13 +822,14 @@ Variable(
     mnemonics="Bethe-Salpeter COUPLING",
     requires="[[optdriver]] == 99",
     text=r"""
-The [[bs_coupling]] input variable defines the treatment of the coupling block
-of the Bethe-Salpeter Hamiltonian. Possible values are 0,1.
+The **bs_coupling** input variable defines the treatment of the coupling block
+of the Bethe-Salpeter Hamiltonian. Possible values are 0, 1.
 
   * 0 --> The coupling block is neglected (the so-called Tamm-Dancoff approximation).
     The code runs faster and the Hamiltonian matrix requires less memory (factor 4).
-    It is a good approximation for the absorption spectrum which only requires the knowledge of Im(\epsilon).
+    It is a good approximation for the absorption spectrum which only requires the knowledge of $\Im(\epsilon)$.
     The reliability of this approximation should be tested in the case of EELF calculations.
+
   * 1 --> The coupling term is included (non Tamm-Dancoff approximation).
 """,
 ),
@@ -838,8 +844,8 @@ Variable(
     mnemonics="Bethe-Salpeter Electron-Hole CUTOFF",
     requires="[[optdriver]] == 99",
     text="""
-It is used to define a cutoff in the e-h basis set. Only those transitions
-whose energy is between bs_eh_window(1) and bs_eh_window(2) will be considered
+Used to define a cutoff in the e-h basis set. Only those transitions
+whose energy is between bs_eh_cutoff(1) and bs_eh_cutoff(2) will be considered
 in the construction of the e-h Hamiltonian.
 """,
 ),
@@ -876,8 +882,7 @@ Variable(
 **bs_freq_mesh(2)** gives the last frequency for the calculation of the
 macroscopic dielectric function. If zero, **bs_freq_mesh(2)** is set automatically to MAX(resonant_energy) + 10%.
 
-**bs_freq_mesh(3)** gives the step of the linear mesh used for evaluating the
-macroscopic dielectric function.
+**bs_freq_mesh(3)** gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
 """,
 ),
 
@@ -889,17 +894,17 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter HAYdock TERMinator",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
-    text="""
-Defines how to terminate the continued fraction expression for the dielectric
-function. The terminator reduces the number of iterations needed to converge
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
+    text=r"""
+Defines how to terminate the continued fraction expression for the dielectric function.
+The terminator reduces the number of iterations needed to converge
 by smoothing the oscillation in the high energy part of the spectrum
 
   * 0 --> No terminator. The contribution given by the terms missing in the Lanczos chain are set to zero.
   * 1 --> Use the terminator function. The particular expression depends on the type of calculation:
-    In the resonant-only case, the a_i and b_i coefficients for i > niter, are replaced by their values at i=niter.
-    Even the coupling block is included, the terminator function described in
-    D. Rocca, R. Gebauer, Y. Saad, S. Baroni, J. Chem. Phys. 128, 154105 (2008) is used.
+    In the resonant-only case, the $a_i$ and $b_i$ coefficients for $i > \text{niter}$, are replaced
+    by their values at $i = \text{niter}$.
+    If the coupling block is included, the terminator function described in [[cite:Rocca2008]].
 """,
 ),
 
@@ -911,12 +916,12 @@ Variable(
     dimensions="scalar",
     defaultval=100,
     mnemonics="Bethe-Salpeter HAYDOCK Number of ITERations",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text="""
-[[bs_haydock_niter]] defines the maximum number of iterations used to
-calculate the macroscopic dielectric function. The iterative algorithm stops
-when the difference between two consecutive evaluations of the optical spectra
-is less than [[bs_haydock_tol]].
+**bs_haydock_niter** defines the maximum number of iterations used to
+calculate the macroscopic dielectric function.
+The iterative algorithm stops when the difference between two consecutive
+evaluations of the optical spectra is less than [[bs_haydock_tol]].
 """,
 ),
 
@@ -928,16 +933,15 @@ Variable(
     dimensions=[2],
     defaultval=[0.02, 0],
     mnemonics="Bethe-Salpeter HAYDOCK TOLerance",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]]==2",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text="""
-Defines the convergence criterion for the Haydock iterative method. The
-iterative algorithm stops when the difference between two consecutive
-evaluations of the macroscopic dielectric function is less than
-**bs_haydock_tol(1)**. The sign of **bs_haydock_tol(1)** defines how to
-estimate the convergence error. A negative value signals that the converge
-should be reached for each frequency (strict criterion), while a positive
-value indicates that the converge error is estimated by averaging over the
-entire frequency range (mild criterion).
+Defines the convergence criterion for the Haydock iterative method.
+The iterative algorithm stops when the difference between two consecutive
+evaluations of the macroscopic dielectric function is less than **bs_haydock_tol(1)**.
+The sign of **bs_haydock_tol(1)** defines how to estimate the convergence error.
+
+A negative value signals that the converge should be reached for each frequency (strict criterion), while a positive
+value indicates that the converge error is estimated by averaging over the entire frequency range (mild criterion).
 
 **bs_haydock_tol(2)** defines the quantity that will be checked for convergence:
 
@@ -955,11 +959,10 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Bethe-Salpeter INTERPolation K-point MULTiplication factors",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_kmult]] defines the number of divisions used to generate the dense
-mesh in the interpolation. [[ngkpt]] of the dense mesh =
-**bs_interp_kmult(:)** * [[ngkpt]] of the coarse mesh.
+**bs_interp_kmult** defines the number of divisions used to generate the dense mesh in the interpolation.
+[[ngkpt]] of the dense mesh = **bs_interp_kmult(:)** * [[ngkpt]] of the coarse mesh.
 """,
 ),
 
@@ -971,7 +974,7 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="Bethe-Salpeter INTERPolation Method3 WIDTH",
-    requires="[[bs_interp_mode]] ==3 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
+    requires="[[bs_interp_mode]] == 3 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 Defines the width of the region where divergence treatment is applied for BSE interpolation
 """,
@@ -985,12 +988,12 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter INTERPolation METHOD",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_method]] selects the method of interpolation:
+*bs_interp_method* selects the interpolation method::
 
-  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see Comput. Phys. Commun. 203, 83 (2016))
-  * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and Phys. Rev. B 62, 4927 (2000))
+  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2015]]).
+  * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and [[cite:Rohlfing2000]])
 """,
 ),
 
@@ -1004,7 +1007,7 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation MODE",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_mode]] selects the mode of interpolation:
+*bs_interp_mode* selects the mode of interpolation:
 
   * 0 --> No interpolation. Standard Bethe-Salpeter computation is performed
   * 1 --> Simple interpolation
@@ -1023,9 +1026,8 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation PREParation",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-[[bs_interp_prep]] allows to trigger the preparation of the interpolation with
-method 2 or method 3. It generates the decomposition of BSR in a,b,c
-coefficients used for the interpolation.
+*bs_interp_prep* allows to trigger the preparation of the interpolation with method 2 or method 3.
+It generates the decomposition of BSR in a, b, c coefficients used for the interpolation.
 """,
 ),
 
@@ -1037,9 +1039,9 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
     text="""
-Gives the index of the neighbour that is used for Rohlfing & Louie method
+Gives the index of the neighbour that is used in the Rohlfing and Louie method ([[cite:Rohlfing2000]])
 """,
 ),
 
@@ -1055,8 +1057,8 @@ Variable(
     text="""
 This variable defines the index of the lowest occupied band used for the
 construction of the electron-hole basis set. For spin polarized calculations,
-one must provide two separated indices for spin up and spin down. An
-additional cutoff energy can be applied by means of the bs_eh_window input variable.
+one must provide two separated indices for spin up and spin down.
+An additional cutoff energy can be applied by means of the [[bs_eh_cutoff]] input variable.
 """,
 ),
 
@@ -1070,9 +1072,9 @@ Variable(
     mnemonics="Bethe-Salpeter Number of STATES",
     requires="[[optdriver]] == 99 and [[bs_algorithm]] in [2, 3]",
     text="""
-[[bs_nstates]] defines the maximum number of excitonic states calculated in
-the direct diagonalization of the excitonic matrix or in the conjugate-
-gradient method. The number of states should be sufficiently large for a
+**bs_nstates** defines the maximum number of excitonic states calculated in
+the direct diagonalization of the excitonic matrix or in the conjugate-gradient method.
+The number of states should be sufficiently large for a
 correct description of the optical properties in the frequency range of interest.
 """,
 ),
@@ -1164,23 +1166,27 @@ user reads the description of the input variables [[freqim_alpha]],
 The integration to be performed for each matrix element of the self energy
 along the imaginary axis is of the form:
 
-![](variables_assets/self_energy_cd.png)
+$$ \langle i|\Sigma(\omega)|j \rangle  \propto
+   \sum_s C_s \int_0^\infty d(i\omega^\prime)
+   \frac{(\omega - \epsilon_s)}{(\omega-\epsilon_s)^2 + i{\omega^\prime}^2}
+   f(i\omega^\prime), 
+$$
 
-Where  _ ω _ is the frequency point along the real axis,  _ ε s  _ is an
-eigenvalue, and  _i ω' _ is the variable along the imaginary axis. Thus the
+where  $\omega$ is the frequency point along the real axis, $\epsilon_s$ is an
+eigenvalue, and  $i\omega^\prime$ is the variable along the imaginary axis. Thus the
 function to be integrated is a Lorentzian weight function centred on the
-origin (whose FWHM is decided by |  _ ω \- ε s  _ |), times a function. The
+origin (whose FWHM is decided by $|\omega-\epsilon_s|$), times a function. The
 function is related to the inverse dielectric matrix. It might have a peaked
 structure near the origin and is very smooth otherwise. the function decays
-asymptotically as  1 / _i ω' _, so the whole integral converges as this to
+asymptotically as  $1/i\omega^\prime$, so the whole integral converges as this to
 the third power.
 
-  * **cd_frqim_method = 1 - Histogram:** This is the **default** method where the function  _f(i ω') _ is approximated by a histogram, and the Lorentzian is integrated analytically in each sub-interval. See the section on grids below for a description of the default grid. This method combined with the default grid is the fastest and optimised for the use of few points along the imaginary axis.
-  * **cd_frqim_method = 2 - Trapezoid:** The next step up from the histogram approximation in the previous method. The integration region is transformed  _[0, ∞[ -> [0,1] _ with a proper weight depending on the width of the Lorentzian. In this space  _f(i ω') _ is approximated by a linear function between grid points (trapezoids), and the integrand is integrated analytically in each sub-interval. This method tends to slightly overestimate contributions while the default method tends to slightly underestimate them, so the results from methods 1 and 2 should bracket the converged values. The asymptotic behaviour is explicitly taken into account by a fit using the last two grid points.
-  * **cd_frqim_method = 3, 4, 5 - Natural Spline:** The function is transformed  _[0, ∞[ -> [0,1] _ . In this space  _f(i ω') _ is approximated by a natural spline function whose starting and ending sections are linear. This transform is chosen so that the function should approach a linear function asymptotically as the integration interval approaches 1, so that the asymptotic behaviour is automatically taken into account. For each Lorentzian width (determined by |  _ ω \- ε s  _ |) the integrand is appropriately scaled in the interval  _[0,1]_, and a nested Gauss-Kronrod (GK) numerical integration rule is performed. The integrand is evaluated at the GK nodes by means of a spline-fit. The order of the GK rule is controlled by the index of the method:
-    * **3 --> Gauss 7 point, Kronrod 15 point rule **
-    * **4 --> Gauss 11 point, Kronrod 23 point rule **
-    * **5 --> Gauss 15 point, Kronrod 31 point rule **
+  * **cd_frqim_method = 1 - Histogram:** This is the **default** method where the function  $f(i\omega^\prime)$ is approximated by a histogram, and the Lorentzian is integrated analytically in each sub-interval. See the section on grids below for a description of the default grid. This method combined with the default grid is the fastest and optimised for the use of few points along the imaginary axis.
+  * **cd_frqim_method = 2 - Trapezoid:** The next step up from the histogram approximation in the previous method. The integration region is transformed  $[0, \infty] \rightarrow [0,1]$ with a proper weight depending on the width of the Lorentzian. In this space  $f(i\omega^\prime)$ is approximated by a linear function between grid points (trapezoids), and the integrand is integrated analytically in each sub-interval. This method tends to slightly overestimate contributions while the default method tends to slightly underestimate them, so the results from methods 1 and 2 should bracket the converged values. The asymptotic behaviour is explicitly taken into account by a fit using the last two grid points.
+  * **cd_frqim_method = 3, 4, 5 - Natural Spline:** The function is transformed  $[0, \infty] \rightarrow [0,1]$. In this space  $f(i\omega^\prime)$ is approximated by a natural spline function whose starting and ending sections are linear. This transform is chosen so that the function should approach a linear function asymptotically as the integration interval approaches 1, so that the asymptotic behaviour is automatically taken into account. For each Lorentzian width (determined by $|\omega-\epsilon_s|$) the integrand is appropriately scaled in the interval $[0,1]$, and a nested Gauss-Kronrod (GK) numerical integration rule is performed. The integrand is evaluated at the GK nodes by means of a spline-fit. The order of the GK rule is controlled by the index of the method:
+    * 3 --> Gauss 7 point, Kronrod 15 point rule.
+    * 4 --> Gauss 11 point, Kronrod 23 point rule.
+    * 5 --> Gauss 15 point, Kronrod 31 point rule.
 There is rarely any difference to machine precision between these rules, and
 the code will issue a warning if a higher-order rule is recommended.
 
@@ -1196,30 +1202,30 @@ the **Mrgscr** utility and plotting them for visual inspection.
 
   * **Default** - The default grid is an exponentially increasing grid given by the formula:
 
-![](variables_assets/cd_default_grid.png)
+$$ i\omega^\prime_k = \frac{\omega_p}{\alpha-2}\left[ e^{\frac{2k}{N+1} \ln(\alpha-1)} -1 \right]. $$
 
-Here  _ ω p  _ is the plasma frequency (by default determined by the average
-density of the system, but this can be overridden by setting [[ppmfrq]]).  _N_
-is the total number of grid points (set by [[nfreqim]]).  _ α _ is a parameter
+Here  $\omega_p$ is the plasma frequency (by default determined by the average
+density of the system, but this can be overridden by setting [[ppmfrq]]).  $N$
+is the total number of grid points (set by [[nfreqim]]). $\alpha$ is a parameter
 which determines how far out the final grid point will lie. The final point
-will be at  _ α*ω p  _ (the default is  _ α = 5 _, and was hard-coded in
+will be at  $\alpha*\omega_p$ (the default is  $\alpha = 5$, and was hard-coded in
 older versions of ABINIT). This grid is designed so that approximately half
 the grid points are always distributed to values lower than the plasma
 frequency, in order to resolve any peaked structure. If one seeks to increase
 the outermost reach by increasing [[ppmfrq]] one must simultaneously take care
 to increase [[nfreqim]] in order to have the appropriate resolution for the
 low-frequency region. In more recent versions of ABINIT one can also simply
-adjust the parameter  _ α _ by using [[freqim_alpha]]. This grid is optimised
+adjust the parameter  $\alpha$ by using [[freqim_alpha]]. This grid is optimised
 for speed and accurate results with few grid points for **cd_frqim_method = 1**.
 
   * **Inverse z transform** - This grid is activated by the use of the variable [[gw_frqim_inzgrid]].
-    This is the standard  _[0, ∞[ -> [0,1] _ transform using the formula:
+    This is the standard  $[0, \infty] \rightarrow [0,1]$ transform using the formula:
 
-![](variables_assets/cd_inzgrid.png)
+$$ i\omega^\prime = \omega_p \frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The grid points are then picked by an equidistant grid (number of
-points set by [[nfreqim]]) in the interval  _z ⊂ [0,1] _ . This grid can
+points set by [[nfreqim]]) in the interval  $z \subset [0,1]$ . This grid can
 easily be uniquely converged by just increasing [[nfreqim]]. Again the points
 are distributed so that approximately half of them lie below the plasma
 frequency.
@@ -1293,7 +1299,7 @@ Variable(
     requires="[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29] and [[cd_customnimfrqs]] != 0",
     text="""
 [[cd_imfrqs]] specifies the grid points for the imaginary axis. The number of
-frequencies is set by the value of [[cd_customnimfrqs]]. Example:
+frequencies is set by the value of [[cd_customnimfrqs]]. For example,
 
     cd_customnimfrqs   5
     nfreqim            5
@@ -1880,7 +1886,7 @@ Variable(
     mnemonics="DELAY between trials to PERMUTE atoms",
     text="""
 Delay (number of time steps) between trials to permute two atoms, in view of
-accelerated search of minima. Still in development. 
+accelerated search of minima. Still in development.
 
 See the routine moldyn.F90 and [[signperm]] for additional information.
 
@@ -2225,19 +2231,19 @@ Variable(
 on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
 Usefull only when [[ionmov]]==2 and [[optcell]]/=0, that is, cell optimization.
 
-In the default mode ([[chkdilatmx]]=1), when the [[dilatmx]] threshold is exceeded, 
+In the default mode ([[chkdilatmx]]=1), when the [[dilatmx]] threshold is exceeded,
 ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
 step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
-booking of a larger planewave basis, but will not rescale the tentative new primitive vectors 
+booking of a larger planewave basis, but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] treshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
 this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0 .
 
-Detailed explanation : The memory space for the planewave basis set is defined 
+Detailed explanation : The memory space for the planewave basis set is defined
 by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
 internally "ecut_eff". Other uses of [[ecut]] are not modified when [[dilatmx]]>1.0.
 Still, operations (like scalar products) are taking into account these fake non-used planewaves,
@@ -3269,8 +3275,8 @@ Variable(
     mnemonics="EFfective MASs, activate DEGenerate formalism",
     requires="[[efmas]] > 0",
     text="""
-Activate (==1) or not (==0) the treatment of degenerate bands 
-(criterion [[efmas_deg_tol]] is used to determine whether bands are degenerate). 
+Activate (==1) or not (==0) the treatment of degenerate bands
+(criterion [[efmas_deg_tol]] is used to determine whether bands are degenerate).
 Also compute the transport equivalent effective mass (see [[cite:Mecholsky2014]]).
 
 [[efmas]]=0 should only be used for testing purposes.
@@ -3882,7 +3888,7 @@ Variable(
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
 
-< **k-q**, b1 | e^{-i ( **q+G** ). **r** } | **k** b2  >
+$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \\rangle $$
 
 In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
@@ -4008,11 +4014,10 @@ Variable(
 ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
 [[freqim_alpha]] determines the location of the maximum frequency point along
 the imaginary axis if the default grid is used in Contour Deformation
-(numerical integration) calculations. It is set as  _ α*ω p  _, where  _ ω p
-_ is the plasma frequency determined by the average density of the system
+(numerical integration) calculations. It is set as  $\alpha*\omega_p$, where $\omega_p$
+is the plasma frequency determined by the average density of the system
 (this can be set by hand by using the variable [[ppmfrq]]). See the section on
 grids in the descriptive text for [[cd_frqim_method]] for a detailed
-description of the formula.
 """,
 ),
 
@@ -5135,13 +5140,13 @@ Variable(
     mnemonics="GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid",
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
-[[gw_frqim_inzgrid]] creates gridpoints along the **imaginary** frequency axis
-by using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
+[[gw_frqim_inzgrid]] creates grid points along the **imaginary** frequency axis
+by using an equidistant grid in the variable  $z \subset [0,1]$ where the transform
 is:
 
-![](variables_assets/cd_inzgrid.png)
+$$ i\omega^\prime = w_p \\frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here  $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqim]])
 and the points are distributed so that half of them lie below the plasma frequency.
 """,
@@ -5158,16 +5163,16 @@ Variable(
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[gw_frqre_inzgrid]] creates grid points along the **real** frequency axis by
-using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
+using an equidistant grid in the variable  $z \subset [0,1]$ where the transform
 is:
 
-![](variables_assets/cd_inzgrid_re.png)
+$$ \omega = \omega_p \\frac{z}{1-z}. $$
 
-Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
+Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqre]] )
 and the points are distributed so that half of them lie below the plasma
 frequency. This is useful in conjuction with [[gw_frqim_inzgrid]] if one needs
-to use a grid which maps  _[0, ∞[ -> [0,1] _. Note that typically _many_ more
+to use a grid which maps $[0, \infty] \\rightarrow [0,1]$. Note that typically _many_ more
 points are needed along the real axis in order to properly resolve peak
 structures. In contrast, both the screening and self-energy are very smooth
 along the imaginary axis. Also, please note that this is **not** an efficient
@@ -5189,10 +5194,10 @@ Variable(
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[gw_frqre_tangrid]] defines a nonuniform grid to be used in frequency, with
-stepsize increasing proportional to tan(x). This makes the grid approximately
+stepsize increasing proportional to $\\tan(x)$. This makes the grid approximately
 linear to start with, with a rapid increase towards the end. Also, this is the
 grid which gives equal importance to each point used in the integration of a
-function which decays as 1/x^2. To be used in conjunction with [[nfreqre]],
+function which decays as $1/x^2$. To be used in conjunction with [[nfreqre]],
 [[cd_max_freq]] and [[cd_halfway_freq]] which determine the parameters of the
 transformed grid.
 """,
@@ -5211,8 +5216,8 @@ Variable(
 [[gw_invalid_freq]] sets the procedure to follow when a PPM frequency is
 invalid (negative or imaginary).
 
-  * [[gw_invalid_freq]]=0: Drop them as proposed in Appendix B of PRB 34, 8, 5390, 1986.
-  * [[gw_invalid_freq]]=1: Set them to 1 hartree, as done for the PPM of Godby-Needs.
+  * [[gw_invalid_freq]]=0: Drop them as proposed in Appendix B of [[cite:Hybertsen1986]].
+  * [[gw_invalid_freq]]=1: Set them to 1 hartree, as done for the PPM of Godby-Needs [[cite:Godby1989]].
   * [[gw_invalid_freq]]=2: Set them to infinity.
 """,
 ),
@@ -5232,12 +5237,12 @@ Salpeter calculations, although the actual meaning of the variable depends on
 the particular run-level (see discussion below).
 
 [[gw_nqlwl]] defines the number of directions in reciprocal space used to
-describe the non-analytical behaviour of the heads (G = G'=0) and the wings
-(G=0 or G'=0) of the dielectric matrix in the optical limit (i.e. for q
+describe the non-analytical behaviour of the heads ($G = G'=0$) and the wings
+($G=0$ or $G'=0$) of the dielectric matrix in the optical limit (i.e. for $q$
 tending to zero). The number of directions is specified by the additional
 variable [[gw_qlwl]].
 
-When [[optdriver]]=3, [[gw_nqlwl]] and **gw_qlwl** define the set of "small" q
+When [[optdriver]]=3, [[gw_nqlwl]] and **gw_qlwl** define the set of "small" $q$
 that will be calculated and stored in the final SCR file. Therefore, the two
 variables can be used to analyze how the optical spectra depend on the
 direction of the incident phonon (useful especially in anisotropic systems).
@@ -5427,18 +5432,18 @@ Variable(
 [[gwcalctyp]] governs the choice between the different capabilities of the GW
 code.
 
-  * 0 <= [[gwcalctyp]] <= 9: standard "1 shot" quasiparticle method
-  * 10 <= [[gwcalctyp]] <= 19: self-consistent quasiparticle method on energies only
-  * 20 <= [[gwcalctyp]] <= 29: self-consistent quasiparticle method on energies and wavefunctions
+  * 0 <= [[gwcalctyp]] <= 9: standard "1 shot" quasiparticle method.
+  * 10 <= [[gwcalctyp]] <= 19: self-consistent quasiparticle method on energies only.
+  * 20 <= [[gwcalctyp]] <= 29: self-consistent quasiparticle method on energies and wavefunctions.
 
-  * [[gwcalctyp]] = 0, 10, or 20: standard Plasmon-Pole model GW calculation
+  * [[gwcalctyp]] = 0, 10, or 20: standard Plasmon-Pole model GW calculation.
   * [[gwcalctyp]] = 1: GW calculation where the self-energy along the real axis is obtained by performing the analytic continuation from the imaginary axis to the full complex plane via the Pade approximant. Only available for standard "1 shot" quasiparticle method.
-  * [[gwcalctyp]] = 2, 12, or 22: GW calculation using numerical integration (contour deformation method, see e.g. S. Lebegue _et al._ PRB **67**, 155208 (2003).)
-  * [[gwcalctyp]]  = 5, 15, or 25: Hybrid functional or Hartree-Fock calculation, with the identifier of the functional given by [[ixc_sigma]]. See the latter for the definition of other related variables.
-  * [[gwcalctyp]] = 6, 16, or 26: Screened Exchange calculation
-  * [[gwcalctyp]] = 7, 17, or 27: COHSEX calculation
-  * [[gwcalctyp]] = 8, 18, or 28: model GW calculation following S. Faleev _et al._ PRL **93**, 126406 (2004) using a Plasmon-Pole model
-  * [[gwcalctyp]]  = 9, 19, or 29: model GW calculation following S. Faleev _et al._ PRL **93**, 126406 (2004) using numerical integration (contour deformation method)
+  * [[gwcalctyp]] = 2, 12, or 22: GW calculation using numerical integration (contour deformation method, see e.g. [[cite:Lebegue2003]]).
+  * [[gwcalctyp]] = 5, 15, or 25: Hybrid functional or Hartree-Fock calculation, with the identifier of the functional given by [[ixc_sigma]]. See the latter for the definition of other related variables.
+  * [[gwcalctyp]] = 6, 16, or 26: Screened Exchange calculation.
+  * [[gwcalctyp]] = 7, 17, or 27: COHSEX calculation.
+  * [[gwcalctyp]] = 8, 18, or 28: model GW calculation following [[cite:Faleev2004]] using a Plasmon-Pole model.
+  * [[gwcalctyp]] = 9, 19, or 29: model GW calculation following [[cite:Faleev2004]] using numerical integration (contour deformation method).
 """,
 ),
 
@@ -5456,8 +5461,8 @@ Variable(
 one improves the completeness in a truncated sum over states. In practice,
 this permits one to reduce quite much the number of bands required in the
 calculation of the screening or of the self-energy. The energy parameter
-needed in the extrapolar approximation is set by [[gwencomp]]. See F.
-Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
+needed in the extrapolar approximation is set by [[gwencomp]]. See
+[[cite:Bruneval2008]] for a description of the methodology.
 """,
 ),
 
@@ -5475,7 +5480,7 @@ Variable(
 used to improve completeness and make the convergence against the number of
 bands much faster.
 
-See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
+See [[cite:Bruneval2008]] for a description of the methodology.
 """,
 ),
 
@@ -5496,14 +5501,15 @@ correction in W, one has to start the sigma calculation from the
 susceptibility file_SUSC instead of the _SCR file (see [[getsuscep]]   and
 [[irdsuscep]]  ) Not available for PAW calculations.
 
-[[gwgamma]]=-4 activates the bootstrap kernel of Sharma et al. [Phys. Rev.
-Lett. 107, 186401 (2011)] in the test-charge-test-charge dielectric function
-[cf. Chen and Pasquarello, Phys. Rev. B 92, 041115(R) (2015)]. A cheaper one-
-shot variant can be achieved with [[gwgamma]]=-6 using only the head of the
-kernel.
+[[gwgamma]] = -4 activates the bootstrap kernel of Sharma et al. [[cite:Sharma2011]]
+in the test-charge-test-charge dielectric function [[cite:Chen2015]]. 
 
-[[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev. Lett.
-115, 137402 (2015), ibid. 114, 146402 (2015)].
+[[gwgamma]] = -6 uses the same bootstrap kernel as with [[gwgamma]] = -4
+but with only the head of the kernel. As such, the self-consistent iteration in the kernel
+can be disregarded [[cite:Chen2016]].
+
+[[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]] 
+and [[cite:Rigamonti2015]]).
 """,
 ),
 
@@ -5517,8 +5523,8 @@ Variable(
     mnemonics="GWLS BAND INDEX",
     requires="[[optdriver]]==66",
     text="""
-Governs the DFT eigenstate |e> in which the self-energy will be evaluated, as
-shown in eq. (7) of Phys. Rev. B 91, 125120 (2015). That is, it is the state
+Governs the DFT eigenstate $|e\\rangle$ in which the self-energy will be evaluated, as
+shown in Eq. (7) of [[cite:Janssen2015]]. That is, it is the state
 to be corrected in the G0W0 scheme.
 """,
 ),
@@ -5533,16 +5539,16 @@ Variable(
     mnemonics="GWLS CORRELATION",
     requires="[[optdriver]]==66",
     text="""
-Governs the use of a dielectric model (as explained in section V of Phys. Rev.
-B 91, 125120 (2015). and the use of the Lanczos scheme to solve eqs. (30) and
+Governs the use of a dielectric model (as explained in Sec. V of
+[[cite:Janssen2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
 (35) of the same reference at all external [[gw_freqsp]] and integration (as
 generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices
 are:
 
-  * [[gwls_correlation]] == 1: GWLS calculation WITH the dielectric model and WITHOUT the shift Lanczos technique,
-  * [[gwls_correlation]] == 2: GWLS calculation WITHOUT the dielectric model and WITHOUT the shift Lanczos technique,
-  * [[gwls_correlation]] == 3: GWLS calculation WITH the dielectric model and WITH the shift Lanczos technique,
-  * [[gwls_correlation]] == 4: GWLS calculation WITHOUT the dielectric model and WITH the shift Lanczos technique,
+  * [[gwls_correlation]] == 1: GWLS calculation **with** the dielectric model and **without** the shift Lanczos technique,
+  * [[gwls_correlation]] == 2: GWLS calculation **without** the dielectric model and **without** the shift Lanczos technique,
+  * [[gwls_correlation]] == 3: GWLS calculation **with** the dielectric model and **with** the shift Lanczos technique,
+  * [[gwls_correlation]] == 4: GWLS calculation **without** the dielectric model and **with** the shift Lanczos technique,
   * [[gwls_correlation]] == 5: Not a GWLS calculation; just calculate and print the eigenvalues of the (static) dielectric matrix (for debugging purposes).
 
 The default, ([[gwls_correlation]] == 3), is the most performant option and
@@ -5593,8 +5599,8 @@ Variable(
     text="""
 This variable sets the band index to be used to generate the first seed vector
 to be used in the construction of the Lanczos basis for the (static)
-dielectric matrix in a GWLS calculation. See section IV of Phys. Rev. B 91,
-125120 (2015). Together with [[gwls_nseeds]], defines the seeds for the
+dielectric matrix in a GWLS calculation. See Sec. IV of [[cite:Janssen2015]].
+Together with [[gwls_nseeds]], this defines the seeds for the
 Lanczos procedure. That is, the states associated to band index
 [[gwls_first_seed]] to [[gwls_first_seed]]+[[gwls_nseeds]]-1 are used to
 generate the seed vectors.
@@ -5616,7 +5622,7 @@ Variable(
     requires="[[optdriver]]==66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-eq. (35) of Phys. Rev. B 91, 125120 (2015) to solve it at all external
+Eq. (35) of [[cite:Janssen2015]] to solve it at all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
 converged to a few 10s of meV for all molecules studied so far.
 """,
@@ -5633,8 +5639,8 @@ Variable(
     requires="[[optdriver]]==66",
     text="""
 The G0W0 formalism involves the calculation of a summation conceptually linked
-to the trace of the dielectric matrix (see eq. (38) of Phys. Rev. B 91, 125120
-(2015). Since the eigenvalues spectrum of the dielectric matrix of formed by a
+to the trace of the dielectric matrix [see Eq. (38) of [[cite:Janssen2015]]\].
+Since the eigenvalues spectrum of the dielectric matrix of formed by a
 few large discrete eigenvalues and an integrable divergence in the density of
 eigenvalues around 0, it is expensive to sample accurately this divergence
 using the exact dielectric operator. It this becomes interesting to calculate
@@ -5645,7 +5651,7 @@ In the context where the model dielectric matrix is used in the calculations,
 [[gwls_kmax_complement]] determines the size of the 'large' basis.
 
 For more information on the exact role of these bases and on the model
-dielectric operator used, see section V of Phys. Rev. B 91, 125120 (2015).
+dielectric operator used, see Sec. V of [[cite:Janssen2015]].
 """,
 ),
 
@@ -5660,7 +5666,7 @@ Variable(
     requires="[[optdriver]]==66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-eq. (30) of Phys. Rev. B 91, 125120 (2015) to solve it simultaneously at all
+Eq. (30) of [[cite:Janssen2015]] to solve it simultaneously at all
 integration frequencies (generated automatically by the number of points
 [[gwls_npt_gauss_quad]] to use in the gaussian quadrature) and all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
@@ -5682,7 +5688,7 @@ The contour deformation technique, in the G0W0 context, will involve the
 calculation of pole residues associated to states lying between the one
 corrected ([[gwls_band_index]]) and the fermi level. These residues take the
 form of a matrix element of the inverse dielectric matrix at a real frequency
-(see eq. (11) of Phys. Rev. B 91, 125120 (2015)). Therefore, the dielectric
+[see Eq. (11) of [[cite:Janssen2015]]\]. Therefore, the dielectric
 matrix must be constructed in some basis at these frequencies and inverted to
 calculate the matrix element. The present input variable sets the size of the
 Lanczos basis to be constructed for this purpose. The default value has proven
@@ -5690,7 +5696,7 @@ to be very robust for many molecular systems and should therefore be left to
 the default value by the user.
 
 For more information on the Lanczos basis constructed for the calculation of
-the residues, see section IV of Phys. Rev. B 91, 125120 (2015).
+the residues, see Sec. IV of [[cite:Janssen2015]].
 """,
 ),
 
@@ -5707,8 +5713,8 @@ Variable(
 This variable sets the frequencies to be used to construct the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved by the construction of the dielectric matrix at finite
-frequencies. See section VI of Phys. Rev. B 91, 125120 (2015). For most cases,
-since the frequencies $\infty$ and (if [[gwls_recycle]]>0) 0.0 are used at no
+frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
+since the frequencies $\infty$ and 0.0 (if [[gwls_recycle]]>0) are used at no
 computational cost, [[gwls_n_proj_freq]]==0 (which means no ADDITIONAL
 frequency is to be used) is fine and no frequencies need to be picked up.
 """,
@@ -5726,13 +5732,13 @@ Variable(
     requires="[[optdriver]]==66",
     text=r"""
 This is the width of the lorentzian, in Ha, used to model the frequency
-dependence of the dielectric matrix in the GWLS calculation (see eqs. (12),
-(13), (14), (15), (16) and (34) of Phys. Rev. B 91, 125120 (2015)). More
-precisely, this parameter is the value of $\alpha$ used in eq. (34). This model
+dependence of the dielectric matrix in the GWLS calculation [see Eqs. (12-16)
+and (34) of [[cite:Janssen2015]]\]. More
+precisely, this parameter is the value of $\alpha$ used in Eq. (34). This model
 is then used to separate the integration over frequencies into a 'model' part
-(second term of eq. (12)) and a 'exact - model' part (first term of eq. (12)).
-Since the 'model' part can be integrated analytically (see eqs. (15), (16) and
-(34)), only the the 'exact - model' part needs to be integrated numerically.
+[second term of Eq. (12)] and an 'exact - model' part [first term of Eq. (12)].
+Since the 'model' part can be integrated analytically [see Eqs. (15), (16) and
+(34)], only the the 'exact - model' part needs to be integrated numerically.
 
 The only effect of this model is therefore to alleviate the numerical cost of
 the integration over frequencies in the G0W0 calculation. The value of the
@@ -5754,11 +5760,11 @@ Variable(
     excludes="",
     requires="[[optdriver]]==66",
     text=r"""
-This variable sets the number of frequencies, on top of $\infty$ and (if
-[[gwls_recycle]]>0) 0.0, to be used for the construction of the basis in which
-the hamiltonian is projected to accelerate the solution of the Sternheimer
+This variable sets the number of frequencies, on top of $\infty$ and 0.0 (if
+[[gwls_recycle]]>0), to be used for the construction of the basis in which
+the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved in the construction of the dielectric matrix at finite
-frequencies. See section VI of Phys. Rev. B 91, 125120 (2015). For most cases,
+frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
 the default ([[gwls_n_proj_freq]]==0) is fine.
 """,
 ),
@@ -5775,8 +5781,8 @@ Variable(
     requires="[[optdriver]]==66",
     text="""
 This variable defines the number of points used for the numerical integration
-of the self-energy over frequencies in GWLS computations (see eq. (12) of
-Phys. Rev. B 91, 125120 (2015)). The default is fine for most cases.
+of the self-energy over frequencies in GWLS computations [see Eq. (12) of
+[[cite:Janssen2015]]\]. The default is fine for most cases.
 """,
 ),
 
@@ -5792,7 +5798,7 @@ Variable(
     text="""
 This variable sets the number of seed vectors to be used in the construction
 of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
-See section IV of Phys. Rev. B 91, 125120 (2015). Only [[gwls_nseeds]]==1 has
+See Sec. IV of [[cite:Janssen2015]]. Only [[gwls_nseeds]]==1 has
 been tested for now and users should keep this value.
 """,
 ),
@@ -5825,16 +5831,16 @@ Variable(
 This variable let the user choose if and how he wants to recycle the solutions
 of the Sternheimer equations involved in the construction of the static dielectric matrix.
 
-  * [[gwls_recycle]]==0: No recycling of the solutions
-  * [[gwls_recycle]]==1: Recycle the solutions. To do so, store them in RAM.
-  * [[gwls_recycle]]==2: Recycle the solutions. To do so, store them on disk.
+  * [[gwls_recycle]]=0: No recycling of the solutions.
+  * [[gwls_recycle]]=1: Recycle the solutions. To do so, store them in RAM.
+  * [[gwls_recycle]]=2: Recycle the solutions. To do so, store them on disk.
 
 If the user choose to recycle the solutions, they are used to construct the
 basis in which the hamiltonian is projected for the solution of the
 Sternheimer equations involved by the calculation of the dielectric matrix at
-finite frequencies. The other solutions used will be those at $\omega \to \Infty$
-(alwyas used) and those at \omega=[[gwls_list_proj_freq]]. For more
-information of the basis constructed, see section IV of Phys. Rev. B 91, 125120 (2015).
+finite frequencies. The other solutions used will be those at $\omega \to \infty$
+(always used) and those at $\omega=$[[gwls_list_proj_freq]]. For more
+information of the basis constructed, see Sec. IV of [[cite:Janssen2015]].
 
 It is important to note that the solutions rapidly take much space to store.
 Therefore, it is often not possible to store them in RAM in production
@@ -5857,9 +5863,9 @@ Variable(
     requires="[[optdriver]]==66",
     text="""
 This variable sets the dimension of the dielectric matrix used in a GWLS
-calculation (see section IV of Phys. Rev. B 91, 125120 (2015)). Typically
+calculation [see Sec. IV of [[cite:Janssen2015]]\]. Typically
 converged at a value of a few hundreds to a few thousands for a convergence
-criterion of 50meV on the eigenenergies.
+criterion of 50 meV on the eigenenergies.
 """,
 ),
 
@@ -5901,8 +5907,8 @@ Variable(
 gwpara is used to choose between the two different parallelization levels
 available in the GW code. The available options are:
 
-  * 1 --> parallelisation on k points
-  * 2 --> parallelisation on bands
+  * 1 --> parallelisation on k points.
+  * 2 --> parallelisation on bands.
 
 In the present status of the code, only the parallelization over bands
 ([[gwpara]]=2) allows to reduce the memory allocated by each processor.
@@ -5923,11 +5929,11 @@ Variable(
     text="""
 [[gwrpacorr]] governs the calculation of the RPA correlation energy.
 
-  * [[gwrpacorr]] = 0, no RPA correlation energy is calculated
+  * [[gwrpacorr]] = 0, no RPA correlation energy is calculated.
   * [[gwrpacorr]] = 1, the RPA correlation energy is calculated using an exact integration
-    over the coupling constant: it requires one diagonalization of the polarizability matrix
-  * [[gwrpacorr]] = _n_ > 1, the RPA correlation energy is calculated using _n_ values
-    for the coupling constant: it requires _n_ inversions of the polarizability matrix
+    over the coupling constant: it requires one diagonalization of the polarizability matrix.
+  * [[gwrpacorr]] = $n$ > 1, the RPA correlation energy is calculated using $n$ values
+    for the coupling constant: it requires $n$ inversions of the polarizability matrix.
 """,
 ),
 
@@ -6014,9 +6020,9 @@ ABINIT knows the LibXC value from [[ixc]], that might not agree with the
 definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
 The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
-VASP is 0.105835 (=0.2 Angstrom$^-1$).
-The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is
-0.1587531 (=0.3 Angstrom$^-1$).
+VASP is 0.105835 (=0.2 $\AA^{-1}$).
+The HSE03 value from LibCX is 0.106066 ($=0.15/\sqrt{2})$), the one of VASP is
+0.1587531 (=0.3 $\AA^{-1}$).
 """,
 ),
 
@@ -6195,7 +6201,7 @@ Many-body calculations for isolated systems present a slow convergence with
 respect to the size of the supercell due to the long ranged Coulomb
 interaction and the high degree of non-locality of the operators involved. A
 similar issue also occurs in fully periodic systems due to the presence of the
-integrable Coulomb singularity at G=0 that hinders the convergence with
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
 respect to the number of q-points used to sample the Brillouin zone. The
 convergence can be accelerated by replacing the true bare Coulomb interaction
 with other expressions.
@@ -6205,19 +6211,18 @@ in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 6. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
-  * 0 --> sphere (molecules but also 3D-crystals)
-  * 1 --> cylinder (nanowires, nanotubes)
-  * 2 --> surface
-  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value)
-  * 4 --> ERF, long-range only Coulomb interaction
-  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional)
-  * 6 --> auxiliary function integration for 3D systems from P. Carrier _et al._, PRB **75**,205126 (2007).
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi
-    [cf. Phys. Rev. B **34**, 4405 (1986) and Massidda et al., ibid. **48**, 5058 (1993)].
+  * 0 --> sphere (molecules but also 3D-crystals).
+  * 1 --> cylinder (nanowires, nanotubes).
+  * 2 --> surface.
+  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value).
+  * 4 --> ERF, long-range only Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
 
-Note that Spencer and Alavi PRB **77**, 193110 (2008) showed that the
-spherical cutoff can efficiently be used also for 3D systems. In the latter
-case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
+Note that Spencer and Alavi showed that the
+spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]]. 
+In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
 """,
@@ -6347,11 +6352,11 @@ Possible values of [[inclvkb]] are 0,1,2. If [[inclvkb]] is 1 or 2, the
 commutator of the non-local part of the pseudopotential with the position
 operator is correctly included in the q --> 0 contribution. This is
 unfortunately time-consuming and in particular when the old algorithm
-implemented by inclvkb==1 is used (inclvkb=2 is the recommended option). When
+implemented by [[inclvkb]]=1 is used ([[inclvkb]]=2 is the recommended option). When
 [[inclvkb]] is 0, this contribution is incorrectly omitted, but the computation is much faster.
 
 The importance of this contribution depends on the number of k points. Turning
-off [[inclvkb]] is let to the choice of the user.
+off [[inclvkb]] is to let to the choice of the user.
 
 In general, the use of [[inclvkb]]=0 is fine for GW calculations in
 crystalline systems provided that the k-point sampling is sufficiently converged.
@@ -8040,7 +8045,7 @@ bands to be considered.
 
 At present, not all k-points are possible. Only those corresponding to the
 k-point grid defined with the same repetition parameters ( [[kptrlatt]], or
-[[ngkpt]] ) than the GS one, but WITHOUT any shift, are allowed.
+[[ngkpt]] ) than the GS one, but **without** any shift, are allowed.
 """,
 ),
 
@@ -8513,7 +8518,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]] in [3,4,99]",
     text="""
-The Scissors operator energy added to the conductions states. In some cases,
+The scissor operator energy added to the conductions states. In some cases,
 it mimics a second iteration self-consistent GW calculation.
 """,
 ),
@@ -8529,9 +8534,9 @@ Variable(
     requires="[[optdriver]]==99 and [[bs_coulomb_term]] in [20,21] (Bethe-Salpeter calculas with a model dielectric function",
     text="""
 [[mdf_epsinf]] specifies the value of the macroscopic dielectric function used
-to model the screening function (see Solid State Commun. **84**, 765 (1992)).
-The proper spatial symmetry of the screening W(r,r_prime) is enforced using
-Eq. (7) of Phys. Rev. B **37**, (1988)
+to model the screening function (see [[cite:Bechstedt1992]]).
+The proper spatial symmetry of the screening $W(\mathbf{r},\mathbf{r}^\prime)$ is enforced using
+Eq. (7) of [[cite:vonderLinden1988]].
 """,
 ),
 
@@ -9045,7 +9050,7 @@ used in a GS run (where [[optdriver]]=0) to generate a _KSS file. In this run,
 used to calculate the irreducible polarizabilty $\chi^{(0)}_{KS}$ using
 [[optdriver]]=3 or to calculate GW corrections setting [[optdriver]]=4.
 
-  * If [[nbandkss]]=0, no _KSS file is created
+  * If [[nbandkss]]=0, no _KSS file is created.
   * If [[nbandkss]]=-1, all the available eigenstates (energies and eigenfunctions) are stored in the abo_KSS file at the end of the ground state calculation. The number of states is forced to be the same for all k-points: it will be the minimum of the number of plane waves over all k-points.
   * If [[nbandkss]] is greater than 0, abinit stores (about) [[nbandkss]] eigenstates in the abo_KSS file. This number of states is forced to be the same for all k-points.
 
@@ -9479,13 +9484,13 @@ Variable(
     requires="[[optdriver]]==4",
     text="""
 depending on the value of [[nfreqmidm]] will calculate the frequency moment of
-the Dielectric matrix or its inverse,
+the dielectric matrix or its inverse,
 
-  * if [[nfreqmidm]] is positive: calculate (nth=[[nfreqmidm]]) frequency moment of the Dielectric matrix
-  * if [[nfreqmidm]] is negative: calculate (nth=[[nfreqmidm]]) frequency moment of the inverse Dielectric matrix
-  * if [[nfreqmidm]] = 0: calculate first frequency moment of the full polarizability
+  * if [[nfreqmidm]] is positive: calculate (nth=[[nfreqmidm]]) frequency moment of the dielectric matrix.
+  * if [[nfreqmidm]] is negative: calculate (nth=[[nfreqmidm]]) frequency moment of the inverse dielectric matrix.
+  * if [[nfreqmidm]] = 0: calculate first frequency moment of the full polarizability.
 
-see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
+See [[cite:Taut1985]].
 """,
 ),
 
@@ -9502,12 +9507,12 @@ Variable(
 [[nfreqre]] sets the number of real frequencies used to calculate the
 dielectric matrix in order to perform the numerical integration of the GW self-energy.
 
-It can be used also in case of GW calculations with plasmon-pole models, _i.e_
-[[gwcalctyp]] <10, to reduce the number of frequencies used to evaluate the
+It can be used also in case of GW calculations with plasmon-pole models, _i.e._
+[[gwcalctyp]]<10, to reduce the number of frequencies used to evaluate the
 dielectric matrix from the (default) two to one frequency (omega=0) by setting
 [[nfreqre]]=1. This might be a good idea in case one is planning to use
-ppmodel>1\. This will force the calculation of the screening on a single
-frequency (omega=0) and hence reduce memory and disk space requirement. The
+[[ppmodel]]>1. This will force the calculation of the screening on a single
+frequency ($\omega=0$) and hence reduce memory and disk space requirement. The
 only draw back is that the user will not be able to perform self energy
 calculation using [[ppmodel]]=1, since in the last case the dielectric matrix
 calculated on two frequencies is required. If the user is not sure which
@@ -9791,7 +9796,7 @@ Variable(
     requires="[[optdriver]]==4",
     text="""
 [[nkptgw]] gives the number of k-points for which the GW calculation must be
-done. It is used to dimension [[kptgw]]
+done. It is used to dimension [[kptgw]].
 """,
 ),
 
@@ -10020,7 +10025,7 @@ Variable(
     text="""
 [[nomegasi]] defines the number of frequency points used to sample the self-
 energy along the imaginary axis. The frequency mesh is linear and covers the
-interval between OMEGASIMIN=0.01 Hartree and [[omegasimax]].
+interval between `omegasimin`=0.01 Hartree and [[omegasimax]].
 """,
 ),
 
@@ -10035,7 +10040,7 @@ Variable(
     requires="[[optdriver]]==4",
     text="""
 The number of real frequencies around the KS energy where the self-energy
-Sigma is evaluated. From these values, the derivative of Sigma at the KS
+$\Sigma$ is evaluated. From these values, the derivative of $\Sigma$ at the KS
 energy is numerically estimated through linear interpolation.
 """,
 ),
@@ -10339,7 +10344,7 @@ In the context of the electronic stopping power of impinging ion in matter,
 [[npvel]] sets the number of the ion velocities to be calculated via linear response.
 When [[npvel]]=0, no stopping power calculation is performed.
 The direction and the velocity maximum are set with the input variable
-[[pvelmax]]. Note that the results are output for a Z=1 impinging ion, i.e. a proton.
+[[pvelmax]]. Note that the results are output for a $Z=1$ impinging ion, i.e. a proton.
 """,
 ),
 
@@ -10369,7 +10374,7 @@ Variable(
     mnemonics="Number of PlaneWaves in the KSS file",
     text="""
 This input variable is used for the preparation of a GW calculation: the GS
-run (where [[optdriver]]=1 and **nbandkss** /=0) should be followed with a run
+run (where [[optdriver]]=1 and [[nbandkss]]/=0) should be followed with a run
 where [[optdriver]]=3. Also, if [[nbandkss]]=0, no use of [[npwkss]].
 
 [[npwkss]] defines the number of planewave components of the Kohn-Sham states
@@ -10377,12 +10382,12 @@ to build the Hamiltonian, in the routine outkss.F90, and so, the size of the
 matrix, the size of eigenvectors, and the number of available states, to be
 stored in the abo_KSS file. If it is set to 0, then, the planewave basis set
 defined by the usual Ground State input variable [[ecut]] is used to generate
-the superset of all planewaves used for all k-points. Note that this (large)
-planewave basis is the same for all k-points.
+the superset of all planewaves used for all k points. Note that this (large)
+planewave basis is the same for all k points.
 
 !!! warning
 
-    For the time being, [[istwfk]] must be 1 for all the k-points.
+    For the time being, [[istwfk]] must be 1 for all the k points.
 """,
 ),
 
@@ -10446,7 +10451,7 @@ Variable(
     mnemonics="Number of Q-PoinTs for the Dielectric Matrix",
     requires="[[optdriver]]==3",
     text="""
-If [[nqptdm]] is equal to 0, the set of q-points for computing the dielectric
+If [[nqptdm]] is equal to 0, the set of q points for computing the dielectric
 matrix is determined automatically considering all the possible differences
 between the k-points contained in the _KSS file. When [[nqptdm]] is non-zero,
 the list of q points is read from [[qptdm]]. This allows one to split the big
@@ -12403,7 +12408,7 @@ Only relevant for Path-Integral Molecular Dynamics.
 Selects a constraint to be applied during the PIMD trajectory. The constraint
 is holonomic (it is a relation between the position variables). In practice,
 the total forces applied to the atomic positions are modified so as to respect
-the constraint. 
+the constraint.
 
 To date, the available constraints are:
 
@@ -12955,18 +12960,18 @@ Variable(
     mnemonics="Plasmon Pole MODEL",
     requires="[[optdriver]] in [3,4]",
     text="""
-  * [[ppmodel]]=1: PP model of Godby and Needs, See Phys Rev Lett 62, 1169 (1989)
-  * [[ppmodel]]=2: PP model of Hybertsen and Louie, See Phys Rev B 34, 5390 (1986)
-  * [[ppmodel]]=3: PP model of W. von der Linden and P. Horsh see Phys Rev B 37, 8351 (1988)
-  * [[ppmodel]]=4: PP model of Farid and Engel. See Phys Rev B47,15931 (1993)
-  * [[ppmodel]]=0: no PP model, numerical integration (contour deformation method, see e.g. S. Lebegue et al. PRB 67, 155208 (2003).)
+  * [[ppmodel]]=1: PP model of Godby and Needs [[cite:Godby1989]].
+  * [[ppmodel]]=2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
+  * [[ppmodel]]=3: PP model of W. von der Linden and P. Horsh [[cite:vonderLinden1988]].
+  * [[ppmodel]]=4: PP model of Farid and Engel [[cite:Engel1993]].
+  * [[ppmodel]]=0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
 Please note the difference between [[ppmodel]] 1 and [[ppmodel]] 2,3,4. In the
 first case ([[ppmodel]]=1), the plasmon-pole parameters are determined in
 order to reproduce the behaviour of the dielectric matrix at two calculated
-frequencies: the static limit (omega=0) and the imaginary frequency defined by
+frequencies: the static limit ($\omega=0$) and the imaginary frequency defined by
 [[ppmfrq]]. In the last three cases, instead, the plasmon-pole parameters are
-found by using the dielectric matrix calculated only at omega=0 and enforcing
+found by using the dielectric matrix calculated only at $\omega=0$ and enforcing
 the so-called f-sum rule. See also [[nfreqre]].
 
 Please note also that in the case of [[ppmodel]] 4, the plasmon energies are
@@ -13382,7 +13387,7 @@ The option prtefg is compatible with spin polarized calculations (see
 
 Variable(
     abivarname="prtefmas",
-    varset="respfn",
+    varset="dfpt",
     vartype="integer",
     topics=['printing_prngs', 'EffectiveMass_useful'],
     dimensions="scalar",
@@ -14408,9 +14413,9 @@ Variable(
     mnemonics="Q-PoinTs for the Dielectric Matrix",
     requires="[[optdriver]]==3 and [[nqptdm]]!=0",
     text="""
-[[qptdm]] contains the set of q-points used in the screening part of ABINIT,
+[[qptdm]] contains the set of q points used in the screening part of ABINIT,
 instead of the automatic generation of the q points when [[nqptdm]]=0. These q
-points are given in terms of reciprocal space primitive translations (NOT in
+points are given in terms of reciprocal space primitive translations (**not** in
 cartesian coordinates!). For further explanation, see the input variable
 [[nqptdm]].
 """,
@@ -15132,7 +15137,7 @@ dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
 dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
 irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
 these routines, the developper should pay a particular attention to the rfpert
-array, defined in the routine respfn.F90, as well as to the ipert local
+array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
 variable.
 """,
 ),
@@ -15840,7 +15845,7 @@ In the spectral method ([[spmeth]]=1 or 2) the irreducible polarizability is
 expressed as the Hilbert transform of the imaginary part. The advantage in
 using this approach consists in the fact that, once the spectral function is
 known, the irreducible polarizability for an arbitrary frequency can be easily
-obtained through inexpensive integrations. On the other hand an accurate
+obtained through inexpensive integrations. On the other hand, an accurate
 evaluation of the imaginary part requires a dense frequency mesh due to the
 presence of delta functions. Two different approaches can be used to
 approximate these delta functions thus allowing the use of affordable
@@ -16010,20 +16015,20 @@ Variable(
     topics=['Susceptibility_expert'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics=r"SYMmetryze $\chi_o$",
+    mnemonics=r"SYMmetryze $\chi_0$",
     characteristics=['[[DEVELOP]]'],
     requires="[[optdriver]]==3",
     text="""
-The evaluation of the irreducible polarizability for a given q-point requires
+The evaluation of the irreducible polarizability for a given q point requires
 an integration over the Brillouin zone (BZ) which is approximated by a
-discrete sum over k-points. In principle the integrand function should be
+discrete sum over k points. In principle the integrand function should be
 evaluated for each k-point in the BZ, however it is possible to reduce the
 number of points to be explicitly considered by taking advantage of symmetry
 properties. The development input variable [[symchi]] is used to choose
 between these two equivalent methods:
 
-  * 0 -->  the summation over k-points is performed considering ALL the points in the BZ (useful for testing and debugging).
-  * 1 -->  the summation is restricted to the k-points belonging to the irreducible wedge defined by the little group associated to the external vector q.
+  * 0 -->  the summation over k points is performed considering **all** the points in the BZ (useful for testing and debugging).
+  * 1 -->  the summation is restricted to the k points belonging to the irreducible wedge defined by the little group associated to the external vector q.
 """,
 ),
 
@@ -16104,21 +16109,21 @@ Variable(
     mnemonics="SYMmetrization of SIGMA matrix elements",
     requires="[[optdriver]] in [4, 7]",
     text="""
-This option activates the symmetrization of the self-energy matrix elements (*symsigma=1*).
+This option activates the symmetrization of the self-energy matrix elements ([[symsigma]]=1).
 In this case the BZ integration defining the self-energy
 matrix elements is reduced to an appropriate irreducible wedge defined
 by the point group of the wave-vector k specified in the [[kptgw]] list.
 
 The symmetrized expression leads to a considerable speedup of the run, especially
-for high-symmetry k-points e.g. $\Gamma$.
+for high-symmetry k points e.g. $\Gamma$.
 Unfortunately, this option is not yet compatible with self-consistent GW
 calculations (see [[gwcalctyp]]).
 
 The code constructs a symmetric invariant
 for the diagonal matrix elements of the self-energy by averaging the self-energy matrix
-elements within the degenerate subspace. Therefore particular care has to be
-taken in the presence of accidental degeneracies. since calculations
-performed with *symsigma=1* won't be able to remove the initial
+elements within the degenerate subspace. Therefore, particular care has to be
+taken in the presence of accidental degeneracies. Since calculations
+performed with [[symsigma]]=1 will not be able to remove the initial
 accidental degeneracy. This is the reason why this option is not activated by default.
 """,
 ),
@@ -16731,9 +16736,10 @@ Variable(
     requires="[[nspinor]] == 1",
     text="""
 When equal to one or two, this variable allows for the calculation of U with
-the cRPA method. An explicit test is shown in automatic tests v7/t23-t24-t25
-and in v7/t68-t69. The present implementation is parallelized (as for usual GW
-calculations), use symetry over k-points only for calculations involving one
+the cRPA method. An explicit test is shown in automatic tests 
+[[test:v7_23]], [[test:v7_24]], [[test:v7_25]], [[test:v7_68]], and [[test:v7_69]].
+The present implementation is parallelized (as for usual GW
+calculations), use symetry over k points only for calculations involving one
 correlated atom, and can be use when correlated bands are entangled or not.
 The constrained calculation of the polarisability can be done by eliminating
 transition betweens correlated bands (and not orbitals) with the variable
@@ -16747,13 +16753,12 @@ window will not be taken into account in the polarisability calculation.
 
 For [[ucrpa]] = 2, the ucrpa_bands should be equal to the [[dmftbandi]] and
 [[dmftbandf]] values, and the polarisability of the correlated subspace is
-constructed with a band and k-point dependent weight.
+constructed with a band and k point dependent weight.
 
 The implementation is restricted to the case of [[nspinor]] = 1 (collinear case).
 
 A short presentation of the method and some aspect of the implementation can
-be found in Section II and Appendix A of
-[B. Amadon, T. Applencourt and F. Bruneval Phys. Rev. B 89, 125110 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110).
+be found in Sec. II and Appendix A of [[cite:Amadon2014]].
 """,
 ),
 
@@ -17521,17 +17526,20 @@ geometry, two different definitions of the cutoff region are available (see
 Phys. Rev. B 73, 233103 and Phys. Rev. B 73, 205119 for a complete description
 of the methods)
 
-In Beigi method (Phys. Rev. B 73, 233103), the cutoff region is given by the
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]], the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
 When [[rcut]].
 
-To define a cylinder along the z-axis use the following lines. icutcoul 1
-vcutgeo 0 0 1
+To define a cylinder along the z-axis use the following lines: 
+```
+icutcoul 1
+vcutgeo  0 0 1
+```
 
-Please note that Beigi method is implemented only in the case if an
+Please note that the method of Ismail-Beigi is implemented only in the case if an
 orthorhombic Bravais lattic. For hexagonal lattices, one has to use the method
-of Rozzi (Phys. Rev. B 73, 205119) In this case, the interaction is truncated
+of Rozzi [[cite:Rozzi2006]]. In this case, the interaction is truncated
 in a finite cylinder. Contrarily to the first approach, here one has to
 specify both the radius of the cylinder with [[rcut]] as well as the length of
 the cylinder along the periodic dimension that should always be smaller than
@@ -17539,17 +17547,32 @@ the extension of the Born von Karman box. The length of the cylinder is given
 in terms of the fraction of the primitive vector along the periodic direction.
 
 For example, in order to define a finite cylinder along z of radius 2.5 Bohr
-and length 3*R3 icutcoul 1 vcutgeo 0 0 -3.0 # note the minus sign rcut 2.5
+and length 3*R3,
+```
+icutcoul 1 
+vcutgeo  0 0 -3.0 # note the minus sign 
+rcut     2.5
+```
 
 For surface calculations ([[icutcoul]]=2), [[vcutgeo]] is used to define the
 two periodic directions defining the surface. Also in this case two different
-techniques are available. In the method of Beigi, the (positive) non-zero
+techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
 The interaction is truncated within a slab of width L where L is the length of
 the primitive vector of the lattice along the non-periodic dimension. For
-example: icutcoul 2 vcutgeo 1 1 0 It is also possible to define a finite
-surface by employing negative values For example: icutcoul 2 vcutgeo -3 -2 0
-defines....
+example: 
+```
+icutcoul 2 
+vcutgeo  1 1 0 
+```
+
+It is also possible to define a finite
+surface by employing negative values. For example: 
+```
+icutcoul 2 
+vcutgeo -3 -2 0
+```
+**Definition to be added**
 """,
 ),
 
@@ -18666,7 +18689,7 @@ convergence in the Haydock iterative method. In this case, [[zcut]] should be
 larger than the typical distance between the eigenvalues of the exciton
 Hamiltonian.
 Ideally, one should make a convergence study decreasing the value of [[zcut]]
-for increasing number of k-points.
+for increasing number of k points.
 """,
 ),
 
