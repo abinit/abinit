@@ -1211,8 +1211,8 @@ end subroutine print_efmas
 !! INPUTS
 !!  dtset = dataset structure containing the input variable of the calculation.
 !!  efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
-!!    efmasval(:,:)%eig2_diag band curvature double tensor
 !!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
+!!    efmasval(:,:)%eig2_diag band curvature double tensor
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
 !!  mpi_enreg = informations about MPI parallelization.
