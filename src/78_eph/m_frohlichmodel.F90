@@ -172,8 +172,6 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
  enddo
 
- ABI_ALLOCATE(eff_mass,(3,3))
-
  do ikpt=1,dtset%nkpt
    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
@@ -181,6 +179,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
      ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+
+     !Convert eig2_diag to cartesian coordinates
      do iband=1,deg_dim
         do jband=1,deg_dim
           eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
@@ -188,7 +188,27 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
         enddo
      enddo
 
-     !One has to perform the integral over the sphere
+     ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
+     ABI_ALLOCATE(m_avg,(deg_dim))
+     ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
+     m_avg=zero
+     m_avg_frohlich=zero
+
+     if(deg_dim>1)then
+       !Initialize the diagonalization routine
+       ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
+       ABI_ALLOCATE(eigenval,(deg_dim))
+
+       lwork=-1
+       ABI_ALLOCATE(rwork,(3*deg_dim-2))
+       ABI_ALLOCATE(work,(1))
+       call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+       lwork=int(work(1))
+       ABI_DEALLOCATE(work)
+       ABI_ALLOCATE(work,(lwork))
+     endif
+
+     !Perform the integral over the sphere
      do itheta=1,ntheta
        costh=gq_points_costh(itheta) ; sinth=gq_points_sinth(itheta)
        do iphi=1,nphi
@@ -199,8 +219,54 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
          unit_r(2)=sinth*sinph
          unit_r(3)=costh
 
-         f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),unit_r(:)))
+         do iband=1,deg_dim
+           do jband=1,deg_dim
+             f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))
+           enddo
+         enddo
 
+         if(deg_dim==1)then
+           m_avg = m_avg + weight*sinth*f3d(1,1)
+           m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d(1,1))**half)
+         else
+           eigenvec = f3d ; eigenval = zero
+           work=zero      ; rwork=zero
+           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+           eigf3d = eigenval
+           m_avg = m_avg + weight*sinth*abs(eigf3d)
+           m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(eigf3d))**half
+         endif
+
+       enddo
+     enddo
+
+     m_avg = quarter/pi*m_avg
+     m_avg = one/m_avg
+
+     m_avg_frohlich = quarter/pi*m_avg_frohlich
+     m_avg_frohlich = m_avg_frohlich**2
+     do iband=1,deg_dim
+       m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
+     enddo
+
+     ABI_DEALLOCATE(eig2_diag_cart)
+     ABI_DEALLOCATE(f3d)
+     ABI_DEALLOCATE(m_avg)
+     ABI_DEALLOCATE(m_avg_frohlich)
+
+   enddo ! ideg
+ enddo ! ikpt
+
+ ABI_DEALLOCATE(gq_points_th)
+ ABI_DEALLOCATE(gq_points_costh)
+ ABI_DEALLOCATE(gq_points_sinth)
+ ABI_DEALLOCATE(gq_weights_th)
+ ABI_DEALLOCATE(gq_points_ph)
+ ABI_DEALLOCATE(gq_points_cosph)
+ ABI_DEALLOCATE(gq_points_sinph)
+ ABI_DEALLOCATE(gq_weights_ph)
+
+ ABI_DEALLOCATE(unit_r)
 HERE
 
 
