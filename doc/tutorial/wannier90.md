@@ -1,5 +1,5 @@
 ---
-authors: TRangel
+authors: T. Rangel
 ---
 
 # Lesson on the use of Wannier90 library  
@@ -11,8 +11,6 @@ Maximally Localized Wannier Functions (MLWFs).
 
 You will learn how to get MLWFs with ABINIT and Wannier90 and what are the
 basic variables to govern the numerical efficiency.  
-It is supposed that you already know how to use ABINIT in the norm conserving
-pseudopotential case.
 
 This lesson should take about 1 hour and it is important to note that the examples in this tutorial 
 are not converged, they are just examples to show how to use the code.
@@ -34,24 +32,45 @@ This is done by using a steepest-descent algorithm, see section D of [[cite:Marz
 After a ground state calculation the Wannier90 code will obtain the MLWFs
 requiring just two ingredients:
 
-  * The overlaps between the cell periodic part of the Bloch states $|u_{nk}\rangle$ (see Eq. 25 of [[cite:Marzari1997]]):   
-    $M_{mn} = \langle u_{mk} | u_{nk+b} \rangle$.
+* The overlaps $M_{mn} = \langle u_{mk} | u_{nk+b} \rangle$ between the cell periodic part 
+  of the Bloch states $|u_{nk}\rangle$. See Eq. 25 of [[cite:Marzari1997]]).
+    
+* As a starting guess the projection, $A_{mn} = \langle \psi_{mk} | g_{n} \rangle$, 
+  of the Bloch states $|\psi_{nk} \rangle$ onto trial 
+  localized orbitals $|g_{n}\rangle$ (See section D of [[cite:Souza2002a]])
+    
 
-  * As a starting guess the projection of the Bloch states $|\psi_{nk} \rangle$ onto trial localized orbitals $|g_{n}\rangle$ (See section D of [[cite:Souza2002a]]):
-
-    $A_{mn} = \langle \psi_{mk} | g_{n} \rangle$.
-
-What ABINIT do is to take the Bloch functions from a ground state calculation
-and compute these two ingredients. Then, Wannier90 is run. Wannier90 is
+What ABINIT does is to take the Bloch functions from a ground state calculation
+and compute these two ingredients. Then, Wannier90 is executed. Wannier90 is
 included as a library in ABINIT and the process is automatic, so that in a
 single run you can do both the ground state calculation and the computation of MLWFs.
 
 ## 2 A first example: the silicon case
   
 Before starting make sure that you compiled abinit enabling Wannier90. 
-You may have to recompile it using the flag `--enable-wannier90`.
+You may have to recompile the code with 
 
-Now we will compute a set of MLWFs for the silicon case. 
+```
+configure --with-config-file=myconf.ac
+```
+
+where `myconf.ac` contains:
+
+```sh
+# Flavor of the DFT library to use (default is atompaw+bigdft+libxc+wannier90)
+
+with_dft_flavor="wannier90"
+
+# Include flags for the Wannier90 library (default is unset)
+#
+#with_wannier90_incs="-I/usr/local/include/wannier90"
+
+# Link flags for the Wannier90 library (default is unset)
+#
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+```
+
+Now we will compute a set of MLWFs for silicon. 
 We are going to extract the Wannier functions corresponding to the four valence states of silicon.  
 
 *Before beginning, you might consider to work in a different sub-directory as
@@ -65,7 +84,7 @@ Copy the files tw90_1.files, tw90_1.in and wannier90.win from the tests/tutoplug
     cp ../tw90_1.files .
     cp ../tw90_1.in .
 
-Wannier90 also uses a secondary input file which is called wannier90.win.
+Wannier90 also uses a secondary input file called wannier90.win.
 Therefore, you must include this file in the folder:
 
     cp ../wannier90.win .
@@ -78,8 +97,8 @@ Let's examine the input file tw90_1.in, while the calculation is running.
 
 {% dialog tests/tutoplugs/Input/tw90_1.in %}
 
-The input file should look familiar to you. It is indeed the silicon case. It
-has two data sets: first a SCF calculation and then a NSCF calculation which
+The input file should look familiar to you. It is indeed the primitive cell of silicon. 
+It has two data sets: first a SCF calculation and then a NSCF calculation which
 will call the Wannier90 library. The only new input variable is [[prtwant]]
 which has to be set to 2 in order to use the Wannier90 utility.
 
@@ -90,8 +109,8 @@ Now lets look at the secondary input file wannier90.win.
 This is a mandatory input file required by the Wannier90 library. 
 There are many variables that can be defined inside this file. 
 In our case we used **num_wann** and **num_iter**. 
-These variables are to be used in the minimization of the spread
-to obtain the MLWF. In particular, **num_wann** tell us the number of Wannier
+These variables are used in the minimization of the spread
+to obtain the MLWF. In particular, **num_wann** defines the number of Wannier
 functions to extract while **num_iter** sets the maximum number of iterations. There
 are also variables to govern the disentanglement procedure outlined in [[cite:Souza2002a]]
 which are not used in this simple case. The complete list of input variables
@@ -113,24 +132,45 @@ This is an explanation of the input and output files for the Wannier90
 library. As you can see many new files were created. The input files for
 Wannier90 which were created by ABINIT are:
 
-  * **wannier90random.amn** contains a list of projections to be used as a starting guess of the WF. 
+**wannier90random.amn**
+:   Contains a list of projections to be used as a starting guess of the WF. 
     This is the $A_{mn}$ matrix which was mentioned before in this tutorial. 
 
-  * **wannier90.eig** contains a list of eigenvalues for each k-point and band. 
+**wannier90.eig** 
+:   Contains a list of eigenvalues for each k-point and band. 
 
-  * **wannier90.mmn** contains the overlaps between the cell periodic part of the Bloch states. 
+**wannier90.mmn**
+:   Contains the overlaps between the cell periodic part of the Bloch states. 
     This is the M_mn matrix mentioned before in this tutorial. 
 
-  * **UNK** files containing the wavefunction in real space for every k-point. 
+**UNK** 
+:   Files containing the wavefunction in real space for every k-point. 
+    Once these files were computed by ABINIT the Wannier90 library was used. 
+    The output files of Wannier90 are:
 
-Once these files were computed by ABINIT the Wannier90 library was used. 
-The output files of Wannier90 are:
+**wannier90.wout**
+:   This is the main output file of the library. 
+    You should read it carefully to see the details of the calculation. 
 
-  * **wannier90.wout** is the main output file of the library. You should read it carefully to see the details of the calculation. 
+**wannier90.chk** 
+:   This file is required to restart a calculation is case you use Wannier90 in standalone mode. In our case it is not used. 
+    
+To obtain information about the steepest-descent minimization just issue:
 
-  * **wannier90.chk** is required to restart a calculation is case you use Wannier90 in standalone mode. In our case it is not used. 
+    grep CONV tw90_1o_DS2_w90.wout
 
-If you want to obtain information about the disentanglement procedure just type:
+You will obtain a table of the following form:
+    
+     +--------------------------------------------------------------------+<-- CONV
+     | Iter  Delta Spread     RMS Gradient      Spread (Ang^2)      Time  |<-- CONV
+     +--------------------------------------------------------------------+<-- CONV
+          0     0.492E+02     0.0000000000       49.1838608828       0.09  <-- CONV
+          1    -0.947E+01    22.7791321117       39.7138163954       0.09  <-- CONV
+
+You can verify that the final spread you get is around 4.0 Å$^2$.
+
+Similarly to obtain information about the disentanglement procedure (not used in this example)
+just type:
 
     grep DIS wannier90.wout
 
@@ -139,27 +179,34 @@ You will obtain a table of the following form:
      +---------------------------------------------------------------------+<-- DIS
      |  Iter     Omega_I(i-1)      Omega_I(i)      Delta (frac.)    Time   |<-- DIS
      +---------------------------------------------------------------------+<-- DIS
-    
-Similarly to obtain information about the steepest-descent minimization just issue:
 
-    grep CONV wannier90.wout
+!!! tip
 
-You will obtain a table of the following form:
-    
-     +--------------------------------------------------------------------+<-- CONV
-     | Iter  Delta Spread     RMS Gradient      Spread (Ang^2)      Time  |<-- CONV
-     +--------------------------------------------------------------------+<-- CONV
+    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    with the `wout` command and the `--expose` option to visualize the iterations
 
-You can verify that the final spread you get is around 4.0 Å$^2$.
+        abiopen.py tw90_1o_DS2_w90.wout --expose -sns
 
-**Visualize the Wannier functions**
+    ![](wannier90_assets/abiopen_tw90_1o_DS2_w90.png)
+
+
+### Visualize the Wannier functions
     
-You can see the Wannier functions in [xcrysden](http://www.xcrysden.org) format. Just type:
+You can see the Wannier functions in |xcrysden| format. Just type:
     
-    xcrysden --xsf wannier90_00001.xsf
+    xcrysden --xsf tw90_1o_DS2_w90_00001.xsf
     
 To see the isosurface click on: Tools->Data Grid -> OK
 And modify the isovalue, put, for instance, 0.3 and check the option "Render +/- isovalue" then click on OK
+Alternatively, one can read the xsf file with |vesta|.
+MacOsx users can use the command line:
+
+    open tw90_1o_DS2_w90_00003.xsf -a vesta
+
+to invoke vesta directly from the terminal:
+
+![](wannier90_assets/tw90_1o_DS2_w90_00001.png)
+    
 
 !!! important
 
@@ -293,3 +340,12 @@ Now run Wannier90:
     [abinit-home]/plugins/wannier90/wannier90.x tw90_4o_DS3_w90
 
 The interpolated bandstructure is in: tw90_4o_DS3_w90_band.dat
+
+To plot the bands, open |gnuplot| in the terminal and type:
+
+```gnuplot
+load "tw90_4o_DS3_w90_band.gnu"
+```
+
+![](wannier90_assets/load_tw90_4o_DS3_w90_band.png)
+
