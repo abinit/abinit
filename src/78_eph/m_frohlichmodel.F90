@@ -103,11 +103,13 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
 !Local variables ------------------------------
 !scalars
+ logical :: sign_warn
  integer :: deg_dim,iband,ideg,ikpt,info,iphi,itheta
  integer :: jband,lwork,nphi,ntheta
  real(dp) :: cosph,costh,sinph,sinth,weight
  character(len=500) :: msg
 !arrays
+ logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
  real(dp) :: kpt(3),unit_r(3)
  real(dp), allocatable :: eigenval(:), rwork(:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
@@ -164,15 +166,18 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
      ABI_ALLOCATE(m_avg,(deg_dim))
      ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
+     ABI_ALLOCATE(eigenval,(deg_dim))
+     ABI_ALLOCATE(saddle_warn,(deg_dim))
+     ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
+
      m_avg=zero
      m_avg_frohlich=zero
+     saddle_warn=.false.
 
-     !Initializations for the diagonalization routine
+     !Initializations for the diagonalization routine 
      if(deg_dim>1)then
-       !Initialize the diagonalization routine
-       ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
-       ABI_ALLOCATE(eigenval,(deg_dim))
 
+       ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
        lwork=-1
        ABI_ALLOCATE(rwork,(3*deg_dim-2))
        ABI_ALLOCATE(work,(1))
@@ -180,6 +185,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
        lwork=int(work(1))
        ABI_DEALLOCATE(work)
        ABI_ALLOCATE(work,(lwork))
+
      endif
 
      !Perform the integral over the sphere
@@ -198,20 +204,33 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
              f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))
            enddo
          enddo
-
+ 
          if(deg_dim==1)then
-           m_avg = m_avg + weight*sinth*f3d(1,1)
-           m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d(1,1))**half)
+           eigenval(1)=f3d(1,1)
          else
            eigenvec = f3d ; eigenval = zero
            work=zero      ; rwork=zero
            call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-           m_avg = m_avg + weight*sinth*abs(eigenval)
-           m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(eigenval))**half
          endif
+
+         m_avg = m_avg + weight*sinth*eigenval
+         m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(eigenval))**half
+
+         if(itheta==1 .and. iphi==1) start_eigf3d_pos = (eigenval > 0)
+         do iband=1,deg_dim
+           if(start_eigf3d_pos(iband) .neqv. (eigenval(iband)>0)) then
+             saddle_warn(iband)=.true.
+           end if
+         end do
 
        enddo
      enddo
+
+     if(deg_dim>1)then
+       ABI_DEALLOCATE(eigenvec)
+       ABI_DEALLOCATE(rwork)
+       ABI_DEALLOCATE(work)
+     endif
 
      m_avg = quarter/pi*m_avg
      m_avg = one/m_avg
@@ -220,32 +239,50 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      m_avg_frohlich = m_avg_frohlich**2
 
      if(deg_dim==1)then
-       write(std_out,'(a,3(f6.3,a),i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), band ',&
+       write(std_out,'(2a,3(f6.3,a),i5)')ch10,&
+&        ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), band ',&
 &        efmasdeg(ikpt)%degs_bounds(1,ideg)
      else
-       write(std_out,'(a,3(f6.3,a),i5,a,i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',&
+       write(std_out,'(2a,3(f6.3,a),i5,a,i5)')ch10,&
+&        ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',&
 &        efmasdeg(ikpt)%degs_bounds(1,ideg),' through ',efmasdeg(ikpt)%degs_bounds(2,ideg)
      endif
 
+     sign_warn=.false.
      do iband=1,deg_dim
-       m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
-       write(std_out,'(a,f14.10)') &
-&        ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
+       if(saddle_warn(iband)) then
+         write(std_out,'(a,i5,a)') ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
+&          '  SADDLE POINT - Frohlich effective mass cannot be defined. '
+         sign_warn=.true.
+       else
+         m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
+         write(std_out,'(a,f14.10)') &
+&          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
+       endif
+       if(start_eigf3d_pos(iband) .neqv. start_eigf3d_pos(1))then
+         sign_warn=.true.
+       endif
      enddo
 
-     if(deg_dim>1) then
+     if(sign_warn .eqv. .false.)then
        write(std_out,'(2a)') ch10,&
-&       ' Angular average effective mass for Frohlich model, averaged over degenerate bands.'
+&       ' Angular average effective mass for Frohlich model (possibly averaged over degenerate bands).'
        write(std_out,'(a,es16.6)') &
 &       ' Value of     (<<m**0.5>>)**2 = ',(sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim)**2
-       write(std_out,'(a,es16.6,a)') &
-&       ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim,ch10
+       write(std_out,'(a,es16.6)') &
+&       ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim
+     else
+       write(std_out,'(a)')& 
+&          '  Angular average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 
      ABI_DEALLOCATE(eig2_diag_cart)
      ABI_DEALLOCATE(f3d)
      ABI_DEALLOCATE(m_avg)
      ABI_DEALLOCATE(m_avg_frohlich)
+     ABI_DEALLOCATE(eigenval)
+     ABI_DEALLOCATE(saddle_warn)
+     ABI_DEALLOCATE(start_eigf3d_pos)
 
    enddo ! ideg
  enddo ! ikpt
