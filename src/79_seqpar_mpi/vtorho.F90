@@ -1387,7 +1387,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         "-----------------------------------------------"
          call wrtout(std_out,message,'COLL')
        end if
-       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
+!       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
      if (psps%usepaw==0) then
