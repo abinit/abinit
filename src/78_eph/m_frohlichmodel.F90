@@ -85,8 +85,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'eph'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'frohlichmodel'
 !End of the abilint section
 
  implicit none
@@ -104,12 +103,12 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
 !Local variables ------------------------------
 !scalars
- integer :: deg_dim,degl,iband,ideg,ikpt,info,iphi,itheta
+ integer :: deg_dim,iband,ideg,ikpt,info,iphi,itheta
  integer :: jband,lwork,nphi,ntheta
  real(dp) :: cosph,costh,sinph,sinth,weight
  character(len=500) :: msg
 !arrays
- real(dp) :: unit_r(3)
+ real(dp) :: kpt(3),unit_r(3)
  real(dp), allocatable :: eigenval(:), rwork(:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
@@ -146,10 +145,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  enddo
 
  do ikpt=1,dtset%nkpt
+
+   kpt(:)=dtset%kptns(:,ikpt)
    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
-     degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
      ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
@@ -157,7 +157,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      do iband=1,deg_dim
         do jband=1,deg_dim
           eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
-          eig2_diag_cart(:,:,iband,jband) = matmul(matmul(dtset%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(dtset%rprimd))/two_pi**2
+          eig2_diag_cart(:,:,iband,jband) = matmul(matmul(cryst%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(cryst%rprimd))/two_pi**2
         enddo
      enddo
 
@@ -220,10 +220,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      m_avg_frohlich = m_avg_frohlich**2
 
      if(deg_dim==1)then
-       write(io_unit,'(a,3(f6.3,a),i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), band ',degl+iband
+       write(std_out,'(a,3(f6.3,a),i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), band ',&
+&        efmasdeg(ikpt)%degs_bounds(1,ideg)
      else
-       write(io_unit,'(a,3(f6.3,a),i5,a,i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',degl+band,' through ',&
-&        degl+deg_dim
+       write(std_out,'(a,3(f6.3,a),i5,a,i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',&
+&        efmasdeg(ikpt)%degs_bounds(1,ideg),' through ',efmasdeg(ikpt)%degs_bounds(2,ideg)
      endif
 
      do iband=1,deg_dim
@@ -257,8 +258,6 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(gq_points_cosph)
  ABI_DEALLOCATE(gq_points_sinph)
  ABI_DEALLOCATE(gq_weights_ph)
-
- ABI_DEALLOCATE(unit_r)
 
  end subroutine frohlichmodel
 

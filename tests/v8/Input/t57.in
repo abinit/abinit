@@ -86,14 +86,15 @@
     prtefmas5     1
 
   # Frohlich model calculation
-    iscf6     -2
-    optdriver6 7
-    getddb6    3
-    getwfk6    4
-    getefmas6  5
+    iscf6          -2
+    optdriver6      7
+    getddb6         3
+    getwfk6         4
+    getefmas6       5
+    efmas_ntheta6   100
     eph_frohlichm6  1
-    eph_task6 6
-    kptopt6   0        # K-points can be specified in any way one want, they just need to be present in the
+    eph_task6       6
+    kptopt6         0        # K-points can be specified in any way one want, they just need to be present in the
     nkpt6     2        # ground state calc. too.
     kpt6      0.00 0.00 0.00   # Gamma
               0.00 0.50 0.50   # X
