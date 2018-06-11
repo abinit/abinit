@@ -14,7 +14,7 @@ the development is based on the
 There is an official [github mirror](https://github.com/abinit/abinit)
 where we welcome bug fixes and improvements. 
 Note, however, that most of the active developments are hosted on our 
-internal [Gitlab server]([https://gitlab.abinit.org/).
+internal [Gitlab server](https://gitlab.abinit.org/).
 Before embarking on making significant changes, please contact the Abinit group.
 
 See the many different projects linked to ABINIT on Github
