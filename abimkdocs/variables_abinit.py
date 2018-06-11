@@ -6962,8 +6962,8 @@ Variable(
 Used when [[vdw_xc]]>0, to read previously calculated vdW-DF variables.
 Supported values:
 
-  * 0 --> do not read vdW-DF variables
-  * 1 --> read vdW-DF variables
+  * 0: do not read vdW-DF variables
+  * 1: read vdW-DF variables
 """,
 ),
 
@@ -17896,8 +17896,9 @@ Used when [[vdw_xc]]>0, to build the vdW-DF kernel.
 
 !!! important
 
-    modifying this variable will likely transform the
-    calculated energies and their gradients into garbage. You have been warned!
+    Modifying this variable will likely transform the
+    calculated energies and their gradients into garbage.
+    You have been warned!
 """,
 ),
 
@@ -17912,8 +17913,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="[[vdw_xc]]>0",
     text="""
-Used when [[vdw_xc]]>0, as introduced in
-[doi:10.1103/PhysRevLett.92.246401](http://dx.doi.org/10.1103/PhysRevLett.92.246401).
+Used when [[vdw_xc]]>0, as introduced in [[cite:Dion2004]].
 """,
 ),
 
@@ -17972,7 +17972,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="[[vdw_xc]]==5",
     text="""
-The DFT-D methods (S. Grimme approach) dispersion potentials, [[vdw_xc]]==5 or
+The DFT-D methods [[cite:Grimme2010]] dispersion potentials, [[vdw_xc]]==5 or
 6 or 7, include a pair potential. The number of pairs of atoms contributing to
 the potential is necessarily limited. To be included in the potential a pair
 of atom must have contribution to the energy larger than [[vdw_tol]].
@@ -17993,8 +17993,9 @@ Variable(
     text="""
 Control the computation of the 3-body correction inside DFT-D3 dispersion
 correction (Grimme approach) to the total energy:
--If **vdw_tol_3bt** <0, no 3-body correction.
--If **vdw_tol_3bt** >0, the 3-body term is included with a tolerance = **vdw_tol_3bt**
+
+  * If **vdw_tol_3bt** <0, no 3-body correction.
+  * If **vdw_tol_3bt** >0, the 3-body term is included with a tolerance = **vdw_tol_3bt**.
 
 DFT-D3 as proposed by S. Grimme adds two contributions to the total energy in
 order to take into account of the dispersion:
@@ -18004,12 +18005,11 @@ order to take into account of the dispersion:
   * A 3-body term which is obtained by summing over all triplets of atoms. Each individual contribution depends of the distances and angles between the three atoms. As it is impossible to sum over all the triplets in a periodic system, one has to define a stopping criterium which is here that an additional contribution to the energy must be higher than **vdw_tol_3bt**
 
 The last term has been predicted to have an important effect for large
-molecules (see for e.g. _Grimme S., J. Chem. Phys. 132, 154104 (2010)_ ). It
-is however quite costly in computational time for periodic systems and seems
-to lead to an overestimation of lattice parameters for weakly bound systems
-(see for e.g. _Reckien W., J. Chem. Phys. 132, 154104(2010)_ ). Still, its
+molecules [[cite:Grimme2010]]. It is however quite costly in computational
+time for periodic systems and seems to lead to an overestimation of lattice
+parameters for weakly bound systems [[cite:Grimme2010a]]. Still, its
 contribution to energy, to forces and to stress is available (not planned for
-elastic constants, dynamical matrix and internal strains)
+elastic constants, dynamical matrix and internal strains).
 """,
 ),
 
@@ -18049,48 +18049,17 @@ will be applied.
 Possible values are:
 
   * 0: no correction.
-  * 1: apply vdW-DF1 (DRSLL) from Dion _et al._
-_doi:10.1103/PhysRevLett.92.246401_
-
-  * 2: apply vdw-DF2 (LMKLL) from Lee _et al._
-_arXiv:1003.5255v1_
-
-  * 5: apply vdw-DFT-D2 as proposed by S. Grimme (adding a semi-empirical dispersion potential)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency
-_J. Comp. Chem. 27, 1787 (2006)_
-
-  * 6: apply vdw-DFT-D3 as proposed by S. Grimme (refined version of DFT-D2)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency and [[vdw_tol_3bt]] variable to
-include 3-body corrections
-_J. Chem. Phys. 132, 154104 (2010)_
-
-  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method J. Chem. Phys. 2004-2006)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency
-_J. Comput. Chem. 32, 1456 (2011)_
-
-  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method.
-_doi:10.1103/PhysRevLett.100.053002._ For details on this implementation
-please check: _doi:10.1016/j.cpc.2011.11.003_
-The improvements introduced by Andrinopoulos _et al._ in _J. Chem. Phys. 135,
-154105 (2011)_ namely the amalgamation procedure, splitting of p-like MLWFs
-into
-two s-like Wannier functions and fractional occupation of MLWFs are performed
-automatically.
-
-  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method.
-_doi:10.1103/PhysRevB.85.073101_
-
-  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions.
-_J. Chem. Phys. 139, 054106 (2013)_
-For periodic systems a supercell approach has to be used since
-**vdw_supercell** is not enabled in this case.
+  * 1: apply vdW-DF1 (DRSLL) from [[cite:Dion2004]].
+  * 2: apply vdw-DF2 (LMKLL) from [[cite:Lee2010]].
+  * 5: apply vdw-DFT-D2 as proposed by S. Grimme [[cite:Grimme2006]] (adding a semi-empirical dispersion potential). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 6: apply vdw-DFT-D3 as proposed by S. Grimme [[cite:Grimme2010]] (refined version of DFT-D2). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence and [[vdw_tol_3bt]] variable to include 3-body corrections.
+  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method from [[cite:Becke2006]]). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method [[cite:Silvestrelli2008]]. For details on this implementation please check [[cite:Espejo2012]]. The improvements introduced by Andrinopoulos _et al._ [[cite:Andrinopoulos2011]], namely the amalgamation procedure, splitting of p-like MLWFs into two s-like Wannier functions and fractional occupation of MLWFs are performed automatically.
+  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method [[cite:Ambrosetti2012]].
+  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions [[cite:Silvestrelli2013]]. For periodic systems a supercell approach has to be used since **vdw_supercell** is not enabled in this case.
 
 For [[vdw_xc]]=1 and [[vdw_xc]]=2, the implementation follows the strategy
-devised in the article of Rom an-Perez and Soler
-([doi:10.1103/PhysRevLett.103.096102](https://dx.doi.org/10.1103/PhysRevLett.103.096102))
+devised in the article of Roman-Perez and Soler [[cite:Romanperez2009]].
 """,
 ),
 
