@@ -51,5 +51,5 @@ spin_dt=1e-16
 #%% authors = H. Xu
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read xml  and run spin dynamics
+#%%   read xml and run spin dynamics
 #%%<END TEST_INFO>

@@ -193,7 +193,7 @@ that gives: Please consult the [[pdf:howto_chebfi]] document.
 
 This is the recommended approach to link pdf documents in the description of the input variables.
 In the lessons and in the theory notes, on the other hand, you may want to
-to display the pdf file directly in the HTML page.
+display the pdf file directly in the HTML page.
 In this case, use the HTML embed element:
 
 ```html
@@ -333,7 +333,7 @@ that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic 
     Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
 
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
-in the case of a bibliographic reference, and add "~abinit/" in the case of a path.
+in the case of a bibliographic reference, and addd *~abinit/* in the case of a path.
 The syntax `[[test:libxc_41]]` is preferable when documenting new tests in the release notes.
 The python code issues a warning in the terminal if the link cannot be established.
 
@@ -374,16 +374,12 @@ Namespace      | Markdown                         | Result
  `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
 
 
-`#files-file` is an HTML id defined in ~abinit/doc/guide/abinit.md with:
+`#files-file` is an HTML id defined in *~abinit/doc/guide/abinit.md with*:
 
 ```html
 <a id="files-file"></a>
 ## 4 More detailed presentation of the files file
 ```
-
-!!! important
-
-    `theorydoc` and bib are deprecated and replaced by `theory` and `cite`, respectively.
 
 Also in this case, it's possible to specify the name of the link with the
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
@@ -407,7 +403,8 @@ To refer to a particular git commit inside a Markdown document use:
 
     Solved in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
-that produces: [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
+that produces: [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
+This extension is useful to generate nice changelogs and [release notes](/about/release-notes).
 
 <!--
 It's also possible to mention a particular github issue with the syntax:
@@ -416,10 +413,6 @@ It's also possible to mention a particular github issue with the syntax:
 
 that produces: Fix https://github.com/abinit/abinit/issues/1
 -->
-
-!!! note
-    This extension is useful to generate nice changelogs and [release notes](/about/release-notes).
-
 
 ### External links
 
@@ -434,7 +427,17 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `https://www.abinit.org` | https://www.abinit.org
 
 It's also possible to specify the name of the link with the `|` separator:
-`[[https://wiki.abinit.org|The ABINIT Wiki]]` that gives [[https://wiki.abinit.org|The ABINIT Wiki]]
+For example, `[[https://wiki.abinit.org|The ABINIT Wiki]]` produces [[https://wiki.abinit.org|The ABINIT Wiki]]
+
+The markdown parser supports aliases for commonly used links.
+The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_aliases`):
+
+| Markdown | Result |
+| :-- | :-- |
+| `|AbiPy|` | |AbiPy| |
+| `|AbipyStructureNb|` | |AbipyStructureNb| |
+| `|xmgrace|` | |xmgrace| |
+| `|gnuplot|` | |gnuplot| |
 
 
 ### Permalinks

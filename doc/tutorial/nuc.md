@@ -62,7 +62,7 @@ The first variable instructs Abinit to compute and print the electric field
 gradient, and the second gives the quadrupole moments of the nuclei, in
 barns, one for
 each type of atom. A standard source for quadrupole moments
-is [[cite:pyykko2008year]]. Here we are considering silicon and oxygen, and in
+is [[cite:Pyykko2008]]. Here we are considering silicon and oxygen, and in
 particular Si-29, which has zero quadrupole moment, and O-17, the only stable
 isotope of oxygen with a non-zero quadrupole moment.
 
@@ -125,13 +125,13 @@ small, while the ionic part and the on-site PAW part are larger. In fact, the
 PAW part is largest -- this is why these calculations give very poor results
 with norm-conserving pseudopotentials, and need the full accuracy of PAW.
 Experimentally, the nuclear quadrupole coupling for O-17 in stishovite is
-reported as $6.5\pm 0.1$ MHz, with asymmetry $0.125\pm 0.05$ [[cite:xianyuxue1994]].
+reported as $6.5\pm 0.1$ MHz, with asymmetry $0.125\pm 0.05$ [[cite:Xianyuxue1994]].
 
 ## 2 Fermi contact interaction
 
 The Fermi contact interaction arises from overlap of the electronic wavefunctions
 with the atomic nucleus, and is an observable for example in
-M&ouml;ssbauer spectroscopy [[cite:greenwoodgibb]]. In M&ouml;ssbauer spectra,
+M&ouml;ssbauer spectroscopy [[cite:Greenwood1971]]. In M&ouml;ssbauer spectra,
 the isomer shift $\delta$ is expressed in velocity units as
 $$
 \begin{equation}
