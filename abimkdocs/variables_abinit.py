@@ -15153,15 +15153,16 @@ ipert=natom+7, two sets of perturbations that the developpers can define.
   * 2 --> response with respect to perturbation natom+7 will be computed
   * 3 --> responses with respect to perturbations natom+6 and natom+7 will be computed
 
-In order to define and use correctly the new perturbations, the developper
-might have to include code lines or additional routines at the level of the
-following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
-dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
-dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
-irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
-these routines, the developper should pay a particular attention to the rfpert
-array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
-variable.
+!!! important
+    In order to define and use correctly the new perturbations, the developper
+    might have to include code lines or additional routines at the level of the
+    following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
+    dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
+    dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
+    irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
+    these routines, the developper should pay a particular attention to the rfpert
+    array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
+    variable.
 """,
 ),
 
