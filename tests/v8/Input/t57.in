@@ -115,7 +115,7 @@ typat 1 2
 natom 2
 ntypat 2
 znucl 20 8
-nband 9 
+nband 12
 nbdbuf 2
 diemac 6
  ecut 30               # Underconverged ecut. 

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 12 Jun 2018.
-- ( at 18h05 )
+- ( at 21h31 )
   
 - input  file    -> t57.in
 - output file    -> t57.out
@@ -84,12 +84,12 @@ _ WF disk file :      2.928 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =           9        mffmem =           1         mkmem =           2
+-    mband =          12        mffmem =           1         mkmem =           2
        mpw =         762          nfft =       32768          nkpt =           2
 ================================================================================
-P This job should need less than                       7.669 Mbytes of memory.
+P This job should need less than                       7.739 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.211 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 
@@ -101,13 +101,13 @@ _ WF disk file :      0.211 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
   nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
       nsym =      48    n1xccc =    2501    ntypat =       2    occopt =       1
    xclevel =       2
--    mband =           9        mffmem =           1         mkmem =           2
+-    mband =          12        mffmem =           1         mkmem =           2
 -   mkqmem =           2        mk1mem =           2           mpw =        1524
       nfft =       32768          nkpt =           2
 ================================================================================
-P This job should need less than                      12.517 Mbytes of memory.
+P This job should need less than                      12.940 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.421 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :      0.560 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 
@@ -119,12 +119,12 @@ _ WF disk file :      0.421 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =           9        mffmem =           1         mkmem =           2
+-    mband =          12        mffmem =           1         mkmem =           2
        mpw =         762          nfft =       32768          nkpt =           2
 ================================================================================
-P This job should need less than                       7.669 Mbytes of memory.
+P This job should need less than                       7.739 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.211 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -278,9 +278,9 @@ P          mk1mem6          2
             nband1          8
             nband2          8
             nband3          8
-            nband4          9
-            nband5          9
-            nband6          9
+            nband4         12
+            nband5         12
+            nband6         12
            nbdbuf1          0
            nbdbuf2          0
            nbdbuf3          0
@@ -1302,17 +1302,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 ================================================================================
  prteigrs : about to open file t57o_DS4_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  8.22E-17  5.28E-17  4.73E-17  7.00E-17  8.68E-17  2.41E-17  4.60E-17  1.91E-17
-  4.63E-10
+  7.80E-17  2.05E-17  4.90E-17  2.52E-17  4.16E-17  8.34E-17  8.29E-17  3.04E-17
+  6.84E-17  7.21E-17  9.42E-17  7.24E-17
  -1.2037E+00 -4.9704E-01 -4.9704E-01 -4.9704E-01 -3.8772E-01  1.8064E-01
-  1.8064E-01  1.8064E-01  3.5093E-01
-  prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  4.63062E-10
+  1.8064E-01  1.8064E-01  3.5093E-01  4.1014E-01  4.1014E-01  4.1014E-01
  Non-SCF case, kpt    2 (  0.00000  0.50000  0.50000), residuals and eigenvalues=
-  3.73E-17  2.85E-17  7.45E-17  4.06E-17  7.05E-17  5.98E-17  6.34E-17  1.17E-16
-  1.32E-13
+  3.49E-17  8.31E-17  3.28E-17  8.91E-17  4.71E-17  6.77E-17  7.94E-17  9.08E-17
+  5.60E-17  9.28E-17  6.30E-11  2.85E-15
  -1.1992E+00 -5.1774E-01 -5.0488E-01 -5.0488E-01 -3.7918E-01  1.3289E-01
-  1.6672E-01  1.6672E-01  3.1711E-01
-  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  1.32287E-13
+  1.6672E-01  1.6672E-01  3.1711E-01  4.7329E-01  5.0563E-01  5.2839E-01
+  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  6.29657E-11
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1323,7 +1322,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.5733E-11; max=  4.6306E-10
+ Mean square residual over all n,k,spin=   2.6237E-12; max=  9.4230E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1335,12 +1334,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
               =  4.834562977678  4.834562977678  4.834562977678 angstroms
  prteigrs : about to open file t57o_DS4_EIG
  Eigenvalues (hartree) for nkpt=   2  k points:
- kpt#   1, nband=  9, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+ kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.20370   -0.49704   -0.49704   -0.49704   -0.38772    0.18064    0.18064    0.18064
-   0.35093
- kpt#   2, nband=  9, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
+   0.35093    0.41014    0.41014    0.41014
+ kpt#   2, nband= 12, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
   -1.19921   -0.51774   -0.50488   -0.50488   -0.37918    0.13289    0.16672    0.16672
-   0.31711
+   0.31711    0.47329    0.50563    0.52839
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1431,46 +1430,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -22.494171528392     -2.249E+01 2.507E-01 0.000E+00
- ETOT  2  -22.799737465695     -3.056E-01 1.191E-02 0.000E+00
- ETOT  3  -22.806878555665     -7.141E-03 3.109E-04 0.000E+00
- ETOT  4  -22.807096115612     -2.176E-04 7.683E-06 0.000E+00
- ETOT  5  -22.807103738893     -7.623E-06 4.496E-07 0.000E+00
- ETOT  6  -22.807104025918     -2.870E-07 7.696E-09 0.000E+00
- ETOT  7  -22.807104037548     -1.163E-08 8.793E-10 0.000E+00
- ETOT  8  -22.807104038040     -4.927E-10 1.141E-11 0.000E+00
- ETOT  9  -22.807104038060     -1.982E-11 2.033E-12 0.000E+00
- ETOT 10  -22.807104038060     -4.547E-13 9.344E-13 0.000E+00
+-ETOT  1  -27.757627718502     -2.776E+01 2.346E-01 0.000E+00
+ ETOT  2  -27.964661736359     -2.070E-01 4.825E-03 0.000E+00
+ ETOT  3  -27.969478428223     -4.817E-03 2.311E-04 0.000E+00
+ ETOT  4  -27.969624110378     -1.457E-04 4.527E-06 0.000E+00
+ ETOT  5  -27.969629266848     -5.156E-06 2.461E-07 0.000E+00
+ ETOT  6  -27.969629461515     -1.947E-07 5.721E-09 0.000E+00
+ ETOT  7  -27.969629469155     -7.639E-09 3.336E-10 0.000E+00
+ ETOT  8  -27.969629469458     -3.037E-10 9.708E-12 0.000E+00
+ ETOT  9  -27.969629469470     -1.177E-11 9.464E-13 0.000E+00
 
- At SCF step   10   max residual=  9.34E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step    9   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -2.2222E-02; max=  9.3439E-13
+ Mean square residual over all n,k,spin=  -1.6667E-02; max=  9.4639E-13
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.1100593039E+00
+          f-sum rule ratio=    1.3569144226E+00
  prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  9, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000   -0.00000   -0.00000   -0.00000    0.00000   -0.00000   -0.00000   -0.00000
-  -0.00000
+ kpt#   1, nband= 12, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+   0.00000   -0.00000   -0.00000    0.00000    0.00000   -0.00000   -0.00000    0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.64581170E+01 eigvalue=   8.06156780E-01  local=  -2.58060469E+01
+     kin0=   4.00230682E+01 eigvalue=  -1.16687030E+00  local=  -2.06750431E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -5.04039961E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16128427E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   4.42438005E+00     enl0=  -3.07550732E+00   enl1=   4.78979243E+00
+    edocc=   1.19038645E+01     enl0=  -2.11539225E+00   enl1=   5.67358616E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -2.28071040E+01
+   erelax=  -2.79696295E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2280710404E+02 Ha. Also 2DEtotal=   -0.620612862715E+03 eV
-    (  non-var. 2DEtotal :   -2.2807101827E+01 Ha)
+ 2DEtotal=   -0.2796962947E+02 Ha. Also 2DEtotal=   -0.761092323916E+03 eV
+    (  non-var. 2DEtotal :   -2.7969628250E+01 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -1488,45 +1486,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -23.115870689795     -2.312E+01 2.300E-01 0.000E+00
- ETOT  2  -23.449730920090     -3.339E-01 1.131E-02 0.000E+00
- ETOT  3  -23.457941395240     -8.210E-03 2.272E-04 0.000E+00
- ETOT  4  -23.458190365149     -2.490E-04 9.006E-06 0.000E+00
- ETOT  5  -23.458198961355     -8.596E-06 3.116E-07 0.000E+00
- ETOT  6  -23.458199276488     -3.151E-07 1.075E-08 0.000E+00
- ETOT  7  -23.458199288671     -1.218E-08 4.849E-10 0.000E+00
- ETOT  8  -23.458199289155     -4.836E-10 1.609E-11 0.000E+00
- ETOT  9  -23.458199289173     -1.837E-11 8.860E-13 0.000E+00
+-ETOT  1  -27.720467887919     -2.772E+01 2.346E-01 0.000E+00
+ ETOT  2  -27.964138158550     -2.437E-01 5.898E-03 0.000E+00
+ ETOT  3  -27.969566294809     -5.428E-03 2.312E-04 0.000E+00
+ ETOT  4  -27.969718471683     -1.522E-04 4.527E-06 0.000E+00
+ ETOT  5  -27.969723472556     -5.001E-06 2.461E-07 0.000E+00
+ ETOT  6  -27.969723646098     -1.735E-07 5.721E-09 0.000E+00
+ ETOT  7  -27.969723652424     -6.325E-09 3.337E-10 0.000E+00
+ ETOT  8  -27.969723652659     -2.358E-10 9.708E-12 0.000E+00
+ ETOT  9  -27.969723652667     -7.880E-12 5.826E-13 0.000E+00
 
- At SCF step    9   max residual=  8.86E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step    9   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -2.2222E-02; max=  8.8601E-13
+ Mean square residual over all n,k,spin=  -1.6667E-02; max=  5.8255E-13
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.1531482358E+00
+          f-sum rule ratio=    1.3569191728E+00
  prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  9, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000   -0.00000    0.00000    0.00000   -0.00000
-  -0.00000
+ kpt#   1, nband= 12, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.00000   -0.00000   -0.00000    0.00000   -0.00000    0.00000    0.00000   -0.00000
+  -0.00000   -0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.64872931E+01 eigvalue=   6.86044237E-01  local=  -2.61728171E+01
+     kin0=   4.10485626E+01 eigvalue=  -1.08596744E+00  local=  -2.13605801E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -5.23605171E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16130584E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   4.42440842E+00     enl0=  -1.96673324E+00   enl1=   5.44412237E+00
+    edocc=   1.15939381E+01     enl0=  -2.22623233E+00   enl1=   5.67361389E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -2.34581993E+01
+   erelax=  -2.79697237E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2345819929E+02 Ha. Also 2DEtotal=   -0.638330065522E+03 eV
-    (  non-var. 2DEtotal :   -2.3458197364E+01 Ha)
+ 2DEtotal=   -0.2796972365E+02 Ha. Also 2DEtotal=   -0.761094886771E+03 eV
+    (  non-var. 2DEtotal :   -2.7969722233E+01 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -1544,46 +1542,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -23.158404898821     -2.316E+01 2.610E-01 0.000E+00
- ETOT  2  -23.450822425765     -2.924E-01 9.102E-03 0.000E+00
- ETOT  3  -23.457971679932     -7.149E-03 3.308E-04 0.000E+00
- ETOT  4  -23.458197153957     -2.255E-04 6.506E-06 0.000E+00
- ETOT  5  -23.458205332972     -8.179E-06 5.998E-07 0.000E+00
- ETOT  6  -23.458205661355     -3.284E-07 7.931E-09 0.000E+00
- ETOT  7  -23.458205675734     -1.438E-08 1.459E-09 0.000E+00
- ETOT  8  -23.458205676405     -6.712E-10 2.090E-11 0.000E+00
- ETOT  9  -23.458205676437     -3.137E-11 4.052E-12 0.000E+00
- ETOT 10  -23.458205676438     -8.669E-13 9.584E-13 0.000E+00
+-ETOT  1  -27.767305180849     -2.777E+01 2.399E-01 0.000E+00
+ ETOT  2  -27.965143927864     -1.978E-01 3.417E-03 0.000E+00
+ ETOT  3  -27.969573838037     -4.430E-03 2.498E-04 0.000E+00
+ ETOT  4  -27.969713172540     -1.393E-04 3.441E-06 0.000E+00
+ ETOT  5  -27.969718385978     -5.213E-06 3.369E-07 0.000E+00
+ ETOT  6  -27.969718595699     -2.097E-07 4.854E-09 0.000E+00
+ ETOT  7  -27.969718604438     -8.739E-09 5.525E-10 0.000E+00
+ ETOT  8  -27.969718604808     -3.698E-10 9.520E-12 0.000E+00
+ ETOT  9  -27.969718604823     -1.518E-11 9.943E-13 0.000E+00
 
- At SCF step   10   max residual=  9.58E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step    9   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -2.2222E-02; max=  9.5842E-13
+ Mean square residual over all n,k,spin=  -1.6667E-02; max=  9.9432E-13
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.1531485658E+00
+          f-sum rule ratio=    1.3569188783E+00
  prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  9, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
-   0.00000
+ kpt#   1, nband= 12, wtk=  0.50000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+   0.00000   -0.00000   -0.00000    0.00000    0.00000   -0.00000   -0.00000    0.00000
+   0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.64872443E+01 eigvalue=   6.86048034E-01  local=  -2.61727795E+01
+     kin0=   4.10491099E+01 eigvalue=  -1.08594822E+00  local=  -2.13609310E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -5.23605321E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16130450E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   4.42441365E+00     enl0=  -1.96672557E+00   enl1=   5.44412550E+00
+    edocc=   1.15937744E+01     enl0=  -2.22628884E+00   enl1=   5.67361014E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -2.34582057E+01
+   erelax=  -2.79697186E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2345820568E+02 Ha. Also 2DEtotal=   -0.638330239328E+03 eV
-    (  non-var. 2DEtotal :   -2.3458203291E+01 Ha)
+ 2DEtotal=   -0.2796971860E+02 Ha. Also 2DEtotal=   -0.761094749412E+03 eV
+    (  non-var. 2DEtotal :   -2.7969717420E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
@@ -1595,86 +1592,82 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.
  - Associated theta integrals calculated with ntheta=    100 points.
 
---- !WARNING
-
-Band(s)     8,
-are not band extrema, but saddle points;
-the transport equivalent formalism breaks down in these conditions.
-The associated tensor(s) will therefore not be printed.
----
-
  K-point ( 0.000, 0.000, 0.000) | band =     6
  Transport equivalent effective mass tensor:
-             -0.7076211863             -0.2153782334             -0.2149863773
-             -0.2153782334             -0.7071714735             -0.2150166241
-             -0.2149863773             -0.2150166241             -0.7067217332
+             -0.4594279985             -0.0000060032             -0.0000060026
+             -0.0000060032             -0.4594279904             -0.0000060059
+             -0.0000060026             -0.0000060059             -0.4594279982
  Transport equivalent effective mass tensor eigenvalues:
-             -1.1374260470             -0.4921936259             -0.4918947201
- Angular average effective mass 1/(<1/m>)=  -0.5030316197
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.5214166544
+             -0.4594400034             -0.4594219961             -0.4594219876
+ Angular average effective mass 1/(<1/m>)=  -0.4240512899
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.4264157872
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -0.4152738856
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -0.4152784753
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -0.4152826996
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -1.3832984082
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -0.7007805643
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -0.7007688521
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -0.7007513562
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -0.3588042802
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -0.3588042742
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -0.3588042800
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -0.4938825121
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -0.4513980935
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -0.4513980931
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -0.4513980894
 
  K-point ( 0.000, 0.000, 0.000) | band =     7
  Transport equivalent effective mass tensor:
-             -3.2420217565             -0.0839574652             -0.0836264502
-             -0.0839574652             -3.2426688520             -0.0838310425
-             -0.0836264502             -0.0838310425             -3.2444416744
+             -3.1215333092             -0.0000232408             -0.0000231842
+             -0.0000232408             -3.1215743521             -0.0000230538
+             -0.0000231842             -0.0000230538             -3.1223632643
  Transport equivalent effective mass tensor eigenvalues:
-             -3.4106576383             -3.1600901536             -3.1583844910
- Angular average effective mass 1/(<1/m>)=  -1.7138844075
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.7940123449
+             -3.1223646224             -3.1215836414             -3.1215226618
+ Angular average effective mass 1/(<1/m>)=  -1.4616039326
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.5327952484
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -2.9256015598
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -2.9256015558
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -2.9256015577
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -1.3832984115
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -1.0947216422
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -1.0947216437
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -1.0947216428
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -2.9255547944
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -2.9255547884
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -2.9255547952
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -1.3832983904
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -1.0947216403
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -1.0947216401
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -1.0947216407
 
  K-point ( 0.000, 0.000, 0.000) | band =     8
  Transport equivalent effective mass tensor:
-     *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***
- Angular average effective mass 1/(<1/m>)=   1.1151667567
- Angular average effective mass for Frohlich model (<m**0.5>)**2=   1.4105605884
+             -4.1295557352             -0.0000297910             -0.0000297719
+             -0.0000297910             -4.1296262165             -0.0000304296
+             -0.0000297719             -0.0000304296             -4.1285207402
+ Transport equivalent effective mass tensor eigenvalues:
+             -4.1296384728             -4.1295451245             -4.1285190946
+ Angular average effective mass 1/(<1/m>)=  -2.3349475403
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -2.4045926600
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   0.9301000740
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   0.9301110147
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   0.9301132996
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -9.3759204026
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   1.3757539308
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   1.3757020825
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   1.3756621357
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -2.9256015741
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -2.9256015702
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -2.9256015607
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -1.3832984324
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -2.9255776764
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -2.9255777010
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -2.9255777221
 
  Angular average effective mass for Frohlich model, averaged over degenerate bands.
- Value of     (<<m**0.5>>)**2 =     1.173011E+00
- Absolute Value of <<m**0.5>> =     1.083057E+00
+ Value of     (<<m**0.5>>)**2 =     1.316176E+00
+ Absolute Value of <<m**0.5>> =     1.147247E+00
 
 
  K-point ( 0.000, 0.000, 0.000) | band =     9
  Effective mass tensor:
-              0.3496614234              0.0000067368              0.0000070766
-              0.0000067368              0.3496613867              0.0000045497
-              0.0000070766              0.0000045497              0.3496604091
+              0.3900299811              0.0000055874              0.0000055879
+              0.0000055874              0.3900299598              0.0000055877
+              0.0000055879              0.0000055877              0.3900299828
  Effective mass tensor eigenvalues:
-              0.3496533802              0.3496564278              0.3496734112
- Angular average effective mass 1/(<1/m>)=   0.3496610729
- Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3496610729
+              0.3900243797              0.3900243941              0.3900411499
+ Angular average effective mass 1/(<1/m>)=   0.3900299744
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3900299744
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   0.3496614232
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   0.3496613865
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   0.3496604089
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   0.3496733152
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   0.3496654473
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   0.3496679927
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   0.3496681417
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   0.3900299809
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   0.3900299596
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   0.3900299827
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   0.3900411499
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   0.3900355588
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   0.3900355697
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   0.3900355577
 
  COMMENTS: 
  - At k-point ( 0.000, 0.500, 0.500), bands     7 through     8
@@ -1685,7 +1678,7 @@ The associated tensor(s) will therefore not be printed.
 
 --- !WARNING
 
-Band(s)     7,
+Band(s)     7,     8,
 are not band extrema, but saddle points;
 the transport equivalent formalism breaks down in these conditions.
 The associated tensor(s) will therefore not be printed.
@@ -1694,57 +1687,53 @@ The associated tensor(s) will therefore not be printed.
  K-point ( 0.000, 0.500, 0.500) | band =     7
  Transport equivalent effective mass tensor:
      *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***
- Angular average effective mass 1/(<1/m>)=  -1.2639624542
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -2.3513550922
+ Angular average effective mass 1/(<1/m>)=  -0.9423854088
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.6079625372
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.8596429170
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -0.8250269177
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -0.8250371032
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -2.3760808961
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -1.5798793043
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -1.6741691783
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -1.6741486761
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.9058670702
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -0.6830086827
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -0.6830072649
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -0.8806101457
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -0.5864889837
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -1.3691581304
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -1.3691641664
 
  K-point ( 0.000, 0.500, 0.500) | band =     8
  Transport equivalent effective mass tensor:
-              1.0038635854             -0.0000173058             -0.0000172853
-             -0.0000173058              1.2713543250              0.2987480931
-             -0.0000172853              0.2987480931              1.2712986404
- Transport equivalent effective mass tensor eigenvalues:
-              1.5700745781              1.0038635844              0.9725783884
- Angular average effective mass 1/(<1/m>)=   1.1257368897
- Angular average effective mass for Frohlich model (<m**0.5>)**2=   1.1401823073
+     *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***
+ Angular average effective mass 1/(<1/m>)=  -2.0188589135
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -3.6276013614
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   0.9967331868
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   1.1703390846
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   1.1702842943
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   1.3379003102
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   1.6142093178
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   1.0847776437
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   1.0848013297
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.8602110807
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -1.1442371592
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -1.1442371527
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -2.3760619752
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->  -1.5798751676
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->  -2.2972957273
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->  -2.2972957356
 
  Angular average effective mass for Frohlich model, averaged over degenerate bands.
- Value of     (<<m**0.5>>)**2 =     1.691568E+00
- Absolute Value of <<m**0.5>> =     1.300603E+00
+ Value of     (<<m**0.5>>)**2 =     2.516476E+00
+ Absolute Value of <<m**0.5>> =     1.586340E+00
 
 
  K-point ( 0.000, 0.500, 0.500) | band =     9
  Effective mass tensor:
-              0.9807112834             -0.0000003328             -0.0000003535
-             -0.0000003328              0.3485518189              0.0000039945
-             -0.0000003535              0.0000039945              0.3485518185
+              1.4250899280             -0.0000008233             -0.0000008234
+             -0.0000008233              0.4472068820              0.0000050383
+             -0.0000008234              0.0000050383              0.4472068804
  Effective mass tensor eigenvalues:
-              0.3485478242              0.3485558132              0.9807112834
- Angular average effective mass 1/(<1/m>)=   0.4439383011
- Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.4697794605
+              0.4472018429              0.4472119195              1.4250899280
+ Angular average effective mass 1/(<1/m>)=   0.5798319149
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.6210517713
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   0.9807112834
-    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   0.3485518189
-    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   0.3485518185
-    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   0.4439423573
-    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   0.3485558132
-    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   0.5143128083
-    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   0.5143128247
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->   1.4250899280
+    2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->   0.4472068819
+    3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->   0.4472068804
+    4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->   0.5798369824
+    5:   0.000000  0.707107  0.707107 /   0.816497  0.408248  0.408248 ->   0.4472119195
+    6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   0.6807782373
+    7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   0.6807782391
 
  END OF EFFECTIVE MASSES SECTION
 
@@ -1757,15 +1746,15 @@ The associated tensor(s) will therefore not be printed.
   WARNING : still subject to testing - especially symmetries.
       direction              matrix element
    alpha     beta       real part   imaginary part
-     1        1       1.5741806978    0.0000000000
-     1        2       0.7870904763    0.0000000000
-     1        3       0.7870902215    0.0000000000
-     2        1       0.7870904763    0.0000000000
-     2        2       1.5622780490    0.0000000000
-     2        3       0.7751875727    0.0000000000
-     3        1       0.7870902215    0.0000000000
-     3        2       0.7751875727    0.0000000000
-     3        3       1.5622777942    0.0000000000
+     1        1       1.8870598598    0.0000000000
+     1        2       0.9435297197    0.0000000000
+     1        3       0.9435301401    0.0000000000
+     2        1       0.9435297197    0.0000000000
+     2        2       1.8870492594    0.0000000000
+     2        3       0.9435195397    0.0000000000
+     3        1       0.9435301401    0.0000000000
+     3        2       0.9435195397    0.0000000000
+     3        3       1.8870496798    0.0000000000
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1840,29 +1829,32 @@ The associated tensor(s) will therefore not be printed.
  where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=      0.035862 Ha=      0.975842 eV
 
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
- Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.5214197771
- Band     7 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.7940065527
- Band     8 SADDLE POINT - Frohlich effective mass and ZPR cannot be defined. 
- Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
+ Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.4264157872
+ Band     7 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.5327953982
+ Band     8 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -2.4045924723
+ Angular and band average effective mass and ZPR for Frohlich model.
+ Value of     (<<m**0.5>>)**2 =     1.316176E+00
+ Absolute Value of <<m**0.5>> =     1.147247E+00
+ ZPR from Frohlich model      =    -8.496785E-03 Ha=   -2.312093E-01 eV
 
  - At k-point ( 0.000, 0.000, 0.000), band     9
- Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3496610729
+ Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3900299744
  Angular and band average effective mass and ZPR for Frohlich model.
- Value of     (<<m**0.5>>)**2 =     3.496611E-01
- Absolute Value of <<m**0.5>> =     5.913215E-01
- ZPR from Frohlich model      =     4.379468E-03 Ha=    1.191714E-01 eV
+ Value of     (<<m**0.5>>)**2 =     3.900300E-01
+ Absolute Value of <<m**0.5>> =     6.245238E-01
+ ZPR from Frohlich model      =     4.625372E-03 Ha=    1.258628E-01 eV
 
  - At k-point ( 0.000, 0.500, 0.500), bands     7 through     8
  Band     7 SADDLE POINT - Frohlich effective mass and ZPR cannot be defined. 
- Band     8 Angular average effective mass for Frohlich model (<m**0.5>)**2=   1.1401823073
+ Band     8 SADDLE POINT - Frohlich effective mass and ZPR cannot be defined. 
  Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
 
  - At k-point ( 0.000, 0.500, 0.500), band     9
- Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.4697794605
+ Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.6210517713
  Angular and band average effective mass and ZPR for Frohlich model.
- Value of     (<<m**0.5>>)**2 =     4.697795E-01
- Absolute Value of <<m**0.5>> =     6.854046E-01
- ZPR from Frohlich model      =     5.076270E-03 Ha=    1.381323E-01 eV
+ Value of     (<<m**0.5>>)**2 =     6.210518E-01
+ Absolute Value of <<m**0.5>> =     7.880684E-01
+ ZPR from Frohlich model      =     5.836622E-03 Ha=    1.588226E-01 eV
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2015,9 +2007,9 @@ P          mk1mem6          2
             nband1          8
             nband2          8
             nband3          8
-            nband4          9
-            nband5          9
-            nband6          9
+            nband4         12
+            nband5         12
+            nband6         12
            nbdbuf1          0
            nbdbuf2          0
            nbdbuf3          0
@@ -2234,10 +2226,10 @@ P          mk1mem6          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         45.2  wall=         45.8
+- Proc.   0 individual time (sec): cpu=         45.6  wall=         46.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  82 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         45.2  wall=         45.8
+.Delivered  81 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         45.6  wall=         46.4
