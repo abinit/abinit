@@ -10,7 +10,7 @@ Supercells are often used in electronic structure calculations in order to
 model compound alloys, defects, etc. The band structure obtained directly from
 these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
-unperturbed host unit cell.  
+unperturbed host unit cell. The unfolding technique used in Abinit is the one presented in Ref. [[cite:Rubel2014]]. 
 
 This lesson aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
