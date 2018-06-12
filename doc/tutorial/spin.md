@@ -142,7 +142,7 @@ A very simple particular case is when the angle is 90°, the axis is <100> and
 the step is the unit cell side: spin directions alternate between
 planes perpendicular to the <100> axis yielding a "spiral stairway":
 
-![](spin_assets/fe_fcc_conv.jpg)
+![](spin_assets/fcc_fe_conv.jpg)
 
 For instance, if the atom at [x,y,0] possesses an "up" magnetization, the atom
 at [x+1/2,y,1/2] would possess a down magnetization etc...  
