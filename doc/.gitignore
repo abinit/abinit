@@ -6,7 +6,7 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/optic.md
+variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -25,8 +25,8 @@ variables/respfn.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
+variables/optic.md
 variables/anaddb.md
-variables/aim.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
