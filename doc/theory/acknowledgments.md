@@ -116,4 +116,4 @@ cite [[cite:Bottin2008]] ([available on Arxiv.org](https://arxiv.org/abs/0707.34
 on the electronic structure are computed, cite [[cite:Ponce2014]] and [[cite:Ponce2015]].
 
 <a id="b17"></a>
-- *B.17.** If the direct (DFPT) computation of effective masses is used, see [[topic:EffMass]], cite [[cite:Laflamme2016]].
+- *B.17.** If the direct (DFPT) computation of effective masses is used, see [[topic:EffectiveMass]], cite [[cite:Laflamme2016]].
