@@ -136,11 +136,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
    gq_points_costh(itheta)=cos(gq_points_th(itheta))
    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
  enddo
+ weight_phi=one/real(nphi,dp)
  do iphi=1,nphi
-   angle_phi=two*pi/nphi*(iphi-1)
+   angle_phi=two*pi*weight_phi*(iphi-1)
    gq_points_cosph(iphi)=cos(angle_phi)
    gq_points_sinph(iphi)=sin(angle_phi)
-   weight_phi=one/real(nphi,dp)
  enddo
 
  do ikpt=1,dtset%nkpt
