@@ -236,11 +236,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      m_avg_frohlich = m_avg_frohlich**2
 
      if(deg_dim==1)then
-       write(std_out,'(2a,3(f6.3,a),i5)')ch10,&
+       write(ab_out,'(2a,3(f6.3,a),i5)')ch10,&
 &        ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), band ',&
 &        efmasdeg(ikpt)%degs_bounds(1,ideg)
      else
-       write(std_out,'(2a,3(f6.3,a),i5,a,i5)')ch10,&
+       write(ab_out,'(2a,3(f6.3,a),i5,a,i5)')ch10,&
 &        ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',&
 &        efmasdeg(ikpt)%degs_bounds(1,ideg),' through ',efmasdeg(ikpt)%degs_bounds(2,ideg)
      endif
@@ -248,12 +248,12 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      sign_warn=.false.
      do iband=1,deg_dim
        if(saddle_warn(iband)) then
-         write(std_out,'(a,i5,a)') ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
+         write(ab_out,'(a,i5,a)') ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
 &          ' SADDLE POINT - Frohlich effective mass cannot be defined. '
          sign_warn=.true.
        else
          m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
-         write(std_out,'(a,i5,a,f14.10)') &
+         write(ab_out,'(a,i5,a,f14.10)') &
 &          ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
 &          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
        endif
@@ -263,14 +263,14 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      enddo
 
      if(sign_warn .eqv. .false.)then
-       write(std_out,'(2a)')&
+       write(ab_out,'(2a)')&
 &       ' Angular and band average effective mass for Frohlich model.'
-       write(std_out,'(a,es16.6)') &
+       write(ab_out,'(a,es16.6)') &
 &       ' Value of     (<<m**0.5>>)**2 = ',(sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim)**2
-       write(std_out,'(a,es16.6)') &
+       write(ab_out,'(a,es16.6)') &
 &       ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim
      else
-       write(std_out,'(a)')& 
+       write(ab_out,'(a)')& 
 &          ' Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 

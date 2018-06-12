@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 11 Jun 2018.
-- ( at 21h48 )
+.Starting date : Tue 12 Jun 2018.
+- ( at 10h11 )
   
 - input  file    -> t57.in
 - output file    -> t57.out
@@ -1835,6 +1835,29 @@ The associated tensor(s) will therefore not be printed.
 
 - Writing phonon DOS to file: t57o_DS6_PHDOS
 
+ - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
+ Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.5214197771
+ Band     7 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.7940065527
+ Band     8 SADDLE POINT - Frohlich effective mass cannot be defined. 
+ Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
+
+ - At k-point ( 0.000, 0.000, 0.000), band     9
+ Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3496610729
+ Angular and band average effective mass for Frohlich model.
+ Value of     (<<m**0.5>>)**2 =     3.496611E-01
+ Absolute Value of <<m**0.5>> =     5.913215E-01
+
+ - At k-point ( 0.000, 0.500, 0.500), bands     7 through     8
+ Band     7 SADDLE POINT - Frohlich effective mass cannot be defined. 
+ Band     8 Angular average effective mass for Frohlich model (<m**0.5>)**2=   1.1401823073
+ Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
+
+ - At k-point ( 0.000, 0.500, 0.500), band     9
+ Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.4697794605
+ Angular and band average effective mass for Frohlich model.
+ Value of     (<<m**0.5>>)**2 =     4.697795E-01
+ Absolute Value of <<m**0.5>> =     6.854046E-01
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2205,10 +2228,10 @@ P          mk1mem6          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         44.6  wall=         45.1
+- Proc.   0 individual time (sec): cpu=         41.5  wall=         41.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  82 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.6  wall=         45.1
++Overall time at end (sec) : cpu=         41.5  wall=         41.6
