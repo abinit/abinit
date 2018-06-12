@@ -104,17 +104,18 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 !Local variables ------------------------------
 !scalars
  logical :: sign_warn
- integer :: deg_dim,iband,ideg,ikpt,info,iphi,itheta
- integer :: jband,lwork,nphi,ntheta
+ integer :: deg_dim,iband,ideg,ikpt,info,iphi,iqdir,itheta
+ integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
  real(dp) :: kpt(3),unit_r(3)
- real(dp), allocatable :: eigenval(:), rwork(:)
+ real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
- real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
+ real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
+ real(dp), allocatable :: weight_qdir(:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
  complex(dpc), allocatable :: f3d(:,:)
@@ -125,23 +126,44 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  !!! Initialization of integrals 
  ntheta   = dtset%efmas_ntheta
  nphi     = 2*ntheta
+ nqdir     = nphi*ntheta
+
  ABI_ALLOCATE(gq_points_th,(ntheta))
- ABI_ALLOCATE(gq_points_costh,(ntheta))
- ABI_ALLOCATE(gq_points_sinth,(ntheta))
  ABI_ALLOCATE(gq_weights_th,(ntheta))
  ABI_ALLOCATE(gq_points_cosph,(nphi))
  ABI_ALLOCATE(gq_points_sinph,(nphi))
+
+ ABI_ALLOCATE(unit_qdir,(3,nqdir))
+ ABI_ALLOCATE(weight_qdir,(nqdir))
+
  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
- do itheta=1,ntheta
-   gq_points_costh(itheta)=cos(gq_points_th(itheta))
-   gq_points_sinth(itheta)=sin(gq_points_th(itheta))
- enddo
  weight_phi=two*pi/real(nphi,dp)
  do iphi=1,nphi
    angle_phi=weight_phi*(iphi-1)
    gq_points_cosph(iphi)=cos(angle_phi)
    gq_points_sinph(iphi)=sin(angle_phi)
  enddo
+ nqdir=0
+ do itheta=1,ntheta
+   costh=cos(gq_points_th(itheta))
+   sinth=sin(gq_points_th(itheta))
+   weight=gq_weights_th(itheta)*weight_phi*sinth
+   do iphi=1,nphi
+     cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
+     nqdir=nqdir+1
+
+     unit_qdir(1,nqdir)=sinth*cosph
+     unit_qdir(2,nqdir)=sinth*sinph
+     unit_qdir(3,nqdir)=costh
+     weight_qdir(nqdir)=weight
+
+   enddo
+ enddo
+
+ ABI_DEALLOCATE(gq_points_th)
+ ABI_DEALLOCATE(gq_weights_th)
+ ABI_DEALLOCATE(gq_points_cosph)
+ ABI_DEALLOCATE(gq_points_sinph)
 
  do ikpt=1,dtset%nkpt
 
@@ -186,41 +208,32 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      endif
 
      !Perform the integral over the sphere
-     do itheta=1,ntheta
-       costh=gq_points_costh(itheta) ; sinth=gq_points_sinth(itheta)
-       weight=gq_weights_th(itheta)*weight_phi
-       do iphi=1,nphi
-         cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
-
-         unit_r(1)=sinth*cosph
-         unit_r(2)=sinth*sinph
-         unit_r(3)=costh
-
-         do iband=1,deg_dim
-           do jband=1,deg_dim
-             f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))
-           enddo
+     do iqdir=1,nqdir
+       do iband=1,deg_dim
+         do jband=1,deg_dim
+           f3d(iband,jband)=DOT_PRODUCT(unit_qdir(:,iqdir),MATMUL(eig2_diag_cart(:,:,iband,jband),unit_qdir(:,iqdir)))
          enddo
- 
-         if(deg_dim==1)then
-           eigenval(1)=f3d(1,1)
-         else
-           eigenvec = f3d ; eigenval = zero
-           work=zero      ; rwork=zero
-           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-         endif
-
-         m_avg = m_avg + weight*sinth*eigenval
-         m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(eigenval))**half
-
-         if(itheta==1 .and. iphi==1) start_eigf3d_pos = (eigenval > 0)
-         do iband=1,deg_dim
-           if(start_eigf3d_pos(iband) .neqv. (eigenval(iband)>0)) then
-             saddle_warn(iband)=.true.
-           end if
-         end do
-
        enddo
+ 
+       if(deg_dim==1)then
+         eigenval(1)=f3d(1,1)
+       else
+         eigenvec = f3d ; eigenval = zero
+         work=zero      ; rwork=zero
+         call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+       endif
+
+       m_avg = m_avg + weight_qdir(iqdir)*eigenval
+       m_avg_frohlich = m_avg_frohlich + weight_qdir(iqdir)/(abs(eigenval))**half
+
+       if(iqdir==1) start_eigf3d_pos = (eigenval > 0)
+
+       do iband=1,deg_dim
+         if(start_eigf3d_pos(iband) .neqv. (eigenval(iband)>0)) then
+           saddle_warn(iband)=.true.
+         end if
+       end do
+
      enddo
 
      if(deg_dim>1)then
@@ -285,12 +298,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
    enddo ! ideg
  enddo ! ikpt
 
- ABI_DEALLOCATE(gq_points_th)
- ABI_DEALLOCATE(gq_points_costh)
- ABI_DEALLOCATE(gq_points_sinth)
- ABI_DEALLOCATE(gq_weights_th)
- ABI_DEALLOCATE(gq_points_cosph)
- ABI_DEALLOCATE(gq_points_sinph)
+ ABI_DEALLOCATE(unit_qdir)
+ ABI_DEALLOCATE(weight_qdir)
 
  end subroutine frohlichmodel
 
