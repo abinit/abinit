@@ -153,7 +153,8 @@ Wannier90 which were created by ABINIT are:
     You should read it carefully to see the details of the calculation. 
 
 **wannier90.chk** 
-:   This file is required to restart a calculation is case you use Wannier90 in standalone mode. In our case it is not used. 
+:   This file is required to restart a calculation is case you use Wannier90 in standalone mode. 
+    In our case it is not used. 
     
 To obtain information about the steepest-descent minimization just issue:
 
