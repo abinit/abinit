@@ -106,7 +106,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  logical :: sign_warn
  integer :: deg_dim,iband,ideg,ikpt,info,iphi,itheta
  integer :: jband,lwork,nphi,ntheta
- real(dp) :: cosph,costh,sinph,sinth,weight
+ real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
@@ -114,7 +114,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  real(dp), allocatable :: eigenval(:), rwork(:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
- real(dp), allocatable :: gq_points_ph(:),gq_points_cosph(:),gq_points_sinph(:),gq_weights_ph(:)
+ real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
  complex(dpc), allocatable :: f3d(:,:)
@@ -129,21 +129,18 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_ALLOCATE(gq_points_costh,(ntheta))
  ABI_ALLOCATE(gq_points_sinth,(ntheta))
  ABI_ALLOCATE(gq_weights_th,(ntheta))
- ABI_ALLOCATE(gq_points_ph,(nphi))
  ABI_ALLOCATE(gq_points_cosph,(nphi))
  ABI_ALLOCATE(gq_points_sinph,(nphi))
- ABI_ALLOCATE(gq_weights_ph,(nphi))
  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
- !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable,
- !since the function to be integrated is periodic...
- call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
  do itheta=1,ntheta
    gq_points_costh(itheta)=cos(gq_points_th(itheta))
    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
  enddo
  do iphi=1,nphi
-   gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
-   gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
+   angle_phi=two*pi/nphi*(iphi-1)
+   gq_points_cosph(iphi)=cos(angle_phi)
+   gq_points_sinph(iphi)=sin(angle_phi)
+   weight_phi=one/real(nphi,dp)
  enddo
 
  do ikpt=1,dtset%nkpt
@@ -191,9 +188,9 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      !Perform the integral over the sphere
      do itheta=1,ntheta
        costh=gq_points_costh(itheta) ; sinth=gq_points_sinth(itheta)
+       weight=gq_weights_th(itheta)*weight_phi
        do iphi=1,nphi
          cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
-         weight=gq_weights_th(itheta)*gq_weights_ph(iphi)
 
          unit_r(1)=sinth*cosph
          unit_r(2)=sinth*sinph
@@ -291,10 +288,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(gq_points_costh)
  ABI_DEALLOCATE(gq_points_sinth)
  ABI_DEALLOCATE(gq_weights_th)
- ABI_DEALLOCATE(gq_points_ph)
  ABI_DEALLOCATE(gq_points_cosph)
  ABI_DEALLOCATE(gq_points_sinph)
- ABI_DEALLOCATE(gq_weights_ph)
 
  end subroutine frohlichmodel
 
