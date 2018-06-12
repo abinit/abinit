@@ -71,10 +71,10 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: paw_dmft
 !no_abirules
-  real(dp), intent(in) :: occ_nd(2, blocksize, blocksize)
-  real(dp), intent(in) :: cwavef_toberot(2, npw, blocksize, nspinor)
-  real(dp), intent(out) :: occ_diag(blocksize)
-  real(dp), intent(out) :: cwavef_rot(2, npw, blocksize, nspinor)
+  real(kind=dp), intent(in) :: occ_nd(2, blocksize, blocksize)
+  real(kind=dp), intent(in) :: cwavef_toberot(2, npw, blocksize, nspinor)
+  real(kind=dp), intent(out) :: occ_diag(blocksize)
+  real(kind=dp), intent(out) :: cwavef_rot(2, npw, blocksize, nspinor)
 
 !Local variables-------------------------------
 
@@ -83,16 +83,15 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
   character(len=500) :: message
 
 !arrays
-  complex(dpc) :: occ_nd_cpx(blocksize, blocksize), rwork(3*blocksize-1)
-  complex(dpc), allocatable :: work(:)
+  complex(kind=dpc) :: occ_nd_cpx(blocksize, blocksize), rwork(3*blocksize-1), fc_tmp(npw,nspinor)
+  complex(kind=dpc), allocatable :: work(:)
 
 ! *************************************************************************
 
   DBG_ENTER("COLL")
 
   if(nband /= blocksize) then
-    message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure &
-& that bandpp*npband = nband."
+    message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure that bandpp*npband = nband."
     MSG_ERROR(message)
   end if
 
@@ -103,7 +102,7 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
 
   do n=1,blocksize
     do np=1,blocksize
-      occ_nd_cpx(n,np) = complex(occ_nd(1,n,np), occ_nd(2,n,np))
+      occ_nd_cpx(n,np) = -cmplx(occ_nd(1,n,np), occ_nd(2,n,np), kind=dpc)
     end do
   end do
 
@@ -123,26 +122,32 @@ subroutine diag_occ_rot_cg(occ_nd, cwavef_toberot, npw, nband, blocksize, nspino
   call zheev('V', 'U', blocksize, occ_nd_cpx, blocksize, occ_diag, work, lwork, rwork, info)
 ! occ_nd_cpx is now the eigen vectors (P) of the occ_nd matrix
 
+  occ_diag = -occ_diag
+  write (*,*) "))) Valeures propres des occupations ", occ_diag
   ABI_DEALLOCATE(work)
 
 !! Compute the corresponding wave functions if nothing wrong happened
   if(info == 0) then
     ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
+    fc_tmp = zero
     do n=1,blocksize
       do np=1,blocksize
-        cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + realpart(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:) &
-&                                                 + imagpart(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:)
-        cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) + realpart(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:) &
-&                                                 - imagpart(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:)
+        fc_tmp = dconjg(occ_nd_cpx(np, n)) * cmplx(cwavef_toberot(1,:,np,:), cwavef_toberot(2,:,np,:), kind=dpc)
+        cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + dreal(fc_tmp)
+        cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) + dimag(fc_tmp)
+!        cwavef_rot(1,:,n,:) = cwavef_rot(1,:,n,:) + dreal(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:) &
+!&                                                 + dimag(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:)
+!        cwavef_rot(2,:,n,:) = cwavef_rot(2,:,n,:) + dreal(occ_nd_cpx(np, n)) * cwavef_toberot(2,:,np,:) &
+!&                                                 - dimag(occ_nd_cpx(np, n)) * cwavef_toberot(1,:,np,:)
       end do
     end do
   else if (info > 0) then
     message=""
-    write(message, "(A99,I5)") " something wrong happened with the diagonalisation of the occupation matrix (did't converge), info=",info
+    write(message, "(a,i5)") " something wrong happened with the diagonalisation of the occupation matrix (did't converge), info=",info
     MSG_ERROR(message)
   else
     message=""
-    write(message, "(A103,I5)") " something wrong happened with the diagonalisation of the occupation matrix (bad input argument), info=",info
+    write(message, "(a,i5)") " something wrong happened with the diagonalisation of the occupation matrix (bad input argument), info=",info
     MSG_ERROR(message)
   end if
   
