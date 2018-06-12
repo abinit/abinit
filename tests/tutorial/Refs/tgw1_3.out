@@ -1,6 +1,6 @@
 
 .Version 8.9.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Jun 2018.
-- ( at 11h22 )
+.Starting date : Mon 11 Jun 2018.
+- ( at 16h56 )
   
-- input  file    -> ../tgw1_3.in
+- input  file    -> tgw1_3.in
 - output file    -> tgw1_3.out
-- root for input  files -> tgw1i
-- root for output files -> tgw1o
+- root for input  files -> tgw1_3i
+- root for output files -> tgw1_3o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -112,7 +112,7 @@ _ WF disk file :      0.990 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -124,7 +124,7 @@ _ WF disk file :      0.990 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
              ecut      7.56385066E+00 Hartree
          ecutsigx      7.56385066E+00 Hartree
           ecutwfn      7.56385066E+00 Hartree
--          fftalg         112
+-          fftalg         312
            getscr           3
            getwfk           2
            istwfk        1
@@ -365,7 +365,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -375,8 +375,8 @@ P           mkmem           1
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -498,7 +498,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -585,7 +585,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.586
 
 
- New Fermi energy :        2.632388E-01 Ha ,    7.163093E+00 eV
+ New Fermi energy :        2.632389E-01 Ha ,    7.163094E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -610,7 +610,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -697,7 +697,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.587
 
 
- New Fermi energy :        2.630944E-01 Ha ,    7.159163E+00 eV
+ New Fermi energy :        2.630945E-01 Ha ,    7.159164E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -722,7 +722,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -809,12 +809,12 @@ P           mkmem           1
  DeltaE^GW_gap    0.587
 
 
- New Fermi energy :        2.630540E-01 Ha ,    7.158063E+00 eV
+ New Fermi energy :        2.630540E-01 Ha ,    7.158065E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1174 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1174 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum optical gap =   3.1175 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap     =   3.1175 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -834,7 +834,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -921,7 +921,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.587
 
 
- New Fermi energy :        2.630435E-01 Ha ,    7.157777E+00 eV
+ New Fermi energy :        2.630435E-01 Ha ,    7.157779E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -954,7 +954,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getscr           3
            getwfk           2
            istwfk        1
@@ -1178,43 +1178,10 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          7.1        0.12      0.002
-- Total wall clock time (s,m,h):          7.1        0.12      0.002
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            7.1, wall_time =            7.1
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  6.829  96.3      6.869  96.3              5      -1.00        0.99       0.99
-- ewald                          0.412   5.8      0.414   5.8              5      -1.00        1.00       1.00
-- pspini                         0.265   3.7      0.267   3.7              5      -1.00        0.99       0.99
-- timing timab                   0.126   1.8      0.127   1.8             10      -1.00        0.99       0.99
-- invars2                        0.065   0.9      0.066   0.9              5      -1.00        0.99       0.99
-- others (108)                   0.035   0.5      0.037   0.5             -1      -1.00        0.95       0.95
--<END_TIMER>
--
-- subtotal                       7.733 109.0      7.780 109.1                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           7.1, wall_time =           7.1
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  6.829  96.3      6.869  96.3              5      -1.00        0.99       0.99
-- ewald                          0.412   5.8      0.414   5.8              5      -1.00        1.00       1.00
-- pspini                         0.265   3.7      0.267   3.7              5      -1.00        0.99       0.99
-- timing timab                   0.126   1.8      0.127   1.8             10      -1.00        0.99       0.99
-- invars2                        0.065   0.9      0.066   0.9              5      -1.00        0.99       0.99
-- others (108)                   0.035   0.5      0.037   0.5             -1      -1.00        0.95       0.95
--<END_TIMER>
 
-- subtotal                       7.733 109.0      7.780 109.1                                  0.99       0.99
 
 ================================================================================
 
@@ -1280,10 +1247,10 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          9.0  wall=          9.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          7.1
+.Delivered  15 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.0  wall=          9.1

@@ -1,6 +1,6 @@
 
 .Version 8.9.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Jun 2018.
-- ( at 11h32 )
+.Starting date : Mon 11 Jun 2018.
+- ( at 16h56 )
   
-- input  file    -> ../tgw1_4.in
+- input  file    -> tgw1_4.in
 - output file    -> tgw1_4.out
-- root for input  files -> tgw1i
-- root for output files -> tgw1o
+- root for input  files -> tgw1_4i
+- root for output files -> tgw1_4o
 
 
  DATASET   11 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -197,7 +197,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -214,7 +214,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           ecuteps      5.10559920E+00 Hartree
          ecutsigx      7.56385066E+00 Hartree
           ecutwfn      7.56385066E+00 Hartree
--          fftalg         112
+-          fftalg         312
            getscr11         0
            getscr12        -1
            getscr21         0
@@ -549,7 +549,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -559,8 +559,8 @@ P           mkmem           1
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -626,21 +626,21 @@ P           mkmem           1
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -23.210   0.000  -0.558  -0.000  -0.669   0.000  -0.701   0.000
-       -0.000  -0.000 -16.635   0.000  -0.363  -0.000  -0.475  -0.000  -0.507
+    2   0.000 -23.210  -0.000  -0.558   0.000  -0.669  -0.000  -0.701   0.000
+       -0.000   0.000 -16.635  -0.000  -0.363   0.000  -0.475  -0.000  -0.507
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -5.689   0.000  -0.102  -0.000  -0.186   0.000  -0.211   0.000
-       -0.000  -0.000  -1.949   0.000  -0.065  -0.000  -0.149  -0.000  -0.173
+    2   0.000  -5.689  -0.000  -0.102   0.000  -0.186  -0.000  -0.211   0.000
+       -0.000   0.000  -1.949  -0.000  -0.065   0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  96.4962
+  dielectric constant =  96.4963
   dielectric constant without local fields = 140.5247
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     43.66  [%]
@@ -658,10 +658,10 @@ P           mkmem           1
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -682,7 +682,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -769,7 +769,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.586
 
 
- New Fermi energy :        2.632388E-01 Ha ,    7.163093E+00 eV
+ New Fermi energy :        2.632389E-01 Ha ,    7.163094E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -792,7 +792,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -848,21 +848,21 @@ P           mkmem           1
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.515   0.000  -0.537  -0.000  -0.549   0.000  -0.540  -0.000
-       -0.000  -0.000 -16.953   0.000  -0.147  -0.000  -0.159   0.000  -0.150
+    2   0.000 -24.515  -0.000  -0.537   0.000  -0.549  -0.000  -0.540   0.000
+       -0.000   0.000 -16.953  -0.000  -0.147   0.000  -0.159  -0.000  -0.150
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.756   0.000  -0.095  -0.000  -0.105   0.000  -0.098  -0.000
-       -0.000  -0.000  -2.165   0.000   0.111  -0.000   0.101   0.000   0.108
+    2   0.000  -6.756  -0.000  -0.095   0.000  -0.105  -0.000  -0.098   0.000
+       -0.000   0.000  -2.165  -0.000   0.111   0.000   0.101  -0.000   0.108
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  97.6590
+  dielectric constant =  97.6591
   dielectric constant without local fields = 140.5293
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     70.14  [%]
@@ -871,10 +871,10 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -904,7 +904,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -988,10 +988,10 @@ P           mkmem           1
 
  E^0_gap          2.530
  E^GW_gap         3.115
- DeltaE^GW_gap    0.584
+ DeltaE^GW_gap    0.585
 
 
- New Fermi energy :        2.604863E-01 Ha ,    7.088194E+00 eV
+ New Fermi energy :        2.604864E-01 Ha ,    7.088194E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1014,7 +1014,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1070,18 +1070,18 @@ P           mkmem           1
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709   0.000  -0.524  -0.000  -0.524   0.000  -0.524   0.000
-       -0.000  -0.000 -16.920   0.000  -0.162  -0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.709  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
+       -0.000   0.000 -16.920  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934   0.000  -0.082  -0.000  -0.082  -0.000  -0.082   0.000
-       -0.000  -0.000  -2.134  -0.000   0.098  -0.000   0.098  -0.000   0.098
+    2   0.000  -6.934  -0.000  -0.082  -0.000  -0.082  -0.000  -0.082  -0.000
+       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098   0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.3494
@@ -1093,19 +1093,19 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1126,7 +1126,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1213,7 +1213,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.582
 
 
- New Fermi energy :        2.591725E-01 Ha ,    7.052441E+00 eV
+ New Fermi energy :        2.591725E-01 Ha ,    7.052442E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1236,7 +1236,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1292,18 +1292,18 @@ P           mkmem           1
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.713   0.000  -0.523  -0.000  -0.523   0.000  -0.523   0.000
-       -0.000  -0.000 -16.918   0.000  -0.162  -0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.713  -0.000  -0.523   0.000  -0.523  -0.000  -0.523   0.000
+       -0.000   0.000 -16.918  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.938   0.000  -0.082  -0.000  -0.082  -0.000  -0.082   0.000
-       -0.000  -0.000  -2.133   0.000   0.098  -0.000   0.098  -0.000   0.098
+    2   0.000  -6.938  -0.000  -0.082  -0.000  -0.082  -0.000  -0.082  -0.000
+       -0.000   0.000  -2.133   0.000   0.098   0.000   0.098   0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.5074
@@ -1315,10 +1315,10 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -1348,7 +1348,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1435,7 +1435,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.583
 
 
- New Fermi energy :        2.588865E-01 Ha ,    7.044660E+00 eV
+ New Fermi energy :        2.588866E-01 Ha ,    7.044661E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1458,7 +1458,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1514,18 +1514,18 @@ P           mkmem           1
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.714   0.000  -0.523  -0.000  -0.523   0.000  -0.523   0.000
-       -0.000  -0.000 -16.918   0.000  -0.162  -0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.714  -0.000  -0.523   0.000  -0.523  -0.000  -0.523   0.000
+       -0.000   0.000 -16.918  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.939   0.000  -0.081  -0.000  -0.081  -0.000  -0.081   0.000
-       -0.000  -0.000  -2.133  -0.000   0.098  -0.000   0.098  -0.000   0.098
+    2   0.000  -6.939  -0.000  -0.081  -0.000  -0.081  -0.000  -0.081  -0.000
+       -0.000   0.000  -2.133   0.000   0.098   0.000   0.098   0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.5227
@@ -1537,10 +1537,10 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -1570,7 +1570,7 @@ P           mkmem           1
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -1657,7 +1657,7 @@ P           mkmem           1
  DeltaE^GW_gap    0.584
 
 
- New Fermi energy :        2.587818E-01 Ha ,    7.041810E+00 eV
+ New Fermi energy :        2.587818E-01 Ha ,    7.041811E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1710,7 +1710,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart52    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getscr11         0
            getscr12        -1
            getscr21         0
@@ -2030,43 +2030,10 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          9.3        0.16      0.003
-- Total wall clock time (s,m,h):          9.4        0.16      0.003
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            9.3, wall_time =            9.4
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  5.437  58.4      5.468  58.4              5      -1.00        0.99       0.99
-- ewald                          0.817   8.8      0.820   8.8             10      -1.00        1.00       1.00
-- pspini                         0.272   2.9      0.273   2.9             10      -1.00        1.00       1.00
-- invars2                        0.153   1.6      0.151   1.6             10      -1.00        1.01       1.01
-- timing timab                   0.124   1.3      0.124   1.3             10      -1.00        1.00       1.00
-- others (108)                   0.061   0.7      0.055   0.6             -1      -1.00        1.10       1.10
--<END_TIMER>
--
-- subtotal                       6.863  73.7      6.891  73.6                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           9.3, wall_time =           9.4
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  5.437  58.4      5.468  58.4              5      -1.00        0.99       0.99
-- ewald                          0.817   8.8      0.820   8.8             10      -1.00        1.00       1.00
-- pspini                         0.272   2.9      0.273   2.9             10      -1.00        1.00       1.00
-- invars2                        0.153   1.6      0.151   1.6             10      -1.00        1.01       1.01
-- timing timab                   0.124   1.3      0.124   1.3             10      -1.00        1.00       1.00
-- others (108)                   0.061   0.7      0.055   0.6             -1      -1.00        1.10       1.10
--<END_TIMER>
 
-- subtotal                       6.863  73.7      6.891  73.6                                  1.00       1.00
 
 ================================================================================
 
@@ -2132,10 +2099,10 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          9.3  wall=          9.4
+- Proc.   0 individual time (sec): cpu=          9.8  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  40 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.3  wall=          9.4
+.Delivered  44 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.8  wall=          9.9
