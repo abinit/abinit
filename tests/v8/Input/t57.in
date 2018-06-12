@@ -141,5 +141,6 @@ nstep 100
 #%% description =
 #%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass 
 #%%  and also the Frohlich ZPR from the general formula.
+#%%  With the settings, the top of the valence band is unfortunately not located exactly at Gamma.
 #%% topics = EffectiveMass
 #%%<END TEST_INFO>

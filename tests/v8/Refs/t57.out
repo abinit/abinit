@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 12 Jun 2018.
-- ( at 17h29 )
+- ( at 18h05 )
   
 - input  file    -> t57.in
 - output file    -> t57.out
@@ -1842,25 +1842,27 @@ The associated tensor(s) will therefore not be printed.
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
  Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.5214197771
  Band     7 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.7940065527
- Band     8 SADDLE POINT - Frohlich effective mass cannot be defined. 
+ Band     8 SADDLE POINT - Frohlich effective mass and ZPR cannot be defined. 
  Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
 
  - At k-point ( 0.000, 0.000, 0.000), band     9
  Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.3496610729
- Angular and band average effective mass for Frohlich model.
+ Angular and band average effective mass and ZPR for Frohlich model.
  Value of     (<<m**0.5>>)**2 =     3.496611E-01
  Absolute Value of <<m**0.5>> =     5.913215E-01
+ ZPR from Frohlich model      =     4.379468E-03 Ha=    1.191714E-01 eV
 
  - At k-point ( 0.000, 0.500, 0.500), bands     7 through     8
- Band     7 SADDLE POINT - Frohlich effective mass cannot be defined. 
+ Band     7 SADDLE POINT - Frohlich effective mass and ZPR cannot be defined. 
  Band     8 Angular average effective mass for Frohlich model (<m**0.5>)**2=   1.1401823073
  Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.
 
  - At k-point ( 0.000, 0.500, 0.500), band     9
  Band     9 Angular average effective mass for Frohlich model (<m**0.5>)**2=   0.4697794605
- Angular and band average effective mass for Frohlich model.
+ Angular and band average effective mass and ZPR for Frohlich model.
  Value of     (<<m**0.5>>)**2 =     4.697795E-01
  Absolute Value of <<m**0.5>> =     6.854046E-01
+ ZPR from Frohlich model      =     5.076270E-03 Ha=    1.381323E-01 eV
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2232,10 +2234,10 @@ P          mk1mem6          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         41.2  wall=         41.4
+- Proc.   0 individual time (sec): cpu=         45.2  wall=         45.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  82 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.2  wall=         41.4
++Overall time at end (sec) : cpu=         45.2  wall=         45.8
