@@ -136,9 +136,9 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
    gq_points_costh(itheta)=cos(gq_points_th(itheta))
    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
  enddo
- weight_phi=one/real(nphi,dp)
+ weight_phi=two*pi/real(nphi,dp)
  do iphi=1,nphi
-   angle_phi=two*pi*weight_phi*(iphi-1)
+   angle_phi=weight_phi*(iphi-1)
    gq_points_cosph(iphi)=cos(angle_phi)
    gq_points_sinph(iphi)=sin(angle_phi)
  enddo
@@ -249,11 +249,12 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      do iband=1,deg_dim
        if(saddle_warn(iband)) then
          write(std_out,'(a,i5,a)') ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
-&          '  SADDLE POINT - Frohlich effective mass cannot be defined. '
+&          ' SADDLE POINT - Frohlich effective mass cannot be defined. '
          sign_warn=.true.
        else
          m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
-         write(std_out,'(a,f14.10)') &
+         write(std_out,'(a,i5,a,f14.10)') &
+&          ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
 &          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
        endif
        if(start_eigf3d_pos(iband) .neqv. start_eigf3d_pos(1))then
@@ -262,15 +263,15 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      enddo
 
      if(sign_warn .eqv. .false.)then
-       write(std_out,'(2a)') ch10,&
-&       ' Angular average effective mass for Frohlich model (possibly averaged over degenerate bands).'
+       write(std_out,'(2a)')&
+&       ' Angular and band average effective mass for Frohlich model.'
        write(std_out,'(a,es16.6)') &
 &       ' Value of     (<<m**0.5>>)**2 = ',(sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim)**2
        write(std_out,'(a,es16.6)') &
 &       ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim
      else
        write(std_out,'(a)')& 
-&          '  Angular average effective mass for Frohlich model cannot be defined because of a sign problem.'
+&          ' Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 
      ABI_DEALLOCATE(eig2_diag_cart)
