@@ -116,10 +116,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
  real(dp), allocatable :: weight_qdir(:)
+ real(dp), allocatable :: polarity_qdir(:,:,:)
+ real(dp), allocatable :: phfrq_qdir(:,:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
  complex(dpc), allocatable :: f3d(:,:)
-
 
 !************************************************************************
 
@@ -164,6 +165,13 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(gq_weights_th)
  ABI_DEALLOCATE(gq_points_cosph)
  ABI_DEALLOCATE(gq_points_sinph)
+
+ ABI_ALLOCATE(polarity_qdir,(3,3*cryst%natom,nqdir))
+ ABI_ALLOCATE(phfrq_qdir,(3*cryst%natom,nqdir))
+
+ !Compute phonon frequencies and mode-polarity for each qdir
+ call ifc_calcnwrite_nana_terms(ifc, cryst, nqdir, unit_qdir, &
+&  phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
 
  do ikpt=1,dtset%nkpt
 
@@ -300,6 +308,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  ABI_DEALLOCATE(unit_qdir)
  ABI_DEALLOCATE(weight_qdir)
+ ABI_DEALLOCATE(polarity_qdir)
+ ABI_DEALLOCATE(phfrq_qdir)
 
  end subroutine frohlichmodel
 

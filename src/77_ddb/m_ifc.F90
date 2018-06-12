@@ -3503,7 +3503,7 @@ end subroutine ifc_test_phinterp
 
 !----------------------------------------------------------------------
 
-!!****f* m_gruneisen/ifc_calcnwrite_nana_terms
+!!****f* m_ifc/ifc_calcnwrite_nana_terms
 !! NAME
 !!  ifc_calcnwrite_nana_terms
 !!
@@ -3515,7 +3515,7 @@ end subroutine ifc_test_phinterp
 !!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
 !!    to the Gamma-point phonon frequencies will be calculated
 !!    The direction is in CARTESIAN COORDINATES
-!!  qnrml2(nph2l)=Normalizatin factor.
+!!  qnrml2(nph2l)=Normalization factor.
 !!
 !! OUTPUT
 !!  Only writing.
@@ -3531,7 +3531,8 @@ end subroutine ifc_test_phinterp
 !!
 !! SOURCE
 
-subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
+subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
+&  qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3543,11 +3544,14 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: nph2l, ncid
+ integer,intent(in) :: nph2l
+ integer,optional,intent(in) :: ncid
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: qph2l(3, nph2l), qnrml2(nph2l)
+ real(dp),intent(in) :: qph2l(3, nph2l) 
+ real(dp),optional,intent(in) :: qnrml2(nph2l)
+ real(dp),optional,intent(out) :: phfrq2l(3*crystal%natom,nph2l), polarity2l(3,3*crystal%natom,nph2l)
 
 !Local variables-------------------------------
 !scalars
@@ -3580,15 +3584,21 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
    ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
 
 #ifdef HAVE_NETCDF
- iphl2 = 0
- call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+ if(present(ncid))then
+   iphl2 = 0
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+ endif
 #endif
 
  ! Examine every wavevector of this list
  do iphl2=1,nph2l
    ! Initialisation of the phonon wavevector
    qphon(:,1) = qph2l(:,iphl2)
-   qphnrm(1) = qnrml2(iphl2)
+   qphnrm(1)=zero
+   if(present(qnrml2))then
+     qphnrm(1) = qnrml2(iphl2)
+   endif
+     
 
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
@@ -3598,9 +3608,15 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
    ! Write the phonon frequencies
    !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
+   if(present(phfrq2l))then
+     phfrq2l(:,iphl2)=phfrq(:)
+   endif
+
 #ifdef HAVE_NETCDF
-   ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+   if(present(ncid))then
+     ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+     call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+   endif
 #endif
  end do ! iphl2
 
