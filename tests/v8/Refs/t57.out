@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 12 Jun 2018.
-- ( at 10h11 )
+- ( at 17h29 )
   
 - input  file    -> t57.in
 - output file    -> t57.out
@@ -446,8 +446,8 @@ P          mk1mem6          2
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -461,8 +461,8 @@ P          mk1mem6          2
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    ../../Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1369,8 +1369,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1384,8 +1384,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    ../../Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINITgit/develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1835,6 +1835,10 @@ The associated tensor(s) will therefore not be printed.
 
 - Writing phonon DOS to file: t57o_DS6_PHDOS
 
+ Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:
+ (+ for electrons, - for holes) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
+ where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=      0.035862 Ha=      0.975842 eV
+
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
  Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.5214197771
  Band     7 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.7940065527
@@ -2228,10 +2232,10 @@ P          mk1mem6          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         41.5  wall=         41.6
+- Proc.   0 individual time (sec): cpu=         41.2  wall=         41.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  82 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.5  wall=         41.6
+.Delivered  82 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         41.2  wall=         41.4

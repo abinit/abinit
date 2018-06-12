@@ -107,6 +107,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  integer :: deg_dim,iband,ideg,ikpt,imode,info,iphi,iqdir,itheta
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
+ real(dp) :: zpr_q0_avg,zpr_q0_fact
  character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
@@ -118,7 +119,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  real(dp), allocatable :: weight_qdir(:)
  real(dp), allocatable :: polarity_qdir(:,:,:)
  real(dp), allocatable :: proj_polarity_qdir(:,:)
- real(dp), allocatable :: summode_sq_proj_polarity_qdir(:)
+ real(dp), allocatable :: zpr_q0_phononfactor_qdir(:)
  real(dp), allocatable :: frohlich_phononfactor_qdir(:)
  real(dp), allocatable :: phfrq_qdir(:,:)
  real(dp), allocatable :: dielt_qdir(:)
@@ -172,7 +173,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  ABI_ALLOCATE(polarity_qdir,(3,3*cryst%natom,nqdir))
  ABI_ALLOCATE(proj_polarity_qdir,(3*cryst%natom,nqdir))
- ABI_ALLOCATE(summode_sq_proj_polarity_qdir,(nqdir))
+ ABI_ALLOCATE(zpr_q0_phononfactor_qdir,(nqdir))
  ABI_ALLOCATE(frohlich_phononfactor_qdir,(nqdir))
  ABI_ALLOCATE(phfrq_qdir,(3*cryst%natom,nqdir))
  ABI_ALLOCATE(dielt_qdir,(nqdir))
@@ -188,29 +189,40 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  !Compute projection of mode-polarity on qdir, and other derived quantities summed over phonon branches for each iqdir.
  !Note that acoustic modes are discarded (imode sum starts only from 4)
- summode_sq_proj_polarity_qdir=zero
+ zpr_q0_phononfactor_qdir=zero
+ zpr_q0_avg=zero
  frohlich_phononfactor_qdir=zero
  do iqdir=1,nqdir
-   summode_sq_proj_polarity_qdir(iqdir)=zero
    do imode=4,3*cryst%natom
      proj_polarity_qdir(imode,iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir))
-     summode_sq_proj_polarity_qdir(iqdir)=summode_sq_proj_polarity_qdir(iqdir)+&
-&      proj_polarity_qdir(imode,iqdir)**2 
+     zpr_q0_phononfactor_qdir(iqdir)=zpr_q0_phononfactor_qdir(iqdir)+&
+&      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **2
      frohlich_phononfactor_qdir(iqdir)=frohlich_phononfactor_qdir(iqdir)+&
-&      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir)
+&      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **(three*half)
    enddo
+   zpr_q0_avg=zpr_q0_avg+&
+&    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
+ zpr_q0_avg=zpr_q0_avg*quarter*piinv
+ zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
- do iqdir=1,nqdir,389
-   write(std_out,'(a,3f8.4,3es12.4)')' unit_qdir,dielt_qdir,summode_sq_proj_polarity,frohlich_phononfactor=',&
-&    unit_qdir(:,iqdir),dielt_qdir(iqdir),summode_sq_proj_polarity_qdir(iqdir),frohlich_phononfactor_qdir(iqdir)
+ do iqdir=1,nqdir,513
+   write(std_out,'(a,3f8.4,3es12.4)')' unit_qdir,dielt_qdir,zpr_q0_phononfactor_qdir,frohlich_phononfactor=',&
+&    unit_qdir(:,iqdir),dielt_qdir(iqdir),zpr_q0_phononfactor_qdir(iqdir),frohlich_phononfactor_qdir(iqdir)
    do imode=1,3*cryst%natom
      write(std_out,'(a,i5,6es12.4)')'   imode,phfrq_qdir,phfrq(cmm1),polarity_qdir=',&
 &     imode,phfrq_qdir(imode,iqdir),phfrq_qdir(imode,iqdir)*Ha_cmm1,polarity_qdir(:,imode,iqdir),proj_polarity_qdir(imode,iqdir)
    enddo
  enddo
+ write(std_out,'(2a,3es12.4)')ch10,&
+& ' zpr_q0_avg, zpr_q0_fact, zpr_q0_fact (eV) =',zpr_q0_avg, zpr_q0_fact, zpr_q0_fact*Ha_eV
 !ENDDEBUG
+
+ write(ab_out,'(6a,f14.6,a,f14.6,a)') ch10,&
+&  ' Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:',ch10,&
+&  ' (+ for electrons, - for holes) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) ',ch10,&
+&  ' where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=',zpr_q0_fact,' Ha=',zpr_q0_fact*Ha_eV,' eV'
 
  !Compute effective masses, and integrate the Frohlich model
  do ikpt=1,dtset%nkpt
