@@ -336,15 +336,14 @@ degeneracy is lifted according to the eigenvalues of the L+S operator
 (l+1/2 and l-1/2 of degeneracy 2l+2 and 2l). 
 After pseudization, the associated wave functions can be recovered by adding to usual pseudo-potential projectors a
 spin-orbit term of the generic form $v(r).|l,s\rangle L.S \langle l,s|$. 
-Not all potentials include this additional term, but it turns out that it is the case 
-for the HGH type pseudopotentials.
+Not all potentials include this additional term, but the HGH type pseudopotentials do systematically.
 
-In a plane wave calculation, the wavefunctions will be two component
+In a plane wave calculation, the wavefunctions will be two-component
 spinors, that is they will have a spin-up and a spin-down component, and these
-components will be coupled. This mean the size of the Hamiltonian matrix is quadrupled.
+components will be coupled. This means the size of the Hamiltonian matrix is quadrupled.
 
 We will consider here a heavier atom than Iron: *Tantalum*.  
-You will have to change the "files" file accordingly, as we here have used the
+You will have to change the "files" file accordingly, as we want to use the
 potential: 73ta.hghsc. It is a HGH pseudopotential, with semicore states.
 Replace the last line of the tspin_x.files by
     
@@ -361,10 +360,11 @@ The input file contains one new variable:
 
   * [[nspinor]]
 
-Have a look at it. You should also look at [[so_psp]]; it is not used here,
-meaning that the SO information is directly read from the pseudopotential file.  
-  
-In this run, we check that we recover the splitting of the atomic level by
+Have a look at it. You should also look at [[so_psp]]; it is not set explicitly here,
+because the SO information is directly read from the pseudopotential file.
+One could force a non-SO calculation by setting [[so_psp]] to 0.
+ 
+In this run, we check that we recover the splitting of the atomic levels by
 performing a calculation in a big box. Two calculations are launched with and
 without spin-orbit.  
   
@@ -389,7 +389,9 @@ After application of the spin-orbit coupling, we now have to consider twice as m
 -0.11629  -0.11629  -0.11629  -0.11629  -0.09221  -0.09221 -0.09120  -0.09120  -0.09120  -0.09120   
 ```
   
-The levels are not perfectly degenerate, due to the finite size of the simulation box. 
+The levels are not perfectly degenerate, due to the finite size of the simulation box,
+and in particular the cubic shape, which gives a small crystal field splitting of the d orbitals
+between $e_g$ and $t_{2g}$ states. 
 We can nevetheless compute the splitting of the levels, and we obtain, for e.g. the p-channel: 1.67294-1.35468=0.31826 Ha  
   
 If we now consider the 
@@ -409,20 +411,20 @@ A more converged (and more expensive calculation) would yield:
 
 Within the Projector Augmented-Wave method, the usual (pseudo-)Hamiltonian can be expressed as:  
 
-H  =  Kin + V_eff + Σ D_ij  |~pi > <~pj  |
+$H  =  K + V_{eff} + \Sigma_{ij} D_{ij}  |p_i \rangle \langle p_j|$
   
 If the two following conditions are satisfied:  
 
 (1) the local PAW basis is complete enough;  
 (2) the electronic density is mainly contained in the PAW augmentation regions,  
   
-it can be showed that a very good approximation of the PAW Hamiltonian --
+it can be shown that a very good approximation of the PAW Hamiltonian --
 including spin-orbit coupling -- is:  
 
-H  ~  Kin + V_eff + Σ (D_ij+D^SO_ij)  |~pi > <~pj  |
+$H  \simeq  K + V_{eff} + \Sigma (D_{ij}+D^{SO}_{ij})  |p_i \rangle \langle p_j|$
   
-where D^SO_ij is the projection of the (L.S) operator into the PAW augmentation regions.  
-As an immediate consequence , we thus have the possibility to use the standard ~pi PAW projectors; 
+where $D^{SO}_{ij}$ is the projection of the ($L.S$) operator into the PAW augmentation regions.  
+As an immediate consequence , we thus have the possibility to use the standard $p_i$ PAW projectors; 
 in other words, it is possible to use the standard PAW datasets (pseudopotentials) to perform 
 calculations including spin-orbit coupling.  
 But, of course, it is still necessary to express the wave-functions as two
@@ -431,26 +433,26 @@ Let's have a look at the following keyword:
 
   * [[pawspnorb]]
 
-It automatically activates the spin-orbit coupling within PAW (forcing [[nspinor]]=2).  
+This activates the spin-orbit coupling within PAW (forcing [[nspinor]]=2).  
   
 Now the practice:  
-We consider here Bismuth.  
-You will have to change the "files" file accordingly, as we here have used the
-potential: 83bi.paw. It is a PAW dataset with 5d, 6s and 6p electrons in valence.  
-Replace the last line of the tspin_x.files by
+We consider Bismuth.  
+You will have to change the "files" file accordingly, to use the new
+potential 83bi.paw. This is a PAW dataset with 5d, 6s and 6p electrons in the valence.  
+Replace the last line of the tspin_x.files by:
 
     ../../../Psps_for_tests/83bi.paw  
 
 You can copy the file ~abinit/tests/tutorial/Input/tspin_6.in in Work_spin
-(one Bismuth atom in a large cell). Change accordingly the file names in
-tspin_x.files, then run the calculation. It takes about 10 secs on a recent
+(one Bismuth atom in a large cell). Change the file names in
+tspin_x.files accordingly, then run the calculation. It takes about 10 seconds on a recent
 computer. 
 
 {% dialog tests/tutorial/Input/tspin_6.in %}
 
-Two datasets are executed: the first one without spin-orbit coupling, the second one using  [[pawspnorb]]=1.  
+Two datasets are executed: the first without spin-orbit coupling, the second one using  [[pawspnorb]]=1.  
 
-The results (eigenvalues) are:  
+The resulting eigenvalues are:  
 
 ```
  Eigenvalues (hartree) for nkpt=   1  k points:  
@@ -462,7 +464,7 @@ coord)
  6p   -0.11089  -0.11089  -0.03810  -0.03810  -0.03810  -0.03810  
 ```
   
-Again, the levels are not perfectly degenerate, due to the finite size of the simulation box.  
+Again, the levels are not perfectly degenerate, due to the finite size and non spherical shape of the simulation box.  
 We can compute the splitting of the levels, and we obtain:  
 
     5d-channel: 0.93353-0.82304=0.11048 Ha  
@@ -475,9 +477,12 @@ of atomic data, we obtain:
     5d-channel: 1.063136-0.952668=0.11047 Ha  
     6p-channel: 0.228107-0.156444=0.07166 Ha  
   
-A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs...  
+A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs. 
+This comes from the generation of the PAW dataset, where the SOC is calculated very accurately
+and for an atomic reference. The exchange correlation functional has little impact on large SOC
+splittings, which are mainly a kinetic energy effect.
 
-## 6 Rotation of the magnetization and spin-orbit
+## 6 Rotation of the magnetization and spin-orbit coupling
   
 The most spectacular manifestation of the spin-orbit coupling is the energy
 associated with a rotation of the magnetisation with respect with the crystal axis. 
