@@ -104,7 +104,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 !Local variables ------------------------------
 !scalars
  logical :: sign_warn
- integer :: deg_dim,iband,ideg,ikpt,info,iphi,iqdir,itheta
+ integer :: deg_dim,iband,ideg,ikpt,imode,info,iphi,iqdir,itheta
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  character(len=500) :: msg
@@ -117,7 +117,11 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
  real(dp), allocatable :: weight_qdir(:)
  real(dp), allocatable :: polarity_qdir(:,:,:)
+ real(dp), allocatable :: proj_polarity_qdir(:,:)
+ real(dp), allocatable :: summode_sq_proj_polarity_qdir(:)
+ real(dp), allocatable :: frohlich_phononfactor_qdir(:)
  real(dp), allocatable :: phfrq_qdir(:,:)
+ real(dp), allocatable :: dielt_qdir(:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
  complex(dpc), allocatable :: f3d(:,:)
@@ -167,12 +171,48 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(gq_points_sinph)
 
  ABI_ALLOCATE(polarity_qdir,(3,3*cryst%natom,nqdir))
+ ABI_ALLOCATE(proj_polarity_qdir,(3*cryst%natom,nqdir))
+ ABI_ALLOCATE(summode_sq_proj_polarity_qdir,(nqdir))
+ ABI_ALLOCATE(frohlich_phononfactor_qdir,(nqdir))
  ABI_ALLOCATE(phfrq_qdir,(3*cryst%natom,nqdir))
+ ABI_ALLOCATE(dielt_qdir,(nqdir))
 
  !Compute phonon frequencies and mode-polarity for each qdir
  call ifc_calcnwrite_nana_terms(ifc, cryst, nqdir, unit_qdir, &
 &  phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
 
+ !Compute dielectric tensor for each qdir
+ do iqdir=1,nqdir
+   dielt_qdir(iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),MATMUL(ifc%dielt(:,:),unit_qdir(:,iqdir)))
+ enddo
+
+ !Compute projection of mode-polarity on qdir, and other derived quantities summed over phonon branches for each iqdir.
+ !Note that acoustic modes are discarded (imode sum starts only from 4)
+ summode_sq_proj_polarity_qdir=zero
+ frohlich_phononfactor_qdir=zero
+ do iqdir=1,nqdir
+   summode_sq_proj_polarity_qdir(iqdir)=zero
+   do imode=4,3*cryst%natom
+     proj_polarity_qdir(imode,iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir))
+     summode_sq_proj_polarity_qdir(iqdir)=summode_sq_proj_polarity_qdir(iqdir)+&
+&      proj_polarity_qdir(imode,iqdir)**2 
+     frohlich_phononfactor_qdir(iqdir)=frohlich_phononfactor_qdir(iqdir)+&
+&      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir)
+   enddo
+ enddo
+
+!DEBUG
+ do iqdir=1,nqdir,389
+   write(std_out,'(a,3f8.4,3es12.4)')' unit_qdir,dielt_qdir,summode_sq_proj_polarity,frohlich_phononfactor=',&
+&    unit_qdir(:,iqdir),dielt_qdir(iqdir),summode_sq_proj_polarity_qdir(iqdir),frohlich_phononfactor_qdir(iqdir)
+   do imode=1,3*cryst%natom
+     write(std_out,'(a,i5,6es12.4)')'   imode,phfrq_qdir,phfrq(cmm1),polarity_qdir=',&
+&     imode,phfrq_qdir(imode,iqdir),phfrq_qdir(imode,iqdir)*Ha_cmm1,polarity_qdir(:,imode,iqdir),proj_polarity_qdir(imode,iqdir)
+   enddo
+ enddo
+!ENDDEBUG
+
+ !Compute effective masses, and integrate the Frohlich model
  do ikpt=1,dtset%nkpt
 
    kpt(:)=dtset%kptns(:,ikpt)
@@ -309,7 +349,9 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(unit_qdir)
  ABI_DEALLOCATE(weight_qdir)
  ABI_DEALLOCATE(polarity_qdir)
+ ABI_DEALLOCATE(proj_polarity_qdir)
  ABI_DEALLOCATE(phfrq_qdir)
+ ABI_DEALLOCATE(dielt_qdir)
 
  end subroutine frohlichmodel
 

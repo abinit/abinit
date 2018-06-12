@@ -3518,7 +3518,9 @@ end subroutine ifc_test_phinterp
 !!  qnrml2(nph2l)=Normalization factor.
 !!
 !! OUTPUT
-!!  Only writing.
+!!  (Optional)
+!!  phfrq2l(3*crystal%natom,nph2l)=List of phonon frequencies
+!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities (see Eq.(41) of Veithen et al, PRB71, 125107 (2005))
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.
@@ -3555,7 +3557,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 
 !Local variables-------------------------------
 !scalars
- integer :: iphl2
+ integer :: iatom,idir,imode,iphl2
  !character(len=500) :: msg
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -3610,6 +3612,17 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 
    if(present(phfrq2l))then
      phfrq2l(:,iphl2)=phfrq(:)
+   endif
+
+   if(present(polarity2l))then
+     polarity2l(:,:,iphl2)=zero
+     do imode=1,3*crystal%natom
+       do iatom=1,crystal%natom
+         do idir=1,3
+           polarity2l(:,imode,iphl2)=polarity2l(:,imode,iphl2)+ifc%zeff(:,idir,iatom)*displ_cart(1,idir+(iatom-1)*3,imode)
+         enddo
+       enddo
+     enddo
    endif
 
 #ifdef HAVE_NETCDF
