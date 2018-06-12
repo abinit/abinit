@@ -2302,11 +2302,11 @@ basis of complex spherical harmonics). They are ordered by increasing m, and
 are defined e.g. in [[cite:Blancoa1997]]. For the case l=2 (d states), the five
 columns corresponds respectively to (the normalisation factor has been dropped)
 
-  * m=-2, xy
-  * m=-1, yz
-  * m=0, 3z^2-r^2
-  * m=1, xz
-  * m=2, x^2-y^2
+  * m=-2, $xy$
+  * m=-1, $yz$
+  * m=0, $3z^{2}-r^{2}$
+  * m=1, $xz$
+  * m=2, $x^{2}-y^{2}$
 
 [[dmatpawu]] must always be given as a "spin-up" occupation matrix (and
 eventually a "spin-down" matrix). Be aware that its physical meaning depends
@@ -2362,9 +2362,9 @@ Variable(
     text="""
 This option governs the way occupations of localized atomic levels are computed:
 
-  * [[dmatpuopt]]=1: atomic occupations are projections on atomic orbitals (Eq. (6) of PRB 77, 155104 (2008)).
+  * [[dmatpuopt]]=1: atomic occupations are projections on atomic orbitals (Eq. (6) of [[cite:Amadon2008a]]).
 
-  * [[dmatpuopt]]=2: atomic occupations are integrated values in PAW spheres of angular-momentum-decomposed charge densities (Eq. (7) of PRB 77, 155104 (2008)).
+  * [[dmatpuopt]]=2: atomic occupations are integrated values in PAW spheres of angular-momentum-decomposed charge densities (Eq. (7) of [[cite:Amadon2008a]]).
 
   * [[dmatpuopt]]=3: only for tests
 
@@ -3738,7 +3738,9 @@ Variable(
     vartype="real",
     topics=['DFT+U_expert'],
     dimensions="scalar",
-    defaultval=['0.625 for d electron', '0.6681 for f electron'],
+    defaultval=ValueWithConditions({'d electrons': 0.625,
+ 'f electrons': 0.6681,
+ 'defaultval': 0}),
     mnemonics="F4 Over F2 ratio of Slater integrals",
     requires="[[usepaw]]==1 and ([[usepawu]]==1 or [[usedmft]]==1)",
     text="""
@@ -6960,8 +6962,8 @@ Variable(
 Used when [[vdw_xc]]>0, to read previously calculated vdW-DF variables.
 Supported values:
 
-  * 0 --> do not read vdW-DF variables
-  * 1 --> read vdW-DF variables
+  * 0: do not read vdW-DF variables
+  * 1: read vdW-DF variables
 """,
 ),
 
@@ -8251,9 +8253,9 @@ Variable(
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="LDA minus half",
     text="""
-For each type of atom, gives whether a LDA-1/2 calculation is to be performed.
-[[ldaminushalf]] =0: the LDA-1/2 approach is not used.
-[[ldaminushalf]] =1: the LDA-1/2 approach is used.
+For each type of atom, gives whether a LDA-${\\frac{1}{2}}$ calculation is to be performed.
+[[ldaminushalf]] =0: the LDA-$\\frac{1}{2}$ approach is not used.
+[[ldaminushalf]] =1: the LDA-$\\frac{1}{2}$ approach is used.
 """,
 ),
 
@@ -8367,7 +8369,7 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=-1),
     mnemonics="value of angular momentum L for PAW+U",
-    requires="[[usepawu]]==1 or [[usepawu]]== 2",
+    requires="[[usepawu]]==1 or 2",
     text="""
 Give for each species the value of the angular momentum (only values 2 or 3
 are allowed)  on which to apply the LDA+U correction.
@@ -11846,17 +11848,17 @@ Variable(
     requires="[[usepaw]]==1",
     text="""
 In the case of PAW computations, during the self-consistent cycle, ABINIT
-mixes the density ρ(r)= ∼ρ(r) +∧ρ(r) and the occupancy matrix ρij. (∼ρ(r) is
-the pseudo density, ∧ρ(r) is the compensation charge density). It can be
-redundant as ρij is contained in ∧ρ(r).
+mixes the density $\\rho(r)= \\tilde{\\rho}(r) +\\hat{\\rho}(r)$ and the occupancy matrix $\\rho_{ij}$. ($\\tilde{\\rho}(r)$ is
+the pseudo density, $\\hat{\\rho}(r)$ is the compensation charge density). It can be
+redundant as $\\rho_{ij}$ is contained in $\\hat{\\rho}(r)$.
 
   * If **pawoptmix** =0:
-ABINIT mixes ρ(r) and ρij but the residual used to control the mixing
-algorithm is only based on ρ(r).
+ABINIT mixes $\\rho(r)$ and $\\rho_{ij}$ but the residual used to control the mixing
+algorithm is only based on $\\rho(r)$.
 
   * If **pawoptmix** =1:
-ABINIT mixes ρ(r) and ρij and the residual used to control the mixing
-algorithm is based on ρ(r) and ρij.
+ABINIT mixes $\\rho(r)$ and $\\rho_{ij}$ and the residual used to control the mixing
+algorithm is based on $\\rho(r)$ and $\\rho_{ij}$.
 
 This has only an influence on the efficiency of the mixing algorithm.
 In cas of mixing problems, the first suggestion is to increase the size of the
@@ -11880,10 +11882,10 @@ matrix elements within the PAW formalism. Possible values are 0,1,2.
 If [[pawoptosc]]=0 the code uses its internal default value (2 for SCREENING
 calculations, 1 for SIGMA calculations, 2 for Bethe-Salpeter
 If [[pawoptosc]]=1 the matrix elements are computed with the expression given
-by Arnaud and Alouani in PRB 62. 4464 The equation is exact provided that the
+by [[cite:Arnaud2000]]. The equation is exact provided that the
 set of PAW partial waves is complete.
 If [[pawoptosc]]=2 the matrix elements are computed with the approximated
-expression proposed by Shishkin and Kresse in PRB 74. 035101
+expression proposed by [[cite:Shishkin2006]].
 """,
 ),
 
@@ -11973,9 +11975,11 @@ Variable(
 This input variable controls the computation and/or printing of contributions
 to the PAW partial DOS in _DOS file(s):
 
-* + Plane-waves contribution
-* + "on-site" all-electron contribution (phi)
-* - "on-site" pseudo contribution (phi_tild).
+* Plane-waves contribution
+
+  $+$ "on-site" all-electron contribution ($\\phi$)
+
+  $-$ "on-site" pseudo contribution ($\\tilde{\\phi}$).
 
 If **pawprtdos=0:**
 
@@ -12009,16 +12013,16 @@ Control print volume and debugging output for PAW in log file or standard
 output. If set to 0, the print volume is at its minimum.
 **pawprtvol** can have values from -3 to 3:
 
-- **pawprtvol** = -1 or 1: matrices rho_ij (atomic occupancies) and D_ij (psp
+- **pawprtvol** = -1 or 1: matrices $\\rho_{ij}$ (atomic occupancies) and $D_{ij}$ (psp
   strength) are printed at each SCF cycle with details about their contributions.
 - **pawprtvol** = -2 or 2: like -1 or 1 plus additional printing: moments of
   "on-site" densities, details about local exact exchange.
 - **pawprtvol** = -3 or 3: like -2 or 2 plus additional printing: details about
   PAW+U, rotation matrices of sphercal harmonics.
 
-When **pawprtvol** >= 0, up to 12 components of rho_ij and D_ij matrices for the
+When **pawprtvol** >= 0, up to 12 components of $\\rho_{ij}$ and $D_{ij}$ matrices for the
 1st and last atom are printed.
-When **pawprtvol** < 0, all components of rho_ij and D_ij matrices for all atoms are printed.
+When **pawprtvol** < 0, all components of $\\rho_{ij}$ and $D_{ij}$ matrices for all atoms are printed.
 """,
 ),
 
@@ -12071,7 +12075,8 @@ Note that only the all-electron "on-site" contribution to the Hamiltonian is
 taken into account; this is a very good approximation but requires the
 following conditions to be fullfilled:
 
-1- the  ~  φ i  basis is complete enough
+1- the  $\\tilde{\\phi}_{i}$  basis is complete enough 
+
 2- the electronic density is mainly contained in the PAW sphere
 
 
@@ -12098,21 +12103,22 @@ Variable(
     requires="[[usepaw]]=1",
     text=r"""
 When PAW is activated, the computation of compensation charge density (so
-called "hat" density) requires the computation of g_l(r).Y_lm(r) factors (and
+called "hat" density) requires the computation of $g_{l}(r).Y_{lm}(r)$ factors (and
 cartesian derivatives) at each point of real space contained in PAW spheres.
 The number of atoms, of (l,m) quantum numbers and the sharpness of the real
-FFT grid can lead to a very big {g_l.Y_lm} datastructure. One can save memory
-by putting [[pawstgylm]]=0; but, in that case, g_l(r).Y_lm(r) factors a re-
+FFT grid can lead to a very big {$g_{l}.Y_{lm}$} datastructure. One can save memory
+by putting [[pawstgylm]]=0; but, in that case, $g_{l}(r).Y_{lm}(r)$ factors a re-
 computed each time they are needed and CPU time increases.
 
 Possible choices:
 
-- [[pawstgylm]]=0: g_l(r).Y_lm(r) are not stored in memory and recomputed.
-- [[pawstgylm]]=1: g_l(r).Y_lm(r) are stored in memory.
+- [[pawstgylm]]=0: $g_{l}(r).Y_{lm}(r)$ are not stored in memory and recomputed.
+- [[pawstgylm]]=1: $g_{l}(r).Y_{lm}(r)$ are stored in memory.
 
 Note:
-g_l(r) are shape functions (analytically known)
-Y_lm(r) are real spherical harmonics
+$g_{l}(r)$ are shape functions (analytically known)
+
+$Y_{lm}(r)$ are real spherical harmonics
 """,
 ),
 
@@ -12207,7 +12213,7 @@ recomputed when needed (this is CPU-time consuming). When [[pawusecp]]=1, then
 the cprj are computed once and then kept in memory.
 Change the value of the keyword only if you are an experienced user
 (developper).
-Remember: cprj = (WF_n .dot. p_i) (WF_n=wave function, p_i=non-local projector).
+Remember: $cprj = <\\tilde{\\psi}_{m}.p_{i}>$ ($\\tilde{\\psi}_{n}$=wave function, $p_{i}$=non-local projector).
 
 For the time being, only activated for RF calculations.
 """,
@@ -14278,7 +14284,7 @@ Variable(
     mnemonics="PoinT CHARGEs",
     requires="[[usepaw]]==1 and [[prtefg]]>=3",
     text="""
-  * Array of point charges, in atomic units, of the nuclei. In the normal computation of electric field gradients (see [[prtefg]]) the ionic contribution is calculated from the core charges of the atomic sites. Thus for example in a PAW data set for oxygen where the core is 1s2, the core charge is +6 (total nuclear charge minus core electron charge). In point charge models, which are much less accurate than PAW calculations, all atomic sites are treated as ions with charges determined by their valence states. In such a case oxygen almost always would have a point charge of -2. The present variable taken together with [[prtefg]] performs a full PAW computation of the electric field gradient and also a simple point charge computation. The user inputs whatever point charges he/she wishes for each atom type.
+  * Array of point charges, in atomic units, of the nuclei. In the normal computation of electric field gradients (see [[prtefg]]) the ionic contribution is calculated from the core charges of the atomic sites. Thus for example in a PAW data set for oxygen where the core is $1s^{2}$, the core charge is +6 (total nuclear charge minus core electron charge). In point charge models, which are much less accurate than PAW calculations, all atomic sites are treated as ions with charges determined by their valence states. In such a case oxygen almost always would have a point charge of -2. The present variable taken together with [[prtefg]] performs a full PAW computation of the electric field gradient and also a simple point charge computation. The user inputs whatever point charges he/she wishes for each atom type.
 """,
 ),
 
@@ -16845,7 +16851,7 @@ In the case of a GW calculation, the U interaction defined by [[upawu]] will
 be REMOVED from the self energy. In particular, for G0 W0 calculations
 (perturbative calculations), the energy eigenvalues obtained after an
 underlying DFT+U calculation will be
-E_GW = E_DFT+U + < phi | Self-energy - U | phi>
+$E_{GW} = E_{DFT+U} + < \\phi | Self-energy - U | \\phi>$
 Actually, in order to perform a GW @ DFT+U calculation, one should define the
 same value of U in the self-energy calculation, than the one defined in the
 DFT calculation. The easiest is actually to define the value of U for the
@@ -16853,9 +16859,9 @@ whole set of calculations (for the different datasets), including the
 screening, even if the U value does not play explicitly a role in the
 computation of the latter (well, the input wavefunctions will be different
 anyhow).
-It is possible to perform calculations of the type GW+U_prime @ DFT+U, so
-keeping a U interaction (usually smaller than the initial U) in the GW
-calculation, by defining a smaller U than the one used in the DFT calculation.
+It is possible to perform calculations of the type GW+$U^{'}$ @ DFT+U, so
+keeping a $U^{'}$ interaction (usually smaller than the initial U) in the GW
+calculation.
 This value will be subtracted in the GW correction calculation, as outlined
 above.
 Explicitly, in order to do a calculation of a material with a DFT U value of
@@ -17144,15 +17150,15 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1 or 2, the LDA+U method (cf [1]) is used. The full rotationally invariant formulation is used (see Eq. (3) of Ref [2]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1 or 2, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
 
-    * If [[usepawu]]=1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of Ref.[2] or Eq. (8) of Ref[3]).
+    * If [[usepawu]]=1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
-    * If [[usepawu]]=2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of Ref [3]). Not valid if nspinor=2.
+    * If [[usepawu]]=2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
 
 If LDA+U is activated ([[usepawu]]=1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
-The implementation is done inside PAW augmentation regions only (cf Ref [4]).
+The implementation is done inside PAW augmentation regions only (cf [[cite:Bengone2000]]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
 The expression of the density matrix is chosen thanks to [[dmatpuopt]]. See
 also [How_to_use_LDA_plus_U.txt](../../guide/legacy/How_to_use_LDA_plus_U.txt). for further information.
@@ -17169,20 +17175,14 @@ define the presence of U for the whole set of calculations (for the different
 datasets), including the screening, even if the U value does not play
 explicitly a role in the computation of the latter (well, the input
 wavefunctions will be different anyhow).
-It is possible to perform calculations of the type GW+U_prime @ DFT+U, so
+It is possible to perform calculations of the type GW+$U^{'}$ @ DFT+U, so
 keeping a smaller U interaction in the GW calculation, by subtracting a
 smaller U than the one used in the DFT calculation. See the description of the
 [[upawu]] input variable.
 
-References:
 
-[1] V. I. Anisimov, J. Zaanen, and O. K. Andersen PRB 44, 943 (1991)
-[2] A.I. Lichtenstein, V.I. Anisimov and J. Zaanen PRB 52, 5467 (1995)
-[3] M. T. Czyzyk and G. A. Sawatzky PRB 49, 14211 (1994)
-[4] O. Bengone, M. Alouani, P. Blochl, and J. Hugel PRB 62, 16392 (2000)
+Suggested acknowledgment:[[cite:Amadon2008a]].
 
-Suggested acknowledgment:
-- B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
 """,
 ),
 
@@ -17404,12 +17404,12 @@ Variable(
 This flag determines how the exchange-correlation terms are computed for the
 pseudo-density.
 When [[usexcnhat]]=0, exchange-correlation potential does not include the
-compensation charge density, i.e. Vxc=Vxc(tild_Ncore + tild_Nvalence).
+compensation charge density, i.e. $V_{xc}=V_{xc}(\\tilde{n}_{core} + \\tilde{n}_{valence})$.
 When [[usexcnhat]]=1, exchange-correlation potential includes the compensation
-charge density, i.e. Vxc=Vxc(tild_Ncore + tild_Nvalence + hat_N).
+charge density, i.e. $V_{xc}=V_{xc}(\\tilde{n}_{core} + \\tilde{n}_{valence}+\\hat{n})$.
 When [[usexcnhat]]=-1,the value of [[usexcnhat]] is determined from the
 reading of the PAW dataset file (pseudopotential file). When PAW datasets with
-different treatment of Vxc are used in the same run, the code stops.
+different treatment of $V_{xc}$ are used in the same run, the code stops.
 """,
 ),
 
@@ -17896,8 +17896,9 @@ Used when [[vdw_xc]]>0, to build the vdW-DF kernel.
 
 !!! important
 
-    modifying this variable will likely transform the
-    calculated energies and their gradients into garbage. You have been warned!
+    Modifying this variable will likely transform the
+    calculated energies and their gradients into garbage.
+    You have been warned!
 """,
 ),
 
@@ -17912,8 +17913,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="[[vdw_xc]]>0",
     text="""
-Used when [[vdw_xc]]>0, as introduced in
-[doi:10.1103/PhysRevLett.92.246401](http://dx.doi.org/10.1103/PhysRevLett.92.246401).
+Used when [[vdw_xc]]>0, as introduced in [[cite:Dion2004]].
 """,
 ),
 
@@ -17972,7 +17972,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="[[vdw_xc]]==5",
     text="""
-The DFT-D methods (S. Grimme approach) dispersion potentials, [[vdw_xc]]==5 or
+The DFT-D methods [[cite:Grimme2010]] dispersion potentials, [[vdw_xc]]==5 or
 6 or 7, include a pair potential. The number of pairs of atoms contributing to
 the potential is necessarily limited. To be included in the potential a pair
 of atom must have contribution to the energy larger than [[vdw_tol]].
@@ -17993,8 +17993,9 @@ Variable(
     text="""
 Control the computation of the 3-body correction inside DFT-D3 dispersion
 correction (Grimme approach) to the total energy:
--If **vdw_tol_3bt** <0, no 3-body correction.
--If **vdw_tol_3bt** >0, the 3-body term is included with a tolerance = **vdw_tol_3bt**
+
+  * If **vdw_tol_3bt** <0, no 3-body correction.
+  * If **vdw_tol_3bt** >0, the 3-body term is included with a tolerance = **vdw_tol_3bt**.
 
 DFT-D3 as proposed by S. Grimme adds two contributions to the total energy in
 order to take into account of the dispersion:
@@ -18004,12 +18005,11 @@ order to take into account of the dispersion:
   * A 3-body term which is obtained by summing over all triplets of atoms. Each individual contribution depends of the distances and angles between the three atoms. As it is impossible to sum over all the triplets in a periodic system, one has to define a stopping criterium which is here that an additional contribution to the energy must be higher than **vdw_tol_3bt**
 
 The last term has been predicted to have an important effect for large
-molecules (see for e.g. _Grimme S., J. Chem. Phys. 132, 154104 (2010)_ ). It
-is however quite costly in computational time for periodic systems and seems
-to lead to an overestimation of lattice parameters for weakly bound systems
-(see for e.g. _Reckien W., J. Chem. Phys. 132, 154104(2010)_ ). Still, its
+molecules [[cite:Grimme2010]]. It is however quite costly in computational
+time for periodic systems and seems to lead to an overestimation of lattice
+parameters for weakly bound systems [[cite:Grimme2010a]]. Still, its
 contribution to energy, to forces and to stress is available (not planned for
-elastic constants, dynamical matrix and internal strains)
+elastic constants, dynamical matrix and internal strains).
 """,
 ),
 
@@ -18049,48 +18049,17 @@ will be applied.
 Possible values are:
 
   * 0: no correction.
-  * 1: apply vdW-DF1 (DRSLL) from Dion _et al._
-_doi:10.1103/PhysRevLett.92.246401_
-
-  * 2: apply vdw-DF2 (LMKLL) from Lee _et al._
-_arXiv:1003.5255v1_
-
-  * 5: apply vdw-DFT-D2 as proposed by S. Grimme (adding a semi-empirical dispersion potential)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency
-_J. Comp. Chem. 27, 1787 (2006)_
-
-  * 6: apply vdw-DFT-D3 as proposed by S. Grimme (refined version of DFT-D2)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency and [[vdw_tol_3bt]] variable to
-include 3-body corrections
-_J. Chem. Phys. 132, 154104 (2010)_
-
-  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method J. Chem. Phys. 2004-2006)
-Available only for ground-state calculations and response functions; see
-[[vdw_tol]] variable to control convergency
-_J. Comput. Chem. 32, 1456 (2011)_
-
-  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method.
-_doi:10.1103/PhysRevLett.100.053002._ For details on this implementation
-please check: _doi:10.1016/j.cpc.2011.11.003_
-The improvements introduced by Andrinopoulos _et al._ in _J. Chem. Phys. 135,
-154105 (2011)_ namely the amalgamation procedure, splitting of p-like MLWFs
-into
-two s-like Wannier functions and fractional occupation of MLWFs are performed
-automatically.
-
-  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method.
-_doi:10.1103/PhysRevB.85.073101_
-
-  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions.
-_J. Chem. Phys. 139, 054106 (2013)_
-For periodic systems a supercell approach has to be used since
-**vdw_supercell** is not enabled in this case.
+  * 1: apply vdW-DF1 (DRSLL) from [[cite:Dion2004]].
+  * 2: apply vdw-DF2 (LMKLL) from [[cite:Lee2010]].
+  * 5: apply vdw-DFT-D2 as proposed by S. Grimme [[cite:Grimme2006]] (adding a semi-empirical dispersion potential). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 6: apply vdw-DFT-D3 as proposed by S. Grimme [[cite:Grimme2010]] (refined version of DFT-D2). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence and [[vdw_tol_3bt]] variable to include 3-body corrections.
+  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method from [[cite:Becke2006]]). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method [[cite:Silvestrelli2008]]. For details on this implementation please check [[cite:Espejo2012]]. The improvements introduced by Andrinopoulos _et al._ [[cite:Andrinopoulos2011]], namely the amalgamation procedure, splitting of p-like MLWFs into two s-like Wannier functions and fractional occupation of MLWFs are performed automatically.
+  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method [[cite:Ambrosetti2012]].
+  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions [[cite:Silvestrelli2013]]. For periodic systems a supercell approach has to be used since **vdw_supercell** is not enabled in this case.
 
 For [[vdw_xc]]=1 and [[vdw_xc]]=2, the implementation follows the strategy
-devised in the article of Rom an-Perez and Soler
-([doi:10.1103/PhysRevLett.103.096102](https://dx.doi.org/10.1103/PhysRevLett.103.096102))
+devised in the article of Roman-Perez and Soler [[cite:Romanperez2009]].
 """,
 ),
 
