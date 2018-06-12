@@ -182,7 +182,7 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
 
   1. [[topic:ElecBandStructure|Electronic band structure and related topics]]
   2. [[topic:ElecDOS|Electronic DOS and related topics]]
-  3. [[topic:EffMass|Effective mass calculations]]
+  3. [[topic:EffectiveMass|Effective mass calculations]]
   4. [[topic:Unfolding|Unfolding supercell band structures]]
   5. [[topic:DensityPotential|Manipulating the density and potentials]]
   6. [[topic:STM|Scanning Tunneling Microscopy map]]

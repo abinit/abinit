@@ -318,6 +318,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%getdkdk =0
    dtsets(idtset)%getdkde =0
    dtsets(idtset)%getden  =0
+   dtsets(idtset)%getefmas=0
    dtsets(idtset)%getgam_eig2nkq  =0
    dtsets(idtset)%gethaydock=0
    dtsets(idtset)%getocc  =0
@@ -392,6 +393,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%irdddb=0
    dtsets(idtset)%irdddk=0
    dtsets(idtset)%irdden=0
+   dtsets(idtset)%irdefmas=0
    dtsets(idtset)%irdhaydock=0
    dtsets(idtset)%irdpawden=0
    dtsets(idtset)%irdqps=0
@@ -622,6 +624,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
+   dtsets(idtset)%prtefmas=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
@@ -845,6 +848,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_intmeth = 2
    dtsets(idtset)%eph_extrael = zero
    dtsets(idtset)%eph_fermie = zero
+   dtsets(idtset)%eph_frohlichm = 0
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]

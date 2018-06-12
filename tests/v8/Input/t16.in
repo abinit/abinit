@@ -49,7 +49,7 @@ spin_dt=1e-16
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = H. Xu
-#%% keywords = Effective potential
+#%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml and run spin dynamics
 #%%<END TEST_INFO>
