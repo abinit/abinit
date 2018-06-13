@@ -2454,7 +2454,7 @@ Variable(
     mnemonics="Dynamical Mean Fied Theory: MiXing parameter for the SelF energy",
     characteristics=['[[DEVELOP]]'],
     text="""
-Mixing parameter for the simple mixing of the self-energy.
+Mixing parameter for the simple mixing of the self-energy (should be between 0.3 and 0.8).
 """,
 ),
 
@@ -2540,6 +2540,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text="""
 Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
+If self-energy file is missing, the self-energy is initialized to the double counting at the first iteration.
 """,
 ),
 
@@ -2562,17 +2563,12 @@ Choice of solver for the Impurity model.
   * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
   * 7 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS with the rotationally invariant formulation.
 
-The CT Hyb algorithm is described in [ Phys. Rev. Lett 97, 076405, (2006)
-](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405). For a
+The CT Hyb algorithm is described in [[cite:Werner2006]]. For a
 discussion of density-density approximation with respect with the
-rotationnally invariant formulation, see e.g. [ Phys. Rev. B 86, 155107 (2012)
-](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.155107).
-The ABINIT/CT Hyb implementation is discussed in [
-http://dx.doi.org/10.1016/j.cpc.2016.04.003
-](http://dx.doi.org/10.1016/j.cpc.2016.04.003).
-The TRIQS/CT Hyb implementation is described in [ Comp. Phys. Comm. 200, 274
-(2016) ](http://dx.doi.org/10.1016/j.cpc.2015.10.023). Before using it, it has
-to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
+rotationnally invariant formulation, see e.g. [[cite:Antipov2012]].
+The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
+The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
+Before using it, it has to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
 Starting from release 8.6.0, the
 interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. An example of a
 config.ac file to compile ABINIT with TRIQS can be found in
@@ -2597,7 +2593,7 @@ Variable(
     text="""
 
 Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
-calculations only on t2g orbitals.
+calculations only on _t<sub>2g</sub>_ orbitals.
 """,
 ),
 
@@ -2649,8 +2645,7 @@ Variable(
     text="""
 [[dmftbandf]] is the last band taken into account in the Projected Local
 Orbitals scheme of DFT+DMFT. With [[dmftbandi]], they define the energy window
-used to define Wannier Functions. (see Amadon, B., Lechermann, F., Georges,
-A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
+used to define Wannier Functions (see [[cite:Amadon2008]]).
 """,
 ),
 
@@ -2666,8 +2661,7 @@ Variable(
     text="""
 [[dmftbandi]] is the first band taken into account in the Projected Local
 Orbitals scheme of LDA+DMFT. With [[dmftbandf]], they define the energy window
-used to define Wannier Functions. (see Amadon, B., Lechermann, F., Georges,
-A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
+used to define Wannier Functions (see [[cite:Amadon2008]]).
 """,
 ),
 
@@ -2681,7 +2675,7 @@ Variable(
     mnemonics="Dynamical Mean Fied Theory: CHECKs",
     characteristics=['[[DEVELOP]]'],
     text="""
-Only for developer purposes. (Introduced by B. Amadon, v6.1.0)
+Only for developer purposes.
 """,
 ),
 
@@ -2866,8 +2860,7 @@ Variable(
 Specify the number of Legendre polynomials used for the calculation of Green's
 function in CTQMC code from the library TRIQS. Default is 30. The value of
 coefficients are given in file whose name ending is
-"Legendre_coefficient.dat".
-(see also [Phys. Rev. B 84, 075145 (2010))](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145)
+"Legendre_coefficient.dat" (see also [[cite:Boehnke2011]]).
 """,
 ),
 
@@ -2880,7 +2873,7 @@ Variable(
     defaultval=0,
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 4",
+    requires="[[dmft_solv]] >= 5",
     text="""
 Number of time slices used to represent the time green function. This value
 should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
@@ -2896,9 +2889,9 @@ Variable(
     defaultval=0.0,
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo Number of sweeps",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 4",
+    requires="[[dmft_solv]] >= 5",
     text="""
-Number of Monte Carlo sweeps. Should be at least 10^6.
+Number of Monte Carlo sweeps. Should be at least 10<sup>6<\sup>.
 """,
 ),
 
@@ -2911,7 +2904,7 @@ Variable(
     defaultval="[[jdtset]]",
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo SEED",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 4",
+    requires="[[dmft_solv]] >= 5",
     text="""
 Seed to initilize the random number generator.
 Should not be relevant except for testing purpose.
@@ -5425,7 +5418,7 @@ Variable(
     abivarname="gwcalctyp",
     varset="gw",
     vartype="integer",
-    topics=['GW_basic', 'SelfEnergy_basic'],
+    topics=['GW_basic', 'SelfEnergy_basic', 'RPACorrEn_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW CALCulation TYPe",
@@ -5923,7 +5916,7 @@ Variable(
     abivarname="gwrpacorr",
     varset="gw",
     vartype="integer",
-    topics=['RPACorrEn_expert'],
+    topics=['RPACorrEn_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW RPA CORRelation energy",
@@ -8998,7 +8991,7 @@ Variable(
     abivarname="nband",
     varset="basic",
     vartype="integer",
-    topics=['BandOcc_basic'],
+    topics=['BandOcc_basic', 'GW_basic', 'RPACorrEn_basic', 'Susceptibility_basic'],
     dimensions="scalar",
     mnemonics="Number of BANDs",
     commentdefault=" the estimated number of occupied bands +1 (TODO provide the mathematical formulation)",
@@ -9465,7 +9458,7 @@ Variable(
     abivarname="nfreqim",
     varset="gw",
     vartype="integer",
-    topics=['FrequencyMeshMBPT_basic'],
+    topics=['FrequencyMeshMBPT_basic', 'RPACorrEn_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of FREQuencies along the IMaginary axis",
