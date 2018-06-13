@@ -19,6 +19,7 @@ import uuid
 import pickle
 import yaml
 import markdown
+import datetime
 
 from collections import OrderedDict, defaultdict
 from itertools import groupby
@@ -848,6 +849,8 @@ The bibtex file is available [here](../abiref.bib).
         def repl(matchobj):
             key = matchobj.group("key")
             if self.verbose: print("Found possible alias:", key)
+            if key == "today":
+                return datetime.date.today().strftime("%B %d, %Y")
             value = self.mkdocs_config["extra"]["abimkdocs_aliases"].get(key)
             if value is not None:
                 if self.verbose: print("Returning", value)
