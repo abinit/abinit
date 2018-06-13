@@ -268,6 +268,21 @@ Wikilinks, latex and markdown extensions can be used inside `text`.
 Adding a new variable is easy. Edit the python module and add a new item at the end of the list. 
 A template is provided.
 
+Remember that `\` is an escaping character in python so the interpreter may 
+raise an Exception if you start to add Latex equations in the documentation e.g.
+
+```python
+Error: '\alpha' is an unrecognized escape in character string starting ""^\alpha"
+```
+
+The solution is simple, declare the string as `raw string` by prepending `r` e.g.:
+
+```python
+    text=r"""
+The [[spmeth]] input variable defines the method used to calculate the
+irreducible polarizability $\chi^{(0)}_{KS}$."""
+```
+
 Note that input variables for the executables other than the main abinit (e.g. anaddb, aim, optic) are 
 denoted `input_variable_name@executable`, e.g. `dipdip@anaddb`
 (this allows to waive the ambiguity with the dipdip input variable used in the main abinit).

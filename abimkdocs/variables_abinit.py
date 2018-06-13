@@ -1169,7 +1169,7 @@ along the imaginary axis is of the form:
 $$ \langle i|\Sigma(\omega)|j \rangle  \propto
    \sum_s C_s \int_0^\infty d(i\omega^\prime)
    \frac{(\omega - \epsilon_s)}{(\omega-\epsilon_s)^2 + i{\omega^\prime}^2}
-   f(i\omega^\prime), 
+   f(i\omega^\prime),
 $$
 
 where  $\omega$ is the frequency point along the real axis, $\epsilon_s$ is an
@@ -3495,11 +3495,11 @@ Variable(
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
 * If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian. 
-Then use it to compute the 
-change of electronic eigenvalues due to electron-phonon interaction, 
-using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation 
-as well as temperature dependence. 
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian.
+Then use it to compute the
+change of electronic eigenvalues due to electron-phonon interaction,
+using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
+as well as temperature dependence.
 """,
 ),
 
@@ -5504,13 +5504,13 @@ susceptibility file_SUSC instead of the _SCR file (see [[getsuscep]]   and
 [[irdsuscep]]  ) Not available for PAW calculations.
 
 [[gwgamma]] = -4 activates the bootstrap kernel of Sharma et al. [[cite:Sharma2011]]
-in the test-charge-test-charge dielectric function [[cite:Chen2015]]. 
+in the test-charge-test-charge dielectric function [[cite:Chen2015]].
 
 [[gwgamma]] = -6 uses the same bootstrap kernel as with [[gwgamma]] = -4
 but with only the head of the kernel. As such, the self-consistent iteration in the kernel
 can be disregarded [[cite:Chen2016]].
 
-[[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]] 
+[[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]]
 and [[cite:Rigamonti2015]]).
 """,
 ),
@@ -6142,7 +6142,7 @@ Variable(
     vartype="integer",
     topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful'],
     dimensions=['[[natsph]]'],
-    defaultval=Range({'start': 1, 'stop': '[[natsph]]'}),
+    defaultval=Range(start=1, stop='[[natsph]]'),
     mnemonics="Index for the ATomic SPHeres of the atom-projected density-of-states",
     requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
     text="""
@@ -6223,7 +6223,7 @@ corresponding influential variables are [[vcutgeo]] and [[rcut]].
   * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
 
 Note that Spencer and Alavi showed that the
-spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]]. 
+spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
 In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
@@ -12075,7 +12075,7 @@ Note that only the all-electron "on-site" contribution to the Hamiltonian is
 taken into account; this is a very good approximation but requires the
 following conditions to be fullfilled:
 
-1- the  $\\tilde{\\phi}_{i}$  basis is complete enough 
+1- the  $\\tilde{\\phi}_{i}$  basis is complete enough
 
 2- the electronic density is mainly contained in the PAW sphere
 
@@ -16742,7 +16742,7 @@ Variable(
     requires="[[nspinor]] == 1",
     text="""
 When equal to one or two, this variable allows for the calculation of U with
-the cRPA method. An explicit test is shown in automatic tests 
+the cRPA method. An explicit test is shown in automatic tests
 [[test:v7_23]], [[test:v7_24]], [[test:v7_25]], [[test:v7_68]], and [[test:v7_69]].
 The present implementation is parallelized (as for usual GW
 calculations), use symetry over k points only for calculations involving one
@@ -17531,7 +17531,7 @@ Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
 When [[rcut]].
 
-To define a cylinder along the z-axis use the following lines: 
+To define a cylinder along the z-axis use the following lines:
 ```
 icutcoul 1
 vcutgeo  0 0 1
@@ -17549,8 +17549,8 @@ in terms of the fraction of the primitive vector along the periodic direction.
 For example, in order to define a finite cylinder along z of radius 2.5 Bohr
 and length 3*R3,
 ```
-icutcoul 1 
-vcutgeo  0 0 -3.0 # note the minus sign 
+icutcoul 1
+vcutgeo  0 0 -3.0 # note the minus sign
 rcut     2.5
 ```
 
@@ -17560,16 +17560,16 @@ techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
 The interaction is truncated within a slab of width L where L is the length of
 the primitive vector of the lattice along the non-periodic dimension. For
-example: 
+example:
 ```
-icutcoul 2 
-vcutgeo  1 1 0 
+icutcoul 2
+vcutgeo  1 1 0
 ```
 
 It is also possible to define a finite
-surface by employing negative values. For example: 
+surface by employing negative values. For example:
 ```
-icutcoul 2 
+icutcoul 2
 vcutgeo -3 -2 0
 ```
 **Definition to be added**
