@@ -119,7 +119,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(paw_dmft_type), intent(in)  :: paw_dmft
+ type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(wvl_wf_type),intent(inout) :: wvl_wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
 !no_abirules
@@ -165,6 +165,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  DBG_ENTER("COLL")
 
 ! ---------- DMFT TEST
+write (*,*) "))) use sc_dmft, paral_kgb : ", paw_dmft%use_sc_dmft, mpi_enreg%paral_kgb
 ! real(dp) :: F(2,3,3)
 ! integer :: I,J
 !
@@ -600,8 +601,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  cwavef_toberot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
                end do
 
+               do ib=1,blocksize
+                 if(.not.paw_dmft%band_in(ib)) then
+                   paw_dmft%occnd(1,ib,ib,ikpt,isppol) = occ_k(ib)
+                 end if
+               end do
+
                call diag_occ_rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_toberot, npw_k, nband_k, blocksize,&
 &                                   dtset%nspinor, occ_diag, cwavef_rot) 
+               do ib=1,blocksize
+                 if(.not.paw_dmft%band_in(ib)) then
+                   paw_dmft%occnd(1,ib,ib,ikpt,isppol) = zero
+                 end if
+               end do
 
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
