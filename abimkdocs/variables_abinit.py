@@ -329,7 +329,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="AUXiliary XC functional for hybrid functional, IXC number",
+    mnemonics="AUxiliary XC functional for hybrid functional, IXC number",
     text="""
 Specification of an auxiliary exchange-correlation functional, thanks to its
 [[ixc]] value, to possibly replace the heavy evaluation of an hybrid
@@ -349,11 +349,11 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1.0,
-    mnemonics="AUXiliary xc functional for hybrid functional- SCALing factor",
+    mnemonics="AUxiliary XC functional for hybrid functional- SCALing factor",
     text="""
 Possible scaling factor for the auxiliary exchange-correlation functional
 defined by [[auxc_ixc]] that has the goal to replace the Fock operator or
-hybrid functional when [[fockoptmix]] = 11.
+hybrid functional when [[fockoptmix]]==11.
 
 The default value 1.0 corresponds to the unmodified xc functional. When the
 auxiliary functional is used to replace the hybrid functional in SCF loops, a
@@ -656,7 +656,7 @@ information is only used in the case of Time-Dependent DFT computation of the
 oscillator strength. One must take boxcenter such as to be roughly the center
 of the cluster or molecule. The default is sensible when the vacuum
 surrounding the cluster or molecule has xred 0 or 1. On the contrary, when the
-cluster or molecule is close to the origin, it is better to take [[boxcenter]]=(0 0 0).
+cluster or molecule is close to the origin, it is better to take [[boxcenter]]=[0.0, 0.0, 0.0].
 """,
 ),
 
@@ -1368,7 +1368,7 @@ the number of electrons per unit cell, [[nelect]].
 Then, if [[iscf]] is positive, the code adds up the band occupancies (given in
 array [[occ]]) for all bands at each k point, then multiplies by the k point
 weight [[wtk]] at each k point. Call this sum "nelect_occ" (for the number of
-electrons from occupation numbers). It is then required that: nelect_occ = nelect
+electrons from occupation numbers). It is then required that: nelect_occ = [[nelect]].
 To treat a neutral system, which is desired in nearly all cases, one must use
 [[charge]]=0. To treat a system missing one electron per unit cell, set [[charge]]=+1.
 """,
@@ -1439,8 +1439,8 @@ Variable(
     text="""
 If [[chkexit]] is 1 or 2, ABINIT will check whether the user wants to
 interrupt the run (using the keyword "exit" on the top of the input file or
-creating a file named "abinit.exit": see the [[chkexit|end of section 3.2]]
-of the [[help:abinit]]).
+creating a file named "abinit.exit": see the end of section 3.2
+of the [[help:abinit#parameters]]).
 
 If [[chkexit]]=0, the check is not performed at all
 
@@ -1491,8 +1491,8 @@ When [[chksymbreak]]=1, the code stops (or issue a warning) if:
   * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
 
-When [[chksymbreak]] is zero, there is no such check.
-When [[chksymbreak]] is minus 1, the code stops if the condition (1) is met,
+When [[chksymbreak]]=0, there is no such check.
+When [[chksymbreak]]=-1, the code stops if the condition (1) is met,
 but in case the condition (2) is met, there will be a trial to shift the
 atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
 
@@ -1585,7 +1585,7 @@ Variable(
     defaultval=0.0,
     mnemonics="CPU time limit in Minutes",
     characteristics=['[[INPUT_ONLY]]'],
-    excludes="specified([[cpum]]) or specified([[cpus]])",
+    excludes="specified([[cpuh]]) or specified([[cpus]])",
     text="""
 Only one of the three real parameters [[cpus]], [[cpum]] and [[cpuh]] can be
 defined in the input file to set up a CPU time limit. When the job reaches
@@ -1606,7 +1606,7 @@ Variable(
     defaultval=0.0,
     mnemonics="CPU time limit in seconds",
     characteristics=['[[NO_MULTI]]'],
-    excludes="specified([[cpum]]) or specified([[cpus]])",
+    excludes="specified([[cpuh]]) or specified([[cpum]])",
     text="""
 Only one of the three real parameters [[cpus]], [[cpum]] and [[cpuh]] can be
 defined in the input file to set up a CPU time limit. When the job reaches
@@ -2021,12 +2021,13 @@ Variable(
     text="""
 Kinetic energy cutoff that controls the number of planewaves used to represent
 the dielectric matrix:
-(1/2)[(2 Pi)*(Gmax)]  2  =[[ecut]] for Gmax.
+$ (1/2) [ 2 \pi \GG_{max}]^2 $ =[[ecut]] for $\GG_{max}$.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diecut]] has
 the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
-All planewaves inside this "basis sphere" centered at G=0 are included in the
+All planewaves inside this "basis sphere" centered at $\GG$=0 are included in the
 basis. This is useful only when [[iprcel]]>=21, which means that a
 preconditioning scheme based on the dielectric matrix is used.
+
 NOTE: a negative [[diecut]] will define the same dielectric basis sphere as
 the corresponding positive value, but the FFT grid will be identical to the
 one used for the wavefunctions. The much smaller FFT grid, used when
@@ -2078,29 +2079,27 @@ Variable(
     dimensions="scalar",
     defaultval="1.0774841d0",
     mnemonics="model DIElectric screening LeNGth",
-    text="""
+    characteristics=['[[LENGTH]]'],
+    text=r"""
 Used for screening length (in Bohr) of the model dielectric function, diagonal
 in reciprocal space. By default, given in Bohr atomic units (1
 Bohr=0.5291772108 Angstrom), although Angstrom can be specified, if preferred,
 since [[dielng]] has the '[[LENGTH]]' characteristics.
-This model dielectric function is as follows (K being a wavevector):
-
-
-             (     1        +     [[dielng]]2* K2   )
-    diel(K)= ------------------------------------
-             ( 1/[[diemac]] + [[dielng]]2 * K2 ) * [[diemix]]
-
+This model dielectric function is as follows ($\kk$ being a wavevector):
+\begin{equation}
+diel(\kk) = \frac{ 1 + [[dielng]]^2 \kk^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 \kk^2  \right) [[diemix]] } \nonumber
+\end{equation}
 
 The inverse of this model dielectric function will be applied to the residual,
-to give the preconditioned change of potential. Right at K=0, diel(K) is imposed to be 1.
+to give the preconditioned change of potential. Right at $\kk$=0, $diel(\kk)$ is imposed to be 1.
 
 If the preconditioning were perfect, the change of potential would lead to an
 exceedingly fast solution of the self-consistency problem (two or three
 steps). The present model dielectric function is excellent for rather
 homogeneous unit cells.
-When K->0, it tends to the macroscopic dielectric constant, eventually
+When $\kk$->0, it tends to the macroscopic dielectric constant, eventually
 divided by the mixing factor [[diemix]] (or [[diemixmag]]  for magnetization).
-For metals, simply put [[diemac]] to a very large value (10^6 is OK)
+For metals, simply put [[diemac]] to a very large value ($10^6$ is OK)
 The screening length [[dielng]] governs the length scale to go from the
 macroscopic regime to the microscopic regime, where it is known that the
 dielectric function should tend to 1. It is on the order of 1 Bohr for metals
@@ -2126,8 +2125,8 @@ function, see the keyword [[dielng]], is used for that purpose. It is
 especially useful for speeding up the treatment of rather homogeneous unit cells.
 
 Some hint:
-The value of [[diemac]] should usually be bigger than 1.0d0, on physical grounds.
-For metals, simply put [[diemac]] to a very large value (the default 10^6 is OK)
+The value of [[diemac]] should usually be bigger than 1.0, on physical grounds.
+For metals, simply put [[diemac]] to a very large value (the default $10^6$ is OK)
 For silicon, use 12.0. A similar value is likely to work well for other semiconductors
 For wider gap insulators, use 2.0 ... 4.0
 For molecules in an otherwise empty big box, try 1.5 ... 3.0
@@ -2160,7 +2159,7 @@ transferred in the SCF cycle.
 It should be between 0.0 and 1.0.
 
 If the model dielectric function were perfect, [[diemix]] should be 1.0. By
-contrast, if the model dielectric function does nothing (when [[diemac]]=1.0d0
+contrast, if the model dielectric function does nothing (when [[diemac]]=1.0
 or [[dielng]] is larger than the size of the cell), [[diemix]] can be used to
 damp the amplifying factor inherent to the SCF loop.
 For molecules, a value on the order 0.5 or 0.33 is rather usual.
@@ -2189,12 +2188,12 @@ field to be transferred in the SCF cycle (see [[diemix]] for further
 information).
 For the time being, apply only when the SCF mixing is done on the density ([[iscf]]>=10).
 
-A negative value of diemixmag means that magnetization is only preconditionned
-by ABS(diemixmag), without the use of any preconditionner.
+A negative value of [[diemixmag]] means that magnetization is only preconditionned
+by ABS([[diemixmag]]), without the use of any preconditionner.
 
 When SCF cycle has some difficulties to converge, changing the value of
 [[diemixmag]] can have a positive effect.
-In particular [[diemixmag]]=-4 is a good choice (i.e. diemixmag=4, no other
+In particular [[diemixmag]]=-4 is a good choice (i.e. [[diemixmag]]=4, no other
 preconditionner on magnetization).
 """,
 ),
@@ -3758,7 +3757,7 @@ Governs the number of bands to be used in the code in the case the parameter
 [[nband]] is not defined in the input file (which means that [[occopt]] is not
 equal to 0 or 2).
 
-In case [[fband]] is 0.0d0, the code computes from the pseudopotential files
+In case [[fband]] is 0.0, the code computes from the pseudopotential files
 and the geometry data contained in the input file, the number of electrons
 present in the system. Then, it computes the minimum number of bands that can
 accommodate them, and use that value for [[nband]].
@@ -5998,9 +5997,9 @@ ABINIT knows the LibXC value from [[ixc]], that might not agree with the
 definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
 The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
-VASP is 0.105835 (=0.2 Angstrom$^-1$).
-The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is
-0.1587531 (=0.3 Angstrom$^-1$).
+VASP is 0.105835 (=0.2 Angstrom$^{-1}$).
+The HSE03 value from LibCX is 0.106066 (=0.15/$\sqrt{2}$), the one of VASP is
+0.1587531 (=0.3 Angstrom$^{-1}$).
 """,
 ),
 
@@ -6118,7 +6117,7 @@ Variable(
     vartype="integer",
     topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful'],
     dimensions=['[[natsph]]'],
-    defaultval=Range({'start': 1, 'stop': '[[natsph]]'}),
+    defaultval=Range(start=1, stop='[[natsph]]'),
     mnemonics="Index for the ATomic SPHeres of the atom-projected density-of-states",
     requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
     text="""
@@ -6153,12 +6152,12 @@ Variable(
     topics=['Coulomb_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Index for the Coulomb TReaTMenT",
+    mnemonics="Index for the COULOMB treatment",
     text="""
 Defines the type of computation used for Hartree potential, local part of
 pseudo-potential and ion-ion interaction:
 
-  * [[icoulomb]]=0: usual reciprocal space computation, using 1 / g^2 for the Hartree potential and using Ewald correction.
+  * [[icoulomb]]=0: usual reciprocal space computation, using $1/\GG^2$ for the Hartree potential and using Ewald correction.
   * [[icoulomb]]=1: free boundary conditions are used when the Hartree potential is computed,
     real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials)
     and simple coulomb interaction gives the ion-ion energy.
@@ -7593,6 +7592,7 @@ Variable(
     defaultval=1,
     mnemonics="Integer for the eXchange-Correlation applied to the electron-POSITRON interaction",
     commentdefault="(Teter parameterization). However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value",
+    requires="[[positron]]/=0",
     text="""
 Relevant only when [[positron]]/=0.
 Define the type of electron-positron correlation that is used in case of a
@@ -7602,32 +7602,24 @@ the electron-positron annhilation rate:
 
 Electron-positron correlation functional:
 
-**ixcpositron=1**: LDA zero positron density limit parametrized by Arponen  &
-Pajanne and provided by Boronski & Nieminen [1,2]
-**ixcpositron=11**: LDA zero positron density limit parametrized by Arponen
-& Pajanne and fitted by Sterne & Kaiser [1,3]
-**ixcpositron=2**: LDA electron-positron correlation provided by Puska,
-Seitsonen, and Nieminen [1,4]
-**ixcpositron=3**: GGA zero positron density limit parametrized by Arponen  &
-Pajanne and provided by Boronski & Nieminen [1,2,5]
-**ixcpositron=31**: GGA zero positron density limit parametrized by Arponen
-& Pajanne and fitted by Sterne & Kaiser [1,3,5]
+  * ixcpositron=1: LDA zero positron density limit parametrized by 
+Arponen & Pajanne and provided by Boronski & Nieminen [[cite:Arponen1979a]],[[cite:Boronski1986]]
+  * ixcpositron=11: LDA zero positron density limit parametrized by 
+Arponen & Pajanne and fitted by Sterne & Kaiser [[cite:Arponen1979a]],[[cite:Sterne1991]] 
+  * ixcpositron=2: LDA electron-positron correlation provided by 
+Puska, Seitsonen, and Nieminen [[cite:Arponen1979a]],[[cite:Puska1995]] 
+  * ixcpositron=3: GGA zero positron density limit parametrized by 
+Arponen & Pajanne and provided by Boronski & Nieminen [[cite:Arponen1979a]],[[cite:Boronski1986]],[[cite:Barbiellini1995]]
+  * ixcpositron=31: GGA zero positron density limit parametrized 
+by Arponen & Pajanne and fitted by Sterne & Kaiser [[cite:Arponen1979a]],[[cite:Sterne1991]],[[cite:Barbiellini1995]] 
 
 Annihilation rate enhancement factor:
 
-**ixcpositron=1**: Boronski and Nieminen full modelisation and RPA limit [1]
-**ixcpositron=11**: Sterne and Kaiser [2]
-**ixcpositron=2**: Puska, Seitsonen and Nieminen [3]
-**ixcpositron=3**: Boronski and Nieminen full modelisation and RPA limit [1],
-with GGA corrections
-**ixcpositron=31**: Sterne and Kaiser [2], with GGA corrections
-
-References:
-**[1]** J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-**[2]** Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-**[3]** P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-**[4]** M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-**[5]** B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+  * ixcpositron=1: Boronski and Nieminen full modelisation and RPA limit [[cite:Arponen1979a]] 
+  * ixcpositron=11: Sterne and Kaiser [[cite:Boronski1986]]
+  * ixcpositron=2: Puska, Seitsonen and Nieminen [[cite:Sterne1991]]
+  * ixcpositron=3: Boronski and Nieminen full modelisation and RPA limit [[cite:Arponen1979a]], with GGA corrections
+  * ixcpositron=31: Sterne and Kaiser [[cite:Boronski1986]], with GGA corrections 
 """,
 ),
 
