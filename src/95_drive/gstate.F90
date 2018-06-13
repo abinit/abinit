@@ -893,7 +893,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Initialize paw_dmft, even if neither dmft not paw are used
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
- if(dtset%paral_kgb>0) use_sc_dmft=0
+! if(dtset%paral_kgb>0) use_sc_dmft=0
  call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
 & dtset%nband,dtset%nkpt,dtset%nspden, &
 & dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,use_sc_dmft,dtset%dmft_solv,mpi_enreg)

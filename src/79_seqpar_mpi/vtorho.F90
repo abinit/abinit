@@ -1252,7 +1252,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !           end if
 !           residm=zero
 !         end if
-         if(dtset%nspinor==2) then
+!        if(dtset%nspinor==2) then
 !          call flush_unit(ab_out)
 !          write(message,'(3a)')&
 !          &         ' Self consistent DFT+DMFT with nspinor==2 is not possible yet ',ch10,&
@@ -1262,7 +1262,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          write(message,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
 !          !           MSG_ERROR(message)
 !          endif
-         end if
+!        end if
 
          if(me_distrb==0) then
            call saveocc_dmft(paw_dmft)
