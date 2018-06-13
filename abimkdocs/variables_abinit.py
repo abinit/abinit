@@ -7685,7 +7685,7 @@ Variable(
 If set to 1, a slab of uniform positive background charge density, that is, a
 jellium slab, is included in the calculation cell. A portion of the unit cell
 is filled with such positive charge density distribution which is equal to a
-bulk-mean value n  bulk  between two edges and zero in the vacuum region if present.
+bulk-mean value $n_{bulk}$ between two edges and zero in the vacuum region if present.
 For the sake of convenience the unit cell is supposed to have the third
 crystal primitive lattice vector orthogonal to the other ones so that the
 portion of the cell filled by the jellium slab can be defined through its edges along z.
@@ -7879,11 +7879,16 @@ the work: L-Gamma-X-W-K,U-L-W-X-K,U-Gamma with
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates:
-l(L-Gamma)=sqrt(3)/4=0.433...; l(Gamma-X)=1/2=0.5; l(X-W)=1/4=0.25;
-l(W-K)=sqrt(2)/8=0.177...; l(K-L)=sqrt(6)/8=0.306...;
-l(L-W)=sqrt(2)/4=0.354...; l(W-X)=1/4=0.25; l(X-K)=sqrt(2)/8=0.177...;
-l(K-Gamma)=sqrt(2).3/8=0.530...
+found using the conventional cartesian coordinates:\n
+$l$(L-Gamma)=$\sqrt{3}/4=$0.433... \n
+$l$(Gamma-X)=$1/2$=0.5 \n
+$l$(X-W)=$1/4$=0.25 \n
+$l$(W-K)=$\sqrt{2}/8$=0.177... \n
+$l$(K-L)=$\sqrt{6}/8$=0.306... \n
+$l$(L-W)=$\sqrt{2}/4$=0.354... \n 
+$l$(W-X)=$1/4$=0.25 \n
+$l$(X-K)=$\sqrt{2}/8$=0.177... \n
+$l$(K-Gamma)=$3\sqrt{2}/8$=0.530... \n
 
 B. **BCC lattice**
 
@@ -7906,10 +7911,14 @@ So, if you want to specify a typical circuit, the following might do the work: G
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates: l(Gamma-H)=1/2=0.5;
-l(H-N)=sqrt(2)/4=0.354...; l(N-Gamma)=sqrt(2)/4=0.354...;
-l(Gamma-P)=sqrt(3)/4=0.433...; l(P-N)=1/4=0.25; l(N-P)=1/4=0.25;
-l(P-H)=sqrt(3)/4=0.433...
+found using the conventional cartesian coordinates:\n
+$l$(Gamma-H)=$1/2$=0.5 \n
+$l$(H-N)=$sqrt{2}/4$=0.354... \n
+$l$(N-Gamma)=$\sqrt{2}/4$=0.354... \n
+$l$(Gamma-P)=$\sqrt{3}/4$=0.433... \n 
+$l$(P-N)=$1/4$=0.25 \n 
+$l$(N-P)=$1/4$=0.25 \n
+$l$(P-H)=$\sqrt{3}/4$=0.433... \n
 
 C. **Hexagonal lattices**
 
@@ -7934,41 +7943,47 @@ might do the work: K-Gamma-M-K-H-A-L-H-L-M-Gamma-A
 In order to find the lengths of segments (this information is useful to draw
 the band structure, with the correct relative scale between special points)
 one needs to know the a and c lattice parameters. Also, in what follows, we
-omit the 2*pi factor sometimes present in the definition of the reciprocal
-space vectors. The reciprocal vectors are (1/a 1/(sqrt(3)*a) 0), (0
-2/(sqrt(3)*a) 0), (0 0 1/c). The lengths of the above-mentioned segments can
-be computed as: l(K-Gamma)=2/(3*a)=0.666.../a;
-l(Gamma-M)=1/(sqrt(3)*a)=0.577.../a; l(M-K)=1/(3*a)=0.333.../a;
-l(K-H)=1/(2*c)=0.5.../c; l(H-A)=2/(3*a)=0.666.../a;
-l(A-L)=1/(sqrt(3)*a)=0.577.../a; l(L-H)=1/(3*a)=0.333.../a;
-l(H-L)=1/(3*a)=0.333.../a; l(L-M)=1/(2*c)=0.5.../c;
-l(M-Gamma)=-1/(sqrt(3)*a)=0.577.../a; l(Gamma-A)=1/(2*c)=0.5.../c
+omit the 2$\pi$ factor sometimes present in the definition of the reciprocal
+space vectors. The reciprocal vectors are $(1/a\, 1/(\sqrt{3}a)\, 0)$, $(0\,
+2/(\sqrt{3}a)\, 0)$, $(0\, 0\, 1/c)$. The lengths of the above-mentioned segments can
+be computed as:\n
+$l$(K-Gamma)=$2/(3a)$=0.666.../a \n
+$l$(Gamma-M)=$1/(\sqrt{3}a)$=0.577.../a \n
+$l$(M-K)=$1/(3a)$=0.333.../a \n
+$l$(K-H)=$1/(2c)$=0.5.../c \n
+$l$(H-A)=$2/(3a)$=0.666.../a \n
+$l$(A-L)=$1/(\sqrt{3}a)$=0.577.../a \n
+$l$(L-H)=$1/(3a)$=0.333.../a \n
+$l$(H-L)=$1/(3a)$=0.333.../a \n
+$l$(L-M)=$1/(2c)$=0.5.../c \n
+$l$(M-Gamma)=$-1/(\sqrt{3}a)$=0.577.../a \n
+$l$(Gamma-A)=$1/(2c)$=0.5.../c \n
 
 D. **Rhombohedral lattices**
 
 Rhombohedral lattices are characterised by two parameters, the length of the
-primitive vectors, that we will denote a0, and the angle they form, alpha.
+primitive vectors, that we will denote a0, and the angle they form, $\gamma$.
 These can be directly input of ABINIT, as [[acell]] and [[angdeg]]
 
 This will generate the primitive vectors in real space, with
 
-      [[acell]] a0 a0 a0    and      [[rprim]]  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
+      acell a0 a0 a0    and      rprim  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
 
-with a^2+c^2=1, a^2=(1-cos(alpha))*2/3, c^2=(1+2*cos(alpha))*1/3,
-(a/c)^2=2*(1-cos(alpha))/(1+2*cos(alpha)) and also
-cos(alpha)=(1-(a/c)^2/2)/(1+(a/c)^2). Alternatively, these values of rprim
+with $a^2+c^2=1$, $a^2=2/3(1-\cos(\gamma))$, $c^2=1/3(1+2\cos(\gamma))$,
+$(a/c)^2=2(1-\cos(\gamma))/(1+2\cos(\gamma))$ and also
+$\cos(\gamma)=(1-(a/c)^2/2)/(1+(a/c)^2)$. Alternatively, these values of [[rprim]]
 might directly be the input of ABINIT (then, the balance of the scaling factor
 might be adjusted between [[acell]] and [[rprim]]).
 
 Unlike for the simple cubic, FCC, BCC, hexagonal (and some other) Bravais
-lattice, the topology of the Brillouin zone will depend on the alpha (or a/c)
-value. We give below information concerning the case when cos(alpha) is
-positive, that is, (a/c)^2 lower than 2.
+lattice, the topology of the Brillouin zone will depend on the $\gamma$ (or $a/c$)
+value. We give below information concerning the case when $\cos(\gamma)$ is
+positive, that is, $(a/c)^2$ lower than 2.
 
 The coordinates of several special points with respect to primitive vectors in
-reciprocal space will not depend on the a/c ratio, but some others will depend
+reciprocal space will not depend on the $a/c$ ratio, but some others will depend
 on it. So, some care has to be exercised. Notations for the Brillouin Zone
-special points are the same as in Phys. Rev. B 41, 11827 (1990).
+special points are the same as in [[cite:Gonze1990]]. 
 
       L (1/2 0 0) or (0 1/2 0) or (0 0 1/2) (or with negative signs)
       T (1/2 1/2 1/2)
@@ -7988,14 +8003,17 @@ path with the following coordinates for the special points X, Gamma, T, L, Gamma
 In order to find the lengths of segments (this information is useful to draw
 the band structure, with the correct relative scale between special points)
 one needs to know the a and c lattice parameters. Also, in what follows, we
-omit the 2*pi factor sometimes present in the definition of the reciprocal
-space vectors. The reciprocal vectors are (2/(3*a) 0 1/(3*c)), -(1/(3*a)
-1/(sqrt(3)*a) 1/(3*c), -(1/(3*a) -1/(sqrt(3)*a) 1/(3*c) ). The lengths of the
-above-mentioned segments can be computed as:
-l(X-Gamma)=2/(sqrt(3)*a)=1.155.../a, with
-l(K-Gamma)=(1+(a/c)^2/4)*4/(3*sqrt(3)*a); l(Gamma-T)=1/(2*c);
-l(T-L)=2/(sqrt(3)*a)=1.155.../a, with l(T-W)=(1-(a/c)^2/2)*4/(3*sqrt(3)*a);
-l(L-Gamma)=sqrt(4/(a^2)+1/(c^2))/3 l(Gamma-X)=sqrt(1/(a^2)+1/(c^2))*2/3
+omit the $2\pi$ factor sometimes present in the definition of the reciprocal
+space vectors. The reciprocal vectors are $( 2/(3a)\: 0\: 1/(3c) )$, $( -1/(3a)\:
+1/(\sqrt{3}a)\: 1/(3c) )$, $( -1/(3a)\: -1/(\sqrt{3}a)\: 1/(3c) )$. The lengths of the
+above-mentioned segments can be computed as:\n
+$l$(X-Gamma)=$2/(\sqrt{3}a)$=1.155.../a \n 
+$l$(K-Gamma)=$4(1+(a/c)^2/4)/(3\sqrt{3}a)$ \n
+$l$(Gamma-T)=$1/(2c)$ \n
+$l$(T-L)=$2/(\sqrt{3}a)$=1.155.../a \n
+$l$(T-W)=$4(1-(a/c)^2/2)/(3\sqrt{3}a)$ \n
+$l$(L-Gamma)=$\sqrt{4/(a^2)+1/(c^2)}/3$ \n
+$l$(Gamma-X)=$2\sqrt{1/(a^2)+1/(c^2)}/3$ \n
 """,
 ),
 
@@ -8408,8 +8426,8 @@ Variable(
 Turns on the imposition of a Lagrangian constraint on the magnetization. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
 a constraint is applied to bring it closer to the input values of [[spinat]].
-The constraint can be either on the direction only (magconon 1) or on the full
-vector (magconon 2). The Lagrangian constraint has an amplitude
+The constraint can be either on the direction only ([[magconon]]=1) or on the full
+vector ([[magconon]]=2). The Lagrangian constraint has an amplitude
 [[magcon_lambda]] which should be neither too big (bad or impossible
 convergence) nor too small (no effect).
 """,
@@ -8676,7 +8694,7 @@ The actual use of the mixing coefficients is defined by the input variable
 [[algalch]]. Note that the masses of the atoms, [[amu]] are also mixed
 according to the value of [[mixalch]], by default.
 
-Example 1. Suppose that we want to describe Ba(0.25) Sr(0.75) Ti O3.
+Example 1. Suppose that we want to describe Ba(0.25) Sr(0.75) Ti O$_3$.
 The input variables related to the construction of the alchemical Ba(0.25)
 Sr(0.75) potential will be:
 
@@ -9517,21 +9535,21 @@ Variable(
     mnemonics="Number of Grid points for Fast Fourier Transform",
     commentdefault="(automatic selection of optimal values)",
     text="""
-gives the size of fast Fourier transform (fft) grid in three dimensions. Each
+gives the size of fast Fourier transform (FFT) grid in three dimensions. Each
 number must be composed of the factors 2, 3, and 5 to be consistent with the
-radices available in our fft.
+radices available in our FFT.
 
 If no [[ngfft]] is provided or if [[ngfft]] is set to 0 0 0, the code will automatically
 provide an optimal set of [[ngfft]] values, based on [[acell]], [[rprim]] and [[ecut]]
 (see also [[boxcutmin]] for speed/accuracy concerns).
 This is the recommended procedure, of course.
-The total number of FFT points is the product: [[ngfft]](1)*[[ngfft]](2)*[[ngfft]](3)=nfft.
+The total number of FFT points is the product: [[ngfft]](1)x[[ngfft]](2)x[[ngfft]](3)=nfft.
 
 When [[ngfft]] is made smaller than recommended values (e.g. by setting
 [[boxcutmin]] to a value smaller than 2.0 or by setting [[ngfft]] manually),
 the code runs faster and the equations in effect are approximated by a low
 pass Fourier filter. The code reports to standard output (unit 06) a parameter
-"boxcut" which is the smallest ratio of the fft box side to the G vector basis
+"boxcut" which is the smallest ratio of the FFT box side to the $\GG$ vector basis
 sphere diameter. When boxcut is less than 2 the Fourier filter approximation
 is being used. When boxcut gets less than about 1.5 the approximation may be
 too severe for realistic results and should be tested against larger values of
@@ -9543,16 +9561,16 @@ reduce this effect.
 Internally, [[ngfft]] is an array of size 18. The present components are
 stored in [[ngfft]](1:3), while
 
-  * ngfft(4:6) contains slightly different (larger) values, modified for efficiency of the FFT
-  * ngfft(7) is [[fftalg]]
-  * ngfft(8) is [[fftcache]]
-  * ngfft(9) is set to 0 if the parallelization of the FFT is not activated, while it is set to 1 if it is activated.
-  * ngfft(10) is the number of processors of the FFT group
-  * ngfft(11) is the index of the processor in the group of processors
-  * ngfft(12) is n2proc, the number of x-z planes, in reciprocal space, treated by the processor
-  * ngfft(13) is n3proc, the number of x-y planes, in real space, treated by the processor
-  * ngfft(14) is mpi_comm_fft, the handle on the MPI communicator in charge of the FFT parallelisation
-  * ngfft(15:18) are not yet used
+  * [[ngfft]](4:6) contains slightly different (larger) values, modified for efficiency of the FFT
+  * [[ngfft]](7) is [[fftalg]]
+  * [[ngfft]](8) is [[fftcache]]
+  * [[ngfft]](9) is set to 0 if the parallelization of the FFT is not activated, while it is set to 1 if it is activated.
+  * [[ngfft]](10) is the number of processors of the FFT group
+  * [[ngfft]](11) is the index of the processor in the group of processors
+  * [[ngfft]](12) is n2proc, the number of x-z planes, in reciprocal space, treated by the processor
+  * [[ngfft]](13) is n3proc, the number of x-y planes, in real space, treated by the processor
+  * [[ngfft]](14) is mpi_comm_fft, the handle on the MPI communicator in charge of the FFT parallelisation
+  * [[ngfft]](15:18) are not yet used
 
 The number of points stored by this processor in real space is n1*n2*n3proc,
 while in reciprocal space, it is n1*n2proc*n3.
@@ -9615,7 +9633,7 @@ Variable(
     topics=['q-points_basic'],
     dimensions=[3],
     defaultval=[0, 0, 0],
-    mnemonics="Number of Grid pointsfor Q PoinTs generation",
+    mnemonics="Number of Grid points for Q PoinTs generation",
     characteristics=['[[INPUT_ONLY]]'],
     excludes="specified([[qptrlatt]])",
     requires="[[nqpt]]==1 and [[kptopt]]>=0",
@@ -9796,9 +9814,9 @@ Variable(
     mnemonics="Number of LINE minimisations",
     text="""
 Gives maximum number of line minimizations allowed in preconditioned conjugate
-gradient minimization for each band. The Default, 4, is fine.
+gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
-energy may require a larger value of [[nline]] (5 or 6 ?) Line minimizations
+energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
 will be stopped anyway when improvement gets small (governed by [[tolrde]]).
 With the input variable [[nnsclo]], governs the convergence of the
 wavefunctions for fixed potential.
