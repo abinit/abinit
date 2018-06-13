@@ -376,6 +376,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_DEALLOCATE(proj_polarity_qdir)
  ABI_DEALLOCATE(phfrq_qdir)
  ABI_DEALLOCATE(dielt_qdir)
+ ABI_DEALLOCATE(zpr_q0_phononfactor_qdir)
+ ABI_DEALLOCATE(frohlich_phononfactor_qdir)
 
  end subroutine frohlichmodel
 
