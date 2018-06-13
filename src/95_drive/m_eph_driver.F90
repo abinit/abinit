@@ -710,8 +710,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ifc_free(ifc)
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
+ if(dtset%eph_frohlichm/=1)then
+   call pawfgr_destroy(pawfgr)
+   call destroy_mpi_enreg(mpi_enreg)
+ endif
  if(allocated(efmasdeg))then
    call efmasdeg_free_array(efmasdeg)
  endif
