@@ -6,8 +6,8 @@ authors: JW, MT
 
 ## Calculation of positron lifetime and momentum distribution in silicon
 
-This lesson aims at showing how to perform Two-Component Density-Functional
-Theory (TCDFT) calculations in the PAW framework to obtain the following
+This lesson aims at showing how to perform **Two-Component Density-Functional
+Theory (TCDFT)** calculations in the PAW framework to obtain the following
 physical properties:
 
   * the positron lifetime in the perfect material,
@@ -21,7 +21,7 @@ The user should be familiar with the four basic lessons of ABINIT and the [first
 This lesson should take about 2 hours.
 
 
-## 1 Computing the positron lifetime in Si lattice
+## 1. Computing the positron lifetime in Si lattice
 
 *Before beginning, you might consider to work in a different subdirectory as
 for the other lessons. Why not `Work_positron`?*
@@ -98,7 +98,7 @@ with the experimental value of about 219 ps [[cite:Panda1997]].
     setting [[posocc]] to a small value (0.0001 ...). This value must obviously be tested...
 
 
-## 2 Computing the positron lifetime in a Si monovacancy
+## 2. Computing the positron lifetime in a Si monovacancy
 
 We will now perform a positron lifetime calculation for a monovacancy in
 silicon in the conventional scheme (which we applied to the perfect lattice
@@ -143,7 +143,7 @@ inside the vacancy. You can see below how the positron (in red, isodensity at
 ![](positron_assets/posdensity.png)
 
 
-## 3 Performing a self-consistent electron-positron calculation for a Si vacancy
+## 3. Performing a self-consistent electron-positron calculation for a Si vacancy
 
 We will now perform a self-consistent calculation of the positron and electron
 densities. As this calculation will take a few minutes, you can already issue
@@ -180,7 +180,7 @@ localization inside the vacancy becomes stronger when the positron and the
 electron densities are allowed to relax.
 
 
-## 4 Relaxing the vacancy according to forces due to electrons and the positron
+## 4. Relaxing the vacancy according to forces due to electrons and the positron
 
 In addition to the self-consistency, the lifetime of a positron inside a
 vacancy can be strongly affected by the relaxation of the atoms due to the
@@ -230,7 +230,7 @@ Also, remember that the 16-atom supercell is not large enough to get converged
 results. In Table IV of [[cite:Wiktor2015]] you can see converged
 results of the positron lifetime of Si monovacancy within various methods.
 
-## 5 Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice
+## 5. Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice
 
 In the last part of the tutorial we will calculate the electron-positron
 momentum distribution (_Doppler spectrum_) of a silicon lattice in the conventional
@@ -288,8 +288,8 @@ projections (_Doppler spectra_) in (001), (011) and (111) directions and to
 calculate the low- and high-momentum contributions to the
 momentum distribution (so called `S` and `W` parameters, see [[cite:Wiktor2015]]).
 
-## 6 Studying the effect of the PAW dataset completeness
-  
+## 6. Studying the effect of the PAW dataset completeness
+
 The positron lifetime and momentum distribution calculations within the PAW
 method are very sensitive to the number of valence electrons in the **PAW
 dataset**. It is due to the fact that it is not easy to describe the positron

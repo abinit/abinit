@@ -6,20 +6,19 @@ authors: MT, FJ
 
 ## Projector Augmented-Wave technique, how to use it?  
 
-This lesson aims at showing how to perform a calculation in the frame of the PAW method.
+This lesson aims at showing how to perform a calculation within the **Projector Augmented-Wave** (PAW) method.
 
 You will learn how to launch a PAW calculation and what are the main input
 variables that govern convergence and numerical efficiency.
-It is supposed that you already know how to use ABINIT in the norm-conserving pseudopotential case.  
+You are supposed to already know how to use ABINIT in the _Norm-Conserving PseudoPotential_ (NCPP) case.
 
 This lesson should take about 1.5 hour.
 
-## 1 Summary of the PAW method
-  
-The PAW (Projector Augmented-Wave) method has been introduced by Peter Blochl in 1994. 
-As he says:
+## 1. Summary of the PAW method
 
-> The projector augmented-wave method is an extension of
+The **Projector Augmented-Wave** approach has been introduced by Peter Blochl in 1994:
+
+> The Projector Augmented-Wave method is an extension of
   augmented wave methods and the pseudopotential approach, which combines their
   traditions into a unified electronic structure method".  
   It is based on a linear and invertible transformation (the PAW transformation)
@@ -31,9 +30,9 @@ As he says:
 \,\langle \tprj_i^a|\tPsi\rangle = |\tPsi\rangle + \sum_a |\Psi^1_a\rangle - |\tPsi_a^1\rangle 
 \end{equation}
 
-This relation is based on the definition of atomic spheres (augmentation
-regions) of radius $r_c$, around the atoms of the system in which the partial
-waves  $|\phi_i\rangle$ form a basis of atomic wavefunctions; $|\tphi_i\rangle$ are "pseudized"
+This relation is based on the definition of _augmentation
+regions_ (atomic spheres of radius $r_c$), around the atoms in which the partial
+waves $|\phi_i\rangle$ form a basis of atomic wavefunctions; $|\tphi_i\rangle$ are "pseudized"
 partial waves (obtained from $|\phi_i\rangle$), and $|\tprj_i\rangle$ are dual functions of the $|\tphi_i\rangle$
 called projectors.
 It is therefore possible to write every quantity depending on $\Psi_n$ (density,
@@ -41,12 +40,12 @@ energy, Hamiltonian) as a function of $\tPsi_n$ and to find $\tPsi_n$ by solving
 
 The PAW method has two main advantages:  
 
-1. From $\tPsi$, it is always possible to obtain the true "all electron" wavefunction $\Psi$.  
-2. The convergency is comparable to an ultrasoft pseudopotential one.
+1. From $\tPsi$, it is always possible to obtain the true "all electron" wavefunction $\Psi$,
+2. The convergency is comparable to an _UltraSoft PseudoPotential_ (USPP) one.
 
-From a practical point of view (user's point of view), a PAW calculation is
-rather similar to a norm-conserving pseudopotential one. Most noticeably, one
-will have to use a special atomic data file (PAW dataset) that contains the
+From a practical point of view, a PAW calculation is
+rather similar to a Norm-Conserving PseudoPotential one. Most noticeably, one
+will have to use a special atomic data file (**PAW dataset**) that contains the
 $\phi_i$, $\tphi_i$ and $\tprj_i$ and that plays the same role as a pseudopotential file.
 
 !!! tip
@@ -57,24 +56,24 @@ $\phi_i$, $\tphi_i$ and $\tprj_i$ and that plays the same role as a pseudopotent
     describing specific notations and formulations
 
 ## 2 Using PAW with ABINIT
-  
+
 *Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_paw1"?
+for the other lessons. Why not `Work_paw1`?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
-All the input files can be found in the ~abinit/tests/tutorial/Input directory.*
+All the input files can be found in the `~abinit/tests/tutorial/Input` directory.*
 
 !!! important
 
     *You can compare your results with reference output files located in
-    ~abinit/tests/tutorial/Refs and ~abinit/tests/tutorial/Refs/tpaw1_addons
+    `~abinit/tests/tutorial/Refs` and `~abinit/tests/tutorial/Refs/tpaw1_addons`
     directories (for the present tutorial they are named `tpaw1_*.out`).*
 
-The input file tpaw1_1.in is an example of a file that contains data for
-computing the total energy for diamond at the experimental volume (within the
-LDA exchange-correlation functional). You might use the file tpaw1_1.files
-(with a standard norm-conserving pseudopotential) as a "files" file, and get
-the corresponding output file (it is available in ../Refs/tpaw1_1.out).  
-Copy the files tpaw1_1.in and tpaw1_1.files in your work directory, and run ABINIT:
+The input file `tpaw1_1.in` is an example of a file to be used to compute
+the total energy of diamond at the experimental volume (within the
+_LDA exchange-correlation functional_). You might use the file `tpaw1_1.files`
+(with a standard Norm-Conserving PseudoPotential) as a `files` file, and get
+the corresponding output file (it is available in `../Refs/tpaw1_1.out`).  
+Copy the files `tpaw1_1.in` and `tpaw1_1.files` in your work directory, and run ABINIT:
     
     abinit < tpaw1_1.files > tmp-log
 
@@ -83,46 +82,48 @@ ABINIT should run very quickly...
 
 {% dialog tests/tutorial/Input/tpaw1_1.files tests/tutorial/Input/tpaw1_1.in %}
   
-Now, open the tpaw1_1.files and modify the last line; replace the 6c.pspnc file by 6c.lda.atompaw.
+Now, open the `tpaw1_1.files` file and change the last line; replace the `6c.pspnc` file by `6c.lda.atompaw`.
 Run ABINIT again:
     
     abinit < tpaw1_1.files > tmp-log
 
-Your run should stop almost immediately!
+Your run should stop almost immediately!  
 The input file is missing the mandatory argument [[pawecutdg]]!!
 
 Add the line:
 
     pawecutdg 50
     
-to tpaw1_1.in file and run ABINIT again. Now the code runs to the end.
+into `tpaw1_1.in` and run ABINIT again. Now the code runs to the end.
 
 !!! note
 
     The time needed for the PAW run is greater than the time needed for
-    the norm-conserving pseudopotential run; indeed, at constant value of plane
+    the Norm-Conserving PseudoPotential run; indeed, at constant value of plane
     wave cut-off energy [[ecut]] PAW requires more computational resources:    
 
     * the "on-site" contributions have to be computed,  
     * the nonlocal contribution of the PAW dataset uses 2 projectors per angular momentum, 
-      while the nonlocal contribution of the present norm-conserving pseudopotential uses only one.  
+      while the nonlocal contribution of the Present Norm-Conserving Pseudopotential uses only one.
 
     However, as the plane wave cut-off energy required by PAW is much smaller than
-    the cut-off needed for the norm-conserving pseudopotential (see next section),
-    a PAW calculation will actually require less CPU time.
+    the cut-off needed for the Norm-Conserving PseudoPotential (see next section),
+    **a PAW calculation will actually require less CPU time**.
 
-Let's open the output file and have a look inside
-(be careful, it is the last output file of the tpaw1_1 series).
-Compared to an output file for a norm-conserving pseudopotential run, an
+Let's open the output file (`tpaw1_1.out`) and have a look inside.  
+Compared to an output file for a Norm-Conserving PseudoPotential run, an
 output file for PAW contains the following specific topics:
 
-At the beginning of the file,
+
+- At the beginning of the file,
 some specific default PAW input variables ([[ngfftdg]], [[pawecutdg]], and
-[[useylm]]) are mentioned in the section:
+[[useylm]]), mentioned in the section:
 
+```
     -outvars: echo values of preprocessed input variables --------
+```
 
-The use of two FFT grids, mentioned in:
+- The use of two FFT grids, mentioned in:
 
 ```
 Coarse grid specifications (used for wave-functions):  
@@ -136,7 +137,8 @@ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
         ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918 
 ```
 
-A specific description of the PAW dataset (you might follow the tutorial [[lesson:paw2|PAW2]], 
+
+- A specific description of the PAW dataset (you might follow the tutorial [[lesson:paw2|PAW2]], 
 devoted to the building of the PAW atomic data, for a complete understanding of the file):
   
 ```
@@ -157,13 +159,13 @@ Radial grid used for Vloc is grid 4
 Radial grid used for pseudo valence density is grid 4
 ```
 
-After the SCF cycle section:
 
+- After the SCF cycle section:
 The value of the integrated compensation charge evaluated by two different
-numerical methodologies (remember: PAW atomic dataset are not norm-conserving
-pseudopotentials); it is given calculated in the augmentation regions (PAW
-spheres) on the "spherical" grid and also in the whole simulation cell on the
-"FFT" grid. A discussion on these two values will be done in a forthcoming section.
+numerical methodologies; 1- computed in the _augmentation regions_
+on the "spherical" grid, 2- computed in the whole simulation cell on the
+"FFT" grid...  
+A discussion on these two values will be done in a forthcoming section.
 
 ```
 PAW TEST:  
@@ -173,8 +175,8 @@ Compensation charge over spherical meshes =      0.413178580356274
 Compensation charge over fine fft grid    =      0.413177280314290
 ```
 
-  
-Information concerning the non-local term (pseudopotential strength $D_{ij}$)
+
+- Information concerning the non-local term (pseudopotential strength $D_{ij}$)
 and the spherical density matrix (augmentation wave occupancies $\rho_{ij}$):
 
 ```
@@ -193,7 +195,8 @@ Atom #  2
  ...
 ```
 
-At the end of the file we find the decomposition of the total energy both 
+
+- At the end of the file we find the decomposition of the total energy both 
 by direct calculation and double counting calculation:
 
 ```
@@ -221,30 +224,30 @@ by direct calculation and double counting calculation:
   >Total DC energy in eV        = -3.13629435073068E+02
 ```
 
-Note that the total energy calculated in PAW is not the same as the one
-obtained in the norm-conserving pseudopotential case. This is normal: in the
-norm-conserving potential case, the energy reference has been arbitrarily
-modified by the pseudopotential construction procedure. Comparing total
-energies computed with different PAW potentials is more meaningful: most of
-the parts of the energy are calculated exactly, and in general you should be
-able to compare numbers for (valence) *energies* between different PAW potentials or different codes.
+!!! Note
+    The PAW total energy is not the equal to the one obtained in the Norm-Conserving PseudoPotential case:
+    in the Norm-Conserving PseudoPotential case, the energy reference has been arbitrarily
+    modified by the pseudopotential construction procedure.
+    Comparing total energies computed with different PAW potentials is more meaningful: most of
+    the parts of the energy are calculated exactly, and in general you should be
+    able to compare numbers for (valence) *energies* between different PAW potentials or different codes.
 
-## 3 The convergence on plane-wave cut-off
+## 3. Convergence with respect to the plane-wave basis cut-off
   
-As in the usual case, the critical convergence parameter is the cut-off
-defining the size of the plane-wave basis...
+As in the usual Norm-Conserving PseudoPotential case, the critical convergence parameter is the cut-off
+energy defining the size of the plane-wave basis...
 
-**3.a** **Computing the convergence in ecut for diamond in the norm-conserving case**
+###3.a Convergence with respect to ecut in the Norm-Conserving PseudoPotential case##
 
-The input file tpaw1_2.in contains data for computing the convergence in ecut
-for diamond (at experimental volume). There are 9 datasets, for which [[ecut]]
-increases from 8 Ha to 24 Ha by step of 2 Ha.
-You might use the tpaw1_2.files file (with a standard norm-conserving
-pseudopotential), and run ABINIT:
+The input file `tpaw1_2.in` contains data to be used to compute the convergence in ecut
+for diamond (at experimental volume). There are 9 datasets, with increasing [[ecut]] values
+from 8 Ha to 24 Ha.  
+You might use the `tpaw1_2.files` file (with a standard Norm-Conserving
+PseudoPotential), and run ABINIT:
     
     abinit < tpaw1_2.files > tmp-log
 
-You should obtain the values (output file tpaw1_2.out):
+You should obtain the following _total energy_ values (see `tpaw1_2.out`):
 
     etotal1  -1.1628880677E+01  
     etotal2  -1.1828052470E+01  
@@ -259,12 +262,11 @@ You should obtain the values (output file tpaw1_2.out):
 You can check that the etotal convergence (at the 1 mHartree level) is not
 achieved for ecut = 24 Hartree.
 
-**3.b** **Computing the convergence in ecut for diamond in the PAW case**
+###3.b Convergence with respect to ecut in the PAW case###
 
-Use the same input files as in section 1.a.
-Again, modify the last line of tpaw1_2.files, replacing the 6c.pspnc file by 6c.lda.atompaw.
-Run ABINIT again and open the output file (it should be tpaw1_2.outA)
-You should obtain the values:
+Use the same input files as in section **1.a**.  
+Again, modify the last line of `tpaw1_2.files`, replacing the `6c.pspnc` file by `6c.lda.atompaw`.  
+Run ABINIT again and open the output file. You should obtain the values:
 
     etotal1  -1.1474828697E+01  
     etotal2  -1.1518675625E+01  
@@ -278,13 +280,13 @@ You should obtain the values:
 
 You can check that:
 
-1. The etotal convergence (at 1 mHartree) is achieved for 12<=ecut<=14 Hartree
-   (etotal4 is within 1 mHartree of the final value);  
-2. The etotal convergence (at 0.1 mHartree) is achieved for 16<=ecut<=18 Hartree
-   (etotal6 is within 0.1 mHartree of the final value).
+1. The _etotal_ convergence (at 1 mHartree) is achieved for _12<=ecut<=14 Hartree_
+   (_etotal4_ is within 1 mHartree of the final value);  
+2. The _etotal_ convergence (at 0.1 mHartree) is achieved for _16<=ecut<=18 Hartree_
+   (_etotal6_ is within 0.1 mHartree of the final value).
 
-So with the same input, a PAW calculation for diamond needs a lower cutoff,
-compared to a norm-conserving pseudopotential calculation.
+With the same input parameters, for diamond, **a PAW calculation needs a lower cutoff,
+compared to a Norm-Conserving PseudoPotential calculation**.
 
 ## 4 The convergence on the double grid FFT cut-off
   
