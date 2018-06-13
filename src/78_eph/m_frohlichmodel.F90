@@ -239,7 +239,8 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      do iband=1,deg_dim
         do jband=1,deg_dim
           eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
-          eig2_diag_cart(:,:,iband,jband) = matmul(matmul(cryst%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(cryst%rprimd))/two_pi**2
+          eig2_diag_cart(:,:,iband,jband)=&
+&           matmul(matmul(cryst%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(cryst%rprimd))/two_pi**2
         enddo
      enddo
 
