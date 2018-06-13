@@ -859,8 +859,8 @@ The bibtex file is available [here](../abiref.bib).
                 #print("Triggered", matchobj.group(0))
                 return matchobj.group(0)
 
-        #ALIAS_SYNTAX = re.compile(r"[^`]\|(\w+)\|[^`]")
-        ALIAS_SYNTAX = re.compile(r"(?!`)\|(?P<key>\w+)\|")
+        ALIAS_SYNTAX = re.compile(r"[^`$]\|((?P<key>\w+)\|")
+        #ALIAS_SYNTAX = re.compile(r"(?!`+)\|(?P<key>\w+)\|")
         return [re.sub(ALIAS_SYNTAX, repl, line) for line in lines]
 
     def _preprocess_include(self, lines):

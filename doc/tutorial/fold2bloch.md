@@ -10,7 +10,8 @@ Supercells are often used in electronic structure calculations in order to
 model compound alloys, defects, etc. The band structure obtained directly from
 these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
-unperturbed host unit cell. The unfolding technique used in Abinit is the one presented in Ref. [[cite:Rubel2014]]. 
+unperturbed host unit cell. 
+The unfolding technique used in Abinit is the one presented in Ref. [[cite:Rubel2014]]. 
 
 This lesson aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
@@ -27,7 +28,7 @@ This lesson should take about 1 hour.
 Let's begin with the simplest structure: a lattice of hydrogen atoms. It is a
 convenient starting point since the hybridization between s-orbitals results
 in a well known dispersion relation for the energy eigenvalues as a function
-of the wave vector $k$ :
+of the wave vector $k$:
 
 $$E(k)=E_0 - 2A \cos(kb)$$
 
@@ -42,9 +43,8 @@ this case, since there is nothing that disturbs the original symmetry.
 However, we made this choice on purpose in order to observe the zone folding.
 
 ![](fold2bloch_assets/Fig1.png)
-
-Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic
-lattice of hydrogen atoms.
+:   Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic
+    lattice of hydrogen atoms.
 
 Since we are interested in the band structure, we need to select a path in the
 reciprocal space which will be used for plotting. The supercell was expanded
@@ -53,8 +53,7 @@ same directions. We select those directions for the band structure plot as
 they will be affected by the zone folding.
 
 ![](fold2bloch_assets/Fig2.png)
-
-Fig. 2: Brillouin zone of the supercell.
+:   Fig. 2: Brillouin zone of the supercell.
 
 *Before beginning, you might consider to work in a different subdirectory as
 for the other lessons. Why not "Work_fold2Bloch"?*
@@ -83,8 +82,8 @@ Before we proceed with the unfolding, let's plot the "standard" band structure
 of a supercell. We will be looking for signatures of the zone folding. In
 order to do this you will need the following scripts:
     
-    energy_eig-abinit.sh; and
-    plot_band.m
+1.  energy_eig-abinit.sh
+2.  plot_band.m
     
 which are located at /abinit/doc/tutorial/lesson_fold2Bloch/
 
@@ -107,13 +106,22 @@ This will plot the band structure of the 6 atom Hydrogen supercell created.
 Lastly, compare the image obtained to the band structure image below.
 
 ![](fold2bloch_assets/Fig3.png)
-
-Fig. 3: 6 atom hydrogen supercell band structure plot
+:   Fig. 3: 6 atom hydrogen supercell band structure plot
 
 Here you can see that the band structure does not look like a cosine function
 along directions Y-Gamma and Z-Gamma. The band structure is folded according
 to the multiplicity along those directions used when constructing the
 supercell (Fig. 1b).
+
+!!! tip
+
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the band dispersion:
+
+        abiopen.py tfold2bloch_1o_DS2_GSR.nc --expose
+
+![](fold2bloch_assets/abiopen_tfold2bloch_1o_DS2_GSR.png)
+
 
 ## 3 Bloch spectral weights with fold2Bloch
   
@@ -147,7 +155,7 @@ You should see the following:
 ```
 
 That output tells us which K-point was processed, total number of K-points
-processed, outputfile, and the format that the data is written in.
+processed, output file, and the format that the data is written in.
 
 Now take a look at the "fold2Bloch.out". The first few lines should be as follows:
 
@@ -246,6 +254,24 @@ After running the script you should see the following graph:
 ![](fold2bloch_assets/H6.png)
 
 As you can see the unfolded band structure perfectly reproduces the
-anticipated dispersion relation $E(k)=E_0 - 2A \cos(kb)$ . We can even
+anticipated dispersion relation $E(k)=E_0 - 2A \cos(kb)$. We can even
 estimate the magnitude of the hopping matrix element between adjacent atoms
 VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG = -2.75 eV.
+
+To analyze the results with AbiPy use:
+
+    abiopen.py tfold2bloch_FOLD2BLOCH.nc
+
+to open the file inside |ipython| and type:
+
+```ipython
+# Plot unfolded bands along the path defined by kbounds.
+In [1] kbounds = [0, 1/2, 0, 0, 0, 0, 0, 0, 1/2]
+In [2] klabels = ["Y", r"$\Gamma$", "X"]
+In [3] abifile.plot_unfolded(kbounds, klabels, title="Unfolded bands")
+```
+
+![](fold2bloch_assets/spectralw_unfolded.png)
+
+See also 
+[this example](http://abinit.github.io/abipy/gallery/plot_fold2bloch.html#sphx-glr-gallery-plot-fold2bloch-py).

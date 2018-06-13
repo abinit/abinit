@@ -438,6 +438,7 @@ The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_alias
 | `|AbipyStructureNb|` | |AbipyStructureNb| |
 | `|xmgrace|` | |xmgrace| |
 | `|gnuplot|` | |gnuplot| |
+| `|today|` | |today| |
 
 
 ### Permalinks

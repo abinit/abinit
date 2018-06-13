@@ -140,7 +140,7 @@ and the Real part with:
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the results stored in the OPTIC.nc file:
 
         abiopen.py toptic_2_OPTIC.nc --expose -sns=paper

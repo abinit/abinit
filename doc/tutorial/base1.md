@@ -384,7 +384,7 @@ Could you answer the following questions?
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the SCF cycle from the main output file:
 
         abiopen.py tbase1_1.out --expose --seaborn

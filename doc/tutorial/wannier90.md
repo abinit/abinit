@@ -183,7 +183,7 @@ You will obtain a table of the following form:
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `wout` command and the `--expose` option to visualize the iterations
 
         abiopen.py tw90_1o_DS2_w90.wout --expose -sns

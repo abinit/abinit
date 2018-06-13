@@ -59,7 +59,8 @@ Then (supposing abinit is the proper alias), issue:
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
 functional is used ([[occopt]]=3), with a large smearing ([[tsmear]]=0.05 Ha).
-The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid (64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
+The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid 
+(64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
 wedge, [[ngkpt]]=4 4 4). Converged results would need a 4x4x4 grid with 4
 shifts (256 **k**-points in the full Brillouin zone). This grid contains the $\Gamma$
 point, at which the valence band structure reaches its minimum.
@@ -167,7 +168,7 @@ The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
 Combining the quasiparticle energy at $\Gamma$ and the Fermi energy, gives the
 band width, 10.404 eV. Using converged parameters, the band width will be
-10.54 eV (see Bruneval[2006]). This is in excellent agreement with the experimental value of 10.6 eV.
+10.54 eV (see [[cite:Bruneval2006]]). This is in excellent agreement with the experimental value of 10.6 eV.
 
 ## 4 Computing a GW spectral function, and the plasmon satellite of Aluminum
   

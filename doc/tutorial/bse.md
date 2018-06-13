@@ -426,7 +426,7 @@ is already able to capture the most important physics.
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the dielectric functions stored in the MDF.nc file:
 
         abiopen.py tbs_2o_MDF.nc --expose --seaborn
@@ -577,7 +577,7 @@ convergence of the spectrum with respect to the number of planewaves in the scre
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abicomp| script
+    If |AbiPy| is installed on your machine, you can use the |abicomp| script
     with the `mdf` command and the `--expose` option to compare 
     multiple dielectric functions:
 

@@ -328,7 +328,7 @@ for a careful analysis of phonon dispersion convergence with Abinit.
 
 ### Plotting phonon bands with AbiPy
 
-If |AbiPy| in installed on your machine, you can use the |abiopen| script
+If |AbiPy| is installed on your machine, you can use the |abiopen| script
 with the `--expose` option to visualize the phonon band structure stored in the PHBST.nc file.
 For instance:
 
