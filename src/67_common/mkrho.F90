@@ -599,9 +599,6 @@ write (*,*) "))) use sc_dmft, paral_kgb : ", paw_dmft%use_sc_dmft, mpi_enreg%par
 
                do ib=1,blocksize
                  cwavef_toberot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
-               end do
-
-               do ib=1,blocksize
                  if(.not.paw_dmft%band_in(ib)) then
                    paw_dmft%occnd(1,ib,ib,ikpt,isppol) = occ_k(ib)
                  end if
@@ -610,13 +607,10 @@ write (*,*) "))) use sc_dmft, paral_kgb : ", paw_dmft%use_sc_dmft, mpi_enreg%par
                call diag_occ_rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_toberot, npw_k, nband_k, blocksize,&
 &                                   dtset%nspinor, occ_diag, cwavef_rot) 
                do ib=1,blocksize
+                 cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                  if(.not.paw_dmft%band_in(ib)) then
                    paw_dmft%occnd(1,ib,ib,ikpt,isppol) = zero
                  end if
-               end do
-
-               do ib=1,blocksize
-                 cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do
                
                occ_k(:) = occ_diag(:)
