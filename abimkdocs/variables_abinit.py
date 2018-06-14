@@ -3493,7 +3493,7 @@ Variable(
     defaultval=0,
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
-* If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
+If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian. 
 Then use it to compute the 
 change of electronic eigenvalues due to electron-phonon interaction, 
@@ -12288,9 +12288,9 @@ Variable(
     dimensions="scalar",
     defaultval=2,
     mnemonics="PHonons: INTegration METHod",
-    text="""
+    text=r"""
 Select the integration technique for computing the phonon DOS and the
-Eliashberg function a2F(w).
+Eliashberg function $\alpha^2F(\omega)$.
 
  * 1 --> Gaussian scheme (see also [[ph_smear]]).
  * 2 --> tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
@@ -12368,7 +12368,7 @@ Variable(
     text="""
 This array contains the list of special q-points used to construct the q-path
 used to (Fourier) interpolate phonon band structures and phonon linewidths.
-See also [[ph_nqpath]] and [[[ph_ndivsm]].
+See also [[ph_nqpath]] and [[ph_ndivsm]].
 """,
 ),
 
@@ -16673,7 +16673,7 @@ Note that the preparatory GS calculations before a RF calculations must be
 highly converged.
 Typical values for these preparatory runs are [[tolwfr]] between 1.0d-16 and 1.0d-22.
 
-Note that [[tolwfr]] is often used in the test cases, but this is _tolwfr_
+Note that [[tolwfr]] is often used in the test cases, but this is [[tolwfr]]
 purely for historical reasons: except when [[iscf]] <0, other critera should be used.
 
 In the wavelet case (see [[usewvl]] = 1), this criterion is the favoured one.
