@@ -40,15 +40,14 @@ accuracy         | 1         | 2          | 3            | 4            | 5     
 [[prtden]]       | 0         | 0          | 1            | 1            | 1         | 1
 
 
+[[accuracy]]=4 corresponds to the default tuning of ABINIT. It is already a very accurate tuning.
 For a parallel calculation, [[timopt]] is enforced to be 0.
 E_min, E_med and E_max may be read from the pseudopotential file (available
 only for XML PAW atomic data files). If E_min, E_med and E_max are not given
 in the pseudopotential file, [[ecut]] must be given in the input file and E_max=E_med=E_max=ecut.
-The values in bold font are the default values of ABINIT. [[accuracy]]=4
-corresponds to the default tuning of ABINIT. It is already a very accurate tuning.
-If the user wants to modify one of the input variable automatically tuned by
-[[accuracy]], he must put it in the input file. The other input variables
-automatically tuned by [[accuracy]] will not be affected.
+If the user wants to modify one of the input variable automatically tuned by [[accuracy]],
+they must put it in the input file. The other input variables automatically tuned
+by [[accuracy]] will not be affected.
 [[accuracy]]=0 means that this input variable is deactivated.
 """,
 ),
@@ -3497,12 +3496,12 @@ Variable(
     defaultval=0,
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
-* If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian.
-Then use it to compute the
-change of electronic eigenvalues due to electron-phonon interaction,
-using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
-as well as temperature dependence.
+If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian. 
+Then use it to compute the 
+change of electronic eigenvalues due to electron-phonon interaction, 
+using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation 
+as well as temperature dependence. 
 """,
 ),
 
@@ -3614,12 +3613,12 @@ Variable(
 When [[optdriver]]==7, select the task to be performed.
 The choice is among:
 
-    0 --> No computation (mainly used to access the post-processing tools)
-    1 --> Compute phonon linewidths in metals.
-    2 --> Compute electron-phonon matrix elements
-    3 --> Compute phonon self-energy.
-    4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller)
-    5 --> Interpolate DFPT potentials.
+ * 0 --> No computation (mainly used to access the post-processing tools)
+ * 1 --> Compute phonon linewidths in metals.
+ * 2 --> Compute electron-phonon matrix elements
+ * 3 --> Compute phonon self-energy.
+ * 4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller)
+ * 5 --> Interpolate DFPT potentials.
 """,
 ),
 
@@ -7115,7 +7114,7 @@ Positive values --> this is the usual choice for doing the usual ground state
 determined self-consistently. The choice between different algorithms for SCF
 is possible:
 
-  *=0 --> SCF cycle, direct minimization scheme on the gradient of the wavefunctions. This algorithm is faster than diagonalisation and mixing but is working only for systems with a gap. It is implemented only on the wavelet basis set, when [[usewvl]]=1.
+  * 0 --> SCF cycle, direct minimization scheme on the gradient of the wavefunctions. This algorithm is faster than diagonalisation and mixing but is working only for systems with a gap. It is implemented only on the wavelet basis set, when [[usewvl]]=1.
   * 1 --> get the largest eigenvalue of the SCF cycle
 ([[DEVELOP]] option, used with [[irdwfk]]=1 or [[irdwfq]]=1)
 
@@ -7162,7 +7161,7 @@ FFT grid increases - see [[ecut]] for NC pseudopotentials, [[pawecutdg]] for PAW
 
 Other (negative) options:
 
-  * = -2 --> a non-self-consistent calculation is to be done; in this case an electron density rho(r) on a real space grid (produced in a previous calculation) will be read from a disk file (automatically if [[ndtset]]=0, or according to the value of [[getden]] if [[ndtset]]/=0).
+  * -2 --> a non-self-consistent calculation is to be done; in this case an electron density rho(r) on a real space grid (produced in a previous calculation) will be read from a disk file (automatically if [[ndtset]]=0, or according to the value of [[getden]] if [[ndtset]]/=0).
 The name of th density file must be given as indicated [[help:abinit#files-file|here]].
 [[iscf]]=-2 would be used for band structure calculations, to permit
 computation of the eigenvalues of occupied and unoccupied states at arbitrary
@@ -7177,12 +7176,12 @@ parameter [[prtden]] (see its description). When a self-consistent set of
 wavefunctions is already available, abinit can be used with [[nstep]]=0 (see
 Test_v2/t47.in), and the adequate value of [[prtden]].
 
-  * = -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly (using [[ngkpt]] or [[kptrlatt]]) depending on the value of [[occopt]].
+  * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly (using [[ngkpt]] or [[kptrlatt]]) depending on the value of [[occopt]].
 For GS, this option might be used to generate Density-of-states (thanks to
 [[prtdos]]), or to produce STM charge density map (thanks to [[prtstm]]).
 For RF, this option is needed to compute the response to ddk perturbation.
 
-  * = -1 --> like -2, but the non-self-consistent calculation is followed by the determination of excited states within TDDFT. This is only possible for [[nkpt]]=1, with [[kpt]]=0 0 0. Note that the oscillator strength needs to be defined with respect to an origin of coordinate, thanks to the input variable [[boxcenter]]. The maximal number of Kohn-Sham excitations to be used to build the excited state TDDFT matrix can be defined by [[td_mexcit]], or indirectly by the maximum Kohn-Sham excitation energy [[td_maxene]].
+  * -1 --> like -2, but the non-self-consistent calculation is followed by the determination of excited states within TDDFT. This is only possible for [[nkpt]]=1, with [[kpt]]=0 0 0. Note that the oscillator strength needs to be defined with respect to an origin of coordinate, thanks to the input variable [[boxcenter]]. The maximal number of Kohn-Sham excitations to be used to build the excited state TDDFT matrix can be defined by [[td_mexcit]], or indirectly by the maximum Kohn-Sham excitation energy [[td_maxene]].
 """,
 ),
 
@@ -7344,7 +7343,7 @@ differences of energies, or derivatives.
 The value [[ixc]]=10 is used internally: gives the difference between
 [[ixc]]=7 and [[ixc]]=9, for use with an accurate RPA correlation energy.
 
-  * 0 --> NO xc;
+  * 0 --> NO xc.
 
   * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
   * 2 --> LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[cite:Perdew1981]]
@@ -7359,25 +7358,26 @@ The value [[ixc]]=10 is used internally: gives the difference between
   * 11 --> GGA, Perdew-Burke-Ernzerhof GGA functional
   * 12 --> GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional
   * 13 --> GGA potential of van Leeuwen-Baerends, while for energy, Perdew-Wang 92 functional
-  * 14 --> GGA, revPBE of Y. Zhang and W. Yang, Phys. Rev. Lett. 80, 890 (1998)
-  * 15 --> GGA, RPBE of B. Hammer, L.B. Hansen and J.K. Norskov, Phys. Rev. B 59, 7413 (1999)
-  * 16 --> GGA, HTCH93 of F.A. Hamprecht, A.J. Cohen, D.J. Tozer, N.C. Handy, J. Chem. Phys. 109, 6264 (1998)
-  * 17 --> GGA, HTCH120 of A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, J. Chem. Phys 112, 1670 (1998) - The usual HCTH functional.
-  * 18 --> (NOT AVAILABLE: used internally for GGA BLYP pseudopotentials from M. Krack, see Theor. Chem. Acc. 114, 145 (2005), available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/blyp) \- use the LibXC instead, with [[ixc]]=-106131.
-  * 19 --> (NOT AVAILABLE: used internally for GGA BP86 pseudopotentials from M. Krack, see Theor. Chem. Acc. 114, 145 (2005), available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/bp) \- use the LibXC instead, with [[ixc]]=-106132.
+  * 14 --> GGA, revPBE of [[cite:Zhang1998]]
+  * 15 --> GGA, RPBE of [[cite:Hammer1999]]
+  * 16 --> GGA, HTCH93 of [[cite:Hamprecht1998]]
+  * 17 --> GGA, HTCH120 of [[cite:Boese2000]] - The usual HCTH functional.
+  * 18 --> (NOT AVAILABLE: used internally for GGA BLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/blyp) \- use the LibXC instead, with [[ixc]]=-106131.
+  * 19 --> (NOT AVAILABLE: used internally for GGA BP86 pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/bp) \- use the LibXC instead, with [[ixc]]=-106132.
 
-  * 20 --> Fermi-Amaldi xc ( -1/N Hartree energy, where N is the number of electrons per cell; G=0 is not taken into account however), for TDDFT tests. No spin-pol. Does not work for RF.
+  * 20 --> Fermi-Amaldi xc ( -1/N Hartree energy, where N is the number of electrons per cell; G=0 is not taken into account however),
+                            for TDDFT tests. No spin-pol. Does not work for RF.
   * 21 --> same as 20, except that the xc-kernel is the LDA ([[ixc]]=1) one, for TDDFT tests.
   * 22 --> same as 20, except that the xc-kernel is the Burke-Petersilka-Gross hybrid, for TDDFT tests.
-  * 23 --> GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
-  * 24 --> GGA, C09x exchange of V. R. Cooper, PRB 81, 161104(R) (2010).
-  * 26 --> GGA, HTCH147 of A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, J. Chem. Phys 112, 1670 (1998).
-  * 27 --> GGA, HTCH407 of A.D. Boese, and N.C. Handy, J. Chem. Phys 114, 5497 (2001).
-  * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from M. Krack, see Theor. Chem. Acc. 114, 145 (2005), available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/olyp) \- use the LibXC instead, with [[ixc]]=-110131.
+  * 23 --> GGA of [[cite:Wu2006]].
+  * 24 --> GGA, C09x exchange of [[cite:Cooper2010]].
+  * 26 --> GGA, HTCH147 of [[cite:Boese2000]].
+  * 27 --> GGA, HTCH407 of [[cite:Boese2001]].
+  * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/olyp) \- use the LibXC instead, with [[ixc]]=-110131.
 
   * 40 --> Hartree-Fock
-  * 41 --> PBE0, J.P. Perdew, M. Ernzerhof and K. Burke, J. Chem. Phys. 105, 9982 (1996)
-  * 42 --> PBE0-1/3, C.A. Guido, E. Bremond, C. Adamo and P. Cortona, J. Chem. Phys. 138, 021104 (2013)
+  * 41 --> PBE0, [[cite:Perdew1996]].
+  * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
 **ETSF Lib XC functionals**
 
@@ -7402,184 +7402,225 @@ This means having [[usekden]]=1.
 
 (S)LDA functionals (do not forget to add a minus sign, as discussed above)
 
-  * 001 --> XC_LDA_X [PAM Dirac, Proceedings of the Cambridge Philosophical Society 26, 376 (1930); F Bloch, Zeitschrift fuer Physik 57, 545 (1929) ]
-  * 002 --> XC_LDA_C_WIGNER Wigner parametrization [EP Wigner, Trans. Faraday Soc. 34, 678 (1938) ]
-  * 003 --> XC_LDA_C_RPA Random Phase Approximation [M Gell-Mann and KA Brueckner, Phys. Rev. 106, 364 (1957) ]
-  * 004 --> XC_LDA_C_HL Hedin & Lundqvist [L Hedin and BI Lundqvist, J. Phys. C 4, 2064 (1971) ]
-  * 005 --> XC_LDA_C_GL ! Gunnarson & Lundqvist [O Gunnarsson and BI Lundqvist, PRB 13, 4274 (1976) ]
-  * 006 --> XC_LDA_C_XALPHA ! Slater's Xalpha ]
-  * 007 --> XC_LDA_C_VWN ! Vosko, Wilk, & Nussair [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 008 --> XC_LDA_C_VWN_RPA ! Vosko, Wilk, & Nussair (RPA) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 009 --> XC_LDA_C_PZ ! Perdew & Zunger [[cite:Perdew1981]]
-  * 010 --> XC_LDA_C_PZ_MOD ! Perdew & Zunger (Modified) [[cite:Perdew1981]] Modified to improve the matching between the low and high rs part ]
-  * 011 --> XC_LDA_C_OB_PZ ! Ortiz & Ballone (PZ) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994); G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997); [[cite:Perdew1981]] ]
-  * 012 --> XC_LDA_C_PW ! Perdew & Wang [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
-  * 013 --> XC_LDA_C_PW_MOD ! Perdew & Wang (Modified) [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992); Added extra digits to some constants as in the PBE routine see [ https://www.chem.uci.edu/~kieron/dftold2/pbe.php ](https://www.chem.uci.edu/~kieron/dftold2/pbe.php) (at some point it was available at http://dft.uci.edu/pbe.php) ]
-  * 014 --> XC_LDA_C_OB_PW ! Ortiz & Ballone (PW) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994); G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997); JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
-  * 017 --> XC_LDA_C_vBH ! von Barth & Hedin [U von Barth and L Hedin, J. Phys. C: Solid State Phys. 5, 1629 (1972) ]
-  * 020 --> XC_LDA_XC_TETER93 ! Teter 93 parametrization [S Goedecker, M Teter, J Hutter, PRB 54, 1703 (1996) ]
-  * 022 --> XC_LDA_C_ML1 ! Modified LSD (version 1) of Proynov and Salahub [EI Proynov and D Salahub, Phys. Rev. B 49, 7874 (1994) ]
-  * 023 --> XC_LDA_C_ML2 ! Modified LSD (version 2) of Proynov and Salahub [EI Proynov and D Salahub, Phys. Rev. B 49, 7874 (1994) ]
-  * 024 --> XC_LDA_C_GOMBAS ! Gombas parametrization [P. Gombas, Pseudopotentials (Springer-Verlag, New York, 1967) ]
-  * 025 --> XC_LDA_C_PW_RPA ! Perdew & Wang fit of the RPA [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
-  * 027 --> XC_LDA_C_RC04 ! Ragot-Cortona [S Ragot and P Cortona, J. Chem. Phys. 121, 7671 (2004) ]
-  * 028 --> XC_LDA_C_VWN_1 ! Vosko, Wilk, & Nussair (1) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 029 --> XC_LDA_C_VWN_2 ! Vosko, Wilk, & Nussair (2) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 030 --> XC_LDA_C_VWN_3 ! Vosko, Wilk, & Nussair (3) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 031 --> XC_LDA_C_VWN_4 ! Vosko, Wilk, & Nussair (4) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
+  * 001 --> XC_LDA_X  [[cite:Dirac1930]], [[cite:Bloch1929]]
+  * 002 --> XC_LDA_C_WIGNER  Wigner parametrization [[cite:Wigner1938]]
+  * 003 --> XC_LDA_C_RPA  Random Phase Approximation [[cite:GellMann1957]]
+  * 004 --> XC_LDA_C_HL  Hedin & Lundqvist [[cite:Hedin1971]]
+  * 005 --> XC_LDA_C_GL  Gunnarson & Lundqvist [[cite:Gunnarsson1976]]
+  * 006 --> XC_LDA_C_XALPHA  Slaters Xalpha 
+  * 007 --> XC_LDA_C_VWN  [[cite:Vosko1980]]
+  * 008 --> XC_LDA_C_VWN_RPA  [[cite:Vosko1980]]
+  * 009 --> XC_LDA_C_PZ  Perdew & Zunger [[cite:Perdew1981]]
+  * 010 --> XC_LDA_C_PZ_MOD  Perdew & Zunger (Modified) [[cite:Perdew1981]] Modified to improve the matching between the low and high rs part
+  * 011 --> XC_LDA_C_OB_PZ  Ortiz & Ballone (PZ) [[cite:Ortiz1994]] [[cite:Ortiz1997]] [[cite:Perdew1981]]
+  * 012 --> XC_LDA_C_PW  Perdew & Wang [[cite:Perdew1992a]]
+  * 013 --> XC_LDA_C_PW_MOD  Perdew & Wang (Modified) [[cite:Perdew1992a]] ; Added extra digits to some constants as in the PBE routine.
+  * 014 --> XC_LDA_C_OB_PW  Ortiz & Ballone (PW) [[cite:Ortiz1994]] [[cite:Ortiz1997]] [[cite:Perdew1992a]]
+  * 017 --> XC_LDA_C_vBH  von Barth & Hedin [[cite:Barth1972]]
+  * 020 --> XC_LDA_XC_TETER93  Teter 93 parametrization [[cite:Goedecker1996]]
+  * 022 --> XC_LDA_C_ML1  Modified LSD (version 1) of Proynov and Salahub [[cite:Proynov1994]]
+  * 023 --> XC_LDA_C_ML2  Modified LSD (version 2) of Proynov and Salahub [[cite:Proynov1994]]
+  * 024 --> XC_LDA_C_GOMBAS  Gombas parametrization [[cite:Gombas1967]]
+  * 025 --> XC_LDA_C_PW_RPA  Perdew & Wang fit of the RPA [[cite:Perdew1992a]]
+  * 027 --> XC_LDA_C_RC04  Ragot-Cortona [[cite:Ragot2004]]
+  * 028 --> XC_LDA_C_VWN_1  Vosko, Wilk, & Nussair (1) [[cite:Vosko1980]]
+  * 029 --> XC_LDA_C_VWN_2  Vosko, Wilk, & Nussair (2) [[cite:Vosko1980]]
+  * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
+  * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
 GGA functionals (do not forget to add a minus sign, as discussed above)
 
-  * 84 --> XC_GGA_C_OP_XALPHA ! one-parameter progressive functional (G96 version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
-  * 85 --> XC_GGA_C_OP_G96 ! one-parameter progressive functional (G96 version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
-  * 86 --> XC_GGA_C_OP_PBE ! one-parameter progressive functional (PBE version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
-  * 87 --> XC_GGA_C_OP_B88 ! one-parameter progressive functional (B88 version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
-  * 88 --> XC_GGA_C_FT97 ! Filatov & Thiel correlation [M Filatov & W Thiel, Int. J. Quant. Chem. 62, 603-616 (1997); M Filatov & W Thiel, Mol Phys 91, 847 (1997) ] WARNING: this functional is not tested. Use at your own risks.
-  * 89 --> XC_GGA_C_SPBE ! PBE correlation to be used with the SSB exchange [M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009) ]
-  * 90 --> XC_GGA_X_SSB_SW ! Swarta, Sola and Bickelhaupt correction to PBE [M Swart, M Sola, and FM Bickelhaupt, J. Comp. Meth. Sci. Engin. 9, 69 (2009) ]
-  * 91 --> XC_GGA_X_SSB ! WARNING: This functional gives NaN on IBM (XG20130608). Swarta, Sola and Bickelhaupt [M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009) ]
-  * 92 -->  XC_GGA_X_SSB_D ! WARNING: This functional gives NaN on IBM (XG20130608). Swarta, Sola and Bickelhaupt dispersion [M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009) ]
-  * 93 -->  XC_GGA_XC_HCTH_407P ! HCTH/407+ [AD Boese, A Chandra, JML Martin, and Dominik Marx, J. Chem. Phys. 119, 5965 (2003) ]
-  * 94 -->  XC_GGA_XC_HCTH_P76 ! HCTH p=7/6 [G Menconi, PJ Wilson, and DJ Tozer, J. Chem. Phys. 114, 3958 (2001) ]
-  * 95 -->  XC_GGA_XC_HCTH_P14 ! HCTH p=1/4 [G Menconi, PJ Wilson, and DJ Tozer, J. Chem. Phys. 114, 3958 (2001) ]
-  * 96 -->  XC_GGA_XC_B97_GGA1 ! Becke 97 GGA-1 [AJ Cohen and NC Handy, Chem. Phys. Lett. 316, 160-166 (2000) ]
-  * 97 -->  XC_GGA_XC_HCTH_A ! HCTH-A [FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998) ]
-  * 98 -->  XC_GGA_X_BPCCAC ! BPCCAC (GRAC for the energy) [E Bremond, D Pilard, I Ciofini, H Chermette, C Adamo, and P Cortona, Theor Chem Acc 131, 1184 (2012) ]
-  * 99 -->  XC_GGA_C_REVTCA ! Tognetti, Cortona, Adamo (revised) [V Tognetti, P Cortona, and C Adamo, Chem. Phys. Lett. 460, 536-539 (2008) ]
-  * 100 -->  XC_GGA_C_TCA ! Tognetti, Cortona, Adamo [V Tognetti, P Cortona, and C Adamo, J. Chem. Phys. 128, 034101 (2008) ]
-  * 101 -->  XC_GGA_X_PBE ! Perdew, Burke & Ernzerhof exchange [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996); JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
-  * 102 -->  XC_GGA_X_PBE_R ! Perdew, Burke & Ernzerhof exchange (revised) [Y Zhang and W Yang, Phys. Rev. Lett 80, 890 (1998) ]
-  * 103 -->  XC_GGA_X_B86 ! Becke 86 Xalfa,beta,gamma [AD Becke, J. Chem. Phys 84, 4524 (1986) ]
-  * 104 -->  XC_GGA_X_HERMAN ! Herman Xalphabeta GGA [F Herman, JP Van Dyke, and IB Ortenburger, Phys. Rev. Lett. 22, 807 (1969); F Herman, IB Ortenburger, and JP Van Dyke, Int. J. Quantum Chem. Symp. 3, 827 (1970) ]
-  * 105 -->  XC_GGA_X_B86_MGC ! Becke 86 Xalfa,beta,gamma (with mod. grad. correction) [AD Becke, J. Chem. Phys 84, 4524 (1986); AD Becke, J. Chem. Phys 85, 7184 (1986) ]
-  * 106 -->  XC_GGA_X_B88 ! Becke 88 [AD Becke, Phys. Rev. A 38, 3098 (1988) ]
-  * 107 -->  XC_GGA_X_G96 ! Gill 96 [PMW Gill, Mol. Phys. 89, 433 (1996) ]
-  * 108 -->  XC_GGA_X_PW86 ! Perdew & Wang 86 [JP Perdew and Y Wang, Phys. Rev. B 33, 8800 (1986) ]
-  * 109 -->  XC_GGA_X_PW91 ! Perdew & Wang 91 [JP Perdew, in Proceedings of the 21st Annual International Symposium on the Electronic Structure of Solids, ed. by P Ziesche and H Eschrig (Akademie Verlag, Berlin, 1991), p. 11.; JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992); JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 48, 4978(E) (1993) ]
-  * 110 -->  XC_GGA_X_OPTX ! Handy & Cohen OPTX 01 [NC Handy and AJ Cohen, Mol. Phys. 99, 403 (2001) ]
-  * 111 -->  XC_GGA_X_DK87_R1 ! dePristo & Kress 87 (version R1) [AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987) ]
-  * 112 -->  XC_GGA_X_DK87_R2 ! dePristo & Kress 87 (version R2) [AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987) ]
-  * 113 -->  XC_GGA_X_LG93 ! Lacks & Gordon 93 [DJ Lacks and RG Gordon, Phys. Rev. A 47, 4681 (1993) ]
-  * 114 -->  XC_GGA_X_FT97_A ! Filatov & Thiel 97 (version A) [M Filatov and W Thiel, Mol. Phys 91, 847 (1997) ]
-  * 115 -->  XC_GGA_X_FT97_B ! Filatov & Thiel 97 (version B) [M Filatov and W Thiel, Mol. Phys 91, 847 (1997) ]
-  * 116 -->  XC_GGA_X_PBE_SOL ! Perdew, Burke & Ernzerhof exchange (solids) [JP Perdew, et al, Phys. Rev. Lett. 100, 136406 (2008) ]
-  * 117 -->  XC_GGA_X_RPBE ! Hammer, Hansen & Norskov (PBE-like) [B Hammer, LB Hansen and JK Norskov, Phys. Rev. B 59, 7413 (1999) ]
-  * 118 -->  XC_GGA_X_WC ! Wu & Cohen [Z Wu and RE Cohen, Phys. Rev. B 73, 235116 (2006) ]
-  * 119 -->  XC_GGA_X_mPW91 ! Modified form of PW91 by Adamo & Barone [C Adamo and V Barone, J. Chem. Phys. 108, 664 (1998) ]
-  * 120 -->  XC_GGA_X_AM05 ! Armiento & Mattsson 05 exchange [R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005); AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
-  * 121 -->  XC_GGA_X_PBEA ! Madsen (PBE-like) [G Madsen, Phys. Rev. B 75, 195108 (2007) ]
-  * 122 -->  XC_GGA_X_MPBE ! Adamo & Barone modification to PBE [C Adamo and V Barone, J. Chem. Phys. 116, 5933 (2002) ]
-  * 123 -->  XC_GGA_X_XPBE ! xPBE reparametrization by Xu & Goddard [X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004) ]
-  * 125 -->  XC_GGA_X_BAYESIAN ! Bayesian best fit for the enhancement factor [JJ Mortensen, K Kaasbjerg, SL Frederiksen, JK Norskov, JP Sethna, and KW Jacobsen, Phys. Rev. Lett. 95, 216401 (2005) ]
-  * 126 -->  XC_GGA_X_PBE_JSJR ! PBE JSJR reparametrization by Pedroza, Silva & Capelle [LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009) ]
-  * 130 -->  XC_GGA_C_PBE ! Perdew, Burke & Ernzerhof correlation [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996); JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
-  * 131 -->  XC_GGA_C_LYP ! Lee, Yang & Parr [C Lee, W Yang and RG Parr, Phys. Rev. B 37, 785 (1988) B Miehlich, A Savin, H Stoll and H Preuss, Chem. Phys. Lett. 157, 200 (1989) ]
-  * 132 -->  XC_GGA_C_P86 ! Perdew 86 [JP Perdew, Phys. Rev. B 33, 8822 (1986) ]
-  * 133 -->  XC_GGA_C_PBE_SOL ! Perdew, Burke & Ernzerhof correlation SOL [JP Perdew, et al, Phys. Rev. Lett. 100, 136406 (2008) ]
-  * 134 -->  XC_GGA_C_PW91 ! Perdew & Wang 91 [JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992) ]
-  * 135 -->  XC_GGA_C_AM05 ! Armiento & Mattsson 05 correlation [ R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005); AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
-  * 136 -->  XC_GGA_C_XPBE ! xPBE reparametrization by Xu & Goddard [X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004) ]
-  * 137 -->  XC_GGA_C_LM ! Langreth and Mehl correlation [DC Langreth and MJ Mehl, Phys. Rev. Lett. 47, 446 (1981) ]
-  * 138 -->  XC_GGA_C_PBE_JRGX ! JRGX reparametrization by Pedroza, Silva & Capelle [LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009) ]
-  * 139 -->  XC_GGA_X_OPTB88_VDW ! Becke 88 reoptimized to be used with vdW functional of Dion et al [J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010) ]
-  * 140 -->  XC_GGA_X_PBEK1_VDW ! PBE reparametrization for vdW [J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010) ]
-  * 141 -->  XC_GGA_X_OPTPBE_VDW ! PBE reparametrization for vdW [J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010) ]
-  * 142 -->  XC_GGA_X_RGE2 ! Regularized PBE [A Ruzsinszky, GI Csonka, and G Scuseria, J. Chem. Theory Comput. 5, 763 (2009) ]
-  * 143 -->  XC_GGA_C_RGE2 ! Regularized PBE [A Ruzsinszky, GI Csonka, and G Scuseria, J. Chem. Theory Comput. 5, 763 (2009) ]
-  * 144 -->  XC_GGA_X_RPW86 ! refitted Perdew & Wang 86 [ED Murray, K Lee and DC Langreth, J. Chem. Theory Comput. 5, 2754-2762 (2009) ]
-  * 145 -->  XC_GGA_X_KT1 ! Keal and Tozer version 1 [TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003) ]
-  * 146 -->  XC_GGA_XC_KT2 ! WARNING: This functional gives NaN on IBM (XG20130608). Keal and Tozer version 2 [TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003) ]
-  * 147 -->  XC_GGA_C_WL ! Wilson & Levy [LC Wilson and M Levy, Phys. Rev. B 41, 12930 (1990) ]
-  * 148 -->  XC_GGA_C_WI ! Wilson & Ivanov [LC Wilson & S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998) ]
-  * 149 -->  XC_GGA_X_MB88 ! Modified Becke 88 for proton transfer [V Tognetti and C Adamo, J. Phys. Chem. A 113, 14415-14419 (2009) ]
-  * 150 -->  XC_GGA_X_SOGGA ! Second-order generalized gradient approximation [Y Zhao and DG Truhlar, J. Chem. Phys. 128, 184109 (2008); http://comp.chem.umn.edu/mfm/index.html ]
-  * 151 -->  XC_GGA_X_SOGGA11 ! Second-order generalized gradient approximation 2011 [R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html ]
-  * 152 -->  XC_GGA_C_SOGGA11 ! Second-order generalized gradient approximation 2011 [R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html ]
-  * 153 -->  XC_GGA_C_WI0 ! Wilson & Ivanov initial version [LC Wilson & S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998) ]
-  * 154 -->  XC_GGA_XC_TH1 ! Tozer and Handy v. 1 [DJ Tozer and NC Handy, J. Chem. Phys. 108, 2545 (1998) ] WARNING: this functional is not tested. Use at your own risks.
-  * 155 -->  XC_GGA_XC_TH2 ! Tozer and Handy v. 2 [DJ Tozer and NC Handy, J. Phys. Chem. A 102, 3162 (1998) ]
-  * 156 -->  XC_GGA_XC_TH3 ! Tozer and Handy v. 3 [DJ Tozer and NC Handy, Mol. Phys. 94, 707 (1998) ]
-  * 157 -->  XC_GGA_XC_TH4 ! Tozer and Handy v. 4 [DJ Tozer and NC Handy, Mol. Phys. 94, 707 (1998) ]
-  * 158 -->  XC_GGA_X_C09X ! C09x to be used with the VdW of Rutgers-Chalmers [VR Cooper, PRB 81, 161104(R) (2010) ]
-  * 159 -->  XC_GGA_C_SOGGA11_X ! To be used with hyb_gga_x_SOGGA11-X [R Peverati and DG Truhlar, J. Chem. Phys. 135, 191102 (2011); http://comp.chem.umn.edu/mfm/index.html ]
-  * 161 -->  XC_GGA_XC_HCTH_93 ! HCTH functional fitted to 93 molecules [FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998) ]
-  * 162 -->  XC_GGA_XC_HCTH_120 ! HCTH functional fitted to 120 molecules [AD Boese, NL Doltsinis, NC Handy, and M Sprik, J. Chem. Phys. 112, 1670 (2000) ]
-  * 163 -->  XC_GGA_XC_HCTH_147 ! HCTH functional fitted to 147 molecules [AD Boese, NL Doltsinis, NC Handy, and M Sprik, J. Chem. Phys. 112, 1670 (2000) ]
-  * 164 -->  XC_GGA_XC_HCTH_407 ! HCTH functional fitted to 407 molecules [AD Boese, and NC Handy, J. Chem. Phys. 114, 5497 (2001) ]
-  * 165 -->  XC_GGA_XC_EDF1 ! Empirical functionals from Adamson, Gill, and Pople [RD Adamson, PMW Gill, and JA Pople, Chem. Phys. Lett. 284 6 (1998) ]
-  * 166 -->  XC_GGA_XC_XLYP ! XLYP functional [X Xu and WA Goddard, III, PNAS 101, 2673 (2004) ]
-  * 167 -->  XC_GGA_XC_B97 ! Becke 97 [AD Becke, J. Chem. Phys. 107, 8554-8560 (1997) ]
-  * 168 -->  XC_GGA_XC_B97_1 ! Becke 97-1 [FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998); AD Becke, J. Chem. Phys. 107, 8554-8560 (1997) ]
-  * 169 -->  XC_GGA_XC_B97_2 ! Becke 97-2 [AD Becke, J. Chem. Phys. 107, 8554-8560 (1997) ]
-  * 170 -->  XC_GGA_XC_B97_D ! Grimme functional to be used with C6 vdW term [S Grimme, J. Comput. Chem. 27, 1787 (2006) ]
-  * 171 -->  XC_GGA_XC_B97_K ! Boese-Martin for Kinetics [AD Boese and JML Martin, J. Chem. Phys., Vol. 121, 3405 (2004) ]
-  * 172 -->  XC_GGA_XC_B97_3 ! Becke 97-3 [TW Keal and DJ Tozer, J. Chem. Phys. 123, 121103 (2005) ]
-  * 173 -->  XC_GGA_XC_PBE1W ! Functionals fitted for water [EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005) ]
-  * 174 -->  XC_GGA_XC_MPWLYP1W ! Functionals fitted for water [EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005) ]
-  * 175 -->  XC_GGA_XC_PBELYP1W ! Functionals fitted for water [EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005) ]
-  * 176 -->  XC_GGA_XC_SB98_1a ! Schmider-Becke 98 parameterization 1a [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 177 -->  XC_GGA_XC_SB98_1b ! Schmider-Becke 98 parameterization 1b [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 178 -->  XC_GGA_XC_SB98_1c ! Schmider-Becke 98 parameterization 1c [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 179 -->  XC_GGA_XC_SB98_2a ! Schmider-Becke 98 parameterization 2a [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 180 -->  XC_GGA_XC_SB98_2b ! Schmider-Becke 98 parameterization 2b [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 181 -->  XC_GGA_XC_SB98_2c ! Schmider-Becke 98 parameterization 2c [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 183 -->  XC_GGA_X_OL2 ! Exchange form based on Ou-Yang and Levy v.2 [P Fuentealba and O Reyes, Chem. Phys. Lett. 232, 31-34 (1995); H Ou-Yang, M Levy, Int. J. of Quant. Chem. 40, 379-388 (1991) ]
-  * 184 -->  XC_GGA_X_APBE ! mu fixed from the semiclassical neutral atom [LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011) ]
-  * 186 -->  XC_GGA_C_APBE ! mu fixed from the semiclassical neutral atom [LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011) ]
-  * 191 -->  XC_GGA_X_HTBS! Haas, Tran, Blaha, and Schwarz [P Haas, F Tran, P Blaha, and K Schwarz, Phys. Rev. B 83, 205117 (2011) ]
-  * 192 -->  XC_GGA_X_AIRY ! Constantin et al based on the Airy gas [LA Constantin, A Ruzsinszky, and JP Perdew, Phys. Rev. B 80, 035125 (2009) ]
-  * 193 -->  XC_GGA_X_LAG ! Local Airy Gas [L Vitos, B Johansson, J Kollar, and HL Skriver, Phys. Rev. B 62, 10046-10050 (2000) ]
-  * 194 -->  XC_GGA_XC_MOHLYP ! Functional for organometallic chemistry [NE Schultz, Y Zhao, DGJ Truhlar, Phys. Chem. A, 109, 11127 (2005) ]
-  * 195 -->  XC_GGA_XC_MOHLYP2 ! Functional for barrier heights [J Zheng, Y Zhao, DGJ Truhlar, Chem. Theory. Comput. 5, 808 (2009) ]
-  * 196 -->  XC_GGA_XC_TH_FL ! Tozer and Handy v. FL [DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997) ]
-  * 197 -->  XC_GGA_XC_TH_FC ! Tozer and Handy v. FC [DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997) ]
-  * 198 -->  XC_GGA_XC_TH_FCFO ! Tozer and Handy v. FCFO [DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997) ]
-  * 199 -->  XC_GGA_XC_TH_FCO ! Tozer and Handy v. FCO [DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997) ]
-  * 200 -->  XC_GGA_C_OPTC ! Optimized correlation functional of Cohen and Handy [AJ Cohen and NC Handy, Mol. Phys. 99, 607-615 (2001) ]
-  * 524 -->  XC_GGA_X_WPBEH ! short-range version of the PBE [J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 118, 8207 (2003) ]
-  * 525 -->  XC_GGA_X_HJS_PBE ! HJS screened exchange PBE version [TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008) ]
-  * 526 -->  XC_GGA_X_HJS_PBE_SOL ! HJS screened exchange PBE_SOL version [TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008) ]
-  * 527 -->  XC_GGA_X_HJS_B88 ! HJS screened exchange B88 version [TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008) ] WARNING: this functional is not tested. Use at your own risks.
-  * 528 -->  XC_GGA_X_HJS_B97X ! HJS screened exchange B97x version [TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008) ]
-  * 529 -->  XC_GGA_X_ITYH ! short-range recipe for exchange GGA functionals [H Iikura, T Tsuneda, T Yanai, and K Hirao, J. Chem. Phys. 115, 3540 (2001) ] WARNING: this functional is not tested. Use at your own risks.
+  * 84 --> XC_GGA_C_OP_XALPHA  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 85 --> XC_GGA_C_OP_G96  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 86 --> XC_GGA_C_OP_PBE  one-parameter progressive functional (PBE version) [[cite:Tsuneda1999]]
+  * 87 --> XC_GGA_C_OP_B88  one-parameter progressive functional (B88 version) [[cite:Tsuneda1999]]
+  * 88 --> XC_GGA_C_FT97  Filatov & Thiel correlation [[cite:Filatov1997a]]  [[cite:Filatov1997]]
+
+!!! warning
+    this functional is not tested. Use at your own risks.
+
+  * 89 --> XC_GGA_C_SPBE  PBE correlation to be used with the SSB exchange [[cite:Swart2009]]
+  * 90 --> XC_GGA_X_SSB_SW  Swart, Sola and Bickelhaupt correction to PBE [[cite:Swart2009a]]
+  * 91 --> XC_GGA_X_SSB  [[cite:Swart2009]]
+
+!!! warning
+    This functional gives NaN on IBM (XG20130608).
+
+  * 92 -->  XC_GGA_X_SSB_D  [[cite:Swart2009]] 
+
+!!! warning
+    This functional gives NaN on IBM (XG20130608).
+
+  * 93 -->  XC_GGA_XC_HCTH_407P  HCTH/407+ [[cite:Boese2003]]
+  * 94 -->  XC_GGA_XC_HCTH_P76  HCTH p=7/6 [[cite:Menconi2001]]
+  * 95 -->  XC_GGA_XC_HCTH_P14  HCTH p=1/4 [[cite:Menconi2001]]
+  * 96 -->  XC_GGA_XC_B97_GGA1  Becke 97 GGA-1 [[cite:Cohen2000]]
+  * 97 -->  XC_GGA_XC_HCTH_A  HCTH-A [[cite:Hamprecht1998]]
+  * 98 -->  XC_GGA_X_BPCCAC  BPCCAC (GRAC for the energy) [[cite:Bremond2012]]
+  * 99 -->  XC_GGA_C_REVTCA  Tognetti, Cortona, Adamo (revised) [[cite:Tognetti2008]]
+  * 100 -->  XC_GGA_C_TCA  Tognetti, Cortona, Adamo [[cite:Tognetti2008a]]
+  * 101 -->  XC_GGA_X_PBE  Perdew, Burke & Ernzerhof exchange [[cite:Perdew1996]]  [[cite:Perdew1997]]
+  * 102 -->  XC_GGA_X_PBE_R  Perdew, Burke & Ernzerhof exchange (revised) [[cite:Zhang1998]]
+  * 103 -->  XC_GGA_X_B86  Becke 86 Xalfa,beta,gamma [[cite:Becke1986]]
+  * 104 -->  XC_GGA_X_HERMAN  Herman Xalphabeta GGA [[cite:Herman1969]]  [[cite:Herman2009]]
+  * 105 -->  XC_GGA_X_B86_MGC  Becke 86 Xalfa,beta,gamma (with mod. grad. correction) [[cite:Becke1986]]  [[cite:Becke1986a]]
+  * 106 -->  XC_GGA_X_B88  Becke 88 [[cite:Becke1988]]
+  * 107 -->  XC_GGA_X_G96  Gill 96 [[cite:Gill1996]]
+  * 108 -->  XC_GGA_X_PW86  Perdew & Wang 86 [[cite:Perdew1986a]]
+  * 109 -->  XC_GGA_X_PW91  Perdew & Wang 91 [JP Perdew, in Proceedings of the 21st Annual International Symposium on the Electronic Structure of Solids, ed. by P Ziesche and H Eschrig (Akademie Verlag, Berlin, 1991), p. 11. ]  [[cite:Perdew1992]]  [[cite:Perdew1993]]
+  * 110 -->  XC_GGA_X_OPTX  Handy & Cohen OPTX 01 [[cite:Handy2001]]
+  * 111 -->  XC_GGA_X_DK87_R1  dePristo & Kress 87 (version R1) [[cite:DePristo1987]]
+  * 112 -->  XC_GGA_X_DK87_R2  dePristo & Kress 87 (version R2) [[cite:DePristo1987]]
+  * 113 -->  XC_GGA_X_LG93  Lacks & Gordon 93 [[cite:Lacks1993]]
+  * 114 -->  XC_GGA_X_FT97_A  Filatov & Thiel 97 (version A) [[cite:Filatov1997a]]
+  * 115 -->  XC_GGA_X_FT97_B  Filatov & Thiel 97 (version B) [[cite:Filatov1997a]]
+  * 116 -->  XC_GGA_X_PBE_SOL  Perdew, Burke & Ernzerhof exchange (solids) [[cite:Perdew2008]]
+  * 117 -->  XC_GGA_X_RPBE  Hammer, Hansen & Norskov (PBE-like) [[cite:Hammer1999]]
+  * 118 -->  XC_GGA_X_WC  Wu & Cohen [[cite:Wu2006]]
+  * 119 -->  XC_GGA_X_mPW91  Modified form of PW91 by Adamo & Barone [[cite:Adamo1998]]
+  * 120 -->  XC_GGA_X_AM05  Armiento & Mattsson 05 exchange [[cite:Armiento2005]]  [[cite:Mattsson2008]]
+  * 121 -->  XC_GGA_X_PBEA  Madsen (PBE-like) [[cite:Madsen2007]]
+  * 122 -->  XC_GGA_X_MPBE  Adamo & Barone modification to PBE [[cite:Adamo2002]]
+  * 123 -->  XC_GGA_X_XPBE  xPBE reparametrization by Xu & Goddard [[cite:Xu2004]]
+  * 125 -->  XC_GGA_X_BAYESIAN  Bayesian best fit for the enhancement factor [[cite:Mortensen2005]]
+  * 126 -->  XC_GGA_X_PBE_JSJR  PBE JSJR reparametrization by Pedroza, Silva & Capelle [[cite:Pedroza2009]]
+  * 130 -->  XC_GGA_C_PBE  Perdew, Burke & Ernzerhof correlation [[cite:Perdew1996]]  [[cite:Perdew1997]]
+  * 131 -->  XC_GGA_C_LYP  Lee, Yang & Parr [[cite:Lee1988]]  [[cite:Miehlich1989]]
+  * 132 -->  XC_GGA_C_P86  Perdew 86 [[cite:Perdew1986]]
+  * 133 -->  XC_GGA_C_PBE_SOL  Perdew, Burke & Ernzerhof correlation SOL [[cite:Perdew2008]]
+  * 134 -->  XC_GGA_C_PW91  Perdew & Wang 91 [[cite:Perdew1992]]
+  * 135 -->  XC_GGA_C_AM05  Armiento & Mattsson 05 correlation [[cite:Armiento2005]]  [[cite:Mattsson2008]]
+  * 136 -->  XC_GGA_C_XPBE  xPBE reparametrization by Xu & Goddard [[cite:Xu2004]]
+  * 137 -->  XC_GGA_C_LM  Langreth and Mehl correlation [[cite:Langreth1981]]
+  * 138 -->  XC_GGA_C_PBE_JRGX  JRGX reparametrization by Pedroza, Silva & Capelle [[cite:Pedroza2009]]
+  * 139 -->  XC_GGA_X_OPTB88_VDW  Becke 88 reoptimized to be used with vdW functional of Dion et al [[cite:Klimes2011]]
+  * 140 -->  XC_GGA_X_PBEK1_VDW  PBE reparametrization for vdW [[cite:Klimes2011]]
+  * 141 -->  XC_GGA_X_OPTPBE_VDW  PBE reparametrization for vdW [[cite:Klimes2011]]
+  * 142 -->  XC_GGA_X_RGE2  Regularized PBE [[cite:Ruzsinszky2009]]
+  * 143 -->  XC_GGA_C_RGE2  Regularized PBE [[cite:Ruzsinszky2009]]
+  * 144 -->  XC_GGA_X_RPW86  refitted Perdew & Wang 86 [[cite:Murray2009]]
+  * 145 -->  XC_GGA_X_KT1  Keal and Tozer version 1 [[cite:Keal2003]]
+  * 146 -->  XC_GGA_XC_KT2 Keal and Tozer version 2 [[cite:Keal2003]]
+
+!!! warning
+    This functional gives NaN on IBM (XG20130608).
+
+  * 147 -->  XC_GGA_C_WL  Wilson & Levy [[cite:Wilson1990]]
+  * 148 -->  XC_GGA_C_WI  Wilson & Ivanov [[cite:Wilson1998]]
+  * 149 -->  XC_GGA_X_MB88  Modified Becke 88 for proton transfer [[cite:Tognetti2009]]
+  * 150 -->  XC_GGA_X_SOGGA  Second-order generalized gradient approximation [[cite:Zhao2008]]
+  * 151 -->  XC_GGA_X_SOGGA11  Second-order generalized gradient approximation 2011 [[cite:Peverati2011]]
+  * 152 -->  XC_GGA_C_SOGGA11  Second-order generalized gradient approximation 2011 [[cite:Peverati2011]]
+  * 153 -->  XC_GGA_C_WI0  Wilson & Ivanov initial version [[cite:Wilson1998]]
+  * 154 -->  XC_GGA_XC_TH1  Tozer and Handy v. 1 [[cite:Tozer1998]]
+
+!!! warning
+    This functional is not tested. Use at your own risks.
+
+  * 155 -->  XC_GGA_XC_TH2  Tozer and Handy v. 2 [[cite:Tozer1998a]]
+  * 156 -->  XC_GGA_XC_TH3  Tozer and Handy v. 3 [[cite:Handy1998]]
+  * 157 -->  XC_GGA_XC_TH4  Tozer and Handy v. 4 [[cite:Handy1998]]
+  * 158 -->  XC_GGA_X_C09X  C09x to be used with the VdW of Rutgers-Chalmers [[cite:Cooper2010]]
+  * 159 -->  XC_GGA_C_SOGGA11_X  To be used with hyb_gga_x_SOGGA11-X [[cite:Peverati2011a]]
+  * 161 -->  XC_GGA_XC_HCTH_93  HCTH functional fitted to 93 molecules [[cite:Hamprecht1998]]
+  * 162 -->  XC_GGA_XC_HCTH_120  HCTH functional fitted to 120 molecules [[cite:Boese2000]]
+  * 163 -->  XC_GGA_XC_HCTH_147  HCTH functional fitted to 147 molecules [[cite:Boese2000]]
+  * 164 -->  XC_GGA_XC_HCTH_407  HCTH functional fitted to 407 molecules [[cite:Boese2001]]
+  * 165 -->  XC_GGA_XC_EDF1  Empirical functionals from Adamson, Gill, and Pople [[cite:Adamson1998]]
+  * 166 -->  XC_GGA_XC_XLYP  XLYP functional [[cite:Xu2004a]]
+  * 167 -->  XC_GGA_XC_B97  Becke 97 [[cite:Becke1997]]
+  * 168 -->  XC_GGA_XC_B97_1  Becke 97-1 [[cite:Hamprecht1998]]  [[cite:Becke1997]]
+  * 169 -->  XC_GGA_XC_B97_2  Becke 97-2 [[cite:Becke1997]]
+  * 170 -->  XC_GGA_XC_B97_D  Grimme functional to be used with C6 vdW term [[cite:Grimme2006]]
+  * 171 -->  XC_GGA_XC_B97_K  Boese-Martin for Kinetics [[cite:Boese2004]]
+  * 172 -->  XC_GGA_XC_B97_3  Becke 97-3 [[cite:Keal2005]]
+  * 173 -->  XC_GGA_XC_PBE1W  Functionals fitted for water [[cite:Dahlke2005]]
+  * 174 -->  XC_GGA_XC_MPWLYP1W  Functionals fitted for water [[cite:Dahlke2005]]
+  * 175 -->  XC_GGA_XC_PBELYP1W  Functionals fitted for water [[cite:Dahlke2005]]
+  * 176 -->  XC_GGA_XC_SB98_1a  Schmider-Becke 98 parameterization 1a [[cite:Schmider1998]]
+  * 177 -->  XC_GGA_XC_SB98_1b  Schmider-Becke 98 parameterization 1b [[cite:Schmider1998]]
+  * 178 -->  XC_GGA_XC_SB98_1c  Schmider-Becke 98 parameterization 1c [[cite:Schmider1998]]
+  * 179 -->  XC_GGA_XC_SB98_2a  Schmider-Becke 98 parameterization 2a [[cite:Schmider1998]]
+  * 180 -->  XC_GGA_XC_SB98_2b  Schmider-Becke 98 parameterization 2b [[cite:Schmider1998]]
+  * 181 -->  XC_GGA_XC_SB98_2c  Schmider-Becke 98 parameterization 2c [[cite:Schmider1998]]
+  * 183 -->  XC_GGA_X_OL2  Exchange form based on Ou-Yang and Levy v.2 [[cite:Fuentealba1995]]  [[cite:OuYang1991]]
+  * 184 -->  XC_GGA_X_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
+  * 186 -->  XC_GGA_C_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
+  * 191 -->  XC_GGA_X_HTBS! Haas, Tran, Blaha, and Schwarz [[cite:Haas2011]]
+  * 192 -->  XC_GGA_X_AIRY  Constantin et al based on the Airy gas [[cite:Constantin2009]]
+  * 193 -->  XC_GGA_X_LAG  Local Airy Gas [[cite:Vitos2000]]
+  * 194 -->  XC_GGA_XC_MOHLYP  Functional for organometallic chemistry [[cite:Schultz2005]]
+  * 195 -->  XC_GGA_XC_MOHLYP2  Functional for barrier heights [[cite:Zheng2009]]
+  * 196 -->  XC_GGA_XC_TH_FL  Tozer and Handy v. FL [[cite:Tozer1997]]
+  * 197 -->  XC_GGA_XC_TH_FC  Tozer and Handy v. FC [[cite:Tozer1997]]
+  * 198 -->  XC_GGA_XC_TH_FCFO  Tozer and Handy v. FCFO [[cite:Tozer1997]]
+  * 199 -->  XC_GGA_XC_TH_FCO  Tozer and Handy v. FCO [[cite:Tozer1997]]
+  * 200 -->  XC_GGA_C_OPTC  Optimized correlation functional of Cohen and Handy [[cite:Cohen2001]]
+  * 524 -->  XC_GGA_X_WPBEH  short-range version of the PBE [[cite:Heyd2003]]
+  * 525 -->  XC_GGA_X_HJS_PBE  HJS screened exchange PBE version [[cite:Henderson2008]]
+  * 526 -->  XC_GGA_X_HJS_PBE_SOL  HJS screened exchange PBE_SOL version [[cite:Henderson2008]]
+  * 527 -->  XC_GGA_X_HJS_B88  HJS screened exchange B88 version [[cite:Henderson2008]]
+
+!!! warning
+    This functional is not tested. Use at your own risks.
+
+  * 528 -->  XC_GGA_X_HJS_B97X  HJS screened exchange B97x version [[cite:Henderson2008]]
+  * 529 -->  XC_GGA_X_ITYH  short-range recipe for exchange GGA functionals [[cite:Iikura2001]]
+
+!!! warning
+    This functional is not tested. Use at your own risks.
+
 
 MetaGGA functionals (do not forget to add a minus sign, as discussed above).
-See Sun et al, PRB 84, 035117 (2011) for the formulas.
+See [[cite:Sun2011]] for the formulas.
 
-  * 202 -->  XC_MGGA_X_TPSS ! Tao, Perdew, Staroverov & Scuseria [J Tao, JP Perdew, VN Staroverov, and G Scuseria, Phys. Rev. Lett. 91, 146401 (2003); JP Perdew, J Tao, VN Staroverov, and G Scuseria, J. Chem. Phys. 120, 6898 (2004) ]
-  * 203 -->  XC_MGGA_X_M06L ! Zhao, Truhlar exchange [Y Zhao and DG Truhlar, JCP 125, 194101 (2006); Y Zhao and DG Truhlar, Theor. Chem. Account 120, 215 (2008) ]
-  * 204 -->  XC_MGGA_X_GVT4 ! GVT4 (X part of VSXC) from van Voorhis and Scuseria [T Van Voorhis and GE Scuseria, JCP 109, 400 (1998) ]
-  * 205 -->  XC_MGGA_X_TAU_HCTH ! tau-HCTH from Boese and Handy [AD Boese and NC Handy, JCP 116, 9559 (2002) ]
-  * 207 -->  XC_MGGA_X_BJ06 ! Becke & Johnson correction to Becke-Roussel 89 [AD Becke and ER Johnson, J. Chem. Phys. 124, 221101 (2006) ] WARNING: this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
-  * 208 -->  XC_MGGA_X_TB09 ! Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [F Tran and P Blaha, Phys. Rev. Lett. 102, 226401 (2009) ] WARNING: this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
-  * 209 -->  XC_MGGA_X_RPP09 ! Rasanen, Pittalis, and Proetto correction to Becke & Johnson [E Rasanen, S Pittalis & C Proetto, arXiv:0909.1477 (2009) ] WARNING: this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
-  * 232 -->  XC_MGGA_C_VSXC ! VSxc from Van Voorhis and Scuseria (correlation part) [T Van Voorhis and GE Scuseria, JCP 109, 400 (1998) ]
+  * 202 -->  XC_MGGA_X_TPSS  Tao, Perdew, Staroverov & Scuseria [[cite:Tao2003]]  [[cite:Perdew2004]]
+  * 203 -->  XC_MGGA_X_M06L  Zhao, Truhlar exchange [[cite:Zhao2006]]  [[cite:Zhao2007]]
+  * 204 -->  XC_MGGA_X_GVT4  GVT4 (X part of VSXC) from van Voorhis and Scuseria [[cite:Voorhis1998]]
+  * 205 -->  XC_MGGA_X_TAU_HCTH  tau-HCTH from Boese and Handy [[cite:Boese2002]]
+  * 207 -->  XC_MGGA_X_BJ06  Becke & Johnson correction to Becke-Roussel 89 [[cite:Becke2006]]
+
+!!! warning
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+
+  * 208 -->  XC_MGGA_X_TB09  Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [[cite:Tran2009]]
+
+!!! warning
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+
+  * 209 -->  XC_MGGA_X_RPP09  Rasanen, Pittalis, and Proetto correction to Becke & Johnson [[cite:Rasanen2010]]
+
+!!! warning
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+
+  * 232 -->  XC_MGGA_C_VSXC  VSxc from Van Voorhis and Scuseria (correlation part) [[cite:Voorhis1998]]
 
 Hybrid functionals (do not forget to add a minus sign, as discussed above).
 
-  * 402 -->  XC_HYB_GGA_XC_B3LYP ! The (in)famous B3LYP [PJ Stephens, FJ Devlin, CF Chabalowski, MJ Frisch, J. Phys. Chem. 98 11623 (1994) ]
-  * 406 -->  XC_HYB_GGA_XC_PBEH ! PBEH (PBE0) [C Adamo and V Barone, J. Chem. Phys. 110, 6158 (1999); M. Ernzerhof, G. E. Scuseria, J. Chem. Phys. 110, 5029 (1999) ]
-  * 427 -->  XC_HYB_GGA_XC_HSE03 ! The 2003 version of the screened hybrid HSE (in this case one should use omega^HF = 0.15/sqrt(2) and omega^PBE = 0.15*(2.0)**1/3)
-428 -->  XC_HYB_GGA_XC_HSE06 ! The 2006 version of the screened hybrid HSE (in
-this case one should use omega^HF = omega^PBE = 0.11)
-(The following section is taken from the LibXC sources. In ABINIT, we stick to
-the LibXC choice.) Note that there is an enormous mess in the literature
-concerning the values of omega in HSE. This is due to an error in the original
-paper that stated that they had used omega=0.15. This was in fact not true,
-and the real value used was omega^HF = 0.15/sqrt(2) ~ 0.1061 and omega^PBE =
-0.15*(2.0)**1/3 ~ 0.1890. In 2006 Krukau et al [JCP 125, 224106 (2006)] tried
-to clarify the situation, and called HSE03 to the above choice of parameters,
-and called HSE06 to the functional where omega^HF=omega^PBE. By testing
-several properties for atoms they reached the conclusion that the best value
-for omega=0.11. Of course, codes are just as messy as the papers. In espresso
-HSE06 has the value omega=0.106. VASP, on the other hand, uses for HSE03 the
-same value omega^HF = omega^PBE = 0.3 (A^-1) ~ 0.1587 and for HSE06 omega^HF =
-omega^PBE = 0.2 (A^-1) ~ 0.1058. [J Heyd, GE Scuseria, and M Ernzerhof, J.
-Chem. Phys. 118, 8207 (2003); J Heyd, GE Scuseria, and M Ernzerhof, J. Chem.
-Phys. 124, 219906 (2006); AV Krukau, OA Vydrov, AF Izmaylov, and GE Scuseria,
-J. Chem. Phys. 125, 224106 (2006) ]
+  * 402 -->  XC_HYB_GGA_XC_B3LYP  The (in)famous B3LYP [[cite:Stephens1994]]
+  * 406 -->  XC_HYB_GGA_XC_PBEH  PBEH (PBE0) [[cite:Adamo1999]]  [[cite:Ernzerhof1999]]
+  * 427 -->  XC_HYB_GGA_XC_HSE03  The 2003 version of the screened hybrid HSE
+                                  (in this case one should use $\omega^{HF} = 0.15/\sqrt{2}$
+                                  and $\omega^{PBE} = 0.15*(2.0)^{1/3}$ )
+  * 428 -->  XC_HYB_GGA_XC_HSE06  The 2006 version of the screened hybrid HSE
+                                  (in this case one should use $\omega^{HF} = \omega^{PBE} = 0.11$)
+                                  (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+                                  Note that there is an enormous mess in the literature
+                                  concerning the values of omega in HSE. This is due to an error in the original
+                                  paper that stated that they had used $\omega=0.15$. This was in fact not true,
+                                  and the real value used was $\omega^{HF} = 0.15 / \sqrt{2} \sim 0.1061$
+                                  and $\omega^{PBE} = 0.15 * (2.0)^{1/3} \sim 0.1890$.
+                                  In 2006 Krukau et al [[cite:Krukau2006]] tried
+                                  to clarify the situation, and called HSE03 to the above choice of parameters,
+                                  and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
+                                  several properties for atoms they reached the conclusion that the best value
+                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In espresso
+                                  HSE06 has the value $\omega=0.106$. VASP, on the other hand, uses for HSE03 the
+                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$
+                                  and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
+                                  [[cite:Heyd2003]] [[cite:Heyd2006]] [[cite:Krukau2006]]
 
-  * 456 -->  XC_HYB_GGA_XC_PBE0_13 ! PBE0-1/3 [P Cortona, J. Chem. Phys. 136, 086101 (2012) ]
+  * 456 -->  XC_HYB_GGA_XC_PBE0_13  PBE0-1/3 [[cite:Cortona2012]]
 """,
 ),
 
@@ -11257,15 +11298,16 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-WARNING: one can use metallic occupation of levels in the case of a molecule,
-in order to avoid any problem with degenerate levels. However, it is advised
-NOT to use [[occopt]]=6 (and to a lesser extent [[occopt]]=4 and 5), since the
-associated number of electron versus the Fermi energy is NOT guaranteed to be
-a monotonic function. For true metals, AND a sufficiently dense sampling of
-the Brillouin zone, this should not happen, but be cautious ! As an indication
-of this problem, a small variation of input parameters might lead to a jump of
-total energy, because there might be two or even three possible values of the
-Fermi energy, and the bissection algorithm finds one or the other.
+!!! warning
+    One can use metallic occupation of levels in the case of a molecule,
+    in order to avoid any problem with degenerate levels. However, it is advised
+    NOT to use [[occopt]]=6 (and to a lesser extent [[occopt]]=4 and 5), since the
+    associated number of electron versus the Fermi energy is NOT guaranteed to be
+    a monotonic function. For true metals, AND a sufficiently dense sampling of
+    the Brillouin zone, this should not happen, but be cautious ! As an indication
+    of this problem, a small variation of input parameters might lead to a jump of
+    total energy, because there might be two or even three possible values of the
+    Fermi energy, and the bissection algorithm finds one or the other.
 """,
 ),
 
@@ -12277,13 +12319,12 @@ Variable(
     dimensions="scalar",
     defaultval=2,
     mnemonics="PHonons: INTegration METHod",
-    text="""
+    text=r"""
 Select the integration technique for computing the phonon DOS and the
-Eliashberg function a2fF(w).
+Eliashberg function $\alpha^2F(\omega)$.
 
-1 for Gaussian scheme (see also [[ph_smear]]).
-
-2 for tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
+ * 1 --> Gaussian scheme (see also [[ph_smear]]).
+ * 2 --> tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
 """,
 ),
 
@@ -12358,7 +12399,7 @@ Variable(
     text="""
 This array contains the list of special q-points used to construct the q-path
 used to (Fourier) interpolate phonon band structures and phonon linewidths.
-See also [[ph_nqpath]] and [[[ph_ndivsm]].
+See also [[ph_nqpath]] and [[ph_ndivsm]].
 """,
 ),
 
@@ -12373,7 +12414,7 @@ Variable(
     requires="[[ph_nqshift]]",
     text="""
 This array gives the shifts to be used to construct the q-mesh for computing
-the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]].
+the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]).
 If not given, a Gamma-centered mesh is used.
 """,
 ),
@@ -16072,7 +16113,7 @@ Variable(
     text="""
 If symdynmat is equal to 1, the dynamical matrix is symmetrized before the
 diagonalization (same meaning as the corresponding anaddb variable). Note that
-symdynmat==1 will automatically enable the symmetrization of the electron-
+[[symdynmat]]==1 will automatically enable the symmetrization of the electron-
 phonon linewidths.
 """,
 ),
@@ -16647,7 +16688,7 @@ Note that the preparatory GS calculations before a RF calculations must be
 highly converged.
 Typical values for these preparatory runs are [[tolwfr]] between 1.0d-16 and 1.0d-22.
 
-Note that [[tolwfr]] is often used in the test cases, but this is _tolwfr_
+Note that [[tolwfr]] is often used in the test cases, but this is [[tolwfr]]
 purely for historical reasons: except when [[iscf]] <0, other critera should be used.
 
 In the wavelet case (see [[usewvl]] = 1), this criterion is the favoured one.
@@ -18719,7 +18760,8 @@ Gives nuclear charge for each type of pseudopotential, in order.
 If [[znucl]] does not agree with nuclear charge, as given in pseudopotential
 files, the program writes an error message and stops.
 
-N.B.: In the pseudopotential files, [[znucl]] is called "zatom".
+!!! note
+    In the pseudopotential files, [[znucl]] is called "zatom".
 
 For a "dummy" atom, with [[znucl]]=0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
