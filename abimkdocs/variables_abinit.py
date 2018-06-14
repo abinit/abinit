@@ -123,7 +123,7 @@ Variable(
     vartype="integer",
     topics=['AtomTypes_expert'],
     dimensions=['[[ntypalch]]'],
-    defaultval=MultipleValue(number=None, value=1),
+    defaultval=MultipleValue(number='[[ntypalch]]', value=1),
     mnemonics="ALGorithm for generating ALCHemical pseudopotentials",
     text="""
 Used for the generation of alchemical pseudopotentials, that is, when
@@ -141,7 +141,7 @@ Presently, [[algalch]] can only have the value 1, that is:
     proportion of the corresponding type of atom that is present in [[mixalch]]
   * the characteristic radius for the core charge is a linear combination of the characteristic radii
     of the core charges, build with the [[mixalch]] mixing coefficients
-  * the core charge function f(r/rc) is a linear combination of the core charge functions,
+  * the core charge function $f(r/r_c)$ is a linear combination of the core charge functions,
     build with the [[mixalch]] mixing coefficients
 
 Later, other algorithms for the mixing might be included.
@@ -664,7 +664,7 @@ Variable(
     text="""
 Defines the center of the box, in reduced coordinates. At present, this
 information is only used in the case of Time-Dependent DFT computation of the
-oscillator strength. One must take boxcenter such as to be roughly the center
+oscillator strength. One must take [[boxcenter]] such as to be roughly the center
 of the cluster or molecule. The default is sensible when the vacuum
 surrounding the cluster or molecule has xred 0 or 1. On the contrary, when the
 cluster or molecule is close to the origin, it is better to take [[boxcenter]]=[0.0, 0.0, 0.0].
@@ -1457,11 +1457,9 @@ interrupt the run (using the keyword "exit" on the top of the input file or
 creating a file named "abinit.exit": see the end of section 3.2
 of the [[help:abinit#parameters]]).
 
-If [[chkexit]]=0, the check is not performed at all
-
-If [[chkexit]]=1, the check is not performed frequently (after each SCF step)
-
-If [[chkexit]]=2, the check is performed frequently (after a few bands, at each k point)
+  * If [[chkexit]]=0, the check is not performed at all
+  * If [[chkexit]]=1, the check is not performed frequently (after each SCF step)
+  * If [[chkexit]]=2, the check is performed frequently (after a few bands, at each k point)
 
 In all cases, the check is performed at most every 2 seconds of CPU time.
 """,
@@ -1507,6 +1505,7 @@ When [[chksymbreak]]=1, the code stops (or issue a warning) if:
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
 
 When [[chksymbreak]]=0, there is no such check.
+
 When [[chksymbreak]]=-1, the code stops if the condition (1) is met,
 but in case the condition (2) is met, there will be a trial to shift the
 atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
@@ -1525,7 +1524,7 @@ the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition (2) is met, the GW code will not be able to find a symmetry-
+the condition (2) is met, the GW code will not be able to find a symmetry
 preserving FFT mesh.
 
 So, it was decided to warn the user about these possible problems already at
@@ -2046,7 +2045,7 @@ preconditioning scheme based on the dielectric matrix is used.
 NOTE: a negative [[diecut]] will define the same dielectric basis sphere as
 the corresponding positive value, but the FFT grid will be identical to the
 one used for the wavefunctions. The much smaller FFT grid, used when
-[[diecut]] is positive, gives exactly the same results.
+[[diecut]] is positive, gives exactly the same results.\n
 No meaning for RF calculations yet.
 """,
 ),
@@ -2065,7 +2064,7 @@ Gives a rough estimation of the dielectric gap between the highest energy
 level computed in the run, and the set of bands not represented. Used to
 extrapolate dielectric matrix when [[iprcel]] >= 21.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diegap]] has
-the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV).\n
 No meaning for RF calculations yet.
 """,
 ),
@@ -2081,7 +2080,7 @@ Variable(
     requires="[[iprcel]] >= 21",
     text="""
 Gives the amount of occupied states with mean energy given by the highest
-level computed in the run, included in the extrapolation of the dielectric matrix.
+level computed in the run, included in the extrapolation of the dielectric matrix.\n
 No meaning for RF calculations yet.
 """,
 ),
@@ -2141,10 +2140,11 @@ especially useful for speeding up the treatment of rather homogeneous unit cells
 
 Some hint:
 The value of [[diemac]] should usually be bigger than 1.0, on physical grounds.
-For metals, simply put [[diemac]] to a very large value (the default $10^6$ is OK)
-For silicon, use 12.0. A similar value is likely to work well for other semiconductors
-For wider gap insulators, use 2.0 ... 4.0
-For molecules in an otherwise empty big box, try 1.5 ... 3.0
+
+  * For metals, simply put [[diemac]] to a very large value (the default $10^6$ is OK)
+  * For silicon, use 12.0. A similar value is likely to work well for other semiconductors
+  * For wider gap insulators, use 2.0 ... 4.0
+  * For molecules in an otherwise empty big box, try 1.5 ... 3.0
 
 Systems that combine a highly polarisable part and some vacuum are rather
 badly treated by the model dielectric function. One has to use the
@@ -3786,6 +3786,7 @@ In case [[fband]] is 0.0, the code computes from the pseudopotential files
 and the geometry data contained in the input file, the number of electrons
 present in the system. Then, it computes the minimum number of bands that can
 accommodate them, and use that value for [[nband]].
+
 In case [[fband]] differs from zero, other bands will be added, just larger
 than [[fband]] times the number of atoms. This parameter is not echoed in the
 top of the main output file, but only the parameter [[nband]] that it allowed
@@ -6604,7 +6605,7 @@ the way the change of potential is derived from the residual.
 The possible values of [[iprcel]] correspond to:
 
   * 0 --> model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
-  * larger or equal to 21 --> will compute the dielectric matrix according to [[diecut]], [[dielam]], [[diegap]]. This methodology is described in P.-M. Anglade, X. Gonze, Phys. Rev. B 78, 045126 (2008).
+  * larger or equal to 21 --> will compute the dielectric matrix according to [[diecut]], [[dielam]], [[diegap]]. This methodology is described in [[cite:Anglade2008]].
   * Between 21 and 29 --> for the first few steps uses the same as option 0 then compute RPA dielectric function, and use it as such.
   * Between 31 and 39 --> for the first few steps uses the same as option 0 then compute RPA dielectric function, and use it, with the mixing factor [[diemix]].
   * Between 41 and 49 --> compute the RPA dielectric matrix at the first step, and recompute it at a later step, and take into account the mixing factor [[diemix]].
@@ -7947,7 +7948,7 @@ The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
 found using the conventional cartesian coordinates:\n
 $l$(Gamma-H)=$1/2$=0.5 \n
-$l$(H-N)=$sqrt{2}/4$=0.354... \n
+$l$(H-N)=$\sqrt{2}/4$=0.354... \n
 $l$(N-Gamma)=$\sqrt{2}/4$=0.354... \n
 $l$(Gamma-P)=$\sqrt{3}/4$=0.433... \n 
 $l$(P-N)=$1/4$=0.25 \n 
@@ -7978,8 +7979,8 @@ In order to find the lengths of segments (this information is useful to draw
 the band structure, with the correct relative scale between special points)
 one needs to know the a and c lattice parameters. Also, in what follows, we
 omit the 2$\pi$ factor sometimes present in the definition of the reciprocal
-space vectors. The reciprocal vectors are $(1/a\, 1/(\sqrt{3}a)\, 0)$, $(0\,
-2/(\sqrt{3}a)\, 0)$, $(0\, 0\, 1/c)$. The lengths of the above-mentioned segments can
+space vectors. The reciprocal vectors are $(1/a\: 1/(\sqrt{3}a)\: 0)$, $(0\: 2/(\sqrt{3}a)\: 0)$,
+ $(0\: 0\: 1/c)$. The lengths of the above-mentioned segments can
 be computed as:\n
 $l$(K-Gamma)=$2/(3a)$=0.666.../a \n
 $l$(Gamma-M)=$1/(\sqrt{3}a)$=0.577.../a \n
@@ -7990,7 +7991,7 @@ $l$(A-L)=$1/(\sqrt{3}a)$=0.577.../a \n
 $l$(L-H)=$1/(3a)$=0.333.../a \n
 $l$(H-L)=$1/(3a)$=0.333.../a \n
 $l$(L-M)=$1/(2c)$=0.5.../c \n
-$l$(M-Gamma)=$-1/(\sqrt{3}a)$=0.577.../a \n
+$l$(M-Gamma)=$1/(\sqrt{3}a)$=0.577.../a \n
 $l$(Gamma-A)=$1/(2c)$=0.5.../c \n
 
 D. **Rhombohedral lattices**
@@ -8003,9 +8004,15 @@ This will generate the primitive vectors in real space, with
 
       acell a0 a0 a0    and      rprim  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
 
-with $a^2+c^2=1$, $a^2=2/3(1-\cos(\gamma))$, $c^2=1/3(1+2\cos(\gamma))$,
-$(a/c)^2=2(1-\cos(\gamma))/(1+2\cos(\gamma))$ and also
-$\cos(\gamma)=(1-(a/c)^2/2)/(1+(a/c)^2)$. Alternatively, these values of [[rprim]]
+with,
+
+ * $a^2+c^2=1$,
+ * $a^2=2/3(1-\cos(\gamma))$,
+ * $c^2=1/3(1+2\cos(\gamma))$,
+ * $(a/c)^2=2(1-\cos(\gamma))/(1+2\cos(\gamma))$, and also
+ * $\cos(\gamma)=(1-(a/c)^2/2)/(1+(a/c)^2)$.
+
+Alternatively, these values of [[rprim]]
 might directly be the input of ABINIT (then, the balance of the scaling factor
 might be adjusted between [[acell]] and [[rprim]]).
 
@@ -8187,7 +8194,7 @@ This input variable is used only when [[kptopt]] is positive. It partially
 defines the k point grid. The other piece of information is contained in
 [[shiftk]]. [[kptrlatt]] cannot be used together with [[ngkpt]].
 
-The values kptrlatt(1:3,1), kptrlatt(1:3,2), kptrlatt(1:3,3) are the
+The values [[kptrlatt]](1:3,1), [[kptrlatt]](1:3,2), [[kptrlatt]](1:3,3) are the
 coordinates of three vectors in real space, expressed in the [[rprimd]]
 coordinate system (reduced coordinates). They defines a super-lattice in real
 space. The k point lattice is the reciprocal of this super-lattice, possibly shifted (see [[shiftk]]).
@@ -8439,12 +8446,12 @@ Variable(
     text="""
 This variable gives the amplitude of the constraint imposed on the
 magnetization vectors on each atom (turned on with flag variable
-[[magconon]]). Typical values for lambda are 0.001 to 0.1. The SCF convergence
-will be difficult if lambda is too large. If lambda is too small, the
+[[magconon]]). Typical values for [[magcon_lambda]] are 0.001 to 0.1. The SCF convergence
+will be difficult if [[magcon_lambda]] is too large. If [[magcon_lambda]] is too small, the
 constraint will not be very effective and it will give magnetization not close
 to the desired [[spinat]] target. In case of convergence problem, it can help
-to start with a small value of lambda and to increase it by reading the
-wavefunction obtained with a lower lambda value. See variable [[magconon]] for more details.
+to start with a small value of [[magcon_lambda]] and to increase it by reading the
+wavefunction obtained with a lower [[magcon_lambda]] value. See variable [[magconon]] for more details.
 """,
 ),
 
@@ -8967,12 +8974,12 @@ Variable(
     mnemonics="Number of ATomic SPHeres for the atom-projected density-of-states",
     requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
     text="""
-[[natsph]] gives the number of atoms around which the sphere for atom-
-projected density-of-states will be built, in the [[prtdos]]=3 case. The
+[[natsph]] gives the number of atoms around which the sphere for atom-projected 
+density-of-states will be built, in the [[prtdos]]=3 case. The
 indices of these atoms are given by [[iatsph]]. The radius of these spheres is
 given by [[ratsph]].
-If [[pawfatbnd]]=1 or 2, it gives the number of atoms around which atom-
-projected band structure will be built (the indices of these atoms are given
+If [[pawfatbnd]]=1 or 2, it gives the number of atoms around which atom-projected 
+band structure will be built (the indices of these atoms are given
 by [[iatsph]]).
 """,
 ),
@@ -8992,7 +8999,7 @@ momentum-projected density-of-states will be built, in the [[prtdos]]=3 case.
 The radius of these spheres is given by [[ratsph_extra]]. This simulates the
 STS signal for an STM tip atom placed at the sphere position, according to the
 chemical nature of the tip (s- p- d- wave etc...).
-If [[pawfatbnd]]=1 or 2, it gives the number of spheres in which l-projected
+If [[pawfatbnd]]=1 or 2, it gives the number of spheres in which $l$-projected
 band structure will be built.
 The position of the spheres is given by the [[xredsph_extra]] variable.
 """,
@@ -9569,7 +9576,7 @@ Variable(
     mnemonics="Number of Grid points for Fast Fourier Transform",
     commentdefault="(automatic selection of optimal values)",
     text="""
-gives the size of fast Fourier transform (FFT) grid in three dimensions. Each
+Gives the size of fast Fourier transform (FFT) grid in three dimensions. Each
 number must be composed of the factors 2, 3, and 5 to be consistent with the
 radices available in our FFT.
 
@@ -9577,7 +9584,7 @@ If no [[ngfft]] is provided or if [[ngfft]] is set to 0 0 0, the code will autom
 provide an optimal set of [[ngfft]] values, based on [[acell]], [[rprim]] and [[ecut]]
 (see also [[boxcutmin]] for speed/accuracy concerns).
 This is the recommended procedure, of course.
-The total number of FFT points is the product: [[ngfft]](1)x[[ngfft]](2)x[[ngfft]](3)=nfft.
+The total number of FFT points is the product: [[ngfft]](1) x [[ngfft]](2) x [[ngfft]](3)=[[nfft]].
 
 When [[ngfft]] is made smaller than recommended values (e.g. by setting
 [[boxcutmin]] to a value smaller than 2.0 or by setting [[ngfft]] manually),
@@ -10286,9 +10293,9 @@ number of types of atoms.
 
 Alchemical pseudopotentials will be present when [[ntypalch]] is non-zero. See
 [[ntypalch]] to understand how to use alchemical potentials in ABINIT. The
-input variables ([[ntypalch]], [[algalch]],[[mixalch]]) are active, and
+input variables ([[ntypalch]], [[algalch]], [[mixalch]]) are active, and
 generate alchemical potentials from the available pseudopotentials. Also, the
-inner variables ([[ntyppure]],[[npspalch]]) become active. See these input
+inner variables ([[ntyppure]], [[npspalch]]) become active. See these input
 variables, especially [[mixalch]], to understand how to use alchemical
 potentials in ABINIT.
 """,
@@ -10755,12 +10762,12 @@ Used for the generation of alchemical pseudopotentials: when [[ntypalch]] is
 non-zero, alchemical mixing will be used.
 
 Among the [[ntypat]] types of atoms, the last [[ntypalch]] will be
-"alchemical" pseudoatoms, while only the first **ntyppure** will be uniquely
-associated with a pseudopotential (the **ntyppure** first of these, actually).
+"alchemical" pseudoatoms, while only the first [[ntyppure]] will be uniquely
+associated with a pseudopotential (the [[ntyppure]] first of these, actually).
 The [[ntypalch]] types of alchemical pseudoatoms are to be made from the
 remaining [[npspalch]] pseudopotentials.
 
-In this case, the input variables [[algalch]],[[mixalch]] are active, and
+In this case, the input variables [[algalch]], [[mixalch]] are active, and
 generate alchemical potentials from the available pseudopotentials. See these
 input variables, especially [[mixalch]], to understand how to use alchemical
 potentials in ABINIT.
@@ -10796,7 +10803,7 @@ Variable(
     topics=['AtomTypes_internal'],
     dimensions="scalar",
     defaultval="[[ntypat]]-[[ntypalch]]",
-    mnemonics='Number of TYPe of atoms that are "PURe"',
+    mnemonics='Number of TYPe of atoms that are "PURE"',
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
 Gives the number of type of atoms that are "pure" when alchemical mixing is
@@ -10834,9 +10841,10 @@ Variable(
     text="""
 In the wavelet basis set, the ground state is found by direct minimisation.
 The algorithm used can be either the steepest descent or the DIIS (Direct
-Inversion of Iteration Space). When [[nwfshist]] = 0, the steepest descent is
-used ( _i.e._ there is no history storage of the previous iterations). If
-[[nwfshist]] is strictly positive, a DIIS is used. A typical value is 6. Using
+Inversion of Iteration Space). \n
+When [[nwfshist]] = 0, the steepest descent is
+used ( _i.e._ there is no history storage of the previous iterations). \n
+If [[nwfshist]] is strictly positive, a DIIS is used. A typical value is 6. Using
 a DIIS increases the memory required by the program since N previous
 wavefunctions are stored during the electronic minimisation.
 """,
@@ -11158,7 +11166,9 @@ Gives occupation numbers for all bands in the problem. Needed if [[occopt]]==0
 or [[occopt]]==2. Ignored otherwise. Also ignored when [[iscf]]=-2.
 Typical band occupancy is either 2 or 0, but can be 1 for half-occupied band
 or other choices in special circumstances.
+
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
+
 If [[occopt]]=2, then the band occupancies must be provided explicitly for
 each band, EACH k POINT, and EACH SPIN-POLARIZATION, in an array which runs
 over all bands, k points, and spin-polarizations.
@@ -12690,16 +12700,15 @@ Variable(
     defaultval=0,
     mnemonics="POSitron computation of DOPPLER broadening",
     text="""
-Relevant only when [[positron]]<>0.
+Relevant only when [[positron]]/=0.
 This input parameter activates the calculation of the Doppler broadening of
 the electron-positron annihilation radiation.
-An output file containing the momentum distributions of annihilating electron-
-positron pairs is created.
+An output file containing the momentum distributions of annihilating electron-positron pairs is created.
 Such a computation needs a core wave-function file (per atom type) to be
-provided. This core WF file should be named '<psp_file_name>.corewf' (where
-<pspfile_name> is the name of the pseudo-potential (or PAW) file) or
-'corewf.abinit<ityp>' (where <ityp> is the index of the atom type). Core WF
-files can be obtained with the atompaw tool by the use of 'prtcorewf' keyword.
+provided. This core WF file should be named '**psp_file_name**.corewf' (where
+**pspfile_name** is the name of the pseudo-potential (or PAW) file) or
+'corewf.abinit**ityp**' (where **ityp** is the index of the atom type). Core WF
+files can be obtained with the atompaw tool by the use of **prtcorewf** keyword.
 """,
 ),
 
@@ -12718,12 +12727,12 @@ Electron-positron correlation functional is defined by [[ixcpositron]].
 Other relevant input parameter: [[posocc]] (occupation number for the
 positron).
 
-_Positive values for [[positron]]:_
-_For **[[positron]]=1 or 2**, will perform the calculation of positron
-lifetime (and annihilation rate)._
+Positive values for [[positron]]:\n
+For [[positron]]=1 or 2, will perform the calculation of positron
+lifetime (and annihilation rate).
 
-  * [[positron]]=1**:
-Starting from a previous electronic GS density (with **[[positron]]=0** ), a
+  * [[positron]]=1:\n
+Starting from a previous electronic GS density (with [[positron]]=0), a
 positronic ground-state calculation is performed, considering that the
 electrons are not perturbed by the presence of the positron.
 This is almost correct for a positron in a perfect bulk material. But this
@@ -12734,14 +12743,14 @@ without [[irdden]] keyword).
 At the end of the SCF cycle, the positron lifetime and annihilation rate are
 printed out.
 
-_Additional information for the use of pseudopotentials:
+Additional information for the use of pseudopotentials:
 
-    * PAW datasets: nothing to do; simply use usual electronic PAW datasets
-    * Norm-conserving pseudopotentials: One has to use specific pseudopotentials for the positron calculation. They must be of the FHI type (pspcod=6), and must contain at their end, the all-electrons core density generated with FHI98PP. They must have lmax=lloc=0 (check that this works for the electronic GS !! No ghost, etc...). Otherwise, their are similar to an usual FHI pseudopotential.
-_
+    PAW datasets: nothing to do; simply use usual electronic PAW datasets
+    Norm-conserving pseudopotentials: One has to use specific pseudopotentials for the positron calculation. They must be of the FHI type (pspcod=6), and must contain at their end, the all-electrons core density generated with FHI98PP. They must have lmax=lloc=0 (check that this works for the electronic GS !! No ghost, etc...). Otherwise, their are similar to an usual FHI pseudopotential.
 
-  * **positron=2**:
-Starting from a previous positronic GS density (with **positron=1** ), an
+
+  * [[positron]]=2:\n
+Starting from a previous positronic GS density (with [[positron]]=1 ), an
 electronic ground-state calculation is performed, keeping the positronic
 density constant.
 The positronic density will be automatically read from a _DEN file (with or
@@ -12749,37 +12758,37 @@ without [[getden]]/[[irdden]] keyword).
 At the end of the SCF cycle, the positron lifetime and annihilation rate are
 printed out.
 
-_Additional information for the use of pseudopotentials:
+Additional information for the use of pseudopotentials:
 
-    * PAW datasets: nothing to do; simply use usual electronic PAW datasets
-    * Norm-conserving pseudopotentials: One has to use specific pseudopotentials for the electron calculation. They must be of the FHI type (pspcod=6), and must contain at their end, the all-electrons core density generated with FHI98PP.
-_
+    PAW datasets: nothing to do; simply use usual electronic PAW datasets
+    Norm-conserving pseudopotentials: One has to use specific pseudopotentials for the electron calculation. They must be of the FHI type (pspcod=6), and must contain at their end, the all-electrons core density generated with FHI98PP.
 
-  * **Typical use**:
+
+  * **Typical use**:\n
 The calculation is done in several steps:
-The first one is a normal GS calculation for the electrons, with **positron**
-=0. The only specific thing to do is to set [[prtden]]=1 (this is the defaut
+The first one is a normal GS calculation for the electrons, with [[positron]]=0. 
+The only specific thing to do is to set [[prtden]]=1 (this is the default
 for ABINIT v6.x+). This will create the associated _DEN file which will be
 used as input file for the positronic GS calculation.
 The second step is the GS calculation of the positron and subsequently its
-lifetime, with **positron** =1. One has to define also [[ixcpositron]].
+lifetime, with [[positron]] =1. One has to define also [[ixcpositron]].
 Then, it is possible to perform an additional step, computing the GS
-electronic density in presence of the positron, with **positron** =2.
+electronic density in presence of the positron, with [[positron]]=2.
 and so on...
 This procedure can be automated (for PAW only) by the use of a negative value
-for **positron**.
+for [[positron]].
 At the end, a converged value of the positron lifetime (decomposed in several
 contributions) is printed.
 See also [[posdoppler]] keyword for the calculation of Doppler broadening.
 
 
-_Negative values for **positron**:_
-_For **positron <0**, will perform an automatic calculation of electrons and
+Negative values for [[positron]]:\n
+For [[positron]]<0, will perform an automatic calculation of electrons and
 positron densities in the two-component DFT context; then will compute
-positron lifetime (and annihilation rate)._
+positron lifetime (and annihilation rate).
 
-  * **positron=-1**:
-Starting from scratch, will first perform an usual electronic ground-state
+  * [[positron]]=-1:\n
+Starting from scratch, will first perform a usual electronic ground-state
 calculation until convergence (controlled by the use of one of the _tolerance_
 keywords).
 Then will perform a positronic ground state calculation in presence of the
@@ -12789,63 +12798,54 @@ and so on... until the total energy is converged.
 The convergence of the total energy of the ions+electrons+positron system is
 controlled by the use of the [[postoldfe]], [[postoldff]] and [[posnstep]]
 input keywords.
-With **positron=-1**, at the beginning of each new electronic/positronic
+With [[positron]]=-1, at the beginning of each new electronic/positronic
 step, the wave functions are unknown.
 
-  * **positron=-10**:
-Same as **positron=-1** except that the electronic/positronic wave functions
+  * [[positron]]=-10:\n
+Same as [[positron]]=-1 except that the electronic/positronic wave functions
 are stored in memory.
 Consequently, the total number of iterations to reach the convergence
-(diff_Etotal <[[postoldfe]] or diff_Forces<[[postoldff]]) is smaller.
+($\Delta$Etotal<[[postoldfe]] or $\Delta$Forces<[[postoldff]]) is smaller.
 But, this can increase the total amount of memory needed by the code.
 
-  * **positron=-2**:
-Same as **positron=-1** except that the two-component DFT cycle is forced to
+  * [[positron]]=-2:\n
+Same as [[positron]]=-1 except that the two-component DFT cycle is forced to
 stop at the end of an electronic step.
 
-  * **positron=-20**:
-Same as **positron=-10** except that the two-component DFT cycle is forced to
+  * [[positron]]=-20:\n
+Same as [[positron]]=-10 except that the two-component DFT cycle is forced to
 stop at the end of an electronic step.
 
 
-_Advice for use:_
+Advice for use:
 There are two typical cases which have to be differently treated:
 
-  * **A positron in a perfect _bulk_ system**:
+  * **A positron in a perfect _bulk_ system**:\n
 In that case, the positron is delocalized in the whole crystal. Its density is
 almost zero.
 Thus, the "zero density positron limit" has to be used. [[ixcpositron]] has to
 be choosen accordingly.
 In order to have the zero density positron limit it is adviced to follow these
 points:
-1- Put a small positronic charge (by setting a [[posocc]] to a small value)
-**OR** use a big supercell.
-2- Use only k=gamma wave vector for the positronic calculation.
-3- Use the manual procedure in 2 steps: first **positron** =0 and then
-**positron** =1; avoid the **positron=2** step and the automatic procedure (
-**positron** <0).
+
+  * 1- Put a small positronic charge (by setting a [[posocc]] to a small value) **OR** use a big supercell.
+  * 2- Use only k=$\Gamma$ wave vector for the positronic calculation.
+  * 3- Use the manual procedure in 2 steps: first [[positron]]=0 and then [[positron]]=1; avoid the [[positron]]=2 step and the automatic procedure ([[positron]]<0).
+
 In principle, the positron lifetime should converge with the value of
 [[posocc]] or the size of the supercell.
 
-  * **A positron trapped in a _default_ (vacancy...)**:
+  * **A positron trapped in a _default_ (vacancy...)**:\n
 In that case, the positron is localized in the default. Its density can be
 localized in the simulation cell (provided that the cell is sufficiently
 large) and influences the electronic density.
-So, it is advised to use the automatic procedure ( **positron** <0) or the
-manual procedure with several **positron** =0,1,2,1,... steps.
+So, it is advised to use the automatic procedure ([[positron]]<0) or the
+manual procedure with several [[positron]]=0,1,2,1,... steps.
 K-points can be used as in usual electronic calculations.
 Also note that it is possible to use forces and stresses to perform structural
 minimization.
 
-References:
-
-**[1]** J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-**[2]** Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-**[3]** P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-**[4]** M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947
-(1994).
-**[5]** B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B
-51, 7341 (1994)
+References: [[cite:Arponen1979a]], [[cite:Boronski1986]], [[cite:Sterne1991]], [[cite:Puska1995]], [[cite:Barbiellini1995]]
 """,
 ),
 
@@ -12862,8 +12862,8 @@ Relevant only when [[positron]]<0.
 Sets the maximum number of electronic/positronic iterations that, when
 reached, will cause the two-component DFT SCF cycle to stop.
 The code will first compute the electronic ground-state, then the positronic
-ground state in the electronic density, then the electronic ground-state in
-the positronic density until diff_Etotal<[[postoldfe]] or diff_Forces<[[postoldff]] or the number
+ground state in the electronic density, then the electronic ground state in
+the positronic density until $\Delta$Etotal<[[postoldfe]] or $\Delta$Forces<[[postoldff]] or the number
 of electronic/positronic steps is [[posnstep]].
 """,
 ),
@@ -12902,9 +12902,9 @@ _ions+electrons+positron_ system) that, when reached, will cause the SCF cycle
 to stop before the number of steps is [[nstep]] or the number of
 electronic/positronic steps is [[posnstep]].
 
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[postoldfe]] has
 the [[ENERGY]] characteristics.
-Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
+One and only one of [[postoldfe]] or [[postoldff]] can be set.
 """,
 ),
 
@@ -12922,7 +12922,7 @@ Sets a tolerance for absolute difference of maximum force acting on ions (due
 to _ions+electrons+positron_ system) that, when reached, will cause the SCF
 cycle to stop before the number of SCF steps is [[nstep]] or the number of
 electronic/positronic steps is [[posnstep]].
-Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
+One and only one of [[postoldfe]] or [[postoldff]] can be set.
 """,
 ),
 
@@ -13254,7 +13254,7 @@ function of the radius will be a constant, except when a new point enters the
 sphere, in which case a sudden jump occurs. However, since the purpose of this
 output is to get a rough idea of the repartition of the density, this is not a
 real problem. If you are interested in a more accurate estimation of the
-density within a sphere, you should use the cut3d postprocessor.
+density within a sphere, you should use the cut3d postprocessor ([[help:cut3d]]).
 """,
 ),
 
@@ -13389,10 +13389,10 @@ Variable(
     text="""
 This option activates the output of the electron eigenvalues. Possible values:
 
-  * 0 Disable the output of the band energies.
-  * 1 Write eigenvalues in xmgrace format. A file with extension `EBANDS.agr` is produced at the end of the run.
+  * 0- Disable the output of the band energies.
+  * 1- Write eigenvalues in xmgrace format. A file with extension `EBANDS.agr` is produced at the end of the run.
     Use `xmgrace file_EBANDS.agr` to visualize the band energies
-  * 2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues
+  * 2- Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues
     and a `EBANDS.gnuplot` script. Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.
 """,
 ),
@@ -14521,7 +14521,7 @@ With [[qptopt]]=1 to 4, rely on [[ngqpt]] or [[qptrlatt]], as well as on
 [[nshiftq]] and [[shiftq]] to set up a q point grid, from which the q point
 with number [[iqpt]] will be selected. The values [[qptopt]]=1 to 4 differ by
 the treatment of symmetries. Note that the symmetries are recomputed starting
-from the values of [[rprimd]] [[xred]] and [[spinat]]. So, the explicit value
+from the values of [[rprimd]], [[xred]] and [[spinat]]. So, the explicit value
 of [[symrel]] are not used. This is to allow doing calculations with
 [[nsym]]=1, sometimes needed for T-dependent electronic structure, still
 decreasing the number of q points in the case [[qptopt]]=1 or [[qptopt]]=3.
@@ -14612,12 +14612,12 @@ Variable(
     vartype="real",
     topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful'],
     dimensions=['[[ntypat]]'],
-    defaultval=ValueWithConditions({'defaultval': 2.0, 'usepaw==1': ['[[AUTO_FROM_PSP]]']}),
+    defaultval=ValueWithConditions({'[[usepaw]]==1': '[[AUTO_FROM_PSP]]' , 'defaultval': 2.0}),
     mnemonics="Radii of the ATomic SPHere(s)",
     text="""
 Relevant only when [[prtdos]]=3 or [[prtdensph]]=1.
 
-When [[prtdos]]=3:
+When [[prtdos]]=3:\n
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
 be analysed. The choice of this radius is quite arbitrary. In a plane-wave
@@ -14629,7 +14629,7 @@ the same charge as the Bader volume. This "Equivalent Bader charge atomic
 radius" might then be used to perform the present analysis. See the
 [[help:aim]] for more explanations. Another physically motivated choice would
 be to rely on another charge partitioning, like the Hirshfeld one (see the
-cut3d utility). The advantage of using charge partitioning schemes comes from
+cut3d utility [[help:cut3d]]). The advantage of using charge partitioning schemes comes from
 the fact that the sum of atomic DOS, for all angular momenta and atoms,
 integrated on the energy range of the occupied states, gives back the total
 charge. If this is not an issue, one could rely on the half of the nearest-
@@ -14640,12 +14640,12 @@ given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
 the charge contained in the sphere...
 
-When [[prtdensph]]=1:
+When [[prtdensph]]=1:\n
 Provides the radius of the spheres around (all) atoms in which the total
 charge density will be integrated.
 
 In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
-considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
+considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 """,
 ),
 
@@ -15372,7 +15372,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     text="""
 Temperature which is imposed on phonon distribution, in the self-consistent
-scheme of Souvatzis et al. PRL **100**, 095901. Determines the extent of the
+scheme of [[cite:Souvatzis2008]]. Determines the extent of the
 finite displacements used, and consequent anharmonic effects. Experimental.
 """,
 ),
@@ -15494,20 +15494,20 @@ Variable(
     defaultval=0.0,
     mnemonics="jellium SLAB Wigner-Seitz RADius",
     characteristics=['[[LENGTH]]'],
-    text="""
-Fix the bulk-mean positive charge density nbulk of a jellium slab (if the
-latter is employed, e.g. [[jellslab]] ≠ 0). Often called "rs" [see for example
-N. D. Lang and W. Kohn PRB 1, 4555 (1970)], [[slabwsrad]] is the radius of a
+    text=r"""
+Fix the bulk-mean positive charge density $n_{bulk}$ of a jellium slab (if the
+latter is employed, e.g. [[jellslab]]/=0). Often called $r_s$ (see for example
+[[cite:Lang1970]]), [[slabwsrad]] is the radius of a
 sphere which has the same volume as the average volume per particle in a
-homogeneous electron gas with density nbulk, so:
-
-      1/nbulk = 4/3 Pi * [[slabwsrad]]3
-
-For example, the bulk aluminum fcc lattice constant is a=4.0495 Angstroms
-(webelements.com), each cubic centered cell includes 4 Al atoms and each atom
-has 3 valence electrons, so the average volume per electron is a3/12=37.34
-Bohr3 which has to be equal to 4/3 Pi*rs3. Consequently Al has approximately
-rs =2.07 Bohr, while for example magnesium has rs =2.65 Bohr, sodium 3.99 Bohr.
+homogeneous electron gas with density $n_{bulk}$, so:
+\begin{equation}
+      1/n_{bulk} = 4/3\: \pi [[slabwsrad]]^3 \nonumber
+\end{equation}
+For example, the bulk aluminum fcc lattice constant is $a$=4.0495 Angstroms
+[WebElements](https://www.webelements.com/), each cubic centered cell includes 4 Al atoms and each atom
+has 3 valence electrons, so the average volume per electron is $a^3/12$=37.34
+Bohr$^3$ which has to be equal to $4/3\: \pi r_s^3$. Consequently Al has approximately
+$r_s$=2.07 Bohr, while for example magnesium has $r_s$=2.65 Bohr, sodium 3.99 Bohr.
 By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
 """,
 ),
@@ -15519,23 +15519,23 @@ Variable(
     topics=['Artificial_expert'],
     dimensions="scalar",
     defaultval=[0.0, 0.0],
-    mnemonics="jellium SLAB BEGinning edge along the Z direction",
-    text="""
-Define the edges of the jellium slab (if used, so if [[jellslab]] ≠ 0) along
+    mnemonics="jellium SLAB BEGinning edge along the z-direction",
+    text=r"""
+Define the edges of the jellium slab (if used, so if [[jellslab]]/=0) along
 z, namely the slab starts at a point along z which is expressed in Bohr by
-**slabzbeg** and it ends at a point expressed in Bohr by [[slabzend]]. The z
-direction is parallel to the third crystal primitive lattice vector which has
+[[slabzbeg]] and it ends at a point expressed in Bohr by [[slabzend]]. 
+The z-direction is parallel to the third crystal primitive lattice vector which has
 to be orthogonal to the other ones, so the length of the cell along z is
-[[rprimd]](3,3). In addition **slabzbeg** and [[slabzend]] have to be such that:
+[[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ **slabzbeg**  < [[slabzend]] ≤ [[rprimd]](3,3)
+      0 ≤ [[slabzbeg]]  < [[slabzend]] ≤ [[rprimd]](3,3)
 
 Together with [[slabwsrad]] they define the jellium positive charge density
-distribution n+(x,y,z) in this way:
-
-      n+(x,y,z) = nbulk     if **slabzbeg**  ≤ z ≤ [[slabzend]]
-                = 0        otherwise,
-
+distribution $n_{+}(x,y,z)$ in this way:
+\begin{eqnarray}
+      n_{+}(x,y,z) &=& n_{bulk} \quad \text{if} \quad [[slabzbeg]]  \leq z \leq [[slabzend]]  \nonumber\\
+                &=& 0       \quad \text{otherwise}                           \nonumber
+\end{eqnarray}
 so the positive charge density is invariant along the xy plane as well as the
 electrostatic potential generated by it.
 """,
@@ -15548,23 +15548,23 @@ Variable(
     topics=['Artificial_expert'],
     dimensions="scalar",
     defaultval=[0.0, 0.0],
-    mnemonics="jellium SLAB ENDing edge along the Z direction",
-    text="""
-Define the edges of the jellium slab (if used, so if [[jellslab]] ≠ 0) along
+    mnemonics="jellium SLAB ENDing edge along the z-direction",
+    text=r"""
+Define the edges of the jellium slab (if used, so if [[jellslab]]/=0) along
 z, namely the slab starts at a point along z which is expressed in Bohr by
-[[slabzbeg]] and it ends at a point expressed in Bohr by **slabzend**. The z
-direction is parallel to the third crystal primitive lattice vector which has
+[[slabzbeg]] and it ends at a point expressed in Bohr by [[slabzend]]. 
+The z-direction is parallel to the third crystal primitive lattice vector which has
 to be orthogonal to the other ones, so the length of the cell along z is
-[[rprimd]](3,3). In addition [[slabzbeg]] and **slabzend** have to be such that:
+[[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ [[slabzbeg]] < **slabzend**  ≤ [[rprimd]](3,3)
+      0 ≤ [[slabzbeg]] < [[slabzend]]  ≤ [[rprimd]](3,3)
 
 Together with [[slabwsrad]] they define the jellium positive charge density
-distribution n+(x,y,z) in this way:
-
-      n+(x,y,z) = nbulk     if [[slabzbeg]] ≤ z ≤ **slabzend**
-                = 0        otherwise,
-
+distribution $n_{+}(x,y,z)$ in this way:
+\begin{eqnarray}
+      n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad [[slabzbeg]] \leq z \leq [[slabzend]] \nonumber \\
+                   &=& 0        \quad  \text{otherwise}                                    \nonumber
+\end{eqnarray}
 so the positive charge density is invariant along the xy plane as well as the
 electrostatic potential generated by it.
 """,
@@ -15604,27 +15604,27 @@ Variable(
 For each type of atom (each pseudopotential), specify the treatment of spin-
 orbit interaction (if [[nspinor]]==2 and Norm-conserving pseudopotentials
 [[usepaw]]==0)
-If 0: no spin-orbit interaction, even if [[nspinor]]=2
-If 1: treat spin-orbit as specified in the pseudopotential file.
-If 2: treat spin-orbit in the HGH form (usual form, although not allowed for
-all pseudopotentials)
-If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented...).
+
+  * If 0: no spin-orbit interaction, even if [[nspinor]]=2
+  * If 1: treat spin-orbit as specified in the pseudopotential file.
+  * If 2: treat spin-orbit in the HGH form (usual form, although not allowed for all pseudopotentials)
+  * If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented...).
 
 For typical usage, the default value is OK. If the spin-orbit needs to be
 turned off for one atom, 0 might be relevant. Note however, that the code will
-stop if [[nspinor]]=2 is used and one of the pseudopotential does not contain
+stop if [[nspinor]]==2 is used and one of the pseudopotential does not contain
 the information about the spin-orbit interaction (this is the case for some
 old pseudopotentials). Indeed, for spinorial calculations, turning off the
 spin-orbit interaction is unphysical, and also does not save CPU time... It
 should only be done for test purposes
 
 Note that if [[nspinor]]==1, the spin-orbit cannot be treated anyhow, so the
-value of [[so_psp]] is irrelevant. In case [[usepaw]]=1, please refer to
+value of [[so_psp]] is irrelevant. In case [[usepaw]]==1, please refer to
 [[pawspnorb]].
 
 Prior to v5.4, the input variable **so_typat** was used, in place of
 [[so_psp]]. Because the values 0 and 1 have been switched between [[so_psp]]
-and so_typat, it was dangerous to continue to allow the use of so_typat.
+and **so_typat**, it was dangerous to continue to allow the use of **so_typat**.
 """,
 ),
 
@@ -15772,11 +15772,11 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['spinpolarisation_basic', 'crystal_useful', 'MagMom_useful'],
-    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': [3, '[[natrd]]'], 'defaultval': [3, '[[natom]]']}),
+    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[3, [[natrd]] ]', 'defaultval': '[3, [[natom]] ]'}),
     defaultval=0.0,
     mnemonics="SPIN for AToms",
     text="""
-Gives the initial electronic spin-magnetization for each atom, in unit of h-bar/2.
+Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$.
 
 Note that if [[nspden]]=2, the z-component must be given for each atom, in
 triplets (0 0 z-component).
@@ -15789,12 +15789,13 @@ It is not checked against the initial occupation numbers [[occ]] for each spin
 channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
 find stable local spin fluctuations, for example: antiferromagnetism, or the
-spontaneous spatial spin separation of elongated H2 molecule.
+spontaneous spatial spin separation of elongated H$_2$ molecule.
 
-* If the atom manipulator is used, [[spinat]] will be related to the preprocessed set of atoms,
+  * If the atom manipulator is used, [[spinat]] will be related to the preprocessed set of atoms,
   generated by the atom manipulator. The user must thus foresee the effect of this atom manipulator (see [[objarf]]).
 
-* If the atom manipulator is not used, and the symmetries are not specified by the user ([[nsym]]=0), spinat will be used, if present, to determine the anti-ferromagnetic characteristics of the symmetry operations, see [[symafm]].
+  * If the atom manipulator is not used, and the symmetries are not specified by the user ([[nsym]]=0), 
+spinat will be used, if present, to determine the anti-ferromagnetic characteristics of the symmetry operations, see [[symafm]].
 In case of collinear antiferromagnetism ([[nsppol]]=1, [[nspinor]]=1,
 [[nspden]]=2), these symmetries are used to symmetrize the density.
 In case of non-collinear magnetism ([[nsppol]]=1, [[nspinor]]=1,
@@ -16029,8 +16030,8 @@ determine the content of [[symafm]].
 The symmetries found as "antiferro magnetic" ([[symafm]]=-1) are used to
 symmetrize density and magnetization in the following cases:
 
-- antiferromagnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=2)
-- non-collinear magnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=4)
+  * antiferromagnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=2)
+  * non-collinear magnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=4)
 
 In other cases they are not used.
 """,
@@ -16287,23 +16288,23 @@ Variable(
     text="""
 This input variable allows to modulate the use of the timing routines.
 
-If 0  -->  as soon as possible, suppresses all calls to timing routines
-If 1  -->  usual timing behaviour, with short analysis, appropriate for
+  * If 0  -->  as soon as possible, suppresses all calls to timing routines
+  * If 1  -->  usual timing behaviour, with short analysis, appropriate for
 sequential execution
-If 2  -->  close to [[timopt]]=1, except that the analysis routine does not time
+  * If 2  -->  close to [[timopt]]=1, except that the analysis routine does not time
 the timer, appropriate for parallel execution.
-If 3  -->  close to [[timopt]]=1, except that the different parts of the lobpcg
+  * If 3  -->  close to [[timopt]]=1, except that the different parts of the lobpcg
 routine are timed in detail.
-If 4  -->  close to [[timopt]]=1, except that the different parts of the lobpcg
+  * If 4  -->  close to [[timopt]]=1, except that the different parts of the lobpcg
 routine are timed in detail. A different splitting of lobpcg than for
 [[timopt]]=-3 is provided.
-If -1  -->  a full analysis of timings is delivered
-If -2  -->  a full analysis of timings is delivered, except timing the timer
-If -3  -->  a full analysis of timings is delivered, including the detailed
+  * If -1  -->  a full analysis of timings is delivered
+  * If -2  -->  a full analysis of timings is delivered, except timing the timer
+  * If -3  -->  a full analysis of timings is delivered, including the detailed
 timing of the different parts of the lobpcg routine. (this takes time, and is
 discouraged for too small runs - the timing would take more time than the run
 !). The timer is timed.
-If -4  -->  a full analysis of timings is delivered, including the detailed
+  * If -4  -->  a full analysis of timings is delivered, including the detailed
 timing of the different parts of the lobpcg routine. A different splitting of
 lobpcg than for [[timopt]]=-3 is provided (this takes time, and is discouraged
 for too small runs - the timing would take more time than the run !). The
@@ -16321,7 +16322,7 @@ Variable(
     mnemonics="TaiL maximum Number of PReConditionner Conjugate Gradient iterations",
     text="""
 This variable is similar to [[wvl_nprccg]] but for the preconditionner
-iterations during the tail corrections (see [[tl_radius]]  ). TO BE IMPROVED:
+iterations during the tail corrections (see [[tl_radius]]). TO BE IMPROVED:
 all tl_* and wvl_* variables should contain a link to a tutorial, David Waroquiers 090831.
 """,
 ),
@@ -16673,13 +16674,12 @@ Variable(
     characteristics=['[[ENERGY]]'],
     text="""
 Gives, in Hartree, the physical temperature of the system, in case
-[[occopt]]=4, 5, 6, or 7.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
+[[occopt]]=4, 5, 6, or 7.\n
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[tphysel]] has the
 '[[ENERGY]]' characteristics (0.001 Ha = 27.2113845 meV = 315.773 Kelvin). One
 has to specify an independent broadening [[tsmear]]. The combination of the
-two parameters [[tphysel]] and [[tsmear]] is described in a paper by M.
-Verstraete and X. Gonze, Phys. Rev. B 65, 035111 (2002). Note that the
-signification of the entropy is modified with respect to the usual entropy.
+two parameters [[tphysel]] and [[tsmear]] is described in [[cite:Verstraete2002]]. 
+Note that the signification of the entropy is modified with respect to the usual entropy.
 The choice has been made to use [[tsmear]] as a prefactor of the entropy, to
 define the entropy contribution to the free energy.
 """,
@@ -16699,8 +16699,8 @@ Gives the broadening of occupation numbers [[occ]], in the metallic cases
 ([[occopt]]=3, 4, 5, 6 and 7). Can be specified in Ha (the default), eV, Ry,
 or Kelvin, since [[tsmear]] has the '[[ENERGY]]' characteristics (0.001 Ha =
 27.2113845 meV = 315.773 Kelvin).
-Default is 0.01 Ha. This should be OK using gaussian like smearings (occopt
-4,5,6,7) for a free-electron metal like Al. For d-band metals, you may need to
+Default is 0.01 Ha. This should be OK using gaussian like smearings ([[occopt]]=4,5,6,7) 
+for a free-electron metal like Al. For d-band metals, you may need to
 use less.
 Always check the convergence of the calculation with respect to this
 parameter, and simultaneously, with respect to the sampling of k-points (see
@@ -16709,8 +16709,7 @@ If [[occopt]]=3, [[tsmear]] is the physical temperature, as the broadening is
 based on Fermi-Dirac statistics. However, if [[occopt]]=4, 5, 6, or 7, the
 broadening is not based on Fermi-Dirac statistics, and [[tsmear]] is only a
 convergence parameter. It is still possible to define a physical temperature,
-thanks to the input variable [[tphysel]]. See the paper by M. Verstraete and
-X. Gonze, Phys. Rev. B (2002).
+thanks to the input variable [[tphysel]] (See also [[cite:Verstraete2002]]).
 """,
 ),
 
@@ -17123,11 +17122,11 @@ Variable(
     defaultval=0,
     mnemonics="USE Kinetic energy DENsity",
     text="""
-If [[usekden]]=1 the kinetic energy density will be computed during the self-
-consistency loop, in a way similar to the computation of the density. This is
-needed if a meta-GGA is to be used as XC functional. Otherwise
+If [[usekden]]=1 the kinetic energy density will be computed during 
+the self-consistent loop, in a way similar to the computation of the density. 
+This is needed if a meta-GGA is to be used as XC functional. By default
 ([[usekden]]=0), the kinetic energy density is not computed during the self-
-consistency loop.
+consistent loop.
 """,
 ),
 
@@ -17486,7 +17485,7 @@ Variable(
     mnemonics="VACUUM identification",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
-Establishes the presence (if 1) or absence (if 0) of a vacuum layer, along the
+Establishes the presence (if [[vacuum]]=1) or absence (if [[vacuum]]=0) of a vacuum layer, along the
 three possible directions normal to the primitive axes.
 
 This information might be used to generate k-point grids, if [[kptopt]]=0 and
@@ -18366,7 +18365,7 @@ Variable(
     topics=['Wavelets_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="WaVeLet BigDFT Comparison",
+    mnemonics="WaVeLet BIGDFT Comparison",
     text="""
 This variable is used for the wavelets capabilities of ABINIT (see [[usewvl]]).
 It is used to compare the results obtained with ABINIT with those obtained
@@ -18384,8 +18383,8 @@ Variable(
     defaultval=6.0,
     mnemonics="WaVeLet Coarse grid Radius MULTiplier",
     text="""
-This factor is used to defined the expansion of the coarse resolution grid in
-the case of wavelets (seea [[usewvl]] ). The grid is made of points inside
+This factor is used to define the expansion of the coarse resolution grid in
+the case of wavelets (see [[usewvl]]). The grid is made of points inside
 spheres centered on atoms. The radius of these spheres are the product between
 this factor and the covalent radius of element (read from the pseudo-potential file).
 This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
@@ -18401,8 +18400,8 @@ Variable(
     defaultval=10.0,
     mnemonics="WaVeLet Fine grid Radius MULTiplier",
     text="""
-This factor is used to defined the expansion of the fine resolution grid in
-the case of wavelets (see [[usewvl]] ). This fine resolution grid has the same
+This factor is used to define the expansion of the fine resolution grid in
+the case of wavelets (see [[usewvl]]). This fine resolution grid has the same
 grid step than the coarse one (see [[wvl_crmult]] ), but on each point, 8
 coefficients are stored instead of one, increasing the precision of the
 calculation in this area. The grid is made of points inside spheres centered
@@ -18438,8 +18437,8 @@ Variable(
     mnemonics="WaVeLet Number of GAUSSians",
     text="""
 In the wavelet-PAW computation case, projectors may be fitted to a sum of
-complex Gaussians. The fit is done for wvl_ngauss(1), wvl_ngauss(1)+1... up
-to wvl_ngauss(2) Gaussians.
+complex Gaussians. The fit is done for [[wvl_ngauss]](1), [[wvl_ngauss]](1)+1... up
+to [[wvl_ngauss]](2) Gaussians.
 """,
 ),
 
