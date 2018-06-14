@@ -53,8 +53,8 @@ state calculation, and takes almost no additional time. The tutorial file is
 for stishovite, a polymorph of SiO$_2$. In addition to typical ground state
 variables, only two additional variables are added:
     
-            prtefg  2
-            quadmom 0.0 -0.02558
+    prtefg  2
+    quadmom 0.0 -0.02558
 
 {% dialog tests/tutorial/Input/tnuc_1.in %}
 
@@ -155,7 +155,7 @@ SnO$_2$, which, like stishovite studied above, has the rutile structure.
 In addition to typical ground state
 variables, only one additional variable is needed:
     
-            prtfc  1
+    prtfc  1
 
 {% dialog tests/tutorial/Input/tnuc_2.in %}
 
@@ -174,7 +174,7 @@ If you run this file, you should find a contact term of
 102.3008. 
 
 To check your results, you can use experimental data for the isomer shift $\delta$
-for known compounds to compute $\Delta\langle r^2\rangle$ in Eq.~\ref{eq:mossbauershift}
+for known compounds to compute $\Delta\langle r^2\rangle$ in Eq.\ref{eq:mossbauershift}
 (see [[cite:Zwanziger2009]]). Using our results above together with standard
 tin M&ouml;ssbauer parameters of $E_\gamma = 23.875$ keV and an experimental shift
 of 2.2 mm/sec for $\alpha$-Sn relative to SnO$_2$, we find

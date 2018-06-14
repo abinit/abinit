@@ -207,14 +207,25 @@ the GW self-energy is done only at the $\Gamma$ point.
 The spectral function is written in the file tgw2_4o_SIG. It is a simple text
 file. It contains, as a function of the frequency (eV), the real part of the
 self-energy, the imaginary part of the self-energy, and the spectral function.
-You can visualize it using your preferred software. For instance, issue
+You can visualize it using your preferred software. 
+For instance, start |gnuplot| and issue
     
-    $ gnuplot
-    gnuplot>  p'tgw2_4o_SIG' u 1:4 w l
+```gnuplot
+p 'tgw2_4o_SIG' u 1:4 w l
+```
 
 You should be able to distinguish the main quasiparticle peak located at the
 GW energy (-3.7 eV) and some additional features in the vicinity of the GW
 eigenvalue minus a plasmon energy (-3.7 eV - 15.8 eV = -19.5 eV).
+
+!!! tip
+
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the results:
+
+        abiopen.py tgw2_4o_SIGRES.nc -e -sns
+
+    ![](gw2_assets/al_spectra_b0_gamma.png)
 
 Another file, tgw2_4o_GW, is worth to mention: it contains information to be
 used for the subsequent calculation of excitonic effects within the Bethe-Salpeter Equation with ABINIT or with other codes from

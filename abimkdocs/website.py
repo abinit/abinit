@@ -851,24 +851,25 @@ The bibtex file is available [here](../abiref.bib).
             if self.verbose: print("Found possible alias:", key)
             if key == "today":
                 return datetime.date.today().strftime("%B %d, %Y")
+
             value = self.mkdocs_config["extra"]["abimkdocs_aliases"].get(key)
             if value is not None:
                 if self.verbose: print("Returning", value)
-                return value
+                return " " + value + " "
             else:
-                #print("Triggered", matchobj.group(0))
+                if self.verbose: print("Returning full match:", matchobj.group(0))
                 return matchobj.group(0)
 
-        ALIAS_SYNTAX = re.compile(r"[^`$]\|((?P<key>\w+)\|")
-        #ALIAS_SYNTAX = re.compile(r"(?!`+)\|(?P<key>\w+)\|")
-        return [re.sub(ALIAS_SYNTAX, repl, line) for line in lines]
+        alias_syntax = re.compile(r"[^`\$]\|(?P<key>\w+)\|")
+        #alias_syntax = re.compile(r"(?!`+)\|(?P<key>\w+)\|")
+        return [re.sub(alias_syntax, repl, line) for line in lines]
 
     def _preprocess_include(self, lines):
         """Handle {action ...} syntax."""
-        INC_SYNTAX = re.compile(r'^\{%\s*(.+?)\s*%\}')
+        inc_syntax = re.compile(r'^\{%\s*(.+?)\s*%\}')
         new_lines = []
         for line in lines:
-            m = INC_SYNTAX.search(line)
+            m = inc_syntax.search(line)
             if not m:
                 new_lines.append(line)
             else:

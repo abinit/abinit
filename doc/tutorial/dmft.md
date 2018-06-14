@@ -98,7 +98,7 @@ end of the calculation. In this calculation, we find 1.E-06, which is large
 (1.E-10 would be better, so nnsclo and nline should be increased, but it would
 take more time). When the calculation is finished, you can plot the fatbands
 for Vanadium and l=2. Several possibilities are available for that purpose. We
-will work with the simple [XMGRACE](http://plasma-gate.weizmann.ac.il/Grace/) package 
+will work with the simple |xmgrace| package 
 (you need to install it, if not already available on your machine).
     
     xmgrace tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002 -par ../Input/tdmft_fatband.par
