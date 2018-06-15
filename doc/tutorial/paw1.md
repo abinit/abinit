@@ -2,7 +2,7 @@
 authors: MT, FJ
 ---
 
-# First lesson on the projector-augmented wave (PAW) technique  
+# First lesson on the Projector Augmented-Wave (PAW) technique
 
 ## Projector Augmented-Wave technique, how to use it?  
 
@@ -172,7 +172,7 @@ PAW TEST:
 ==== Compensation charge inside spheres ============  
 The following values must be close to each other ...  
 Compensation charge over spherical meshes =      0.413178580356274  
-Compensation charge over fine fft grid    =      0.413177280314290
+```Compensation charge over fine fft grid    =      0.413177280314290
 ```
 
 
