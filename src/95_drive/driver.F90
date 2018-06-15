@@ -660,6 +660,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    call timab(642,2,tsec)
 
+!  ****************************************************************************
+!  Main case selection in driver
+
    select case(dtset%optdriver)
 
    case(RUNL_GSTATE)

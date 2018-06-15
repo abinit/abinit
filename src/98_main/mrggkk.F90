@@ -182,7 +182,7 @@ program mrggkk
    ios = open_file(outfile,message,unit=unitout,form='formatted')
    rdwrout = 4
  else
-   MSG_ERROR(' binascii must be 0 or 1')
+   MSG_ERROR(' binascii must be between 0 and 2')
  end if
 
  ABI_CHECK(ios==0,message)

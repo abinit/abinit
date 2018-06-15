@@ -6,6 +6,7 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
+variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -23,9 +24,8 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
-variables/aim.md
-variables/anaddb.md
 variables/optic.md
+variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -48,7 +48,7 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffMass.md
+topics/EffectiveMass.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md
