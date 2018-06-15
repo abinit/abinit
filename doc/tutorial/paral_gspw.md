@@ -95,7 +95,7 @@ waves G and the Bands, but you can imagine everything you want.
 One of the most simple way to launch the KGB parallelization in ABINIT is to
 add just one input variable to the sequential input file. 
 This is [[paral_kgb]] and controls everything concerning the KGB parallelization: the
-use of the LOBPCG eigensolver ([[wfoptalg]]=~~4 or 14~~114) of A. Knyazev, the
+use of the LOBPCG eigensolver ([[wfoptalg]]=4 or 14 or 114) of A. Knyazev, the
 parallel 3dim-FFT ([[fftalg]]=401) written by S. Goedecker, and some other tricks... 
 Then you have to chose between tuning you parallelism with the 3 variables
 to define the number or processors needed on each level of the KGB parallelization: [[npband]], [[npfft]] and [[npkpt]],

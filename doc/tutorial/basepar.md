@@ -223,7 +223,7 @@ as the abinit command:
     
 ```bash
     mpirun -n 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
- ```
+```
 
 Depending on your particular machine, "mpirun" might have to be replaced by
 "mpiexec", and "-n" by some other option.
@@ -285,7 +285,8 @@ machine, and the sequential part of ABINIT), you will not be able to decrease
 further the Wall clock time seen by one processor. It is not worth to try to
 use more processors. You should get a curve similar to this one:
 
-![Speedup kpt](basepar_assets/lesson_basepar_speedup.png "Spped up for k-pt parallelisation"):Speedup with k point parallelization.
+![Speedup kpt](basepar_assets/lesson_basepar_speedup.png "Spped up for k-pt parallelisation")
+_Speedup with k point parallelization_
 
 The red curve materializes the speed-up achieved, while the green one is the
 $y = x$ line. The shape of the red curve will vary depending on your hardware

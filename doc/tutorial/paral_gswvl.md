@@ -192,7 +192,8 @@ the time is short, one can reduce [[wvl_hgrid]] in the input file to 0.45.
 
 ![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png) 
 ![Efficiency for the C21H44 alkane chain](paral_gswvl_assets/efficiency-C21.png)
-![Time repartition for the C21H44 alkane chain](paral_gswvl_assets/time-C21.png):Time measurements for a run over several processors of a C 21H44 alkane chain
+![Time repartition for the C21H44 alkane chain](paral_gswvl_assets/time-C21.png)
+_Time measurements for a run over several processors of a C 21H44 alkane chain_
 
 As we obtained previously, the efficiency is generally lowered when the number
 of processors is not a divisor of the number of orbitals (namely here 24 and 48).
