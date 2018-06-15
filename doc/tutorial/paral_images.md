@@ -21,20 +21,17 @@ You are supposed to know already some basics of parallelism in ABINIT, explained
 
 ## 1 Summary of the String Method
   
-The string method [1] is an algorithm that allows the computation of a Minimum
-Energy Path (MEP) between an initial (i) and a final (f) configuration. It is
-inspired from the Nudge Elastic Band (NEB) method. An elastic chain of
-configurations joining (i) to (f) is progressively driven to the MEP using an
+The string method [[cite:Weinan2002]] is an algorithm that allows the computation of a Minimum
+Energy Path (MEP) between an initial (_i_) and a final (_f_) configuration. It is
+inspired from the Nudge Elastic Band (NEB) method. A chain of
+configurations joining (_i_) to (_f_) is progressively driven to the MEP using an
 iterative procedure in which each iteration consists of two steps:  
 
-1. evolution step: the images are moved following the atomic forces,  
-2. reparametrization step: the images are equally redistributed along the string.  
+1. **Evolution step**: the images are moved following the atomic forces.  
+2. **Reparametrization step**: the images are equally redistributed along the string.  
 
-The algorithm presently implemented in ABINIT is the so-called "simplified string method" [2]. 
-It has been designed for the sampling of smooth energy landscapes.  
-[1] "String method for the study of rare events", W. E, W. Ren, E. Vanden-Eijnden, Physical Review B 66, 052301 (2002).  
-[2] "Simplified string method for computing the minimum energy path in
-barrier-crossing events", W. E, W. Ren, E. Vanden-Eijnden, J. Chem. Phys. 126, 164103 (2007).  
+The algorithm presently implemented in ABINIT is the so-called "simplified string method" [[cite:Weinan2007]]. 
+It has been designed for the sampling of smooth energy landscapes.   
 
 *Before continuing you might work in a different subdirectory as for the other
 lessons. Why not "work_paral_string"?* 
@@ -45,23 +42,25 @@ lessons. Why not "work_paral_string"?*
     All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
     You can compare your results with reference output files located in ~abinit/tests/tutoparal/Refs.  
   
-    In the following, when "run ABINIT over nn CPU cores" appears, you have to use
+    In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of
-    the computer you are using. This can be for instance: mpirun -n nn abinit < abinit.files 
+    the computer you are using. This can be for instance: mpirun -n _nn_ abinit < abinit.files 
     or the use of a specific submission file.
 
 ## 2 Computation of the initial and final configurations
 
 We propose to compute the energy barrier for transferring a proton from an
-hydronium ion (H3O+) onto a NH3 molecule:  
+hydronium ion (H<sub>3</sub>O<sup>+</sup>) onto a NH<sub>3</sub> molecule: 
 
-    H3O+ + NH3 --> H2O + NH4+
+\begin{equation} \nonumber
+\rm H_3O^+ + NH_3 \rightarrow H_2O + NH_4^+
+\end{equation}
 
 Starting from an hydronium ion and an ammoniac molecule, we obtain as final
-state a water molecule and an ammonium ion NH4+. In such a process, the MEP
+state a water molecule and an ammonium ion NH<sub>4</sub><sup>+</sup>. In such a process, the MEP
 and the barrier are dependent on the distance between the hydronium ion and
-the NH3 molecule. Thus we choose to fix the O atom of H3O+ and the N atom of
-NH3 at a given distance from each other (4.0 Ä). The calculation is performed
+the NH<sub>3</sub> molecule. Thus we choose to fix the O atom of H<sub>3</sub>O<sup>+</sup> and the N atom of
+NH<sub>3</sub> at a given distance from each other (4.0 Å). The calculation is performed
 using a LDA exchange-correlation functional.  
   
 You can visualize the initial and final states of the reaction below (H atoms
@@ -72,29 +71,29 @@ are in white, the O atom is in red and the N atom in grey).
 ![final state](paral_images_assets/Initial2.png)  
   
 Before using the string method, it is necessary to optimize the initial and
-final points. The input files tstring_01.in and tstring_02.in contain
+final points. The input files `tstring_01.in` and `tstring_02.in` contain
 respectively two geometries close to the initial and final states of the
 system. You have first to optimize properly these initial and final
 configurations, using for instance the Broyden algorithm implemented in ABINIT.  
 
 {% dialog tests/tutoparal/Input/tstring_01.in tests/tutoparal/Input/tstring_02.in %}
   
-Open the tstring_01.in file and look at it carefully. The unit cell is defined
+Open the `tstring_01.in` file and look at it carefully. The unit cell is defined
 at the end. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
-4.0 Ä of vacuum in the three directions. The keyword [[charge]] is used to
+4.0 Å of vacuum in the three directions. The keyword [[charge]] is used to
 remove an electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge background).  
   
-The exchange-correlation functional uses the external library libxc. You have
-to compile ABINIT using the libxc plugin (if not, simply replace
+The exchange-correlation functional uses the external library _libxc_. You have
+to compile ABINIT using the _libxc_ plugin (if not, simply replace
 [[ixc]]=-001009 by [[ixc]] 7). This input file has to be run in parallel using
-20 CPU cores. You might use the tstring.files file. Edit it and adapt it with
+20 CPU cores. You might use the `tstring.files` file. Edit it and adapt it with
 the appropriate file names.  
   
 Then run the calculation in parallel over 20 CPU cores, first for the initial
-configuration (tstring_01.in), and then for the final one (tstring_02.in). You
+configuration (`tstring_01.in`), and then for the final one (`tstring_02.in`). You
 should obtain the following positions:  
   
 1) for the initial configuration:
@@ -145,7 +144,7 @@ you can turn to the computation of the MEP. Let us first have a look at the rela
 :       convergence criterion (in Hartree) on the total energy (averaged over the [[nimage]] images).  
 
 [[fxcartfactor]]
-:       "time step" (in Bohr^2/Hartree) for the evolution step of
+:       "time step" (in Bohr<sup>2</sup>/Hartree) for the evolution step of
         the string method. For the time being (ABINITv6.10), only steepest-descent
         algorithm is implemented.  
 
@@ -166,7 +165,7 @@ thus only perform one step of string method.
 
 {% dialog tests/tutoparal/Input/tstring_03.in %}
 
-Open the tstring_03.in file and look at it. The initial and final
+Open the `tstring_03.in` file and look at it. The initial and final
 configurations are specified at the end through the keywords [[xangst] and
 [[nimage|xangst_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
@@ -175,7 +174,7 @@ correspond to the initial and final states, 10 are evolving). [[nimage]] is
 thus set to 12. The keyword [[npimage]] is set to 1 (no parallelism over
 images) and [[ntimimage]] is set to 1 (only one time step).
 
-You might use the tstring.files file. Edit it and adapt it with the
+You might use the `tstring.files` file. Edit it and adapt it with the
 appropriate file names. Since the parallelism over the images is not used,
 this calculation has to be run over 20 CPU cores.
 
@@ -185,7 +184,7 @@ Now you can perform the complete computation of the MEP using the parallelism ov
 
 {% dialog tests/tutoparal/Input/tstring_04.in %}
   
-Open the tstring_04.in file. The keyword [[npimage]] has been set to 10, and
+Open the `tstring_04.in` file. The keyword [[npimage]] has been set to 10, and
 [[ntimimage]] has been increased to 50.
 This calculation has thus to be run over 200 CPU cores. Note that the output
 file is very big, so that no reference file is provided in the ABINIT package.
@@ -193,21 +192,21 @@ file is very big, so that no reference file is provided in the ABINIT package.
 The convergence of the string method algorithm is controlled by [[tolimg]],
 which has been set to 0.0001 Ha. In order to obtain a more lisible output
 file, you can decrease the printing volume and set [[prtvolimg]] to 2.
-Here again, you might use the tstring.files. Edit it and adapt it with the
+Here again, you might use the `tstring.files`. Edit it and adapt it with the
 appropriate file names. Then run ABINIT over 200 CPU cores.  
   
 When the calculation is completed, ABINIT provides you with 12 configurations
-that sample the Minimum Energy Path between the initial (i) and final (f)
+that sample the Minimum Energy Path between the initial (_i_) and final (_f_)
 states. Plotting the total energy of these configurations with respect to a
-reaction coordinate that join (i) to (f) gives you the energy barrier that
-separates (i) from (f). In our case, a natural reaction coordinate can be the
-distance between the hopping proton and the O atom of H2O (dOH), or
-equivalently the distance between the proton and the N atom (dHN). The graph
+reaction coordinate that join (_i_) to (_f_) gives you the energy barrier that
+separates (_i_) from (_f_). In our case, a natural reaction coordinate can be the
+distance between the hopping proton and the O atom of H<sub>2</sub>O (d<sub>OH</sub>), or
+equivalently the distance between the proton and the N atom (d<sub>HN</sub>). The graph
 below shows the total energy as a function of the OH distance along the MEP.
-It indicates that the barrier for crossing from H2O to NH3 is ~ 1.36 eV. The
+It indicates that the barrier for crossing from H<sub>2</sub>O to NH<sub>3</sub> is ~ 1.36 eV. The
 6th image gives an approximate geometry of the transition state. Note that in
 the initial state, the OH distance is significantly stretched, due to the
-presence of the NH3 molecule.  
+presence of the NH<sub>3</sub> molecule.  
   
 Note that the total energy of each of the 12 replicas of the simulation cell
 can be found at the end of the output file in the section:  
@@ -225,17 +224,17 @@ fcart_1img, fcart_2img, ..., fcart_12img.
 ![courbe 1](paral_images_assets/curve1.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
-and tolimg=0.0001 (which is very close to the x coordinate of the proton:
+and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
 first coordinate of xangst for the 8th atom in the output file).  
   
 The keyword [[npimage]] can be automatically set by ABINIT. It takes the
 requested total number of CPU cores divided by the number of dynamical images.
-The remaining cores are, if possible, distributed over k, band and FFT.  
+The remaining cores are, if possible, distributed over k-points, bands and FFT.  
   
-Let us test this functionality. Edit again the tstring_04.in file and comment
+Let us test this functionality. Edit again the `tstring_04.in` file and comment
 the [[npimage]] line. Then run the calculation again over a number of cores of
 your choice (less than 200). If the code stops with an error message
-indicating that the number of kpt, band and FFT processors is not correct,
+indicating that the number of k-point, band and FFT processors is not correct,
 adapt the value of [[npband]] and [[npfft]].  
   
 Open the output file and look at the [[npimage]] value ...
@@ -256,12 +255,12 @@ barrier.
 ![curve 2](paral_images_assets/curve2.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
-and tolimg=0.0001 (black curve) and the one computed with 22 images and
-tolimg=0.0001 (red curve).  
+and [[tolimg]]=0.0001 (black curve) and the one computed with 22 images and
+[[tolimg]]=0.0001 (red curve).  
   
 The following animation (animated gif file) is made by putting together the 22
-images obtained at the end of this calculation, from (i) to (f) and then from
-(f) to (i). It allows to visualize the MEP.  
+images obtained at the end of this calculation, from (_i_) to (_f_) and then from
+(_f_) to (_i_). It allows to visualize the MEP.  
   
 
 [![image](paral_images_assets/start.gif)](paral_images_assets/stringvideo.gif)  
@@ -284,4 +283,4 @@ section. The graph below superimposes the path obtained with 12 images and
 ![image](paral_images_assets/curve3.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
-and tolimg=0.0001 (black curve) and the one computed with 12 images and tolimg=0.001 (red curve).  
+and [[tolimg]]=0.0001 (black curve) and the one computed with 12 images and [[tolimg]]=0.001 (red curve).  
