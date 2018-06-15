@@ -5,7 +5,6 @@ authors: XG, RC
 # First tutorial on DFPT
 
 ## Dynamical and dielectric properties of AlAs
-<div class=text-justify>
 
 In this tutorial you will learn how to get the following physical properties (of an insulator) from density-functional perturbation theory (DFPT):
 
@@ -600,4 +599,3 @@ close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
     You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to 
     make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
 
-</div>

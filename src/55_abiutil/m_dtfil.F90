@@ -345,10 +345,10 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
 !According to getefmas and irdefmas, build _EFMAS file name, referred as fil_efmas
 !A default is available if getefmas is 0
- stringfile='_EFMAS' ; stringvar='efmas'
+ stringfile='_EFMAS.nc' ; stringvar='efmas'
  call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,&
 & ndtset,stringfile,stringvar,will_read)
- if(will_read==0)fil_efmas=trim(filnam_ds(3))//'_EFMAS'
+ if(will_read==0)fil_efmas=trim(filnam_ds(3))//'_EFMAS.nc'
 
 !According to getscr and irdscr, build _SCR file name, referred as filscr
 !A default is available if getscr is 0

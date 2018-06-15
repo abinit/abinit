@@ -329,7 +329,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="AUXiliary XC functional for hybrid functional, IXC number",
+    mnemonics="AUxiliary XC functional for hybrid functional, IXC number",
     text="""
 Specification of an auxiliary exchange-correlation functional, thanks to its
 [[ixc]] value, to possibly replace the heavy evaluation of an hybrid
@@ -349,11 +349,11 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1.0,
-    mnemonics="AUXiliary xc functional for hybrid functional- SCALing factor",
+    mnemonics="AUxiliary XC functional for hybrid functional- SCALing factor",
     text="""
 Possible scaling factor for the auxiliary exchange-correlation functional
 defined by [[auxc_ixc]] that has the goal to replace the Fock operator or
-hybrid functional when [[fockoptmix]] = 11.
+hybrid functional when [[fockoptmix]]==11.
 
 The default value 1.0 corresponds to the unmodified xc functional. When the
 auxiliary functional is used to replace the hybrid functional in SCF loops, a
@@ -445,9 +445,11 @@ numbers give the lowest and highest bands for spin up, and the third and
 fourth numbers give the lowest and highest bands for spin down. Their
 occupation number is assumed to be 1.
 
-Presently, [[bdberry]] MUST be initialized by the user in case of a Berry
-phase calculation with [[berryopt]] = 1, 2, or 3: the above-mentioned default
-will cause an early exit.
+!!! important
+
+    Presently, [[bdberry]] MUST be initialized by the user in case of a Berry
+    phase calculation with [[berryopt]] = 1, 2, or 3: the above-mentioned default
+    will cause an early exit.
 """,
 ),
 
@@ -461,7 +463,6 @@ Variable(
     mnemonics="BanD for second-order EIGenvalues from Response-Function",
     requires="[[ieig2rf]] in [1,2,3,4,5]",
     text="""
-that is, if the user is performing second-order eigenvalue calculations using response-functions.
 
 The variable [[bdeigrf]] is the maximum number of bands for which the second-
 order eigenvalues must be calculated: the full number of bands is still used
@@ -526,14 +527,18 @@ electric field calculations.
   * 2 --> the computation of derivatives with respect to the wavevector, thanks to the
     Berry phase finite-difference formula, is activated (uderiv routine)
   * 3 --> same as option 1 and 2 together
-**Note that options 1 to 3 require the use of a serial build of Abinit.**
+
+!!! note
+    Note that options 1 to 3 require the use of a serial build of Abinit.**
 
   * -1 --> alternative computation of Berry phases (berryphase_new routine)
   * -2 --> alternative computation of derivatives with respect to the wavevector,
     thanks to the Berry phase finite-difference formula (berryphase_new routine)
   * -3 --> same as option -1 and -2 together
-**Options -1 to -3 permit use of a parallel build and will be preferred by
-most users.**
+
+!!! note
+    Options -1 to -3 permit use of a parallel build and will be preferred by
+    most users.
 
   * 4 --> finite electric field calculation (unreduced E-field)
   * 6 --> finite electric displacement field calculation (unreduced D-field)
@@ -545,7 +550,7 @@ most users.**
 Other related input variables are:
 
   * in case of [[berryopt]]=1,2, or 3: [[bdberry]] and [[kberry]]; also, [[nberry]] must be larger than 0;
-  * in case of [[berryopt]]=-1,-2, or -3: the variable [[rfdir]] must be used to specify the primitive vector along which the projection of the polarization or the ddk will be computed. For example if [[berryopt]]=-1 and [[rfdir]]=1 0 0, the projection of the polarization along the reciprocal lattice vector G_1 is computed. In case [[rfdir]]=1 1 1, ABINIT computes the projection of P along G_1, G_2 and G_3 and transforms the results to cartesian coordinates;
+  * in case of [[berryopt]]=-1,-2, or -3: the variable [[rfdir]] must be used to specify the primitive vector along which the projection of the polarization or the ddk will be computed. For example if [[berryopt]]=-1 and [[rfdir]]=1 0 0, the projection of the polarization along the reciprocal lattice vector $G_1$ is computed. In case [[rfdir]]=1 1 1, ABINIT computes the projection of P along $G_1$, $G_2$ and $G_3$ and transforms the results to cartesian coordinates;
   * in cases where [[berryopt]] is negative, [[berrystep]] allow a computation of multiple-step Berry phase in order to accelerate the convergence.
   * [[efield]] and [[rfdir]] in case of [[berryopt]]=4;
 
@@ -558,10 +563,12 @@ variable [[symmorphi]] is set to zero).
 
 For a phonon calculation under a finite electric field, respect the following procedure.
 
-  * 1. Run a scf ground-state calculation at zero electric field to get wavefunctions to initialize the ground-state calculation in finite electric fields.
-  * 2. Run a scf ground-state calculation in finite electric field. The electric field is controlled by the input variable [[efield]]. [[berryopt]] should be 4. The input variable [[kptopt]] should be set to be 2.
-  * 3. Based on the wave functions obtained in step (2), perform phonon calculation by setting [[berryopt]]=4, [[kptopt]]=3 and The same value of [[efield]] than in step 2. [[nsym]] should be set to 1 currently but this restriction may be removed later. The other parameters are the same as phonon calculation at zero electric field.
-  * Note: the choice of k-point sampling N x N x N should be the same in the three runs and N should be an even number.
+  * a) Run a scf ground-state calculation at zero electric field to get wavefunctions to initialize the ground-state calculation in finite electric fields.
+  * b) Run a scf ground-state calculation in finite electric field. The electric field is controlled by the input variable [[efield]]. [[berryopt]] should be 4. The input variable [[kptopt]] should be set to be 2.
+  * c) Based on the wave functions obtained in step (2), perform phonon calculation by setting [[berryopt]]=4, [[kptopt]]=3 and The same value of [[efield]] than in step 2. [[nsym]] should be set to 1 currently but this restriction may be removed later. The other parameters are the same as phonon calculation at zero electric field.
+
+!!! important
+    The choice of k-point sampling N x N x N should be the same in the three runs and N should be an even number.
 
 In case of finite electric and displacement field calculations
 ([[berryopt]]=4,6,7,14,16,17), see also the input variables [[berrysav]],
@@ -579,13 +586,15 @@ Variable(
     mnemonics="BERRY SAVe",
     text="""
   * 0 --> for finite electric field calculation ([[berryopt]]=4/14),
-    the polarization branch will be chosen on each iteration from (-pi, pi);
-    for finite electric displacement field calculation([[berryopt]]=6/7/16/17),
+    the polarization branch will be chosen on each iteration from (-pi, pi).
+    For finite electric displacement field calculation([[berryopt]]=6/7/16/17),
     the polarization will be chosen to minimize the internal energy.
   * 1 --> the polarization will be kept in the same branch on each iteration.
     At the end of the run, a file "POLSAVE" will be saved containing the reduced polarization in atomic units.
-    Note: Make sure that "POLSAVE" is empty or it does not exist before the calculation, or else that
-    it specifies the desired polarization branch.
+
+    !!! note
+        Make sure that "POLSAVE" is empty or it does not exist before the calculation, or else that
+        it specifies the desired polarization branch.
 """,
 ),
 
@@ -602,9 +611,9 @@ Variable(
 If [[berryopt]] is negative, this variable is used to compute berry phases
 using multiple discrete steps, in order to accelerate convergence. The single-
 step berry phase is the standard calculation using strings of k-points based
-on overlap of Bloch function separated by dk, while the two-step berry phase
-use strings use overlaps based on dk and 2*dk, the three-step use overlaps
-based on dk, 2*dk and 3*dk...
+on overlap of Bloch function separated by $dk$, while the two-step berry phase
+use strings use overlaps based on dk and $2*dk$, the three-step use overlaps
+based on dk, $2*dk$ and $3*dk$...
 
 The default value of this variable is 1, meaning that only the single-step
 berry phase calculation is done. If a larger value is set, ABINIT will compute
@@ -625,7 +634,9 @@ Variable(
     mnemonics="finite B FIELD calculation",
     text="""
 Perform finite magnetic field calculation.
-**THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.**
+
+!!! important
+    **THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.**
 """,
 ),
 
@@ -656,7 +667,7 @@ information is only used in the case of Time-Dependent DFT computation of the
 oscillator strength. One must take boxcenter such as to be roughly the center
 of the cluster or molecule. The default is sensible when the vacuum
 surrounding the cluster or molecule has xred 0 or 1. On the contrary, when the
-cluster or molecule is close to the origin, it is better to take [[boxcenter]]=(0 0 0).
+cluster or molecule is close to the origin, it is better to take [[boxcenter]]=[0.0, 0.0, 0.0].
 """,
 ),
 
@@ -1372,7 +1383,7 @@ the number of electrons per unit cell, [[nelect]].
 Then, if [[iscf]] is positive, the code adds up the band occupancies (given in
 array [[occ]]) for all bands at each k point, then multiplies by the k point
 weight [[wtk]] at each k point. Call this sum "nelect_occ" (for the number of
-electrons from occupation numbers). It is then required that: nelect_occ = nelect
+electrons from occupation numbers). It is then required that: nelect_occ = [[nelect]].
 To treat a neutral system, which is desired in nearly all cases, one must use
 [[charge]]=0. To treat a system missing one electron per unit cell, set [[charge]]=+1.
 """,
@@ -1443,8 +1454,8 @@ Variable(
     text="""
 If [[chkexit]] is 1 or 2, ABINIT will check whether the user wants to
 interrupt the run (using the keyword "exit" on the top of the input file or
-creating a file named "abinit.exit": see the [[chkexit|end of section 3.2]]
-of the [[help:abinit]]).
+creating a file named "abinit.exit": see the end of section 3.2
+of the [[help:abinit#parameters]]).
 
 If [[chkexit]]=0, the check is not performed at all
 
@@ -1495,8 +1506,8 @@ When [[chksymbreak]]=1, the code stops (or issue a warning) if:
   * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
 
-When [[chksymbreak]] is zero, there is no such check.
-When [[chksymbreak]] is minus 1, the code stops if the condition (1) is met,
+When [[chksymbreak]]=0, there is no such check.
+When [[chksymbreak]]=-1, the code stops if the condition (1) is met,
 but in case the condition (2) is met, there will be a trial to shift the
 atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
 
@@ -1589,7 +1600,7 @@ Variable(
     defaultval=0.0,
     mnemonics="CPU time limit in Minutes",
     characteristics=['[[INPUT_ONLY]]'],
-    excludes="specified([[cpum]]) or specified([[cpus]])",
+    excludes="specified([[cpuh]]) or specified([[cpus]])",
     text="""
 Only one of the three real parameters [[cpus]], [[cpum]] and [[cpuh]] can be
 defined in the input file to set up a CPU time limit. When the job reaches
@@ -1610,7 +1621,7 @@ Variable(
     defaultval=0.0,
     mnemonics="CPU time limit in seconds",
     characteristics=['[[NO_MULTI]]'],
-    excludes="specified([[cpum]]) or specified([[cpus]])",
+    excludes="specified([[cpuh]]) or specified([[cpum]])",
     text="""
 Only one of the three real parameters [[cpus]], [[cpum]] and [[cpuh]] can be
 defined in the input file to set up a CPU time limit. When the job reaches
@@ -1835,11 +1846,11 @@ Variable(
     requires="[[berryopt]] in [6, 16]",
     text="""
 In case [[berryopt]]=6, the electric field is updated after each SCF iteration
-according to E_{n+1}= [[ddamp]]*(D - 4*pi*P_{n}) + (1-[[ddamp]])*E_{n} where
-P_{n} and E_{n} are the polarization and electric field after nth SCF
+according to $E_{n+1}=$[[ddamp]]$(D-4 \pi P_{n})+(1-$[[ddamp]]$)E_{n}$, where
+$P_{n}$ and $E_{n}$ are the polarization and electric field after $n_{th}$ SCF
 iteration. [[ddamp]] is a damping parameter used to control the convergence speed.
 In case [[berryopt]]=16, the electric field is updated after each SCF
-iteration according to e_{n+1}= [[ddamp]]*(d - p_{n}) + (1-[[ddamp]])*e_{n}
+iteration according to $e_{n+1}=$[[ddamp]]$(d-p_{n})+(1-$[[ddamp]]$)e_{n}$.
 If you have difficulty getting convergence, try to reduce this value or reduce
 maxestep. This parameter is used in finite electric displacement field
 calculations (berryopt=6,16,17).
@@ -2006,8 +2017,8 @@ Variable(
     text="""
 It is the value of the "scissors operator", the shift of conduction band
 eigenvalues, used in response function calculations.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
-'[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
 Typical use is for response to electric field ([[rfelfd]]=3), but NOT for d/dk
 ([[rfelfd]]=2) and phonon responses.
 """,
@@ -2025,12 +2036,13 @@ Variable(
     text="""
 Kinetic energy cutoff that controls the number of planewaves used to represent
 the dielectric matrix:
-(1/2)[(2 Pi)*(Gmax)]  2  =[[ecut]] for Gmax.
+$ (1/2) [ 2 \pi \GG_{max}]^2 $ =[[ecut]] for $\GG_{max}$.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diecut]] has
 the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
-All planewaves inside this "basis sphere" centered at G=0 are included in the
+All planewaves inside this "basis sphere" centered at $\GG$=0 are included in the
 basis. This is useful only when [[iprcel]]>=21, which means that a
 preconditioning scheme based on the dielectric matrix is used.
+
 NOTE: a negative [[diecut]] will define the same dielectric basis sphere as
 the corresponding positive value, but the FFT grid will be identical to the
 one used for the wavefunctions. The much smaller FFT grid, used when
@@ -2082,29 +2094,27 @@ Variable(
     dimensions="scalar",
     defaultval="1.0774841d0",
     mnemonics="model DIElectric screening LeNGth",
-    text="""
+    characteristics=['[[LENGTH]]'],
+    text=r"""
 Used for screening length (in Bohr) of the model dielectric function, diagonal
 in reciprocal space. By default, given in Bohr atomic units (1
 Bohr=0.5291772108 Angstrom), although Angstrom can be specified, if preferred,
 since [[dielng]] has the '[[LENGTH]]' characteristics.
-This model dielectric function is as follows (K being a wavevector):
-
-
-             (     1        +     [[dielng]]2* K2   )
-    diel(K)= ------------------------------------
-             ( 1/[[diemac]] + [[dielng]]2 * K2 ) * [[diemix]]
-
+This model dielectric function is as follows ($\kk$ being a wavevector):
+\begin{equation}
+diel(\kk) = \frac{ 1 + [[dielng]]^2 \kk^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 \kk^2  \right) [[diemix]] } \nonumber
+\end{equation}
 
 The inverse of this model dielectric function will be applied to the residual,
-to give the preconditioned change of potential. Right at K=0, diel(K) is imposed to be 1.
+to give the preconditioned change of potential. Right at $\kk$=0, $diel(\kk)$ is imposed to be 1.
 
 If the preconditioning were perfect, the change of potential would lead to an
 exceedingly fast solution of the self-consistency problem (two or three
 steps). The present model dielectric function is excellent for rather
 homogeneous unit cells.
-When K->0, it tends to the macroscopic dielectric constant, eventually
+When $\kk$->0, it tends to the macroscopic dielectric constant, eventually
 divided by the mixing factor [[diemix]] (or [[diemixmag]]  for magnetization).
-For metals, simply put [[diemac]] to a very large value (10^6 is OK)
+For metals, simply put [[diemac]] to a very large value ($10^6$ is OK)
 The screening length [[dielng]] governs the length scale to go from the
 macroscopic regime to the microscopic regime, where it is known that the
 dielectric function should tend to 1. It is on the order of 1 Bohr for metals
@@ -2130,8 +2140,8 @@ function, see the keyword [[dielng]], is used for that purpose. It is
 especially useful for speeding up the treatment of rather homogeneous unit cells.
 
 Some hint:
-The value of [[diemac]] should usually be bigger than 1.0d0, on physical grounds.
-For metals, simply put [[diemac]] to a very large value (the default 10^6 is OK)
+The value of [[diemac]] should usually be bigger than 1.0, on physical grounds.
+For metals, simply put [[diemac]] to a very large value (the default $10^6$ is OK)
 For silicon, use 12.0. A similar value is likely to work well for other semiconductors
 For wider gap insulators, use 2.0 ... 4.0
 For molecules in an otherwise empty big box, try 1.5 ... 3.0
@@ -2164,7 +2174,7 @@ transferred in the SCF cycle.
 It should be between 0.0 and 1.0.
 
 If the model dielectric function were perfect, [[diemix]] should be 1.0. By
-contrast, if the model dielectric function does nothing (when [[diemac]]=1.0d0
+contrast, if the model dielectric function does nothing (when [[diemac]]=1.0
 or [[dielng]] is larger than the size of the cell), [[diemix]] can be used to
 damp the amplifying factor inherent to the SCF loop.
 For molecules, a value on the order 0.5 or 0.33 is rather usual.
@@ -2193,12 +2203,12 @@ field to be transferred in the SCF cycle (see [[diemix]] for further
 information).
 For the time being, apply only when the SCF mixing is done on the density ([[iscf]]>=10).
 
-A negative value of diemixmag means that magnetization is only preconditionned
-by ABS(diemixmag), without the use of any preconditionner.
+A negative value of [[diemixmag]] means that magnetization is only preconditionned
+by ABS([[diemixmag]]), without the use of any preconditionner.
 
 When SCF cycle has some difficulties to converge, changing the value of
 [[diemixmag]] can have a positive effect.
-In particular [[diemixmag]]=-4 is a good choice (i.e. diemixmag=4, no other
+In particular [[diemixmag]]=-4 is a good choice (i.e. [[diemixmag]]=4, no other
 preconditionner on magnetization).
 """,
 ),
@@ -3176,17 +3186,19 @@ V/m, see note below), in cartesian coordinates.
 
 References for the calculation under electric field (based on multi k point Berry phase):
 
-  * Nunes and Vanderbilt, PRL 73, 712 (1994): real-space version of the finite-field Hamiltonian
-  * Nunes and Gonze, PRB 63, 155107 (2001): reciprocal-space version of the finite-field Hamiltonian (the one presently implemented), and extensive theoretical analysis
-  * Souza, Iniguez and Vanderbilt, PRL 89, 117602 (2003): implementation of the finite-field Hamiltonian (reciprocal-space version)
-  * Zwanziger, Galbraith, Kipouros, Torrent, Giantomassi and Gonze, Comp. Mater. Sci. 58, 113 (2012): extension to PAW formalism
+  * [[cite:Nunes1994]]: real-space version of the finite-field Hamiltonian
+  * [[cite:Nunes2001]]: reciprocal-space version of the finite-field Hamiltonian (the one presently implemented), and extensive theoretical analysis
+  * [[cite:Souza2002]]: implementation of the finite-field Hamiltonian (reciprocal-space version)
+  * [[cite:Zwanziger2012]]: extension to PAW formalism
 
-See also Umari, Gonze, Pasquarello, PRL 90, 027401 (2003).
+See also [[cite:Umari2003]].
 
-The atomic unit of electric field strength is: e_Cb/(4 pi eps0 a0**2), where
-e_Cb is the electronic charge in Coulomb (1.60217653e-19), eps0 is the
-electric constant (8.854187817d-12 F/m), and a0 is the Bohr radius in meter
-(0.5291772108e-10).
+!!! note
+
+    The atomic unit of electric field strength is: $\\frac{e_{Cb}}{4\pi\\varepsilon_0a_0^2}$, where
+    $e_{Cb}$ is the electronic charge in Coulomb (1.60217653$^{-19}$), $\\varepsilon_0$ is the
+    electric constant (8.854187817d-12 F/m), and $a_0$ is the Bohr radius in meter
+    (0.5291772108$^{-10}$).
 """,
 ),
 
@@ -3205,12 +3217,12 @@ dataset. It must therefore be used with [[rfelfd]]=2 (or 1).
 
   * 0 --> no effective mass tensor calculation
   * 1 --> effective mass tensor calculation
-
-At the present time, both norm-conserving (NC) and PAW calculations are
-supported. Also, for PAW calculations only, [[nspinor]]==2 and
-[[pawspnorb]]==1 (i.e. spin-orbit (SO) calculations) is supported. NC SO
-calculations are NOT currently supported. Also, for both NC and PAW,
-[[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
+!!! note
+    At the present time, both norm-conserving (NC) and PAW calculations are
+    supported. Also, for PAW calculations only, [[nspinor]]==2 and
+    [[pawspnorb]]==1 (i.e. spin-orbit (SO) calculations) is supported. NC SO
+    calculations are NOT currently supported. Also, for both NC and PAW,
+    [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
 """,
 ),
 
@@ -3252,7 +3264,7 @@ When [[efmas_calc_dirs]]==0, no directions are read from the input file (using
 output by default.
 
 When [[efmas_calc_dirs]]==1, 2 or 3, [[efmas_n_dirs]] directions are read from
-[[efmas_dirs]], assuming cartesian, reduced or angular (theta,phi)
+[[efmas_dirs]], assuming cartesian, reduced or angular ($\\theta$,$\phi$)
 coordinates, respectively. In the case [[efmas_calc_dirs]]==3, 2 real values
 per directions are read, whereas 3 real values are read in the two other cases.
 """,
@@ -3413,15 +3425,13 @@ Variable(
     characteristics=['[[ENERGY]]'],
     requires="[[ieig2rf]] != 0",
     text="""
-that is, if the user is performing performing second-order eigenvalue
-calculations using response-functions.
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
-denominator of the sum-over-states in the perturbation denominator,
-(e_{nk}-e_{n'k'}+i [[elph2_imagden]]). One should use a width comparable with
+denominator of the sum-over-states in the perturbation,
+$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]). One should use a width comparable with
 the Debye frequency or the maximum phonon frequency.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
-'[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
 """,
 ),
 
@@ -3657,15 +3667,12 @@ Variable(
     characteristics=['[[ENERGY]]'],
     requires="[[smdelta]] != 0",
     text=r"""
-that is, if the user is performing simulations of the electronic lifetimes
-induced by the electron-phonon coupling.
-
 The variable [[esmear]] determines the width of the functions approximating
 the delta function, $\delta(e_{nk}-e_{n'k'})$, present in the expression of the
 lifetimes. One should use a width comparable with the Debye frequency or the
 maximum phonon frequency.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
-'[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
 """,
 ),
 
@@ -3775,7 +3782,7 @@ Governs the number of bands to be used in the code in the case the parameter
 [[nband]] is not defined in the input file (which means that [[occopt]] is not
 equal to 0 or 2).
 
-In case [[fband]] is 0.0d0, the code computes from the pseudopotential files
+In case [[fband]] is 0.0, the code computes from the pseudopotential files
 and the geometry data contained in the input file, the number of electrons
 present in the system. Then, it computes the minimum number of bands that can
 accommodate them, and use that value for [[nband]].
@@ -4130,8 +4137,8 @@ Variable(
     mnemonics="FReeZe FERMI energy",
     text="""
 Can be used to suppress artificially the first-order change of Fermi energy,
-in case of Response Function calculation for metals at Q=0. The input variable
-[[frzfermi]], if set to 1, allows to suppress this contribution, but this is incorrect.
+in case of Response Function calculation for metals at Q=0. If the input variable
+[[frzfermi]] is set to 1, this contribution is suppressed, even though this is incorrect.
 """,
 ),
 
@@ -6170,12 +6177,12 @@ Variable(
     topics=['Coulomb_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Index for the Coulomb TReaTMenT",
+    mnemonics="Index for the COULOMB treatment",
     text="""
 Defines the type of computation used for Hartree potential, local part of
 pseudo-potential and ion-ion interaction:
 
-  * [[icoulomb]]=0: usual reciprocal space computation, using 1 / g^2 for the Hartree potential and using Ewald correction.
+  * [[icoulomb]]=0: usual reciprocal space computation, using $1/\GG^2$ for the Hartree potential and using Ewald correction.
   * [[icoulomb]]=1: free boundary conditions are used when the Hartree potential is computed,
     real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials)
     and simple coulomb interaction gives the ion-ion energy.
@@ -6237,27 +6244,35 @@ trailing suffix _EIGR2D, containing the second-order electronic eigenvalues
 for the perturbation. These files are used in the calculation of the thermal
 correction to the electronic eigenvalues.
 
-If [[ieig2rf]] is set to 1, the second-order electronic eigenvalues will be
-calculated from the DFPT method (Sternheimer).
-If [[ieig2rf]] is set to 2, the second-order electronic eigenvalues will be
-calculated from the Allen-Cardona method. (sum over states)
-If [[ieig2rf]] is set to 3, the second-order electronic eigenvalues will be
-calculated from the DFPT method (sum over states) but using a different part
-of the code. This is equivalent to [[ieig2rf]] = 1 [debuging]
-If [[ieig2rf]] is set to 4, the second-order electronic eigenvalues will be
-calculated from the dynamical DFPT method (Sternheimer). The code will
-generate _EIGR2D.nc files that contain the electron-phonon matrix element
-squared on the space orthogonal to the active space. The code will also
-produce _FAN.nc files that contain the electron-phonon matrix elements
-squared. Note that [[ieig2rf]]=4 can only be used if Abinit is compiled with NETCDF support.
-If [[ieig2rf]] is set to 5, the second-order electronic eigenvalues will be
-calculated from the dynamical DFPT method (Sternheimer). The code will
-generate _EIGR2D.nc files that contain the electron-phonon matrix element
-square on the space orthogonal to the active space. The code will also produce
-_GKK.nc files that contain electron-phonon matrix elements. This option is
-preferable for large system to [[ieig2rf]]=4 as the GKK files take less much
-less disk space and memory (but run a little bit slower). Note that
-[[ieig2rf]]=5 can only be used if Abinit is compiled with NETCDF support.
+  * If [[ieig2rf]] is set to 1, the second-order electronic eigenvalues will be
+    calculated from the DFPT method (Sternheimer).
+
+  * If [[ieig2rf]] is set to 2, the second-order electronic eigenvalues will be
+    calculated from the Allen-Cardona method (sum over states).
+
+  * If [[ieig2rf]] is set to 3, the second-order electronic eigenvalues will be
+    calculated from the DFPT method (sum over states) but using a different part
+    of the code. This is equivalent to [[ieig2rf]] = 1 [debuging].
+
+  * If [[ieig2rf]] is set to 4, the second-order electronic eigenvalues will be
+    calculated from the dynamical DFPT method (Sternheimer). The code will
+    generate _EIGR2D.nc files that contain the electron-phonon matrix element
+    squared on the space orthogonal to the active space. The code will also
+    produce _FAN.nc files that contain the electron-phonon matrix elements
+    squared.
+
+  * If [[ieig2rf]] is set to 5, the second-order electronic eigenvalues will be
+    calculated from the dynamical DFPT method (Sternheimer). The code will
+    generate _EIGR2D.nc files that contain the electron-phonon matrix element
+    square on the space orthogonal to the active space. The code will also produce
+    _GKK.nc files that contain electron-phonon matrix elements. This option is
+    preferable for large system to [[ieig2rf]]=4 as the GKK files take much
+    less disk space and memory (but run a little bit slower).
+
+!!! note
+    [[ieig2rf]]=4 and 5 can only be used if Abinit is compiled with NETCDF support.
+
+
 Related variables:
 [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
 """,
@@ -7609,6 +7624,7 @@ Variable(
     defaultval=1,
     mnemonics="Integer for the eXchange-Correlation applied to the electron-POSITRON interaction",
     commentdefault="(Teter parameterization). However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value",
+    requires="[[positron]]/=0",
     text="""
 Relevant only when [[positron]]/=0.
 Define the type of electron-positron correlation that is used in case of a
@@ -7618,32 +7634,24 @@ the electron-positron annhilation rate:
 
 Electron-positron correlation functional:
 
-**ixcpositron=1**: LDA zero positron density limit parametrized by Arponen  &
-Pajanne and provided by Boronski & Nieminen [1,2]
-**ixcpositron=11**: LDA zero positron density limit parametrized by Arponen
-& Pajanne and fitted by Sterne & Kaiser [1,3]
-**ixcpositron=2**: LDA electron-positron correlation provided by Puska,
-Seitsonen, and Nieminen [1,4]
-**ixcpositron=3**: GGA zero positron density limit parametrized by Arponen  &
-Pajanne and provided by Boronski & Nieminen [1,2,5]
-**ixcpositron=31**: GGA zero positron density limit parametrized by Arponen
-& Pajanne and fitted by Sterne & Kaiser [1,3,5]
+  * ixcpositron=1: LDA zero positron density limit parametrized by 
+Arponen & Pajanne and provided by Boronski & Nieminen [[cite:Arponen1979a]],[[cite:Boronski1986]]
+  * ixcpositron=11: LDA zero positron density limit parametrized by 
+Arponen & Pajanne and fitted by Sterne & Kaiser [[cite:Arponen1979a]],[[cite:Sterne1991]] 
+  * ixcpositron=2: LDA electron-positron correlation provided by 
+Puska, Seitsonen, and Nieminen [[cite:Arponen1979a]],[[cite:Puska1995]] 
+  * ixcpositron=3: GGA zero positron density limit parametrized by 
+Arponen & Pajanne and provided by Boronski & Nieminen [[cite:Arponen1979a]],[[cite:Boronski1986]],[[cite:Barbiellini1995]]
+  * ixcpositron=31: GGA zero positron density limit parametrized 
+by Arponen & Pajanne and fitted by Sterne & Kaiser [[cite:Arponen1979a]],[[cite:Sterne1991]],[[cite:Barbiellini1995]] 
 
 Annihilation rate enhancement factor:
 
-**ixcpositron=1**: Boronski and Nieminen full modelisation and RPA limit [1]
-**ixcpositron=11**: Sterne and Kaiser [2]
-**ixcpositron=2**: Puska, Seitsonen and Nieminen [3]
-**ixcpositron=3**: Boronski and Nieminen full modelisation and RPA limit [1],
-with GGA corrections
-**ixcpositron=31**: Sterne and Kaiser [2], with GGA corrections
-
-References:
-**[1]** J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-**[2]** Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-**[3]** P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-**[4]** M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-**[5]** B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+  * ixcpositron=1: Boronski and Nieminen full modelisation and RPA limit [[cite:Arponen1979a]] 
+  * ixcpositron=11: Sterne and Kaiser [[cite:Boronski1986]]
+  * ixcpositron=2: Puska, Seitsonen and Nieminen [[cite:Sterne1991]]
+  * ixcpositron=3: Boronski and Nieminen full modelisation and RPA limit [[cite:Arponen1979a]], with GGA corrections
+  * ixcpositron=31: Sterne and Kaiser [[cite:Boronski1986]], with GGA corrections 
 """,
 ),
 
@@ -7658,7 +7666,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text="""
 Method of calculation of the 1st order XC potential in non-collinear DFPT
-calculations. The possible values are 1,2 and 3 correspond to the following
+calculations. The possible values 1,2 and 3 correspond to the following
 methods
 
   * If ixcrot=1, the spinor rotation matrix U at each fft point is not calculated explicitly. Instead the needed expressions involving U are derived based on the general properties of the U matrix.
@@ -7668,8 +7676,10 @@ methods
 In theory, all methods give identical results. However, due to different
 implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
-the method can also affect the convergence. Note that for non-zero
-perturbation wavector, only ixcrot=3 implementation is currently available.
+the method can also affect the convergence.
+
+!!! note
+    For non-zero perturbation wavector, only ixcrot=3 implementation is currently available.
 """,
 ),
 
@@ -7709,7 +7719,7 @@ Variable(
 If set to 1, a slab of uniform positive background charge density, that is, a
 jellium slab, is included in the calculation cell. A portion of the unit cell
 is filled with such positive charge density distribution which is equal to a
-bulk-mean value n  bulk  between two edges and zero in the vacuum region if present.
+bulk-mean value $n_{bulk}$ between two edges and zero in the vacuum region if present.
 For the sake of convenience the unit cell is supposed to have the third
 crystal primitive lattice vector orthogonal to the other ones so that the
 portion of the cell filled by the jellium slab can be defined through its edges along z.
@@ -7730,22 +7740,22 @@ Variable(
     requires="[[berryopt]] = 17",
     text="""
 When specifying mixed electric field boundary conditions ( [[berryopt]]=17),
-jfielddir controls whether reduced electric field ([[jfielddir]]=1) or reduced
+[[jfielddir]] controls whether reduced electric field ([[jfielddir]]=1) or reduced
 electric displacement field ([[jfielddir]]=2) is chosen to be fixed, in each
 of the three lattice directions (i.e., in the reduced, not the Cartesian,
-frame). For example, [[jfielddir]]=(1 1 2) tells the code to use fixed ebar_1
-and ebar_2 along the first two lattice directions and fixed d_3 along the third.
+frame). For example, [[jfielddir]]=(1 1 2) tells the code to use fixed $\\bar{e}_1$
+and $\\bar{e}_2$ along the first two lattice directions and fixed $d_3$ along the third.
 For the case of mixed electric field boundary conditions, [[red_efieldbar]]
-and [[red_dfield]] are used to control ebar and d, respectively. For example,
+and [[red_dfield]] are used to control $\\bar{e}$ and $d$, respectively. For example,
 for electric boundary conditions corresponding to a material in a parallel-
-plate capacitor, if you want to control d_3=d0, while fixing ebar_1=ebar_2=0,
+plate capacitor, if you want to control $d_3=d_0$, while fixing $\\bar{e}_1=\\bar{e}_1=0$,
 then the input files should have [[berryopt]]=17, [[jfielddir]]=(1 1 2),
-[[red_efieldbar]]=(0.0 0.0 a), and [[red_dfield]]=(b c d0). Here a, b, and c
+[[red_efieldbar]]=(0.0 0.0 a), and [[red_dfield]]=($b\ c\ d_0$). Here a, b, and c
 are the starting values. They can be chosen in this way: do a single run for
-fixed d calculation ([[red_dfield]]=0,0,d0), from the final results you will
-have ebar_3, which is a good guess for a. Then do another single run for fixed
+fixed d calculation ([[red_dfield]]=0,0,$d_0$), from the final results you will
+have $\\bar{e}_3$, which is a good guess for a. Then do another single run for fixed
 ebar calculation ([[red_efieldbar]]=(0 0 0)), from the final results you will
-have d_1,d_2, these are good guesses for b, c.
+have $d_1$,$d_2$, these are good guesses for b, c.
 """,
 ),
 
@@ -7903,11 +7913,16 @@ the work: L-Gamma-X-W-K,U-L-W-X-K,U-Gamma with
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates:
-l(L-Gamma)=sqrt(3)/4=0.433...; l(Gamma-X)=1/2=0.5; l(X-W)=1/4=0.25;
-l(W-K)=sqrt(2)/8=0.177...; l(K-L)=sqrt(6)/8=0.306...;
-l(L-W)=sqrt(2)/4=0.354...; l(W-X)=1/4=0.25; l(X-K)=sqrt(2)/8=0.177...;
-l(K-Gamma)=sqrt(2).3/8=0.530...
+found using the conventional cartesian coordinates:\n
+$l$(L-Gamma)=$\sqrt{3}/4=$0.433... \n
+$l$(Gamma-X)=$1/2$=0.5 \n
+$l$(X-W)=$1/4$=0.25 \n
+$l$(W-K)=$\sqrt{2}/8$=0.177... \n
+$l$(K-L)=$\sqrt{6}/8$=0.306... \n
+$l$(L-W)=$\sqrt{2}/4$=0.354... \n 
+$l$(W-X)=$1/4$=0.25 \n
+$l$(X-K)=$\sqrt{2}/8$=0.177... \n
+$l$(K-Gamma)=$3\sqrt{2}/8$=0.530... \n
 
 B. **BCC lattice**
 
@@ -7930,10 +7945,14 @@ So, if you want to specify a typical circuit, the following might do the work: G
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates: l(Gamma-H)=1/2=0.5;
-l(H-N)=sqrt(2)/4=0.354...; l(N-Gamma)=sqrt(2)/4=0.354...;
-l(Gamma-P)=sqrt(3)/4=0.433...; l(P-N)=1/4=0.25; l(N-P)=1/4=0.25;
-l(P-H)=sqrt(3)/4=0.433...
+found using the conventional cartesian coordinates:\n
+$l$(Gamma-H)=$1/2$=0.5 \n
+$l$(H-N)=$sqrt{2}/4$=0.354... \n
+$l$(N-Gamma)=$\sqrt{2}/4$=0.354... \n
+$l$(Gamma-P)=$\sqrt{3}/4$=0.433... \n 
+$l$(P-N)=$1/4$=0.25 \n 
+$l$(N-P)=$1/4$=0.25 \n
+$l$(P-H)=$\sqrt{3}/4$=0.433... \n
 
 C. **Hexagonal lattices**
 
@@ -7958,41 +7977,47 @@ might do the work: K-Gamma-M-K-H-A-L-H-L-M-Gamma-A
 In order to find the lengths of segments (this information is useful to draw
 the band structure, with the correct relative scale between special points)
 one needs to know the a and c lattice parameters. Also, in what follows, we
-omit the 2*pi factor sometimes present in the definition of the reciprocal
-space vectors. The reciprocal vectors are (1/a 1/(sqrt(3)*a) 0), (0
-2/(sqrt(3)*a) 0), (0 0 1/c). The lengths of the above-mentioned segments can
-be computed as: l(K-Gamma)=2/(3*a)=0.666.../a;
-l(Gamma-M)=1/(sqrt(3)*a)=0.577.../a; l(M-K)=1/(3*a)=0.333.../a;
-l(K-H)=1/(2*c)=0.5.../c; l(H-A)=2/(3*a)=0.666.../a;
-l(A-L)=1/(sqrt(3)*a)=0.577.../a; l(L-H)=1/(3*a)=0.333.../a;
-l(H-L)=1/(3*a)=0.333.../a; l(L-M)=1/(2*c)=0.5.../c;
-l(M-Gamma)=-1/(sqrt(3)*a)=0.577.../a; l(Gamma-A)=1/(2*c)=0.5.../c
+omit the 2$\pi$ factor sometimes present in the definition of the reciprocal
+space vectors. The reciprocal vectors are $(1/a\, 1/(\sqrt{3}a)\, 0)$, $(0\,
+2/(\sqrt{3}a)\, 0)$, $(0\, 0\, 1/c)$. The lengths of the above-mentioned segments can
+be computed as:\n
+$l$(K-Gamma)=$2/(3a)$=0.666.../a \n
+$l$(Gamma-M)=$1/(\sqrt{3}a)$=0.577.../a \n
+$l$(M-K)=$1/(3a)$=0.333.../a \n
+$l$(K-H)=$1/(2c)$=0.5.../c \n
+$l$(H-A)=$2/(3a)$=0.666.../a \n
+$l$(A-L)=$1/(\sqrt{3}a)$=0.577.../a \n
+$l$(L-H)=$1/(3a)$=0.333.../a \n
+$l$(H-L)=$1/(3a)$=0.333.../a \n
+$l$(L-M)=$1/(2c)$=0.5.../c \n
+$l$(M-Gamma)=$-1/(\sqrt{3}a)$=0.577.../a \n
+$l$(Gamma-A)=$1/(2c)$=0.5.../c \n
 
 D. **Rhombohedral lattices**
 
 Rhombohedral lattices are characterised by two parameters, the length of the
-primitive vectors, that we will denote a0, and the angle they form, alpha.
+primitive vectors, that we will denote a0, and the angle they form, $\gamma$.
 These can be directly input of ABINIT, as [[acell]] and [[angdeg]]
 
 This will generate the primitive vectors in real space, with
 
-      [[acell]] a0 a0 a0    and      [[rprim]]  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
+      acell a0 a0 a0    and      rprim  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
 
-with a^2+c^2=1, a^2=(1-cos(alpha))*2/3, c^2=(1+2*cos(alpha))*1/3,
-(a/c)^2=2*(1-cos(alpha))/(1+2*cos(alpha)) and also
-cos(alpha)=(1-(a/c)^2/2)/(1+(a/c)^2). Alternatively, these values of rprim
+with $a^2+c^2=1$, $a^2=2/3(1-\cos(\gamma))$, $c^2=1/3(1+2\cos(\gamma))$,
+$(a/c)^2=2(1-\cos(\gamma))/(1+2\cos(\gamma))$ and also
+$\cos(\gamma)=(1-(a/c)^2/2)/(1+(a/c)^2)$. Alternatively, these values of [[rprim]]
 might directly be the input of ABINIT (then, the balance of the scaling factor
 might be adjusted between [[acell]] and [[rprim]]).
 
 Unlike for the simple cubic, FCC, BCC, hexagonal (and some other) Bravais
-lattice, the topology of the Brillouin zone will depend on the alpha (or a/c)
-value. We give below information concerning the case when cos(alpha) is
-positive, that is, (a/c)^2 lower than 2.
+lattice, the topology of the Brillouin zone will depend on the $\gamma$ (or $a/c$)
+value. We give below information concerning the case when $\cos(\gamma)$ is
+positive, that is, $(a/c)^2$ lower than 2.
 
 The coordinates of several special points with respect to primitive vectors in
-reciprocal space will not depend on the a/c ratio, but some others will depend
+reciprocal space will not depend on the $a/c$ ratio, but some others will depend
 on it. So, some care has to be exercised. Notations for the Brillouin Zone
-special points are the same as in Phys. Rev. B 41, 11827 (1990).
+special points are the same as in [[cite:Gonze1990]]. 
 
       L (1/2 0 0) or (0 1/2 0) or (0 0 1/2) (or with negative signs)
       T (1/2 1/2 1/2)
@@ -8012,14 +8037,17 @@ path with the following coordinates for the special points X, Gamma, T, L, Gamma
 In order to find the lengths of segments (this information is useful to draw
 the band structure, with the correct relative scale between special points)
 one needs to know the a and c lattice parameters. Also, in what follows, we
-omit the 2*pi factor sometimes present in the definition of the reciprocal
-space vectors. The reciprocal vectors are (2/(3*a) 0 1/(3*c)), -(1/(3*a)
-1/(sqrt(3)*a) 1/(3*c), -(1/(3*a) -1/(sqrt(3)*a) 1/(3*c) ). The lengths of the
-above-mentioned segments can be computed as:
-l(X-Gamma)=2/(sqrt(3)*a)=1.155.../a, with
-l(K-Gamma)=(1+(a/c)^2/4)*4/(3*sqrt(3)*a); l(Gamma-T)=1/(2*c);
-l(T-L)=2/(sqrt(3)*a)=1.155.../a, with l(T-W)=(1-(a/c)^2/2)*4/(3*sqrt(3)*a);
-l(L-Gamma)=sqrt(4/(a^2)+1/(c^2))/3 l(Gamma-X)=sqrt(1/(a^2)+1/(c^2))*2/3
+omit the $2\pi$ factor sometimes present in the definition of the reciprocal
+space vectors. The reciprocal vectors are $( 2/(3a)\: 0\: 1/(3c) )$, $( -1/(3a)\:
+1/(\sqrt{3}a)\: 1/(3c) )$, $( -1/(3a)\: -1/(\sqrt{3}a)\: 1/(3c) )$. The lengths of the
+above-mentioned segments can be computed as:\n
+$l$(X-Gamma)=$2/(\sqrt{3}a)$=1.155.../a \n 
+$l$(K-Gamma)=$4(1+(a/c)^2/4)/(3\sqrt{3}a)$ \n
+$l$(Gamma-T)=$1/(2c)$ \n
+$l$(T-L)=$2/(\sqrt{3}a)$=1.155.../a \n
+$l$(T-W)=$4(1-(a/c)^2/2)/(3\sqrt{3}a)$ \n
+$l$(L-Gamma)=$\sqrt{4/(a^2)+1/(c^2)}/3$ \n
+$l$(Gamma-X)=$2\sqrt{1/(a^2)+1/(c^2)}/3$ \n
 """,
 ),
 
@@ -8432,8 +8460,8 @@ Variable(
 Turns on the imposition of a Lagrangian constraint on the magnetization. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
 a constraint is applied to bring it closer to the input values of [[spinat]].
-The constraint can be either on the direction only (magconon 1) or on the full
-vector (magconon 2). The Lagrangian constraint has an amplitude
+The constraint can be either on the direction only ([[magconon]]=1) or on the full
+vector ([[magconon]]=2). The Lagrangian constraint has an amplitude
 [[magcon_lambda]] which should be neither too big (bad or impossible
 convergence) nor too small (no effect).
 """,
@@ -8700,7 +8728,7 @@ The actual use of the mixing coefficients is defined by the input variable
 [[algalch]]. Note that the masses of the atoms, [[amu]] are also mixed
 according to the value of [[mixalch]], by default.
 
-Example 1. Suppose that we want to describe Ba(0.25) Sr(0.75) Ti O3.
+Example 1. Suppose that we want to describe Ba(0.25) Sr(0.75) Ti O$_3$.
 The input variables related to the construction of the alchemical Ba(0.25)
 Sr(0.75) potential will be:
 
@@ -9541,21 +9569,21 @@ Variable(
     mnemonics="Number of Grid points for Fast Fourier Transform",
     commentdefault="(automatic selection of optimal values)",
     text="""
-gives the size of fast Fourier transform (fft) grid in three dimensions. Each
+gives the size of fast Fourier transform (FFT) grid in three dimensions. Each
 number must be composed of the factors 2, 3, and 5 to be consistent with the
-radices available in our fft.
+radices available in our FFT.
 
 If no [[ngfft]] is provided or if [[ngfft]] is set to 0 0 0, the code will automatically
 provide an optimal set of [[ngfft]] values, based on [[acell]], [[rprim]] and [[ecut]]
 (see also [[boxcutmin]] for speed/accuracy concerns).
 This is the recommended procedure, of course.
-The total number of FFT points is the product: [[ngfft]](1)*[[ngfft]](2)*[[ngfft]](3)=nfft.
+The total number of FFT points is the product: [[ngfft]](1)x[[ngfft]](2)x[[ngfft]](3)=nfft.
 
 When [[ngfft]] is made smaller than recommended values (e.g. by setting
 [[boxcutmin]] to a value smaller than 2.0 or by setting [[ngfft]] manually),
 the code runs faster and the equations in effect are approximated by a low
 pass Fourier filter. The code reports to standard output (unit 06) a parameter
-"boxcut" which is the smallest ratio of the fft box side to the G vector basis
+"boxcut" which is the smallest ratio of the FFT box side to the $\GG$ vector basis
 sphere diameter. When boxcut is less than 2 the Fourier filter approximation
 is being used. When boxcut gets less than about 1.5 the approximation may be
 too severe for realistic results and should be tested against larger values of
@@ -9567,16 +9595,16 @@ reduce this effect.
 Internally, [[ngfft]] is an array of size 18. The present components are
 stored in [[ngfft]](1:3), while
 
-  * ngfft(4:6) contains slightly different (larger) values, modified for efficiency of the FFT
-  * ngfft(7) is [[fftalg]]
-  * ngfft(8) is [[fftcache]]
-  * ngfft(9) is set to 0 if the parallelization of the FFT is not activated, while it is set to 1 if it is activated.
-  * ngfft(10) is the number of processors of the FFT group
-  * ngfft(11) is the index of the processor in the group of processors
-  * ngfft(12) is n2proc, the number of x-z planes, in reciprocal space, treated by the processor
-  * ngfft(13) is n3proc, the number of x-y planes, in real space, treated by the processor
-  * ngfft(14) is mpi_comm_fft, the handle on the MPI communicator in charge of the FFT parallelisation
-  * ngfft(15:18) are not yet used
+  * [[ngfft]](4:6) contains slightly different (larger) values, modified for efficiency of the FFT
+  * [[ngfft]](7) is [[fftalg]]
+  * [[ngfft]](8) is [[fftcache]]
+  * [[ngfft]](9) is set to 0 if the parallelization of the FFT is not activated, while it is set to 1 if it is activated.
+  * [[ngfft]](10) is the number of processors of the FFT group
+  * [[ngfft]](11) is the index of the processor in the group of processors
+  * [[ngfft]](12) is n2proc, the number of x-z planes, in reciprocal space, treated by the processor
+  * [[ngfft]](13) is n3proc, the number of x-y planes, in real space, treated by the processor
+  * [[ngfft]](14) is mpi_comm_fft, the handle on the MPI communicator in charge of the FFT parallelisation
+  * [[ngfft]](15:18) are not yet used
 
 The number of points stored by this processor in real space is n1*n2*n3proc,
 while in reciprocal space, it is n1*n2proc*n3.
@@ -9639,7 +9667,7 @@ Variable(
     topics=['q-points_basic'],
     dimensions=[3],
     defaultval=[0, 0, 0],
-    mnemonics="Number of Grid pointsfor Q PoinTs generation",
+    mnemonics="Number of Grid points for Q PoinTs generation",
     characteristics=['[[INPUT_ONLY]]'],
     excludes="specified([[qptrlatt]])",
     requires="[[nqpt]]==1 and [[kptopt]]>=0",
@@ -9820,9 +9848,9 @@ Variable(
     mnemonics="Number of LINE minimisations",
     text="""
 Gives maximum number of line minimizations allowed in preconditioned conjugate
-gradient minimization for each band. The Default, 4, is fine.
+gradient minimization for each band. The default, 4, is fine.
 Special cases, with degeneracies or near-degeneracies of levels at the Fermi
-energy may require a larger value of [[nline]] (5 or 6 ?) Line minimizations
+energy may require a larger value of [[nline]] (5 or 6 ?). Line minimizations
 will be stopped anyway when improvement gets small (governed by [[tolrde]]).
 With the input variable [[nnsclo]], governs the convergence of the
 wavefunctions for fixed potential.
@@ -12649,7 +12677,7 @@ When doing a finite electric displacement field calculation, if the structure
 is centrosymmetric but the polarization is non-zero (such as for AlAs), this
 non-zero polarization should be specified as [[polcen]] (in REDUCED
 coordinates, in atomic units) in the input file. See Eq.(24) in the Suppl. of
-Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
+[[cite:Stengel2009]]
 """,
 ),
 
@@ -12984,16 +13012,18 @@ Variable(
     abivarname="prepanl",
     varset="dfpt",
     vartype="integer",
-    topics=['nonlinear_basic'],
+    topics=['nonlinear_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PREPAre Non-Linear response calculation",
     text="""
 The computation of third-order derivatives from the 2n+1 theorem requires the
 first-order wavefunctions and densities obtained from a linear response
-calculation. The standard approach in a linear response calculation is (i) to
-compute only the irreducible perturbations, and (ii) to use symmetries to
-reduce the number of k-points for the k-point integration.
+calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
 This approach cannot be applied, presently (v4.1), if the first-order
 wavefunctions are to be used to compute third-order derivatives. First, for
 electric fields, the code needs the derivatives along the three directions.
@@ -13001,9 +13031,9 @@ Still, in case of phonons, only the irreducible perturbations are required.
 Second, for both electric fields and phonons, the wavefunctions must be
 available in half the BZ (kptopt=2), or the full BZ (kptopt=3).
 During the linear response calculation, in order to prepare a non-linear
-calculation, one should put [[prepanl]] to 1 in order to force ABINIT (i) to
+calculation, one should put [[prepanl]] to 1 in order to force ABINIT to
 compute the electric field perturbation along the three directions explicitly,
-and (ii) to keep the full number of k-points.
+and to keep the full number of k-points.
 """,
 ),
 
@@ -13086,8 +13116,7 @@ Variable(
     mnemonics="PRinT Band-By-Band decomposition",
     text="""
 If [[prtbbb]] is 1, print the band-by-band decomposition of Born effective
-charges and localization tensor, in case they are computed. See Ph. Ghosez and
-X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
+charges and localization tensor, in case they are computed. See [[cite:Ghosez2000]].
 """,
 ),
 
@@ -14808,8 +14837,7 @@ In case [[berryopt]]=16, a reduced finite electric displacement field
 calculation is performed. The value of this displacement field, and its
 direction is determined by [[red_dfield]]. It must be given in atomic units.
 
-[[red_dfield]] is defined via Eq.(26) in the Supplement of M. Stengel, N.A.
-Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+[[red_dfield]] is defined via Eq.(26) in the Supplement of [[cite:Stengel2009]].
 """,
 ),
 
@@ -14824,11 +14852,10 @@ Variable(
     requires="[[berryopt]] = 16",
     text="""
 In case [[berryopt]]=16, a reduced finite electric displacement field
-calculation is performed. In this case, the parameter red_efield specifies the
+calculation is performed. In this case, the parameter [[red_efield]] specifies the
 initial electric field used on the first iteration, in atomic units.
 
-[[red_efield]] is defined via Eq.(25) in the Supplement of M. Stengel, N.A.
-Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+[[red_efield]] is defined via Eq.(25) in the Supplement [[cite:Stengel2009]].
 """,
 ),
 
@@ -14844,10 +14871,9 @@ Variable(
     text="""
 In case [[berryopt]]=14, a reduced finite electric field calculation is
 performed. The magnitude and direction of this electric field are determined
-by red_efieldbar. It must be given in atomic units.
+by [[red_efieldbar]]. It must be given in atomic units.
 
-[[red_efieldbar]] is defined via Eq.(28) in the Supplement of M. Stengel, N.A.
-Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+[[red_efieldbar]] is defined via Eq.(28) in the Supplement of [[cite:Stengel2009]].
 """,
 ),
 
@@ -14919,8 +14945,8 @@ auxiliary quantity in the calculations of 3rd-order derivatives of the energy
 [[rfdir]] (TO BE CORRECTED!).
 
   * 0 --> no derivative calculation
-  * 1 --> calculation along diagonal directions (d2/(dk_i dk_i), natom+10 is activated)
-  * 2 --> calculation along off-diagonal directions (d2/(dk_i dk_j), natom+11 is activated)
+  * 1 --> calculation along diagonal directions ($\,d^2$/($\,d k_i \,d k_i$), natom+10 is activated)
+  * 2 --> calculation along off-diagonal directions ($\,d^2$/($\,d k_i \,d k_j$), natom+11 is activated)
   * 3 --> calculation along all directions (both natom+10 and natom+11 are activated)
 """,
 ),
@@ -14961,7 +14987,7 @@ Variable(
     mnemonics="Response Function: ATomic POLarisation",
     text="""
 Control the range of atoms for which displacements will be considered in
-phonon calculations (atomic polarizations), using the 2n+1 theorem.
+phonon calculations (atomic polarizations).
 These values are only relevant to phonon response function calculations.
 May take values from 1 to [[natom]], with [[rfatpol]](1)<=[[rfatpol]](2).
 The atoms to be moved will be defined by the
@@ -14975,7 +15001,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [help:respfn|the response function help file]).
+or stress type (see [[help:respfn|the response function help file]]).
 """,
 ),
 
@@ -14990,11 +15016,11 @@ Variable(
     text="""
 Activates computation of derivatives of ground state wavefunctions with
 respect to wavevectors. This is not strictly a response function but is a
-needed auxiliary quantity in the electric field calculations (see [[rfelfd]])
+needed auxiliary quantity in the electric field calculations (see [[rfelfd]]).
 The directions for the derivatives are determined by [[rfdir]].
 
   * 0 --> no derivative calculation
-  * 1 --> calculation of first derivatives of wavefunctions with respect to k points (d/dk calculation).
+  * 1 --> calculation of first derivatives of wavefunctions with respect to k points ($\,d/ \,d k$ calculation).
     The exact same functionality is provided by [[rfelfd]] = 2.
 """,
 ),
@@ -15012,7 +15038,7 @@ Gives the directions to be considered for response function calculations (also
 for the Berry phase computation of the polarization, see the [[berryopt]]
 input variable).
 The three elements corresponds to the three primitive vectors, either in real
-space (phonon calculations), or in reciprocal space (d/dk, homogeneous
+space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
 electric field, homogeneous magnetic field calculations). So, they generate a
 basis for the generation of the dynamical matrix or the macroscopic dielectric
 tensor or magnetic susceptibility and magnetic shielding, or the effective charge tensors.
@@ -15036,16 +15062,17 @@ calculations requires first the non-self-consistent calculation of derivatives
 with respect to k, independently of the electric field perturbation itself.
 
   * 0 --> no electric field perturbation
-  * 1 --> full calculation, with first the derivative of ground-state wavefunction with respect to k (d/dk calculation), by a non-self-consistent calculation, then the generation of the first-order response to an homogeneous electric field
+  * 1 --> full calculation, with first the derivative of ground-state wavefunction with respect to k ($\,d / \,d k$ calculation), by a non-self-consistent calculation, then the generation of the first-order response to an homogeneous electric field
   * 2 --> only the derivative of ground-state wavefunctions with respect to k
   * 3 --> only the generation of the first-order response to the electric field, assuming that the data on derivative of ground-state wavefunction with respect to k is available on disk.
 
-(Note: because the tolerances to be used for derivatives or homogeneous
-electric field are different, one often does the calculation of derivatives in
-a separate dataset, followed by calculation of electric field response as well
-as phonon.
-The options 2 and 3 proves useful in that context; also, in case a scissor
-shift is to be used, it is usually not applied for the d/dk response).
+!!! note
+    Because the tolerances to be used for derivatives or homogeneous
+    electric field are different, one often does the calculation of derivatives in
+    a separate dataset, followed by calculation of electric field response as well
+    as phonon.
+    The options 2 and 3 proves useful in that context; also, in case a scissor
+    shift is to be used, it is usually not applied for the $\,d / \,d k$ response).
 """,
 ),
 
@@ -15058,8 +15085,8 @@ Variable(
     defaultval=0,
     mnemonics="Response Function with respect to MAGNetic B-field perturbation",
     text="""
-It must be equal to 1 to run response function calculations with respect to
-external magnetic field. Currently, orbital magnetism is not taken into
+[[rfmagn]] allows to run response function calculations with respect to
+external magnetic field if set to 1. Currently, orbital magnetism is not taken into
 account and the perturbing potential has Zeeman form.
 """,
 ),
@@ -15073,7 +15100,7 @@ Variable(
     defaultval=1,
     mnemonics="Response Function METHod",
     text="""
-Selects method used in response function calculations. Presently, only 1 is
+Selects method used in response function calculations. Presently, only [[rfmeth]]=1 is
 allowed.
 """,
 ),
@@ -15129,15 +15156,16 @@ ipert=natom+7, two sets of perturbations that the developpers can define.
   * 2 --> response with respect to perturbation natom+7 will be computed
   * 3 --> responses with respect to perturbations natom+6 and natom+7 will be computed
 
-In order to define and use correctly the new perturbations, the developper
-might have to include code lines or additional routines at the level of the
-following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
-dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
-dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
-irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
-these routines, the developper should pay a particular attention to the rfpert
-array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
-variable.
+!!! important
+    In order to define and use correctly the new perturbations, the developper
+    might have to include code lines or additional routines at the level of the
+    following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
+    dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
+    dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
+    irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
+    these routines, the developper should pay a particular attention to the rfpert
+    array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local
+    variable.
 """,
 ),
 
@@ -15555,11 +15583,11 @@ When [[smdelta]] in non-zero, it will trigger the calculation of the imaginary
 part of the second-order electronic eigenvalues, which can be related to the
 electronic lifetimes. The delta function is evaluated using:
 
-  * when [[smdelta]] == 1, Fermi-Dirac smearing: 0.25_dp/(cosh(xx/2.0_dp)**2
-  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter a=-.5634 (minimization of the bump): exp(-xx2)/sqrt(pi) * (1.5d0+xx*(-a*1.5d0+xx*(-1.0d0+a*xx)))
-  * when [[smdelta]] == 3, Cold smearing by Marzari using the parameter a=-.8165 (monotonic function in the tail): as 2 but different a
-  * when [[smdelta]] == 4, Smearing of Methfessel and Paxton (PRB40,3616(1989)) with Hermite polynomial of degree 2, corresponding to "Cold smearing" of N. Marzari with a=0 (so, same smeared delta function as smdelta=2, with different a).
-  * when [[smdelta]] == 5, Gaussian smearing: 1.0d0*exp(-xx**2)/sqrt(pi)
+  * when [[smdelta]] == 1, Fermi-Dirac smearing: $$\\frac{0.25}{(cosh(\\frac{x}{2.0}))^2}$$
+  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter $a=-0.5634$ (minimization of the bump): $$\\frac{e^{-x^2}}{\sqrt{\pi}}1.5\ d_0+x(-a\ 1.5\ d_0+x(-1.0\ d_0+a\ x))$$
+  * when [[smdelta]] == 3, Cold smearing by Marzari using the parameter $a=-0.8165$ (monotonic function in the tail): as 2 but different $a$
+  * when [[smdelta]] == 4, Smearing of Methfessel and Paxton ([[cite:Methfessel1989]]) with Hermite polynomial of degree 2, corresponding to "Cold smearing" of N. Marzari with $a=0$ (so, same smeared delta function as smdelta=2, with different $a$).
+  * when [[smdelta]] == 5, Gaussian smearing: $$\\frac{1.0\ d_0\ e^{-x^2}}{\sqrt{\pi}}$$
 """,
 ),
 
@@ -15791,10 +15819,10 @@ Variable(
     mnemonics="SPIN-MAGNetization TARGET",
     text="""
 This input variable is active only in the [[nsppol]]=2 case. If
-[[spinmagntarget]] is not the "magic" value of -99.99d0, the spin-
+[[spinmagntarget]] is not the "magic" value of -99.99, the spin-
 magnetization of the primitive cell will be fixed (or optimized, if it is not
 possible to impose it) to the value of [[spinmagntarget]], in Bohr magneton
-units, e.g. for an Hydrogen atom, it is 1.
+units (for an Hydrogen atom, it is 1).
 If [[occopt]] is a metallic one, the Fermi energies for spin up and spin down
 are adjusted to give the target spin-polarisation (this is equivalent to an
 exchange splitting). If [[occopt]]=1 and [[nsppol]]=2, the occupation numbers
@@ -15808,9 +15836,10 @@ up and spin down Fermi energy in the metallic case, while for the other cases,
 there will be no spin-magnetization, except for an odd number of electrons if
 [[occopt]]=1 and [[nsppol]]=2.
 
-Note: for the time being, only the spin down Fermi energy is written out in
-the main output file. In the fixed magnetic moment case, it differs from the
-spin up Fermi energy.
+!!! note
+    For the time being, only the spin down Fermi energy is written out in
+    the main output file. In the fixed magnetic moment case, it differs from the
+    spin up Fermi energy.
 """,
 ),
 
@@ -16136,16 +16165,12 @@ Variable(
     defaultval=0.0,
     mnemonics="Time-Dependent dft: MAXimal kohn-sham ENErgy difference",
     text="""
-The Matrix to be diagonalized in the Casida framework (see "Time-Dependent
-Density Functional Response Theory of Molecular systems: Theory, Computational
-Methods, and Functionals", by M.E. Casida, in Recent Developments and
-Applications of Modern Density Functional Theory, edited by J.M. Seminario
-(Elsevier, Amsterdam, 1996).) is a NxN matrix, where, by default, N is the
-product of the number of occupied states by the number of unoccupied states.
-The input variable [[td_maxene]] allows to diminish N: it selects only the
-pairs of occupied and unoccupied states for which the Kohn-Sham energy
-difference is less than [[td_maxene]]. The default value 0.0 means that all
-pairs are taken into account.
+The Matrix to be diagonalized in the Casida framework (see [[cite:Casida1995]])
+is a NxN matrix, where, by default, N is the product of the number of occupied
+states by the number of unoccupied states. The input variable [[td_maxene]]
+allows to diminish N: it selects only the pairs of occupied and unoccupied
+states for which the Kohn-Sham energy difference is less than [[td_maxene]].
+The default value 0.0 means that all pairs are taken into account.
 See [[td_mexcit]] for an alternative way to decrease N.
 """,
 ),
@@ -16159,16 +16184,12 @@ Variable(
     defaultval=0,
     mnemonics="Time-Dependent dft: Maximal number of EXCITations",
     text="""
-The Matrix to be diagonalized in the Casida framework (see "Time-Dependent
-Density Functional Response Theory of Molecular systems: Theory, Computational
-Methods, and Functionals", by M.E. Casida, in Recent Developments and
-Applications of Modern Density Functional Theory, edited by J.M. Seminario
-(Elsevier, Amsterdam, 1996).) is a NxN matrix, where, by default, N is the
-product of the number of occupied states by the number of unoccupied states.
-The input variable [[td_mexcit]] allows to diminish N: it selects the first
-[[td_mexcit]] pairs of occupied and unoccupied states, ordered with respect to
-increasing Kohn-Sham energy difference. However, when [[td_mexcit]] is zero,
-all pairs are allowed.
+The Matrix to be diagonalized in the Casida framework (see [[cite:Casida1995]])
+is a NxN matrix, where, by default, N is the product of the number of occupied
+states by the number of unoccupied states. The input variable [[td_mexcit]]
+allows to diminish N: it selects the first [[td_mexcit]] pairs of occupied and
+unoccupied states, ordered with respect to increasing Kohn-Sham energy difference.
+However, when [[td_mexcit]] is zero, all pairs are allowed.
 See [[td_maxene]] for an alternative way to decrease N.
 """,
 ),
@@ -18141,8 +18162,8 @@ specified in Ha (the default), Ry, eV or Kelvin, since [[vprtrb]] has the
 This is made available for testing responses to such perturbations. The form
 of the perturbation, which is added to the local potential, is:
 
-  * ([[vprtrb]](1)+I*[[vprtrb]](2))/2 at G=[[qprtrb]] and
-  * ([[vprtrb]](1)-I*[[vprtrb]](2))/2 at G=-[[qprtrb]] (see [[qprtrb]] also).
+  * ([[vprtrb]](1)$+I$[[vprtrb]](2)$)/2$ at $G=$[[qprtrb]] and
+  * ([[vprtrb]](1)$-I$[[vprtrb]](2)$)/2$ at $G=-$[[qprtrb]] (see [[qprtrb]] also).
 """,
 ),
 
@@ -18665,8 +18686,8 @@ Variable(
     mnemonics="ZEEMAN FIELD",
     characteristics=['[[MAGNETIC_FIELD]]'],
     text="""
-Give the value of the Zeeman field, H, acting on the spinorial wavefunctions.
-Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
+Give the value of the Zeeman field, $H$, acting on the spinorial wavefunctions.
+Note that Tesla are admitted. This sets the magnitude of $\mu_0H$, in Tesla,
 with H in Amperes/metre.
 """,
 ),

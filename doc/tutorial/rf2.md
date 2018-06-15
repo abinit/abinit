@@ -5,7 +5,6 @@ authors: XG
 # Second tutorial on DFPT:
 
 ## Phonon band structures, thermodynamical properties.  
-<div class=text-justify>
 
 In this tutorial you will learn how to post-process the raw data of the Abinit DFPT calculations to
 get the following physical properties of periodic solids:
@@ -465,4 +464,3 @@ An example is presented in tests/v5, test 22 .
 
     Do not forget that we are working in the harmonic approximation; beyond some
     temperature, anharmonic effects will have a sizeable contributions.
-</div>

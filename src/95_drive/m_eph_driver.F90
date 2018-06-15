@@ -132,6 +132,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_time,            only : cwtime
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
+ use m_frohlichmodel,   only : frohlichmodel
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -624,7 +625,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
    call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
- else
+ endif
+
+!I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
+ if(dtset%eph_frohlichm/=0)then
    
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
@@ -689,7 +693,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
 
-!  call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
+   call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -698,6 +702,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  !==== Free memory ====
  !=====================
+
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
@@ -705,13 +710,22 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ifc_free(ifc)
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
- call efmasdeg_free_array(efmasdeg)
- call efmasval_free_array(efmasval)
+ if(dtset%eph_frohlichm/=1)then
+   call pawfgr_destroy(pawfgr)
+   call destroy_mpi_enreg(mpi_enreg)
+ endif
+ if(allocated(efmasdeg))then
+   call efmasdeg_free_array(efmasdeg)
+ endif
+ if( allocated (efmasval))then
+   call efmasval_free_array(efmasval)
+ endif
  if(allocated(kpt_efmas))then
    ABI_DEALLOCATE(kpt_efmas)
  endif
+
+!XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+ write(std_out,*)' eph : after free efmasval and kpt_efmas'
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then
