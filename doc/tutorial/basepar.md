@@ -1,4 +1,5 @@
 ---
+title: Basic parallelization in ABINIT
 authors: YP, XG
 ---
 
@@ -59,8 +60,8 @@ environment, we are not able to provide you with support beyond ABINIT itself.
 ## 2 Characteristics of parallel environments
   
 Different software solutions can be used to benefit from parallelism. 
-Most of ABINIT parallelism is based on MPI, but some additional speed-up (or a better
-distribution of data, allowing to run bigger calculations) is based on OpenMP.
+Most of ABINIT parallelism is based on MPI, but significant additional speed-up (or a better
+distribution of data, allowing to run bigger calculations) is based on OpenMP and multi-threaded libraries.
 As of writing, efforts also focus on Graphical Processing Units (GPUs), with
 CUDA and MAGMA. The latter will not be described in the present tutorial.
 
@@ -85,7 +86,7 @@ bunch of projects have popped-up like daisies in the grass. Now the tendency
 is back to gathering and merging. For instance, Open MPI is a project
 combining technologies and resources from several other projects 
 (FT-MPI, LA-MPI, LAM/MPI, and PACX-MPI) in order to build the best MPI library available.
-Open MPI is a completely new MPI2-compliant implementation, offering
+Open MPI is a completely new MPI3.1-compliant implementation, offering
 advantages for system and software vendors, application developers and
 computer science researchers (see <https://www.open-mpi.org>)
 
@@ -99,17 +100,20 @@ a portable, scalable model that gives shared-memory parallel programmers a
 simple and flexible interface for developing parallel applications for
 platforms ranging from the desktop to the supercomputer (<http://www.openmp.org>).
 
-OpenMP is rarely used within ABINIT, and only for specific purposes. In any
-case, the first level of parallelism for these parts is based on MPI. Thus,
-the use of OpenMP in ABINIT will not be described in this tutorial.
+OpenMP was rarely used within ABINIT versions < 8.8.x, and only for specific purposes. 
+Last versions > 8.8 now benefits from multi-threaded libraries speedup like MKL and fftw3.
+Still not mandatory, on new architecture like Intel Xeon Phi KNL or last Intel Xeon Skylake, 
+multithreading shows better performances than MPI (*if and only if* an multithread version of linear
+algebra library is provided)
 
 ### Scalapack
 
 Scalapack is the parallel version of the popular LAPACK library (for linear
 algebra). It can play some role in the parallelism of several parts of ABINIT,
-especially the Band-FFT parallelism, and the parallelism for the Bethe-
+especially the LOBPCG algorithm in ground state calculations, and the parallelism for the Bethe-
 Salpether equation. ScaLAPACK being itself based on MPI, we will not discuss
-its use in ABINIT in this tutorial.
+its use in ABINIT in this tutorial.  
+**Important** : Scalapack is not thread-safe in many versions. Combining OpenMP and Scalapack can result is unpredictable behaviours.
 
 ### Fast/slow communications
 
@@ -131,7 +135,7 @@ If the set of computing cores that you plan to use is not entirely linked
 using a fast network, but includes some connections based e.g. on Ethernet,
 then, you might not be able to benefit from the speed-up announced in the
 tutorials. You have to perform some tests on your actual machine to gain
-knowledge of it.
+knowledge of it, and perhaps consider using multithreading.
 
 ## 3 What parts of ABINIT are parallel?
   
@@ -167,18 +171,18 @@ be given in the next section.
 *Before starting, you might consider working in a different subdirectory as
 for the other lessons. Why not "Work_paral"?*
 
-Copy the _files_ file and the input file from the _~abinit/tests/tutorial_
-directory to your work directory. They are named _tbasepar_1.files_ and
-_tbasepar_1.in_. You can start immediately a sequential run, to have a
+Copy the `files` file and the input file from the `~abinit/tests/tutorial`
+directory to your work directory. They are named `tbasepar_1.files` and
+`tbasepar_1.in`. You can start immediately a sequential run, to have a
 reference CPU time. On a 2.8GHz PC, it runs in about one minute.
 
-Contrary to the sequential case, it is worth to have a look at the "files"
+Contrary to the sequential case, it is worth to have a look at the `files`
 file, and to modify it for the parallel execution, as one should avoid
 unnecessary network communications. If every node has its own temporary or
 scratch directory, you can achieve this by providing a path to a local disk
-for the temporary files in _abinit.files_. Supposing each processor has access
-to a local temporary disk space named _/scratch/user_ , then you might modify
-the 5th line of the _files_ file so that it becomes:
+for the temporary files in `abinit.files`. Supposing each processor has access
+to a local temporary disk space named `/scratch/user` , then you might modify
+the 5th line of the `files` file so that it becomes:
     
     tbasepar_1.in
     tbasepar_1.out
@@ -189,13 +193,19 @@ the 5th line of the _files_ file so that it becomes:
     
 Note that determining ahead of time the precise resources you will need for
 your run will save you a lot of time if you are using a batch queue system.
+Also, for parallel runs, note that the _log_ files **will not** be written execpt the main log file.
+You can change this behaviour by creating a file named `_LOG` to enforce the creation of all log files
+```bash
+touch _LOG
+```
+At *contrario* you can create a `_NOLOG` file if you want to avoid all log files.
 
 ### Parallelism over the k-points
 
 The most favorable case for a parallel run is to treat the k-points
 concurrently, since the calculations can be done independently for each one of them.
 
-Actually, _tbasepar_1.in_ corresponds to the investigation of a fcc crystal of
+Actually, `tbasepar_1.in` corresponds to the investigation of a fcc crystal of
 lead, which requires a large number of k-points if one wants to get an
 accurate description of the ground state. Examine this file. Note that the
 cut-off is realistic, as well as the grid of k-points (giving 60 k points in
@@ -203,18 +213,20 @@ the irreducible Brillouin zone). However, the number of SCF steps, [[nstep]],
 has been set to 3 only. This is to keep the CPU time reasonable for this
 tutorial, without affecting the way parallelism on the k points will be able
 to increase the speed. Once done, your output files have likely been produced.
-Examine the timing in the output file (the last line gives the overall CPU and
-Wall time), and keep note of it.
+Examine the timing in the output file (the last line gives the CPU `overall time` and
+`Wall time`), and keep note of it.
 
-Now you should run the parallel version of ABINIT. On a multi-core PC, you
-might succeed to use two compute cores by issuing the run command for your MPI
+We assume you have compiled ABINIT with MPI enable `--enable-mpi` option at configuration step.
+On a multi-core PC, you might succeed to use two compute cores by issuing the run command for your MPI
 implementation, and mention the number of processors you want to use, as well
 as the abinit command:
     
-    mpirun -np 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+```bash
+    mpirun -n 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+ ```
 
 Depending on your particular machine, "mpirun" might have to be replaced by
-"mpiexec", and "-np" by some other option.
+"mpiexec", and "-n" by some other option.
 
 On a cluster, with the MPICH implementation of MPI, you have to set up a file
 with the addresses of the different CPUs. Let's suppose you call it _cluster_.
@@ -229,15 +241,16 @@ For a cluster of four machines, you might have something like:
     tux2
     tux3
 
-More possibilities are mentioned in the file _~abinit/doc/users/paral_use_.
+More possibilities are mentioned in the file `~abinit/doc/users/paral_use`.
 
 Then, you have to issue the run command for your MPI implementation, and
 mention the number of processors you want to use, as well as the abinit
 command and the file containing the CPU addresses.
 
 On a PC bi-processor machine, this gives the following:
-    
+```bash
     mpirun -np 2 -machinefile cluster ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+```
 
 Now, examine the corresponding output file. If you have kept the output from
 the sequential job, you can make a diff between the two files. You will notice
@@ -272,33 +285,31 @@ machine, and the sequential part of ABINIT), you will not be able to decrease
 further the Wall clock time seen by one processor. It is not worth to try to
 use more processors. You should get a curve similar to this one:
 
-![](basepar_assets/lesson_basepar_speedup.png)
+![Speedup kpt](basepar_assets/lesson_basepar_speedup.png "Spped up for k-pt parallelisation"):Speedup with k point parallelization.
 
 The red curve materializes the speed-up achieved, while the green one is the
-"y = x" line. The shape of the red curve will vary depending on your hardware
+$y = x$ line. The shape of the red curve will vary depending on your hardware
 configuration. The definition of the speed-up is the time taken in a
 sequential calculation divided by the time for your parallel calculation (hopefully > 1) .
 
 One last remark: the number of k-points need not be a multiple of the number
 of processors. As an example, you might try to run the above case with 16
-processors: most of the processors will treat 4 k points, but four of them
-will only treat 3 k points. The maximal speed-up will only be 15 (=60/4), instead of 16.
+processors: all will treat $\lfloor 60/16 \rfloor$ k points, but $60-16\times3=12$ processors
+will have to treat one more k point so that $12*4+16*3=60$.
+The maximal speed-up will only be 15 (=60/4), instead of 16.
 
 Try to avoid leaving an empty processor as this can make abinit fail with
-certain compilers. An empty processor happens, for example, if you use 14
-processors: you obtain ceiling(60/14) = 5 k points per processor. In this case
-12 processors are filled with 5 k points each (giving 60), and the last 2
-processors are completely empty. Obviously there is no point in not reducing
-the number of processors to 12. The extra processors do no useful work, but
-have to run anyway, just to confirm to abinit once in a while that all 14
-processors are alive.
+certain compilers. An empty processor happens, for example, if you use more processors 
+than the number of k point.
+The extra processors do no useful work, but have to run anyway, just to confirm to abinit
+once in a while that all processors are alive.
 
 ### Parallelism over the spins
 
 The parallelization over the spins (up, down) is done along with the one over
 the k-points, so it works exactly the same way. The files
-_~abinit/tests/tutorial/tbasepar_2.in_ and
-_~abinit/tests/tutorial/tbasepar_2.files_ treat a spin-polarized system
+`~abinit/tests/tutorial/tbasepar_2.in` and
+`~abinit/tests/tutorial/tbasepar_2.files` treat a spin-polarized system
 (distorted FCC Iron) with only one k-point in the Irreducible Brillouin Zone.
 This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
@@ -349,9 +360,9 @@ the decreasing charge on each processor too.
 ### The MPI toolbox in ABINIT
 
 The ABINIT-specific MPI routines are located in different subdirectories of
-_~abinit/src_ : 12_hide_mpi/, 51_manage_mpi/, 56_io_mpi/, 79_seqpar_mpi/. They include:
+`~abinit/src` : `12_hide_mpi/`, `51_manage_mpi/`, `56_io_mpi/`, `79_seqpar_mpi/`. They include:
 
-  * low-level communication handlers (xfuncmpi, initmpi_*,xdef_comm);
+  * low-level communication handlers 
   * header I/O helpers (hdr_io, hdr_io_netcdf);
   * wavefunction I/O helpers (Wff*);
   * a multiprocess-aware output routine (wrtout);
@@ -370,44 +381,47 @@ with ABINIT internals and source code. Anyway, you can skip this section
 without hesitation, as it is primarily intended for advanced developers.
 
 First, every call to a MPI routine and every purely parallel section of your
-subroutine **must** be surrounded by the following preprocessing directives:
-    
-    #if defined MPI
-    ...
-    #endif
-    
-
-The first block of this type will likely appear in the "local variables"
-section, where you will declare all MPI-specific variables. Please note that
-some of them will be used in sequential mode as well, and thus will be
-declared outside this block (typically _am_master_ , master, me_loc, etc.).
-
-The MPI communications should be initialized at the very beginning of your
-subroutine. To do this, we suggest the following piece of code:
+subroutine **must** be surrounded by the following preprocessing directives
+if you don't use functions provided by the `m_xmpi` module.
     
 ```fortran
-! Init mpi_comm
-call xcomm_world(spaceComm)
-am_master=.true.
-master = 0
-
-! Init ntot proc max
-call xproc_max(nproc_loc,ierr)
-
-! Define who i am
-call xme_whoiam(me_loc)
-
 #if defined HAVE_MPI
-if (me_loc/=0) then
-  am_master=.FALSE.
-endif
-
-write(message, '(a,i3,a)' ) ' <ROUTINE NAME> ',nproc_loc,' CPU synchronized'
-call wrtout(std_out,message,'COLL')
 ...
 #endif
 ```
 
-Note that the first calls to x* are outside the preprocessing - they must be
-called in all cases, and have their own pre-processed sections. The cleaning
-and closing of MPI stuff is done in a central part of abinit at the end of the run.
+Usually, the function you will write will have as an argument a communicator.
+You can then retrieve the number of processors in this communicator with `xmpi_comm_size(comm)`,
+the rank of a processor with `xmpi_comm_rank(comm)`.  
+Example of a function
+    
+```fortran
+subroutine dosomethin(arg,comm)
+  !define arguments
+  integer, intent(in) :: arg
+  integer, intent(in) :: com,
+  !define local arguments
+  integer :: rank
+  integer :: size
+  integer, parameter :: master = 0 ! proc 0 will be our master
+
+  !retrieve size and rank
+  size = xmpi_comm_size(comm)
+  rank = xmpi_comm_rank(comm)
+
+  !do things
+  call xmpi_sum(...)
+
+  !Use not wrapped-functions
+#if defined HAVE_MPI
+  call mpi_comm_split(com,....)
+#endif
+
+  !Master do something
+  if ( rank == master ) then
+    !do things
+  endif
+
+  call wrtout(std_out,"Only master will write",'COLL')
+  call wrtout(std_out,"Each proc will write in its own std_out",'PERS')
+```
