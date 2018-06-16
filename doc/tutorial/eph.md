@@ -6,7 +6,7 @@ authors: MVer
 
 ## Electron-Phonon interaction and superconducting properties of Al.  
 
-This lesson demonstrates how to obtain the following physical properties, for a metal:
+This tutorial demonstrates how to obtain the following physical properties, for a metal:
 
   * the phonon linewidths (inverse lifetimes) due to the electron-phonon interaction
   * the Eliashberg spectral function
@@ -19,7 +19,7 @@ utility. This implies a preliminary calculation of the electron-phonon matrix
 elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Calculation of the ground state and phonon structure of fcc Al
 

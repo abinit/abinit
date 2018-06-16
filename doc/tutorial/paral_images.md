@@ -6,14 +6,14 @@ authors: MT, GG
 
 ## String method for the computation of minimum energy paths, in parallel.  
 
-This lesson aims at showing how to perform a calculation of a minimum energy
+This tutorial aims at showing how to perform a calculation of a minimum energy
 path (MEP) using the string method.
 
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
 efficiency of the parallelism on "images".  
 
-This lesson should take about 1.5 hour and requires to have at least a 200 CPU
+This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
 cores parallel computer.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
@@ -34,7 +34,7 @@ The algorithm presently implemented in ABINIT is the so-called "simplified strin
 It has been designed for the sampling of smooth energy landscapes.   
 
 *Before continuing you might work in a different subdirectory as for the other
-lessons. Why not "work_paral_string"?* 
+tutorials. Why not "work_paral_string"?* 
 
 !!! important
 

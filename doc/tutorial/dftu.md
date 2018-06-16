@@ -6,15 +6,15 @@ authors: SPesant, MCote, XG, BAmadon
 
 ## The projected density of states of NiO.  
 
-This lesson aims at showing how to perform a DFT+U calculation using Abinit (see also [[cite:Amadon2008a]])
+This tutorial aims at showing how to perform a DFT+U calculation using Abinit (see also [[cite:Amadon2008a]])
 
 You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two lessons on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
+Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
 
-This lesson should take about 1 hour to complete.
+This tutorial should take about 1 hour to complete.
 
 ## 0 Short summary of the DFT+U method
   

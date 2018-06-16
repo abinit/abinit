@@ -12,7 +12,7 @@ these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
 unperturbed host unit cell. The unfolding technique used in Abinit is the one presented in Ref. [[cite:Rubel2014]]. 
 
-This lesson aims at demonstrating how to unfold the band structure of a
+This tutorial aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
 inherent to the unperturbed unit cell. We will construct a supercell of 6
 hydrogen atoms, perform self-consistent cycle and plot the corresponding band
@@ -20,7 +20,7 @@ structure. At the end, we will recover the familiar dispersion relation using
 the fold2Bloch utility.  
 See also the [[help:fold2bloch]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Creating a Hydrogen supercell structure
   
@@ -57,7 +57,7 @@ they will be affected by the zone folding.
 Fig. 2: Brillouin zone of the supercell.
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_fold2Bloch"?*
+for the other tutorials. Why not "Work_fold2Bloch"?*
 
 In order to use the fold2Bloch, you need to first generate a wave function file (_WFK file).
 

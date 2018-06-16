@@ -6,7 +6,7 @@ authors: TRangel
 
 ## The Wannier90 interface tutorial.  
 
-This lesson aims at showing how to use the Wannier90 interface to compute
+This tutorial aims at showing how to use the Wannier90 interface to compute
 Maximally Localized Wannier Functions (MLWFs).
 
 You will learn how to get MLWFs with ABINIT and Wannier90 and what are the
@@ -14,7 +14,7 @@ basic variables to govern the numerical efficiency.
 It is supposed that you already know how to use ABINIT in the norm conserving
 pseudopotential case.
 
-This lesson should take about 1 hour and it is important to note that the examples in this tutorial 
+This tutorial should take about 1 hour and it is important to note that the examples in this tutorial 
 are not converged, they are just examples to show how to use the code.
 
 ## 1 Summary of Wannier90 in ABINIT
@@ -55,7 +55,7 @@ Now we will compute a set of MLWFs for the silicon case.
 We are going to extract the Wannier functions corresponding to the four valence states of silicon.  
 
 *Before beginning, you might consider to work in a different sub-directory as
-for the other lessons. Why not "Work_w90"?*
+for the other tutorials. Why not "Work_w90"?*
 
     mkdir Work_w90
     cd Work_w90

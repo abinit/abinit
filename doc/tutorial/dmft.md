@@ -6,19 +6,19 @@ authors: BAmadon
 
 ## A DFT+DMFT calculation for SrVO<sub>3</sub>.  
 
-This lesson aims at showing how to perform a DFT+DMFT calculation using Abinit.
+This tutorial aims at showing how to perform a DFT+DMFT calculation using Abinit.
 
 You will not learn here what is DFT+DMFT. But you will learn how to do a
 DFT+DMFT calculation and what are the main input variables controlling this
 type of calculation.
 
 It might be useful that you already know how to do PAW calculations using
-ABINIT but it is not mandatory (you can follow the two lessons on PAW in
+ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT, [PAW1](paw1) and [PAW2](paw2).
 Also the [DFT+U lesson](dftu) in ABINIT might be useful to know some basic
 variables common to DFT+_U_ and DFT+DMFT.
 
-This lesson should take one hour to complete 
+This tutorial should take one hour to complete 
 (especially if you have access to several processors).
 
 ## 1 The DFT+DMFT method: summary and key parameters

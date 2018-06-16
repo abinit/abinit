@@ -14,7 +14,7 @@ You will learn how to use some keywords related to the "KGB" parallelization sch
 On the one hand, you will see how to improve the speedup of your calculations and, on the other hand, 
 how to increase the convergence speed of a self consistent field calculation.  
   
-This lesson should take about 1.5 hour and requires access to at least a 200
+This tutorial should take about 1.5 hour and requires access to at least a 200
 CPU core parallel computer.
 
 You are supposed to know already some basics of parallelism in ABINIT,
@@ -25,7 +25,7 @@ tutorials about parallelism in ABINIT.
 ## 1 Introduction
 
 *Before continuing you might work in a different subdirectory, as for the
-other lessons. Why not "work_paral_gspw"?* 
+other tutorials. Why not "work_paral_gspw"?* 
 
 All the input files can be found in the `~abinit/tests/tutoparal/Input directory`. 
 You might have to adapt them to the path of the directory in which you have decided to perform your runs. 

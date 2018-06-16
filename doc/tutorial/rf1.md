@@ -20,17 +20,17 @@ In this tutorial you will learn how to get the following physical properties (of
     to produce phonon band structures and the associated
     thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2]]
 
-This lesson should take about 2 hours.
+This tutorial should take about 2 hours.
 
 ## 1 The ground-state geometry of AlAs
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Input?*
+for the other tutorials. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Input?*
 
 !!! important
 
     The reference directory that contains the example files for the
-    tutorial is no more ~abinit/tests/tutorial (as for the basic lessons and the
+    tutorial is no more ~abinit/tests/tutorial (as for the basic tutorials and the
     specialized, non-DFPT ones), but ~abinit/tests/tutorespfn. 
     This will be the case for all the DFPT based part of the tutorial.
 
@@ -44,7 +44,7 @@ Note that two pseudopotentials are mentioned in this "files" file: one
 for the Aluminum atom, and one for the Arsenic atom. 
 The first listed in trf1_x.files (for Al) will define the first type of atom of the input file (see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
 It might be the first time that you encounter this situation (more than one type of atoms) in the
-tutorials, at variance with the four "basic" lessons.
+tutorials, at variance with the four "basic" tutorials.
 
 You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in Work_rf1. 
 

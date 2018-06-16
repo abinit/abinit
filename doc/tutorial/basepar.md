@@ -169,7 +169,7 @@ be given in the next section.
 ### Running a job
 
 *Before starting, you might consider working in a different subdirectory as
-for the other lessons. Why not "Work_paral"?*
+for the other tutorials. Why not "Work_paral"?*
 
 Copy the `files` file and the input file from the `~abinit/tests/tutorial`
 directory to your work directory. They are named `tbasepar_1.files` and

@@ -6,7 +6,7 @@ authors: XG, RC
 
 ## The H<sub>2</sub> molecule, without convergence studies
 
-This lesson aims at showing how to get the following physical properties:
+This tutorial aims at showing how to get the following physical properties:
 
 * the (pseudo) total energy 
 * the bond length 
@@ -23,7 +23,7 @@ like a tourist, and you discover a town in a coach.
 You will have a bit more freedom after that first step.
 It is supposed that you have some good knowledge of UNIX/Linux.
 
-This lesson should take about 2 hours.
+This tutorial should take about 2 hours.
 
 ## Computing the (pseudo) total energy, and some associated quantities
   
@@ -42,7 +42,7 @@ Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`).
   
 In that directory, you will find the necessary input files to run the examples related to this tutorial. 
 Take a few seconds to read the names of the files already present in `~abinit/tests/tutorial/Input`. 
-Compare with the lessons mentioned in the index of the [Tutorial home page](index.md).
+Compare with the tutorials mentioned in the index of the [Tutorial home page](index.md).
 You will find other input files, specific for the Density Functional
 Perturbation Theory ("Response functions") capabilities in the directory `~abinit/tests/tutorespfn/Input`. 
 

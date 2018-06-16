@@ -6,7 +6,7 @@ authors: XG
 
 ## Time-Dependent Density Functional Theory, Casida's approach.  
 
-This lesson aims at showing how to get the following physical properties, for finite systems:
+This tutorial aims at showing how to get the following physical properties, for finite systems:
 
   * Excitation energies 
   * Associated oscillator strengths 
@@ -14,7 +14,7 @@ This lesson aims at showing how to get the following physical properties, for fi
 
 in the Casida approach, within Time-Dependent Density Functional Theory.
 
-This lesson should take about 30 minutes.
+This tutorial should take about 30 minutes.
 
 ## 1 Brief theoretical introduction
   
@@ -104,7 +104,7 @@ an important role in the understanding of the way to use Abinit
 implementation of Casida's formalism.
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_tddft"?*
+for the other tutorials. Why not "Work_tddft"?*
 
 Now, you are ready to run ABINIT and prepare the needed file.
 

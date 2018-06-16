@@ -12,7 +12,7 @@ interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
   * the electric field gradient, 
   * the isomer shift 
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Electric field gradient
   

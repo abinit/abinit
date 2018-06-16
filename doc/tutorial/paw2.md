@@ -6,12 +6,12 @@ authors: MT
 
 ## Generation of PAW atomic datasets
 
-This lesson aims at showing how to compute atomic datasets for the Projector Augmented-Wave (PAW) method.
+This tutorial aims at showing how to compute atomic datasets for the Projector Augmented-Wave (PAW) method.
 
 You will learn how to generate these atomic datasets and how to control their softness and transferability.
 You already should know how to use ABINIT in the PAW case (see [[lesson:paw1|1st lesson on PAW]]).
   
-This lesson should take about 2h00.
+This tutorial should take about 2h00.
 
 ## 1. The PAW atomic dataset - introduction
   
@@ -77,7 +77,7 @@ correctly the generation of PAW atomic datasets:
 ## 2. Use of the generation code
   
 *Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not `Work_paw2`?*
+for the other tutorials. Why not `Work_paw2`?*
 
 Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option, the `ATOMPAW` code is directly available from command line.  
 First, just try to type:

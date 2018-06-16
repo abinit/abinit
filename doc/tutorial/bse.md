@@ -6,20 +6,20 @@ authors: MG, MS
 
 ## Absorption spectra including excitonic effects.  
 
-This lesson discusses how to calculate the macroscopic dielectric function
+This tutorial discusses how to calculate the macroscopic dielectric function
 including excitonic effects within the Bethe-Salpeter (BS) approach.
 Crystalline silicon is used as test case. A brief description of the formalism
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
-The user should be familiarized with the four basic lessons of ABINIT and the
+The user should be familiarized with the four basic tutorials of ABINIT and the
 [first lesson of the GW tutorial](gw1).
 
-This lesson should take about one hour to be completed.
+This tutorial should take about one hour to be completed.
 
 ## Preparatory steps (WFK and the SCR file)
   
 *Before starting, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_bs"?*
+for the other tutorials. Why not "Work_bs"?*
 
 Copy the files file *~abinit/tests/tutorial/Input/tbs_1.files* 
 in the working directory *~abinit/tests/tutorial/Input/Work_bs*.

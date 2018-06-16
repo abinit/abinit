@@ -6,14 +6,14 @@ authors: DJA
 
 ## How to determine *U* for DFT+*U* in ABINIT ? Cococcioni's approach.  
 
-This lesson aims to show how you can determine *U* for further DFT+*U*
+This tutorial aims to show how you can determine *U* for further DFT+*U*
 calculations consistently and in a fast an easy way. You will learn to prepare
 the input files for the determination and to use the main parameters implemented for this aim.  
 It is supposed that you already know how to run ABINIT in the PAW mode (lesson [PAW1](paw1)). 
 Obviously, you should also read the lesson [DFT+U](dftu), and likely the lesson  [PAW2](paw2), 
 to generate PAW atomic data.  
 
-This lesson should take about 1/2 hour.
+This tutorial should take about 1/2 hour.
 
 ## 1 Summary of linear response method to determine *U*
   
@@ -62,7 +62,7 @@ The implementation of the determination of *U* in ABINIT is briefly discussed in
 ## 2 Determine *U* in ABINIT
   
 *Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_udet"?* 
+for the other tutorials. Why not "Work_udet"?* 
 
 !!! important
 

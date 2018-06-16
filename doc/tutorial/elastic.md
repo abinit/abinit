@@ -6,7 +6,7 @@ authors: DRH
 
 ## Elastic and piezoelectric properties.  
 
-This lesson shows how to calculate physical properties related to strain, for
+This tutorial shows how to calculate physical properties related to strain, for
 an insulator and a metal:
 
   * the rigid-atom elastic tensor 
@@ -14,16 +14,16 @@ an insulator and a metal:
   * the internal strain tensor 
   * the atomic relaxation corrections to the elastic and piezoelectric tensor 
 
-You should complete lessons [RF1](rf1) and [RF2](rf2)
+You should complete tutorials [RF1](rf1) and [RF2](rf2)
 to introduce the density-functional perturbation theory (DFPT) features of
 ABINIT before starting this lesson. You will learn to use additional DFPT
 features of ABINIT, and to use relevant parts of the associated codes Mrgddb and Anaddb.
 
-This lesson should take about two hours.
+This tutorial should take about two hours.
 
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
-*Before beginning, you might consider working in a different subdirectory as for the other lessons. 
+*Before beginning, you might consider working in a different subdirectory as for the other tutorials. 
 Why not create "Work_elast" in ~abinit/tests/tutorespfn/Input?*
 
 You should copy the files ~abinit/tests/tutorespfn/Input/telast_1.files and telast_1.in into Work_elast. 
@@ -39,7 +39,7 @@ It was chosen for this lesson because the atomic
 positions are not completely determined by symmetry. 
 Both the atomic positions and the lattice constants should be optimized before beginning DFPT
 calculations, especially those related to strain properties. 
-While GS structural optimization was treated in lessons 1-3, we are introducing a few
+While GS structural optimization was treated in tutorials 1-3, we are introducing a few
 new features here, and you should look at the following new input variables which will be discussed below:  
 
   * [[getxred]] 

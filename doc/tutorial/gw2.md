@@ -6,7 +6,7 @@ authors: FBruneval, XG
 
 ## Treatment of metals.  
 
-This lesson aims at showing how to obtain self-energy corrections to the DFT
+This tutorial aims at showing how to obtain self-energy corrections to the DFT
 Kohn-Sham eigenvalues within the GW approximation, in the metallic case,
 without the use of a plasmon-pole model. 
 The band width and Fermi energy of Aluminum will be computed.  
@@ -30,16 +30,16 @@ A brief description of the equations implemented in the code can be found in the
 Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT, 
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
-The user should be familiarized with the four basic lessons of ABINIT, see the
+The user should be familiarized with the four basic tutorials of ABINIT, see the
 [[lesson:index]] as well as the [[lesson:gw1|first GW lesson]].
 
-This lesson should take about one hour to be completed (also including the
+This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
 ## 1 The preliminary Kohn-Sham band structure calculation
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw2"?*
+for the other tutorials. Why not "Work_gw2"?*
 
 In [[lesson:base4|lesson 4]], we have computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is

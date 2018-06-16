@@ -6,7 +6,7 @@ authors: JB
 
 ## How to perform Molecular Dynamics calculations using parallelism  
 
-This lesson aims at showing how to perform molecular dynamics with ABINIT
+This tutorial aims at showing how to perform molecular dynamics with ABINIT
 using a parallel computer.
 You will learn how to launch molecular dynamics calculation and what are the
 main input variables that govern convergence and numerical efficiency.  
@@ -16,7 +16,7 @@ explained in the tutorial
 [A first introduction to ABINIT in parallel](basepar), and 
 [ground state with plane waves](paral_gspw).
 
-This lesson should take about 1.5 hour to be done and requires to have at
+This tutorial should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.
 
 ## 1 Summary of the molecular dynamics method
@@ -47,7 +47,7 @@ abinit.files or the use of a specific submission file.
 !!! important
 
     Before continuing, you might consider to work in a different subdirectory as
-    for the other lessons. Why not "Work_paral_moldyn"? 
+    for the other tutorials. Why not "Work_paral_moldyn"? 
     In what follows, the name of files are mentioned as if you were in this subdirectory.  
     All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
 

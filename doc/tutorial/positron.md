@@ -6,7 +6,7 @@ authors: JW, MT
 
 ## Calculation of positron lifetime and momentum distribution in silicon
 
-This lesson aims at showing how to perform **Two-Component Density-Functional
+This tutorial aims at showing how to perform **Two-Component Density-Functional
 Theory (TCDFT)** calculations in the PAW framework to obtain the following
 physical properties:
 
@@ -16,15 +16,15 @@ physical properties:
 
 For the description of the implementation of TCDFT in ABINIT see [[cite:Wiktor2015]].
 
-The user should be familiar with the four basic lessons of ABINIT and the [first PAW tutorial](paw1).
+The user should be familiar with the four basic tutorials of ABINIT and the [first PAW tutorial](paw1).
 
-This lesson should take about 2 hours.
+This tutorial should take about 2 hours.
 
 
 ## 1. Computing the positron lifetime in Si lattice
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not `Work_positron`?*
+for the other tutorials. Why not `Work_positron`?*
 
 The lesson begins with a calculation of the positron lifetime in a silicon lattice.
 In a perfect material the positron is delocalized. We can assume that its

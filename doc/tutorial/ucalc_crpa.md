@@ -6,12 +6,12 @@ authors: BAmadon
 
 ## Using the constrained RPA to compute the U and J in the case of SrVO<sub>3</sub>.  
 
-This lesson aims at showing how to perform a calculation of _U_ and _J_ in
+This tutorial aims at showing how to perform a calculation of _U_ and _J_ in
 Abinit using cRPA. This method is well adapted in particular to determine _U_
 and _J_ as they can be used in DFT+DMFT. The implementation is described in [[cite:Amadon2014]].
 
 It might be useful that you already know how to do PAW calculations using
-ABINIT but it is not mandatory (you can follow the two lessons on PAW in
+ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT ([PAW1](paw1), [PAW2](paw2))).
 The DFT+_U_ tutorial in ABINIT ([DFT+U](dftu)) might be useful to know some
 basic variables about correlated orbitals.
@@ -20,7 +20,7 @@ The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
-This lesson should take two hours to complete (you should have access to more than 8 processors).
+This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
   

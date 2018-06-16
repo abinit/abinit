@@ -6,7 +6,7 @@ authors: SP
 
 ## Temperature-DEPendence of the Electronic Structure.  
 
-This lesson aims at showing how to get the following physical properties, for periodic solids:
+This tutorial aims at showing how to get the following physical properties, for periodic solids:
 
   * The zero-point-motion renormalization (ZPR) of eigenenergies  
 

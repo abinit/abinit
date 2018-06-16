@@ -6,7 +6,7 @@ authors: SS, XG, YG
 
 ## Frequency-dependent linear and second order nonlinear optical response.  
 
-This lesson aims at showing how to get the following physical properties, for semiconductors:
+This tutorial aims at showing how to get the following physical properties, for semiconductors:
 
   * Frequency dependent linear dielectric tensor 
   * Frequency dependent second order nonlinear susceptibility tensor 
@@ -14,12 +14,12 @@ This lesson aims at showing how to get the following physical properties, for se
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of the [[help:optic]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Computing the momentum matrix elements
   
 *Before beginning, you might consider working in a different subdirectory from
-for the other lessons. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
+for the other tutorials. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
 
 In order to use the Optic utility, you should first have some theoretical background. 
 We strongly suggest that you first read the first two sections of the [[help:optic]].

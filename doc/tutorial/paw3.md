@@ -18,7 +18,7 @@ assumes no previous experience with the `Elk` code, but it is strongly advised
 that the users familiarise themselves a bit with this code before attempting
 to do similar comparisons with their own datasets.  
   
-This lesson should take about 3h-4h.
+This tutorial should take about 3h-4h.
 
 
 ## 1. Introduction - the quantities to be compared
@@ -71,7 +71,7 @@ it here. We will now discuss the prerequisites for this tutorial.
 ## 2. Prerequisites, code components and scripts
 
 It is assumed that you are already familiar with the contents and procedures
-in lessons [[lesson:paw1|PAW1]] and [[lesson:paw2|PAW2]], and so
+in tutorials [[lesson:paw1|PAW1]] and [[lesson:paw2|PAW2]], and so
 have some familiarity with input files for atompaw, and the issues in creating
 PAW datasets. To exactly reproduce the results in this tutorial, you will
 need:  

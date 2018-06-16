@@ -6,7 +6,7 @@ authors: PhG,  MVeithen,  XG
 
 ## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.  
 
-This lesson aims at showing how to get the following non-linear physical properties, for an insulator:
+This tutorial aims at showing how to get the following non-linear physical properties, for an insulator:
 
   * The non-linear optical susceptibilities 
   * The Raman tensor of TO and LO modes 
@@ -22,17 +22,17 @@ non-linear properties, one will also obtain several linear response properties:
 Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor) thanks to finite differences.
 
-The user should have already passed through several advanced lessons of the
+The user should have already passed through several advanced tutorials of the
 tutorial: the [lesson Response-Function 1](rf1), the [lesson Response-Function 2](rf2), 
 the [lesson on Polarization and finite electric field](ffield), and the 
 [lesson on Elastic properties](elastic)
 
-This lesson should take about 1 hour and 30 minutes.
+This tutorial should take about 1 hour and 30 minutes.
 
 
 ## 1 Ground-state properties of AlAs and general parameters
   
-*Before beginning, you might consider to work in a different subdirectory as for the other lessons. 
+*Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
 Why not create "Work-NLO" in ~abinit/tests/tutorespfn/Input?*
 
 In order to save some time, you might immediately start running a calculation.

@@ -6,13 +6,13 @@ authors: DC
 
 ## Boron cluster, alkane molecule...  
 
-This lesson explains how to run the calculation of an isolated system using a
+This tutorial explains how to run the calculation of an isolated system using a
 wavelet basis-set on a parallel computer using MPI. You will learn the
 different characteristics of a parallel run using the wavelet basis-set and
 test the speed-up on a small boron cluster of 14 atoms followed by a test on a
 bigger alkane molecule.
 
-This lesson should take about 90 minutes and requires you have several CPU
+This tutorial should take about 90 minutes and requires you have several CPU
 cores (up to 64).
 
 You are supposed to know already some basics of parallelism in ABINIT,

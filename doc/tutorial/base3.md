@@ -6,7 +6,7 @@ authors: XG, RC
 
 ## Crystalline silicon.  
 
-This lesson aims at showing you how to get the following physical properties, for an insulator:
+This tutorial aims at showing you how to get the following physical properties, for an insulator:
 
 * the total energy 
 * the lattice parameter 
@@ -14,7 +14,7 @@ This lesson aims at showing you how to get the following physical properties, fo
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Computing the total energy of silicon at fixed number of k points
 

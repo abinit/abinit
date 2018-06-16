@@ -6,7 +6,7 @@ authors: GZ, MT, EB, MJV
 
 ## Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).  
 
-This lesson aims at showing how to get the following physical properties:
+This tutorial aims at showing how to get the following physical properties:
 
 * the total magnetization of a ferromagnetic material  
 * the magnetization of an antiferromagnetic material  
@@ -18,12 +18,12 @@ This lesson aims at showing how to get the following physical properties:
 
 You will learn to use features of ABINIT which deal with spin.  
 
-This lesson should take about 1.5 hour.
+This tutorial should take about 1.5 hour.
 
 ## 1 A ferromagnetic material: *bcc* Fe
   
 *Before beginning, you might consider to work in a different subdirectory, as
-for the other lessons. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
+for the other tutorials. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
 
 The file _~abinit/tests/tutorial/Input/tspin\_x.files_ lists the file names and root names. 
 You can copy it in the Work\_spin directory (and change it, when needed, as usual).  

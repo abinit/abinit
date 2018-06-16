@@ -6,7 +6,7 @@ authors: XG, RC
 
 ## Aluminum, the bulk and the surface.  
 
-This lesson aims at showing how to get the following physical properties, for a metal, and for a surface:
+This tutorial aims at showing how to get the following physical properties, for a metal, and for a surface:
 
 * the total energy 
 * the lattice parameter 
@@ -16,7 +16,7 @@ This lesson aims at showing how to get the following physical properties, for a 
 You will learn about the smearing of the Brillouin zone integration, and also
 a bit about preconditioning the SCF cycle.
 
-This lesson should take about 1 hour and 30 minutes.
+This tutorial should take about 1 hour and 30 minutes.
 
 ## 1 Total energy and lattice parameters at fixed smearing and k-point grid
 
@@ -394,7 +394,7 @@ recompute the result with 3 aluminum layers.
 
 The input file ~abinit/tests/tutorial/Input/tbase4_7.in is an example, while
 ~abinit/tests/tutorial/Refs/tbase4_7.out is a reference output file. This run
-might take about one minute, and is the longer of the four basic lessons. 
+might take about one minute, and is the longer of the four basic tutorials. 
 You should start it now.
 
 {% dialog tests/tutorial/Input/tbase4_7.in tests/tutorial/Refs/tbase4_7.out %}

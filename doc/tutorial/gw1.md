@@ -6,7 +6,7 @@ authors: VOlevano, FBruneval, XG
 
 ## The quasi-particle band structure of Silicon, in the GW approximation.  
 
-This lesson aims at showing how to calculate self-energy corrections to the
+This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham eigenvalues in the GW approximation.
 
 A brief description of the formalism and of the equations implemented in the
@@ -23,16 +23,16 @@ in Solid State Physics 54, 1-218 (2000), also available
 It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
-The user should be familiarized with the four basic lessons of ABINIT, 
+The user should be familiarized with the four basic tutorials of ABINIT, 
 see the [[help:index|tutorial home page]]
 After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]
 
-This lesson should take about 2 hours.
+This tutorial should take about 2 hours.
 
 ## 1 General example of an almost converged GW calculation
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw1"?*
+for the other tutorials. Why not "Work_gw1"?*
 
 At the end of [lesson 3](base3), we computed the Kohn-Sham band
 structure of silicon. In this approximation, the band dispersion as well as

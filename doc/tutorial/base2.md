@@ -6,7 +6,7 @@ authors: XG, RC
 
 ## The H<sub>2</sub> molecule, with convergence studies.  
 
-This lesson aims at showing how to get converged values for the following physical properties:
+This tutorial aims at showing how to get converged values for the following physical properties:
 
 * the bond length 
 * the atomisation energy 
@@ -18,7 +18,7 @@ problems related to the use of different pseudopotential are not examined.
 
 You will also finish to read the [[help:abinit]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Summary of the previous lesson
   

@@ -6,13 +6,13 @@ authors: MT, FJ
 
 ## Projector Augmented-Wave technique, how to use it?  
 
-This lesson aims at showing how to perform a calculation within the **Projector Augmented-Wave** (PAW) method.
+This tutorial aims at showing how to perform a calculation within the **Projector Augmented-Wave** (PAW) method.
 
 You will learn how to launch a PAW calculation and what are the main input
 variables that govern convergence and numerical efficiency.
 You are supposed to already know how to use ABINIT in the _Norm-Conserving PseudoPotential_ (NCPP) case.
 
-This lesson should take about 1.5 hour.
+This tutorial should take about 1.5 hour.
 
 ## 1. Summary of the PAW method
 
@@ -58,7 +58,7 @@ $\phi_i$, $\tphi_i$ and $\tprj_i$ and that plays the same role as a pseudopotent
 ## 2. Using PAW with ABINIT
 
 *Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not `Work_paw1`?
+for the other tutorials. Why not `Work_paw1`?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
 All the input files can be found in the `~abinit/tests/tutorial/Input` directory.*
 
