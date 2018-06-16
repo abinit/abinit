@@ -24,7 +24,7 @@ Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2008]].
 
 After having gone through the present New User's Guide, you should follow the
-[[lesson:index|ABINIT tutorial]].
+[[tutorial:index|ABINIT tutorial]].
 
 ## Introduction
   
@@ -87,7 +87,7 @@ The detailed description of input variables is given in many "Variable Set" file
   * Parallelisation variables, [[varset:paral]]
   * Density Functional Perturbation Theory variables, [[varset:dfpt]]
 
-A set of examples aimed at guiding the beginner is available in the [[lesson:index|tutorials]].
+A set of examples aimed at guiding the beginner is available in the [[tutorial:index|tutorials]].
 
 Other test cases (more than 800 input files) can be found in the ~abinit/test
 subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
@@ -354,4 +354,4 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 8.8.3 is more debugged than 8.8.2, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[lesson:index|the tutorial]]
+In order to start using ABINIT, please follow [[tutorial:index|the tutorial]]

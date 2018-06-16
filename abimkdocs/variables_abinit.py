@@ -13625,7 +13625,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[lesson:eph]].
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph]].
 """,
 ),
 
@@ -17179,7 +17179,7 @@ Variable(
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
-(see [[lesson:paw1]]) can only be performed with PAW atomic data input files,
+(see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
 while pseudopotential calculations are performed in ABINIT with norm-
 conserving pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.
