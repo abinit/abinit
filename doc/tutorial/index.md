@@ -4,15 +4,15 @@ authors: XG
 
 # Welcome  
 
-## Overview of the ABINIT tutorial.  
+## Overview of the ABINIT tutorials.  
 
-The lessons of this tutorial are aimed at teaching the use of ABINIT, in the
+These tutorials are aimed at teaching the use of ABINIT, in the
 UNIX/Linux OS and its variants (MacOSX, AIX ...). 
 They might be used for other operating systems, but the commands have to be adapted.
 
-At present, more than thirty lessons are available. Each of them is at most
-two hours of student work. Lessons 1-4 cover the basics, other lectures are
-more specialized. There are dependencies between lessons.
+At present, more than thirty tutorials are available. Each of them is at most
+two hours of student work. Tutorials 1-4 cover the basics, other lectures are
+more specialized. There are dependencies between tutorials.
 The following schema should help you to understand these dependencies. 
 
 <center>
@@ -55,11 +55,11 @@ The following schema should help you to understand these dependencies.
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v6.png" usemap="#map1"/>
 </center>
 
-The "base" lessons are presented at the top, in orange. The blocks in red represents additional lessons related 
+The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related 
 to ground-state features. Response-function features are explained
-in the lessons in the light brown blocks. Finally, the Many-Body Perturbation Theory
-capabilities are demonstrated in the lessons belonging to the dark brown blocks.
-The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
+in the tutorials in the light brown blocks. Finally, the Many-Body Perturbation Theory
+capabilities are demonstrated in the tutorials belonging to the dark brown blocks.
+The right-hand side blocks gather the tutorials related to the parallelism inside ABINIT.
 
 Before following the tutorials, you should have read the 
 [new user's guide](..),
@@ -74,137 +74,142 @@ contained in the subdirectories of ~abinit/tests/, e.g. the directories fast,
 v1, v2, ... , that provide many example input files. 
 You should have a look at the README files of these directories.
 
-### Brief description of each lesson's content
+### Tutorials on basic concepts
 
-**I. The lessons 1-4 present the basic concepts, and form a global entity: you
+**The tutorials 1-4 present the basic concepts, and form a global entity: you
 should not skip any of these.**
 
-* [The lesson 1](base1) deals with the H2 molecule: 
+* [The tutorial 1](base1) deals with the H2 molecule: 
   get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
 
-* [The lesson 2](base2) deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [The tutorial 2](base2) deals again with the H2 molecule: convergence studies, LDA versus GGA 
 
-* [The lesson 3](base3) deals with crystalline silicon (an insulator): 
+* [The tutorial 3](base3) deals with crystalline silicon (an insulator): 
  the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, 
  and again, convergence studies ...
 
-* [The lesson 4](base4) deals with crystalline aluminum (a metal), and its surface: occupation numbers, 
+* [The tutorial 4](base4) deals with crystalline aluminum (a metal), and its surface: occupation numbers, 
   smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
 
-**Other lessons present more specialized topics.**
+**Other tutorials present more specialized topics.**
 
-**II. There is a group of lessons that can be started without any other
-prerequisite than the lessons 1 to 4, and that you can do in any order (there are some exceptions, though):**
+### Miscellaneous advanced tutorials
 
-  * [The lesson on spin in ABINIT](spin) presents the properties related to spin: 
+**There is a group of tutorials that can be started without any other
+prerequisite than the tutorials 1 to 4, and that you can do in any order (there are some exceptions, though):**
+
+  * [The tutorial on spin in ABINIT](spin) presents the properties related to spin: 
    spin-polarized calculations and spin-orbit coupling. 
 
-  * [The lesson on the use of PAW (PAW1)](paw1) presents the Projector-Augmented Wave method, 
+  * [The tutorial on the use of PAW (PAW1)](paw1) presents the Projector-Augmented Wave method, 
     implemented in ABINIT as an alternative to norm-conserving pseudopotentials, 
     with a sizeable accuracy and CPU time advantage.
 
-  * [The lesson on the generation of PAW atomic data files (PAW2)](paw2) presents the generation 
+  * [The tutorial on the generation of PAW atomic data files (PAW2)](paw2) presents the generation 
     of atomic data for use with the PAW method. Prerequisite: PAW1.
 
-  * [The lesson on the validation of a PAW atomic datafile (PAW3)](paw3) demonstrates how to test 
+  * [The tutorial on the validation of a PAW atomic datafile (PAW3)](paw3) demonstrates how to test 
     a generated PAW dataset using ABINIT, against the ELK all-electron code, for diamond and magnesium. 
     Prerequisite: PAW1 and PAW2.
 
-  * [The lesson on the properties of the nuclei](nuc) shows how to compute the electric field gradient. 
+  * [The tutorial on the properties of the nuclei](nuc) shows how to compute the electric field gradient. 
     Prerequisite: PAW1.
 
-  * [The lesson on Wannier90](wannier90) deals with the Wannier90 library to obtain Maximally Localized Wannier Functions.
+  * [The tutorial on Wannier90](wannier90) deals with the Wannier90 library to obtain Maximally Localized Wannier Functions.
 
-  * [The lesson on polarization and finite electric field](ffield) deals with the computation 
+  * [The tutorial on polarization and finite electric field](ffield) deals with the computation 
     of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks 
     to the Berry phase approach, and also presents the computation of materials properties 
     in the presence of a finite electric field (also thanks to the Berry phase approach).
 
-  * [The lesson on electron-positron annihilation](positron) shows how to perform 
+  * [The tutorial on electron-positron annihilation](positron) shows how to perform 
     Two-Component Density-Functional Theory (TCDFT) calculations in the PAW framework 
     to obtain the positron lifetime in the perfect material, the lifetime of a positron 
     localized in a vacancy, the electron-positron momentum distribution wavefunctions and densities. 
 
-  * [The lesson on Analysis Tools](analysis_tools) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
+  * [The tutorial on Analysis Tools](analysis_tools) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
 
-  * [The lesson on the fold2bloch postprocessor](fold2bloch) deals with the use of the fold2Bloch utility 
+  * [The tutorial on the fold2bloch postprocessor](fold2bloch) deals with the use of the fold2Bloch utility 
     to unfold band structures from supercell calculations.
 
-  * [The lesson on DFT+U](dftu) shows how to perform a DFT+U calculation using ABINIT, 
+  * [The tutorial on DFT+U](dftu) shows how to perform a DFT+U calculation using ABINIT, 
     and will lead to compute the projected DOS of NiO. Prerequisite: PAW1.
 
-  * [The lesson on DFT+DMFT](dmft) shows how to perform a DFT+DMFT calculation on SrVO3 
+  * [The tutorial on DFT+DMFT](dmft) shows how to perform a DFT+DMFT calculation on SrVO3 
     using projected Wannier functions. Prerequisite: DFT+U.
 
-  * [The lesson on the calculation of effective interactions U and J by the cRPA method](ucalc_crpa) 
+  * [The tutorial on the calculation of effective interactions U and J by the cRPA method](ucalc_crpa) 
     shows how to determine the U value with the constrained Random Phase Approximation 
     using projected Wannier orbitals. Prerequisite: DFT+U.
 
-  * [The lesson on the determination of U for DFT+U](udet) shows how to determine the U value 
+  * [The tutorialon the determination of U for DFT+U](udet) shows how to determine the U value 
     with the linear response method, to be used in the DFT+U approach. Prerequisite: DFT+U.
 
-  * [The lesson on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems, 
+  * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems, 
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
-  * [The lesson "Source code"](source_code) introduces the user to the development 
-    of new functionalities in ABINIT: in this lesson, one learns how to add a new input variable ...
+  * [The tutorial "Source code"](source_code) introduces the user to the development 
+    of new functionalities in ABINIT: in this tutorial, one learns how to add a new input variable ...
 
-**III. There is an additional group of lessons on density-functional
+### DFPT-related tutorials
+**There is an additional group of tutorials on density-functional
 perturbation theory (phonons, optics, dielectric constant, electron-phonon
 interaction, elastic response, non-linear optics, Raman coefficients,
 piezoelectricity ...), for which some common additional information are needed:**
 
-  * [The lesson DFPT 1 (RF1 - response function 1)](rf1) presents the basics of DFPT within ABINIT. 
+  * [The tutorial DFPT 1 (RF1 - response function 1)](rf1) presents the basics of DFPT within ABINIT. 
     The example given is the study of dynamical and dielectric properties of AlAs (an insulator): 
     phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. 
     The creation of the "Derivative Data Base" (DDB) is presented.
 
-  * [The lesson DFPT 2 (RF2 - response function 2)](rf2) presents the analysis of the DDBs that have been 
-    introduced in the preceeding lesson RF1. The computation of the interatomic forces and the computation 
-    of thermodynamical properties is an outcome of this lesson.
+  * [The tutorial DFPT 2 (RF2 - response function 2)](rf2) presents the analysis of the DDBs that have been 
+    introduced in the preceeding tutorial RF1. The computation of the interatomic forces and the computation 
+    of thermodynamical properties is an outcome of this tutorial.
 
-**The additional information given by lesson DFPT1 opens the door to:**
+**The additional information given by tutorial DFPT1 opens the door to:**
 
-  * [The lesson on Optic](optic), the utility that allows to obtain
+  * [The tutorial on Optic](optic), the utility that allows to obtain
     the frequency dependent linear optical dielectric function and the frequency
     dependent second order nonlinear optical susceptibility, in the simple "Sum-Over-State" approximation.
 
-**The additional information given by lesson DFPT1 and DFPT2 opens the door to a group of lessons 
+**The additional information given by tutorials DFPT1 and DFPT2 opens the door to a group of tutorials 
 that can be followed independently of each other:**
 
-  * [The lesson on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB 
+  * [The tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB 
     to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 
-  * [The lesson on temperature dependence of the electronic structure](tdepes) presents the computation 
+  * [The tutorial on temperature dependence of the electronic structure](tdepes) presents the computation 
     of the temperature dependence of the electronic structure, 
     the zero-point motion effect, the lifetime/broadening of eigenenergies.
 
-  * [The lesson on the elastic properties](elastic) presents the computation with respect to 
+  * [The tutorial on the elastic properties](elastic) presents the computation with respect to 
     the strain perturbation and its responses: elastic constants, piezoelectricity.
 
-  * [The lesson on static non-linear properties](nlo) presents the computation of responses beyond 
+  * [The tutorial on static non-linear properties](nlo) presents the computation of responses beyond 
     the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation): 
     Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect. 
     Comparison with the finite field technique (combining DFPT calculatons with finite difference calculations), is also provided.
 
-**IV. There is another additional group of lessons on many-body perturbation
+### MBPT-related tutorials
+**There is another additional group of tutorials on many-body perturbation
 theory (GW approximation, Bethe-Salpeter equation), to be done sequentially):**
 
-  * [The first lesson on GW (GW1)](gw1) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), 
+  * [The first tutorial on GW (GW1)](gw1) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), 
     in the GW approximation (much better than the Kohn-Sham LDA band structure), with a plasmon-pole model. 
 
-  * [The second lesson on GW (GW2)](gw2) deals with the computation of the quasi-particle band structure 
+  * [The second tutorial on GW (GW2)](gw2) deals with the computation of the quasi-particle band structure 
     of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) 
     without using the plasmon-pole model. 
 
-  * [The lesson on the Bethe-Salpeter Equation (BSE)](bse) deals with the computation 
+  * [The tutorial on the Bethe-Salpeter Equation (BSE)](bse) deals with the computation 
     of the macroscopic dielectric function of Silicon within the Bethe-Salpeter equation. 
 
-**V. Concerning parallelism, there is another set of specialized lessons. 
-For each of these lessons, you are supposed to be familiarized with the
+### Tutorials on parallelism
+**Concerning parallelism, there is another set of specialized tutorials. 
+For each of these tutorials, you are supposed to be familiarized with the
 corresponding tutorial for the sequential calculation.**
 
-  * [An introduction on ABINIT in Parallel](basepar) should be read before going to the next lessons about parallelism. 
+  * [An introduction on ABINIT in Parallel](basepar) should be read before going to the next tutorials about parallelism. 
     One simple example of parallelism in ABINIT will be shown.
 
   * [Parallelism for ground-state calculations, with plane waves](paral_gspw) presents the combined 
