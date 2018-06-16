@@ -2,7 +2,7 @@
 authors: TRangel
 ---
 
-# Lesson on the use of Wannier90 library  
+# Tutorial on the use of Wannier90 library  
 
 ## The Wannier90 interface tutorial.  
 

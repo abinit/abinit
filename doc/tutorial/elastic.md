@@ -2,7 +2,7 @@
 authors: DRH
 ---
 
-# Lesson on elastic properties  
+# Tutorial on elastic properties  
 
 ## Elastic and piezoelectric properties.  
 

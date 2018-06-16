@@ -2,7 +2,7 @@
 authors: SS, XG
 ---
 
-# Lesson on fold2bloch  
+# Tutorial on fold2bloch  
 
 ## Unfolding the electronic structure of a lattice of Hydrogen atoms.  
 

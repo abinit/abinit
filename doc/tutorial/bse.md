@@ -2,7 +2,7 @@
 authors: MG, MS
 ---
 
-# Lesson on Bethe-Salpeter calculations  
+# Tutorial on Bethe-Salpeter calculations  
 
 ## Absorption spectra including excitonic effects.  
 

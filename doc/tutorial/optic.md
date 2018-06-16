@@ -2,7 +2,7 @@
 authors: SS, XG, YG
 ---
 
-# Lesson on optical properties  
+# Tutorial on optical properties  
 
 ## Frequency-dependent linear and second order nonlinear optical response.  
 

@@ -3,7 +3,7 @@ title: Basic parallelization in ABINIT
 authors: YP, XG
 ---
 
-# Lesson on basic parallelism  
+# Tutorial on basic parallelism  
 
 ## Parallelism in ABINIT, generalities and environments.  
 

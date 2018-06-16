@@ -2,7 +2,7 @@
 authors: JWZ, XG
 ---
 
-# Lesson on properties at the nuclei  
+# Tutorial on properties at the nuclei  
 
 ## Observables near the atomic nuclei.  
 

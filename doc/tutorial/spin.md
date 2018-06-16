@@ -2,7 +2,7 @@
 authors: GZ, MT, EB, MJV
 ---
 
-# Lesson about the spin  
+# Tutorial about the spin  
 
 ## Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).  
 

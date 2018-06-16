@@ -2,7 +2,7 @@
 authors: SP
 ---
 
-# Lesson TDepES  
+# Tutorial TDepES  
 
 ## Temperature-DEPendence of the Electronic Structure.  
 

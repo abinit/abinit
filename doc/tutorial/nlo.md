@@ -2,7 +2,7 @@
 authors: PhG,  MVeithen,  XG
 ---
 
-# Lesson on static non-linear properties  
+# Tutorial on static non-linear properties  
 
 ## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.  
 

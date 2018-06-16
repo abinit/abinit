@@ -2,7 +2,7 @@
 authors: BAmadon
 ---
 
-# Lesson on DFT+DMFT  
+# Tutorial on DFT+DMFT  
 
 ## A DFT+DMFT calculation for SrVO<sub>3</sub>.  
 

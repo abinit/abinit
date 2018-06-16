@@ -2,7 +2,7 @@
 authors: PhG, MVeithen, XG
 ---
 
-# Lesson on polarization and finite electric fields  
+# Tutorial on polarization and finite electric fields  
 
 ## Polarization, and responses to finite electric fields for AlAs.  
 

@@ -2,7 +2,7 @@
 authors: MC, SP
 ---
 
-# Lesson on analysis tools  
+# Tutorial on analysis tools  
 
 ## How to use cut3d
 

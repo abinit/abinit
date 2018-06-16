@@ -2,7 +2,7 @@
 authors: XG
 ---
 
-# Lesson on TDDFT  
+# Tutorial on TDDFT  
 
 ## Time-Dependent Density Functional Theory, Casida's approach.  
 
