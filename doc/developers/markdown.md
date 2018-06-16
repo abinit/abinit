@@ -348,7 +348,7 @@ The python code issues a warning in the terminal if the link cannot be establish
 Other internal links can be recognized thanks to the namespace.
 
 <!--
-`lesson`, `topic`, `help`, `theorydoc, and `varset` create a link
+`tutorial`, `topic`, `help`, `theorydoc, and `varset` create a link
 to the corresponding Markdown files inside the `tutorials`, `topic`, `user-guide`, `vari
 A first set of allowed internal namespaces are:
 In such cases, provided there is a corresponding generated HTML file
@@ -359,8 +359,8 @@ Examples:
 
 Namespace      | Markdown                         | Result
 -------------  | -------------------------------- |
- `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
- `lesson`      | `[[lesson:index]]`               | [[lesson:index]]
+ `tutorial`    | `[[tutorial:gw1]]`               | [[tutorial:gw1]]
+ `tutorial`    | `[[tutorial:index]]`             | [[tutorial:index]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `topic`       | `[[topic:index]]`                | [[topic:index]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]

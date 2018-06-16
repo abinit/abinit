@@ -176,7 +176,7 @@ some cases, in order to obtain a reasonable optical spectrum and make a realisti
 comparison with experiments one needs to correct for this. 
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap, and simply shifts the conduction bands. Alternatively, one may
-determine the self energy using the [[lesson:gw1|GW approach]], in which case
+determine the self energy using the [[tutorial:gw1|GW approach]], in which case
 the opening of the gap due to the GW correction can be used as scissor shift.
 """,
 ),

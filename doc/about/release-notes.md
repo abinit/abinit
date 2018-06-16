@@ -87,8 +87,8 @@ B.6 The Chern number can be computed, in the norm-conserving case as well as in 
     Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call. 
-    Tutorial [[lesson:nuc|nuc]] is nightly tested.
-    By J. Zwanziger ([[lesson:nuc|nuc]] testing by X. Gonze).
+    Tutorial [[tutorial:nuc|nuc]] is nightly tested.
+    By J. Zwanziger ([[tutorial:nuc|nuc]] testing by X. Gonze).
 
 * * *
 
@@ -154,7 +154,7 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[lesson:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
     See all tests in `tutorespfn/tdepes*`.
     By X. Gonze and M. Giantomassi
 
@@ -333,7 +333,7 @@ B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in 
     have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
     By M. Torrent.
 
-B.8 A new tutorial, called [[lesson:positron|Electron-positron annihilation]] has been created.
+B.8 A new tutorial, called [[tutorial:positron|Electron-positron annihilation]] has been created.
     By J. Wiktor and M. Torrent.
 
 B.9 The new input variable [[chkdilatmx]] has been introduced, to allow expert users to make
