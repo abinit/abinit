@@ -2,7 +2,7 @@
 authors: MVer
 ---
 
-# Electron-phonon lesson  
+# Electron-phonon tutorial
 
 ## Electron-Phonon interaction and superconducting properties of Al.  
 
@@ -79,7 +79,7 @@ very different from versions before 7.6.
 
 The calculation is done using minimal values of a number of parameters, in
 order to make it tractable in a time appropriate for a tutorial. The results
-will be completely unconverged, but by the end of the lesson you should know
+will be completely unconverged, but by the end of the tutorial you should know
 how to run a full electron phonon calculation, and be able to improve the
 convergence on your own.
 
@@ -241,7 +241,7 @@ The new variables are at the head of the file:
 [[anaddb:elphflag]] is a flag to turn on the calculation of the electron-
 phonon quantities. The first quantities which will be calculated are the
 phonon linewidths along a path in reciprocal space (exactly like the band
-structure in [[lesson:base3]]. The path is specified by the
+structure in [the tutorial 3](base3). The path is specified by the
 variable [[anaddb:qpath]] giving the apexes of the path in reciprocal space,
 which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
@@ -310,7 +310,7 @@ method.
 {% dialog tests/tutorespfn/Input/teph_5.in %}
 
 If you are patient, save the output _LWD and _A2F files and run the
-full lesson again with a denser k-point grid (say, 6x6x6) and you will be able
+full tutorial again with a denser k-point grid (say, 6x6x6) and you will be able
 to observe the differences in convergence.
 
 ## 6 Transport quantities within Boltzmann theory
@@ -328,7 +328,7 @@ the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
 [[cite:Ashcroft1976|Ashcroft and Mermin]] as well). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
-a DDK calculation (see [[lesson:rf1|the Gamma point phonon tutorial]].
+a DDK calculation (see [the first DFPT tutorial (DFPT1)](rf1).
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
 phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more

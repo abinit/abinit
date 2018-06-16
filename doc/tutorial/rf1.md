@@ -18,7 +18,7 @@ In this tutorial you will learn how to get the following physical properties (of
 
     In order to learn the use of the associated codes Mrgddb and Anaddb, 
     to produce phonon band structures and the associated
-    thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2]]
+    thermodynamical properties, please see the [tutorial DFPT 2](rf2).
 
 This tutorial should take about 2 hours.
 
@@ -66,7 +66,7 @@ In production runs, you should choose a large enough value of [[nstep]] to reach
 In the present tutorial, due to portability concerns related to automatic testing, we could
 not allow a larger [[nstep]] value. 
 This minor problem with some tutorial examples was mentioned briefly in 
-a side note to the answer to question 1 of lesson 1 - just before [this section](base1#computation-of-the-interatomic-distance-method-1). 
+a side note to the answer to question 1 of tutorial 1 - just before [this section](base1#computation-of-the-interatomic-distance-method-1). 
 
 !!! danger 
 
@@ -596,6 +596,6 @@ close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 !!! note 
     This ABINIT tutorial is now finished. 
-    You are advised to go through the [[lesson:rf2|second tutorial on DFPT]] to 
+    You are advised to go through the [second tutorial on DFPT](rf2) to 
     make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
 

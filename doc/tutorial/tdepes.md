@@ -91,7 +91,7 @@ There are two ways to compute the temperature dependence with Abinit:
 
 ## 1 Calculation of the ZPR of eigenenergies at q=Γ. 
   
-The reference input files for this lesson are located in
+The reference input files for this tutorial are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
 are in ~abinit/tests/tutorespfn/Refs.
 The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to indicate
@@ -477,7 +477,7 @@ the converged wavefunctions are already available. The second dataset will corre
 a non-self-consistent ground-state calculation at k+q (it is also quick thanks to previously available wavefunctions), 
 and the third dataset will correspond to the DFPT calculations at k+q (this is the CPU intensive part) .
 
-So, compared to the first run in this lesson, we have to replace   
+So, compared to the first run in this tutorial, we have to replace   
 
     ndtset 3     by      ndtset 24 udtset 8 3
 

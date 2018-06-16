@@ -2,7 +2,7 @@
 authors: XG, RC
 ---
 
-# First (basic) lesson  
+# First (basic) tutorial
 
 ## The H<sub>2</sub> molecule, without convergence studies
 
@@ -16,7 +16,7 @@ This tutorial aims at showing how to get the following physical properties:
 You will learn about the two input files, the basic input variables, the
 existence of defaults, the actions of the parser, and the use of the multi-dataset feature. 
 You will also learn about the two output files as well as the density file.
-This first lesson covers the first sections of the [[help:abinit]].
+This first tutorial covers the first sections of the [[help:abinit]].
 
 The very first step is a detailed tour of the input and output files: you are
 like a tourist, and you discover a town in a coach. 
@@ -334,7 +334,7 @@ Could you answer the following questions?
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
     the target tolerance, defined by one of the "tolXXX" input variables. However,
-    this is not always the case (e.g. the test case 1 of the [[lesson:rf1|lesson DFPT 1]] 
+    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](rf1) 
     because of some portability problems, that could only be
     solved by stopping the SCF cycles before the required tolerance.
 
@@ -610,7 +610,7 @@ There are some subtleties in the calculation of an isolated atom.
 * in many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]] ; 
 
 * the highest occupied level might be degenerate with the lowest unoccupied level of the same spin, 
-  in which case the techniques usually appropriate for metals are to be used (see [lesson base4](base4)) 
+  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](base4)) 
 
 * also often, the symmetry of the ground-state charge density will NOT be spherical, so that the automatic 
   determination of symmetries by the code, based on the atomic coordinates, should be disabled, 
@@ -726,5 +726,5 @@ We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density 
 (as well as the local-spin-density approximation) in the
 Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table (Phys. Rev. B 54, 1703 (1996)).
 
-We will see in the [[lesson:base2|next lesson]] how to address the choice
+We will see in the [next tutorial](base2) how to address the choice
 of these parameters (except the pseudopotential).

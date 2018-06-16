@@ -46,7 +46,7 @@ explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
 The step 1 is done in a preliminary ground-state calculation (either by an
 independent run, or by computing them using an earlier dataset before the DFPT calculation). 
-The parallelisation of this step is examined in a separate lesson.  
+The parallelisation of this step is examined in a separate tutorial.  
 
 The step 2 and step 3 are the time-consuming DFPT steps, to which the present
 tutorial is dedicated, and for which the implementation of the parallelism

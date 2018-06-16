@@ -154,15 +154,15 @@ For comparison, we have included in the tutorial, three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy
 and a number of bands that should be larger). You can visualize them as follows:
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0001-linopt.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0001-linopt.out
 
 for the linear optics, obtained with a 28x28x28 grid (keeping everything else fixed), and
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
 
 as well as
     
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
 
 for the non-linear optics, obtained with a 18x18x18 grid (keeping everything else fixed).
 

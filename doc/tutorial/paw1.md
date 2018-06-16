@@ -2,7 +2,7 @@
 authors: MT, FJ
 ---
 
-# First lesson on the Projector Augmented-Wave (PAW) technique
+# First tutorial on the Projector Augmented-Wave (PAW) technique
 
 ## Projector Augmented-Wave technique, how to use it?  
 
@@ -138,7 +138,7 @@ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
 ```
 
 
-- A specific description of the PAW dataset (you might follow the lesson [[lesson:paw2|PAW2]],
+- A specific description of the PAW dataset (you might follow the tutorial [PAW2](paw2),
 devoted to the building of the PAW atomic data, for a complete understanding of the file):
   
 ```
@@ -520,7 +520,8 @@ Such a test is useful to estimate the precision we can expect on the stress tens
   
 You can compare other results in the 3 output files: total energy, eigenvalues, occupations...
   
-Note: if you want to learn how to generate PAW datasets with different `partial wave` basis, you might follow the [[lesson:paw2|lesson on generating PAW datasets]].
+Note: if you want to learn how to generate PAW datasets with different `partial wave` basis, you might follow the 
+[tutorial on generating PAW datasets(PAW2)](PAW2).
 
 ## 7. Checking the validity of PAW results
   
@@ -588,7 +589,7 @@ even be by-passed with [[pawovlp]]=-1 (not recommended!).
     is eventually printed...
 
 Also note that you can control the compensation charge radius and shape
-function while generating the PAW dataset (see [[lesson:paw2|lesson on generating PAW datasets]]).
+function while generating the PAW dataset (see [tutorial on generating PAW datasets(PAW2)](PAW2) ).
 
 
 ### 8.b. Mixing scheme for the Self-Consistent cycle; decomposition of the total energy###

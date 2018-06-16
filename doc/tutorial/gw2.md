@@ -2,7 +2,7 @@
 authors: FBruneval, XG
 ---
 
-# Second lesson on GW  
+# Second tutorial on GW  
 
 ## Treatment of metals.  
 
@@ -31,7 +31,7 @@ Also, it is suggested to acknowledge the efforts of developers of the GW part of
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, see the
-[[lesson:index]] as well as the [[lesson:gw1|first GW lesson]].
+[index](index) as well as the [first GW tutorial](gw1).
 
 This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
@@ -41,7 +41,7 @@ reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not "Work_gw2"?*
 
-In [[lesson:base4|lesson 4]], we have computed different properties of
+In [tutorial 4](base4), we have computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
@@ -49,7 +49,7 @@ significantly if one relies on the GW approximation.
 
 In the directory ~abinit/tests/tutorial/Input/Work_gw2, copy the files
 ~abinit/tests/tutorial/Input/tgw2_x.files and tgw2_1.in, and modify the
-tgw2_x.files file as usual (see [[lesson:base1]]).  
+tgw2_x.files file as usual (see [the tutorial 1](base1).  
 Then (supposing abinit is the proper alias), issue:
     
     abinit < tgw2_x.files >& tgw2_1.log &

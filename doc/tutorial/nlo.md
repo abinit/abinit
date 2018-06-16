@@ -23,9 +23,9 @@ Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor) thanks to finite differences.
 
 The user should have already passed through several advanced tutorials of the
-tutorial: the [lesson Response-Function 1](rf1), the [lesson Response-Function 2](rf2), 
-the [lesson on Polarization and finite electric field](ffield), and the 
-[lesson on Elastic properties](elastic)
+tutorial: the [tutorial Response-Function 1](rf1), the [tutorial Response-Function 2](rf2), 
+the [tutorial on Polarization and finite electric field](ffield), and the 
+[tutorial on Elastic properties](elastic)
 
 This tutorial should take about 1 hour and 30 minutes.
 
@@ -53,7 +53,7 @@ proper convergence on the total energy, and to use them blindly for non-linear
 properties)
 
 We will adopt the following set of generic parameters (the same than in the
-[lesson on Polarization and finite electric field](ffield)):
+[tutorial on Polarization and finite electric field](ffield)):
     
        acell               10.53
        ixc                 3

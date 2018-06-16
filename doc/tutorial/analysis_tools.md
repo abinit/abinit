@@ -14,7 +14,7 @@ At present, at least XCrySDen ([www.xcrysden.org](http://www.xcrysden.org/), fre
 is known to support this output.
 
 The cut3d program can be used to treat data in a density file (_DEN), a
-potential file (_POT) or a wavefunction file (_WFK). In this lesson will we
+potential file (_POT) or a wavefunction file (_WFK). In this tutorial we will
 see how to use this program to obtain the value of the density on a line.
 
 This tutorial should take about 15 minutes.
@@ -24,7 +24,7 @@ This tutorial should take about 15 minutes.
 We will first start by a simple example: viewing Silicon density information.
 Before using the cut3d program, we first have to generate the density and
 the wavefunctions files by running the Abinit program. For this simple case,
-we will use the last input file used in [lesson 3](base3)
+we will use the last input file used in [tutorial 3](base3)
 (tbase3_5.in). That input file contains two datasets, one to obtain a 
 self-consistent density and the other to obtain a selected number of k-point wavefunctions. 
 If you do not have the output of this case, you will need to
@@ -66,7 +66,7 @@ program can be accessed by simply typing its name, now write the command:
     cut3d
 
 The cut3d program will ask you several questions in order to determine what
-you want him to do. In this lesson, the text coming from the cut3d program are
+you want him to do. In this tutorial, the text coming from the cut3d program are
 in black and the input that you have to type in are in  red.
 
 After some text about the version and the licence, you will see the question:

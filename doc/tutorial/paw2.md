@@ -2,14 +2,14 @@
 authors: MT
 ---
 
-# Second lesson on the Projector Augmented-Wave (PAW) technique
+# Second tutorial on the Projector Augmented-Wave (PAW) technique
 
 ## Generation of PAW atomic datasets
 
 This tutorial aims at showing how to compute atomic datasets for the Projector Augmented-Wave (PAW) method.
 
 You will learn how to generate these atomic datasets and how to control their softness and transferability.
-You already should know how to use ABINIT in the PAW case (see [[lesson:paw1|1st lesson on PAW]]).
+You already should know how to use ABINIT in the PAW case (see the tutorial [PAW1](paw1) ).
   
 This tutorial should take about 2h00.
 
@@ -491,7 +491,7 @@ This generally shows the presence of a _ghost state_.
 In most cases (changing pseudopotential or matching radius), one has to restart the procedure from step 5.
 
 To see an example of ghost state, use the
-`~abinit/doc/tutorial/lesson_paw2/Ni.ghost.atompaw.input` file and run it with `ATOMPAW`.  
+`~abinit/doc/tutorial/paw2_assets/Ni.ghost.atompaw.input` file and run it with `ATOMPAW`.  
 Look at the $l=1$ logarithmic derivatives (`logderiv.1` file). They look like:
 
 ![Ni l=1 log derivatives](paw2_assets/log1c.jpg)  
@@ -557,11 +557,11 @@ This is not a good result for a PAW dataset; let's try to optimize it.
   Keyword `bloechl` has to be replaced by `vanderbilt` in the `ATOMPAW` input file
   and $r_c$ values have to be added at the end of the file (one for each PS partial-wave).
   See this input file:
-  `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.vanderbilt`.  
+  `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt`.  
 
 
 * 2nd possibility: use `RRKJ` pseudization scheme for projectors.  
-  Use this input file for `ATOMPAW`: `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input2`.  
+  Use this input file for `ATOMPAW`: `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input2`.  
   As you can see `bloechl` has been changed by `custom rrkj`
   and 6 $r_c$ values have been added at the end of the file, each one
   corresponding to the matching radius of one PS partial-wave.  
@@ -593,7 +593,7 @@ This is not a good result for a PAW dataset; let's try to optimize it.
 This is a reasonable result for a PAW dataset!
 
 * 3rd possibility: use _enhanced polynomial_ pseudization scheme for projectors.  
-  Edit  `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input2` and replace `custom rrkj`
+  Edit  `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input2` and replace `custom rrkj`
   by `custom polynom2 7 10`.  
   Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and look at the `ecut` convergence.  
 
@@ -601,7 +601,7 @@ This is a reasonable result for a PAW dataset!
     Let's go back to Vanderbilt projectors.
 
     Repeat the procedure (`ATOMPAW`\ + `ABINIT`) with
-    `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.vanderbilt` file.
+    `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt` file.
 
     {% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
@@ -665,7 +665,7 @@ The last step is to examine carefully the physical quantities obtained with our 
 
 Copy `~abinit/tests/tutorial/Input/tpaw2_2.in` in your working directory.
 Edit it, activate the 8 datasets,
-change `tpaw2_x.files` to use `~abinit/doc/tutorial/lesson_paw2/Ni.GGA-PBE-paw.abinit.rrkj` psp file
+change `tpaw2_x.files` to use `~abinit/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.abinit.rrkj` psp file
 (obtained from `Ni.atompaw.input2 file`).  
 Run ABINIT (this may take a while...).
 
@@ -727,7 +727,7 @@ dataset is used for non-standard solid structures or thermodynamical domains.
 
 !!! Optional_exercise
     Let's add 3s and 3p semi-core states in PAW dataset!  
-    Repeat the procedure (`ATOMPAW` \+ `ABINIT`) with `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.semicore`
+    Repeat the procedure (`ATOMPAW` \+ `ABINIT`) with `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.semicore`
     file. The execution time is a bit longer as more electrons have to be treated by ABINIT.  
     Look at $a_0$, $B$ or $\mu$ variation.  
     _Note: this new PAW dataset has a smaller $r_{PAW}$ radius (because semi-core states are localized)._
@@ -771,7 +771,7 @@ In practice we have to:
 and let the `ATOMPAW` code apply the transformation to $\tprj_i$ and deduce $R_0$ radius.
 
 You can test it now.  
-In your working directory, re-use the dataset `~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input3`
+In your working directory, re-use the dataset `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input3`
 (Bloechl's projectors).  
 Replace the ABINIT options (penultimate line):
 ````

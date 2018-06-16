@@ -2,7 +2,7 @@
 authors: VOlevano, FBruneval, XG
 ---
 
-# First lesson on GW  
+# First tutorial on GW  
 
 ## The quasi-particle band structure of Silicon, in the GW approximation.  
 
@@ -25,7 +25,7 @@ the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, 
 see the [[help:index|tutorial home page]]
-After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]
+After this first tutorial on GW, you should read the [second WG tutorial](gw2).
 
 This tutorial should take about 2 hours.
 
@@ -34,7 +34,7 @@ This tutorial should take about 2 hours.
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not "Work_gw1"?*
 
-At the end of [lesson 3](base3), we computed the Kohn-Sham band
+At the end of [tutorial 3](base3), we computed the Kohn-Sham band
 structure of silicon. In this approximation, the band dispersion as well as
 the band widths are reasonable, but the band gaps are qualitatively wrong.
 Now, we will compute the band gaps much more accurately, using the so-called
@@ -52,7 +52,7 @@ explain what has been done.
 
 *In the directory ~abinit/tests/tutorial/Input/Work_gw1, copy the files
 ~abinit/tests/tutorial/Input/tgw1_x.files and tgw1_1.in, and modify the
-tgw1_x.files file as usual (see lesson 1).*
+tgw1_x.files file as usual (see tutorial 1).*
 
 Then, issue:
     
@@ -715,7 +715,7 @@ correction at a sparse set of points.
 
 ## Advanced features in the GW code
    
-The user might switch to the [lesson:gw2|second GW tutorial] before
+The user might switch to the [second GW tutorial](gw2) before
 coming back to the present section.
 
 #### **Calculations without using the Plasmon-Pole model**

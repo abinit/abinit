@@ -2,7 +2,7 @@
 authors: XG, RC
 ---
 
-# Second (basic) lesson  
+# Second (basic) tutorial
 
 ## The H<sub>2</sub> molecule, with convergence studies.  
 
@@ -20,7 +20,7 @@ You will also finish to read the [[help:abinit]].
 
 This tutorial should take about 1 hour.
 
-## Summary of the previous lesson
+## Summary of the previous tutorial
   
 We studied the H2 molecule in a big box. 
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
@@ -43,7 +43,7 @@ The bond length is awful (nearly 10% off), and the atomisation energy is a bit t
 
 **2.1.a** **Computing the bond length and corresponding atomisation energy in one run.**
 
-*Before beginning, you might consider to work in a different subdirectory as for lesson_base1. 
+*Before beginning, you might consider to work in a different subdirectory as for tutorial 1. 
 Why not "Work2"?*
 
 Because we will compute many times the bond length and atomisation energy, it
@@ -62,7 +62,7 @@ while ~abinit/tests/tutorial/Refs/tbase2_1.out is an example of output file.
 {% dialog tests/tutorial/Refs/tbase2_1.out %}
 
 You might use ~abinit/tests/tutorial/Input/tbase2_x.files as "files" file (do not forget to
-modify it, like in lesson 1), although it does not differ from
+modify it, like in tutorial 1), although it does not differ from
 ~abinit/tests/tutorial/Input/tbase1_x.files. 
 
 {% dialog tests/tutorial/Input/tbase2_x.files %}
@@ -79,7 +79,7 @@ and
         xcart1  -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
                  7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
     
-These are similar to those determined in [lesson 1](base1),
+These are similar to those determined in [tutorial 1](base1),
 although they have been obtained in one run. 
 You can also check that the residual forces are lower than `5.0d-4`. 
 Convergence issues are discussed in [[help:abinit#7|section 7]] of the abinit help file.  

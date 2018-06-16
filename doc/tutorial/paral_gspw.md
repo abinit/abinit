@@ -40,7 +40,7 @@ mpirun -n nn abinit < abinit.files | tee log
 ``` 
 
 or the use of a specific submission file. 
-Some scripts are given as examples in the directory `~abinit/doc/tutorial/lesson_paral_gspw/`. 
+Some scripts are given as examples in the directory `~abinit/doc/tutorial/paral_gspw_assets/`. 
 You can adapt them to your own calculations.  
 
 When the size of the system increases up to 100 or 1000 atoms, it is usually

@@ -180,7 +180,7 @@ And modify the isovalue, put, for instance, 0.3 and check the option "Render +/-
 
 ## 3 The PAW case
   
-Before starting it is assumed that you have already completed the [[lesson:paw1]] and [[lesson:paw2]].
+Before starting it is assumed that you have already completed the tutorials [PAW1](paw1) and [PAW2](paw2).
 
 For silicon, we just have to add the variable [[pawecutdg]] and the PAW Atomic Data is included in the pseudopotential file. 
 An example has already been prepared.

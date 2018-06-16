@@ -134,7 +134,7 @@ the two calculations.
 
 Now we can calculate and plot several quantities. 
 We need for that the _diag_moldyn.py_ python script. 
-You can find it in the _~abinit/doc/tutorial/documents/lesson_paral_moldyn_ 
+You can find it in the _~abinit/doc/tutorial/paral_moldyn_assets_ 
 directory (link [here](paral_moldyn_assets/diag_moldyn.py)).  
 Run the script as:
 

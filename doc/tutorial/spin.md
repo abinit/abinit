@@ -223,8 +223,7 @@ interpolation of the magnetization at any point in space. cut3d is one of the
 executables of the ABINIT package and is installed together with abinit.  
 For the moment cut3d is interactive, and we will use it through a very primitive script
 (written in Python) to perform a rough estimate of the magnetization on each atom.  
-You can have a look at the ~abinit/doc/tutorial/documents/lesson_spin/magnetization.py
-program, and note
+You can have a look at the [magnetization.py program](spin_assets/magnetization.py), and note
 (or believe) that it does perform an integration of the magnetization in a cube of
 side acell/2 around each atom; if applicable, you might consider adjusting the
 value of the "CUT3D" string in the Python script.  

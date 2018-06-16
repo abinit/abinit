@@ -2,7 +2,7 @@
 authors: MS, MT
 ---
 
-# Third lesson on the Projector Augmented-Wave (PAW) technique
+# Third tutorial on the Projector Augmented-Wave (PAW) technique
 
 ## Testing PAW datasets against an all-electron code  
 
@@ -71,7 +71,7 @@ it here. We will now discuss the prerequisites for this tutorial.
 ## 2. Prerequisites, code components and scripts
 
 It is assumed that you are already familiar with the contents and procedures
-in tutorials [[lesson:paw1|PAW1]] and [[lesson:paw2|PAW2]], and so
+in tutorials [PAW1](paw1) and [PAW2](paw2), and so
 have some familiarity with input files for atompaw, and the issues in creating
 PAW datasets. To exactly reproduce the results in this tutorial, you will
 need:  
@@ -85,8 +85,8 @@ need:
     We will use the `Elk` code itself, as well as its `eos` (equation-of-state) utility,
     for calculating equilibrium lattice parameters.
 
-  * Auxiliary `bash` and `python` _scripts_ for the comparison of band structures, available in the folde
-    `ABINIT/doc/tutorial/documents/lesson_paw3/scripts/`.
+  * Auxiliary `bash` and `python` _scripts_ for the comparison of band structures, available in the folder
+    `ABINIT/doc/tutorial/paw3_assets/scripts/`.
     Here ABINIT stands for the abinit source directory. 
     There are also various `gnuplot` _scripts_ there.
 
@@ -768,7 +768,7 @@ better, so let us see if we can make it so.
 ### 3.4. Carbon - improving the dataset
 
 Now that you know the target values, is up to you to experiment and see if you
-can improve this dataset. The techniques are well documented in lesson
+can improve this dataset. The techniques are well documented in tutorial
 [PAW2](paw2). Here's a brief summary of main points to be concerned about:
 
   * Use the keyword series `custom rrkj ...`, or `custom polynom ...`, or `custom polynom2 ...`,
@@ -1270,4 +1270,4 @@ calculations, here is a list of a few:
   * As a rule of thumb, a PAW dataset for GW should have at least three projectors per state, if not more.
 
   * A particularly sensitive thing is the quality of the expansion of the pseudised plane-wave part in terms of the on-site basis. 
-     This can be checked by using the density of states (DOS), as described in the [[lesson:paw1|first PAW lesson]].
+     This can be checked by using the density of states (DOS), as described in the [first PAW tutorial](PAW1).

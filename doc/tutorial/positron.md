@@ -26,7 +26,7 @@ This tutorial should take about 2 hours.
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not `Work_positron`?*
 
-The lesson begins with a calculation of the positron lifetime in a silicon lattice.
+The tutorial begins with a calculation of the positron lifetime in a silicon lattice.
 In a perfect material the positron is delocalized. We can assume that its
 density approaches zero and that it cannot affect the electron density. We will
 perform a calculation in only two steps:
@@ -276,7 +276,7 @@ file (one per atom type), which needs to be provided. This _core WF file_ should
 be named `<psp_file_name>.corewf` (where `<psp_file_name>` is the name of the
 pseudo-potential (or PAW) file) or `corewf.abinit<ityp>` (where `<ityp>` is the
 index of the atom type). _Core WF files_ can be obtained with the `atompaw` tool
-(see [[lesson:paw2|lesson on generating PAW datasets]]) by the use of the
+(see [the tutorial on generating PAW datasets (PAW2)](PAW2) ) by the use of the
 `prtcorewf` keyword. You will find the core wavefunction file used in this calculation in
 
     ~abinit/tests/Psps_for_tests/Si.LDA-PW-paw.abinit.corewf
@@ -344,4 +344,4 @@ unphysically high probability at high momenta in the spectrum.
 
 Further explanation of the influence of the PAW dataset on the _Doppler spectra_
 can be found in [[cite:Wiktor2015]]. In case you need to generate
-your own dataset for momentum distribution calculations, you can follow the [[lesson:paw2|lesson on generating PAW datasets]].
+your own dataset for momentum distribution calculations, you can follow the [tutorial on generating PAW datasets (PAW2)](PAW2) .

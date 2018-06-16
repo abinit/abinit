@@ -86,7 +86,7 @@ order to do this you will need the following scripts:
     energy_eig-abinit.sh; and
     plot_band.m
     
-which are located at /abinit/doc/tutorial/lesson_fold2Bloch/
+which are located at /abinit/doc/tutorial/fold2Bloch_assets/
 
 Execute the energy_eig-avinit.sh script
 

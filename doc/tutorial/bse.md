@@ -12,7 +12,7 @@ Crystalline silicon is used as test case. A brief description of the formalism
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 The user should be familiarized with the four basic tutorials of ABINIT and the
-[first lesson of the GW tutorial](gw1).
+[first GW tutorial](gw1).
 
 This tutorial should take about one hour to be completed.
 
@@ -84,7 +84,7 @@ we can finally proceed to analyze the screening computation performed in the
 last dataset of *tbs_1.in*.
 
 The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha. 
-In the [[lesson:gw1|first GW lesson]], these
+In the [first GW tutorial](gw1), these
 values were found to give QP energies converged within 0.01 eV, so we are
 confident that our SCR file is well converged and it can be safely used for
 performing convergence tests in the Bethe-Salpeter part.
@@ -262,7 +262,7 @@ The last section of the input file
 
 specifies the parameters used to calculate the kernel matrix elements and the
 matrix elements of the dipole operator. 
-We have already encountered these variables in the [[lesson:gw1|first lesson]] of the GW tutorial 
+We have already encountered these variables in the [first GW tutorial](gw1) of the GW tutorial 
 so their meaning is (hopefully) familiar to you. 
 A more detailed discussion of the role played by these variables in the BS code 
 can be found in the [[theory:bse|Bether-Salpeter notes]].
@@ -664,7 +664,7 @@ with [[ecuteps]] = 3 and 4 Ha are almost indistinguishable from each other. Our
 final estimate for [[ecuteps]] is therefore 3 Ha.
 
 Note that this value is smaller than the one required to converge the QP
-corrections within 0.01 eV (in the [[lesson:gw1|first GW lesson]] of the GW
+corrections within 0.01 eV (in the [first GW tutorial](gw1) of the GW
 tutorial we obtained 6.0 Ha). This is a general behavior, in the sense that
 Bethe-Salpeter spectra, unlike GW corrections, are not very sensitive
 to truncations in the planewave expansion of W. Reasonable BS spectra are
@@ -738,7 +738,7 @@ agreement with the experiment.
   Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method 
   and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.) 
 
-* Calculate the one-shot GW corrections for silicon following the [[lesson:gw1|first GW lesson]].
+* Calculate the one-shot GW corrections for silicon following the [first GW tutorial](gw1).
   Then use the `_GW` file produced by the code to calculate the absorption spectrum. 
 
 * Learn how to use AbiPy to automate BS calculations as described in this
