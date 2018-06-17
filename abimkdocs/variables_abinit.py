@@ -6021,7 +6021,7 @@ As described in the LibXC sources (and copied in the ABINIT doc, see
 ABINIT knows the LibXC value from [[ixc]], that might not agree with the
 definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
-The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
+The HSE06 value from LibCX is 0.11, the one of Quantum Espresso is 0.106, the one of
 VASP is 0.105835 (=0.2 $\AA^{-1}$).
 The HSE03 value from LibCX is 0.106066 ($=0.15/\sqrt{2})$), the one of VASP is
 0.1587531 (=0.3 $\AA^{-1}$).
@@ -7345,19 +7345,19 @@ The value [[ixc]]=10 is used internally: gives the difference between
 
   * 0 --> NO xc.
 
-  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
+  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang 92 [[cite:Perdew1992a]] (which reproduces Ceperley-Alder [[cite:Ceperley1980]]!).
   * 2 --> LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[cite:Perdew1981]]
-  * 3 --> LDA, old Teter rational polynomial parametrization (4/91) fit to Ceperley-Alder data (no spin-polarization)
+  * 3 --> LDA, old Teter rational polynomial parametrization (4/91) fit to Ceperley-Alder data (no spin-polarization) [[cite:Ceperley1980]]
   * 4 --> LDA, Wigner functional (no spin-polarization)
-  * 5 --> LDA, Hedin-Lundqvist functional (no spin-polarization)
+  * 5 --> LDA, Hedin-Lundqvist functional (no spin-polarization) [[cite:Hedin1971]]
   * 6 --> LDA, "X-alpha" functional (no spin-polarization)
-  * 7 --> LDA or LSD, Perdew-Wang 92 functional
-  * 8 --> LDA or LSD, x-only part of the Perdew-Wang 92 functional
-  * 9 --> LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional
+  * 7 --> LDA or LSD, Perdew-Wang 92 functional [[cite:Perdew1992a]]
+  * 8 --> LDA or LSD, x-only part of the Perdew-Wang 92 functional [[cite:Perdew1992a]]
+  * 9 --> LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional [[cite:Perdew1992a]]
 
-  * 11 --> GGA, Perdew-Burke-Ernzerhof GGA functional
-  * 12 --> GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional
-  * 13 --> GGA potential of van Leeuwen-Baerends, while for energy, Perdew-Wang 92 functional
+  * 11 --> GGA, Perdew-Burke-Ernzerhof GGA functional [[cite:Perdew1996]]
+  * 12 --> GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional [[cite:Perdew1996]]
+  * 13 --> GGA potential of van Leeuwen-Baerends [[cite:VanLeeuwen1994]], while for energy, Perdew-Wang 92 functional [[cite:Perdew1992a]]
   * 14 --> GGA, revPBE of [[cite:Zhang1998]]
   * 15 --> GGA, RPBE of [[cite:Hammer1999]]
   * 16 --> GGA, HTCH93 of [[cite:Hamprecht1998]]
@@ -7546,7 +7546,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 183 -->  XC_GGA_X_OL2  Exchange form based on Ou-Yang and Levy v.2 [[cite:Fuentealba1995]]  [[cite:OuYang1991]]
   * 184 -->  XC_GGA_X_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
   * 186 -->  XC_GGA_C_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
-  * 191 -->  XC_GGA_X_HTBS! Haas, Tran, Blaha, and Schwarz [[cite:Haas2011]]
+  * 191 -->  XC_GGA_X_HTBS  Haas, Tran, Blaha, and Schwarz [[cite:Haas2011]]
   * 192 -->  XC_GGA_X_AIRY  Constantin et al based on the Airy gas [[cite:Constantin2009]]
   * 193 -->  XC_GGA_X_LAG  Local Airy Gas [[cite:Vitos2000]]
   * 194 -->  XC_GGA_XC_MOHLYP  Functional for organometallic chemistry [[cite:Schultz2005]]
@@ -7581,17 +7581,17 @@ See [[cite:Sun2011]] for the formulas.
   * 207 -->  XC_MGGA_X_BJ06  Becke & Johnson correction to Becke-Roussel 89 [[cite:Becke2006]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 208 -->  XC_MGGA_X_TB09  Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [[cite:Tran2009]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 209 -->  XC_MGGA_X_RPP09  Rasanen, Pittalis, and Proetto correction to Becke & Johnson [[cite:Rasanen2010]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 232 -->  XC_MGGA_C_VSXC  VSxc from Van Voorhis and Scuseria (correlation part) [[cite:Voorhis1998]]
 
@@ -7614,9 +7614,9 @@ Hybrid functionals (do not forget to add a minus sign, as discussed above).
                                   to clarify the situation, and called HSE03 to the above choice of parameters,
                                   and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
                                   several properties for atoms they reached the conclusion that the best value
-                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In espresso
-                                  HSE06 has the value $\omega=0.106$. VASP, on the other hand, uses for HSE03 the
-                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$
+                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
+                                  HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
+                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
                                   and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
                                   [[cite:Heyd2003]] [[cite:Heyd2006]] [[cite:Krukau2006]]
 

@@ -122,7 +122,7 @@ tbase1_xo_DEN  tbase1_xo_EIG.nc  tbase1_xo_GSR.nc  tbase1_xo_OUT.nc  tbase1_xo_W
 
 Different output files have been created, including a `log` file and the output file `tbase1_1.out`. 
 To check that everything is correct, you can make a diff of
-`tbase1_1.out` with a reference file [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
+`tbase1_1.out` with the reference file [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
 
 ```sh
 diff tbase1_1.out ../../Refs/tbase1_1.out | less
@@ -136,15 +136,15 @@ files or timing differences, e.g.:
 
 ```diff
 2,3c2,3
-< .Version 8.0.8 of ABINIT
+< .Version 8.8.3 of ABINIT
 < .(MPI version, prepared for a x86_64_linux_gnu5.4 computer)
 ---
-> .Version 8.0.7  of ABINIT
+> .Version 8.8.0  of ABINIT
 > .(MPI version, prepared for a x86_64_linux_gnu5.3 computer)
 17c17
-< .Starting date : Fri 27 May 2016.
+< .Starting date : Fri 27 May 2018.
 ---
-> .Starting date : Thu 26 May 2016.
+> .Starting date : Thu 26 May 2018.
 27c27
 < - input  file    -> tbase1_1.in
 ---
@@ -357,7 +357,7 @@ Could you answer the following questions?
     On the first atom (located at -0.7 0 0 in cartesian coordinates, in Bohr), the
     force vector is pointing in the minus x direction, and in the plus x direction
     for the second atom located at +0.7 0 0 .  
-    The H2 molecule would like to expand...
+    The H$_2$ molecule would like to expand...
 
 ??? note "Q4. What is the difference of eigenenergies between the two electronic states?"
 
@@ -384,7 +384,7 @@ Could you answer the following questions?
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the SCF cycle from the main output file:
 
         abiopen.py tbase1_1.out --expose --seaborn
@@ -604,7 +604,7 @@ as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abin
 The atomisation energy is the energy needed to separate a molecule in its constituent atoms, each being neutral.   
 In the present case, one must compute first the total energy of an isolated
 hydrogen atom. The atomisation energy will be the difference between the total
-energy of H2 and twice the total energy of H.  
+energy of H$_2 and twice the total energy of H.  
 There are some subtleties in the calculation of an isolated atom.
 
 * in many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]] ; 
@@ -687,12 +687,12 @@ The total energy is
     
     etotal   -4.7010531489E-01
 
-while the total energy of the H2 molecule is (see test 13):
+while the total energy of the H$_2$ molecule is (see test 13):
     
     etotal   -1.1058360644E+00
 
 The atomisation energy is thus 0.1656 Ha (The difference between the total
-energy of the H2 molecule and twice the energy of an isolated Hydrogen atom).
+energy of the H$_2$ molecule and twice the energy of an isolated Hydrogen atom).
 
 At this stage, we can compare our results:
 
@@ -700,7 +700,7 @@ At this stage, we can compare our results:
   * atomisation energy at that bond length: 0.1656 Ha = 4.506 eV 
 
 with the experimental data as well as theoretical data using a much more
-accurate technique (see Kolos and Roothaan, Rev. Mod. Phys. 32, 219 (1960), especially p.225)
+accurate technique (see [[cite:Kolos1960]], especially p.225)
 
   * bond length: 1.401 Bohr 
   * atomisation energy: 4.747 eV 
@@ -724,7 +724,7 @@ These are:
   
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
 (as well as the local-spin-density approximation) in the
-Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table (Phys. Rev. B 54, 1703 (1996)).
+Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table [[cite:Goedecker1996]].
 
 We will see in the [next tutorial](base2) how to address the choice
 of these parameters (except the pseudopotential).

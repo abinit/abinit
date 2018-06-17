@@ -39,8 +39,8 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="230  ,265 ,376 ,289 " href="rf2/index.html" />
 <area shape="rect" coords="230  ,290 ,376 ,309 " href="eph/index.html" /> 
 <area shape="rect" coords="230  ,310 ,376 ,334 " href="tdepes/index.html" /> 
-<area shape="rect" coords="230  ,335 ,327 ,365 " href="elastic/index.html" /> 
-<area shape="rect" coords="328  ,335 ,376 ,365 " href="nlo/index.html" /> 
+<area shape="rect" coords="230  ,335 ,376 ,365 " href="elastic/index.html" /> 
+<area shape="rect" coords="230  ,366 ,376 ,395 " href="nlo/index.html" /> 
 <area shape="rect" coords="360  ,420 ,456 ,465 " href="gw1/index.html" />
 <area shape="rect" coords="360  ,480 ,456 ,502 " href="gw2/index.html" /> 
 <area shape="rect" coords="360  ,503 ,456 ,525 " href="bse/index.html" /> 
@@ -52,7 +52,7 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="520  ,380 ,695 ,435 " href="paral_dfpt/index.html" />
 <area shape="rect" coords="520  ,445 ,695 ,500 " href="paral_mbt/index.html" />
 </map>
-<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v6.png" usemap="#map1"/>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v7.png" usemap="#map1"/>
 </center>
 
 The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related 
