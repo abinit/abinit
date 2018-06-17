@@ -4,7 +4,7 @@ authors: VOlevano, FBruneval, XG
 
 # First lesson on GW  
 
-## The quasi-particle band structure of Silicon, in the GW approximation.  
+## The quasi-particle band structure of Silicon in the GW approximation.  
 
 This lesson aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the GW approximation.
@@ -14,11 +14,9 @@ code can be found in the [[theory:mbt|GW_notes]].
 The different formulas of the GW formalism have been written in a [[pdf:gwa|pdf document]]
 by Valerio Olevano who also wrote the first version of this tutorial.
 For a much more consistent discussion of the theoretical aspects of the GW
-method we refer the reader to the review
-
-"Quasiparticle calculations in solids", by Aulbur WG, Jonsson L, Wilkins JW,   
-in Solid State Physics 54, 1-218 (2000), also available 
-[here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
+method we refer the reader to the review article
+[[cite:Aulbur2001|Quasiparticle calculations in solids]] by W.G Aulbur et al
+also available [here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
 
 It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
@@ -36,8 +34,8 @@ for the other lessons. Why not "Work_gw1"?*
 
 At the end of [lesson 3](base3), we computed the KS band
 structure of silicon. In this approximation, the band dispersion as well as
-the band widths are reasonable, but the band gaps are qualitatively wrong.
-Now, we will compute the band gaps much more accurately, using the so-called
+the band widths are reasonable but the band gaps are qualitatively wrong.
+Now we will compute the band gaps much more accurately, using the so-called
 GW approximation.
 
 We start by an example, in which we show how to perform in a single input file
@@ -71,14 +69,15 @@ In order to perform a standard one-shot GW calculation one has to:
      including several empty states. Note that, unlike standard band structure calculations, 
      here the KS states must be computed on a regular grid of **k**-points. 
 
-  3. Use [[optdriver]]=3 to compute the independent-particle susceptibility $\chi^0$ on a regular grid of 
+  3. Use [[optdriver]] = 3 to compute the independent-particle susceptibility $\chi^0$ on a regular grid of 
      **q**-points, for at least two frequencies (usually, $\omega=0$ and a large purely imaginary 
      frequency - of the order of the plasmon frequency, a dozen of eV). 
      The inverse dielectric matrix $\epsilon^{-1}$ is then obtained via matrix inversion and stored in an external file (SCR). 
      The list of **q**-points is automatically defined by the k-mesh used to generate the KS states in the previous step. 
 
-  4. Use [[optdriver]]=4 to compute the self-energy $\Sigma$ matrix element for a given set of k-points in order 
-     to obtain the GW quasiparticle energies Note that the **k**-point must belong to the k-mesh used to generate the WFK file in step 2. 
+  4. Use [[optdriver]] = 4 to compute the self-energy $\Sigma$ matrix elements for a given set of k-points in order 
+     to obtain the GW quasiparticle energies. 
+     Note that the **k**-point must belong to the k-mesh used to generate the WFK file in step 2. 
 
 The flowchart diagram of a standard one-shot run is depicted in the figure below.
 
@@ -157,7 +156,7 @@ Then, three input variables describe the computation:
     
 In this case, we use 17 bands to calculate the KS response function $\chi^{0}$.
 The dimension of $\chi^{0}$, as well as all the other matrices ($\chi$, $\epsilon^{-1}$) is
-determined by the cut-off energy [[ecuteps]]=3.6 Hartree, which yields 169 planewaves in our case.
+determined by the cut-off energy [[ecuteps]] = 3.6 Hartree, which yields 169 planewaves in our case.
 
 Finally, we define the frequencies at which the screening must be evaluated:
 $\omega=0.0$ eV and the imaginary frequency $\omega= i 16.7$ eV. The latter is determined by
@@ -176,7 +175,7 @@ from EELS calculations existing in literature.
 #### 1.d Computing the GW energies.
 
 In dataset 4 the calculation of the Self-Energy matrix elements is performed.
-One needs to define the driver option, as well as the _WFK and _SCR files.
+One needs to define the driver option as well as the _WFK and _SCR files.
     
     optdriver4  4       # Self-Energy calculation
     getwfk4    -2       # Obtain WFK file from dataset 2
@@ -186,7 +185,7 @@ The [[getscr]] input variable is similar to other "get" input variables of ABINI
 
 Then, comes the definition of parameters needed to compute the self-energy. As
 for the computation of the susceptibility and dielectric matrices, one must
-define the set of bands, and two sets of planewaves:
+define the set of bands and two sets of planewaves:
     
     nband4       30      # Bands to be used in the Self-Energy calculation
     ecutsigx4   8.0      # Dimension of the G sum in Sigma_x
@@ -196,10 +195,11 @@ In this case, [[nband]] controls the number of bands used to calculate the
 correlation part of the Self-Energy while [[ecutsigx]] gives the number of
 planewaves used to calculate $\Sigma_x$ (the exchange part of the self-energy). The
 size of the planewave set used to compute $\Sigma_c$ (the correlation part of the
-self-energy) is controlled by [[ecuteps]] that and cannot be larger than the value
+self-energy) is controlled by [[ecuteps]] and cannot be larger than the value
 used to generate the SCR file. 
-It is advised to set [[ecutsigx]] to a value as high as [[ecut]] since, any way, this parameter 
-is not much influential on the total computational time.
+For the initial convergence studies, it is advised to set [[ecutsigx]] to a value as high 
+as [[ecut]] since, any way, this parameter is not much influential on the total computational time.
+Note that exact treatment of the exchange part requires, in principle, ecutsigx = 4 ecut.
 
 Then, come the parameters defining the k-points and the band indices for which
 the quasiparticle energies will be computed:
@@ -267,8 +267,8 @@ dielectric matrices will be computed.
 
 The q-mesh is the set of points defined as all
 the possible differences among the **k**-points ( $\mathbf{q} =\mathbf{k}-\mathbf{k}'$ ) of the grid chosen to
-generate the WFK file. From the last statement the interest to
-choose homogeneous **k**-point grids in order to minimize the number of **q**-points is clear.
+generate the WFK file. From the last statement it is clear the importance of
+choosing homogeneous **k**-point grids in order to minimize the number of **q**-points is clear.
 
 After this section, the code prints the parameters of the FFT grid needed to
 represent the wavefunctions and to compute their convolution (required for the
@@ -323,12 +323,13 @@ At the end of the screening calculation, the macroscopic dielectric constant is 
       dielectric constant without local fields =  27.1361
 
 
-Note that the convergence in the dielectric constant **does not guarantee** the
-convergence in the GW corrections. In fact, the dielectric constant is
-representative of only one element i.e. the head of the full dielectric
-matrix. Even if the convergence on the dielectric constant with local fields
-takes somehow into account also other non-diagonal elements. In a GW
-calculation the whole $\epsilon^{-1}$ matrix is used to build the Self-Energy operator.  
+!!! note
+    Note that the convergence in the dielectric constant **does not guarantee** the
+    convergence in the GW corrections. In fact, the dielectric constant is
+    representative of only one element i.e. the head of the full dielectric
+    matrix. Even if the convergence on the dielectric constant with local fields
+    takes somehow into account also other non-diagonal elements. In a GW
+    calculation the whole $\epsilon^{-1}$ matrix is used to build the Self-Energy operator.  
 
 The dielectric constant reported here is the so-called RPA dielectric constant
 due to the electrons. Although evaluated at zero frequency, it is understood
@@ -445,7 +446,7 @@ K-point: [+0.000, +0.000, +0.000] $\Gamma$, spin: 0
 4     4  8.472  8.955      9.099 -10.056  -5.573    -3.856   0.0  0.77
 ```
 
-For further details about the SIGRES.nc file and the AbiPy API see |SigresFileNb|.
+For further details about the SIGRES.nc file and the AbiPy API see the |SigresFileNb|.
 
 ## 2 Preparing convergence studies: Kohn-Sham structure (WFK file) and screening (SCR file)
   
@@ -471,7 +472,7 @@ the next runs. Move tgw1o_DS2_WFK to tgw1o_DS1_WFK and tgw1o_DS3_SCR to tgw1o_DS
 The next sections are intended to show you how to find the converged
 parameters for a GW calculation. In principle, the following parameters might
 be used to decrease the CPU time and/or the memory requirements:
-[[optdriver]]=3 [[ecuteps]], [[nband]] and, for [[optdriver]]=4, [[nband]].
+[[optdriver]] = 3 [[ecuteps]], [[nband]] and, for [[optdriver]] = 4, [[nband]].
 
 Before 2008, the advice was indeed to check independently what was the best
 value for each of these. However, with the evolution of memory/disk space, as
@@ -480,11 +481,11 @@ needed (see e.g. [[cite:Bruneval2008]] and
 the input variable [[gwcomp]]), standard calculations nowadays only need the
 tuning of [[nband]] [[ecuteps]], simultaneously for [[optdriver]]=3 and =4.
 Indeed, [[ecutwfn]] and can have the default value of [[ecut]], while
-[[ecutsigx]] can have the default value of 4*[[ecut]] for norm-conserving
+[[ecutsigx]] can have the default value of 4 * [[ecut]] for norm-conserving
 pseudopotentials, or [[pawecutdg]] for PAW calculations.
 
 We begin by the convergence study on the only important parameter needed in the self-
-energy calculation ([[optdriver]]=4): [[nband]].
+energy calculation ([[optdriver]] = 4): [[nband]].
 This is because for these, we will not need a double dataset loop to check
 this convergence, and we will rely on the previously determined SCR file.
 
@@ -585,7 +586,7 @@ and the |G0W0LessonNb| for GW calculations powered by AbiPy.
 ## 4 Convergence on the number of bands to calculate the screening ($\epsilon^{-1}$)
   
 Now, we come back to the calculation of the screening. Adequate convergence
-studies will couple the change of parameters for [[optdriver]]=3 with a
+studies will couple the change of parameters for [[optdriver]] = 3 with a
 computation of the GW energy changes. One cannot rely on the convergence of
 the macroscopic dielectric constant to assess the convergence of the GW energies.
 
@@ -750,7 +751,7 @@ of bands, one gets:
      5   8.445  -9.700  -3.222  -6.800   0.794  -0.259  -9.955  -0.255   8.190
 
     
-So that ecuteps=6.0 (npweps=169) can be considered converged within 0.01 eV.
+So that ecuteps = 6.0 ([[npweps]] = 169) can be considered converged within 0.01 eV.
 
 At this stage, we know that for the screening computation, we need
 [[ecuteps]]=6.0 Ha and [[nband]]=100.
@@ -763,6 +764,12 @@ square of the number of **k**-points (roughly), and the number of k-points can
 increase very rapidly from one possible grid to the next denser one. This is
 why we will leave this out of the present tutorial, and consider that we
 already know a sufficient **k**-point grid, for the last calculation.
+
+As discussed in [[cite:Setten2017]], the convergence study for k-points
+the number of bands and the cutoff energies can be decoupled
+in the sense that one can start from a reasonaby coarse k-mesh to find 
+the converged values of [[nband]], [[ecuteps]], [[ecutsigx]] and then
+fix these values and look at the convergence with respect to the BZ mesh.
 
 ## 6 Calculation of the GW corrections for the band gap at $\Gamma$
   
@@ -861,23 +868,54 @@ choosing the level of accuracy for the convergence parameters in the GW calculat
 
 ### How to compute GW band structures
 
-Finally, it is possible to calculate a full band plot of a system. There are
-two possible techniques. The first one is based on the use of Wannier
-functions, to interpolate a few selected points obtained using the direct GW
-approach [[cite:Hamann2009]].
-You need to have the Wannier90 plug-in installed. See the directory
-tests/wannier90, test case 03, for an example of a file where a GW calculation
+Finally, it is possible to calculate a full GW band plot of a system via interpolation.
+There are three possible techniques. 
+
+The first one is based on the use of Wannier functions to interpolate a few selected points 
+in the IBZ obtained using the direct GW approach [[cite:Hamann2009]].
+You need to have the Wannier90 plug-in installed. 
+See the directory tests/wannier90, test case 03, for an example of a file where a GW calculation
 is followed by the use of Wannier90. 
 
 {% dialog tests/wannier90/Input/t03.in %}
 
+The wannier interpolation is a very accurate method, can handle band crossings
+but it may require additional work to obtain well localized wannier functions.
 Another practical way follows from the
-fact that the GW corrections are quite linear with the energy, for each group
-of bands. This is evident when reporting on a plot the GW correction with
-respect to the 0-order LDA energy for each state. One can then simply correct
-the KS band structure at any point, by using a GW correction for the
+fact that the QP energies, similarly to the KS eigenvalues, 
+must fulfill the symmetry properties:
+
+$$
+\ee(\kpG) = \ee(\kk)
+$$
+
+and
+
+$$
+\ee(S\kk) = \ee(\kk)
+$$
+
+where $\GG$ is a reciprocal lattice vector and $S$ is a rotation of the point group of the crystal.
+Therefore it's possible to employ the star-function interpolation by Shankland, Koelling and Wood 
+[[cite:Euwema1969]], [[cite:Koelling1986]]
+in the improved version proposed by [[cite:Pickett1988]] to fit the ab-initio results. 
+This interpolation technique, by construction, passes through the initial points and satisfies 
+the basic symmetry property of the band energies.
+It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings 
+that may cause unphysical oscillations between the ab-initio points. 
+To reduce this spurious effect, we suggest to interpolate the GW corrections instead of the GW energies. 
+The corrections, indeed, are usually smoother in k-space and the resulting fit is more stable.
+A python example showing how to construct an energy-dependent scissors operator with AbiPy is available 
+[here](http://abinit.github.io/abipy/gallery/plot_qpbands_with_interpolation.html#sphx-glr-gallery-plot-qpbands-with-interpolation-py)
+
+The third method uses that fact that the GW corrections are usually linear with the energy, 
+for each group of bands. This is evident when reporting on a plot the GW correction with
+respect to the 0-order KS energy for each state. 
+One can then simply correct the KS band structure at any point, by using a GW correction for the
 **k**-points where it has not been calculated explicitly, using a fit of the GW
 correction at a sparse set of points.
+A python example showing how to construct an energy-dependent scissors operator with AbiPy is available
+[here](http://abinit.github.io/abipy/gallery/plot_qpbands_with_scissor.html#sphx-glr-gallery-plot-qpbands-with-scissor-py).
 
 ## Advanced features in the GW code
    

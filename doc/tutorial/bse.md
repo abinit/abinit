@@ -434,7 +434,7 @@ is already able to capture the most important physics.
     ![](bse_assets/abiopen_tbs_2o_MDF.png)
 
     For further information about the MDF file and the post-processing tools provided by AbiPy,
-    please consult the |MdfFileNb|
+    please consult the |MdfFileNb|.
 
 
 ### Optional Exercises
