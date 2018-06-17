@@ -14,7 +14,7 @@ LDA and GGA, wirhin norm-conserving pseudopotentials as well as PAW  approach [[
 
 Doppler broadening can also be computed. The details of the way to perform such
 calculations are given in the description of the [[positron]] input variable,
-as well as in [[lesson:positron|the lesson on electron-positron
+as well as in [[tutorial:positron|the tutorial on electron-positron
 annihilation]].
 
 Examples can be found in [[cite:Wiktor2013]], [[cite:Wiktor2014]],
@@ -32,5 +32,5 @@ Examples can be found in [[cite:Wiktor2013]], [[cite:Wiktor2014]],
 
 ## Tutorials
 
-* [[lesson:positron|The lesson on electron-positron annihilation]]
+* [[tutorial:positron|The tutorial on electron-positron annihilation]]
 

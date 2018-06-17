@@ -105,5 +105,5 @@ quantities.
 
 ## Tutorials
 
-* [[lesson:dmft|The lesson on DFT+DMFT]] shows how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite: DFT+U.
+* [[tutorial:dmft|The tutorial on DFT+DMFT]] shows how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite: DFT+U.
 

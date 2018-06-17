@@ -42,7 +42,7 @@ Phonon calculations are arbitrary q-points can be done under finite electric
 field ([[topic:Berry]]).
 
 It will be the easiest to discover the capabilities of these two executables
-through the [[lesson:rf1]] of the tutorial.
+through the [[tutorial:rf1]] of the tutorial.
 
 See [[topic:DFPT]] for the general information about DFPT, [[topic:q-points]]
 for the specification of q-points, and [[topic:PhononBands]] for the
@@ -66,5 +66,5 @@ computation of full phonon bands.
 
 ## Tutorials
 
-* [[lesson:rf1|The lesson Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
+* [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
 

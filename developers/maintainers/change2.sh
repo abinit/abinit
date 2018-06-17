@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file
- sed -e 's!lessons 1!tutorials 1!' $file > tmp.file
+ sed -e 's!Lesson!Tutorial!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
