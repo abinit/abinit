@@ -62,5 +62,5 @@ fixed if needed, see [[topic:GeoConstraints]].
 
 ## Tutorials
 
-* [[lesson:paral_images|Parallelism based on "images"]], e.g. for the determination of transitions paths (string method), that can be activated on top of the "KGB" parallelism for force calculations.
+* [[tutorial:paral_images|Parallelism based on "images"]], e.g. for the determination of transitions paths (string method), that can be activated on top of the "KGB" parallelism for force calculations.
 

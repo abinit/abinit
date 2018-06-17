@@ -147,7 +147,7 @@ pages:
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
-- Lessons:
+- Tutorial:
     - Overview: tutorial/index.md
     - Base Tutorials: 
         - Base1: tutorial/base1.md

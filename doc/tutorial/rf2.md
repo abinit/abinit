@@ -13,12 +13,12 @@ get the following physical properties of periodic solids:
 * Phonon band structures 
 * Thermodynamical properties 
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Generation of a derivative database
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input?*
+for the other tutorials. Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input?*
 
 This tutorial starts by the generation of a database, that might be quite time-consuming.
 We suggest you to start immediately this computation...

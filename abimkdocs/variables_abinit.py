@@ -399,7 +399,7 @@ Variable(
 Control the size of the block in the LOBPCG algorithm. This keyword works only
 with [[paral_kgb]]=1 and has to be either 1 or a multiple of 2.
 
-With [[npband]] == 1:
+With [[npband]] = 1:
 
 * 1 --> band-per-band algorithm
 * n --> The minimization is performed using [[nband]]/n blocks of n bands.
@@ -408,19 +408,19 @@ With [[npband]] == 1:
 
     [[nband]]/n has to be an integer.
 
-With [[npband]] /= 1:
+With [[npband]] $\\ne$ 1:
 
 * 1 --> The minimization is performed using [[nband]]/[[npband]] blocks of [[npband]] bands.
-* n --> The minimization is performed using [[nband]]/([[npband]]*n) blocks of [[npband]]*n bands.
+* n --> The minimization is performed using [[nband]]/([[npband]] $\\times$ n) blocks of [[npband]]  $\\times$ n bands.
 
 !!! warning
 
-    [[nband]] / ([[npband]]*n) has to be an integer.
+    [[nband]] / ([[npband]]  $\\times$ n) has to be an integer.
 
 By minimizing a larger number of bands together in LOBPCG, we increase the
 convergence of the residual. The better minimization procedure (as concerns
 the convergence, but not as concerns the speed) is generally performed by
-using [[bandpp]]*[[npband]]=[[nband]]. Put [[bandpp]]=2 when [[istwfk]]=2
+using [[bandpp]]  $\\times$ [[npband]]=[[nband]]. Put [[bandpp]]=2 when [[istwfk]]=2
 (the time spent in FFTs is divided by two).
 """,
 ),
@@ -5083,7 +5083,7 @@ defines the threshold above which linear (and matrix) algebra operations are
 done on the Graphics Processing Unit.
 The considered matrix size is equal to:
 
-* SIZE=([[mpw]]*[[nspinor]]/ [[npspinor]])* ([[npband]]*[[bandpp]])**2
+* SIZE=([[mpw]] $\\times$ [[nspinor]] / [[npspinor]]) $\\times$ ([[npband]] $\\times$ [[bandpp]]) $^2$
 
 When SIZE>=[[gpu_linalg_limit]], [[wfoptalg]] parameter is automatically set
 to 14 which corresponds to the use of LOBPCG algorithm for the calculation of
@@ -6021,7 +6021,7 @@ As described in the LibXC sources (and copied in the ABINIT doc, see
 ABINIT knows the LibXC value from [[ixc]], that might not agree with the
 definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
-The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
+The HSE06 value from LibCX is 0.11, the one of Quantum Espresso is 0.106, the one of
 VASP is 0.105835 (=0.2 $\AA^{-1}$).
 The HSE03 value from LibCX is 0.106066 ($=0.15/\sqrt{2})$), the one of VASP is
 0.1587531 (=0.3 $\AA^{-1}$).
@@ -7345,19 +7345,19 @@ The value [[ixc]]=10 is used internally: gives the difference between
 
   * 0 --> NO xc.
 
-  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
+  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang 92 [[cite:Perdew1992a]] (which reproduces Ceperley-Alder [[cite:Ceperley1980]]!).
   * 2 --> LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[cite:Perdew1981]]
-  * 3 --> LDA, old Teter rational polynomial parametrization (4/91) fit to Ceperley-Alder data (no spin-polarization)
+  * 3 --> LDA, old Teter rational polynomial parametrization (4/91) fit to Ceperley-Alder data (no spin-polarization) [[cite:Ceperley1980]]
   * 4 --> LDA, Wigner functional (no spin-polarization)
-  * 5 --> LDA, Hedin-Lundqvist functional (no spin-polarization)
+  * 5 --> LDA, Hedin-Lundqvist functional (no spin-polarization) [[cite:Hedin1971]]
   * 6 --> LDA, "X-alpha" functional (no spin-polarization)
-  * 7 --> LDA or LSD, Perdew-Wang 92 functional
-  * 8 --> LDA or LSD, x-only part of the Perdew-Wang 92 functional
-  * 9 --> LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional
+  * 7 --> LDA or LSD, Perdew-Wang 92 functional [[cite:Perdew1992a]]
+  * 8 --> LDA or LSD, x-only part of the Perdew-Wang 92 functional [[cite:Perdew1992a]]
+  * 9 --> LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional [[cite:Perdew1992a]]
 
-  * 11 --> GGA, Perdew-Burke-Ernzerhof GGA functional
-  * 12 --> GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional
-  * 13 --> GGA potential of van Leeuwen-Baerends, while for energy, Perdew-Wang 92 functional
+  * 11 --> GGA, Perdew-Burke-Ernzerhof GGA functional [[cite:Perdew1996]]
+  * 12 --> GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional [[cite:Perdew1996]]
+  * 13 --> GGA potential of van Leeuwen-Baerends [[cite:VanLeeuwen1994]], while for energy, Perdew-Wang 92 functional [[cite:Perdew1992a]]
   * 14 --> GGA, revPBE of [[cite:Zhang1998]]
   * 15 --> GGA, RPBE of [[cite:Hammer1999]]
   * 16 --> GGA, HTCH93 of [[cite:Hamprecht1998]]
@@ -7546,7 +7546,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 183 -->  XC_GGA_X_OL2  Exchange form based on Ou-Yang and Levy v.2 [[cite:Fuentealba1995]]  [[cite:OuYang1991]]
   * 184 -->  XC_GGA_X_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
   * 186 -->  XC_GGA_C_APBE  mu fixed from the semiclassical neutral atom [[cite:Constantin2011]]
-  * 191 -->  XC_GGA_X_HTBS! Haas, Tran, Blaha, and Schwarz [[cite:Haas2011]]
+  * 191 -->  XC_GGA_X_HTBS  Haas, Tran, Blaha, and Schwarz [[cite:Haas2011]]
   * 192 -->  XC_GGA_X_AIRY  Constantin et al based on the Airy gas [[cite:Constantin2009]]
   * 193 -->  XC_GGA_X_LAG  Local Airy Gas [[cite:Vitos2000]]
   * 194 -->  XC_GGA_XC_MOHLYP  Functional for organometallic chemistry [[cite:Schultz2005]]
@@ -7581,17 +7581,17 @@ See [[cite:Sun2011]] for the formulas.
   * 207 -->  XC_MGGA_X_BJ06  Becke & Johnson correction to Becke-Roussel 89 [[cite:Becke2006]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 208 -->  XC_MGGA_X_TB09  Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [[cite:Tran2009]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 209 -->  XC_MGGA_X_RPP09  Rasanen, Pittalis, and Proetto correction to Becke & Johnson [[cite:Rasanen2010]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
 
   * 232 -->  XC_MGGA_C_VSXC  VSxc from Van Voorhis and Scuseria (correlation part) [[cite:Voorhis1998]]
 
@@ -7614,9 +7614,9 @@ Hybrid functionals (do not forget to add a minus sign, as discussed above).
                                   to clarify the situation, and called HSE03 to the above choice of parameters,
                                   and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
                                   several properties for atoms they reached the conclusion that the best value
-                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In espresso
-                                  HSE06 has the value $\omega=0.106$. VASP, on the other hand, uses for HSE03 the
-                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$
+                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
+                                  HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
+                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
                                   and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
                                   [[cite:Heyd2003]] [[cite:Heyd2006]] [[cite:Krukau2006]]
 
@@ -10172,7 +10172,7 @@ This maximum number of cores can be set with [[np_slk]].
 A large number for [[np_slk]] (i.e. 1000000) means that all cores are used for
 the Linear Algebra calls.
 np_slk must divide the number of processors involved in diagonalizations
-([[npband]]*[[npfft]]*[[npspinor]]).
+([[npband]] $\\times$ [[npfft]] $\\times$ [[npspinor]]).
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
 """,
@@ -10245,7 +10245,7 @@ occupied states level is shared. [[nphf]] and [[npkpt]] are combined to give
 the total number of processors (nproc) working on the parallelisation.
 
 Note: [[nphf]] should be a divisor or equal to the number of k-point times
-the number of bands for exact exchange ([[nkpthf]]*[[nbandhf]]) in order to
+the number of bands for exact exchange ([[nkpthf]] $\\times$ [[nbandhf]]) in order to
 have the better load-balancing and efficiency.
 """,
 ),
@@ -10292,7 +10292,7 @@ See [[npband]], [[npfft]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 
 [[npkpt]] should be a divisor or equal to with the number of k-point/spin-
-components ([[nkpt]]*[[nsppol]]) in order to have the better load-balancing
+components ([[nkpt]] $\\times$ [[nsppol]]) in order to have the better load-balancing
 and efficiency.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
@@ -10310,7 +10310,7 @@ Variable(
     requires="[[paral_rf]]==1",
     text="""
 This parameter is used in connection to the parallelization over
-perturbations(see [[paral_rf]] ), for a linear response calculation.
+perturbations (see [[paral_rf]] ), for a linear response calculation.
 [[nppert]] gives the number of processors among which the work load over the
 perturbation level is shared. It can even be specified separately for each
 dataset.
@@ -11593,25 +11593,22 @@ Require compilation option --enable-mpi="yes".
 HOWTO fix the number of processors along one level of parallelisation:
 At first, try to parallelise over the k point and spin (see
 [[npkpt]],[[npspinor]]). Otherwise, for unpolarized calculation at the gamma
-point, parallelise over the two other levels: the band and FFT ones. For nproc
-<=50, the best speed-up is achieved for [[npband]]=nproc and [[npfft]]=1
-(which is not yet the default). For nproc>=50, the best speed-up is achieved
-for [[npband]] >=4*[[npfft]].
+point, parallelise over the two other levels: the band and FFT ones. For nproc $\leq$ 50, the best speed-up is achieved for [[npband]]=nproc and [[npfft]]=1
+(which is not yet the default). For nproc $\geq$ 50, the best speed-up is achieved
+for [[npband]] $\geq$ 4 $\\times$ [[npfft]].
 
 For additional information, download F. Bottin presentation at the
 [ABINIT workshop 2007](https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html)
 
 Suggested acknowledgments:
-F. Bottin, S. Leroux, A. Knyazev and G. Zerah, _Large scale ab initio
-calculations based on three levels of parallelization_, Comput. Mat. Science
-**42**, 329 (2008), also available on arXiv, http://arxiv.org/abs/0707.3405.
+[[cite:Bottin2008]], also available on arXiv, http://arxiv.org/abs/0707.3405.
 
 If the total number of processors used is compatible with the four levels of
 parallelization, the values for [[npkpt]], [[npspinor]], [[npfft]], [[npband]]
 and [[bandpp]] will be filled automatically, although the repartition may not
 be optimal. To optimize the repartition use:
 
-**If paral_kgb=1** and **max_ncpus = n /= 0** ABINIT will test automatically
+**If paral_kgb=1** and **max_ncpus = n $\\ne$ 0** ABINIT will test automatically
 if all the processor numbers between 2 and n are convenient for a parallel
 calculation and print the possible values in the log file. A weight is
 attributed to each possible processors repartition. It is adviced to select a
@@ -13628,7 +13625,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[lesson:eph]].
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph]].
 """,
 ),
 
@@ -17182,7 +17179,7 @@ Variable(
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
-(see [[lesson:paw1]]) can only be performed with PAW atomic data input files,
+(see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
 while pseudopotential calculations are performed in ABINIT with norm-
 conserving pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.

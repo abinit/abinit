@@ -82,7 +82,7 @@ axes are described in [[topic:FrequencyMeshMBPT]].
 
 ## Tutorials
 
-* The first lesson on GW ([[lesson:gw1|GW1]]) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), in the GW approximation (much better than the Kohn-Sham LDA band structure), with a plasmon-pole model. 
-* The second lesson on GW ([[lesson:gw1|GW2]]) deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
-* [[lesson:paral_mbt|The lesson on Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
+* The first tutorial on GW ([[tutorial:gw1|GW1]]) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), in the GW approximation (much better than the Kohn-Sham LDA band structure), with a plasmon-pole model. 
+* The second tutorial on GW ([[tutorial:gw1|GW2]]) deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
+* [[tutorial:paral_mbt|The tutorial on Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 

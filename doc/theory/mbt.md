@@ -398,7 +398,7 @@ has to be performed separately for each frequency.
 
 This linear scaling represents a serious problem, especially when many
 frequencies are wanted, for example when computing QP corrections within the
-contour deformation technique described in the [[lesson:gw2|second lesson]] of the GW tutorial.
+contour deformation technique described in the [[tutorial:gw2|GW2 tutorial]].
 
 This computational bottleneck can be removed, under certain circumstances, by
 employing an efficient algorithm proposed in [[cite:Miyake2000]] and subsequently

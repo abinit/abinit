@@ -1050,8 +1050,8 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None:
                     a.text = var.name if not var.is_internal else "%%%s" % var.name
 
-            elif namespace == "lesson":
-                # Handle [[lesson:wannier90|text]]
+            elif namespace == "lesson" or namespace == "tutorial" :
+                # Handle [[tutorial:wannier90|text]]
                 if name == "index":
                     url = "/tutorial/"
                     if a.text is None: a.text = "tutorial home page"
