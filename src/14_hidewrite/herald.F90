@@ -73,7 +73,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2018
- mm_rel=5
+ mm_rel=6
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
