@@ -1907,8 +1907,8 @@ Variable(
     text=r"""
 Used when [[iscf]]>0, to define:
 
-- the way a change of density is derived from a change of atomic position,
-- the way forces are corrected when the SCF cycle is not converged.
+  - the way a change of density is derived from a change of atomic position,
+  - the way forces are corrected when the SCF cycle is not converged.
 
 Supported values:
 
@@ -1916,46 +1916,48 @@ Supported values:
   * 1 --> density not changed, forces corrected with rigid ion hypothesis (atomic charge moved with atom)
   * 2 --> density changed and forces corrected with rigid ion hypothesis (atomic charge moves with atom)
   * 3 --> density changed and forces corrected with a different implementation of the rigid ion hypothesis
-  * 4 --> density not changed, forces corrected with the use of Harris functional formula (*)
-  * 5 --> density changed using D. Alfe 2nd-order algorithm (**), forces not corrected
-  * 6 --> density changed using D. Alfe 2nd-order algorithm (**) and forces corrected with the use of Harris functional formula (*)
+  * 4 --> density not changed, forces corrected with the use of Harris functional formula (see note)
+  * 5 --> density changed using D. Alfe 2nd-order algorithm (see notes), forces not corrected
+  * 6 --> density changed using D. Alfe 2nd-order algorithm (see notes) and forces corrected with the use of Harris functional formula
 
 Similar negative values are also allowed (see the meaning later), for
 development purposes only. No meaning for RF calculations.
 
 For the time being,
 
-- [[densfor_pred]]=3 must be used with [[ionmov]]=4 and [[iscf]]=5.
-- [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
+  - [[densfor_pred]]=3 must be used with [[ionmov]]=4 and [[iscf]]=5.
+  - [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
   Otherwise, use [[densfor_pred]]=2
 
-**(*)** _Note concerning the correction of forces (use of [[densfor_pred]]=1,
-2, 3, 4 or 6)_:
-The force on the atom located at R is corrected by the addition of the following term:
-_F_residual=Int[dr.V_residual.dRho_atomic/dR]_, where Rho_atomic is an atomic (spherical) density.
 
-- When such an atomic density (Rho_atomic) is found in the pseudopotential or
-PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
-- When SCF mixing is done on the density ([[iscf]] >=10), the potential
-residual (V_residual) is obtained from the density residual with the first
-order formula _V_residual=dV/drho.Rho_residual_ and uses the exchange-
-correlation kernel _dVxc/drho=Kxc_ whose computation is time-consuming for GGA
-functionals. By default (positive values of [[densfor_pred]]), the local-
-density part of the GGA exchange-correlation kernel is used (even for GGA, for
-which it seems to give a reasonable accuracy). Using the full GGA exchange
-correlation kernel (so, including derivatives with respect to the gradient of
-the density) is always possible by giving a negative value to
-[[densfor_pred]]. In case of hybrid functionals, a similar correction term is
-added, although in the density mixing scheme, the related GGA kernel is used
-instead of the hybrid functional kernel.
+!!! note "concerning the correction of forces (use of [[densfor_pred]]=1, 2, 3, 4 or 6)"
+    The force on the atom located at R is corrected by the addition of the following 
+    term: $F_{residual}=\int dr V_{residual} \frac{d \rho_{atomic}}{dR}$, 
+    where $\rho_{atomic}$ is an atomic (spherical) density.
 
-**(**)** _Note concerning the use of [[densfor_pred]]=5 or 6 (density prediction)_:
-The algorithm is described in _Computer Physics Communications **118** (1999)
-31-33 _. It uses an atomic (spherical) density. When such an atomic density
-is found in the pseudopotential or PAW file, it is used. If not, a gaussian
-density (defined by [[densty]] parameter) is used.
-Also note that, to be efficient, this algorithm requires a minimum convergence
-of the SCF cycle; Typically, vres2 (or nres2) has to be small enough (10  -4 ...10 -5  ).
+    - When such an atomic density ($\rho_{atomic}$) is found in the pseudopotential or
+    PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
+    - When SCF mixing is done on the density ([[iscf]] >=10), the potential
+    residual ($V_residual$) is obtained from the density residual with the first
+    order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
+    and uses the exchange-correlation kernel 
+    $ \frac{dV_{xc}}{d\rho}=K_{xc}$ whose computation is time-consuming for GGA
+    functionals. By default (positive values of [[densfor_pred]]), the local-
+    density part of the GGA exchange-correlation kernel is used (even for GGA, for
+    which it seems to give a reasonable accuracy). Using the full GGA exchange
+    correlation kernel (so, including derivatives with respect to the gradient of
+    the density) is always possible by giving a negative value to
+    [[densfor_pred]]. In case of hybrid functionals, a similar correction term is
+    added, although in the density mixing scheme, the related GGA kernel is used
+    instead of the hybrid functional kernel.
+
+!!! note "concerning the use of [[densfor_pred]]=5 or 6 (density prediction)"
+    The algorithm is described in [[cite:Alfe1999]].
+    It uses an atomic (spherical) density. When such an atomic density
+    is found in the pseudopotential or PAW file, it is used. If not, a gaussian
+    density (defined by [[densty]] parameter) is used.
+    Also note that, to be efficient, this algorithm requires a minimum convergence
+    of the SCF cycle; Typically, vres2 (or nres2) has to be small enough (10  -4 ...10 -5  ).
 """,
 ),
 
@@ -2698,9 +2700,13 @@ Variable(
     text="""
 Choose the basis to perform CTQMC calculation.
 
-  * 0 --> Use the local basis in the spherical harmonics basis. Can be useful if the Hamiltonian has weak off diagonal terms and for this reason, one want to keep the original basis for simplicity and for physical insight.
-  * 1 --> Default value, diagonalize the local Hamiltonian (but only if it is not diagonal). The best choice in general.
-  * 2 --> Diagonalise the local correlated occupation matrix. Can lead to non diagonal Hamiltonian that cannot be handled by CTQMC. This option should be thus avoided.
+  * 0 --> Use the local basis in the spherical harmonics basis. 
+  Can be useful if the Hamiltonian has weak off diagonal terms and for this reason, 
+  one want to keep the original basis for simplicity and for physical insight.
+  * 1 --> Default value, diagonalize the local Hamiltonian (but only if it is not diagonal). 
+  The best choice in general.
+  * 2 --> Diagonalise the local correlated occupation matrix. Can lead to non 
+  diagonal Hamiltonian that cannot be handled by CTQMC. This option should be thus avoided.
 """,
 ),
 
@@ -3648,7 +3654,7 @@ Variable(
     text="""
 [[eshift]] gives the shift of the energy used in the shifted Hamiltonian
 squared. The algorithm will determine eigenvalues and eigenvectors centered on [[eshift]].
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[eshift]] has the
 '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
 """,
 ),
@@ -3722,8 +3728,7 @@ Variable(
     text="""
 This flag activates the extrapolation of wave-functions from one Molecular
 Dynamics (or Structural Relaxation) step to another. The wave functions are
-extrapolated using 2nd-order algorithm of Arias, Payne and Joannopoulos (PRB
-45, 1538 (1992)).
+extrapolated using 2nd-order algorithm of [[cite:Arias1992]].
 Note that, when activated, this extrapolation requires non-negligible
 additional memory resources as the wave functions are stored for the two
 previous time steps. Also, it can only be activated if a consistent density
@@ -3831,8 +3836,8 @@ This keyword is **irrelevant** when Fast Fourier Transforms are done using
 (in that case, it is ignored).
 
 Allows to choose the algorithm for Fast Fourier Transforms. These have to be
-used when applied to wavefunctions (routine fourwf.F90), as well as when
-applied to densities and potentials (routine fourdp.F90). Presently, it is the
+used when applied to wavefunctions (routine `src/53_ffts/fourwf.F90`), as well as when
+applied to densities and potentials (routine `src/53_ffts/fourdp.F90`). Presently, it is the
 concatenation of three digits, labelled (A), (B) and (C).
 
 The first digit (A) is to be chosen among 1, 2, 3, 4 or 5:
@@ -3844,12 +3849,12 @@ The first digit (A) is to be chosen among 1, 2, 3, 4 or 5:
   * 4 -->  use FFT routines written by S. Goedecker, 2002 version, that will be suited for MPI and OpenMP parallelism.
   * 5 -->  use serial or multi-threaded MKL routines Currently implemented with [[fftalg]]=512.
 
-The second digit (B) is related to fourdp.f:
+The second digit (B) is related to `src/53_ffts/fourdp.F90`:
 
   * 0 -->  only use Complex-to-complex FFT
   * 1 -->  real-to-complex is also allowed (only coded for A==1, A==3 and A==5)
 
-The third digit (C) is related to fourwf.f:
+The third digit (C) is related to `src/53_ffts/fourwf.F90`:
 
   * 0 --> no use of zero padding
   * 1 --> use of zero padding (only coded for A==1, A==4)
@@ -4871,7 +4876,8 @@ refers to dataset 2 when dataset 4 is initialized. Response-function calculation
   * one and only one of [[getwfkfine]] or [[irdwfkfine]] MUST be non-zero
   * if [[getwfkfine]] = 1: read ground state k -wavefunctions from a disk file appended with _WFK,
     produced in a previous ground state calculation.
-  * Reading the fine grid wavefunction will trigger the k-points interpolation technique of the temperature dependent calculations.
+  * Reading the fine grid wavefunction will trigger the k-points interpolation 
+  technique of the temperature dependent calculations.
 
 Bethe-Salpeter calculation:
 
@@ -6439,8 +6445,10 @@ compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a
 
 References:
 
-  * "Specification of an extensible and portable file format for electronic structure and crystallographic data", X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete, Comput. Mat. Science 43, 1056 (2008)
-  * "Sharing electronic structure and crystallographic data with ETSF_IO", D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze, Comput. Physics Communications 179, 748 (2008)
+  * "Specification of an extensible and portable file format for electronic structure and crystallographic data", 
+  X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete, [[cite: Gonze2008 | Comput. Mat. Science 43, 1056 (2008) ]]
+  * "Sharing electronic structure and crystallographic data with ETSF_IO", D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze, Comput.
+  [[cite: Caliste2008 | Physics Communications 179, 748 (2008) ]]
   * see also [ http://www.etsf.eu/fileformats ](http://www.etsf.eu/fileformats).
 """,
 ),
@@ -6690,7 +6698,9 @@ Supported values:
 
   * 1 --> "uniformrandom", delivered with ABINIT package (initially comes from numerical recipes).
   * 2 --> intrinsic Fortran 90 random number generator.
-  * 3 --> "ZBQ" non-deterministic random number generator by R. Chandler and P. Northrop. (Available at [).
+  * 3 --> "ZBQ" non-deterministic random number generator by R. Chandler and P. Northrop.
+  [Documentation](http://www.ucl.ac.uk/~ucakarc/work/software/randgen.txt) and 
+  [Source code](http://www.ucl.ac.uk/~ucakarc/work/software/randgen.f)
 
 [[irandom]]=3 is strongly advised when performing Molecular Dynamics restarts (avoids bias).
 """,
@@ -8392,7 +8402,7 @@ Variable(
 Sets proper input values for the determination of U and J i.e. for [[pawujat]]
 (first atom treated with PAW+U), [[irdwfk]] (=1), [[tolvrs]] (=10^(-8)),
 [[nstep]] (=255), [[diemix]] (=0.45), [[atvshift]] ([[pawujat]]) [[pawujv]]).
-Do not overwrite these variables manually unless you know what you do.
+Do not overwrite these variables manually unless you know what you are doing.
 
   * [[macro_uj]]=1 (and [[nsppol]]=2) Standard procedure to determine U on atom pawujat through a shift of the potential on both spin channels.
   * [[macro_uj]]=1 (and [[nsppol]]=1) Non standard procedure to determine U from potential shift on atom pawujat (experimental).
@@ -8589,7 +8599,7 @@ Variable(
     mnemonics="MEMory TEST",
     characteristics=['[[DEVELOP]]'],
     text="""
-This variable controls the memory test done in the memana routine. Possible
+This variable controls the memory test done in the `memana` routine. Possible
 values:
 
   * 0 no test on the available memory is performed
@@ -9225,6 +9235,7 @@ When [[nctime]] is non-zero, the molecular dynamics information is output in
 NetCDF format, every [[nctime]] time step. Here is the content of an example
 file:
 
+```    
     netcdf md32.outH_moldyn1 {
     dimensions:
        time = UNLIMITED; // (11 currently)
@@ -9250,6 +9261,7 @@ file:
        double Cell_Volume(DimScalar);
           Cell_Volume:units = "Bohr^3";
     }
+```
 """,
 ),
 
@@ -9860,7 +9872,7 @@ More detailed explanations:
    been coded. This should be especially efficient on scalar and super-scalar
    machines. This has been confirmed by tests.
 
-Note: internally, [[nloc_alg]] is stored in _nloalg(1)_. See also
+Note: internally, [[nloc_alg]] is stored in `dtset%nloalg(1)`. See also
 [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
 """,
 ),
@@ -9882,13 +9894,13 @@ More detailed explanations:
 - [[nloc_mem]]==2: (k+G) vectors are precomputed, once per k-point.
 - [[nloc_mem]]==-1 or -2: Negative values of [[nloc_mem]] correspond
   positive ones, where the phase precomputation has been suppressed, in order to
-  save memory space, as an array _double precision: ph3d(2,npw,[[natom]])_ is
+  save memory space, as an array `double precision: ph3d(2,npw,[[natom]])` is
   saved (typically half the space needed for the wavefunctions at 1 k point -
   this corresponds to the silicon case). However, the computation of phases
   inside nonlop is somehow time-consuming.
 
-Note: internally, sign([[nloc_mem]]) is stored in _nloalg(2)_ and
-abs([[nloc_mem]])-1 is stored in _nloalg(3)_. See also [[nloc_alg]] for the
+Note: internally, sign([[nloc_mem]]) is stored in `dtset%nloalg(2)` and
+abs([[nloc_mem]])-1 is stored in `dtset%nloalg(3)`. See also [[nloc_alg]] for the
 algorithm for the non-local operator application.
 """,
 ),
@@ -9922,13 +9934,15 @@ Variable(
 Gives the maximum number of non-self-consistent loops of [[nline]] line
 minimisations, in the SCF case (when [[iscf]] >0). In the case [[iscf]] <=0,
 the number of non-self-consistent loops is determined by [[nstep]].
-The Default value of 0 -- for standard plane-wave calculations -- corresponds
-to make the two first fixed potential determinations of wavefunctions have 2
-non-self consistent loops, and the next ones to have only 1 non-self
-consistent loop.
-The Default value of 0 -- for wavelets calculations ([[usewvl]]=1) --
-corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
-non-self consistent loops, then the next ones with 1 non-self consistent loop.
+
+    * The Default value of 0 -- for standard plane-wave calculations -- corresponds
+    to make the two first fixed potential determinations of wavefunctions have 2
+    non-self consistent loops, and the next ones to have only 1 non-self
+    consistent loop.
+
+    * The Default value of 0 -- for wavelets calculations ([[usewvl]]=1) --
+    corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
+    non-self consistent loops, then the next ones with 1 non-self consistent loop.
 """,
 ),
 
@@ -11384,8 +11398,9 @@ Variable(
 Allows to choose options for the calculation of non-linear XC correction. At
 present, only relevant for the FHI type of pseudopotentials, with pspcod=6.
 
-  * [[optnlxccc]]=1: uses the old psp6cc.f routine, with inconsistent treatment of real-space derivatives of the core function (computed in this routine, while splined in the other parts of the code)
-  * [[optnlxccc]]=2: consistent calculation derivatives, in the psp6cc_dhr.f routine from DHamann.
+  * [[optnlxccc]]=1: uses the old `psp6cc.f` routine, with inconsistent treatment of real-space derivatives of the core 
+  function (computed in this routine, while splined in the other parts of the code)
+  * [[optnlxccc]]=2: consistent calculation derivatives, in the `psp6cc_dhr.f` routine from DHamann.
 """,
 ),
 
@@ -11944,7 +11959,8 @@ Variable(
     text="""
 Forces the output of the all-electron wavefunction for only a single k-point.
 To be used in conjuction with: [[pawprtwf]] = 1 and [[pawprt_b]].
-The indexing follows the order in ouptput of the internal variable **kpt** in the beginning of the run.
+The indexing follows the order in ouptput of the internal variable **kpt** in 
+the beginning of the run.
 """,
 ),
 
@@ -12504,13 +12520,13 @@ the projections.
 
   * 0 --> Default value: do not activate calculation of PLO Wannier.
   * 1 --> Compute PLO Wannier and band structure
-  * 2 --> Compute PLO Wannier and band structure. In this case, the coupling in k-space between blocks of Wannier functions belonging to different angular momenta or atoms is removed.
+  * 2 --> Compute PLO Wannier and band structure. In this case, the 
+  coupling in k-space between blocks of Wannier functions belonging to 
+  different angular momenta or atoms is removed.
 
 Other related variables are [[plowan_realspace]], [[plowan_nt]],
 [[plowan_it]]. The implementation is not symetrized over k-point and not
-parallelized. (The calculation of projections is detailed in [ Phys. Rev. B
-77, 205112, (2008)
-](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112) )
+parallelized. (The calculation of projections is detailed in [[cite:Amadon2008]] )
 """,
 ),
 
@@ -13108,7 +13124,7 @@ Variable(
     mnemonics="PRinT output for BoLTZTRaP code",
     characteristics=['[[DEVELOP]]'],
     text="""
-Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for
+Print out geometry _BLZTRP_GEOM and eigenenergy _BLZTRP_EIGEN files for
 the [ BoltzTraP
 code](https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/)
 by Georg Madsen.
@@ -13754,7 +13770,7 @@ Variable(
     text="""
 Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon
 codes for frozen phonon calculations. See the associated script in
-~abinit/extras/post_processing/phondisp2abi.py for further details on
+{% modal ../scripts/post_processing/phondisp2abi.py %} for further details on
 interfacing with PHON, PHONOPY, etc...
 """,
 ),
@@ -14738,15 +14754,23 @@ Variable(
     defaultval=0,
     mnemonics="RECursion - TROTTer parameter",
     characteristics=['[[DEVELOP]]'],
-    text="""
+    text=r"""
 Used in Recursion method ([[tfkinfunc]]=2). Determine the trotter parameter
 used to compute the exponential of the hamiltonian in the recursion method:
-exp(-beta*(-Delta + V)) ~ (exp(-beta/(4*recptrott) V) exp(-beta/(4*recptrott)
-Delta) exp(-beta/(4*recptrott) V))^(2*recptrott). If set to 0, we use
-recptrott = 1/2 in the above formula. Increasing [[recptrott]] improve the
+
+$$ e^{-\beta(-\Delta + V)} \approx
+\left( 
+    e^{-\frac{\beta}{4c} V} 
+    e^{-\frac{\beta}{4c} \Delta} 
+    e^{-\frac{\beta}{4c} V} 
+\right)^{2c} $$
+
+where $c$=[[recptrott]].
+If set to 0, we use [[recptrott]] = $1/2$ in the above formula. 
+Increasing [[recptrott]] improve the
 accuracy of the trotter formula, but increase the dicretisation error: it may
 be necessary to increase [[ngfft]]. The discretisation error is essentially
-the discretisation error of the green kernel exp((recptrott/beta*|r|^2)) on
+the discretisation error of the green kernel $e^{\frac{c}{\beta|r|^2}}$ on
 the ngfft grid.
 """,
 ),
@@ -16190,8 +16214,8 @@ Variable(
     mnemonics="Thomas-Fermi KINetic energy FUNCtional",
     characteristics=['[[DEVELOP]]'],
     text="""
-  * [[tfkinfunc]]=1: Thomas-Fermi kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic energy functional (implicit functional of the density through Kohn-Sham wavefunctions).
-See Perrot F., Phys. Rev. A20,586-594 (1979)).
+  * [[tfkinfunc]]=1: Thomas-Fermi kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic 
+  energy functional (implicit functional of the density through Kohn-Sham wavefunctions). See [[cite:Perrot1979]].
 
   * [[tfkinfunc]]=11: Thomas-Fermi-Weizsacker kinetic functional with Gradient Corrections is used.
 The convergence of a calculation with this functional needs to be initialized
@@ -16204,8 +16228,18 @@ it is necessary to find the best set of preconditionning parameters
 ([[diemix]], [[diemac]], [[dielng]]) and the best value of [[npulayit]] (if
 the default Pulay mixing is used).
 
-  * [[tfkinfunc]]=12: same as **tfkinfunc** =11, but without the initialization steps. Gradient correction is directly added.
-  * [[tfkinfunc]]=2: the Recursion Method is used in order to compute electronic density, entropy, Fermi energy and eigenvalues energy. This method computes the density without computing any orbital, is efficient at high temperature, with a efficient parallelization (almost perfect scalability). When that option is in use, the [[ecut]] input variable is no longer a convergence parameter; [[ngfft]] becomes the main convergence parameter: you should adapt ecut for the ngfft grid you need (it is not yet automatically computed). Other convergence parameter are for the energetic values: [[recnrec]], [[recptrott]], [[recnpath]].
+  * [[tfkinfunc]]=12: same as **tfkinfunc** =11, but without the initialization steps. 
+  Gradient correction is directly added.
+
+  * [[tfkinfunc]]=2: the Recursion Method is used in order to compute electronic density, 
+  entropy, Fermi energy and eigenvalues energy. This method computes the density 
+  without computing any orbital, is efficient at high temperature, with a efficient 
+  parallelization (almost perfect scalability). 
+  When that option is in use, the [[ecut]] input variable is no longer a convergence 
+  parameter; [[ngfft]] becomes the main convergence parameter: you should adapt ecut 
+  for the ngfft grid you need (it is not yet automatically computed). 
+  Other convergence parameter are for the energetic values: [[recnrec]], [[recptrott]], [[recnpath]].
+
 Since the convergence of the self-consistent cycle is determined directly by
 the convergence of the density: [[toldfe]], [[toldff]], [[tolrff]],
 [[tolvrs]], [[tolwfr]] are not used, and are replaced by [[rectolden]]; the
@@ -16213,7 +16247,7 @@ energetic values, except for the fermi energy, are only computed during the
 latest SFC cycle: the output file will show a jump of the total energy at the
 end, but it is not because of a bad convergence behavior. Computational speed
 can be improved by the use of [[recrcut]] and [[recgratio]]. The recursion
-method has not be tested in the case of non cubic cell or with the use of
+method has not been tested in the case of non cubic cell or with the use of
 symmetries.
 In the recursion method the following variables are set to: [[useylm]]=1,
 [[userec]]=1.
@@ -17012,9 +17046,8 @@ If set to 1, enable the use of DFT+DMFT, see in particular the important
 variables [[dmft_solv]], [[dmftbandi]], [[dmftbandf]], [[dmft_nwli]],
 [[dmft_nwlo]], [[dmft_tollc]], [[dmft_tolfreq]], and [[dmft_iter]].
 
-The current implementation uses Wannier functions obtained from [ projected
-local orbitals
-](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112) as
+The current implementation uses Wannier functions obtained from 
+[[ cite:Amadon2008 | projected local orbitals ]] as
 correlated orbitals (see [[dmftbandi]] and [[dmftbandf]] input variables to
 define them).
 
@@ -17054,12 +17087,9 @@ As DFT+DMFT calculations (with CTQMC) are computationnally expensive, it is
 convenient to use prtden=-1, to write DEN file at each DFT iteration, in order
 to be able to restart the calculation easily.
 
-For details of the implementation see, [ B. Amadon, F. Lechermann, A. Georges,
-F. Jollet, T. O. Wehling, and A. I. Lichtenstein, Phys. Rev. B 77(20), (2008)
-](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112), for
-Wannier functions and B. Amadon, J. Phys.: Condens. Matter 24 075604 (2012)
-(doi:10.1088/0953-8984/24/7/075604), for self-consistency and Hubbard I
-implementation. If [[usedmft]]=1 and [[nbandkss]]/=0, then, the DFT+DMFT
+For details of the implementation with Wannier functions see [[cite:Amadon2008]], 
+for self-consistency and Hubbard I
+implementation see [[cite:Amadon2012]]. If [[usedmft]]=1 and [[nbandkss]]/=0, then, the DFT+DMFT
 calculation is not done and only projections are computed at the end of the
 calculation. They can be used by an external code or used to compute the
 screened interaction (see variable [[ucrpa]]).
@@ -17198,7 +17228,8 @@ Variable(
 Fix the convention for the choice of the average value of the Hartree potential, as described in [[cite:Bruneval2014]].
   * [[usepotzero]]=0, the usual convention: the smooth potential is set to zero average value.
   * [[usepotzero]]=1, the new convention: the all-electron physical potential is set to zero average value.
-  * [[usepotzero]]=2, the PWscf convention: the potential of equivalent point charges is set to zero average value (convention also valid for NC pseudopotentials).
+  * [[usepotzero]]=2, the PWscf convention: the potential of equivalent point charges is set to 
+  zero average value (convention also valid for NC pseudopotentials).
 """,
 ),
 
@@ -17229,7 +17260,7 @@ These are user-definable integers which the user may input and then utilize in
 subroutines of his/her own design. They are not used in the official versions
 of the ABINIT code, and should ease independent developments (hopefully
 integrated in the official version afterwards).
-Internally, they are available in the dtset structured datatype, e.g. dtset%useria.
+Internally, they are available in the dtset structured datatype, e.g. `dtset%useria`.
 """,
 ),
 
@@ -17246,7 +17277,7 @@ These are user-definable integers which the user may input and then utilize in
 subroutines of his/her own design. They are not used in the official versions
 of the ABINIT code, and should ease independent developments (hopefully
 integrated in the official version afterwards).
-Internally, they are available in the dtset structured datatype, e.g. dtset%useria.
+Internally, they are available in the dtset structured datatype, e.g. `dtset%useria`.
 """,
 ),
 
@@ -17263,7 +17294,7 @@ These are user-definable integers which the user may input and then utilize in
 subroutines of his/her own design. They are not used in the official versions
 of the ABINIT code, and should ease independent developments (hopefully
 integrated in the official version afterwards).
-Internally, they are available in the dtset structured datatype, e.g. dtset%useria.
+Internally, they are available in the dtset structured datatype, e.g. `dtset%useria`.
 """,
 ),
 
@@ -17280,7 +17311,7 @@ These are user-definable integers which the user may input and then utilize in
 subroutines of his/her own design. They are not used in the official versions
 of the ABINIT code, and should ease independent developments (hopefully
 integrated in the official version afterwards).
-Internally, they are available in the dtset structured datatype, e.g. dtset%useria.
+Internally, they are available in the dtset structured datatype, e.g. `dtset%useria`.
 """,
 ),
 
@@ -17297,7 +17328,7 @@ These are user-definable integers which the user may input and then utilize in
 subroutines of his/her own design. They are not used in the official versions
 of the ABINIT code, and should ease independent developments (hopefully
 integrated in the official version afterwards).
-Internally, they are available in the dtset structured datatype, e.g. dtset%useria.
+Internally, they are available in the dtset structured datatype, e.g. `dtset%useria`.
 """,
 ),
 
@@ -17427,9 +17458,9 @@ When this flag is activated, the non-local operator is applied using an
 algorithm based on spherical harmonics. Non-local projectors are used with
 their usual form:
 
-P  lmn  (r)=Y  lm  (r)*p  ln  (r)
+$$P_{lmn}(r) = Y_{lm}(r) p_{ln}(r)$$
 
-When [[useylm]]=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
+When [[useylm]]=0, the sum over $Y_{lm}$ can be reduced to a Legendre polynomial form.
 """,
 ),
 
@@ -18272,13 +18303,33 @@ Allows one to choose the algorithm for the optimisation of the wavefunctions.
 The different possibilities are:
 
   * [[wfoptalg]]=0: standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states;
-  * [[wfoptalg]]=2: minimisation of the residual with respect to different shifts, in order to cover the whole set of occupied bands, with possibility to parallelize over blocks of states (or bands). The number of states in a block is defined in [[nbdblock]]. THIS IS STILL IN DEVELOPMENT.
-  * [[wfoptalg]]=3: minimisation of the residual with respect to a shift. Available only in the non-self-consistent case [[iscf]]=-2, in order to find eigenvalues and wavefunctions close to a prescribed value.
-  * [[wfoptalg]]=4: (see also [[wfoptalg]]=14), a parallel code based on the Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG) method of Knyazev. [ Reference: A.V. Knyazev, "Toward the Optimal Preconditioned Eigensolver: Locally Optimal Block Preconditioned Conjugate Gradient Method". SIAM Journal on Scientific Computing 23, pp517-541 (2001) ](http://dx.doi.org/10.1137/S1064827500366124) . The implementation rests on the [ matlab program by Knyazev ](http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m) . [ Reference A. V. Knyazev, I. Lashuk, M. E. Argentati, and E. Ovchinnikov, Block Locally Optimal Preconditioned Eigenvalue Xolvers (BLOPEX) in hypre and PETSc (2007). SIAM Journal on Scientific Computing (SISC). 25(5): 2224-2239 ](http://dx.doi.org/10.1137/060661624) . For more information see [ F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale ab initio calculations based on three levels of parallelization. (2008). Computational Material Science, 42(2), 329-336. ](http://dx.doi.org/10.1016/j.commatsci.2007.07.019)
-  * [[wfoptalg]]=10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states, but modified scheme described in Kresse, Furthmuller, PRB 54, 11169 (1996) (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...);
-  * [[wfoptalg]]=14: the recommended for parallel code, the same as [[wfoptalg]]=4 except that the preconditioning of the block vectors does not depend on the kinetic energy of each band, and the orthogonalization after the LOBPCG algorithm is no longer performed. The first modification increases the convergence and the second one the efficiency.
-  * [[wfoptalg]]=114: A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library. With more than 1 thread [[npfft]] shoud NOT be used for the time being.
-  * [[wfoptalg]]=1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms. By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary. For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]]. For more information, see the [ performance guide ](../../theory/howto_chebfi.pdf) and the [ paper ](https://arxiv.org/abs/1406.4350) by A. Levitt and M. Torrent. Status: experimental but usable. Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
+
+  * [[wfoptalg]]=2: minimisation of the residual with respect to different shifts, in order to cover the whole set of occupied bands, 
+  with possibility to parallelize over blocks of states (or bands). The number of states in a block is defined in [[nbdblock]]. THIS IS STILL IN DEVELOPMENT.
+
+  * [[wfoptalg]]=3: minimisation of the residual with respect to a shift. Available only in the non-self-consistent case [[iscf]]=-2, 
+  in order to find eigenvalues and wavefunctions close to a prescribed value.
+
+  * [[wfoptalg]]=4: (see also [[wfoptalg]]=14), a parallel code based on the Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG) 
+  method of [[cite:Knyazev2001 ]].
+  The implementation rests on the [ matlab program by Knyazev ](http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m) [[cite:Knyazev2007]].
+  For more information see [[cite:Bottin2008]]
+
+  * [[wfoptalg]]=10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states, 
+  but modified scheme described in [[cite:Kresse1996]] (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...);
+
+  * [[wfoptalg]]=14: the recommended for parallel code, the same as [[wfoptalg]]=4 except that the preconditioning of the block vectors does not 
+  depend on the kinetic energy of each band, and the orthogonalization after the LOBPCG algorithm is no longer performed. The first modification increases the convergence and the second one the efficiency.
+
+  * [[wfoptalg]]=114: A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library. 
+  With more than 1 thread [[npfft]] shoud NOT be used for the time being.
+
+  * [[wfoptalg]]=1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime 
+  where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms. 
+  By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary. 
+  For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]]. 
+  For more information, see the [ performance guide ](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable. 
+  Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
 
@@ -18505,22 +18556,28 @@ Variable(
     defaultval=99.99,
     mnemonics="Value of the c parameter in the eXchange-Correlation TB09 functional",
     text=r"""
-The modified Becke-Johnson exchange-correlation functional by Tran and Blaha
-(Phys. Rev. Lett. 102, 226401 (2009)) reads:
+The modified Becke-Johnson exchange-correlation functional by 
+[[cite:Tran2009 | Tran and Blaha]] reads:
 
-V_x(r) = c * V_x^{BR}(r) + (3*c - 2) * 1/pi * sqrt(5/12) *
-sqrt(2*kden(r)/den(r))
+$$ V_x(r) = 
+c V_x^{BR}(r) + 
+(3c - 2) \frac{1}{\pi} \sqrt{\frac{5}{12}}
+\sqrt{2 \frac{t(r)}{\rho(r)}} $$
 
-in which V_x^{BR}(r) is the Becke-Roussel potential.
+where $\rho(r)$ is the electron density,
+$t(r)$ is the kinetic-energy density, and 
+$ V_x^{BR}(r)$ is the Becke-Roussel potential.
 
-In this equation the parameter c can be evaluated at each SCF step according
+In this equation the parameter $c$ can be evaluated at each SCF step according
 to the following equation:
 
-c = alpha + beta * sqrt(1/V_{cell} * \int_{V_{cell}} |grad(den(r))|/den(r)
-d3r)
+$$ c = \alpha + \beta 
+\left( \frac{1}{V_{cell}} 
+\int_{V_{cell}} \frac{|\nabla \rho(r)|}{\rho(r)}
+d^3r \right)^{1/2} $$
 
-The c parameter is evaluated thanks to the previous equation when xc_tb09_c is
-equal to the "magic" default value 99.99. The c parameter can also be fixed to
+The $c$ parameter is evaluated thanks to the previous equation when xc_tb09_c is
+equal to the "magic" default value 99.99. The $c$ parameter can also be fixed to
 some (property-optimized or material-optimized) value by using this variable.
 """,
 ),
