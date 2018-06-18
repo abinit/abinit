@@ -19,7 +19,7 @@ orbital content (so-called "Fat Bands"), in case of PAW calculation, see
 
 Different interpolation schemes for the band energies can be defined thanks to [[einterp]]. 
 The Wannier interpolation is also available through the use of
-the [[lesson:wannier90]] post-processor.
+the [[tutorial:wannier90]] post-processor.
 
 The band structure from a supercell calculation can be unfolded to the (large)
 Brillouin zone of the (small) primitive cell thanks to the [[help:fold2bloch]]

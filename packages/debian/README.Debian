@@ -1,7 +1,7 @@
 abinit for Debian
 -----------------
 
-How to run the lesson 1 from the tutorial: install the abinit-doc package, and
+How to run the tutorial 1: install the abinit-doc package, and
 create the file "t1x.files":
 
 $ cat t1x.files 

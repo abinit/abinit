@@ -2,11 +2,11 @@
 authors: PhG, MVeithen, XG
 ---
 
-# Lesson on polarization and finite electric fields  
+# Tutorial on polarization and finite electric fields  
 
 ## Polarization, and responses to finite electric fields for AlAs.  
 
-This lesson aims at showing how to get the following physical properties, for an insulator:
+This tutorial aims at showing how to get the following physical properties, for an insulator:
 
   * The polarization.
   * The Born effective charge (by finite differences of polarization)
@@ -16,14 +16,14 @@ This lesson aims at showing how to get the following physical properties, for an
 
 The case of the linear responses (Born effective charge, dielectric constant,
 piezoelectric tensor) is treated independently in other tutorials 
-([lesson Response-Function 1](rf1), [lesson on Elastic properties](elastic)), 
+([tutorial Response-Function 1](rf1), [tutorial on Elastic properties](elastic)), 
 using Density-Functional Perturbation Theory. 
 You will learn here how to get these quantities using the finite
 difference techniques within ABINIT. To that end, we will describe how to
 compute the polarization, in the Berry phase formulation, and how to perform
 finite electric field calculations.
 
-This lesson should take about 1 hour and 30 minutes.
+This tutorial should take about 1 hour and 30 minutes.
 
 The basic theory for Berry phase computation of the polarization was proposed
 by R. D. King-Smith and D. Vanderbilt in [[cite:Kingsmith1993]].
@@ -40,7 +40,7 @@ discussed in [[cite:Gonze2009]] and [[cite:Zwanziger2012]].
 
 ## 1 Ground-state properties of AlAs and general parameters
   
-*Before beginning, you might consider working in a different subdirectory, as for the other lessons. 
+*Before beginning, you might consider working in a different subdirectory, as for the other tutorials. 
 Why not create "Work-ffield" in ~abinit/tests/tutorespfn/Input?*
 
 In this tutorial we will assume that the ground-state properties of AlAs have
@@ -98,7 +98,7 @@ aluminum atom, and one for the arsenic atom. The first to be mentioned, for
 Al, will define the first type of atom. The second to be mentioned, for As,
 will define the second type of atom. It might the first time that you
 encounter this situation (more than one type of atoms) in the tutorials, at
-variance with the four "basic" lessons.
+variance with the four "basic" tutorials.
 
 Because of the use of two types of atoms, have also a look at the following
 input variables present, in the "input" file:
@@ -235,7 +235,7 @@ Actually, the file tffield_2.in
 not only leads to the computation of the Born effective charges, but also the
 computation of the piezoelectric constants (see later).
 
-You can review how to use DFPT thanks to the [lesson Response-function 1](rf1) and [lesson Response-function 2](rf2)
+You can review how to use DFPT thanks to the [tutorial Response-function 1](rf1) and [tutorial Response-function 2](rf2)
 tutorials. For now, go ahead and run the input file, and have a look at the
 output file, to identify the place where the Born effective charge is written
 (search for the phrase "Effective charges" in the output file). The value we
@@ -436,7 +436,7 @@ This value is similar to the value reported from DFPT. If you do calculations
 for more electric fields, fitting them with the general expression of the
 force above (including the $E^2$ term), you can find the $d\chi/d\tau$ term. At
 [[ecut]]=5 you should get $d\chi/d\tau$ for Al = -0.06169. This will be useful
-later for the [lesson on static Non-linear properties](nlo).
+later for the [tutorial on static Non-linear properties](nlo).
 
 Going back to the output file, you can also look at the evolution of the
 polarization with the field.
@@ -495,7 +495,7 @@ If you do calculations for more electric fields, fitting them with the general
 expression of the force above (including the $E^2$ term) you can find the non-
 linear optical susceptibilities $\chi^{(2)}$. At [[ecut]]=5 you should get
 $\chi^{(2)} = 29.769~\mathrm{pm/V}$.
-This result will be also be useful for the [lesson on static Non-linear properties](nlo).
+This result will be also be useful for the [tutorial on static Non-linear properties](nlo).
 
 Looking at the evolution of the stress (see graphic below), you should also be
 able to extract the piezoelectric constants. You can try to do it as an

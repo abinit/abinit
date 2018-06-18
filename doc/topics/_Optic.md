@@ -53,7 +53,7 @@ as imaginary parts.
 
 ## Tutorials
 
-* See [[lesson:optic|The lesson on Optic]], the utility that allows to obtain the
+* See [[tutorial:optic|The tutorial on Optic]], the utility that allows to obtain the
 frequency dependent linear optical dielectric function and the frequency
 dependent second order nonlinear optical susceptibility, in the simple
 "Sum-Over-States" approximation.

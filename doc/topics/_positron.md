@@ -4,16 +4,17 @@ authors: MT
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
-This page gives hints on how to set parameters for a calculation with a positron in the system. with the ABINIT package.
+This page gives hints on how to set parameters for a calculation with a positron in the system with the ABINIT package.
 
 ## Introduction
 
-The lifetime of positrons and their annihilation rate can be computed, using
-the self-consistent two-component DFT, including force and stress computation,
-LDA and GGA, norm-conserving as well as PAW [[cite:Wiktor2015]]. Doppler
-broadening can also be computed. The details of of the way to perform such
-calculations is given in the description of the [[positron]] input variable,
-as well as in [[lesson:positron|the lesson on electron-positron
+The lifetime of a positron, its annihilation rate and other associated properties can be computed, using
+the self-consistent two-component DFT formalism, including force and stress computation (and thus relaxation),
+LDA and GGA, wirhin norm-conserving pseudopotentials as well as PAW  approach [[cite:Wiktor2015]].
+
+Doppler broadening can also be computed. The details of the way to perform such
+calculations are given in the description of the [[positron]] input variable,
+as well as in [[tutorial:positron|the tutorial on electron-positron
 annihilation]].
 
 Examples can be found in [[cite:Wiktor2013]], [[cite:Wiktor2014]],
@@ -31,5 +32,5 @@ Examples can be found in [[cite:Wiktor2013]], [[cite:Wiktor2014]],
 
 ## Tutorials
 
-* [[lesson:positron|The lesson on electron-positron annihilation]]
+* [[tutorial:positron|The tutorial on electron-positron annihilation]]
 
