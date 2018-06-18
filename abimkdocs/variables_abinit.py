@@ -764,7 +764,7 @@ Possible values are in [1, 2, 3]:
   For the time being [[bs_algorithm]] = 2 cannot be used for calculations in which the coupling
   term is included (Tamm-Dancoff approximation).
 
-* 3 --> Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
+* 3 --> Conjugate-gradient method. This method allows one to find the few first excitonic eigenvalues.
   Only available for resonant calculations (Tamm-Dancoff approximation).
 """,
 ),
@@ -1036,7 +1036,7 @@ Variable(
     mnemonics="Bethe-Salpeter INTERPolation PREParation",
     requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
-*bs_interp_prep* allows to trigger the preparation of the interpolation with method 2 or method 3.
+*bs_interp_prep* allows one to trigger the preparation of the interpolation with method 2 or method 3.
 It generates the decomposition of BSR in a, b, c coefficients used for the interpolation.
 """,
 ),
@@ -2245,8 +2245,8 @@ ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the
-booking of a larger planewave basis, but will not rescale the tentative new primitive vectors
+step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows one to
+book a larger planewave basis, but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] treshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
@@ -2432,8 +2432,8 @@ Variable(
     mnemonics="Dynamical Mean Fied Theory: ENTROPY",
     requires="[[usedmft]]==1 and [[dmft_solv]]==5",
     text="""
-If 1, enable the calculation of the entropy within the DMFT framework and so
-allows the calculation of the total energy (free energy). In the current
+If 1, enables the calculation of the entropy within the DMFT framework and so
+allows one the calculation of the total energy (free energy). In the current
 implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time
 Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 """,
@@ -3110,7 +3110,7 @@ thing to do), use a very small [[ecutsm]], on the order of one microHartree.
 
 Technical information:
 See [[cite:Bernasconi1995]]for a related method using constant pressure molecular dynamics.
-[[ecutsm]] allows to define an effective kinetic energy for plane waves, close
+[[ecutsm]] allows one to define an effective kinetic energy for plane waves, close
 to, but lower than the maximal kinetic energy [[ecut]]. For kinetic energies
 less than [[ecut]]-[[ecutsm]], nothing is modified, while between
 [[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by:
@@ -3162,7 +3162,7 @@ Variable(
     mnemonics="EFFective MASS for the FREE electron",
     characteristics=['[[DEVELOP]]'],
     text="""
-This parameter allows to change the free electron mass, with respect to its experimental value.
+This parameter allows one to change the free electron mass, with respect to its experimental value.
 The electron mass is simply changed in the Schrodinger equation.
 Only for testing purposes, of course.
 """,
@@ -3686,7 +3686,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="[[useexexch]] == 1",
     text="""
-[[exchmix]] allows to tune the ratio of exact exchange when [[useexexch]] is
+[[exchmix]] allows one to tune the ratio of exact exchange when [[useexexch]] is
 used. The default value of 0.25 corresponds to PBE0.
 """,
 ),
@@ -3791,7 +3791,7 @@ than [[fband]] times the number of atoms. This parameter is not echoed in the
 top of the main output file, but only the parameter [[nband]] that it allowed
 to compute. It is also not present in the dtset array (no internal).
 The default values are chosen such as to give naturally some conduction bands.
-This improves the robustness of the code, since this allows to identify lack
+This improves the robustness of the code, since this allows one to identify lack
 of convergence coming from (near-)degeneracies at the Fermi level. In the
 metallic case, the number of bands generated might be too small if the
 smearing factor is large. The occupation numbers of the higher bands should be
@@ -4256,10 +4256,7 @@ Variable(
     mnemonics="GENerator of the translation for Anti-FerroMagnetic space group",
     text="""
 This input variable might be used to define a Shubnikov type IV magnetic space
-group (anti-ferromagnetic space group). The user is advised to consult "The
-mathematical theory of symmetry in solids, Representation theory for point
-groups and space groups, 1972, C.J. Bradley and A.P. Cracknell, Clarendon
-Press, Oxford."
+group (anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]] 
 A Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries, that do not change the magnetization), and
 one translation associated with a change of magnetization. [[genafm]] is
@@ -4590,7 +4587,7 @@ Relevant for second-order eigenvalue calculations using response-functions
 From the electron-phonon matrix elements at some wavevector only, it is not
 possible to determine the Debye-Waller contribution: one has to know also the
 q=Gamma electron-phonon matrix elements.
-The variable [[getgam_eig2nkq]] allows to transmit the information about the
+The variable [[getgam_eig2nkq]] allows one to transmit the information about the
 second-order derivatives of the eigenvalues for q=Gamma from the dataset where
 the calculation at Gamma was done, to the datasets for other wavevectors.
 """,
@@ -5913,7 +5910,7 @@ available in the GW code. The available options are:
   * 2 --> parallelisation on bands.
 
 In the present status of the code, only the parallelization over bands
-([[gwpara]]=2) allows to reduce the memory allocated by each processor.
+([[gwpara]]=2) allows one to reduce the memory allocated by each processor.
 Using [[gwpara]]=1, indeed, requires the same amount of memory as a sequential
 run, irrespectively of the number of CPUs used.
 """,
@@ -7204,7 +7201,7 @@ minimisation, 1 out of 4 is saved)
 Using [[isecur]]=1 or higher integers will raise gradually the threshold to make extrapolation.
 Using [[isecur]]=-2 will allow to save 2 non-SCF calculations every three line
 minimisation, but this can make the algorithm unstable. Lower values of
-[[isecur]] allows for more (tentative) savings. In any case, there must be one
+[[isecur]] allows one for more (tentative) savings. In any case, there must be one
 non-SCF computation per line minimisation.
 No meaning for RF calculations yet.
 """,
@@ -7835,7 +7832,7 @@ calculations is defined by [[nberry]]), the difference of wavevector between k
 points for which the overlap matrix must be computed. The polarisation vector
 will be projected on the direction of that wavevector, and the result of the
 computation will be the magnitude of this projection. Doing more than one
-wavevector, with different independent direction, allows to find the full
+wavevector, with different independent direction, allows one to find the full
 polarisation vector. However, note that converged results need oriented grids,
 denser along the difference wavevector than usual Monkhorst-Pack grids.
 
@@ -8242,7 +8239,7 @@ space. The k point lattice is the reciprocal of this super-lattice, possibly shi
 
 If neither [[ngkpt]] nor [[kptrlatt]] are defined, ABINIT will automatically
 generate a set of k point grids, and select the best combination of
-[[kptrlatt]] and [[shiftk]] that allows to reach a sufficient value of
+[[kptrlatt]] and [[shiftk]] that allows one to reach a sufficient value of
 [[kptrlen]]. See this latter variable for a complete description of this procedure.
 """,
 ),
@@ -8967,7 +8964,7 @@ Gives the total number of atoms in the unit cell. Default is 1 but you will
 obviously want to input this value explicitly.
 Note that [[natom]] refers to all atoms in the unit cell, not only to the
 irreducible set of atoms in the unit cell (using symmetry operations, this set
-allows to recover all atoms). If you want to specify only the irreducible set
+allows one to recover all atoms). If you want to specify only the irreducible set
 of atoms, use the symmetriser, see the input variable [[natrd]].
 """,
 ),
@@ -9692,7 +9689,7 @@ and [[ngkpt]] are exclusive of each other).
 Its three positive components give the number of k points of Monkhorst-Pack
 grids (defined with respect to primitive axis in reciprocal space) in each of
 the three dimensions. [[ngkpt]] will be used to generate the corresponding
-[[kptrlatt]] input variable. The use of [[nshiftk]] and [[shiftk]], allows to
+[[kptrlatt]] input variable. The use of [[nshiftk]] and [[shiftk]], allows one to
 generate shifted grids, or Monkhorst-Pack grids defined with respect to
 conventional unit cells.
 
@@ -9724,7 +9721,7 @@ At variance with [[ngkpt]], note that only one q point is selected per dataset
 (see [[iqpt]]).
 Its three positive components give the number of q points of Monkhorst-Pack
 grids (defined with respect to primitive axis in reciprocal space) in each of
-the three dimensions. The use of [[nshiftq]] and [[shiftq]], allows to
+the three dimensions. The use of [[nshiftq]] and [[shiftq]], allows one to
 generate shifted grids, or Monkhorst-Pack grids defined with respect to
 conventional unit cells.
 
@@ -10976,11 +10973,11 @@ Variable(
 Gives three repetition factors of the objects a.
 This gives the opportunity to generate a three-dimensional set of repeated
 objects, although a simple one-dimensional repetition will be easily obtained
-through the specification of 'nrep' 1 1
-where 'nrep' is the 1D repetition factor.
+through the specification of `nrep 1 1`
+where `nrep` is the 1D repetition factor.
 The initial rotation and translation of the object, as well as the increment
 of rotation or translation from one object to the next are specified by the
-variables [[objaro]] and [[objatr]], for object a,
+variable [[objaro]].
 Note that the atom manipulator will generate the full set of atoms from the
 primitive set of atoms using the following order: it will process each atom
 in the primitive list one by one, determine whether it belongs to either
@@ -10991,7 +10988,7 @@ In the final list of atoms, one will first find the atoms generated from atom
 1 in the primitive list, then those generated from atom 2 in the primitive
 list, and so on.
 If the atom manipulator is only used to rotate or translate an object, without
-repeating it, simply use 1 1 1, which is also the Default value.
+repeating it, simply use `1 1 1`, which is also the Default value.
 """,
 ),
 
@@ -11009,13 +11006,13 @@ Variable(
 Give, for each object, the angles of rotation in degrees to be applied to the
 corresponding object.
 The rotation is applied before the translation, and the axis is defined by the
-variables [[objaax]] and [[objbax]]. See the latter variables for the
+variable [[objaax]]. See the latter variable for the
 definition of the sign of the rotation.
-The first component [[objaro]](1) and **objbro** (1) gives the angle of
+The first component [[objaro]](1) gives the angle of
 rotation to be applied to the first instance of the object. The second, third
 or fourth component (resp.) gives the increment of rotation angle from one
 instance to the next instance, defined by the first, second or third
-repetition factor (resp.). This allows to generate 3D arrays of molecules
+repetition factor (resp.). This allows one to generate 3D arrays of molecules
 with different rotation angles.
 """,
 ),
@@ -11036,11 +11033,11 @@ to be applied to the corresponding object. By default, given in Bohr atomic
 units (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified, if
 preferred, since these variables have the '[[LENGTH]]' characteristics.
 The translation is applied after the rotation.
-The first vector [[objatr]](3,1) and [[objbtr]](3,1) gives the translation to
+The first vector [[objatr]](3,1) gives the translation to
 be applied to the first instance of the object. The second, third or fourth
 component (resp.) gives the increment of translation from one instance to the
-next instance, defined by the first, second or third repetition factor (resp.)
-. This allows to generate 3D arrays of molecules.
+next instance, defined by the first, second or third repetition factor (resp.). 
+This allows one to generate 3D arrays of molecules.
 In general, when the objects are repeated, a translation vector must be given,
 since otherwise, the repeated objects pack in the same region of space. As an
 exception, one can have a set of molecules regularly spaced on a circle, in
@@ -11122,7 +11119,7 @@ Gives three repetition factors of the objects a or b.
 This gives the opportunity to generate a three-dimensional set of repeated
 objects, although a simple one-dimensional repetition will be easily obtained
 through the specification of
-nrep 1 1 <r> where nrep is the 1D repetition factor.
+`nrep 1 1` where `nrep` is the 1D repetition factor.
 The initial rotation and translation of the object, as well as the increment
 of rotation or translation from one object to the next are specified by the
 variables [[objbro]] and [[objbtr]], for object b.
@@ -11136,7 +11133,7 @@ In the final list of atoms, one will first find the atoms generated from atom
 1 in the primitive list, then those generated from atom 2 in the primitive
 list, and so on.
 If the atom manipulator is only used to rotate or translate an object, without
-repeating it, simply use 1 1 1, which is also the Default value.
+repeating it, simply use `1 1 1`, which is also the Default value.
 """,
 ),
 
@@ -11154,13 +11151,13 @@ Variable(
 Give, for each object, the angles of rotation in degrees to be applied to the
 corresponding object.
 The rotation is applied before the translation, and the axis is defined by the
-variables [[objaax]] and [[objbax]]. See the latter variables for the
+variable [[objbax]]. See the latter variable for the
 definition of the sign of the rotation.
-The first component [[objaro]](1) and **objbro** (1) gives the angle of
+The first component [[objbro]](1) gives the angle of
 rotation to be applied to the first instance of the object. The second, third
 or fourth component (resp.) gives the increment of rotation angle from one
 instance to the next instance, defined by the first, second or third
-repetition factor (resp.). This allows to generate 3D arrays of molecules
+repetition factor (resp.). This allows one to generate 3D arrays of molecules
 with different rotation angles.
 """,
 ),
@@ -11184,8 +11181,8 @@ The translation is applied after the rotation.
 The first vector [[objatr]](3,1) and [[objbtr]](3,1) gives the translation to
 be applied to the first instance of the object. The second, third or fourth
 component (resp.) gives the increment of translation from one instance to the
-next instance, defined by the first, second or third repetition factor (resp.)
-. This allows to generate 3D arrays of molecules.
+next instance, defined by the first, second or third repetition factor (resp.). 
+This allows one to generate 3D arrays of molecules.
 In general, when the objects are repeated, a translation vector must be given,
 since otherwise, the repeated objects pack in the same region of space. As an
 exception, one can have a set of molecules regularly spaced on a circle, in
@@ -11706,7 +11703,7 @@ Variable(
     requires="[[usepaw]]==1",
     text="""
 Define the energy cut-off for the fine FFT grid (the "double grid", that
-allows to transfer data from the normal, coarse, FFT grid to the spherical
+allows one to transfer data from the normal, coarse, FFT grid to the spherical
 grid around each atom).
 [[pawecutdg]] must be larger or equal to [[ecut]]. If it is equal to it, then
 no fine grid is used. The results are not very accurate, but the computations
@@ -13356,7 +13353,7 @@ shifted grids, for the same grid spacing. There is no need to take care of the
 [[occopt]] or [[tsmear]] input variables, and there is no subtlety to be taken
 into account for insulators. The computation can be done in the self-
 consistent case as well as in the non-self-consistent case, using [[iscf]]=-3.
-This allows to refine the DOS at fixed starting density.
+This allows one to refine the DOS at fixed starting density.
 In that case, if [[ionmov]]==0, the name of the potential file will be the
 root output name, followed by _DOS (like in the [[prtdos]]=1 case).
 However, if [[ionmov]]==1 or 2, potential files will be output at each time
@@ -14359,10 +14356,7 @@ Variable(
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
 This internal variable characterizes a Shubnikov type III magnetic space group
-(anti-ferromagnetic space group). The user is advised to consult "The
-mathematical theory of symmetry in solids, Representation theory for point
-groups and space groups, 1972, C.J. Bradley and A.P. Cracknell, Clarendon
-Press, Oxford."
+(anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]].
 A Shubnikov type III magnetic space group might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and the halving space group (only the symmetries that do not change
@@ -14605,7 +14599,7 @@ shifted (see [[shiftq]]).
 
 If neither [[ngqpt]] nor [[qptrlatt]] are defined, ABINIT will automatically
 generate a set of k point grids, and select the best combination of
-[[qptrlatt]] and [[shiftq]] that allows to reach a sufficient value of
+[[qptrlatt]] and [[shiftq]] that allows one to reach a sufficient value of
 [[kptrlen]]. See this latter variable for a complete description of this procedure.
 """,
 ),
@@ -14671,7 +14665,7 @@ cut3d utility [[help:cut3d]]). The advantage of using charge partitioning scheme
 the fact that the sum of atomic DOS, for all angular momenta and atoms,
 integrated on the energy range of the occupied states, gives back the total
 charge. If this is not an issue, one could rely on the half of the nearest-
-neighbour distances, or any scheme that allows to define an atomic radius.
+neighbour distances, or any scheme that allows one to define an atomic radius.
 Note that the choice of this radius is however critical for the balance
 between the s, p and d components. Indeed, the integrated charge within a
 given radius, behave as a different power of the radius, for the different
@@ -15123,7 +15117,7 @@ Variable(
     defaultval=0,
     mnemonics="Response Function with respect to MAGNetic B-field perturbation",
     text="""
-[[rfmagn]] allows to run response function calculations with respect to
+[[rfmagn]] allows one to run response function calculations with respect to
 external magnetic field if set to 1. Currently, orbital magnetism is not taken into
 account and the perturbing potential has Zeeman form.
 """,
@@ -15722,11 +15716,11 @@ groups is for example: 15:c1, A2/a_c = C2/c where,
   * _c marks the orientation of the two-fold axis or of the mirror plane,
   * C2/c represents the parent space group.
 
-How to determine which spgaxor you need:
+How to determine which [[spgaxor]] you need:
 
   1. check the reduced positions you have, for more symmetric positions, e.g. 1/2 1/4 3/4 etc... Let us say your symmetric positions are in the first coordinate (a axis) and you are using spgroup 62.
   2. look up the raw space group Wyckoff positions on [ the Bilbao server ](http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list) to see where they put the corresponding symmetric positions. For spgroup 62 Bilbao puts the 1/4 3/4 in the second coordinate, ie along the b axis.
-  3. in this case you need to swap the axes from the original abc order to a new order where the Bilbao axis (b) is in the first position. In this case you have 2 possibilities, spgaxor 3 or 5. If you have more than one highly symmetric coordinate you may have only a single possibility.
+  3. in this case you need to swap the axes from the original abc order to a new order where the Bilbao axis (b) is in the first position. In this case you have 2 possibilities, [[spgaxor]] 3 or 5. If you have more than one highly symmetric coordinate you may have only a single possibility.
 """,
 ),
 
@@ -15766,8 +15760,8 @@ It should be between 1 and 230. This option can be used to obtain all the
 atoms in the unit cell, starting from the asymmetric unit cell.
 The references for computing the symmetry corresponding to the space groups are:
 
-  * International Tables for Crystallography, 1983, Ed. Theo Hahn, D. Reidel Publishing Company
-  * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups, 1972, C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford.
+  * International Tables for Crystallography [[cite:Hahn1983]]
+  * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups [[cite:Bradley1972]] 
 
 For more details see the [[help:spacegroup]].
 """,
@@ -15784,10 +15778,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     text="""
 This input variable might be used to define a Shubnikov magnetic space group
-(anti-ferromagnetic space group). The user is advised to consult "The
-mathematical theory of symmetry in solids, Representation theory for point
-groups and space groups, 1972, C.J. Bradley and A.P. Cracknell, Clarendon
-Press, Oxford."
+(anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]].
 A Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
@@ -15795,7 +15786,7 @@ A Shubnikov type III magnetic space group might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
 For the additional number [[spgroupma]], we follow the definition of Table 7.4
-of the above-mentioned Bradley and Cracknell textbook.
+of the above-mentioned [[cite:Bradley1972]].
 Thus, one way to specify a Shubnikov IV magnetic space group, is to define
 both [[spgroup]] and [[spgroupma]].
 For example, the group P2_1/c_prime has [[spgroup]]=14 and [[spgroupma]]=78.
@@ -16207,7 +16198,7 @@ Variable(
 The Matrix to be diagonalized in the Casida framework (see [[cite:Casida1995]])
 is a NxN matrix, where, by default, N is the product of the number of occupied
 states by the number of unoccupied states. The input variable [[td_maxene]]
-allows to diminish N: it selects only the pairs of occupied and unoccupied
+allows one to diminish N: it selects only the pairs of occupied and unoccupied
 states for which the Kohn-Sham energy difference is less than [[td_maxene]].
 The default value 0.0 means that all pairs are taken into account.
 See [[td_mexcit]] for an alternative way to decrease N.
@@ -16226,7 +16217,7 @@ Variable(
 The Matrix to be diagonalized in the Casida framework (see [[cite:Casida1995]])
 is a NxN matrix, where, by default, N is the product of the number of occupied
 states by the number of unoccupied states. The input variable [[td_mexcit]]
-allows to diminish N: it selects the first [[td_mexcit]] pairs of occupied and
+allows one to diminish N: it selects the first [[td_mexcit]] pairs of occupied and
 unoccupied states, ordered with respect to increasing Kohn-Sham energy difference.
 However, when [[td_mexcit]] is zero, all pairs are allowed.
 See [[td_maxene]] for an alternative way to decrease N.
@@ -16324,7 +16315,7 @@ Variable(
     mnemonics="TIMing OPTion",
     characteristics=['[[NO_MULTI]]'],
     text="""
-This input variable allows to modulate the use of the timing routines.
+This input variable allows one to modulate the use of the timing routines.
 
   * If 0  -->  as soon as possible, suppresses all calls to timing routines
   * If 1  -->  usual timing behaviour, with short analysis, appropriate for
@@ -16792,7 +16783,7 @@ Variable(
     mnemonics="calculation of the screened interaction U with the Constrained RPA method",
     requires="[[nspinor]] == 1",
     text="""
-When equal to one or two, this variable allows for the calculation of U with
+When equal to one or two, this variable allows one to calculate U with
 the cRPA method. An explicit test is shown in automatic tests
 [[test:v7_23]], [[test:v7_24]], [[test:v7_25]], [[test:v7_68]], and [[test:v7_69]].
 The present implementation is parallelized (as for usual GW
