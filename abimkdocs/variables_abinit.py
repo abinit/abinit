@@ -10177,8 +10177,10 @@ Note (bef v8.8) : an optimal value for this parameter can be automatically found
 the [[autoparal]] input keyword.
 Note (since v8.8 and only for LOBPCG ([[wfoptalg]]==114) with [[paral_kgb]]=1) : 
 * If set to ***0*** then scalapack is disabled.
-* If set to its ***default value***, then abinit uses between 2 and [[npband]]*[[npfft]]*[[npspinor]] cpus according to the system size (default auto behaviour).
-* If set to a number ***>1** then forces abinit to use exactly this number of cpus. **arbitrary value**
+* If set to its ***default value***, then abinit uses between 2 and [[npband]]*[[npfft]]*[[npspinor]] cpus according to the system size (default auto behaviour).  
+  See [[slk_rankpp]] for more customization.
+* If set to a number ***>1** then forces abinit to use exactly this number of cpus.  
+  Due to legacy behaviour, although it is not mandatory in theory, this value *must* divide [[npband]]*[[npfft]]*[[npspinor]].  
 See also [[slk_rankpp]] for a better tuning instead of this variable.
 """,
 ),
@@ -15625,14 +15627,16 @@ Variable(
     defaultval=[1000],
     mnemonics="ScaLapacK matrix RANK Per Process",
     text="""
-This variable controls how the number of processus to be used in Scalapack diagonalization algorithm ([[np_slk]] will be calculated.
+This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.
 This value is the matrix rank each process will hold for the diagonalization.
 For a 1000x1000 matrix with default value, scalapack won't be used.
 For a 2000x2000 matrix with default value, scalapack will used 2000/1000=2 MPI.
 For a 2000x2000 matrix with a slk_rank=500, scalapack will use 2000/500=4 MPI.
 In case of hybrid MPI+OpenMP, the number of thread is also taken into account.
+***WARNING*** None of the available scalapack library are thread-safe  (2018). Therefore using both scalapack *and* OpenMP is highly unpredictable.
+Furthermore, using multithreaded linear algebra library (MKL ACML...) is more efficient than pure MPI scalapack.
 
-Usually it is better to tune this variable and let [[np_slk]] to its default value (ie. don't use it).
+Usually it is better to tune this variable and let the code do the rest.
 """,
 ),
 

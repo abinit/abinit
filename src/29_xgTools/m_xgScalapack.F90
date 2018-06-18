@@ -154,6 +154,7 @@ module m_xgScalapack
     xgScalapack%size(M__WORLD) = nproc
 
     maxProc = (maxDim / (M__MAXDIM*nthread))+1 ! ( M__MAXDIM x M__MAXDIM matrice per MPI )
+    maxProc = 2*((maxProc+1)/2)
     if ( M__CONFIG > 0 .and. M__CONFIG <= nproc ) then
       maxProc = M__CONFIG
     else if ( maxProc > nproc ) then

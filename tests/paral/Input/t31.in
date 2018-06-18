@@ -3,15 +3,18 @@ paral_kgb 1
 npband 10
 npfft 1
 npkpt 1
-bandpp 50
 use_gemm_nonlop 1
 
 prtden 0 prtwf 0 prteig 0
 ecut 6.
-nband 500
+# change the number of band to force occ1 occ2 to be printed in outvars
+bandpp1 50
+bandpp2 52
+nband1 500
+nband2 520
 
 #SCF cycle parameters
-tolvrs 1.d-3 nstep 50
+tolvrs 1.d-3 nstep 3
 
 #K-points and sym
 occopt 3
