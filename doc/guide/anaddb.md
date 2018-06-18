@@ -17,8 +17,8 @@ this topic, he/she will read different help files of the ABINIT package,
 related to the [[help:abinit|main ABINIT executable]], to the
 [[help:respfn|DFPT features of ABINIT]], and to the [[help:mrgddb|DDB merge tool]].
 
-It will be easier to discover the present file with the help of the [tutorial](index),
-especially the tutorials on [DFPT1](rf1) and [DFPT2](rf2).  
+It will be easier to discover the present file with the help of the [tutorials](../tutorial),
+especially the tutorials on [DFPT1](../tutorial/rf1) and [DFPT2](../tutorial/rf2).  
 
 ## 1 Introduction
   

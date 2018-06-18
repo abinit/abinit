@@ -1270,4 +1270,4 @@ calculations, here is a list of a few:
   * As a rule of thumb, a PAW dataset for GW should have at least three projectors per state, if not more.
 
   * A particularly sensitive thing is the quality of the expansion of the pseudised plane-wave part in terms of the on-site basis. 
-     This can be checked by using the density of states (DOS), as described in the [first PAW tutorial](PAW1).
+     This can be checked by using the density of states (DOS), as described in the [first PAW tutorial](paw1).

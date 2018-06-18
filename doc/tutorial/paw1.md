@@ -521,7 +521,7 @@ Such a test is useful to estimate the precision we can expect on the stress tens
 You can compare other results in the 3 output files: total energy, eigenvalues, occupations...
   
 Note: if you want to learn how to generate PAW datasets with different `partial wave` basis, you might follow the 
-[tutorial on generating PAW datasets(PAW2)](PAW2).
+[tutorial on generating PAW datasets(PAW2)](paw2).
 
 ## 7. Checking the validity of PAW results
   
@@ -589,7 +589,7 @@ even be by-passed with [[pawovlp]]=-1 (not recommended!).
     is eventually printed...
 
 Also note that you can control the compensation charge radius and shape
-function while generating the PAW dataset (see [tutorial on generating PAW datasets(PAW2)](PAW2) ).
+function while generating the PAW dataset (see [tutorial on generating PAW datasets(PAW2)](paw2) ).
 
 
 ### 8.b. Mixing scheme for the Self-Consistent cycle; decomposition of the total energy###
