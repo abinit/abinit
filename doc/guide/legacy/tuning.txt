@@ -1,0 +1,453 @@
+
+Tuning
+
+TUNING OF THE ABINIT CODE
+
+This file is a complement to abinit_help,
+and describes how to tune ABINIT :
+- some information about large numbers and large arrays
+- how to reduce the memory needs at the expense of (some) CPU time
+   or wall clock time.
+- brief introduction to the most CPU time consuming routines.
+Before tuning ABINIT, you should understand how to obtain accurate
+results for the physical problem of interest.
+This is treated in 'abinit_help', not here.
+
+__________________________________________________________________
+
+See a recent version of the file 'new_user_guide', for an introduction
+to the ABINIT package.
+See a recent version of the file 'abinit_help' for
+learning how to use the code, as well as for indications
+about the numerical accuracy of the code.
+These files can be found in the ~abinit/doc subdirectory.
+
+Any comment or suggestion to improve the 'tuning' file will be welcome,
+simply contact the ABINIT group.
+
+Copyright (C) 1999-2018 ABINIT group (XG,DCA)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+*******************************************************************
+
+0. Time and memory.
+1. Basic variables.
+2. Large arrays.
+3. Tuning the memory use.
+4. The CPU time consuming routines.
+
+*******************************************************************
+
+0. Time and memory
+
+The "wall clock" time is the time seen by the user between the beginning
+of a job and the end of the job. It will depend of course on the charge
+of the machine (if the machine can run many processes concurrently), and the
+number of processors of the machine (if the code can be used in parallel).
+It includes the time for all operations : straight number crunching, but
+also system interrupts and input/output (I/O) operations.
+
+The "CPU" time is an internal measure of the time that the job spends on the
+Central Processing Unit(s) (the CPUs). It excludes I/O time, and should
+depend little on the charge of the machine (in practice, this is not
+true for all machines, since there is some overhead for switching
+from one user to another user).
+
+The (central - or core) memory is the space for arrays directly addressed
+by the code.
+On PC computers, it is presently (Feb 1999) on the order of 32 to 128 MB.
+Disk space can be used by I/O operations, which are much slower than
+addressing central memory.
+
+ABINIT estimates the memory needs for each dataset at the beginning of the
+run, while it prints the CPU and wall clock time effectively used for
+a complete job at the end of the run.
+
+__________________________________________________________________
+
+1. Basic variables
+
+It is important to understand first the behaviour of a few variables
+(natom, mband, ucvol, mpw, nfft, nkpt, and nsppol)
+with respect to the characteristics of the system that is investigated.
+Some of them have already been described in the abinit_help file.
+
+1.A. The number of atoms
+
+We will consider the number of atoms in the unit cell, natom,
+as the primary source of memory and CPU time scaling. It is an input variable.
+Roughly speaking, the number of bands, nband, another input variable,
+will scale directly with the number of atoms.
+Since the number of bands may depend on the k-point (if occopt==2), we will
+use the maximum number of bands over the k-points, called mband, as the
+basic variable instead of nband.
+
+1.B. The volume of the cell
+
+The volume of the unit cell (ucvol) will be computed from the input variables
+acell and rprim. In many cases, the volume of the cell is proportional
+to the number of atoms. However, there are cases in which the volume
+can be increased while the number of atoms is fixed : an isolated
+atom or molecule in a supercell ; a slab calculation (elongated
+cell with a significant fraction of vacuum).
+
+1.C. The spatial resolution
+
+The cell size and number of atoms being fixed, the memory
+and CPU time needs may still vary, as they depend on the size of the
+smallest features of the wavefunction and density to be described
+correctly. This is determined by
+the kinetic energy of the plane wave basis set, whose maximum
+is determined by the input variable ecut. The largest wavevector
+of the plane wave basis set, contained in spheres centered on each k point,
+will scale as the square root of ecut.
+The number of plane waves scales as the volume of these spheres,
+and thus as the 3/2 power of ecut. Since the spheres are different
+for each k-point, ecut determines different plane wave sets,
+whose maximum is called mpw (maximum number of plane waves).
+
+When the cell size is allowed to vary, mpw varies linearly with the volume
+of the cell, ucvol.
+
+The wavefunctions are treated both
+in reciprocal space (using the coefficients of plane waves)
+and in real space (using a Fourier transformed set).
+The transform between real and reciprocal space, done
+by the Fast Fourier Transform algorithm,
+relies on 3D homogeneous grids of points. The number of points
+of this grid is approximately 16 times the number
+of plane waves (see section 4.A),
+and is called nfft. This number is usually very large (between 2000 and 10e6).
+
+1.D. Sampling the Brillouin zone.
+
+Since ABINIT is based on periodic boundary conditions, the Brillouin
+zone must be sampled adequately. The number of k-points to be used
+for this sampling, in the full Brillouin zone, is inversely
+proportional to ucvol, but may also
+vary a lot from system to system. As a rule of thumb, a system
+with a large band gap will need few k-points, while metals will need
+lot of k-points to produce converged results.
+For large systems, the inverse scale with respect to ucvol
+is unfortunately stopped because at least one k-point must be
+used. The effective number of k-points to be used will be strongly
+influenced by the symmetries of the system, since only the
+irreducible part of the Brillouin zone must be sampled. Moreover
+the time-reversal symmetry (k equivalent to -k) can be used for
+ground-state calculations,
+to reduce sometimes even further the portion of the brillouin zone
+to be sampled. The number of k points to be used in a calculation
+is named nkpt. There is another way to take advantage of the
+time-reversal symmetry, in the specific case of k-points that are
+invariant under k => -k , or are sent to another vector distant
+of the original one by some vector of the reciprocal lattice.
+See below for more explanation about the advantages of using
+these k-points.
+
+As a rule of thumb, for homogeneous systems, a reasonable accuracy may be
+reached when the product of the number of atoms by the number of k-points
+in the full Brillouin zone is on the order of 50 or larger, for wide gap
+insulators, on the order of 250 for small gap semiconductors like Si,
+and beyond 500 for metals, depending on the value of the input variable
+tsmear. As soon as there is some vacuum in the system, the product
+natom * nkpt can be much smaller than this (for an isolated molecule
+in a sufficiently large supercell, one k-point is enough).
+
+1.E. The number of spin polarizations.
+
+Finally, many treatments and arrays must be duplicated when calculations
+involve spin-polarized systems. The basic variable is here nsppol.
+
+____________________________________________________________________________
+
+2. Large arrays.
+
+
+There are many large arrays used by ABINIT. Here, we describe the most
+important ones.
+
+
+2.A. The wavefunction arrays.
+
+The wavefunction coefficients describe, for each k point, for each band,
+for each spin polarisation, the wavefunctions in reciprocal space.
+That is, for each wavefunction, a set of npw (number of plane wave) complex
+coefficients in double precision.
+As presently coded, the number of bytes taken by the
+whole set of numbers is the product
+   nkpt * mband * nsppol * mpw * 16
+   (16 is the number of bytes for a double precision complex)
+Starting with small systems, for which the number of k-points scales as the
+inverse of the system size, the size of this set of numbers is roughly
+proportional to the system size
+(nkpt is inversely proportional, while mband and mpw are proportional).
+When the number of k-points has been reduced to one, the scaling
+will be quadratic in the system size (scaling of mband and mpw).
+
+In the specific case of the following 8 k points :
+(0 0 0), (0 0 1/2), (0 1/2 0), (0 1/2 1/2), (1/2 0 0), (1/2 0 1/2),
+(1/2 1/2 0), (1/2 1/2 1/2), the use of time-reversal symmetry
+has been implemented. It allows
+to connect coefficients of the wavefunctions that
+correspond to G+k and -G-k : each must be complex conjugate of the other.
+So, the number of planewaves explicitly treated in ABINIT can be taken
+as half the usual number of plane waves (see istwfk input variable).
+We will refer to these k-points as being TR (Time Reversal) k-points.
+If the time-reversal symmetry is not taken into account, special k-point
+grids based on TR k-points are not the most efficient ones. But CPU time
+gains due to the use of time-reversal symmetry can change this
+appreciably. For example, for a case without spatial symmetry,
+the shifted 2x2x2 k-point grid reduces to 4 k-points :
+(1/4 1/4 1/4), ( 1/4  1/4 -1/4), ( 1/4 -1/4  1/4), ( 1/4 -1/4 -1/4)
+while a non-shifted 2x2x2 k-point grid gives precisely the
+set of 8 k-points mentioned above. The accuracy of both k-point sets
+should be about the same. If time-reversal symmetry is not taken into
+account, the shifted grid is obviously more advantageous (twice
+less CPU time, the same core memory needed), but taking into account
+the time-reversal symmetry will give about the same CPU time, and
+only half the memory needs for the non-shifted grid.
+
+
+
+2.B. The FFT arrays.
+
+There are many arrays that are dimensioned with nfft. By chance, no other
+variable that scales as ucvol or natom
+appears in their other dimensions, only small numbers like nsppol,
+or constant factors like 2 or 4 (the latter only for GGA).
+So, the overall scaling is linear with system size.
+However, the total space for these arrays usually
+dominates the memory needs when natom is lower than about 20-40,
+since nfft is a very large number. The total number of bytes is on the
+order of 15 to 50 times nfft double precision complex numbers.
+The prefactor will be the largest for spin-polarized calculations, GGA
+calculations, and when iscf=5 instead of iscf=2 or 3.
+
+2.C. The phases for the non-local form factors.
+
+The last big array to be described is the set of phases generated
+by the scalar product of the planewave vectors in reciprocal space by the
+atom position in real space. Its size in bytes is
+   mpw * natom * 16
+   (16 is the number of bytes for a double precision complex)
+The scaling of this array is quadratic in the system size.
+
+____________________________________________________________________________
+
+3. Tuning the memory use.
+
+3.A. The phases of the non-local form factors.
+
+These can be recomputed by block, so that the maximal size will be
+on the order of    mpw * 10 * 16   bytes, and will not scale
+quadratically with the system size. Simply set the input variable
+nloalg to a negative value (see the abinit_help file).
+The penalty for recomputing the
+phase factors will be seen at the level of CPU time for the nonlop routine,
+may be an increase of 20 to 40 % of CPU time in this routine.
+
+____________________________________________________________________________
+
+4. The CPU time consuming routines.
+
+When the number of atoms in the system exceeds 5-20,
+only a few routines will significantly contributes to the CPU time of the
+job. These are fourwf, nonlop and projbd.
+Fourwf scales as the square of the system size, times its
+logarithm, with a large prefactor, while nonlop and projbd scale
+as the cube of the system size. The latter two will dominate for
+really large systems.
+
+The routines fourwf and nonlop are called every time the Hamiltonian
+is applied to a trial wavefunction or wavefunction change. The routine
+projbd is called after that application is done.
+The number of such applications is already large, since it is on the order
+of the product of  mband by nkpt by
+the number of line minimizations (whose maximum is the input variable nline) by
+the number of SCF cycles (whose maximum is the input variable nstep) by
+the number of 'time steps' (whose maximum is the input variable ntime).
+Improving the convergence of the overall procedure resulting
+in the decrease of the
+number of line minimizations, the number of SCF cycles and the number
+of time steps might lead to a considerable speed-up of the code, but
+the corresponding techniques are not described in the present document.
+We focus here on the time associated with these three routines when
+the number of applications of the Hamiltonian is kept fixed, except
+for the linear scaling of mband with ucvol.
+The product of mband by nkpt does not scale as the size of the system
+when the number of k-points is not reduced to one, but will scale
+linearly with it otherwise. The other factors may have some weak scaling
+with the dimension of the system, but this is also not described here.
+
+
+4.A. The wavefunction Fourier transform routine (fourwf).
+
+The routine fourwf performs the Fourier transform of the wavefunctions
+for real to reciprocal space and vice-versa.
+When the wavefunction is obtained in real space, the local potential
+operator may be applied to it. Then, the product is back transformed to
+reciprocal space. Due to the Nyquist theorem (see standard books on Fourier
+transform), the smallest feature of the grid in real space must be
+half the smallest wavelength of the planewaves in order to have an exact
+numerical result thanks to the use of the Fourier transform on a grid.
+Thus, the plane wave basis sphere can be inscribed in a rectangular
+grid of half the linear dimensions of the FFT grid. Taking into
+account the ratio between the volume of a sphere and the volume of a
+parallelipipedic box in which it is placed, we arrive at a ratio of about
+16 between the number of FFT grid points and the number of plane wave
+coefficients.
+
+As a related technical issue, such Fourier transforms between the sphere
+of plane wave coefficients and the FFT grid in real space can be
+done either in a naive way, by inserting the planewave sphere in a FFT box in
+reciprocal space and filling the remaining grid with zeroes, before
+performing a usual 3D FFT, or in a more clever way, by doing computations
+only on the sets of numbers that are not all zeros. If the algorithm
+of the FFT is otherwise unchanged, the latter technique will only use
+7/12 of the CPU time of the first technique. If the wavefunction
+corresponds to a TR k-point, the FFT CPU time can be decreased further
+by about 45%.
+
+As an important technical information, the Fast Fourier Transform
+algorithm is efficient
+only when the size of the grid along each of the dimensions is a multiple
+of powers of small prime numbers, like 2, 3, 5 and eventually 7 or 11.
+Consult for example the book 'Numerical Recipes' for an explanation.
+In this case, the time for one FFT will be proportional to the
+size of the FFT grid times its logarithm.
+
+Usually, the vendor of number-crunching computers provide a library
+of highly optimized numerical routines, that include a 3D FFT routine.
+However, this routine will not take into account the specific feature
+of the FFT needed for the present code, that is, it will make computations
+on arrays of zeroes. Also, the set of allowed multiple of powers of small
+prime numbers for such library routines will vary from vendor to vendor.
+
+That is why an portable FFT routine is needed, that takes advantage of
+the above-mentioned features, and that behaves in the same way on different
+machines. Such a routine has been included in the ABINIT code
+thaks to the use of subroutines written by S. Goedecker
+(see the ~abinit/doc/users/bibliography.html file).
+
+In order to be able to compare the speed of this routine with the speed
+of vendor routines, the input variable fftalg has been introduced.
+S. Goedecker routines are used when the absolute value of fftalg
+is either 1 or 3. Negative values of fftalg use the naive approach,
+while positive values do not make operations on arrays of zeroes.
+When the ABINIT code is installed on a new computer, it is possible
+to use immediately these options. It is also possible
+to change the routine fourwf to take advantage of an eventual
+vendor-provided 3D FFT routine, that should be called by fftalg=-2 .
+This machine-dependency is handled through the use of the C-preprocessor,
+(see the ~abinit/doc/developers/use_cpp file). Note that the
+implementation must also be done at the level of the fourdp routine.
+
+Until now, the fftalg=3 option is the best one on all scalar and
+super-scalar machines, even
+when vendor-provided 3D FFT routines are available. It should be possible
+in the future to build a routine with vendor-provided 1D FFT routines
+that take advantage of the existence of planes filled with zeroes, but
+this will take time to be coded ...
+For the vector machine VPP Fujitsu, it has been
+found that the fftalg=1 option is better.
+
+It is also possible to use the FFTW routines with fftalg=3, with or without
+multi-threadings (see the ~abinit/doc/developers/use_cpp file). A
+good choice of FFTW_NTHREADS depends upon the size of the transform as well
+as on the number of processors you have. As a general use, you don't want to
+use more threads than you have processors (Using more threads will work, but
+there will be extra overhead with no benefit.) In fact, if the problem
+size is too small, you may want to use fewer threads than you have processors.
+
+Finally, it must also be mentioned that the fourwf routine is also used
+to generate the density corresponding to a wavefunction. This use is less
+frequent (the factor nline is not present in the count of calls, and only
+the reciprocal to real space transform is done). In the timing analysis
+the two usages are distinguished : fourwf(pot) and fourwf(den) .
+
+
+4.B. The application of the non-local part of the Hamiltonian (nonlop).
+
+There will usually be a non-local, separable part of pseudopotential of
+the Kleinman-Bylander type, for each atom in the system.
+The number of components for each atom type will vary with the
+angular momenta explicitly treated in the pseudopotential :
+1 for the s channel, 3 for the p channel, 6 for the d channel, and
+10 for the f channel. Moreover, for each channel, the number of
+projectors can be 1 or a larger number.
+For example, a pseudopotential with 2 s-projectors  and 1 p-projectors
+will have 5 components.
+
+To apply this separable part, in the present status of the code,
+the number of operations will be
+proportional to  mpw * natom * the number of components.
+The scaling for one application is thus proportional to the square
+of the size of the system.
+
+Different implementation of the non-local pseudopotential application
+have been coded, and
+can be called by the input variable nloalg. The value nloalg=4
+seems to be good for all the machines. In theory, it is optimized
+for super-scalar architectures.
+
+In the future, a real space implementation of the non-local
+pseudopotential application might reduce the scaling from quadratic to
+linear in the system size, but this takes coding time ...
+The present reciprocal space implementation is rather well optimized.
+
+The nonlop routine is used also to compute the non-local pseudopotential
+contributions to the forces and stresses. These uses are less frequent
+than the application of the non-local part of the pseudopotential
+to wavefunctions. In the timing analysis
+the three usages are distinguished : nonlop(energy) for the application
+to a wavefunction, and also nonlop(forces) and nonlop(stresses)
+for the computation of forces and stresses. Their scaling with
+respect to the system size is the same, but the force computation is
+done only once at the end of a line minimization, while the stress
+computation is even done only at the end of a set of SCF cycles, when the
+wavefunctions are converged.
+
+For a wavefunction corresponding to a TR k-point,
+the CPU time for the application of
+the non-local operator is decreased by about 45%.
+
+
+4.C. The routine for projection of the change of wavefunctions
+out of the occupied space (projbd)
+
+When the Hamiltonian has been applied to the wavefunction, the resulting
+vector must be orthogonalized against the existing wavefunctions of the
+present band and the other bands of the same k-point.
+This is done in reciprocal space, and the scaling of the operation
+for a single wavefunction is proportional to the product mpw * mband .
+Thus, it scales quadratically with the system size.
+
+This routine might dominate the CPU time when the number of atoms
+becomes very large. There will be a constant ratio between this
+time and the time needed for nonlop. On most machines this ratio is between
+1/2 and 3/2 . This ratio depends on the number of components
+of the pseudopotentials, and on the ratio between the number of
+atoms and the number of bands.
+
+The routine projbd is called twice for every Hamiltonian application,
+in the standard implementation of the band-by-band CG algorithm.
+It is possible to call it only once per application, by changing the
+value of the ortalg input variable to negative values.
+However, the convergence of the
+overall algorithm will change a bit. This might overcome the
+gain due to the reduction from two calls to one.
+
+This routine has also been optimized a bit, by taking into
+account the use of registers. The default value 2 seems good on all machines.
+
+If the wavefunctions correspond to a TR k-point, the CPU time for projbd
+will be decreased by at least a factor of two, and at most a factor
+of four.
+
+This part of the overall algorithm is the one in which most of the
+progress should be done in the future, both at the level of the
+algorithm, as well as the level of the implementation.
+It might be very profitable to use the BLAS library in this respect.

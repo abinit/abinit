@@ -7,7 +7,7 @@
 !! Verify that the paw spheres are not overlapping
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,6 +71,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 !Local variables ---------------------------------------
 !scalars
  integer :: ia,ib,ii,t1,t2,t3
+ logical :: stop_on_error
  real(dp) :: dd,dif1,dif2,dif3,ha,hb,norm2
  real(dp) :: ratio_percent,va,vb,vv
  character(len=750) :: message
@@ -138,66 +139,69 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
    end do
  end do
 
+ stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.ratio_percent_max(1)>pawovlp))
+
+!Print adapted message with overlap value
  if (iovl(1)+iovl(2)>0) then
 
-!  Print adapted message with overlap value:
-   if (abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.ratio_percent_max(1)>pawovlp)) then
-     write(message, '(2a)' ) ch10,' chkpawovlp : ERROR -'
-   else
-     write(message, '(2a)' ) ch10,' chkpawovlp : WARNING -'
-   end if
+   !ii=1: PAW augmentation regions overlap
+   !ii=2: compensation charges overlap
+   if (iovl(2)==0) ii=1
+   if (iovl(2)> 0) ii=2
 
-!  Print  message concerning PAW radius
-   if (iovl(1)>0) then
-     write(message, '(4a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,a)' ) trim(message),ch10,&
-&     '  PAW SPHERES ARE OVERLAPPING !',ch10,&
-&     '   Distance between atoms ',iamax(1),' and ',ibmax(1),' is  : ',sqrt(norm2_min(1)),ch10,&
-&     '   PAW radius of the sphere around atom ',iamax(1),' is: ',pawtab(typat(iamax(1)))%rpaw,ch10,&
-&     '   PAW radius of the sphere around atom ',ibmax(1),' is: ',pawtab(typat(ibmax(1)))%rpaw,ch10,&
-&     '   This leads to a (voluminal) overlap ratio of ',ratio_percent_max(1),' %'
-     call wrtout(std_out,message,'COLL')
-   end if
+   if (iovl(ii)>0) then
 
-!  Print  message concerning shape radius
-   if (iovl(2)>0) then
-     write(message, '(3a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,3a)' ) ch10,&
-&     '  COMPENSATION DENSITIES ARE OVERLAPPING !!!!',ch10,&
-&     '   Distance between atoms ',iamax(2),' and ',ibmax(2),' is  : ',sqrt(norm2_min(2)),ch10,&
-&     '   Compensation radius around atom ',iamax(2),' is: ',pawtab(typat(iamax(2)))%rshp,ch10,&
-&     '   Compensation radius around atom ',ibmax(2),' is: ',pawtab(typat(ibmax(2)))%rshp,ch10,&
-&     '   This leads to a (voluminal) overlap ratio of ',ratio_percent_max(2),' %',ch10,&
-&     '  THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
-     call wrtout(std_out,message,'COLL')
+     if (ii==1) write(message,' (a)' ) 'PAW SPHERES ARE OVERLAPPING!'
+     if (ii==2) write(message, '(2a)' )'PAW COMPENSATION DENSITIES ARE OVERLAPPING !!!!'
+
+     if (iovl(ii)==1) then
+       write(message, '(3a)' ) trim(message),ch10,&
+&       '   There is one pair of overlapping atoms.'
+     else
+       write(message, '(3a,i5,a)' ) trim(message),ch10,&
+&       '   There are ', iovl(1),' pairs of overlapping atoms.'
+     end if
+     write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
+     '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
+     write(message, '(2a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,a)' ) trim(message),ch10,&
+&     '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii)),ch10,&
+&     '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
+&     '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10,&
+&     '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
+     if (ii==2) then
+       write(message, '(3a)' ) trim(message),ch10,&
+&       'THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
+     end if
+
+     if (stop_on_error) then
+       MSG_ERROR_NOSTOP(message,ia) !ia is dummy
+     else
+       MSG_WARNING(message)
+     end if
+
    end if
 
 !  Print advice
-   if (abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.ratio_percent_max(1)>pawovlp)) then
+   if (stop_on_error) then
      write(message, '(3a)' )&
 &     '  Action: 1- decrease cutoff radius of PAW dataset',ch10,&
-&     '      OR  2- ajust "pawovlp" input variable to allow overlap (risky)'
+&     '    OR  2- ajust "pawovlp" input variable to allow overlap (risky)'
      MSG_ERROR(message)
    end if
 
-!  Print additional info
-   if (iovl(1)>1.or.iovl(2)>1) then
-     write(message, '(2a)' ) ch10,'  => Note that other spheres are overlapping !'
-     call wrtout(std_out,message,'COLL')
-   end if
-
 !  Print last message if execution continues:
-   if (pawovlp<tol6) then
-     write(message, '(6a)' ) ch10,&
+   if (pawovlp<=tol6) then
+     write(message, '(6a)' ) &
 &     '       Results might be approximate,',ch10,&
 &     '       and even inaccurate (if overlap is too big) !',ch10,&
-&     '       Assume experienced user. Execution will continue.'
+&     '       Assume experienced user. Execution will continue.',ch10
      call wrtout(std_out,message,'COLL')
-   end if
-   if (pawovlp>tol6.and.ratio_percent_max(1)<=pawovlp) then
-     write(message, '(8a)' ) ch10,&
+   else if (ratio_percent_max(1)<=pawovlp) then
+     write(message, '(8a)' ) &
 &     '       Overlap ratio seems to be acceptable (less than value',ch10,&
 &     '       of "pawovlp" input parameter): execution will continue.',ch10,&
 &     '       But be aware that results might be approximate,',ch10,&
-&     '       and even inaccurate (depending on your physical system) !'
+&     '       and even inaccurate (depending on your physical system) !',ch10
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -218,7 +222,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
    real(dp) :: sqnrm_pawovlp
    real(dp),intent(in) :: u1,u2,u3
-   
+
    sqnrm_pawovlp=rmet(1,1)*u1*u1+rmet(2,1)*u2*u1+rmet(3,1)*u3*u1&
 &   +rmet(1,2)*u1*u2+rmet(2,2)*u2*u2+rmet(3,2)*u3*u2&
 &   +rmet(1,3)*u1*u3+rmet(2,3)*u2*u3+rmet(3,3)*u3*u3

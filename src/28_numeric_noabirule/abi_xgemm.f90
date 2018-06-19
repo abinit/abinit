@@ -15,7 +15,7 @@
 !! *  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2017 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,9 +31,9 @@
 !! abi_zgemm_2d
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
-!!   
+!!
 !!
 !! PARENTS
 !!
@@ -101,12 +101,12 @@ end subroutine abi_zgemm_2d
 !! abi_d2zgemm
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
-!!   
+!!
 !!
 !! PARENTS
-!!      
+!!
 !!
 !! CHILDREN
 !!
@@ -177,7 +177,7 @@ subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 #ifdef DEV_LINALG_TIMING
  call timab(TIMAB_XGEMM,2,tsec)
 #endif
-    
+
 end subroutine abi_d2zgemm
 !!***
 

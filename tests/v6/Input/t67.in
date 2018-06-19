@@ -110,7 +110,6 @@ nbdbuf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@petrus
 #%% [files]
 #%% files_to_test = 
 #%%   t67.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0

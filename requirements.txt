@@ -1,0 +1,20 @@
+html2text
+# Pinned versions
+#-mkdocs==0.16.3
+#-mkdocs-material==1.12.2
+mkdocs==0.17.2
+mkdocs-material==2.6.6
+pymdown-extensions
+python-markdown-math
+pyyaml
+pygments
+pybtex
+
+#graphviz or python-graphviz if conda
+py_w3c
+# Unit tests
+pytest
+#pytest-cov
+#pytest-xdist
+
+abimkdocs_plugin/.

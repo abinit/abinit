@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,26 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "addout.F90",
- "adini.F90",
- "aim_follow.F90",
- "consist.F90",
- "cpdrv.F90",
- "critic.F90",
- "critics.F90",
- "defad.F90",
- "drvaim.F90",
- "graph.F90",
- "initaim.F90",
- "inpar.F90",
- "inspln.F90",
- "integrho.F90",
- "integvol.F90",
- "onestep.F90",
- "plint.F90",
- "rsurf.F90",
- "surf.F90",
- "vgh_rho.F90",
- "vnorm.F90"]
+ "m_bader.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

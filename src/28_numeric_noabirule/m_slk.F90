@@ -7,7 +7,7 @@
 !! This module contains the description of the variables used in the ScaLAPACK routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2018 ABINIT group (CS,GZ,FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,7 +236,7 @@ CONTAINS  !=====================================================================
 !!  grid= the grid of processors used by Scalapack
 !!
 !! PARENTS
-!!      m_slk
+!!      m_slk,m_xgScalapack
 !!
 !! CHILDREN
 !!
@@ -2680,6 +2680,7 @@ end subroutine compute_generalized_eigen_problem
 !!  eigen= eigenvalues of the matrix
 !!
 !! PARENTS
+!!      m_xgScalapack
 !!
 !! CHILDREN
 !!
@@ -2701,7 +2702,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  integer,intent(in) :: comm
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: istwf_k
- type(processor_scalapack),intent(inout) :: processor
+ type(processor_scalapack),intent(in) :: processor
 !arrays
  real(dp),intent(inout) :: matrix(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: vector(:)
@@ -2815,6 +2816,7 @@ end subroutine compute_eigen1
 !!  eigen= eigenvalues of the matrix
 !!
 !! PARENTS
+!!      m_xgScalapack
 !!
 !! CHILDREN
 !!
@@ -2836,7 +2838,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: comm
  integer,intent(in) :: istwf_k
- type(processor_scalapack),intent(inout) :: processor
+ type(processor_scalapack),intent(in) :: processor
 !arrays
  real(dp),intent(inout) :: matrix1(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: matrix2(cplex*nbli_global,nbco_global)

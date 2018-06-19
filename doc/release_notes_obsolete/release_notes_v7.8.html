@@ -1,0 +1,269 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+January 2014 and June 2014. These release notes
+are relative to improvements of ABINITv7.8 with respect to v7.6.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, T. Applencourt, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bottin, J. Bouchet,
+F. Bruneval, D. Caliste, M. Delaveau, B. Dorado, C. Espejo, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze,  
+D. Hamann, F. Jollet, A. Levitt, I. Lukacevic, A. Martin, C. Martins, S. Ponce, Y. Pouillon, T. Rangel, G.-M. Rignanese,
+A. Romero, A. Shukri, M. Torrent, M. Van Setten, M. Verstraete, Bin Xu, V. Zecca, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.8, released on June 30, 2014.
+
+Changes with respect to version 7.6 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 As advertised in the recent announcements of ABINITv7.6, some developers are presently "cleaning" ABINIT,
+    i.e. removing little used code, or rarely used capabilities, that were slowing down the
+    developments by requiring too much maintenance.
+    As a consequence, in ABINITv7.8, some backward compatibilities have been broken.
+    In particular, the input variable mkmem (and associated mkqmem, mk1mem, mffmem) have been removed. 
+    Calculations using out-of-core storing of wavefunctions are not possible anymore.
+    Instead, the user should rely on the parallelisation, with distributed memory. 
+    The computation of lattice wannier function has also been disabled, as well as the self-consistent
+    phonon calculations (see C.7).
+
+A.2 Although the availability of NetCDF, libxc, and MPI-IO (in case of parallelism) is not yet mandatory,
+    v7.8 is likely the last version of ABINIT for which NetCDF is not mandatory (it will be mandatory
+    for ABINITv8). On the other hand the requirement of libxc and MPI-IO will likely not be enforced in ABINITv8 .
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 Computation of the U parameter (for LDA+U or DMFT), using the cRPA screened interaction formalism.
+    This is available based on two models : the d-dp(b) model or the energy range model.
+    For the latter, see the new input variable ucrpa_window.
+    Tests v7#68 and 69.
+    Published in Phys. Rev.B 89, 125110 (2014).
+    By B. Amadon and T. Applencourt
+    This can be used in LDA+U as well as in DMFT
+    (Note :  the CTQMC solver has been included in the trunk (dmft_solv=5), see the release notes for ABINITv7.6, point B.2)
+
+B.2 The Path-Integral Molecular Dynamics in NVT ensemble is now available
+    with two thermostats (Langevin and Nose-Hoover chains) and possible coordinate transformations (primitive, staging, normal modes).
+    See the test v7#08 .
+    Adiabatic Path-Integral Molecular Dynamics is under development. New input variables : adpimd and adpimd_gamma. 
+    Work by G. Geneste and M. Torrent.
+
+B.3 Computation of the random stopping power, in the RPA and in the TD-LDA.
+    Input variables npvel and pvelmax.
+    Test v7#67 .
+    Work by A. Shukri and F. Bruneval.
+
+B.4 Response function from Molecular Dynamics
+    Phonon spectrum obtained from trajectories (with a minimal set of coefficients)
+    Included in APPA.
+    Work by Francois Bottin, Johann Bouchet, and Alexandre Martin
+
+B.5 ABINIT has the capability to read the pseudopotentials created by the ONCVPSP code by D. Hammann.
+    Also including the spin-orbit interaction. Documentation available in doc/psp_infos/psp8_info_txt .
+    See test v7#07
+    Work by D. Hamann
+
+B.6 Computation of the electron-phonon transport in the inelastic variational approximation are in beta testing.
+    See test v6#95.
+    Work by Bin Xu and M. Verstraete
+
+B.7 FFT : completion of the parallel implementation for fftalg=312 (FFTW3) and fftalg=401 and 402 (SGoedecker) ,
+    also with unitary testing.
+    Also, paral_kgb=1 can take advantage of composite operations (fftalg=402, 312)
+    New MPI-FFT version based on zero-padding and powered by FFTW3/MKL (312)
+    Automatic selection of the best FFT algorithm depending on the value of npfft
+    See tests tfftfftw3 #05,06 and tfftsg #05,06
+    NOTE : at present the default value of fftalg is still 401 when FFTW3 is not available and paral_kgb==1.
+     Users are encourages to use fftalg 402 or even better 312 for their calculations. Later, the default
+     will be changed to 402 - automatic test references have to be updated.
+    Work by M. Giantomassi
+
+B.8 Constrained magnetization calculations can now be performed.
+    Input variables magconon and magcon_lambda
+    From M. Verstraete, I. Lukacevic and E. Bousquet
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 The test farm has undergone many modifications. 
+    New bots : 
+    - tikal_gcc49 : gfort v4.9 is thus officially supported. This bot is used for full debugging.
+    - petrus_nag (NAG 5.3.1) : NAG compiler is officially supported. The debugging is quite aggressive. 
+    - buda_intel14 (14.0.2) : quite aggressive optim : -O3 -xhost
+    - bigmac_gcc48_sl : testing MacPorts, and Scalapack is also activated.
+    Rendering ABINIT NAG enabled was a significant debugging work for ABINIT ! 
+
+    Updated bots :
+    - ktulu_gcc48 (ubuntu packages) : OS ubuntu 14.04 instead of ubuntu 10.04
+    - inca_gcc44_sdebug (for buildsys and abirules) : use of make (version 4) able to synchronize output with -j option
+    - cronos_gcc46_paral : executes the entire test with np=2
+
+    Suppressed different bots : amd-g95_milou_ftrace_nofb, amd-g95_milou_ftrace_serial_nofb, amd-gfortran4.8_milou_fpetrap_nofb,
+    amd-gfortran4.8_milou_fpetrap_serial_nofbi, intel-gfortran4.4_ktulu,  intel-gfortran4.7_bigmac_sernofb
+    xeon-g95_green, xeon-intel11_green
+
+    The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
+    g95, pathscale, open64 . This does not mean that ABINIT will not work, but there is no guarantee for ABINIT to run correctly.
+
+    Work by JM Beuken, and MGiantomassi, with contributions from Vittorio Zecca for the NAG enabling.
+
+C.2 The modularization of the build system is progressing : bindings is autonomous ; 
+    creation of the "watch" subdirectory ; "Special" tests have been separated from usual non-regression tests.
+    See https://wiki.abinit.org/doku.php?id=maintainers:buildsys:roadmap_v8
+    Work by Y. Pouillon
+
+C.3 The modularization of the sources is progressing : many subroutines have been gathered in modules. 
+    About two dozen of new modules have been created : m_alloc.F90, m_anaddb_dataset.F90, 
+    m_array.F90, m_atmdata.F90, m_ddb.F90, 
+    m_dfpt_db.F90, m_doublegrid.F90, m_dynmat.F90, m_eig2d.F90, m_ewald.F90, m_fftcore.F90, m_fstrings.F90, m_ifc.F90, m_kxc.F90,
+    m_psps.F90, m_sg2002.F90, m_special_funcs.F90, m_xieee.F90, 
+    Work by Matteo Giantomassi (and others)
+
+C.4 The script mkrobodoc_dirs.py, to provide headers of directories for ROBODOC, has been written.
+    Work by Matteo Giantomassi 
+
+C.5 There is a new naming scheme for the procedures exported by m_xmpi (e.g. old: xsum_mpi, new: xmpi_sum)
+    Work by Matteo Giantomassi.
+
+C.6 The creation of sections of output written in YAML (see e.g. http://en.wikipedia.org/wiki/YAML ) is progressing.
+    See the use of yaml_out in abinit.F90, anaddb.F90 and optic.F90
+     (Note : in ABINITv7.6, The build system supports YAML, and The YAML library has been integrated in the build system)
+    Work by M. Giantomassi and Y. Pouillon
+
+C.7 Cleaning : suppression of lattice wannier function (LWF) calculations, and self-consistent phonon calculations (SCPhon).
+    The automatic tests for LWF, v3#96 and 97, and for SCPhon, v5#100 have been suppressed.
+    Input variables for SCPhon have been suppressed : prepscphon, scphon_temp, scphon_supercell.
+    By M. Giantomassi and M. Verstraete
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 The input variable gw_qprange has been introduced, to allow selecting the
+    set of bands and k-points for which  the GW correction has to be computed (optdriver=4 only).
+    Work by M. Giantomassi
+
+D.2 The computation of oscillator matrix elements within the PAW formalism can not be done
+    following two different methodologies : Arnaud and Alouani or Shishkin and Kresse.
+    Input variable pawoptosc .
+    Tests that explicitely specify these : v67mbpt#29 (for Arnaud Alouani expression), and
+    v7#68,69 for Shishkin Kresse .
+    Work by M. Giantomassi.
+
+D.3 Temperature-dependence of the gap 
+    Addition of current qpoint inside the EIGR2D.nc and adaptation of the temp dep python script to read nc files
+    Output EIGR2D file (second order derivative wrt phononic displacement) in netcdf format following the ETSF-io specifications
+    Work by S. Ponce
+
+D.4 Tutorial files have been updated/corrected/checked, for the ABINIT tutorial in CECAM Lyon, May 2014.
+    Work by E. Bousquet, M. Giantomassi, GM Rignanese, M. Torrent, M. Verstraete, J. Zwanziger
+
+D.5 Point symmetrize all efg tensor contributions, update tests accordingly.
+    Work by J. Zwanziger
+
+D.6 A new flavour of VdW_WF (vdw_xc=14) was added, which implements the recent vdW-QHO-WF method, a combination
+    of the MBD method of Tkatchenko with the localized Wannier functions approach. This method includes many body 
+    dispersion contributions to the van der Waals correction to the DFT energy.  
+    See test wannier90#14 .
+    Work by C. Espejo and A. Romero
+
+D.7 Generalize prt1dm for spinors
+     Work by M. Verstraete
+
+D.8 Improvements and debugging of the Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Carlo solver 
+    is going on.
+    Work by J. Bieder and B. Amadon
+
+D.9 Work on ABINIT GUI by F. Abreu and Y. Gillet
+
+D.10 On-going efforts on the development of Hartree-Fock and hybrid functionals.
+    Hartree-Fock calculations are now coded within Norm-Conserving PSP formalism,
+    with the use of symetries and parallelism.
+    PAW + Hartree-Fock is under development.
+    Still in the testing phase.
+    New input variables : cgtyphf, nbandhf, nkpthf, nnsclohf, nphf.
+    Tests v7#65 and 66 for PBE0, and Tests paral#93 (HF in parallel) and 94 (PBE0 in parallel).
+    From C. Martins (helped by M. Torrent and B. Amadon)
+
+D.11 Development of scripts for high-throughput GW calculations 
+     Work by M. Van Setten and G.-M. Rignanese
+    
+D.12 Work on Berry phase calculations with PAW, by J. Zwanziger (creation of the routine dsdr_k_paw.F90)
+    Forces with electric field and PAW now working, more tests to come
+    
+D.13 Contribution from M Delaveau: improvement of parallelization over atoms for DFPT
+
+D.14 Debugging of PAW+DFPT+metals, and also for Born Effective charges.
+     Phonon band structures are now OK within PAW+DFPT, but not yet sure of the BEC.
+     By M. Torrent and A. Martin
+
+D.15 Work on elastic and piezoelectric tensor in PAW.
+     By A. Martin and M. Torrent
+
+D.16 Implementation of several flavours of k-space interpolation technique for Bethe-Salpeter.
+     Work by Y. Gillet.
+
+D.17 PAW + Bigdft project
+    The ABINIT PAW library (libpaw) is in progress, see src/42_libpaw.
+    Work by T. Rangel + M Torrent.
+
+D.18 Work is continuing on the JTH PAW dataset table.
+     Soon the JTH 2.0 table will be released.
+    Work by F. Jollet.
+ 
+D.19 On-going work on PAW+DFPT : improving the stability, the parallelism has been fully tested and improved.
+    See test mpiio#62
+    Work by M. Torrent and B. Dorado.
+
+D.20 Continued efforts on the development of the abipy library
+    From M. Giantomassi 
+
+D.21 Implementation of the Chebishev algorithm, allowing to scale to 10000 procs (and beyond) with the band-FFT parallelism.
+    Still, not yet completely ready for mass production (missing istwfk > 1, ecutsm, nspinor)
+    By A. Levitt and M. Torrent
+
+D.22 The Bethe-Salpeter Equation with spin-polarization is now available in the case of direct diagonalization.
+    See test v67mbpt#29.
+    Later, it will be available with the Haydock method as well.
+    The model dielectric function can be computed on-the-fly, allowing a large saving of memory
+    See test v67mbpt#11.
+    Work by M. Giantomassi
+
+D.22 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
+     including patches for the fallbacks), and improvements of documentation by :
+     B. Amadon, J. Bieder, F. Bruneval, D. Caliste, M. Giantomassi, Y. Gillet, F. Jollet, 
+     S. Ponce, Y. Pouillon, T. Rangel, M. Torrent, M. Verstraete, V. Zecca, J. Zwanziger
+
+</pre>
+</body>

@@ -11,7 +11,7 @@
 !!  (4) pseudo-core contrib. to frozen-wf part the dynamical matrix (part 2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,14 +75,14 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  use m_errors
  use m_linalg_interfaces
 
+ use m_geometry,   only : strconv
+ use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore'
- use interfaces_18_timing
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -173,7 +173,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  nfftot=n1*n2*n3
  me_fft = mpi_enreg%me_fft
 
- ! Get the distrib associated with this fft_grid 
+ ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  delta=one/(n1xccc-1)
@@ -187,7 +187,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
    if (nspden>=2) then
      ifft=1
      do i3=1,n3
-       if(me_fft==fftn3_distrib(i3)) then 
+       if(me_fft==fftn3_distrib(i3)) then
          do i2=1,n2
            do i1=1,n1
              work(i1,i2,i3)=half*(vxc(ifft,1)+vxc(ifft,2))
@@ -199,7 +199,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
    else
      ifft=1
      do i3=1,n3
-       if(me_fft==fftn3_distrib(i3)) then 
+       if(me_fft==fftn3_distrib(i3)) then
          do i2=1,n2
            do i1=1,n1
              work(i1,i2,i3)=vxc(ifft,1)
@@ -473,7 +473,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !  strdia = (1/N) Sum(r) [mu_xc_avg(r) * rho_core(r)]
    ifft=0 ; strdia=zero
    do i3=1,n3
-     if(me_fft==fftn3_distrib(i3)) then 
+     if(me_fft==fftn3_distrib(i3)) then
        do i2=1,n2
          do i1=1,n1
            ifft=ifft+1
@@ -560,7 +560,7 @@ end subroutine mkcore
 !! This routine is an alternative to mkcore, to be used for PAW and/or WVL.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TRangel,MT)
+!! Copyright (C) 1998-2018 ABINIT group (TRangel,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -631,18 +631,18 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use m_errors
  use m_linalg_interfaces
 
+ use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab,      only : pawtab_type
  use m_paw_numeric, only : paw_splint
+ use m_geometry,    only : strconv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_alt'
- use interfaces_18_timing
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

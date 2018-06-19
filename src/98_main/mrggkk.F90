@@ -8,7 +8,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,16 +64,16 @@ program mrggkk
 #endif
  use m_hdr
 
+ use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrggkk'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -182,7 +182,7 @@ program mrggkk
    ios = open_file(outfile,message,unit=unitout,form='formatted')
    rdwrout = 4
  else
-   MSG_ERROR(' binascii must be 0 or 1')
+   MSG_ERROR(' binascii must be between 0 and 2')
  end if
 
  ABI_CHECK(ios==0,message)

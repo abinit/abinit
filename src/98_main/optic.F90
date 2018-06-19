@@ -8,7 +8,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (SSharma,MVer,VRecoules,YG)
+!! Copyright (C) 2002-2018 ABINIT group (SSharma,MVer,VRecoules,YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,22 +98,20 @@ program optic
  use netcdf
 #endif
 
- use m_time ,          only : asctime
+ use m_specialmsg,     only : specialmsg_getcount, herald
+ use m_time ,          only : asctime, timein
+ use m_symtk,          only : mati3inv, matr3inv
+ use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
  use m_crystal_io,     only : crystal_ncwrite
- !use m_specialmsg,only : specialmsg_getcount
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optic'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -148,22 +146,17 @@ program optic
  type(crystal_t) :: cryst
  type(eprenorms_t) :: Epren
 !arrays
- integer,allocatable :: istwfk(:), npwarr(:)
- integer,allocatable :: nband(:), symrel(:,:,:), symrec(:,:,:)
- real(dp) :: tsec(2)
- real(dp) :: gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
- real(dp),allocatable :: symcart(:,:,:)
- real(dp),allocatable :: kpt(:,:),wmesh(:)
- real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
- real(dp),allocatable :: eig0tmp(:), eigen0(:)
+ integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
+ real(dp) :: tsec(2), gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
+ real(dp),allocatable :: symcart(:,:,:), kpt(:,:),wmesh(:)
+ real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:), eig0tmp(:), eigen0(:)
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
- real(dp),pointer :: outeig(:)
  real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
+ real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncddk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
  character(len=fnlen) :: infiles(0:3)
-
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp

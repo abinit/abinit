@@ -8,7 +8,7 @@
 !! elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GM, AR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,14 +54,14 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
+ use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrhar'
- use interfaces_18_timing
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

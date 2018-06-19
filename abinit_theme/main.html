@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block libs %}
+    {{ super() }}
+
+    <!-- Jquery from Google CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Load Jquery UI -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <!-- Handle jQuery plugin naming conflict between jQuery UI and Bootstrap 
+    https://stackoverflow.com/questions/13731400/jqueryui-tooltips-are-competing-with-twitter-bootstrap
+    -->
+    <script>
+      $.widget.bridge('uibutton', $.ui.button);
+      $.widget.bridge('uitooltip', $.ui.tooltip);
+    </script>
+
+    <!--
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/pepper-grinder/jquery-ui.css">
+    -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <!-- Bootstrap theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/bootstrap.min.css"/>
+
+    <!-- Bootstrap http://getbootstrap.com/getting-started/ -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" 
+    integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" 
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+    </script>
+
+    <!-- font-awesome -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    {% if page.meta and page.meta.bootstrap_table %}
+        <!-- Support for bootstrap table http://bootstrap-table.wenzhixin.net.cn/ -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+    {% endif %}
+
+    <!--Pace support. http://github.hubspot.com/pace/ -->
+    <script>
+        paceOptions = {
+            ajax: true,      // disabled
+            document: true,  // activated
+            eventLag: false  // disabled
+            //target: 'article'
+            //elements: {selectors: ['.my-page']}
+        };
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/white/pace-theme-big-counter.min.css" />
+    <!--
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/white/pace-theme-bounce.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-corner-indicator.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-flat-top.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-loading-bar.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-center-atom.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-flash.min.css" />
+    -->
+
+    <!-- MathJax support
+    <script type="text/javascript" async 
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script> 
+    -->
+    <!--
+    This is compatible with plotly.
+    -->
+    <script type="text/javascript" async 
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_SVG">
+    </script> 
+
+    <!--
+    Configure MathJax to produce automatic equation numbers http://docs.mathjax.org/en/latest/tex.html
+    -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        //jax: ["input/TeX","output/HTML-CSS"],
+        //tex2jax: {inlineMath: [['$','$']]},
+        //displayAlign: "center",
+        TeX: {
+            equationNumbers: { autoNumber: "AMS" },
+            extensions: ["AMSmath.js"],
+            Macros: {
+                "*": "{\\dagger}",
+                "ra": "{\\rangle}",
+                "la": "{\\langle}",
+                // matchcal version
+                mcG: "{\\mathcal{G}}",
+                mcR: "{\\mathcal{R}}",
+                mcS: "{\\mathcal{S}}",
+                mcC: "{\\mathcal{C}}",
+                mcO: "{\\mathcal{O}}",
+                // acronyms
+                KS: "{\\text{KS}}",
+                QP: "{\\text{QP}}",
+                BZ: "{\\text{BZ}}",
+                sign: "{\\text{sign}}",
+                xc: "{\\text{xc}}",
+                tchi: "{\\tilde\\chi}",
+                // symbols commonly used
+                rr: "{\\bf r}",
+                RR: "{\\bf R}",
+                tt: "{\\bf t}",
+                GG: "{\\bf G}",
+                kk: "{\\bf k}",
+                qq: "{\\bf q}",
+                kq: "{\\kk + \\qq}",
+                qG: "{\\bf q + G}",
+                kmq: "{\\kk - \\qq}",
+                kpq: "{\\kk + \\qq}",
+                kpG: "{\\kk + \\GG}",
+                qpG: "{\\qq + \\GG}",
+                // Many-body theory
+                Go: "{G_0}",
+                Wo: "{W_0}",
+                Ueff: "{U_{\\text{eff}}}",
+                // greek symbols + tilde version
+                ee: "{\\epsilon}",
+                tee: "{\\tilde{\\epsilon}}",
+                ww: "{\\omega}",
+                tww: "{\\tilde\\omega}",
+                dd: "{\\,\\text{d}}",
+                vxc: "{v_\\xc}",
+                // symrel
+                Ri: "{\\mcR^{-1}}",
+                Rit: "{\\mcR^{-1\\tau}}",
+                // symrec
+                Si: "{\\mcS^{-1}}}",
+                Sit: "{\\Si^\\tau}}",
+                // partial and functional derivative.
+                PDER: ["{\\dfrac{\\partial #1}{\\partial #2}}", 2],
+                FDER: ["{\\dfrac{\\delta #1}{\\delta #2}}", 2],
+                // PAW
+                tPsi: "{\\tilde\\Psi}",
+                tpsi: "{\\tilde\\psi}",
+                tPhi: "{\\tilde\\Phi}",
+                tphi: "{\\tilde\\phi}",
+                tprj: "{\\tilde p}"
+            }
+          }
+      });
+    </script>
+
+    <!-- See http://docs.mathjax.org/en/latest/start.html 
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js", "MathMenu.js", "MathZoom.js"],
+        jax: ["input/TeX", "output/HTML-CSS", "output/NativeMML],
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true
+        },
+        "HTML-CSS": { availableFonts: ["TeX"] }
+      });
+    </script>
+    -->
+
+    {% if page.meta and page.meta.plotly %}
+        <!-- Plotly support -->
+        <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+    {% endif %}
+    
+    {% if page.meta and page.meta.light_gallery %}
+        <!-- lightgallery support. See https://github.com/sachinchoolur/lightGallery-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css" 
+            integrity="sha256-6hdzBLI5YrM1ltRrsPdV0y2CsqGgLYCeNlLFFQoh7MY=" crossorigin="anonymous" />
+
+        <!-- A jQuery plugin that adds cross-browser mouse wheel support. (Optional) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/js/lightgallery-all.min.js" 
+            integrity="sha256-n9ZE2vNe6Iv4S6dUXnzuvvt2yLWOZPJqD787TC7S4W4=" crossorigin="anonymous"></script>
+    {% endif %}
+
+    <!-- Introjs for Guided Tour -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css" />
+
+    <!-- Load fonts used for input variables -->
+    <!--
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet">
+    -->
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+
+<!-- 
+add dropdown button with toolbar (based on https://bootsnipp.com/snippets/featured/inbox-by-gmail)
+and return to Top button (based on https://codepen.io/rdallaire/pen/apoyx)
+-->
+<div class="md-container">
+  <div class="row">
+    <div id="inbox">
+      <div class="fab btn-group show-on-hover dropup">
+        <div data-toggle="tooltip" data-placement="left" title="Menu" style="margin-left: 42px;">
+          <button id="return-to-top" type="button" class="btn btn-primary btn-io dropdown-toggle" data-toggle="dropdown">
+            <span class="fa-stack fa-2x">
+                <i class="fa fa-circle fa-stack-2x fab-backdrop"></i>
+                <i class="fa fa-chevron-up fa-stack-1x fa-inverse fab-primary"></i>
+                <i class="fa fa-map-signs fa-stack-1x fa-inverse fab-secondary"></i>
+            </span>
+          </button>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        {% set icons = [
+          "fa-info-circle",
+          "fa-terminal", 
+          "fa-book", 
+          "fa-graduation-cap", 
+          "fa-file-text-o", 
+          "fa-question", 
+          "fa-user-circle-o", 
+          ] %}
+        {% for nav_item in nav | reverse %}
+          <li><a href="{{ (nav_item.children | first).url }}" data-toggle="tooltip" data-placement="left" 
+                  title="{{ nav_item.title }}"><i class="fa {{ icons[loop.index0] }}"></i></a></li>
+        {% endfor %}
+        <!--
+        Example: 
+        <li><a href="/index.html" data-toggle="tooltip" data-placement="left" title="User-Guide">
+              <i class="fa fa-user-circle-o"></i></a></li>
+        -->
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    <!-- Add tabs to footer -->
+    {% if config.theme.feature.tabs %}
+        {% include "partials/tabs.html" %}
+    {% endif %}
+    {{ super() }}
+{% endblock %}
+
+<!--
+MkDocs version : {{ mkdocs_version }}
+Build Date UTC : {{ build_date_utc }}
+-->

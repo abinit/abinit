@@ -1,0 +1,184 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+July 2014 and October 2014. These release notes
+are relative to improvements of ABINITv7.10 with respect to v7.8.
+
+This version 7.10 was not initially planned for release, as the cleaning on top of ABINITv7.8
+had started, and should have been followed by ABINITv8.0. Some nice development could however not been merged
+in ABINITv7.8, while the last released version of ABINITv7 was intended to be used for the writing of the next ABINIT paper.
+So, it was decided to release ABINITv7.10, albeit with only few noticeable achievements with respect to ABINITv7.8.
+
+
+The list of contributors includes :
+B. Amadon, J.-M. Beuken, J. Bieder, E. Bousquet, F.Bruneval, M. Delaveau, A. Gerossier, M. Giantomassi, Y. Gillet, F. Jollet,
+G. Jomard, A. Levitt, S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Torrent, M. Van Setten, M. Verstraete, Bin Xu, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 7.10, released on November 3, 2014.
+
+Changes with respect to version 7.8 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 Although the availability of NetCDF, libxc, and MPI-IO (in case of parallelism) is not yet mandatory,
+    v7.10 is likely the last version of ABINIT for which NetCDF is not mandatory (it will be mandatory
+    for ABINITv8). On the other hand the requirement of libxc and MPI-IO will likely not be enforced in ABINITv8 .
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 For the massively parallel computations (ground state), there is a new algorithm based on Chebyshev filtering, 
+    designed for very large number of processors, in the regime where LOBPCG does not scale anymore (typically beyond 500 procs for band-FFT work)
+    It is not able to use preconditionning and therefore might converge slower than other algorithms; when convergence is poor, a good idea is to use
+    more bands than strictly necessary, by increasing nband and using nbdbuf input variable.
+    Use the input variable wfoptalg=1, and test patal#30. 
+    See also the new input variable use_gemm_nonlop, for more performance in case a good BLAS GEMM routine is available (at the expense of memory).
+    For more information, see the performance guide (doc/theory/howto_chebfi.pdf).
+    A paper, written by A. Levitt and M. Torrent is available at "http://arxiv.org/abs/1406.4350" .
+
+B.2 A more general implementation of projected local orbital Wannier functions, in view of doing Dynamical Mean Field Theory (DMFT).
+    See the input variable plowan_compute, as well as the auxiliary input variables plowan_bandi, plowan_bandf, 
+    plowan_iatom, plowan_it, plowan_lcalc, plowan_natom, plowan_nbl, plowan_nt, plowan_projcalc, plowan_realspace.
+    See the tests v7#71 and 72.
+    This can also be used to build a simplified interpolated band structure.
+    Work by A. Gerossier and B. Amadon
+
+B.3 The Bethe-Salpeter Equation can be solved with conjugate gradient algorithm.
+    See test v67mbpt#16.
+    Work by M. Giantomassi
+
+B.4 Computation of positron Doppler broadening.
+    k-point parallelization is implemented. Band-FFT paralleization is under development.
+    Electron-positron momentum distribution calculations for each k-point is allowed.
+    See "posdoppler" input variable and test v7#t30.
+    From J. Wiktor, M. Torrent and G. Jomard.
+
+B.5 Temperature-dependence of the gap
+    Inclusion of dynamical corrections, according to Eq. 5.42 of Grimvall. Computation of lifetime.
+    Writing of a tutorial for the temperature dependence of the gap, 
+    available at https://wiki.abinit.org/doku.php?id=howto:temperature .
+    Work by S. Ponce
+
+B.6 Electronic entropy in Dynamical Mean Field Theory (DMFT).
+    See the input variable dmft_entropy and dmft_nlambda
+    See the tests v7#29 and v7#30-31.
+    The electronic entropy is calculated performing a thermodynamical integration over the screened coulomb interaction.
+    The calculation is currently only available when the continuous-time quantum Monte Carlo solver (see dmft_solv) is used for the DMFT.
+    Work by J. Bieder and B. Amadon
+
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 Some routines that are not called at all, have been put in a separate directory "quarantine".
+    Work by Y. Pouillon
+
+C.2 Development of a GUI to view and edit the input variable documentation file, when it is translated in YAML.
+    Work by Y. GIllet
+
+C.3 Allowed API compatibility ranges for LibXC
+    From Y. Pouillon
+
+C.4 Replacement of m_profiling by m_profiling_abi, and similar change of naming, in order
+    to suppress duplication of names between bigdft and abinit .
+
+C.5 Activate netcdf+etsf_io for petrus (NAG), from Jean-Michel Beuken
+
+C.6 Lot of clean-up already done by Matteo Giantomassi ...
+
+C.7 The GPU automatic tests are now executed with CUDA 6.5 on a NVIDIA K40s card.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 A mini-tutorial on work function is available, see doc/users/work_function_tutorial.tex
+    From M. Verstraete
+
+D.2 Work on ABINIT GUI by F. Abreu and Y. Gillet
+
+D.3 Development of scripts for high-throughput GW calculations 
+    Work by M. Van Setten and G.-M. Rignanese
+
+D.4 Development of norm-conserving pseudopotentials for high-throughput calculations, see 
+    the pseudo-dojo at http://www.pseudo-dojo.org/dojo.html . 
+    This is the first release of the Website.
+    Work by M. Van Setten, J.-M. Beuken, Matteo Giantomassi, and G.-M. Rignanese
+
+D.5 Implementation of several flavours of k-space interpolation technique for Bethe-Salpeter.
+     See the new input variables bs_interp_mode, bs_interp_prep, bs_interp_kmult,
+     and also test v67mbpt#15.
+     Work by Y. Gillet, M. Giantomassi and X. Gonze.
+
+D.6 Add limit on dilatmx renormalizations, to stabilize the algorithm.
+    From M. Torrent and M. Verstraete
+
+D.7 Work on Born effective charges with PAW, and also piezoelectricity
+    From M. Torrent and A. Martin
+
+D.8 Work is continuing on the JTH PAW dataset table.
+     The JTH 0.2 table has been released.
+    See https://www.abinit.org/downloads/PAW2 .
+    Work by F. Jollet.
+ 
+D.9 Continued efforts on the development of the abipy library
+    From M. Giantomassi 
+
+D.10 The memory requirements can be estimated and tested at the very beginning of a run,
+     see the input variable mem_test .
+
+D.11 Improvement of parallelization over atoms for DFPT
+     By Muriel Delaveau
+
+D.12 Documentation for adpimd and adpimd_gamma has been provided
+     From G. Geneste and M. Torrent
+
+D.13 Option to enable/disable IALLTOALL in MPI-FFT
+     From M. Giantomassi
+
+D.14 Stress term for PAW with efield working
+     From J. Zwanziger
+
+D.15 The PLASMA library can be used
+     (One should have more information on this ! )
+     Work by M. Giantomassi
+
+D.16 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
+     including patches for the fallbacks), and improvements of documentation by :
+     B. Amadon, J. Bieder, E. Bousquet, F.Bruneval, M. Delaveau, M. Giantomassi, Y. Gillet, F. Jollet, 
+     A. Levitt, S. Ponce, Y. Pouillon, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger
+
+</pre>
+
+</body>

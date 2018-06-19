@@ -1,0 +1,247 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2006 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between February 2006 and November 2006. These release notes
+are relative to improvements of ABINITv5.2 with respect to v5.1.
+
+The list of contributors includes :
+B. Amadon, P.-M. Anglade, N. Bandeira, F. Bottin, M. Boulet,
+D. Caliste, M. Cote, T. Deutsch, L. Genovese,
+M. Giantomassi, S. Goedecker, D. Hamann, F. Jollet,
+F. Lambert, Bo Liu, Deyu Lu,
+S. Mazevet, Y. Pouillon, V. Recoules, L. Sindic, M. Torrent,
+M. Verstraete, Xinjie Wang, C. Wiegert, G. Zerah, Zhou "Bob John"
+
+Also, P.M. Anglade and D. Caliste have contributed a lot to finding
+errors during the merge of the different branches.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.2, released on August 14, 2006.
+
+Changes with respect to version 5.1 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. For the developers, there are important changes described in
+    section C . Please, also have a look at the new installation notes,
+    (either from the Web, or in
+    ~abinit/doc/install_notes/install_v5.2.html )
+
+A2. The default value of ntime has been changed from 5 to 0. Indeed
+    a non-zero value was misleading (some people did not care about that variable,
+    and got underconverged results without noticing it).
+    See indefo.F90, and https://www.abinit.org/Infos_v5.2/input_variables/varrlx.html#ntime
+
+A3. In v5.2.3, a bug with some bearing on numerical results,
+    related to molecular dynamics and optimization
+    has been removed. Bug found by Craig Wiegert.
+    Precisely : instead of correctly removing the average force from
+    the force felt by each atom, the total force acting on the cell
+    was removed from the force felt by each atom. This was the case
+    for the Broyden algorithm (brdmin.F90 routine) as well as the
+    Molecular Dynamics (moldyn.F90 routine). Of course, if the XC grid
+    was sufficiently fine, such overall force should tend to zero,
+    and the coding error should have little effect.
+    Still, this bug might perhaps explain some painfully
+    slow relaxations previously observed.
+
+A4. In v5.2.4, a bug that might have an important effect on numerical
+    results has been removed. Test case given by Bo Liu.
+    This bug could only appear in phonon dynamical matrix calculations,
+    for non-zero wavevectors, in case in the list of admitted
+    symmetries for that wavevector, an atom
+    would send an atom to an equivalent atom in another cell, and the
+    difference vector between the two atoms
+    would have non-zero scalar product with the wavevector.
+    Precisely : in the non-stationary generation of dynamical matrix
+    elements, the action of the symmetrizer for the non-local part included
+    an erroneous phase. None of the automatic tests of phonon generations
+    tested that possibility. A new test case has been created,
+    test v5#21 , from input files by Bo Liu
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+(B0. This version is the first v5 to lead to a full production version. The
+    build system seems stable, at least ...).
+
+B1. The computation of phonon band structure in the presence of
+    a finite electric field is now possible
+    (contribution by Xinjie Wang, with help by David Vanderbilt and Don Hamann)
+    See Test_v4#80 , as well as the description of the input variable berryopt
+    1. Run a scf ground-state calculation at zero electric field
+       to get wave functions for the ground-state calculation in finite electric fields.
+    2. Run a scf ground-state calculation in finite electric field. The
+       electric field is controlled by the input variable 'efield'. And
+       'berryopt' should be 4. The input variable 'kptopt' should be set to be 2.
+    3. Based on the wave functions obtained in step (2), perform phonon
+       calculation by setting 'berryopt=4','kptopt=3' and 'efield'.
+       nsym should be set to 1 currently but this restriction may be
+       removed later . The other
+       parameters are the same as phonon calculation at zero electric field.
+    The choice of k-point sampling N x N x N should be the same in the three runs
+    and N should be an even number.
+
+B2. The treatment of Hartree potential with open boundary
+    conditions has been included by Damien Caliste.
+    This might be useful for treating molecules or clusters in a big empty box
+    (not periodic solids, slabs, or 1D systems)
+    It is based on a wavelet Poisson solver (from S. Goedecker,
+    T. Deutsch, L. Genovese - BIGDFT project).
+    The local part of potential created by ions is also treated
+    in real space (when GTH pseudo-potentials are involved) and the Ewald
+    energy has been replaced by a simple Coulombian ion-ion interaction.
+    The treatment in real space is control by the input variable
+    icoultrtmt. An other input variable nscforder) is used to tune the scaling
+    functions basis used by the Poisson solver. See Test_v5#07 which tests these
+    two variables for the hydrogen atom. The forces can also be computed with
+    this real space computation but is still in an early stage of
+    implementation.
+
+B3. The generation of wavefunction files following the SpecFFNQ
+    specification has been coded.
+    (Note : the merge of this development is not yet done, likely for v5.2.4)
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C1. Interfaces are now automatically generated, thanks to the
+    script abilint.py, written by T. Deutsch.
+    This guarantees a better coherence between the F90 files,
+    compilers being able to cross-check the content of the
+    arguments.
+    Note, however, that each time a new argument is introduced
+    in a subroutine, one have to run
+
+     */abilint . .
+
+    in the top directory. See the explanations in the installation
+    notes, section 6 (either from the Web, or in
+    ~abinit/doc/install_notes/install_v5.2.html )
+
+C2. A brief report is now issued when automatic tests
+    are performed, mentioning that each test has
+    succeeded (no worry anymore), passed (usually it is OK),
+    passed marginally (within 1.5 of the usually accepted deviation)
+    or failed. This mechanism is activated in case
+    all automatic tests in one test directory are performed.
+    As examples, this happen when one issues, in the tests directory :
+    make tests_acc
+    or
+    make tests_min
+    or also
+    make tests_fast
+    and for similar targets.
+    This mechanism is based on the fact that now, the (usual)
+    fldiff.report files contain a one-line summary of the behaviour of each
+    test (this has been added by L. Sindic), and these one-line
+    summaries are examined, and compared with a database
+    (see the files tests/*/Input/report.in ).
+    The output is a file named "report", that is present in
+    the directory where the tests were performed.
+    See also the section X of the installation notes
+    (either from the Web, or in
+    ~abinit/doc/install_notes/install_v5.2.html ).
+
+C3. The new directory tests/v5 was started by Pierre-Matthieu Anglade and Damien Caliste
+    to accomodate new features.
+
+C4. The new task "make tests_speed" is available in the tests directory,
+    to test quickly the speed of the code, after installation.
+    This produces results, to be compared
+    to those of https://www.abinit.org/documentation/?text=benchmarks .
+
+C5. To new parameters have been defined : czero and cone (for
+    complex zero and complex one). See defs_basis.F90 .
+    They can be used in call to zgemm or other blas or lapack routines,
+    in case the argument has to be complex instead of real.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. Implementation of LDA+U in the PAW framework is underway.
+    Test cases and doc must still be added.
+    Work by F. Jollet and coworkers B. Amadon
+
+D2. In ANADDB, related to electron-phonon interaction,
+    it is now possible to compute and print the nesting factor.
+    See the input variable prtnest (of ANADDB). Implemented by  Matteo Giantomassi.
+    See also automatic test elphon_5 .
+
+D3. In ANADDB, related to electron-phonon interaction, it is now
+    possible to output the Fermi surface, in a format compatible with XCrysDen.
+    Implemented by  Matteo Giantomassi.
+    Still need an automatic test ...
+
+D4. Better use of memory and more efficient coding of XC routines, from Luigi Genovese
+
+D5. Improvements of the PAW implementation, by Marc Torrent.
+
+D6. Debugging and bug fixes of the build system by Yann Pouillon, as well as Damien Caliste.
+
+D7. Some output values are exported into XML files when the input variable
+    outputxml is set. The corresponding
+    DTD is distributed as extras/post_processing/abinitRun.dtd. All the DTD is not
+    yet implemented and this one is currently restricted to ground computations
+    (and derivative such as geometry optimisation). Development by Damien Caliste.
+
+D8. A restart for molecular dynamics has been coded by Stephane Mazevet
+    Still need to be documented, with test cases.
+
+D9. Computation of the conductivity has been coded within PAW, by V. Recoules.
+    Still need to be documented, with test cases.
+
+D10. Two new SCF preconditioners are under development :
+    one is based on a real space treatment of the density-potential
+    relationship, and the other is based on Thomas-Fermi-Von Weiszacker
+    model. This has been developed by Pierre-Matthieu Anglade.
+
+D11. FFT parallelism has been tested, in a selected regime, and has shown
+    excellent performance. However, it is not yet in production stage.
+    Full generality should be reached, automatic tests and documentation are still lacking.
+    (contribution by Mireille Boulet, Gilles Zerah)
+
+D12. A "Materials studio to ABINIT" converter has been written by Zhou (bobjohn.lzu@gmail.com).
+     It is available at util/users/Cell2Abinit.py .
+
+D13. Debugging of memory use (deallocate missing) by Deyu Lu and PM Anglade, as well as DCaliste.
+     Other debugging by Nuno Bandeira, MVerstraete, DCaliste, MTorrent, GZerah, MBoulet,
+     BAmadon, FBottin, FLambert
+
+D14. The documentation of the input variable kptbounds has been improved a lot : it indicates
+     now the coordinate of different k points, for FCC, BCC and exagonal lattices, as well as
+     typical paths in reciprocal space, useful for drawing electronic (and phononic band structures).
+
+</pre>

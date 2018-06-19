@@ -9,7 +9,7 @@
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2018 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_errors
  use m_xmpi

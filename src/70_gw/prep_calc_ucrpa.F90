@@ -7,7 +7,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,6 +110,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_defs_ptgroups
  use m_errors
 
+ use m_time,          only : timab
  use m_blas,          only : xdotc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -133,7 +134,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => prep_calc_ucrpa
 !End of the abilint section
@@ -715,7 +715,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
                  write(std_out,*) "Warning: precision is low, oscillator strengh should be one and is :",rhotwg_ki(1,jb)
                !else
                !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
-               endif 
+               endif
              endif
            endif
            if (Psps%usepaw==1.and.pawcross==1) then ! Add paw cross term

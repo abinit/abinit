@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (FR, EB, SPr)
+!! Copyright (C) 2001-2018 ABINIT group (FR, EB, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,22 +70,22 @@
 #include "abi_common.h"
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
-&          nhat1gr,nhat1grdim,nkxc,nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
-&          rprimd,usexcnhat,vxc,vxc1,xccc3d1)
+&          nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
+&          rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
 
  use defs_basis
  use defs_abitypes
  use m_errors
  use m_profiling_abi
-
  use m_xc_noncoll
+
+ use m_time,      only : timab
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc_noncoll'
- use interfaces_18_timing
- use interfaces_56_xc, except_this_one => dfpt_mkvxc_noncoll
 !End of the abilint section
 
  implicit none
@@ -93,7 +93,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhatdim,nhat1dim,nhat1grdim,optnc
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat,nkxc_cur
+ integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -104,10 +104,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  real(dp),intent(in),target :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: qphon(3),rprimd(3,3),xccc3d1(cplex*n3xccc)
  real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
-
+ integer,optional,intent(in) :: ixcrot
 !Local variables-------------------------------
 !scalars
- integer :: ifft
 !arrays
  real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0),tsec(2)
  real(dp),allocatable :: m_norm(:),rhor1_diag(:,:),vxc1_diag(:,:)
@@ -119,6 +118,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  Compute Vxc(r)^(1) in the spin frame aligned with \vec{m} and rotate it back
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(nhat1gr)
 
  call timab(181,1,tsec)
 
@@ -181,10 +181,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 
 !  -- Rotate back Vxc(r)^(1)
    if (optnc==1) then
-     if (option==0) then
-       call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
+     if(present(ixcrot)) then
+       call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
+&       mag_norm_in=m_norm,rot_method=ixcrot)
      else
-       call rotate_back_mag_dfpt(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
+       call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
 &       mag_norm_in=m_norm)
      end if
    else

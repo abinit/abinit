@@ -10,7 +10,7 @@
 !!   from projected scalars to reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1228,7 +1228,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
    if (choice>1) then
      ABI_DEALLOCATE(dgxdtfac_)
    end if
-   if (choice==8) then
+   if (choice==54.or.choice==8.or.choice==81) then
      ABI_DEALLOCATE(d2gxdtfac_)
    end if
  end if
@@ -1237,7 +1237,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
    if (choice>1) then
      ABI_DEALLOCATE(dgxdtfacs_)
    end if
-   if (choice==8) then
+   if (choice==54.or.choice==8.or.choice==81) then
      ABI_DEALLOCATE(d2gxdtfacs_)
    end if
  end if

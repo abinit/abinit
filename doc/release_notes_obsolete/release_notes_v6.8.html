@@ -1,0 +1,243 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+February 2011 and June 2011. These release notes
+are relative to improvements of ABINITv6.8 with respect to v6.6.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, K. Delaney, C. Espejo,
+G.A. Franco, G. Geneste, M. Giantomassi, X. Gonze, Jiawang Hong, A. Jacques,
+L. He, A. Knyazev, S. Le Roux, A. Lherbier, F. Liu, M. Mancini, T. Nishimatsu, M. Oliveira, 
+S. Ponce, Y. Pouillon, G.-M. Rignanese, A. Romero,
+M. Torrent, M. Stankovski, M. Verstraete, D. Waroquiers, J. Zwanziger .
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+(Please note the WARNINGS !)
+
+Xavier
+
+__________________________________________________________________
+
+Version 6.8, released on June 27, 2011.
+
+Changes with respect to version 6.6 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The default value for optforces has been changed (to 2).
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+ 
+B.1 The meta-GGA in the LibXC exchange-correlation library can now be used with ABINIT,
+    in the norm-conserving case (not yet PAW), in the spin-non-polarized and collinear spin-polarized case
+    (not yet non-collinear case).
+    Some problems with the self-consistency are still present, though mostly for large cells and/or
+    systems with a low symmetry.
+    See the input variable ixc, and tests v6#33, libxc#06,07,08, and the associated comments in the libxc README.
+    Work done by A. Lherbier and M. Oliveira.
+
+B.2 The GGA XC kernels from libxc can now be used with ABINIT,
+   in the norm-conserving case and in the PAW case (only if pawxcdev=0 is set in input file),
+   in the spin-non-polarized and collinear spin-polarized case
+   (not yet non-collinear case).
+   See the input variable ixc, and tests libxc#11, 12, 13
+   By F. Liu, L. He, G.-M. Rignanese and Marc Torrent
+
+B.3 PAW+libxc is now allowed, see test libxc#10 (prepared by JZwanziger).
+   To be used together with ATOMPAW+LibXC
+   Work by M. Torrent
+
+B.4 A GUI for ABINIT has been set-up. It is available in the subdirectory "gui". Please, consult the README file
+    for some instruction on how to use it.
+    Work done by F. Abreu. Integrated in the build system by Y. Pouillon.
+
+B.5 The definition of the set of q points (for phonon calculations) for different datasets can now be done in the same
+    spirit as for the generation of k points, that is, 
+    based on the input of a homogeneous grid of points.
+    Related input variables : qptopt, ngqpt, nshiftq, shiftq, qptrlatt, iqpt.
+    By X. Gonze
+    See the automatic tests Tv6#35 and 78.
+
+B.6 The computation of the temperature-dependence of the electronic structure
+    within the rigid-ion approximation (DFPT implementation, improving upon the Allen-Heine-Cardona approach)
+    has been parallelized, and is much easier to use than before, thanks to modifications
+    of ANADDB (input variable thmflag 5 to 8). An imaginary shift of the difference of energy
+    (input variable elph2_imagden)
+    allows to avoid the divergence of the denominator.
+    By X. Gonze
+    See automatic tests v6#37-40 and v6#68-69. And paral#AB for the parallelism.
+
+B.7 RPA calculations can be done now with extrapolar trick, saving a large amount of CPU time.
+    The parallelism for the RPA functional with numerical integration has been implemented.
+    Test cases are still to be provided.
+    By F. Bruneval
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 A new subdirectory of tests has been introduced, called "unitary". At present only FFT are tested.
+    The purpose is to be able to test quickly a large number of options in a subset of routines
+    that form an inner library of ABINIT.
+    By M. Giantomassi
+
+C.2 A link checker has been activated, to enforce correctness of the hyperlinks in the HTML documentation of ABINIT. 
+    NOTE : It detects correctly all the broken links with target INSIDE of the ABINIT package.
+    The correct detection of the broken links OUTSIDE of the ABINIT package is problematic,
+    as they do not depend on us, and some Web site can be temporarily down. So, the check of
+    external links has not been activated.
+    By J.-M. Beuken. 
+
+C.3 Woopy is a new slave for the test farm, under Windows. 
+    A new on-demand mechanism for testing ABINIT on the Web has been set-up, with address
+    http://wwwold.abinit.org/on_demand
+    The new slave ktulu is also available, to test debian/ubuntu packages.
+    By J.-M. Beuken, and A. Jacques.
+
+C.4 Introduced a new subdirectory of tests, called tutoplugs, for testing the plugins when used in tutorials.
+    By X. Gonze
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 A new automatic test (Tv6#94) and new input variables (bs_hayd_term and bs_nstates)
+    have been introduced for the Bethe-Salpeter Equation part of ABINIT.
+    Work in progress :  model dielectric function, Haydock approach,
+    the potting of excitons, the Haydock method for pseudo Hermitian matrices,
+    approximated DOS with Haydock method, post-processing tools for BSE calculations,
+    BSE with collinear spin.
+    Test cases to be provided ...
+    By M. Giantomassi.
+
+D.2 The input variable vdw_nfrag and vdw_typfrag have been introduced, 
+    related to Silvestrelli approach to van der Waals interactions. 
+    Also, added spin polarizarion support for vdW-Wannier.
+    This is in the frame of an on-going effort to provide vdW functionals for ABINIT.
+    Also, on-going effort to have VdW-DF interfaced with ABINIT.
+    Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.3 New input variables getpawden and irdpawden have been introduced.
+    No documentation and no tests provided though ...
+
+D.4 New input variables cd_halfway_freq, cd_max_freq, cd_subset_freq,
+    gw_use_freqre_tangrid have been introduced.
+    See the test case libxc#14 to be activated soon.
+
+D.5 Phonon calculations using DFPT can now be done reliably with the PAW methodology,
+   for the insulating case. This is still in beta testing. Some systems (with peculiar symetries)
+   may not work.
+   The metal case is operational (under the same conditions), except for q=0 (not fully implemented).
+   The electric field response was already available previously.
+   Still, for the time being, mixing of electric field and atomic displacement is not allowed.
+   Work done by M. Torrent.
+   See the test v6#62.
+
+D.6 On-going big restructuration of the routines involved in the change
+    of the atomic coordinates and cell parameters (called by gstate.F90, linke brdmin.F90), also coupled with on-going
+    changes to accomodate the images (above gstate.F90).
+    Defines the use of NETCDF files, also ETSF-IO , for the restarts.
+    See section C.3 of v6.4 release notes.
+    By G.A. Franco .
+
+D.7 Atomic projection of the phonon band structure.
+    See test v6#76, with input variables natprj_bs and iatprj_bs .
+    By M. Verstraete. 
+
+D.8 Add support for acml (4.4.0) in the build system
+    By A. Jacques.
+
+D.9 Introduce occopt=8, with linearly changing occupation numbers between two limits.
+     By X. Gonze.
+
+D.10 Work on the interfacing with xyz , poscar and CML files.
+     By M. Verstraete.
+
+D.11 A genetic algorithm to find new structures is under development.
+     (see D.13 of the 6.4 release notes)
+     By AH. Romero and X. Gonze
+
+D.12 Memory optimization of the mrgddb tool
+     By S. Poncé.
+
+D.13 Automatic computation of mqgrid (default is 0).
+     By D. Waroquiers
+
+D.14 Work on library extraction.
+     By D. Caliste
+
+D.15 Work on the input variable zeemanfield.
+     By Kris Delaney. 
+
+D.16 Work on the Effective Energy Technique by A. Berger.
+
+D.17 Added directory psps to interface with the pseudopotential generation and testing project.
+     Also populated with some scripts.
+     By A. Jacques, D. Waroquiers, M. Stankovski, and X. Gonze.
+
+D.18 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the
+     ionic degrees of freedom, combined with DFT for the electronic degrees of freedom.
+     Also, parallelism over the images.
+     (see D.7 of the 6.4 release notes)
+     By G. Geneste and M. Torrent
+
+D.19 The use of an extrapolation scheme to decrease the number of k-points needed for Berry phase
+     calculations, finite electric fields and Raman intensity is in progress.
+     Test v6#20 . Input variable berrystep.
+     By S. Le Roux.
+
+D.20 The use of LDA+Dynamical Mean Field Theory is in progress.
+     (see D.6 of the 6.4 release notes)
+     Test v6#51.
+     By B. Amadon
+
+D.21 On-going effort to provide vdW functionals for ABINIT.
+     Silvestrelli approach is working.
+     See input variables vdw_xc (=10 for Silvestrelli approach), vdw_nwan and vdw_supercell .
+     Also, the XC functional C09 (ixc 24), for use with the Silvestrelli approach, has been coded.
+     Available in v6#12, 13.
+     Also, a new directory to test vdwxc has been created. At present Tvdwxc#10 is working.
+     (see D.7 of the 6.4 release notes)
+     Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.22 Work on SCPhonons going on.
+     By M. Verstraete
+
+D.23 Related to B.3, the maximal number of datasets that can be treated by ABINIT has been
+    increased from 99 to 9999. In a double-loop case, the maximum number for the
+    first (outer) loop index is 999, while for the second (inner) loop it is 9.
+    By X. Gonze
+    See the automatic tests Tv6#34.
+
+D.24 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by
+     A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, 
+     G.A. Franco, M. Giantomassi, X. Gonze, Jiawang Hong, A. Knyazev, A. Jacques, S. Le Roux,
+     A. Lherbier, M. Mancini, T. Nishimatsu, S. Ponce, Y. Pouillon, G.-M. Rignanese,
+     M. Torrent, M. Stankovski, M. Verstraete, J. Zwanziger .
+</pre>

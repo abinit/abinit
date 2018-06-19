@@ -9,7 +9,7 @@
 !! contributions to elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,           only : timab
  use m_special_funcs,  only : abi_derfc
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
 
@@ -64,7 +65,6 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'elt_ewald'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

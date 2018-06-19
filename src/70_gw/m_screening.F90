@@ -8,7 +8,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,18 +45,19 @@ MODULE m_screening
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : print_arr, hermitianize
  use m_special_funcs,   only : k_fermi, k_thfermi
- use m_geometry,        only : normv, vdotw
+ use m_geometry,        only : normv, vdotw, metric
  use m_abilasi,         only : xginv
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item, box_len
  use m_fft_mesh,        only : g2ifft
+ use m_fftcore,         only : kgindex
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -932,7 +933,6 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkdump_Er'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1488,7 +1488,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 #undef ABI_FUNC
 #define ABI_FUNC 'make_epsm1_driver'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2013,7 +2012,6 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 #undef ABI_FUNC
 #define ABI_FUNC 'rpa_symepsm1'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2179,7 +2177,6 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
 #undef ABI_FUNC
 #define ABI_FUNC 'atddft_symepsm1'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2864,7 +2861,6 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_mdielf'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -3427,8 +3423,6 @@ subroutine lwl_free(lwl)
 
 end subroutine lwl_free
 !!***
-
-!----------------------------------------------------------------------
 
 END MODULE m_screening
 !!***

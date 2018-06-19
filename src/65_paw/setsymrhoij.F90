@@ -10,7 +10,7 @@
 !! and other similar quantities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (NH, FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (NH, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,8 +48,8 @@
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,gstate,initberry,respfn,screening,sigma
-!!      wfk_analyze
+!!      bethe_salpeter,dfpt_looppert,gstate,initberry,initorbmag,respfn
+!!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mkeuler,wrtout
@@ -69,13 +69,13 @@ subroutine setsymrhoij(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
  use m_profiling_abi
 
  use m_special_funcs, only : phim
+ use m_angles,        only : mkeuler, dbeta
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setsymrhoij'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

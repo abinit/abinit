@@ -8,7 +8,7 @@
 !! Module with datatype and tools for the harmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -770,8 +770,8 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
        cij = strain_coupling(alpha,mu,ii)
 !      Accumulte for this atom
        energy = energy + half*cij*strain(alpha)*disp(mu,ia)
-       fcart(mu,ia)  = fcart(mu,ia)  + cij*strain(alpha)
-       strten(alpha) = strten(alpha) + cij*disp(mu,ia)
+       fcart(mu,ia)  = fcart(mu,ia)  + half*cij*strain(alpha)
+       strten(alpha) = strten(alpha) + half*cij*disp(mu,ia)
      end do
    end do
    ii = ii +1

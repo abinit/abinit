@@ -10,7 +10,7 @@
 !!  map template integer/double
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +86,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,7 +143,7 @@ END SUBROUTINE MapHyb_init
 !!  impose size of the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,7 +200,7 @@ END SUBROUTINE MapHyb_setSize
 !!  enlarge memory space
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +277,7 @@ END SUBROUTINE MapHyb_enlarge
 !!  assign this=map
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -331,7 +331,7 @@ END SUBROUTINE MapHyb_assign
 !!  sort the this with respect to the integer array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,7 +379,7 @@ END SUBROUTINE MapHyb_sort
 !!  with the quickSort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -463,7 +463,7 @@ END SUBROUTINE MapHyb_quickSort
 !!  print the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -519,7 +519,7 @@ END SUBROUTINE MapHyb_print
 !!  Clear the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -564,7 +564,7 @@ END SUBROUTINE MapHyb_clear
 !!  destroy and deallocate the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

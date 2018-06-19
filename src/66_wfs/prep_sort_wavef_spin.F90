@@ -9,7 +9,7 @@
 !! Sort to have all nspinor=1 fisrt, then all nspinor=2
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MD)
+!! Copyright (C) 2010-2018 ABINIT group (MD)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,6 @@
 #include "abi_common.h"
 
 subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,index_wavef)
-
 
  use defs_basis
  use m_profiling_abi

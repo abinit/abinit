@@ -7,7 +7,7 @@
 !! Do various initializations for the positron lifetime calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,8 +135,10 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
  use m_fock,     only : fock_type
-
+ use m_kg,       only : getcut
  use defs_wvltypes, only : wvl_data
+ use m_spacepar,    only : hartre
+ use m_mkrho,       only : initro
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -144,8 +146,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron
 !End of the abilint section
@@ -787,7 +787,7 @@ type(fock_type),pointer, intent(inout) :: fock
 !  Log message
    if (electronpositron%calctype==0) then
      message = 'Were are now performing an electronic ground-state calculation...'
-   else if (electronpositron%calctype==1) then    
+   else if (electronpositron%calctype==1) then
      message = 'Were are now performing a positronic ground-state calculation...'
    else if (electronpositron%calctype==2) then
      message = 'Were are now performing an electronic ground-state calculation in presence of a positron...'

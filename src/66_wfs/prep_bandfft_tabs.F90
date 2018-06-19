@@ -7,7 +7,7 @@
 !! This routine transpose various tabs needed in bandfft parallelization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FB,MT)
+!! Copyright (C) 1998-2018 ABINIT group (FB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,6 +44,9 @@
  use m_errors
  use m_profiling_abi
  use m_xmpi
+
+ use m_time,        only : timab
+ use m_kg,          only : mkkpg
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_set_ikpt,bandfft_kpt_init2
  use m_hamiltonian, only : gs_hamiltonian_type
 
@@ -51,8 +54,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_bandfft_tabs'
- use interfaces_18_timing
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

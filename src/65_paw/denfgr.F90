@@ -8,7 +8,7 @@
 !!  and adding PAW corrections
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2005-2017 ABINIT group (JWZ)
+!!   Copyright (C) 2005-2018 ABINIT group (JWZ)
 !!   This file is distributed under the terms of the
 !!   GNU General Public License, see ~ABINIT/COPYING
 !!   or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,7 @@
  use m_sort
 
  use m_io_tools,    only : open_file
+ use m_geometry,    only : xred2xcart
  use m_pptools,     only : printxsf
  use m_pawrad,      only : pawrad_type, pawrad_deducer0
  use m_pawtab,      only : pawtab_type,pawtab_get_lsize
@@ -96,7 +97,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'denfgr'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_65_paw, except_this_one => denfgr
 !End of the abilint section
 
@@ -447,18 +447,18 @@
      rhor_paw = rhor_paw + rhor - nhat
    else  ! Spin-polarised case: rhor_paw contains rhor_paw(spin_up,spin_down) but we need rhor_paw(total,spin_up)
      ABI_ALLOCATE(tot_rhor,(pawfgr%nfft))
-!      
+!
 !      AE rhor
      tot_rhor(:) = SUM(rhor_paw,DIM=2)
      rhor_paw(:,2) = rhor_paw(:,1)
      rhor_paw(:,1) = tot_rhor
      rhor_paw = rhor_paw + rhor - nhat
-!      
+!
 !      onsite AE rhor
      tot_rhor(:) = SUM(rhor_n_one,DIM=2)
      rhor_n_one(:,2) = rhor_n_one(:,1)
      rhor_n_one(:,1) = tot_rhor
-!      
+!
 !      onsite PS rhor
      tot_rhor(:) = SUM(rhor_nt_one,DIM=2)
      rhor_nt_one(:,2) = rhor_nt_one(:,1)

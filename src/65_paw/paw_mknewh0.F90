@@ -6,7 +6,7 @@
 !! Calculates the new bare PAW Hamiltonian in the case of quasi-particle self-consistent GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +54,7 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
  use defs_basis
  use m_profiling_abi
  use m_errors
- use m_xmpi, only : xmpi_comm_self
+ use m_xmpi
 
  use m_crystal,      only : crystal_t
  use m_pawang,       only : pawang_type
@@ -101,7 +101,7 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
  logical :: ltest,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indklmn_(:,:)
+ integer, pointer :: indklmn_(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),rdum2(1)
  real(dp),allocatable :: prod_hloc(:,:),prodhxc_core(:,:)
@@ -166,7 +166,7 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
 
    ABI_CHECK(cplex==1,'cplex/=1 not implemented')
    ABI_CHECK(cplex_dij==1,'cplex_dij/=1 not implemented')
-!  
+!
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    if (Pawfgrtab(iat)%gylm_allocated==0) then
      if (allocated(Pawfgrtab(iat)%gylm))  then
@@ -268,7 +268,7 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
 &          -Paw_ij(iat)%dijxc_val (klmn,idij) &  ! I suppose that the "hat" term on the FFT mesh in included in both.
 &          +dijhmxc_val(klmn,idij)               ! Local + Hartree - XC val contribution to the "hat" term.
 
-!          Add the U contribution to the 
+!          Add the U contribution to the
 !          if (.FALSE. .and. Pawtab(itypat)%usepawu>0) then
            if (.TRUE. .and. Pawtab(itypat)%usepawu>0) then
              Paw_ij(iat)%dij(klmn,idij) = Paw_ij(iat)%dij(klmn,idij) + Paw_ij(iat)%dijU(klmn,idij)

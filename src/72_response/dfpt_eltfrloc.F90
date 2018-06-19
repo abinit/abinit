@@ -9,7 +9,7 @@
 !! cartesian strain component and one reduced-coordinate atomic displacement).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (DRH, XG)
+!! Copyright (C) 2000-2018 ABINIT group (DRH, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,13 +63,13 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,    only : timab
  use m_mpinfo,  only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrloc'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

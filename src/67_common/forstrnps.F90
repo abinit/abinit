@@ -8,7 +8,7 @@
 !! as well as kinetic energy contribution to stress tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,25 +105,28 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_xmpi
  use m_errors
  use m_fock
- use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
-&                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
-&                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+ use m_cgtools
+
+ use m_time,             only : timab
+ use m_geometry,         only : stresssym
+ use m_kg,               only : mkkpg
+ use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
+&                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+&                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
- use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
-use m_cgtools
+ use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_reorder
+ use m_spacepar,         only : meanvalue_g
+ use m_mkffnl,           only : mkffnl
+ use m_mpinfo,           only : proc_distrb_cycle
+ use m_nonlop,            only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstrnps'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_spacepar
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -231,12 +234,12 @@ use m_cgtools
      compute_gbound=.true.
    end if
  end if
- 
+
  usecprj_local=usecprj
 
  if ((usefock_loc).and.(psps%usepaw==1)) then
    usecprj_local=1
-   if(optfor==1)then 
+   if(optfor==1)then
      fockcommon%optfor=.true.
      if (.not.allocated(fockcommon%forces_ikpt)) then
        ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
@@ -570,7 +573,7 @@ use m_cgtools
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                MSG_BUG(msg)
-             end if 
+             end if
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
              ABI_ALLOCATE(ghc_dum,(0,0))
@@ -588,7 +591,7 @@ use m_cgtools
                if (fockcommon%optfor) then
                  fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
                end if
-             end do 
+             end do
              ABI_DEALLOCATE(ghc_dum)
            end if
          end if

@@ -1,0 +1,1033 @@
+
+Rules_coding
+
+ABINIT style for Fortran programming
+(revised many times from the original draft in 1991 ... )
+
+Copyright (C) 1991-2018 ABINIT group (DCA,XG,GMR,MM,HM,PT,MV)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+=====================================================================
+
+The following sections are covered :
+0. Foreword.
+1. Declarations.
+2. Variables
+3. File format
+4. Constructs for flow control
+5. Use of arrays
+6. Coding practice
+7. Exception handling, I/Os
+8. To be avoided.
+9. Use of BLAS and LAPACK subroutines.
+10. Modules
+11. Derived datatypes
+12. Other topics
+13. Useful links
+
+=====================================================================
+
+0. Foreword.
+
+The ABINIT code should conform to the ANSI Fortran norm (Fortran 90).
+This norm is abbreviated F90, while the
+older norm, Fortran 77, is abbreviated F77.
+
+The following set of rules complements the F90 standard.
+The ABINIT code conforms to most of these additional rules already.
+Each modification, or new routine is expected to adopt all
+the standards, that will be also enforced gradually
+in existing routines.
+
+The developer is supposed to have a good knowledge of the F90
+constructs. For an introduction to them, consult the
+following URL :
+... (to be filled)
+
+The rules described afterwards do NOT apply to the routines
+that are in the Lib_* directories.
+Their source is voluntarily not modified (except recently, for OpenMP),
+to keep coherence with the original versions, provided by somebody
+who followed other coding rules.
+
+Names having a special meaning in F90 are written here in uppercase.
+They are usually NOT in uppercase in the code, however.
+
+The basic utility of this document is to provide a
+common style to all the routines. This is important,
+in order for ABINIT developers
+to understand quickly what a routine
+does : they expect some information to be always present
+in some part of each routine, or, in the
+opposite sense, they should know where to place
+each information (and not spend time to evaluate
+where each information should be placed).
+This document is also a way to enforce a
+kind of "locality
+of information" principle : all the information
+needed to understand what a routine does should
+be contained in the same routine, and if possible,
+the information about a small part of the routine
+should be contained within a screen page of this
+part of the routine.
+
+In general, the developer will conform to the style
+by taking an existing routine as an example, and
+use it to generate a new routine. However, it is
+worth reading the present rules from time to time ...
+
+Starting in January 2001, a working group
+began to work on the update of these rules,
+on the basis of a proposal by H. Matthis.
+It became clear that the present document was already
+very complex. It should be reordered, and also
+reformatted using HTML and an index, so that the
+reader can easily get the information he really needs.
+This is to be done...
+In the meantime, the result of the working group efforts
+produced the new sections 10 (modules), 11 (derived datatypes),
+as well as modifications (or addition) of the rules
+ 1.b, 1.c, 1.e, 1.f, 1.h, 2.a. 3.g, 3.n, 3.p, 3.q .
+Modifications with respect to the rules for ABINITv3.0
+are signaled thanks to the > sign.
+
+Also, the new rules will be enforced gradually.
+This means that not only the format, but also
+the content of present document is IN A TRANSITIONAL state.
+
+
+----------------------------------------------------------
+
+1. Declarations.
+
+1.a. Use IMPLICIT NONE, forcing explicit declaration of all variables,
+in all subroutines.
+(enforced)
+
+1.b. COMPLEX*16 or REAL*8 are not ANSI standards.
+In the basis_defs module (see section 10.b), one defines
+ the integer variable "dp":
+
+INTEGER, PARAMETER :: dp = kind(1.0d0)
+
+Accordingly, define floating point numbers as
+
+REAL(dp) :: real_variable
+
+(the double precision is standard, avoid single precision).
+For the declaration of complex numbers, use two
+real numbers
+REAL(dp) :: complex_variable(2)
+That is, place complex numbers in a single array with real parts in odd
+array components and imaginary parts in even array components.
+For historical reasons, using a COMPLEX subtype is not allowed
+(sorry for this).
+
+For an array of complex numbers, use
+REAL(dp) :: array(2,size_array)
+
+When setting values of constants, include "_dp" or "d0" on the end to
+indicate double precision constants, e.g. 0.0_dp or 0.0d0 .
+
+For integers, one has the choice between
+INTEGER :: ii
+and
+INTEGER(i4b) :: ii
+where i4b has been defined in the 'basis_defs' module.
+
+1.c. Mention all the attributes of a variable in a single-line
+declaration. This means that PARAMETER, SAVE, ALLOCATABLE, INTENT(IN),
+... Should not be declared later. However, avoid the
+DIMENSION attribute, and declare the dimension after each array.
+This is to save numerous line in the declaration section.
+The use of the double colon is the standard.
+For example :
+REAL(dp), PARAMETER :: aa=1.0d0, bb=1.0d0/3.0d0
+INTEGER, ALLOCATABLE :: cc(:)
+
+1.d. For character strings, use
+CHARACTER*10 :: name(5)
+Avoid the rather confusing
+CHARACTER name(5)*10                 ! to be avoided
+Eventually use
+CHARACTER*(*) :: names(8)
+for a string of characters whose length is known
+only in the calling subroutine. It is better to avoid undefined length
+strings but it is not always possible.
+(enforced)
+
+1.e. Logical variables are allowed, especially for very big arrays,
+where the memory gain is important, or for temporary
+logical arrays (work arrays). However, when a variable
+has to describe a choice, use an integer instead of
+a logical : this
+paves the way to the introduction of further choices.
+For logicals, one has the choice between
+LOGICAL :: ii
+and
+LOGICAL(lgt) :: ii
+where lgt has been defined in the 'basis_defs' module.
+(enforced)
+
+1.f. Never use automatic arrays, use allocatable arrays.
+First, the handling of automatic and allocatable variables in memory
+is different : automatic variables are placed in the stack, while
+allocatable arrays are placed in the heap. The stack size is usually limited.
+Second, this also allows the checking of the parts of the program
+where memory is allocated, through the use of a
+grep allocatable *     or     grep allocate *
+command. In order for such a search to be efficient,
+never continue an allocate or allocatable command on the next line.
+(see also rule 5.f)
+Pointers are allowed whenever a dynamically-allocated
+multi-dimensional array has to be allocated in a subprogram and then
+used and deallocated outside it.
+Example :
+REAL(dp),DIMENSION(:),POINTER :: array
+nullify(array)
+CALL init(array)
+... (using array)
+DEALLOCATE(array)
+
+where the subroutine init contains
+
+INTEGER :: size_array
+REAL(dp),DIMENSION(:),POINTER :: array
+size_array=...(some expression)
+ALLOCATE(array(size_array))
+... (initialize array)
+END SUBROUTINE
+
+There is a great advantage in using pointers as shown
+in this example. It is no longer necessary to define
+allocatable arrays in the main program itself  any array
+should be allocated only when it is necessary,
+and should be deallocated anywhere and as soon as
+possible. The same construct allows to use arrays in derived
+datatypes.
+
+Also note that a pointer should be nullified as soon as possible.
+
+(enforced)
+
+1.g. Always declare explicitly in the subroutine
+the dimension of a variable.
+This is to allow to understand locally exactly what array operations
+are doing. So, use
+INTEGER :: zat(natom)
+and avoid
+INTEGER :: zat(*) 		! to be avoided
+In general, avoid the declaration using asterisks.
+(enforced)
+
+1.h. Some compilers are very strict on the syntax (e.g. the PGI-HPF compiler
+under Linux, on Pentium Pros), and do not allow for change of shape
+between the calling routine and the called routine. Actually,
+changing this characteristics is confusing.
+For example :
+
+PROGRAMME gnagna
+REAL(dp) :: gprim(3,3)
+CALL gnigni(gprim)
+END
+
+with
+
+SUBROUTINE gnigni(gprim)
+REAL(dp) :: gprim(9)
+END SUBROUTINE
+
+(the array gprim has not the same shape in gnagna and gnigni).
+So, the rule to be enforced is : do not change the shape of the
+arrays between calling and called routines. This, despite
+the fact that only the address of the first element matters really.
+
+Changing shape is not possible when using explicit
+F90 interfaces of subprograms.
+(enforced)
+
+----------------------------------------------------------
+
+2. Variables
+
+2.a. Never use a one-letter name for a variable, because they are
+too difficult to find systematically. Even two-letter
+variables (except duplicated letters, easy to find, or names
+including j, k, q, x, or z, or some special variables
+like "dp") should be avoided. So, use ii,jj,kk instead of i,j,k.
+Note that F90 allows for names
+longer than 6 characters, unlike F77.
+(enforced)
+
+2.b. Naming of looping variables (integers) :
+	Use i... for the current (dummy) value of a given index
+        Use n... for the number of a given quantity, in general
+		also equal to its maximum (unlike in the old standard)
+        Use m... for the maximum number of a given quantity,
+		when it is not equal to the actual number of this
+ 		given quantity
+For example: iatom, natom, matom, respectively.
+(partially enforced)
+
+2.c. For global variables, always use a single common name
+throughout the entire code. Exception : utility programs should
+use generic names for the arguments.
+(partially enforced)
+
+----------------------------------------------------------
+
+3. File format
+
+3.a. Use the Fortran90 free format.
+(132 column maximum, continuation sign & ... &, comment sign ! ,
+no restriction on the use of the first columns)
+Note that doubling the comment sign (!!) will be used to
+allow processing by Robodoc, see rule 3.e .
+(enforced)
+
+3.b. Always use the continuation sign on both the continued line
+(at its end), and on the continuation line (at its beginning).
+(enforced)
+
+3.c. Use indentation of two columns for each DO-loop or each
+IF-block, or any other of structure.
+(usually enforced)
+
+3.d. Use indentation of 10 supplementary columns for the parts
+of the code related to the parallel MPI version.
+For example :
+#          if defined MPI
+           include 'mpif.h'
+#          endif
+Note that the # symbol, recognized by cpp, is in the first column.
+This is because the cpp on the HP S-class machine does not accept
+it if it is placed in another column.
+(enforced)
+
+3.e. The header of each routine must use a special format,
+so that it can be processed by the Robodoc documentation
+program (see http://www.xs4all.nl/~rfsber/Robo/robodoc.html
+and http://www.xs4all.nl/~rfsber/Robo/manual.html).
+This header of the file will have to mention :
+- the name of the subroutine
+- the function of the subroutine
+- the copyright
+- the complete set of input arguments with explanation
+- the complete set of output arguments with explanation
+- the complete set of arguments that are both input and output, with explanation
+- the list of calling routines (produced automatically : do not worry about it).
+- eventually some notes.
+Then, the body of the routine will follow (with CPP F90 instructions,
+see rule 3.f).
+For Robodoc treating Fortran 90, there is a special meaning attached
+to the lines of the source files that begin with a double bang :
+!!
+There are also keywords ("NAME","FUNCTION","COPYRIGHT","INPUTS","OUTPUT",
+SIDE EFFECTS","NOTES","SOURCE" ...) to be used.
+The header format is the most easily understood by a commented example ...
+
+
+!!****f* ABINIT/name_of_subroutine
+!! NAME
+!! name_of_subroutine
+!!
+!! FUNCTION
+!! explanation of "name_of_subroutine"
+!! will be described here ...
+!!
+!! COPYRIGHT
+!! Copyright (C) yyy1[-yyy2] ABINIT group (initials)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  arg1 = ...
+!!  arg2 = ...
+!!
+!! OUTPUT
+!!  arg3 = ...
+!!  arg4 = ...
+!!
+!! SIDE EFFECTS
+!! Input/Output   ! if this line is found in a routine, use "SIDE EFFECT".
+!!  arg5 = ...
+!!
+!! PARENTS        ! This paragraph will be produced automatically
+!!                ! It will mention the routines that call the present one.
+!!
+!! NOTES
+!!  (miscellaneous note, warning, etc., if any)
+!!
+!! SOURCE
+
+
+The string "name_of_subroutine" must be replaced by the name of the subroutine.
+In the copyright notice, "yyy1" and "yyy2" must be replaced by years of modifications,
+"initials" must be replaced by the initials of the contributors, for example
+!! Copyright (C) 2007-2018 ABINIT group (DCA, XG).
+"arg1=..." and similar strings must be replaced by the actual description
+of input or output variables. They must appear in the same order in which
+they appear as arguments to the subroutine. Note that the Robodoc keywords
+are "INPUTS" (with a "S") and "OUTPUT" (without a "S").
+If physical quantities are being passed
+as arguments, give the appropriate dimension for the quantity
+(e.g. Hartrees or Bohr). No work space private to each routine should be an argument
+of the routine, use ALLOCATABLE, ALLOCATE, and DEALLOCATE inside
+the subroutine.
+
+After the line
+!! SOURCE
+follows the CPP and F90 lines.
+
+(enforced)
+
+3.f. After the header, and before the F90 declaration of variables,
+one must mention, in order :
+- eventually, global CPP definitions
+- the subroutine name and arguments
+- eventually, "include" files
+
+As an example :
+
+ #define FNLEN 132    /* defines the length of file name variables */
+ subroutine name_of_subroutine (arg1,arg2,arg3,arg4,arg5)
+ include 'file'
+
+(enforced)
+
+3.g. Every routine should then have the declaration IMPLICIT NONE.
+This should then be followed by other declarations as follows.
+*** Very important note : the order of declarations is automatically
+enforced by the abirules script. The developer can perfectly
+leave to the script the duty of ordering his new declarations,
+at the time of the merge with the rest of the code ***
+Note that within each list, the variable names should be
+in alphabetic order.
+
+A1. Arguments : scalars
+
+INTENT(IN)
+(1) integers
+(2) double precision
+(3) other variables in argument list
+INTENT(OUT)
+(4) integers
+(5) double precision
+(6) other variables in argument list
+INTENT(INOUT)
+(7) integers
+(8) double precision
+(9) other variables in argument list
+
+A2. Arguments : arrays
+ same as (1)-(9à) above
+
+B1. Local variables (sequential) : scalars
+
+INTEGER
+(1) integer parameters
+(2) integer with save attribute
+(3) other integers
+DOUBLE PRECISION
+(4) double precision parameters
+(5) double precision with save attribute
+(6) other double precision
+
+(7) other scalar variables
+
+B2. Local variables (sequential) : arrays
+
+INTEGER
+(1) integer arrays
+(2) allocatable integer arrays
+(3) pointers to integer arrays
+DOUBLE PRECISION
+(4) real arrays
+(5) allocatable real arrays
+(6) pointers to real arrays
+
+(7) other array variables
+
+C1. Local variables (parallel case : MPI code section) : scalars
+C2. Local variables (parallel case : MPI code section) : arrays
+See the description of the sequential variables
+
+NOTE that it is not possible to specify an INTENT
+characteristics for POINTERs. However, they will be
+placed in the correct section of the argument list.
+See 3.q .
+(the splitting based on INTENT is not yet enforced ;
+apart this, enforced)
+
+3.h. Do coding in lower case. Lower case is suggested because it looks
+prettier. Use standard English grammar for comments (start sentences
+with uppercase). The keywords DEBUG and ENDDEBUG, in uppercase,
+should emphasize each part of the code, commented or uncommented,
+that is written for the purpose of debugging.
+(enforced)
+
+3.i. Use comments frequently to explain manipulations and make
+them in English.
+(enforced)
+
+3.j. Only permit a single "return" from any subroutine,
+at the end of the subroutine, by using the
+END SUBROUTINE statement (the old-fashioned RETURN statement
+should be avoided). For program stopping, see the section
+related to error handling.
+(enforced)
+
+3.k. For reason of readability and ease of maintenance (compilation time also),
+files should not be too long.
+In general, each subroutine will be contained in one file, whose
+length should not exceed 850 lines. When a file exceeds 600 lines,
+it is worthwhile to consider splitting it.
+As of October 1998, about 13 out of 182 files exceeded 600 lines,
+none of them beyond 850 lines.
+It is also not worthwhile to write very short
+subroutines. Indeed, the total number of subroutines should be kept
+sufficiently low, in order to maintain them more easily. Also,
+with a large number of routines, it becomes difficult to remember
+what each routine is doing.
+(should be enforced again for version 3.0 : there are presently
+ more than 5 routines with more than 850 lines)
+
+3.l. Equations mentioned in comment lines should be written
+in Latex, for processing using Src2tex.
+There are several ways to describe latex equations in the F90 comments
+(these might be introduced by one "!" or two) :
+
+1)  !! $ equation $
+1') !  $ equation $
+2)  !! $\displaystyle equation$
+2') !  $\displaystyle equation$
+3)  !!{{\ \begin{equation}
+    !!  ... equation ...
+    !!\end{equation} }}
+3') !{{\ \begin{equation}
+    !  ... equation ...
+    !\end{equation} }}
+4)  !!{{\ \begin{eqnarray}
+    !!  ... equation ...
+    !!\end{eqnarray} }}
+4') !{{\ \begin{eqnarray}
+    !  ... equation ...
+    !\end{eqnarray} }}
+
+For example :
+!!  epsatm=$(4 \pi) \int_0^\infty [r^2 (V(r)+Zv/r) dr]$ (hartree)
+
+If a long fraction sentence is found, "!! $\displaystyle equation $"
+may be better for visualization.
+
+In some cases, "!!\begin{equation} ...!!\end{equation}" or
+"!!\begin{eqnarray} ...!!\end{eqnarray}" format might be better,
+especially for very long equation lines.
+
+3.m. Additional information about Src2tex and Robodoc.
+As mentioned in rule 3.e , the content of the PARENT paragraph
+will be created or updated automatically.
+Also, the source files will be preprocessed automatically
+before applying src2tex,
+- the very first line will be added :
+!{\src2tex{texfont=tt}}
+- the very last line will also be added :
+!!***
+(usually enforced)
+
+3.n. Place only one subroutine in each file.
+This is to allow preprocessing for self-documentation
+of sources. This rule is in conflict with the usual
+use of modules, or chains of modules.
+Resolving this conflict is the topics of current reflexion.
+
+
+3.o. In order to ease the writing of the script that generates
+"PARENT" routines before the self-documentation call to Robodoc,
+it was needed to impose two additional rules :
+- subroutines should be used instead of functions
+- the instruction CALL should
+always be the first of an instruction line. In particular,
+the construct :
+
+ IF(condition) CALL subroutine       !to be avoided
+
+ should be avoided, and replaced by
+ IF(condition) THEN
+  CALL subroutine
+ ENDIF
+(enforced)
+
+3.p. The file format might change, due to the recent
+introduction of modules, pointers, interfaces,...
+in ABINITv3.1 . This is a topics of current
+reflexion. See HM2_document, section 2 of the
+proposal by H. Matthis, in the present directory,
+~abinit/doc/developers .
+
+3.q. The INTENT must always be precised, except
+for pointers (which have no intent) and subprogram
+names given as formal arguments (rare).
+Nevertheless pointers should be placed in list of
+formal arguments according their 'quasi-intent'
+in source code (read/modified/affected data).
+On the other hand, a subprogram given as formal argument
+behaves always like 'intent(in)'. In that case, the formal
+argument consists of the explicit interface of the
+subprogram.
+A formal argument belonging to a structures type
+must have an 'intent(in)' (respectively 'intent(out)')
+if all fields of the structure are read-only
+(resp. write-only). In all other cases, specify
+an 'intent(inout)' and detail (with comments) the status
+for each field.
+
+
+----------------------------------------------------------
+
+4. Constructs for flow control
+
+4.a. Do not use numeral labels. These can be avoided through the
+use of the construct
+DO ...
+ ...
+ENDDO
+as well as the instruction (new to F90) CYCLE or EXIT,
+or the constructs based on IF, CASE, WHERE or FORALL.
+Note : Numeral labels can also be avoided for FORMAT statements by
+placing the format descriptor in a character string, like in
+WRITE (unit, '(i3)' ) nn
+or
+READ (texte, '(i6, f6.2)' ) nn, xx
+A character string can be explicitly declared, then
+initialized, if it is to be used more than once.
+(enforced)
+
+4.b. Literal labels or comment lines must be used for each
+construct that is longer than one page of a screen (about 20 lines),
+both at the beginning and at the end of the construct.
+(enforced)
+
+----------------------------------------------------------
+
+5. Use of arrays
+
+5.a. Distinguish explicitly a vector operation from its
+scalar counterpart, by specifying colons :
+suppose
+REAL(dp) :: aa(10), bb(10), cc(10)
+then use
+aa(:)=bb(:)+cc(:)
+and not
+aa=bb+cc			! to be avoided
+However, this rule can lead to problems with the stack size, see rules 5c-e.
+(enforced)
+
+5.b. In order to improve the readability of the
+code, use vector operations instead of
+explicit DO-loop constructs. Use also the intrinsic
+subroutines DOT_PRODUCT, or MATMUL, as well as
+functions like SUM or MAXVAL. However, avoid using
+segments as arguments. Use directly the array name : you
+do not need to distinguish this operation from an hypothetical
+scalar counterpart.
+For reason of efficiency, very heavily used parts of
+codes could be coded differently.
+Use also BLAS and LAPACK routines for higher-level
+constructs, although they
+do not lead to as good a readability (see later).
+(partially enforced)
+
+5.c DO NOT pass as an argument of a subroutine, a segment
+of an array. For example :
+call routine(aa(1:naa))         ! to be avoided
+Indeed, some compilers copy all the values of the segment into
+a temporary variable. Thus, this is memory and CPU time consuming.
+Moreover, the zone of memory that is used for that purpose can be limited
+in size, and thus the code is constrained not by the full physical
+memory of the machine, but by the size of that zone (stack size on the DECs).
+For character strings, this restriction is not too important,
+since character strings are rather short in any case, so the rule
+is not to be followed for character strings. The same argument
+applies when the size of the segment is know to be
+limited in all cases (like in nonlop.f, setsym.f, xctotl.f or pseudopotential
+routines for example).
+(enforced, with the restrictions mentioned)
+
+5.d Avoid the following construct, except when the segment size is
+sufficiently small :
+aa(:,ii)=aa(:,jj)
+On the DEC machines, the compiler thinks it must first store
+the segment aa(:,jj) in the stack, then copy the stack in aa(:,ii).
+This not only doubles the time for copying, but can lead to stack size
+problems. This likely happens each time the same array
+appears both at the left-hand side and right-hand side of an assignment
+expression.
+However, there is no problem with
+aa(:,ii)=bb(:,jj)
+(enforced)
+
+5.e Avoid the use of large segments in read or write operations :
+read(6,*)aa(:,ii)
+Again, on the DEC machines, the stack is used, and there are potential
+problems with the declared stack size.
+Use instead :
+read(6,*)(aa(jj,ii),jj=jmin,jmax)
+A full array, not presented as a segment, also has no problem :
+read(6,*)bigarray
+But avoid :
+read(6,*)bigarray(:)
+(enforced)
+
+5.f For allocation and deallocation of arrays :
+- never continue an allocate or allocatable command on the next line.
+   (see rule 1.f)
+(enforced)
+
+----------------------------------------------------------
+
+6. Coding practice
+
+6.a. Run innermost loop fastest in looping. This is simply
+less CPU time consuming in Fortran.
+(usually enforced)
+
+6.b. Use generic function names instead of specializing to
+double precision function calls for Fortran intrinsic functions.
+E.g. use "cos" or "sin", not "dcos" or "dsin".
+(enforced)
+
+6.c. On many machines cache memory conflicts, which slow
+down performance, are avoided by not using dimension of
+arrays in multiples of 256. Thus it is recommended to
+avoid array lengths which are multiples of 256. This
+becomes especially important in the use of Fast Fourier
+Transforms.
+(usually enforced)
+
+----------------------------------------------------------
+
+7. Exception handling and I/Os
+
+7.a. The code issues four types of special messages :
+ERROR, BUG, WARNING and COMMENT messages.
+ERROR and BUG messages cause the code to stop,
+immediately, or after a very small delay. An ERROR is attributed
+to the user, while a BUG is attributed to the developer.
+A WARNING message
+indicates that something happened that is not as expected,
+but this something is not so important as to make the code stop.
+A COMMENT message gives some information to the user, about
+something unusual. None of them should appear when the run
+is completely normal, and runs as expected.
+(enforced)
+
+7.b. Some checking should be provided for input variables
+for physical reasonableness or internal consistency.
+This is intended to maintain a user-friendliness already present
+in the code, and will greatly improve the possibility of widespread
+use by new users.
+(usually enforced)
+
+7.c. Exception diagnostics from routines should be directed
+to the standard output (std_out), and report :
+- the name of the routine which is reporting the error;
+- the sort of exception that is occurring (ERROR, BUG, WARNING or COMMENT);
+- the present status;
+- the expected status;
+- in the case of an ERROR message or a BUG message,
+what is wrong, like "The volume of the unit cell should not be zero";
+- in the case of ERROR message, what action the user should take
+(note that BUG messages are automatically appended with the directive
+ "Action : contact ABINIT group").
+Experience shows that the trouble spent putting good
+descriptive error diagnostics in place is well repaid by
+minimizing the time spent fixing trivial bugs.
+(usually enforced)
+
+7.d. Exiting should always be done through the LEAVE
+subroutine (presently LEAVE_NEW), except for temporary debugging purposes.
+The corresponding error
+message must be printed through the wrtout routine, since
+this routine can be used to modify the error message
+in a standard way when needed.  See also the
+rules_parallel file, since exiting is much more complicated
+in the parallel case.
+(exit through leave_new is enforced, systematic use of wrtout not yet)
+
+7.e. Never write a character in the first column of the output file.
+This is because the fldiff tool (see programmer_guide) uses the
+signs in this column to perform comparison of test case output files
+with reference ones.
+(enforced)
+
+7.f. When you output a message using the wrtout routine, do not
+use the Fortran90 / (Slash) editing. It is not treated correctly.
+Use instead  char(10), that will be handled in a special way
+(note that the abbreviation 'ch10' for 'char(10)'
+ is defined in basis_defs.f )
+By contrast, do not use  char(10) when
+you output something using the Fortran90 write intrinsic :
+char(10) is the end-of-line sign ONLY under UNIX.
+For example MacOS needs char(13) ... So, use the Fortran90 / (Slash)
+editing in that case ... For example :
+write(std_out,'(a,/,a,/)') ' hello',' world !'
+(enforced)
+
+7.g. When you write to the main output file, using the 'f'
+format of Fortran (like in f12.4), in case there
+is a possibility of different rounding on different
+computers, add a small
+number (on the order of 100000 times smaller than the
+precision of the f format) to the number you want to write.
+For example, be the number  numb=0.56250000000_dp ,
+to be written using the format f11.3 :
+ write(ab_out,'(f11.3)')numb      ! will give portability problems
+On some computers, it will be written 0.562 , and on some others,
+it will be written 0.563 . Instead, use :
+ write(ab_out,'(f11.3)')numb+tol10
+as tol10 is defined 0.0000000001_dp in defs_basis.f .
+In this way, it will print as 0.563 always.
+
+7.h. Use always the string "std_out" to write to the standard output file 
+(the "log" file, with unit number 6). Use always the string "ab_out"
+to write to the main output file (with unit number 7). Use alwas the string "std_err"
+to write to the standard error file (with unit number 0). 
+This is to allow correct redirection in case of massively 
+parallel run (beyond 100 processors) : the writing
+can be globally suppressed. Also, writing to the standard error file
+should only be done when the code is about to stop 
+gain to avoid problems with numerous write with massively parallel 
+machines.
+(enforced)
+
+----------------------------------------------------------
+
+8. To be avoided.
+
+8.a. Use <  instead of the old-fashioned .LT.   ,
+     use <= instead of .LE.  ,
+     use >  instead of .GT.  ,
+     use >= instead of .GE.  ,
+     use == instead of .EQ.  ,
+     use /= instead of .NE.  ,
+(enforced)
+
+8.b. Avoid RETURN at the end of each subroutine, use only END SUBROUTINE
+(this was not allowed by F77). Avoid RETURN at the end of each function,
+use only END FUNCTION
+(enforced)
+
+8.c. Avoid DATA statements, initialize variables in their declaration line :
+INTEGER :: nline = 6
+(note : initialized variables get automatically the SAVE status)
+(note : there are arrays constructors to initialize arrays in their
+        declaration line )
+(enforced)
+
+8.d. Avoid the use of COMMON and EQUIVALENCE.
+(enforced)
+
+8.e. Do not use an isolated quote (') in a comment, like in the following :
+! This isn't a good thing
+Indeed, the CPP (preprocessor) does not treat properly such occurrences
+on some machines. Instead replace it simply with
+! This is not a good thing
+or
+! This isn t a good thing
+Everybody will understand the latter, although grammatically incorrect.
+(usually enforced)
+
+----------------------------------------------------------
+
+9. Use of BLAS and LAPACK subroutines.
+
+Note : BLAS and LAPACK subroutines are public domain subroutines, gathered
+in libraries, that can be optimized by each hardware vendor on their
+platform. BLAS means Basic Linear Algebra Subroutines. There are
+different levels of BLAS :
+- BLAS 1 : basic scalar and vector subroutines
+- BLAS 2 : matrix-vector subroutines
+- BLAS 3 : matrix-matrix subroutines
+- Sparse BLAS : sparse vector operations
+LAPACK is a set of subroutine that supersedes the old LINPACK and EISPACK
+libraries, and addresses Linear equation solution and Eigensystem solution
+(matrix inversion, linear least squares problems, orthogonal factorization,
+ordinary eigenvalue problems, generalized eigenvalue problems,
+singular value decomposition).
+The Web addresses :
+http://www.netlib.org/lapack/index.html
+http://www.netlib.org/blas/index.html
+
+9.a. For inversion or diagonalisation of small matrices
+(however larger than 3*3), LAPACK should be used
+preferentially to any other subroutines.
+(usually enforced)
+
+9.b. In general, the capabilities of BLAS subroutines can be obtained
+by the array capabilities of F90. The corresponding code is usually
+easier to read. For example,
+
+REAL(dp) :: aa(npw),bb(npw)
+CALL DCOPY(npw,aa,1,bb,1)
+
+can be replaced by
+
+REAL(dp) :: aa(npw),bb(npw)
+bb(:)=aa(:)
+
+So, the rule will be to use F90 instead of BLAS subroutines,
+with some exceptions (see 9.c). In general, the following
+can be avoided : DSCAL, DCOPY, DAXPY, DZERO, DSUM, DMAX ..., as well as
+their corresponding COMPLEX variant.
+(partially enforced)
+
+9.c. There are exceptions :
+- constructs that would still be easier to read with BLAS calls,
+- constructs that are critical for speed, and faster with BLAS calls.
+In the first class of routines, one find the scalar product between
+complex numbers, in our particular representation by
+REAL(dp) :: aa(2,size),bb(2,size)  arrays.
+Indeed, the F90 function
+DOT_PRODUCT(aa,bb) cannot be used, since it would not
+lead to the evaluation of a
+complex dot product, but a real dot product.
+So, use
+call DDOT(2*size,aa,1,bb,1)
+(at present, no other BLAS routines than those called by LAPACK
+ are used in ABINIT, so these rules are indications for the future)
+
+----------------------------------------------------------
+
+10. Modules.
+
+10.a. The architecture of ABINIT is modular, albeit
+not principally relying on F90 modules in its present status.
+Routines are partitioned in different subdirectories,
+with a related hierarchy of usage. A more extensive use
+of modules at that level is the topics of current
+reflexion. See HM5_document, section 5 of the
+proposal by H. Matthis, in the present directory,
+~abinit/doc/developers .
+
+10.b. The module named 'basis_defs' contains global variables
+of ABINIT, and is used in every subroutine.
+It contains the definitions of :
+- subtypes (e.g. kind of floating numbers)
+- I/O units
+- selected fractionary real constants or trigonometric constants
+- physical constants (conversion factors)
+This module should also be mentioned in all block interface, e.g.:
+interface
+ subroutine jojo(npt,jiji)
+  use basis_defs
+  integer,  intent(in) :: npt
+  real(dp) :: jiji
+ end subroutine jojo
+end interface
+This is because dp must be defined before real(dp)
+
+10.c. Modules are also useful for the definition
+of F90 interfaces (for optional arguments),
+or F90 derived datatypes (structured types).
+
+10.d. Although they are allowed, no rules has been
+set up for the use of optional arguments, and calls
+based about keywords. This is a topics of
+current reflexion. be cautious when you introduce
+such a feature, and mention it to the ABINIT coordinator.
+
+
+
+----------------------------------------------------------
+
+11. Derived datatypes
+
+11.a. Derived datatypes should be declared in the
+adequate module (see rule 10.c). These are powerful
+F90 constructs, but the information about them is
+not local to the subroutine where they are used, so
+they should be introduced in a controlled way, in
+order for the programmers to become sufficiently
+easily familiarized with them: the introduction
+of a new derived datatype must be made in agreement
+with the coordinator of ABINIT.
+The introduction of appropriate derived datatypes
+in ABINIT is one of the central issues of v3.2 and
+later versions.
+
+11.b. Suffix a type identifier with '_type'.
+For example :
+
+TYPE ipe_type              ! information on program execution
+ INTEGER :: nb_proc
+ CHARACTER*63 :: fname
+END TYPE ipe_type
+
+which allows to define in subroutines :
+
+TYPE(ipe_type) :: ipe
+
+11.c. Pros and cons.
+Grouping connected variables into structured types
+is interesting for readability (it avoids too long
+lists of formal arguments for instance) and may
+facilitate programmation changes inside subprograms.
+Imagine you want to add a new general information and
+you want an access to this data in many subprograms :
+if you insert a new field in 'ipe_type' structure,
+it will not be necessary to change each subprogram
+interface.
+
+However, source code itself may become less readable.
+Also, remember that the use of structured types is
+never more efficient for CPU : complex declarations
+should be avoided.
+
+
+----------------------------------------------------------
+
+12. Other topics.
+
+
+12.a. For the time being, pointers are only allowed
+when an array has to be allocated in a subprogram, and
+then used and deallocated outside it. See rule 1.f .
+They should be nullified as soon as possible.
+
+12.b. F95 constructs are not yet allowed. It has been
+checked for ABINITv3.1 that not all compilers are
+able to deal with them.
+
+12.c. Object-oriented programming in F90 (definition
+of operators acting on objects...) is the
+subject of current reflexion. See for example the URL:
+http://www.cs.rpi.edu/~szymansk/oof90.html
+
+----------------------------------------------------------
+
+13. Useful links.
+
+On the WEB page (http://www.cs.rpi.edu/~szymansk/oof90.html):
+"Introduction to Object-Oriented Concepts using Fortran90" :
+http://www.cs.rpi.edu/~szymansk/OOF90/Forum.html (shorter version)
+http://www.cs.rpi.edu/~szymansk/OOF90/F90_Objects.html (PS file available)
+(e.g. the data encapsulation is explained, taking a FFT routine
+as such an example. This might be related to the port using fftw...)
+The other PS file ("How to Express C++ Concepts in Fortran 90")
+seems similar to the above notes.
+Also, to the link "Gocha ! Click here for
+Fortran90 bug bites" on this page. This page warns the usage of
+the new functions in Fortran90.
+
+"Compiler and tools tricks"
+http://www.fortran-2000.com/ArnaudRecipes/CompilerTricks.html
+
+"Arnaud's advice to develop and debug numerical applications"
+http://www.fortran-2000.com/ArnaudRecipes/ArnaudAdvice.html
+
