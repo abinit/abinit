@@ -673,7 +673,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      MSG_ERROR(message)
    end if
 
-   shiftq=half
+   shiftq=zero
    call intagm(dprarr,intarr,jdtset,marr,3*nshiftq,string(1:lenstr),'shiftq',tread,'DPR')
 
    if(tread==1)then
