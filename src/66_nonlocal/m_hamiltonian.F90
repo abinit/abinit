@@ -244,12 +244,12 @@ module m_hamiltonian
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
-  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+  integer, pointer :: kg_k(:,:) => null()
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
 
-  integer, ABI_CONTIGUOUS pointer :: kg_kp(:,:) => null()
+  integer, pointer :: kg_kp(:,:) => null()
    ! kg_kp(3,npw_fft_kp)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k^prime
@@ -309,27 +309,27 @@ module m_hamiltonian
    ! ekb is spin dependent in the case of PAW calculations.
    ! For each spin component, ekb points to ekb_spin(:,:,:,my_isppol)
 
-  real(dp), ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:) => null()
+  real(dp), pointer :: ffnl_k(:,:,:,:) => null()
    ! ffnl_k(npw_fft_k,2,dimffnl_k,ntypat)
    ! nonlocal form factors at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: ffnl_kp(:,:,:,:) => null()
+  real(dp), pointer :: ffnl_kp(:,:,:,:) => null()
    ! ffnl_kp(npw_fft_kp,2,dimffnl_kp,ntypat)
    ! nonlocal form factors at k_prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: kinpw_k(:) => null()
+  real(dp), pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: kinpw_kp(:) => null()
+  real(dp), pointer :: kinpw_kp(:) => null()
    ! kinpw_kp(npw_fft_kp)
    ! (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: kpg_k(:,:) => null()
+  real(dp), pointer :: kpg_k(:,:) => null()
    ! kpg_k(3,npw_fft_k)
    ! k+G vector coordinates at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: kpg_kp(:,:) => null()
+  real(dp), pointer :: kpg_kp(:,:) => null()
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
@@ -342,19 +342,19 @@ module m_hamiltonian
    ! phkpxred(2,natom)
    ! phase factors exp(2 pi k^prime.xred) at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: ph3d_k(:,:,:) => null()
+  real(dp), pointer :: ph3d_k(:,:,:) => null()
    ! ph3d_k(2,npw_fft_k,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: ph3d_kp(:,:,:) => null()
+  real(dp), pointer :: ph3d_kp(:,:,:) => null()
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
+  real(dp), pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
 
-  real(dp), ABI_CONTIGUOUS pointer :: vxctaulocal(:,:,:,:,:) => null()
+  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
    ! vxctaulocal(n4,n5,n6,nvloc,4)
    ! derivative of XC energy density with respect to kinetic energy density,
    ! in real space, on the augmented fft grid
@@ -365,7 +365,7 @@ module m_hamiltonian
 
 ! ===== Complex array points
 
-  complex(dpc), ABI_CONTIGUOUS pointer :: nucdipmom_k(:) => null()
+  complex(dpc), pointer :: nucdipmom_k(:) => null()
    ! nucdipmom_k(npw_k*(npw_k+1)/2)
    ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
    ! lower triangular part of Hermitian matrix
@@ -456,23 +456,23 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), ABI_CONTIGUOUS pointer :: dkinpw_k(:) => null()
+  real(dp), pointer :: dkinpw_k(:) => null()
    ! dkinpw_k(npw_k)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: dkinpw_kp(:) => null()
+  real(dp), pointer :: dkinpw_kp(:) => null()
    ! dkinpw_kp(npw_kp)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: ddkinpw_k(:) => null()
+  real(dp), pointer :: ddkinpw_k(:) => null()
    ! ddkinpw_k(npw_k)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), ABI_CONTIGUOUS pointer :: ddkinpw_kp(:) => null()
+  real(dp), pointer :: ddkinpw_kp(:) => null()
    ! ddkinpw_kp(npw_kp)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: e1kbfr(:,:,:) => null()
+  real(dp), pointer :: e1kbfr(:,:,:) => null()
    ! Frozen part of 1st derivative of ekb
    ! for the considered perturbation (not depending on VHxc^(1))
    ! e1kbfr(dime1kb1,dime1kb2,nspinor**2)
@@ -484,7 +484,7 @@ module m_hamiltonian
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,my_isppol)
 
-  real(dp), ABI_CONTIGUOUS pointer :: vlocal1(:,:,:,:) => null()
+  real(dp), pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 

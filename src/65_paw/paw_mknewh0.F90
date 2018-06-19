@@ -101,7 +101,7 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
  logical :: ltest,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indklmn_(:,:)
+ integer, pointer :: indklmn_(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),rdum2(1)
  real(dp),allocatable :: prod_hloc(:,:),prodhxc_core(:,:)

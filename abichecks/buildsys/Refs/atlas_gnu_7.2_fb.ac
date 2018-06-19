@@ -289,7 +289,7 @@
 # Forced Fortran preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FPPFLAGS="-P -traditional-cpp"
+#FPPFLAGS="-P"
 
                        # ------------------------------ #
 
@@ -315,7 +315,7 @@ FPPFLAGS="-P -traditional-cpp"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-g -L/usr/local/nag/lib"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -382,7 +382,7 @@ FCFLAGS_EXTRA="-g -L/usr/local/nag/lib"
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-enable_fc_wrapper="yes"
+#enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi-1.6.5_nag5.3.1"
+with_mpi_prefix="$MPI_HOME"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
+#with_netcdf_incs="-I/usr/local/include/netcdf"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
+#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -769,15 +769,15 @@ with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include/"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="netlib"
+with_linalg_flavor="atlas"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/fallbacks_nag/lib -llapack -lblas"
+with_linalg_libs="-L/usr/lib64 -llapack -lblas -L/usr/lib64/atlas -latlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -923,7 +923,7 @@ with_linalg_libs="-L/usr/local/fallbacks_nag/lib -llapack -lblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
@@ -953,11 +953,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
+#with_libxc_incs="-I/opt/etsf/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
+#with_libxc_libs="-L/opt/etsf/lib -lxc"
 
                        # ------------------------------ #
 
@@ -1056,7 +1056,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-#enable_openmp="yes"
+enable_openmp="no"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
