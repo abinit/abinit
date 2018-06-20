@@ -1,6 +1,6 @@
 !!****d* ABINIT/linalg
 !! NAME
-!!  27_linalg
+!!  29_linalg
 !!
 !! DESCRIPTION
 !!  Contains interfaces to the BLAS and LAPACK linear algebra routines.
