@@ -2036,7 +2036,8 @@ Variable(
     text="""
 Kinetic energy cutoff that controls the number of planewaves used to represent
 the dielectric matrix:
-$ (1/2) [ 2 \pi \GG_{max}]^2 $ =[[ecut]] for $\GG_{max}$.
+$ (1/2) [ 2 \pi \GG_{diel,max}]^2 $ =[[diecut]] with $\GG_{diel,max}$ being the maximum
+length of the reciprocal space planewave wavevectors for the dielectric matrix.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diecut]] has
 the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
 All planewaves inside this "basis sphere" centered at $\GG$=0 are included in the
