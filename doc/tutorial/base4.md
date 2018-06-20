@@ -98,7 +98,7 @@ In what follows, we will restrict ourselves to the grids with [[nkpt]]=2, 10 and
 <a id="3"></a>
 ## 3 The convergence study with respect to both number of k-points AND broadening factor (tsmear)
 
-The theoretical convergence rate for [[tsmear]] ending to 0, in the case of [[occopt]]=4, is quartic. This is obtained in the hypothesis of infinitely dense k-point grid. We will check the evolution of [[acell]] as a function of [[tsmear]], for the following values of [[tsmear]]: 0.01, 0.02, 0.03 and 0.04. Use the double-loop capability of the multi-dataset mode, with the [[tsmear]] changes in the **inner** loop. This will saves CPU time, as the wavefunctions of the previous dataset will be excellent (no transfer to different k-points).
+The theoretical convergence rate for [[tsmear]] heading to 0, in the case of [[occopt]]=4, is quartic. This is obtained in the hypothesis of infinitely dense k-point grid. We will check the evolution of [[acell]] as a function of [[tsmear]], for the following values of [[tsmear]]: 0.01, 0.02, 0.03 and 0.04. Use the double-loop capability of the multi-dataset mode, with the [[tsmear]] changes in the **inner** loop. This will saves CPU time, as the wavefunctions of the previous dataset will be excellent (no transfer to different k-points).
 
 The input file `~abinit/tests/tutorial/Input/tbase4_3.in` is an example, while `~abinit/tests/tutorial/Refs/tbase4_3.out` is a reference output file.
 
