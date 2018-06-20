@@ -1,6 +1,6 @@
 !!****d* ABINIT/20_datashare
 !! NAME
-!! 20_datashare
+!! 66_vdwxc
 !!
 !! DESCRIPTION
 !! This directory contains data and routines for vdw

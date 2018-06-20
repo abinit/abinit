@@ -191,7 +191,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 #define ABI_FUNC 'cchi0q0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_66_wannier
+ use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -1151,7 +1151,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 #define ABI_FUNC 'cchi0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_66_wannier
+ use interfaces_70_gw
 !End of the abilint section
 
  implicit none

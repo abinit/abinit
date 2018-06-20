@@ -1,6 +1,6 @@
 !!****d* ABINIT/wannier
 !! NAME
-!! wannier
+!! 71_wannier
 !!
 !! DESCRIPTION
 !! This directory contains several routines related to the computation

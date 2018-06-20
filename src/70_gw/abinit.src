@@ -54,5 +54,6 @@ sources = [
  "m_screen.F90",
  "m_sigma.F90",
  "prep_calc_ucrpa.F90",
+ "read_plowannier.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
