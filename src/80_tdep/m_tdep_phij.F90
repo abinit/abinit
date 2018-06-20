@@ -659,7 +659,7 @@ subroutine tdep_destroy_eigen2nd(Eigen2nd)
 end subroutine tdep_destroy_eigen2nd
 
 !=====================================================================================================
-subroutine tdep_write_yaml(Eigen2nd,Qpt)
+subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -672,13 +672,14 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt)
 
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
+  character(len=*) :: Prefix
 ! type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: ii,iqpt,imode,nmode
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file=trim(InVar%output_prefix)//'phonon-bands.yaml')
+  open(unit=52,file=trim(Prefix)//'phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'

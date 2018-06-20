@@ -143,7 +143,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 
 ! Print the DOS
 ! =============
-  phdos_fname = "TDEP_PHDOS"
+  phdos_fname = trim(InVar%output_prefix)//"_PHDOS"
   call phdos_print(PHdos,phdos_fname)
   domega=(InVar%dosdeltae*Ha_meV)
   integ=0.d0

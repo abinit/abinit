@@ -1,0 +1,119 @@
+============= Direct results (without any inter/extrapolation) ==================
+ For present temperature (in Kelvin): T=  495.05000
+   The cold contribution (in eV/atom): U_0 =  -944.38376
+   The specific heat (in k_b/atom): C_v=       NaN
+   The vibrational entropy (in k_b/atom): S_vib =       NaN
+   The internal energy (in eV/atom): U_vib =       NaN
+   The vibrational contribution (in eV/atom): F_vib = U_vib -T.S_vib = -Infinity
+   The anharmonic contribution (in eV/atom): DeltaF_AH =  -0.17693
+   So the free energy (in eV/atom) is equal to:
+      Harmonic only -->  F_tot^HA = U_0 + F_vib =   -Infinity
+      With anharmonic contribution -->  F_tot^AH = U_0 + F_vib + DeltaF_AH =   -Infinity
+ 
+============= Quasi-Harmonic Approximation (QHA) ==================
+   Note that the following results come from an EXTRAPOLATION:
+     1/ F_vib^QHA(T) is computed for each T using vDOS(T=  495)
+     2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0
+     3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2
+     4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)
+   T      F_vib^QHA(T)   F_tot^QHA(T)    DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)
+   100       -Infinity       -Infinity        -0.00722       -Infinity
+   200       -Infinity       -Infinity        -0.02888       -Infinity
+   300       -Infinity       -Infinity        -0.06497       -Infinity
+   400       -Infinity       -Infinity        -0.11551       -Infinity
+   500       -Infinity       -Infinity        -0.18048       -Infinity
+   600       -Infinity       -Infinity        -0.25989       -Infinity
+   700       -Infinity       -Infinity        -0.35374       -Infinity
+   800       -Infinity       -Infinity        -0.46203       -Infinity
+   900       -Infinity       -Infinity        -0.58476       -Infinity
+  1000       -Infinity       -Infinity        -0.72192       -Infinity
+  1100       -Infinity       -Infinity        -0.87353       -Infinity
+  1200       -Infinity       -Infinity        -1.03957       -Infinity
+  1300       -Infinity       -Infinity        -1.22005       -Infinity
+  1400       -Infinity       -Infinity        -1.41497       -Infinity
+  1500       -Infinity       -Infinity        -1.62433       -Infinity
+  1600       -Infinity       -Infinity        -1.84813       -Infinity
+  1700       -Infinity       -Infinity        -2.08636       -Infinity
+  1800       -Infinity       -Infinity        -2.33903       -Infinity
+  1900       -Infinity       -Infinity        -2.60615       -Infinity
+  2000       -Infinity       -Infinity        -2.88770       -Infinity
+  2100       -Infinity       -Infinity        -3.18368       -Infinity
+  2200       -Infinity       -Infinity        -3.49411       -Infinity
+  2300       -Infinity       -Infinity        -3.81898       -Infinity
+  2400       -Infinity       -Infinity        -4.15828       -Infinity
+  2500       -Infinity       -Infinity        -4.51202       -Infinity
+  2600       -Infinity       -Infinity        -4.88021       -Infinity
+  2700       -Infinity       -Infinity        -5.26283       -Infinity
+  2800       -Infinity       -Infinity        -5.65988       -Infinity
+  2900       -Infinity       -Infinity        -6.07138       -Infinity
+  3000       -Infinity       -Infinity        -6.49732       -Infinity
+  3100       -Infinity       -Infinity        -6.93769       -Infinity
+  3200       -Infinity       -Infinity        -7.39250       -Infinity
+  3300       -Infinity       -Infinity        -7.86175       -Infinity
+  3400       -Infinity       -Infinity        -8.34544       -Infinity
+  3500       -Infinity       -Infinity        -8.84357       -Infinity
+  3600       -Infinity       -Infinity        -9.35613       -Infinity
+  3700       -Infinity       -Infinity        -9.88314       -Infinity
+  3800       -Infinity       -Infinity       -10.42458       -Infinity
+  3900       -Infinity       -Infinity       -10.98046       -Infinity
+  4000       -Infinity       -Infinity       -11.55078       -Infinity
+  4100       -Infinity       -Infinity       -12.13554       -Infinity
+  4200       -Infinity       -Infinity       -12.73474       -Infinity
+  4300       -Infinity       -Infinity       -13.34837       -Infinity
+  4400       -Infinity       -Infinity       -13.97645       -Infinity
+  4500       -Infinity       -Infinity       -14.61896       -Infinity
+  4600       -Infinity       -Infinity       -15.27591       -Infinity
+  4700       -Infinity       -Infinity       -15.94730       -Infinity
+  4800       -Infinity       -Infinity       -16.63313       -Infinity
+  4900       -Infinity       -Infinity       -17.33339       -Infinity
+  5000       -Infinity       -Infinity       -18.04810       -Infinity
+  5100       -Infinity       -Infinity       -18.77724       -Infinity
+  5200       -Infinity       -Infinity       -19.52082       -Infinity
+  5300       -Infinity       -Infinity       -20.27884       -Infinity
+  5400       -Infinity       -Infinity       -21.05130       -Infinity
+  5500       -Infinity       -Infinity       -21.83820       -Infinity
+  5600       -Infinity       -Infinity       -22.63953       -Infinity
+  5700       -Infinity       -Infinity       -23.45531       -Infinity
+  5800       -Infinity       -Infinity       -24.28552       -Infinity
+  5900       -Infinity       -Infinity       -25.13017       -Infinity
+  6000       -Infinity       -Infinity       -25.98926       -Infinity
+  6100       -Infinity       -Infinity       -26.86279       -Infinity
+  6200       -Infinity       -Infinity       -27.75075       -Infinity
+  6300       -Infinity       -Infinity       -28.65316       -Infinity
+  6400       -Infinity       -Infinity       -29.57000       -Infinity
+  6500       -Infinity       -Infinity       -30.50128       -Infinity
+  6600       -Infinity       -Infinity       -31.44701       -Infinity
+  6700       -Infinity       -Infinity       -32.40716       -Infinity
+  6800       -Infinity       -Infinity       -33.38176       -Infinity
+  6900       -Infinity       -Infinity       -34.37080       -Infinity
+  7000       -Infinity       -Infinity       -35.37427       -Infinity
+  7100       -Infinity       -Infinity       -36.39218       -Infinity
+  7200       -Infinity       -Infinity       -37.42454       -Infinity
+  7300       -Infinity       -Infinity       -38.47132       -Infinity
+  7400       -Infinity       -Infinity       -39.53255       -Infinity
+  7500       -Infinity       -Infinity       -40.60822       -Infinity
+  7600       -Infinity       -Infinity       -41.69832       -Infinity
+  7700       -Infinity       -Infinity       -42.80287       -Infinity
+  7800       -Infinity       -Infinity       -43.92185       -Infinity
+  7900       -Infinity       -Infinity       -45.05527       -Infinity
+  8000       -Infinity       -Infinity       -46.20313       -Infinity
+  8100       -Infinity       -Infinity       -47.36543       -Infinity
+  8200       -Infinity       -Infinity       -48.54216       -Infinity
+  8300       -Infinity       -Infinity       -49.73334       -Infinity
+  8400       -Infinity       -Infinity       -50.93895       -Infinity
+  8500       -Infinity       -Infinity       -52.15900       -Infinity
+  8600       -Infinity       -Infinity       -53.39349       -Infinity
+  8700       -Infinity       -Infinity       -54.64242       -Infinity
+  8800       -Infinity       -Infinity       -55.90579       -Infinity
+  8900       -Infinity       -Infinity       -57.18359       -Infinity
+  9000       -Infinity       -Infinity       -58.47584       -Infinity
+  9100       -Infinity       -Infinity       -59.78252       -Infinity
+  9200       -Infinity       -Infinity       -61.10364       -Infinity
+  9300       -Infinity       -Infinity       -62.43920       -Infinity
+  9400       -Infinity       -Infinity       -63.78920       -Infinity
+  9500       -Infinity       -Infinity       -65.15363       -Infinity
+  9600       -Infinity       -Infinity       -66.53251       -Infinity
+  9700       -Infinity       -Infinity       -67.92582       -Infinity
+  9800       -Infinity       -Infinity       -69.33357       -Infinity
+  9900       -Infinity       -Infinity       -70.75576       -Infinity
+ 10000       -Infinity       -Infinity       -72.19239       -Infinity

@@ -223,9 +223,9 @@ program tdep
  write(stdout,*) '#############################################################################'
  write(stdout,*) '######################## Dynamical matrix ###################################'
  write(stdout,*) '#############################################################################'
- open(unit=53,file='omega.dat')
- open(unit=52,file='dij.dat')
- open(unit=51,file='eigenvectors.dat')
+ open(unit=53,file=trim(InVar%output_prefix)//'omega.dat')
+ open(unit=52,file=trim(InVar%output_prefix)//'dij.dat')
+ open(unit=51,file=trim(InVar%output_prefix)//'eigenvectors.dat')
  ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(omega,(3*InVar%natom_unitcell))
@@ -244,7 +244,7 @@ program tdep
  close(53)
  close(52)
  close(51)
- call tdep_write_yaml(Eigen2nd,Qpt)
+ call tdep_write_yaml(Eigen2nd,Qpt,InVar%output_prefix)
  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
 !==========================================================================================
 !===================== Compute the elastic constants ======================================

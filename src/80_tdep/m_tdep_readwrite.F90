@@ -193,7 +193,7 @@ contains
   real(dp), allocatable :: znucl(:)
 
 ! Define output files  
-  InVar%stdout=8
+  InVar%stdout=7
   InVar%stdlog=6
   !open(unit=InVar%stdlog,file='data.log')
 

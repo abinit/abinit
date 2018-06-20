@@ -2755,6 +2755,7 @@ class TdepTest(BaseTest):
 
         md_hist_fname = self.cygwin_path(md_hist_fname)
         t_stdin.write(md_hist_fname + "\n") 
+        t_stdin.write( self.id + "\n")       # 2) formatted output file e.g. t13.out
 
         return t_stdin.getvalue()
 
