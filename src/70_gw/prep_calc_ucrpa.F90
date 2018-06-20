@@ -135,7 +135,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => prep_calc_ucrpa
+ use interfaces_66_wannier
 !End of the abilint section
 
  implicit none

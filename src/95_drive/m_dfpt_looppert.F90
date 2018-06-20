@@ -230,8 +230,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
  use interfaces_14_hidewrite
+ use interfaces_28_kpoints
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal

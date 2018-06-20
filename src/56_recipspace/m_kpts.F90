@@ -971,7 +971,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkgrid'
- use interfaces_41_geometry
+ use interfaces_28_kpoints
 !End of the abilint section
 
  implicit none

@@ -159,7 +159,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_28_kpoints
 !End of the abilint section
 
  implicit none
@@ -2959,7 +2959,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_setupqpt'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_28_kpoints
 !End of the abilint section
 
  implicit none

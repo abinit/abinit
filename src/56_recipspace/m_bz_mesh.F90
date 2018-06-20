@@ -2621,7 +2621,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_init'
- use interfaces_41_geometry
+ use interfaces_28_kpoints
 !End of the abilint section
 
  implicit none
