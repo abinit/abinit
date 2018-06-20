@@ -444,7 +444,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
- real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
+ real(dp) :: cpu,wall,gflops,cpu_all,wall_all,cpu_dvscf,wall_dvscf,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,weight
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
@@ -651,10 +651,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (dvdb_findq(dvdb, sigma%qibz_k(:,iq_ibz)) == -1) do_ftv1q = do_ftv1q + 1
    end do
    if (do_ftv1q /= 0) then
+     call cwtime(cpu,wall,gflops,"start")
      write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",sigma%nqibz_k,"]"
      call wrtout(std_out, msg)
      call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(sigma%ngqpt)))
      call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfftf, ngfftf, comm)
+     call cwtime(cpu,wall,gflops,"stop")
+     wall_dvscf = wall_dvscf + wall
+     cpu_dvscf = cpu_dvscf + cpu
    end if
 
    ! Allocate PW-arrays. Note mpw in kg_kq
@@ -1442,6 +1446,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
+ call wrtout(std_out, sjoin("Interpolate dVscf:", sec2str(cpu_dvscf), ", Total cpu time:", sec2str(wall_dvscf)))
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10, ch10))
 
  ! Free memory
@@ -2961,10 +2966,12 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
                (2*interp_side(2)+1)*&
                (2*interp_side(3)+1)
 
+
  write(std_out,*) 'coarse:      ', nkpt_coarse
  write(std_out,*) 'dense:       ', nkpt_dense
  write(std_out,*) 'interp_kmult:', interp_kmult
  write(std_out,*) 'ndiv:        ', eph_dg%ndiv
+ ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'dense mesh is smaller than coarse mesh.') 
 
  ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
  ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
