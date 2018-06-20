@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# Fourth (basic) lesson  
+# Fourth (basic) tutorial
 
 ## Aluminum, the bulk and the surface.  
 
-This lesson aims at showing how to get the following physical properties, for a metal, and for a surface:
+This tutorial aims at showing how to get the following physical properties, for a metal, and for a surface:
 
 * the total energy 
 * the lattice parameter 
@@ -16,11 +16,11 @@ This lesson aims at showing how to get the following physical properties, for a 
 You will learn about the smearing of the Brillouin zone integration, and also
 a bit about preconditioning the SCF cycle.
 
-This lesson should take about 1 hour and 30 minutes.
+This tutorial should take about 1 hour and 30 minutes.
 
 ## 1 Total energy and lattice parameters at fixed smearing and k-point grid
 
-*Before beginning, you might consider to work in a different subdirectory as for lesson 1, 2 or 3. 
+*Before beginning, you might consider to work in a different subdirectory as for tutorials 1, 2 or 3. 
 Why not "Work4"?*
 
 The file ~abinit/tests/tutorial/Input/tbase4_x.files lists the file names and root names. 
@@ -189,6 +189,26 @@ The associated total energy and accuracy can be deduced from
                etotal34   -2.0984218116E+00
 
 **etotal** 24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha .
+
+
+!!! tip
+
+    To analyze the convergence of the total energy, one can use the |abicomp| script
+    provide by |AbiPy| and the `gsr` command that will start an interactive |ipython| session
+    so that we can interact directly with the AbiPy object.
+    To load all the GSR files produced by calculation, use the command 
+
+        abicomp.py gsr tbase4_3o_*_GSR.nc
+
+    then, inside the ipython terminal, execute the `plot_convergence` method of the `GsrRobot`:
+
+    ```ipython
+    In [1]: robot.plot_convergence("energy", sortby="nkpt", hue="tsmear")
+    ```
+
+    to produce this plot with the total energy in eV for different values of nkpt grouped by tsmear:
+
+    ![](base4_assets/abicomp_tbase4_3o.png)
 
 ## 4 Surface energy of aluminum (100): changing the orientation of the unit cell
 
@@ -374,7 +394,7 @@ recompute the result with 3 aluminum layers.
 
 The input file ~abinit/tests/tutorial/Input/tbase4_7.in is an example, while
 ~abinit/tests/tutorial/Refs/tbase4_7.out is a reference output file. This run
-might take about one minute, and is the longer of the four basic lessons. 
+might take about one minute, and is the longer of the four basic tutorials. 
 You should start it now.
 
 {% dialog tests/tutorial/Input/tbase4_7.in tests/tutorial/Refs/tbase4_7.out %}

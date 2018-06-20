@@ -120,7 +120,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !real(dp) :: tsec(2)
  real(dp) :: svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: nonlop_out(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: gvnl2_(:,:)
+ real(dp), pointer :: gvnl2_(:,:)
  real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:)
  real(dp),allocatable,target :: enl_temp(:,:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)

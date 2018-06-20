@@ -1,0 +1,4669 @@
+# Grace project file
+#
+version 50121
+page size 1000, 780
+page scroll 5%
+page inout 5%
+link page off
+map font 0 to "Times-Roman", "Times-Roman"
+map font 1 to "Times-Italic", "Times-Italic"
+map font 2 to "Times-Bold", "Times-Bold"
+map font 3 to "Times-BoldItalic", "Times-BoldItalic"
+map font 4 to "Helvetica", "Helvetica"
+map font 5 to "Helvetica-Oblique", "Helvetica-Oblique"
+map font 6 to "Helvetica-Bold", "Helvetica-Bold"
+map font 7 to "Helvetica-BoldOblique", "Helvetica-BoldOblique"
+map font 8 to "Courier", "Courier"
+map font 9 to "Courier-Oblique", "Courier-Oblique"
+map font 10 to "Courier-Bold", "Courier-Bold"
+map font 11 to "Courier-BoldOblique", "Courier-BoldOblique"
+map font 12 to "Symbol", "Symbol"
+map font 13 to "ZapfDingbats", "ZapfDingbats"
+map color 0 to (255, 255, 255), "white"
+map color 1 to (0, 0, 0), "black"
+map color 2 to (255, 0, 0), "red"
+map color 3 to (0, 255, 0), "green"
+map color 4 to (0, 0, 255), "blue"
+map color 5 to (255, 255, 0), "yellow"
+map color 6 to (188, 143, 143), "brown"
+map color 7 to (220, 220, 220), "grey"
+map color 8 to (148, 0, 211), "violet"
+map color 9 to (0, 255, 255), "cyan"
+map color 10 to (255, 0, 255), "magenta"
+map color 11 to (255, 165, 0), "orange"
+map color 12 to (114, 33, 188), "indigo"
+map color 13 to (103, 7, 72), "maroon"
+map color 14 to (64, 224, 208), "turquoise"
+map color 15 to (0, 139, 0), "green4"
+map color 16 to (240, 0, 50), "red"
+reference date 0
+date wrap off
+date wrap year 1950
+default linewidth 1.0
+default linestyle 1
+default color 1
+default pattern 1
+default font 0
+default char size 1.000000
+default symbol size 1.000000
+default sformat "%.8g"
+background color 0
+page background fill on
+timestamp off
+timestamp 0.03, 0.03
+timestamp color 1
+timestamp rot 0
+timestamp font 0
+timestamp char size 1.000000
+timestamp def "Tue Jun 12 10:49:21 2018"
+r0 off
+link r0 to g0
+r0 type above
+r0 linestyle 1
+r0 linewidth 1.0
+r0 color 1
+r0 line 0, 0, 0, 0
+r1 off
+link r1 to g0
+r1 type above
+r1 linestyle 1
+r1 linewidth 1.0
+r1 color 1
+r1 line 0, 0, 0, 0
+r2 off
+link r2 to g0
+r2 type above
+r2 linestyle 1
+r2 linewidth 1.0
+r2 color 1
+r2 line 0, 0, 0, 0
+r3 off
+link r3 to g0
+r3 type above
+r3 linestyle 1
+r3 linewidth 1.0
+r3 color 1
+r3 line 0, 0, 0, 0
+r4 off
+link r4 to g0
+r4 type above
+r4 linestyle 1
+r4 linewidth 1.0
+r4 color 1
+r4 line 0, 0, 0, 0
+g0 on
+g0 hidden false
+g0 type XY
+g0 stacked false
+g0 bar hgap 0.000000
+g0 fixedpoint off
+g0 fixedpoint type 0
+g0 fixedpoint xy 0.000000, 0.000000
+g0 fixedpoint format general general
+g0 fixedpoint prec 6, 6
+with g0
+    world 1, -9, 86, 7
+    stack world 0, 0, 0, 0
+    znorm 1
+    view 0.139854, 0.148995, 1.187386, 0.936015
+    title ""
+    title font 0
+    title size 0.000000
+    title color 1
+    subtitle ""
+    subtitle font 0
+    subtitle size 0.000000
+    subtitle color 1
+    xaxes scale Normal
+    yaxes scale Normal
+    xaxes invert off
+    yaxes invert off
+    xaxis  on
+    xaxis  type zero false
+    xaxis  offset 0.000000 , 0.000000
+    xaxis  bar on
+    xaxis  bar color 1
+    xaxis  bar linestyle 1
+    xaxis  bar linewidth 1.0
+    xaxis  label ""
+    xaxis  label layout para
+    xaxis  label place auto
+    xaxis  label char size 1.720000
+    xaxis  label font 0
+    xaxis  label color 1
+    xaxis  label place normal
+    xaxis  tick on
+    xaxis  tick major 50
+    xaxis  tick minor ticks 1
+    xaxis  tick default 6
+    xaxis  tick place rounded true
+    xaxis  tick in
+    xaxis  tick major size 1.000000
+    xaxis  tick major color 1
+    xaxis  tick major linewidth 1.0
+    xaxis  tick major linestyle 1
+    xaxis  tick major grid on
+    xaxis  tick minor color 1
+    xaxis  tick minor linewidth 1.0
+    xaxis  tick minor linestyle 1
+    xaxis  tick minor grid off
+    xaxis  tick minor size 0.500000
+    xaxis  ticklabel on
+    xaxis  ticklabel format general
+    xaxis  ticklabel prec 5
+    xaxis  ticklabel formula ""
+    xaxis  ticklabel append ""
+    xaxis  ticklabel prepend ""
+    xaxis  ticklabel angle 0
+    xaxis  ticklabel skip 0
+    xaxis  ticklabel stagger 0
+    xaxis  ticklabel place normal
+    xaxis  ticklabel offset auto
+    xaxis  ticklabel offset 0.000000 , 0.010000
+    xaxis  ticklabel start type auto
+    xaxis  ticklabel start 0.000000
+    xaxis  ticklabel stop type auto
+    xaxis  ticklabel stop 0.000000
+    xaxis  ticklabel char size 1.730000
+    xaxis  ticklabel font 0
+    xaxis  ticklabel color 1
+    xaxis  tick place both
+    xaxis  tick spec type both
+    xaxis  tick spec 5
+    xaxis  tick major 0, 1
+    xaxis  ticklabel 0, "R"
+    xaxis  tick major 1, 18
+    xaxis  ticklabel 1, "\xG"
+    xaxis  tick major 2, 38
+    xaxis  ticklabel 2, "X"
+    xaxis  tick major 3, 58
+    xaxis  ticklabel 3, "M"
+    xaxis  tick major 4, 86
+    xaxis  ticklabel 4, "\xG"
+    yaxis  on
+    yaxis  type zero false
+    yaxis  offset 0.000000 , 0.000000
+    yaxis  bar on
+    yaxis  bar color 1
+    yaxis  bar linestyle 1
+    yaxis  bar linewidth 1.0
+    yaxis  label "\xe-e\s\0f \N(eV)"
+    yaxis  label layout para
+    yaxis  label place spec
+    yaxis  label place 0.000000, 0.070000
+    yaxis  label char size 1.720000
+    yaxis  label font 0
+    yaxis  label color 1
+    yaxis  label place normal
+    yaxis  tick on
+    yaxis  tick major 2
+    yaxis  tick minor ticks 1
+    yaxis  tick default 6
+    yaxis  tick place rounded true
+    yaxis  tick in
+    yaxis  tick major size 1.000000
+    yaxis  tick major color 1
+    yaxis  tick major linewidth 1.0
+    yaxis  tick major linestyle 1
+    yaxis  tick major grid off
+    yaxis  tick minor color 1
+    yaxis  tick minor linewidth 1.0
+    yaxis  tick minor linestyle 1
+    yaxis  tick minor grid off
+    yaxis  tick minor size 0.500000
+    yaxis  ticklabel on
+    yaxis  ticklabel format general
+    yaxis  ticklabel prec 5
+    yaxis  ticklabel formula ""
+    yaxis  ticklabel append ""
+    yaxis  ticklabel prepend ""
+    yaxis  ticklabel angle 0
+    yaxis  ticklabel skip 0
+    yaxis  ticklabel stagger 0
+    yaxis  ticklabel place normal
+    yaxis  ticklabel offset auto
+    yaxis  ticklabel offset 0.000000 , 0.010000
+    yaxis  ticklabel start type auto
+    yaxis  ticklabel start 0.000000
+    yaxis  ticklabel stop type auto
+    yaxis  ticklabel stop 0.000000
+    yaxis  ticklabel char size 1.540000
+    yaxis  ticklabel font 0
+    yaxis  ticklabel color 1
+    yaxis  tick place both
+    yaxis  tick spec type none
+    altxaxis  off
+    altyaxis  off
+    legend on
+    legend loctype view
+    legend 0.85, 0.8
+    legend box color 1
+    legend box pattern 1
+    legend box linewidth 1.0
+    legend box linestyle 1
+    legend box fill color 0
+    legend box fill pattern 1
+    legend font 0
+    legend char size 1.000000
+    legend color 1
+    legend length 4
+    legend vgap 1
+    legend hgap 1
+    legend invert false
+    frame type 0
+    frame linestyle 1
+    frame linewidth 1.0
+    frame color 1
+    frame pattern 1
+    frame background color 0
+    frame background pattern 0
+    s0 hidden false
+    s0 type xydy
+    s0 symbol 0
+    s0 symbol size 1.000000
+    s0 symbol color 1
+    s0 symbol pattern 1
+    s0 symbol fill color 1
+    s0 symbol fill pattern 0
+    s0 symbol linewidth 1.0
+    s0 symbol linestyle 1
+    s0 symbol char 65
+    s0 symbol char font 0
+    s0 symbol skip 0
+    s0 line type 1
+    s0 line linestyle 1
+    s0 line linewidth 1.5
+    s0 line color 1
+    s0 line pattern 1
+    s0 baseline type 0
+    s0 baseline off
+    s0 dropline off
+    s0 fill type 0
+    s0 fill rule 0
+    s0 fill color 1
+    s0 fill pattern 1
+    s0 avalue off
+    s0 avalue type 2
+    s0 avalue char size 1.000000
+    s0 avalue font 0
+    s0 avalue color 1
+    s0 avalue rot 0
+    s0 avalue format general
+    s0 avalue prec 3
+    s0 avalue prepend ""
+    s0 avalue append ""
+    s0 avalue offset 0.000000 , 0.000000
+    s0 errorbar on
+    s0 errorbar place both
+    s0 errorbar color 11
+    s0 errorbar pattern 1
+    s0 errorbar size 1.000000
+    s0 errorbar linewidth 1.5
+    s0 errorbar linestyle 0
+    s0 errorbar riser linewidth 2.0
+    s0 errorbar riser linestyle 1
+    s0 errorbar riser clip off
+    s0 errorbar riser clip length 0.100000
+    s0 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s0 legend  ""
+    s1 hidden false
+    s1 type xydy
+    s1 symbol 0
+    s1 symbol size 1.000000
+    s1 symbol color 1
+    s1 symbol pattern 1
+    s1 symbol fill color 1
+    s1 symbol fill pattern 0
+    s1 symbol linewidth 1.0
+    s1 symbol linestyle 1
+    s1 symbol char 65
+    s1 symbol char font 0
+    s1 symbol skip 0
+    s1 line type 1
+    s1 line linestyle 1
+    s1 line linewidth 1.5
+    s1 line color 1
+    s1 line pattern 1
+    s1 baseline type 0
+    s1 baseline off
+    s1 dropline off
+    s1 fill type 0
+    s1 fill rule 0
+    s1 fill color 1
+    s1 fill pattern 1
+    s1 avalue off
+    s1 avalue type 2
+    s1 avalue char size 1.000000
+    s1 avalue font 0
+    s1 avalue color 1
+    s1 avalue rot 0
+    s1 avalue format general
+    s1 avalue prec 3
+    s1 avalue prepend ""
+    s1 avalue append ""
+    s1 avalue offset 0.000000 , 0.000000
+    s1 errorbar on
+    s1 errorbar place both
+    s1 errorbar color 11
+    s1 errorbar pattern 1
+    s1 errorbar size 1.000000
+    s1 errorbar linewidth 1.5
+    s1 errorbar linestyle 0
+    s1 errorbar riser linewidth 2.0
+    s1 errorbar riser linestyle 1
+    s1 errorbar riser clip off
+    s1 errorbar riser clip length 0.100000
+    s1 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s1 legend  ""
+    s2 hidden false
+    s2 type xydy
+    s2 symbol 0
+    s2 symbol size 1.000000
+    s2 symbol color 1
+    s2 symbol pattern 1
+    s2 symbol fill color 1
+    s2 symbol fill pattern 0
+    s2 symbol linewidth 1.0
+    s2 symbol linestyle 1
+    s2 symbol char 65
+    s2 symbol char font 0
+    s2 symbol skip 0
+    s2 line type 1
+    s2 line linestyle 1
+    s2 line linewidth 1.5
+    s2 line color 1
+    s2 line pattern 1
+    s2 baseline type 0
+    s2 baseline off
+    s2 dropline off
+    s2 fill type 0
+    s2 fill rule 0
+    s2 fill color 1
+    s2 fill pattern 1
+    s2 avalue off
+    s2 avalue type 2
+    s2 avalue char size 1.000000
+    s2 avalue font 0
+    s2 avalue color 1
+    s2 avalue rot 0
+    s2 avalue format general
+    s2 avalue prec 3
+    s2 avalue prepend ""
+    s2 avalue append ""
+    s2 avalue offset 0.000000 , 0.000000
+    s2 errorbar on
+    s2 errorbar place both
+    s2 errorbar color 11
+    s2 errorbar pattern 1
+    s2 errorbar size 1.000000
+    s2 errorbar linewidth 1.5
+    s2 errorbar linestyle 0
+    s2 errorbar riser linewidth 2.0
+    s2 errorbar riser linestyle 1
+    s2 errorbar riser clip off
+    s2 errorbar riser clip length 0.100000
+    s2 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s2 legend  ""
+    s3 hidden false
+    s3 type xydy
+    s3 symbol 0
+    s3 symbol size 1.000000
+    s3 symbol color 1
+    s3 symbol pattern 1
+    s3 symbol fill color 1
+    s3 symbol fill pattern 0
+    s3 symbol linewidth 1.0
+    s3 symbol linestyle 1
+    s3 symbol char 65
+    s3 symbol char font 0
+    s3 symbol skip 0
+    s3 line type 1
+    s3 line linestyle 1
+    s3 line linewidth 1.5
+    s3 line color 1
+    s3 line pattern 1
+    s3 baseline type 0
+    s3 baseline off
+    s3 dropline off
+    s3 fill type 0
+    s3 fill rule 0
+    s3 fill color 1
+    s3 fill pattern 1
+    s3 avalue off
+    s3 avalue type 2
+    s3 avalue char size 1.000000
+    s3 avalue font 0
+    s3 avalue color 1
+    s3 avalue rot 0
+    s3 avalue format general
+    s3 avalue prec 3
+    s3 avalue prepend ""
+    s3 avalue append ""
+    s3 avalue offset 0.000000 , 0.000000
+    s3 errorbar on
+    s3 errorbar place both
+    s3 errorbar color 11
+    s3 errorbar pattern 1
+    s3 errorbar size 1.000000
+    s3 errorbar linewidth 1.5
+    s3 errorbar linestyle 0
+    s3 errorbar riser linewidth 2.0
+    s3 errorbar riser linestyle 1
+    s3 errorbar riser clip off
+    s3 errorbar riser clip length 0.100000
+    s3 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s3 legend  ""
+    s4 hidden false
+    s4 type xydy
+    s4 symbol 0
+    s4 symbol size 1.000000
+    s4 symbol color 1
+    s4 symbol pattern 1
+    s4 symbol fill color 1
+    s4 symbol fill pattern 0
+    s4 symbol linewidth 1.0
+    s4 symbol linestyle 1
+    s4 symbol char 65
+    s4 symbol char font 0
+    s4 symbol skip 0
+    s4 line type 1
+    s4 line linestyle 1
+    s4 line linewidth 1.5
+    s4 line color 1
+    s4 line pattern 1
+    s4 baseline type 0
+    s4 baseline off
+    s4 dropline off
+    s4 fill type 0
+    s4 fill rule 0
+    s4 fill color 1
+    s4 fill pattern 1
+    s4 avalue off
+    s4 avalue type 2
+    s4 avalue char size 1.000000
+    s4 avalue font 0
+    s4 avalue color 1
+    s4 avalue rot 0
+    s4 avalue format general
+    s4 avalue prec 3
+    s4 avalue prepend ""
+    s4 avalue append ""
+    s4 avalue offset 0.000000 , 0.000000
+    s4 errorbar on
+    s4 errorbar place both
+    s4 errorbar color 11
+    s4 errorbar pattern 1
+    s4 errorbar size 1.000000
+    s4 errorbar linewidth 1.5
+    s4 errorbar linestyle 0
+    s4 errorbar riser linewidth 2.0
+    s4 errorbar riser linestyle 1
+    s4 errorbar riser clip off
+    s4 errorbar riser clip length 0.100000
+    s4 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s4 legend  ""
+    s5 hidden false
+    s5 type xydy
+    s5 symbol 0
+    s5 symbol size 1.000000
+    s5 symbol color 1
+    s5 symbol pattern 1
+    s5 symbol fill color 1
+    s5 symbol fill pattern 0
+    s5 symbol linewidth 1.0
+    s5 symbol linestyle 1
+    s5 symbol char 65
+    s5 symbol char font 0
+    s5 symbol skip 0
+    s5 line type 1
+    s5 line linestyle 1
+    s5 line linewidth 1.5
+    s5 line color 1
+    s5 line pattern 1
+    s5 baseline type 0
+    s5 baseline off
+    s5 dropline off
+    s5 fill type 0
+    s5 fill rule 0
+    s5 fill color 1
+    s5 fill pattern 1
+    s5 avalue off
+    s5 avalue type 2
+    s5 avalue char size 1.000000
+    s5 avalue font 0
+    s5 avalue color 1
+    s5 avalue rot 0
+    s5 avalue format general
+    s5 avalue prec 3
+    s5 avalue prepend ""
+    s5 avalue append ""
+    s5 avalue offset 0.000000 , 0.000000
+    s5 errorbar on
+    s5 errorbar place both
+    s5 errorbar color 11
+    s5 errorbar pattern 1
+    s5 errorbar size 1.000000
+    s5 errorbar linewidth 1.5
+    s5 errorbar linestyle 0
+    s5 errorbar riser linewidth 2.0
+    s5 errorbar riser linestyle 1
+    s5 errorbar riser clip off
+    s5 errorbar riser clip length 0.100000
+    s5 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s5 legend  ""
+    s6 hidden false
+    s6 type xydy
+    s6 symbol 0
+    s6 symbol size 1.000000
+    s6 symbol color 1
+    s6 symbol pattern 1
+    s6 symbol fill color 1
+    s6 symbol fill pattern 0
+    s6 symbol linewidth 1.0
+    s6 symbol linestyle 1
+    s6 symbol char 65
+    s6 symbol char font 0
+    s6 symbol skip 0
+    s6 line type 1
+    s6 line linestyle 1
+    s6 line linewidth 1.5
+    s6 line color 1
+    s6 line pattern 1
+    s6 baseline type 0
+    s6 baseline off
+    s6 dropline off
+    s6 fill type 0
+    s6 fill rule 0
+    s6 fill color 1
+    s6 fill pattern 1
+    s6 avalue off
+    s6 avalue type 2
+    s6 avalue char size 1.000000
+    s6 avalue font 0
+    s6 avalue color 1
+    s6 avalue rot 0
+    s6 avalue format general
+    s6 avalue prec 3
+    s6 avalue prepend ""
+    s6 avalue append ""
+    s6 avalue offset 0.000000 , 0.000000
+    s6 errorbar on
+    s6 errorbar place both
+    s6 errorbar color 11
+    s6 errorbar pattern 1
+    s6 errorbar size 1.000000
+    s6 errorbar linewidth 1.5
+    s6 errorbar linestyle 0
+    s6 errorbar riser linewidth 2.0
+    s6 errorbar riser linestyle 1
+    s6 errorbar riser clip off
+    s6 errorbar riser clip length 0.100000
+    s6 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s6 legend  ""
+    s7 hidden false
+    s7 type xydy
+    s7 symbol 0
+    s7 symbol size 1.000000
+    s7 symbol color 1
+    s7 symbol pattern 1
+    s7 symbol fill color 1
+    s7 symbol fill pattern 0
+    s7 symbol linewidth 1.0
+    s7 symbol linestyle 1
+    s7 symbol char 65
+    s7 symbol char font 0
+    s7 symbol skip 0
+    s7 line type 1
+    s7 line linestyle 1
+    s7 line linewidth 1.5
+    s7 line color 1
+    s7 line pattern 1
+    s7 baseline type 0
+    s7 baseline off
+    s7 dropline off
+    s7 fill type 0
+    s7 fill rule 0
+    s7 fill color 1
+    s7 fill pattern 1
+    s7 avalue off
+    s7 avalue type 2
+    s7 avalue char size 1.000000
+    s7 avalue font 0
+    s7 avalue color 1
+    s7 avalue rot 0
+    s7 avalue format general
+    s7 avalue prec 3
+    s7 avalue prepend ""
+    s7 avalue append ""
+    s7 avalue offset 0.000000 , 0.000000
+    s7 errorbar on
+    s7 errorbar place both
+    s7 errorbar color 11
+    s7 errorbar pattern 1
+    s7 errorbar size 1.000000
+    s7 errorbar linewidth 1.5
+    s7 errorbar linestyle 0
+    s7 errorbar riser linewidth 2.0
+    s7 errorbar riser linestyle 1
+    s7 errorbar riser clip off
+    s7 errorbar riser clip length 0.100000
+    s7 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s7 legend  ""
+    s8 hidden false
+    s8 type xydy
+    s8 symbol 0
+    s8 symbol size 1.000000
+    s8 symbol color 1
+    s8 symbol pattern 1
+    s8 symbol fill color 1
+    s8 symbol fill pattern 0
+    s8 symbol linewidth 1.0
+    s8 symbol linestyle 1
+    s8 symbol char 65
+    s8 symbol char font 0
+    s8 symbol skip 0
+    s8 line type 1
+    s8 line linestyle 1
+    s8 line linewidth 1.5
+    s8 line color 1
+    s8 line pattern 1
+    s8 baseline type 0
+    s8 baseline off
+    s8 dropline off
+    s8 fill type 0
+    s8 fill rule 0
+    s8 fill color 1
+    s8 fill pattern 1
+    s8 avalue off
+    s8 avalue type 2
+    s8 avalue char size 1.000000
+    s8 avalue font 0
+    s8 avalue color 1
+    s8 avalue rot 0
+    s8 avalue format general
+    s8 avalue prec 3
+    s8 avalue prepend ""
+    s8 avalue append ""
+    s8 avalue offset 0.000000 , 0.000000
+    s8 errorbar on
+    s8 errorbar place both
+    s8 errorbar color 11
+    s8 errorbar pattern 1
+    s8 errorbar size 1.000000
+    s8 errorbar linewidth 1.5
+    s8 errorbar linestyle 0
+    s8 errorbar riser linewidth 2.0
+    s8 errorbar riser linestyle 1
+    s8 errorbar riser clip off
+    s8 errorbar riser clip length 0.100000
+    s8 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s8 legend  ""
+    s9 hidden false
+    s9 type xydy
+    s9 symbol 0
+    s9 symbol size 1.000000
+    s9 symbol color 1
+    s9 symbol pattern 1
+    s9 symbol fill color 1
+    s9 symbol fill pattern 0
+    s9 symbol linewidth 1.0
+    s9 symbol linestyle 1
+    s9 symbol char 65
+    s9 symbol char font 0
+    s9 symbol skip 0
+    s9 line type 1
+    s9 line linestyle 1
+    s9 line linewidth 1.5
+    s9 line color 1
+    s9 line pattern 1
+    s9 baseline type 0
+    s9 baseline off
+    s9 dropline off
+    s9 fill type 0
+    s9 fill rule 0
+    s9 fill color 1
+    s9 fill pattern 1
+    s9 avalue off
+    s9 avalue type 2
+    s9 avalue char size 1.000000
+    s9 avalue font 0
+    s9 avalue color 1
+    s9 avalue rot 0
+    s9 avalue format general
+    s9 avalue prec 3
+    s9 avalue prepend ""
+    s9 avalue append ""
+    s9 avalue offset 0.000000 , 0.000000
+    s9 errorbar on
+    s9 errorbar place both
+    s9 errorbar color 11
+    s9 errorbar pattern 1
+    s9 errorbar size 1.000000
+    s9 errorbar linewidth 1.5
+    s9 errorbar linestyle 0
+    s9 errorbar riser linewidth 2.0
+    s9 errorbar riser linestyle 1
+    s9 errorbar riser clip off
+    s9 errorbar riser clip length 0.100000
+    s9 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s9 legend  ""
+    s10 hidden false
+    s10 type xydy
+    s10 symbol 0
+    s10 symbol size 1.000000
+    s10 symbol color 1
+    s10 symbol pattern 1
+    s10 symbol fill color 1
+    s10 symbol fill pattern 0
+    s10 symbol linewidth 1.0
+    s10 symbol linestyle 1
+    s10 symbol char 65
+    s10 symbol char font 0
+    s10 symbol skip 0
+    s10 line type 1
+    s10 line linestyle 1
+    s10 line linewidth 1.5
+    s10 line color 1
+    s10 line pattern 1
+    s10 baseline type 0
+    s10 baseline off
+    s10 dropline off
+    s10 fill type 0
+    s10 fill rule 0
+    s10 fill color 1
+    s10 fill pattern 1
+    s10 avalue off
+    s10 avalue type 2
+    s10 avalue char size 1.000000
+    s10 avalue font 0
+    s10 avalue color 1
+    s10 avalue rot 0
+    s10 avalue format general
+    s10 avalue prec 3
+    s10 avalue prepend ""
+    s10 avalue append ""
+    s10 avalue offset 0.000000 , 0.000000
+    s10 errorbar on
+    s10 errorbar place both
+    s10 errorbar color 11
+    s10 errorbar pattern 1
+    s10 errorbar size 1.000000
+    s10 errorbar linewidth 1.5
+    s10 errorbar linestyle 0
+    s10 errorbar riser linewidth 2.0
+    s10 errorbar riser linestyle 1
+    s10 errorbar riser clip off
+    s10 errorbar riser clip length 0.100000
+    s10 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s10 legend  ""
+    s11 hidden false
+    s11 type xydy
+    s11 symbol 0
+    s11 symbol size 1.000000
+    s11 symbol color 1
+    s11 symbol pattern 1
+    s11 symbol fill color 1
+    s11 symbol fill pattern 0
+    s11 symbol linewidth 1.0
+    s11 symbol linestyle 1
+    s11 symbol char 65
+    s11 symbol char font 0
+    s11 symbol skip 0
+    s11 line type 1
+    s11 line linestyle 1
+    s11 line linewidth 1.5
+    s11 line color 1
+    s11 line pattern 1
+    s11 baseline type 0
+    s11 baseline off
+    s11 dropline off
+    s11 fill type 0
+    s11 fill rule 0
+    s11 fill color 1
+    s11 fill pattern 1
+    s11 avalue off
+    s11 avalue type 2
+    s11 avalue char size 1.000000
+    s11 avalue font 0
+    s11 avalue color 1
+    s11 avalue rot 0
+    s11 avalue format general
+    s11 avalue prec 3
+    s11 avalue prepend ""
+    s11 avalue append ""
+    s11 avalue offset 0.000000 , 0.000000
+    s11 errorbar on
+    s11 errorbar place both
+    s11 errorbar color 11
+    s11 errorbar pattern 1
+    s11 errorbar size 1.000000
+    s11 errorbar linewidth 1.5
+    s11 errorbar linestyle 0
+    s11 errorbar riser linewidth 2.0
+    s11 errorbar riser linestyle 1
+    s11 errorbar riser clip off
+    s11 errorbar riser clip length 0.100000
+    s11 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s11 legend  ""
+    s12 hidden false
+    s12 type xydy
+    s12 symbol 0
+    s12 symbol size 1.000000
+    s12 symbol color 1
+    s12 symbol pattern 1
+    s12 symbol fill color 1
+    s12 symbol fill pattern 0
+    s12 symbol linewidth 1.0
+    s12 symbol linestyle 1
+    s12 symbol char 65
+    s12 symbol char font 0
+    s12 symbol skip 0
+    s12 line type 1
+    s12 line linestyle 1
+    s12 line linewidth 1.5
+    s12 line color 1
+    s12 line pattern 1
+    s12 baseline type 0
+    s12 baseline off
+    s12 dropline off
+    s12 fill type 0
+    s12 fill rule 0
+    s12 fill color 1
+    s12 fill pattern 1
+    s12 avalue off
+    s12 avalue type 2
+    s12 avalue char size 1.000000
+    s12 avalue font 0
+    s12 avalue color 1
+    s12 avalue rot 0
+    s12 avalue format general
+    s12 avalue prec 3
+    s12 avalue prepend ""
+    s12 avalue append ""
+    s12 avalue offset 0.000000 , 0.000000
+    s12 errorbar on
+    s12 errorbar place both
+    s12 errorbar color 11
+    s12 errorbar pattern 1
+    s12 errorbar size 1.000000
+    s12 errorbar linewidth 1.5
+    s12 errorbar linestyle 0
+    s12 errorbar riser linewidth 2.0
+    s12 errorbar riser linestyle 1
+    s12 errorbar riser clip off
+    s12 errorbar riser clip length 0.100000
+    s12 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s12 legend  ""
+    s13 hidden false
+    s13 type xydy
+    s13 symbol 0
+    s13 symbol size 1.000000
+    s13 symbol color 1
+    s13 symbol pattern 1
+    s13 symbol fill color 1
+    s13 symbol fill pattern 0
+    s13 symbol linewidth 1.0
+    s13 symbol linestyle 1
+    s13 symbol char 65
+    s13 symbol char font 0
+    s13 symbol skip 0
+    s13 line type 1
+    s13 line linestyle 1
+    s13 line linewidth 1.5
+    s13 line color 1
+    s13 line pattern 1
+    s13 baseline type 0
+    s13 baseline off
+    s13 dropline off
+    s13 fill type 0
+    s13 fill rule 0
+    s13 fill color 1
+    s13 fill pattern 1
+    s13 avalue off
+    s13 avalue type 2
+    s13 avalue char size 1.000000
+    s13 avalue font 0
+    s13 avalue color 1
+    s13 avalue rot 0
+    s13 avalue format general
+    s13 avalue prec 3
+    s13 avalue prepend ""
+    s13 avalue append ""
+    s13 avalue offset 0.000000 , 0.000000
+    s13 errorbar on
+    s13 errorbar place both
+    s13 errorbar color 11
+    s13 errorbar pattern 1
+    s13 errorbar size 1.000000
+    s13 errorbar linewidth 1.5
+    s13 errorbar linestyle 0
+    s13 errorbar riser linewidth 2.0
+    s13 errorbar riser linestyle 1
+    s13 errorbar riser clip off
+    s13 errorbar riser clip length 0.100000
+    s13 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s13 legend  ""
+    s14 hidden false
+    s14 type xydy
+    s14 symbol 0
+    s14 symbol size 1.000000
+    s14 symbol color 1
+    s14 symbol pattern 1
+    s14 symbol fill color 1
+    s14 symbol fill pattern 0
+    s14 symbol linewidth 1.0
+    s14 symbol linestyle 1
+    s14 symbol char 65
+    s14 symbol char font 0
+    s14 symbol skip 0
+    s14 line type 1
+    s14 line linestyle 1
+    s14 line linewidth 1.5
+    s14 line color 1
+    s14 line pattern 1
+    s14 baseline type 0
+    s14 baseline off
+    s14 dropline off
+    s14 fill type 0
+    s14 fill rule 0
+    s14 fill color 1
+    s14 fill pattern 1
+    s14 avalue off
+    s14 avalue type 2
+    s14 avalue char size 1.000000
+    s14 avalue font 0
+    s14 avalue color 1
+    s14 avalue rot 0
+    s14 avalue format general
+    s14 avalue prec 3
+    s14 avalue prepend ""
+    s14 avalue append ""
+    s14 avalue offset 0.000000 , 0.000000
+    s14 errorbar on
+    s14 errorbar place both
+    s14 errorbar color 11
+    s14 errorbar pattern 1
+    s14 errorbar size 1.000000
+    s14 errorbar linewidth 1.5
+    s14 errorbar linestyle 0
+    s14 errorbar riser linewidth 2.0
+    s14 errorbar riser linestyle 1
+    s14 errorbar riser clip off
+    s14 errorbar riser clip length 0.100000
+    s14 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s14 legend  ""
+    s15 hidden false
+    s15 type xydy
+    s15 symbol 0
+    s15 symbol size 1.000000
+    s15 symbol color 1
+    s15 symbol pattern 1
+    s15 symbol fill color 1
+    s15 symbol fill pattern 0
+    s15 symbol linewidth 1.0
+    s15 symbol linestyle 1
+    s15 symbol char 65
+    s15 symbol char font 0
+    s15 symbol skip 0
+    s15 line type 1
+    s15 line linestyle 1
+    s15 line linewidth 1.5
+    s15 line color 1
+    s15 line pattern 1
+    s15 baseline type 0
+    s15 baseline off
+    s15 dropline off
+    s15 fill type 0
+    s15 fill rule 0
+    s15 fill color 1
+    s15 fill pattern 1
+    s15 avalue off
+    s15 avalue type 2
+    s15 avalue char size 1.000000
+    s15 avalue font 0
+    s15 avalue color 1
+    s15 avalue rot 0
+    s15 avalue format general
+    s15 avalue prec 3
+    s15 avalue prepend ""
+    s15 avalue append ""
+    s15 avalue offset 0.000000 , 0.000000
+    s15 errorbar on
+    s15 errorbar place both
+    s15 errorbar color 11
+    s15 errorbar pattern 1
+    s15 errorbar size 1.000000
+    s15 errorbar linewidth 1.5
+    s15 errorbar linestyle 0
+    s15 errorbar riser linewidth 2.0
+    s15 errorbar riser linestyle 1
+    s15 errorbar riser clip off
+    s15 errorbar riser clip length 0.100000
+    s15 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s15 legend  ""
+    s16 hidden false
+    s16 type xydy
+    s16 symbol 0
+    s16 symbol size 1.000000
+    s16 symbol color 1
+    s16 symbol pattern 1
+    s16 symbol fill color 1
+    s16 symbol fill pattern 0
+    s16 symbol linewidth 1.0
+    s16 symbol linestyle 1
+    s16 symbol char 65
+    s16 symbol char font 0
+    s16 symbol skip 0
+    s16 line type 1
+    s16 line linestyle 1
+    s16 line linewidth 1.5
+    s16 line color 1
+    s16 line pattern 1
+    s16 baseline type 0
+    s16 baseline off
+    s16 dropline off
+    s16 fill type 0
+    s16 fill rule 0
+    s16 fill color 1
+    s16 fill pattern 1
+    s16 avalue off
+    s16 avalue type 2
+    s16 avalue char size 1.000000
+    s16 avalue font 0
+    s16 avalue color 1
+    s16 avalue rot 0
+    s16 avalue format general
+    s16 avalue prec 3
+    s16 avalue prepend ""
+    s16 avalue append ""
+    s16 avalue offset 0.000000 , 0.000000
+    s16 errorbar on
+    s16 errorbar place both
+    s16 errorbar color 11
+    s16 errorbar pattern 1
+    s16 errorbar size 1.000000
+    s16 errorbar linewidth 1.5
+    s16 errorbar linestyle 0
+    s16 errorbar riser linewidth 2.0
+    s16 errorbar riser linestyle 1
+    s16 errorbar riser clip off
+    s16 errorbar riser clip length 0.100000
+    s16 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s16 legend  ""
+    s17 hidden false
+    s17 type xydy
+    s17 symbol 0
+    s17 symbol size 1.000000
+    s17 symbol color 1
+    s17 symbol pattern 1
+    s17 symbol fill color 1
+    s17 symbol fill pattern 0
+    s17 symbol linewidth 1.0
+    s17 symbol linestyle 1
+    s17 symbol char 65
+    s17 symbol char font 0
+    s17 symbol skip 0
+    s17 line type 1
+    s17 line linestyle 1
+    s17 line linewidth 1.5
+    s17 line color 1
+    s17 line pattern 1
+    s17 baseline type 0
+    s17 baseline off
+    s17 dropline off
+    s17 fill type 0
+    s17 fill rule 0
+    s17 fill color 1
+    s17 fill pattern 1
+    s17 avalue off
+    s17 avalue type 2
+    s17 avalue char size 1.000000
+    s17 avalue font 0
+    s17 avalue color 1
+    s17 avalue rot 0
+    s17 avalue format general
+    s17 avalue prec 3
+    s17 avalue prepend ""
+    s17 avalue append ""
+    s17 avalue offset 0.000000 , 0.000000
+    s17 errorbar on
+    s17 errorbar place both
+    s17 errorbar color 11
+    s17 errorbar pattern 1
+    s17 errorbar size 1.000000
+    s17 errorbar linewidth 1.5
+    s17 errorbar linestyle 0
+    s17 errorbar riser linewidth 2.0
+    s17 errorbar riser linestyle 1
+    s17 errorbar riser clip off
+    s17 errorbar riser clip length 0.100000
+    s17 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s17 legend  ""
+    s18 hidden false
+    s18 type xydy
+    s18 symbol 0
+    s18 symbol size 1.000000
+    s18 symbol color 1
+    s18 symbol pattern 1
+    s18 symbol fill color 1
+    s18 symbol fill pattern 0
+    s18 symbol linewidth 1.0
+    s18 symbol linestyle 1
+    s18 symbol char 65
+    s18 symbol char font 0
+    s18 symbol skip 0
+    s18 line type 1
+    s18 line linestyle 1
+    s18 line linewidth 1.5
+    s18 line color 1
+    s18 line pattern 1
+    s18 baseline type 0
+    s18 baseline off
+    s18 dropline off
+    s18 fill type 0
+    s18 fill rule 0
+    s18 fill color 1
+    s18 fill pattern 1
+    s18 avalue off
+    s18 avalue type 2
+    s18 avalue char size 1.000000
+    s18 avalue font 0
+    s18 avalue color 1
+    s18 avalue rot 0
+    s18 avalue format general
+    s18 avalue prec 3
+    s18 avalue prepend ""
+    s18 avalue append ""
+    s18 avalue offset 0.000000 , 0.000000
+    s18 errorbar on
+    s18 errorbar place both
+    s18 errorbar color 11
+    s18 errorbar pattern 1
+    s18 errorbar size 1.000000
+    s18 errorbar linewidth 1.5
+    s18 errorbar linestyle 0
+    s18 errorbar riser linewidth 2.0
+    s18 errorbar riser linestyle 1
+    s18 errorbar riser clip off
+    s18 errorbar riser clip length 0.100000
+    s18 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s18 legend  ""
+    s19 hidden false
+    s19 type xydy
+    s19 symbol 0
+    s19 symbol size 1.000000
+    s19 symbol color 1
+    s19 symbol pattern 1
+    s19 symbol fill color 1
+    s19 symbol fill pattern 0
+    s19 symbol linewidth 1.0
+    s19 symbol linestyle 1
+    s19 symbol char 65
+    s19 symbol char font 0
+    s19 symbol skip 0
+    s19 line type 1
+    s19 line linestyle 1
+    s19 line linewidth 1.5
+    s19 line color 1
+    s19 line pattern 1
+    s19 baseline type 0
+    s19 baseline off
+    s19 dropline off
+    s19 fill type 0
+    s19 fill rule 0
+    s19 fill color 1
+    s19 fill pattern 1
+    s19 avalue off
+    s19 avalue type 2
+    s19 avalue char size 1.000000
+    s19 avalue font 0
+    s19 avalue color 1
+    s19 avalue rot 0
+    s19 avalue format general
+    s19 avalue prec 3
+    s19 avalue prepend ""
+    s19 avalue append ""
+    s19 avalue offset 0.000000 , 0.000000
+    s19 errorbar on
+    s19 errorbar place both
+    s19 errorbar color 11
+    s19 errorbar pattern 1
+    s19 errorbar size 1.000000
+    s19 errorbar linewidth 1.5
+    s19 errorbar linestyle 0
+    s19 errorbar riser linewidth 2.0
+    s19 errorbar riser linestyle 1
+    s19 errorbar riser clip off
+    s19 errorbar riser clip length 0.100000
+    s19 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s19 legend  ""
+    s20 hidden false
+    s20 type xydy
+    s20 symbol 0
+    s20 symbol size 1.000000
+    s20 symbol color 1
+    s20 symbol pattern 1
+    s20 symbol fill color 1
+    s20 symbol fill pattern 0
+    s20 symbol linewidth 1.0
+    s20 symbol linestyle 1
+    s20 symbol char 65
+    s20 symbol char font 0
+    s20 symbol skip 0
+    s20 line type 1
+    s20 line linestyle 1
+    s20 line linewidth 1.5
+    s20 line color 1
+    s20 line pattern 1
+    s20 baseline type 0
+    s20 baseline off
+    s20 dropline off
+    s20 fill type 0
+    s20 fill rule 0
+    s20 fill color 1
+    s20 fill pattern 1
+    s20 avalue off
+    s20 avalue type 2
+    s20 avalue char size 1.000000
+    s20 avalue font 0
+    s20 avalue color 1
+    s20 avalue rot 0
+    s20 avalue format general
+    s20 avalue prec 3
+    s20 avalue prepend ""
+    s20 avalue append ""
+    s20 avalue offset 0.000000 , 0.000000
+    s20 errorbar on
+    s20 errorbar place both
+    s20 errorbar color 11
+    s20 errorbar pattern 1
+    s20 errorbar size 1.000000
+    s20 errorbar linewidth 1.5
+    s20 errorbar linestyle 0
+    s20 errorbar riser linewidth 2.0
+    s20 errorbar riser linestyle 1
+    s20 errorbar riser clip off
+    s20 errorbar riser clip length 0.100000
+    s20 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s20 legend  ""
+    s21 hidden false
+    s21 type xydy
+    s21 symbol 0
+    s21 symbol size 1.000000
+    s21 symbol color 1
+    s21 symbol pattern 1
+    s21 symbol fill color 1
+    s21 symbol fill pattern 0
+    s21 symbol linewidth 1.0
+    s21 symbol linestyle 1
+    s21 symbol char 65
+    s21 symbol char font 0
+    s21 symbol skip 0
+    s21 line type 1
+    s21 line linestyle 1
+    s21 line linewidth 1.5
+    s21 line color 1
+    s21 line pattern 1
+    s21 baseline type 0
+    s21 baseline off
+    s21 dropline off
+    s21 fill type 0
+    s21 fill rule 0
+    s21 fill color 1
+    s21 fill pattern 1
+    s21 avalue off
+    s21 avalue type 2
+    s21 avalue char size 1.000000
+    s21 avalue font 0
+    s21 avalue color 1
+    s21 avalue rot 0
+    s21 avalue format general
+    s21 avalue prec 3
+    s21 avalue prepend ""
+    s21 avalue append ""
+    s21 avalue offset 0.000000 , 0.000000
+    s21 errorbar on
+    s21 errorbar place both
+    s21 errorbar color 11
+    s21 errorbar pattern 1
+    s21 errorbar size 1.000000
+    s21 errorbar linewidth 1.5
+    s21 errorbar linestyle 0
+    s21 errorbar riser linewidth 2.0
+    s21 errorbar riser linestyle 1
+    s21 errorbar riser clip off
+    s21 errorbar riser clip length 0.100000
+    s21 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s21 legend  ""
+    s22 hidden false
+    s22 type xydy
+    s22 symbol 0
+    s22 symbol size 1.000000
+    s22 symbol color 1
+    s22 symbol pattern 1
+    s22 symbol fill color 1
+    s22 symbol fill pattern 0
+    s22 symbol linewidth 1.0
+    s22 symbol linestyle 1
+    s22 symbol char 65
+    s22 symbol char font 0
+    s22 symbol skip 0
+    s22 line type 1
+    s22 line linestyle 1
+    s22 line linewidth 1.5
+    s22 line color 1
+    s22 line pattern 1
+    s22 baseline type 0
+    s22 baseline off
+    s22 dropline off
+    s22 fill type 0
+    s22 fill rule 0
+    s22 fill color 1
+    s22 fill pattern 1
+    s22 avalue off
+    s22 avalue type 2
+    s22 avalue char size 1.000000
+    s22 avalue font 0
+    s22 avalue color 1
+    s22 avalue rot 0
+    s22 avalue format general
+    s22 avalue prec 3
+    s22 avalue prepend ""
+    s22 avalue append ""
+    s22 avalue offset 0.000000 , 0.000000
+    s22 errorbar on
+    s22 errorbar place both
+    s22 errorbar color 11
+    s22 errorbar pattern 1
+    s22 errorbar size 1.000000
+    s22 errorbar linewidth 1.5
+    s22 errorbar linestyle 0
+    s22 errorbar riser linewidth 2.0
+    s22 errorbar riser linestyle 1
+    s22 errorbar riser clip off
+    s22 errorbar riser clip length 0.100000
+    s22 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s22 legend  ""
+    s23 hidden false
+    s23 type xydy
+    s23 symbol 0
+    s23 symbol size 1.000000
+    s23 symbol color 1
+    s23 symbol pattern 1
+    s23 symbol fill color 1
+    s23 symbol fill pattern 0
+    s23 symbol linewidth 1.0
+    s23 symbol linestyle 1
+    s23 symbol char 65
+    s23 symbol char font 0
+    s23 symbol skip 0
+    s23 line type 1
+    s23 line linestyle 1
+    s23 line linewidth 1.5
+    s23 line color 1
+    s23 line pattern 1
+    s23 baseline type 0
+    s23 baseline off
+    s23 dropline off
+    s23 fill type 0
+    s23 fill rule 0
+    s23 fill color 1
+    s23 fill pattern 1
+    s23 avalue off
+    s23 avalue type 2
+    s23 avalue char size 1.000000
+    s23 avalue font 0
+    s23 avalue color 1
+    s23 avalue rot 0
+    s23 avalue format general
+    s23 avalue prec 3
+    s23 avalue prepend ""
+    s23 avalue append ""
+    s23 avalue offset 0.000000 , 0.000000
+    s23 errorbar on
+    s23 errorbar place both
+    s23 errorbar color 11
+    s23 errorbar pattern 1
+    s23 errorbar size 1.000000
+    s23 errorbar linewidth 1.5
+    s23 errorbar linestyle 0
+    s23 errorbar riser linewidth 2.0
+    s23 errorbar riser linestyle 1
+    s23 errorbar riser clip off
+    s23 errorbar riser clip length 0.100000
+    s23 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s23 legend  ""
+    s24 hidden false
+    s24 type xydy
+    s24 symbol 0
+    s24 symbol size 1.000000
+    s24 symbol color 1
+    s24 symbol pattern 1
+    s24 symbol fill color 1
+    s24 symbol fill pattern 0
+    s24 symbol linewidth 1.0
+    s24 symbol linestyle 1
+    s24 symbol char 65
+    s24 symbol char font 0
+    s24 symbol skip 0
+    s24 line type 1
+    s24 line linestyle 1
+    s24 line linewidth 1.5
+    s24 line color 1
+    s24 line pattern 1
+    s24 baseline type 0
+    s24 baseline off
+    s24 dropline off
+    s24 fill type 0
+    s24 fill rule 0
+    s24 fill color 1
+    s24 fill pattern 1
+    s24 avalue off
+    s24 avalue type 2
+    s24 avalue char size 1.000000
+    s24 avalue font 0
+    s24 avalue color 1
+    s24 avalue rot 0
+    s24 avalue format general
+    s24 avalue prec 3
+    s24 avalue prepend ""
+    s24 avalue append ""
+    s24 avalue offset 0.000000 , 0.000000
+    s24 errorbar on
+    s24 errorbar place both
+    s24 errorbar color 11
+    s24 errorbar pattern 1
+    s24 errorbar size 1.000000
+    s24 errorbar linewidth 1.5
+    s24 errorbar linestyle 0
+    s24 errorbar riser linewidth 2.0
+    s24 errorbar riser linestyle 1
+    s24 errorbar riser clip off
+    s24 errorbar riser clip length 0.100000
+    s24 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s24 legend  ""
+    s25 hidden false
+    s25 type xydy
+    s25 symbol 0
+    s25 symbol size 1.000000
+    s25 symbol color 1
+    s25 symbol pattern 1
+    s25 symbol fill color 1
+    s25 symbol fill pattern 0
+    s25 symbol linewidth 1.0
+    s25 symbol linestyle 1
+    s25 symbol char 65
+    s25 symbol char font 0
+    s25 symbol skip 0
+    s25 line type 1
+    s25 line linestyle 1
+    s25 line linewidth 1.5
+    s25 line color 1
+    s25 line pattern 1
+    s25 baseline type 0
+    s25 baseline off
+    s25 dropline off
+    s25 fill type 0
+    s25 fill rule 0
+    s25 fill color 1
+    s25 fill pattern 1
+    s25 avalue off
+    s25 avalue type 2
+    s25 avalue char size 1.000000
+    s25 avalue font 0
+    s25 avalue color 1
+    s25 avalue rot 0
+    s25 avalue format general
+    s25 avalue prec 3
+    s25 avalue prepend ""
+    s25 avalue append ""
+    s25 avalue offset 0.000000 , 0.000000
+    s25 errorbar on
+    s25 errorbar place both
+    s25 errorbar color 11
+    s25 errorbar pattern 1
+    s25 errorbar size 1.000000
+    s25 errorbar linewidth 1.5
+    s25 errorbar linestyle 0
+    s25 errorbar riser linewidth 2.0
+    s25 errorbar riser linestyle 1
+    s25 errorbar riser clip off
+    s25 errorbar riser clip length 0.100000
+    s25 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s25 legend  ""
+    s26 hidden false
+    s26 type xydy
+    s26 symbol 0
+    s26 symbol size 1.000000
+    s26 symbol color 1
+    s26 symbol pattern 1
+    s26 symbol fill color 1
+    s26 symbol fill pattern 0
+    s26 symbol linewidth 1.0
+    s26 symbol linestyle 1
+    s26 symbol char 65
+    s26 symbol char font 0
+    s26 symbol skip 0
+    s26 line type 1
+    s26 line linestyle 1
+    s26 line linewidth 1.5
+    s26 line color 1
+    s26 line pattern 1
+    s26 baseline type 0
+    s26 baseline off
+    s26 dropline off
+    s26 fill type 0
+    s26 fill rule 0
+    s26 fill color 1
+    s26 fill pattern 1
+    s26 avalue off
+    s26 avalue type 2
+    s26 avalue char size 1.000000
+    s26 avalue font 0
+    s26 avalue color 1
+    s26 avalue rot 0
+    s26 avalue format general
+    s26 avalue prec 3
+    s26 avalue prepend ""
+    s26 avalue append ""
+    s26 avalue offset 0.000000 , 0.000000
+    s26 errorbar on
+    s26 errorbar place both
+    s26 errorbar color 11
+    s26 errorbar pattern 1
+    s26 errorbar size 1.000000
+    s26 errorbar linewidth 1.5
+    s26 errorbar linestyle 0
+    s26 errorbar riser linewidth 2.0
+    s26 errorbar riser linestyle 1
+    s26 errorbar riser clip off
+    s26 errorbar riser clip length 0.100000
+    s26 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s26 legend  ""
+    s27 hidden false
+    s27 type xydy
+    s27 symbol 0
+    s27 symbol size 1.000000
+    s27 symbol color 1
+    s27 symbol pattern 1
+    s27 symbol fill color 1
+    s27 symbol fill pattern 0
+    s27 symbol linewidth 1.0
+    s27 symbol linestyle 1
+    s27 symbol char 65
+    s27 symbol char font 0
+    s27 symbol skip 0
+    s27 line type 1
+    s27 line linestyle 1
+    s27 line linewidth 1.5
+    s27 line color 1
+    s27 line pattern 1
+    s27 baseline type 0
+    s27 baseline off
+    s27 dropline off
+    s27 fill type 0
+    s27 fill rule 0
+    s27 fill color 1
+    s27 fill pattern 1
+    s27 avalue off
+    s27 avalue type 2
+    s27 avalue char size 1.000000
+    s27 avalue font 0
+    s27 avalue color 1
+    s27 avalue rot 0
+    s27 avalue format general
+    s27 avalue prec 3
+    s27 avalue prepend ""
+    s27 avalue append ""
+    s27 avalue offset 0.000000 , 0.000000
+    s27 errorbar on
+    s27 errorbar place both
+    s27 errorbar color 11
+    s27 errorbar pattern 1
+    s27 errorbar size 1.000000
+    s27 errorbar linewidth 1.5
+    s27 errorbar linestyle 0
+    s27 errorbar riser linewidth 2.0
+    s27 errorbar riser linestyle 1
+    s27 errorbar riser clip off
+    s27 errorbar riser clip length 0.100000
+    s27 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s27 legend  ""
+    s28 hidden false
+    s28 type xydy
+    s28 symbol 0
+    s28 symbol size 1.000000
+    s28 symbol color 1
+    s28 symbol pattern 1
+    s28 symbol fill color 1
+    s28 symbol fill pattern 0
+    s28 symbol linewidth 1.0
+    s28 symbol linestyle 1
+    s28 symbol char 65
+    s28 symbol char font 0
+    s28 symbol skip 0
+    s28 line type 1
+    s28 line linestyle 1
+    s28 line linewidth 1.5
+    s28 line color 1
+    s28 line pattern 1
+    s28 baseline type 0
+    s28 baseline off
+    s28 dropline off
+    s28 fill type 0
+    s28 fill rule 0
+    s28 fill color 1
+    s28 fill pattern 1
+    s28 avalue off
+    s28 avalue type 2
+    s28 avalue char size 1.000000
+    s28 avalue font 0
+    s28 avalue color 1
+    s28 avalue rot 0
+    s28 avalue format general
+    s28 avalue prec 3
+    s28 avalue prepend ""
+    s28 avalue append ""
+    s28 avalue offset 0.000000 , 0.000000
+    s28 errorbar on
+    s28 errorbar place both
+    s28 errorbar color 11
+    s28 errorbar pattern 1
+    s28 errorbar size 1.000000
+    s28 errorbar linewidth 1.5
+    s28 errorbar linestyle 0
+    s28 errorbar riser linewidth 2.0
+    s28 errorbar riser linestyle 1
+    s28 errorbar riser clip off
+    s28 errorbar riser clip length 0.100000
+    s28 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s28 legend  ""
+    s29 hidden false
+    s29 type xydy
+    s29 symbol 0
+    s29 symbol size 1.000000
+    s29 symbol color 1
+    s29 symbol pattern 1
+    s29 symbol fill color 1
+    s29 symbol fill pattern 0
+    s29 symbol linewidth 1.0
+    s29 symbol linestyle 1
+    s29 symbol char 65
+    s29 symbol char font 0
+    s29 symbol skip 0
+    s29 line type 1
+    s29 line linestyle 1
+    s29 line linewidth 1.5
+    s29 line color 1
+    s29 line pattern 1
+    s29 baseline type 0
+    s29 baseline off
+    s29 dropline off
+    s29 fill type 0
+    s29 fill rule 0
+    s29 fill color 1
+    s29 fill pattern 1
+    s29 avalue off
+    s29 avalue type 2
+    s29 avalue char size 1.000000
+    s29 avalue font 0
+    s29 avalue color 1
+    s29 avalue rot 0
+    s29 avalue format general
+    s29 avalue prec 3
+    s29 avalue prepend ""
+    s29 avalue append ""
+    s29 avalue offset 0.000000 , 0.000000
+    s29 errorbar on
+    s29 errorbar place both
+    s29 errorbar color 11
+    s29 errorbar pattern 1
+    s29 errorbar size 1.000000
+    s29 errorbar linewidth 1.5
+    s29 errorbar linestyle 0
+    s29 errorbar riser linewidth 2.0
+    s29 errorbar riser linestyle 1
+    s29 errorbar riser clip off
+    s29 errorbar riser clip length 0.100000
+    s29 comment "tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002"
+    s29 legend  ""
+    s30 hidden false
+    s30 type xydy
+    s30 symbol 0
+    s30 symbol size 1.000000
+    s30 symbol color 1
+    s30 symbol pattern 1
+    s30 symbol fill color 1
+    s30 symbol fill pattern 0
+    s30 symbol linewidth 1.0
+    s30 symbol linestyle 1
+    s30 symbol char 65
+    s30 symbol char font 0
+    s30 symbol skip 0
+    s30 line type 1
+    s30 line linestyle 1
+    s30 line linewidth 1.5
+    s30 line color 1
+    s30 line pattern 1
+    s30 baseline type 0
+    s30 baseline off
+    s30 dropline off
+    s30 fill type 0
+    s30 fill rule 0
+    s30 fill color 1
+    s30 fill pattern 1
+    s30 avalue off
+    s30 avalue type 2
+    s30 avalue char size 1.000000
+    s30 avalue font 0
+    s30 avalue color 1
+    s30 avalue rot 0
+    s30 avalue format general
+    s30 avalue prec 3
+    s30 avalue prepend ""
+    s30 avalue append ""
+    s30 avalue offset 0.000000 , 0.000000
+    s30 errorbar on
+    s30 errorbar place both
+    s30 errorbar color 11
+    s30 errorbar pattern 1
+    s30 errorbar size 1.000000
+    s30 errorbar linewidth 1.5
+    s30 errorbar linestyle 0
+    s30 errorbar riser linewidth 2.0
+    s30 errorbar riser linestyle 1
+    s30 errorbar riser clip off
+    s30 errorbar riser clip length 0.100000
+    s30 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s30 legend  ""
+    s31 hidden false
+    s31 type xydy
+    s31 symbol 0
+    s31 symbol size 1.000000
+    s31 symbol color 1
+    s31 symbol pattern 1
+    s31 symbol fill color 1
+    s31 symbol fill pattern 0
+    s31 symbol linewidth 1.0
+    s31 symbol linestyle 1
+    s31 symbol char 65
+    s31 symbol char font 0
+    s31 symbol skip 0
+    s31 line type 1
+    s31 line linestyle 1
+    s31 line linewidth 1.5
+    s31 line color 1
+    s31 line pattern 1
+    s31 baseline type 0
+    s31 baseline off
+    s31 dropline off
+    s31 fill type 0
+    s31 fill rule 0
+    s31 fill color 1
+    s31 fill pattern 1
+    s31 avalue off
+    s31 avalue type 2
+    s31 avalue char size 1.000000
+    s31 avalue font 0
+    s31 avalue color 1
+    s31 avalue rot 0
+    s31 avalue format general
+    s31 avalue prec 3
+    s31 avalue prepend ""
+    s31 avalue append ""
+    s31 avalue offset 0.000000 , 0.000000
+    s31 errorbar on
+    s31 errorbar place both
+    s31 errorbar color 11
+    s31 errorbar pattern 1
+    s31 errorbar size 1.000000
+    s31 errorbar linewidth 1.5
+    s31 errorbar linestyle 0
+    s31 errorbar riser linewidth 2.0
+    s31 errorbar riser linestyle 1
+    s31 errorbar riser clip off
+    s31 errorbar riser clip length 0.100000
+    s31 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s31 legend  ""
+    s32 hidden false
+    s32 type xydy
+    s32 symbol 0
+    s32 symbol size 1.000000
+    s32 symbol color 1
+    s32 symbol pattern 1
+    s32 symbol fill color 1
+    s32 symbol fill pattern 0
+    s32 symbol linewidth 1.0
+    s32 symbol linestyle 1
+    s32 symbol char 65
+    s32 symbol char font 0
+    s32 symbol skip 0
+    s32 line type 1
+    s32 line linestyle 1
+    s32 line linewidth 1.5
+    s32 line color 1
+    s32 line pattern 1
+    s32 baseline type 0
+    s32 baseline off
+    s32 dropline off
+    s32 fill type 0
+    s32 fill rule 0
+    s32 fill color 1
+    s32 fill pattern 1
+    s32 avalue off
+    s32 avalue type 2
+    s32 avalue char size 1.000000
+    s32 avalue font 0
+    s32 avalue color 1
+    s32 avalue rot 0
+    s32 avalue format general
+    s32 avalue prec 3
+    s32 avalue prepend ""
+    s32 avalue append ""
+    s32 avalue offset 0.000000 , 0.000000
+    s32 errorbar on
+    s32 errorbar place both
+    s32 errorbar color 11
+    s32 errorbar pattern 1
+    s32 errorbar size 1.000000
+    s32 errorbar linewidth 1.5
+    s32 errorbar linestyle 0
+    s32 errorbar riser linewidth 2.0
+    s32 errorbar riser linestyle 1
+    s32 errorbar riser clip off
+    s32 errorbar riser clip length 0.100000
+    s32 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s32 legend  ""
+    s33 hidden false
+    s33 type xydy
+    s33 symbol 0
+    s33 symbol size 1.000000
+    s33 symbol color 1
+    s33 symbol pattern 1
+    s33 symbol fill color 1
+    s33 symbol fill pattern 0
+    s33 symbol linewidth 1.0
+    s33 symbol linestyle 1
+    s33 symbol char 65
+    s33 symbol char font 0
+    s33 symbol skip 0
+    s33 line type 1
+    s33 line linestyle 1
+    s33 line linewidth 1.5
+    s33 line color 1
+    s33 line pattern 1
+    s33 baseline type 0
+    s33 baseline off
+    s33 dropline off
+    s33 fill type 0
+    s33 fill rule 0
+    s33 fill color 1
+    s33 fill pattern 1
+    s33 avalue off
+    s33 avalue type 2
+    s33 avalue char size 1.000000
+    s33 avalue font 0
+    s33 avalue color 1
+    s33 avalue rot 0
+    s33 avalue format general
+    s33 avalue prec 3
+    s33 avalue prepend ""
+    s33 avalue append ""
+    s33 avalue offset 0.000000 , 0.000000
+    s33 errorbar on
+    s33 errorbar place both
+    s33 errorbar color 11
+    s33 errorbar pattern 1
+    s33 errorbar size 1.000000
+    s33 errorbar linewidth 1.5
+    s33 errorbar linestyle 0
+    s33 errorbar riser linewidth 2.0
+    s33 errorbar riser linestyle 1
+    s33 errorbar riser clip off
+    s33 errorbar riser clip length 0.100000
+    s33 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s33 legend  ""
+    s34 hidden false
+    s34 type xydy
+    s34 symbol 0
+    s34 symbol size 1.000000
+    s34 symbol color 1
+    s34 symbol pattern 1
+    s34 symbol fill color 1
+    s34 symbol fill pattern 0
+    s34 symbol linewidth 1.0
+    s34 symbol linestyle 1
+    s34 symbol char 65
+    s34 symbol char font 0
+    s34 symbol skip 0
+    s34 line type 1
+    s34 line linestyle 1
+    s34 line linewidth 1.5
+    s34 line color 1
+    s34 line pattern 1
+    s34 baseline type 0
+    s34 baseline off
+    s34 dropline off
+    s34 fill type 0
+    s34 fill rule 0
+    s34 fill color 1
+    s34 fill pattern 1
+    s34 avalue off
+    s34 avalue type 2
+    s34 avalue char size 1.000000
+    s34 avalue font 0
+    s34 avalue color 1
+    s34 avalue rot 0
+    s34 avalue format general
+    s34 avalue prec 3
+    s34 avalue prepend ""
+    s34 avalue append ""
+    s34 avalue offset 0.000000 , 0.000000
+    s34 errorbar on
+    s34 errorbar place both
+    s34 errorbar color 11
+    s34 errorbar pattern 1
+    s34 errorbar size 1.000000
+    s34 errorbar linewidth 1.5
+    s34 errorbar linestyle 0
+    s34 errorbar riser linewidth 2.0
+    s34 errorbar riser linestyle 1
+    s34 errorbar riser clip off
+    s34 errorbar riser clip length 0.100000
+    s34 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s34 legend  ""
+    s35 hidden false
+    s35 type xydy
+    s35 symbol 0
+    s35 symbol size 1.000000
+    s35 symbol color 1
+    s35 symbol pattern 1
+    s35 symbol fill color 1
+    s35 symbol fill pattern 0
+    s35 symbol linewidth 1.0
+    s35 symbol linestyle 1
+    s35 symbol char 65
+    s35 symbol char font 0
+    s35 symbol skip 0
+    s35 line type 1
+    s35 line linestyle 1
+    s35 line linewidth 1.5
+    s35 line color 1
+    s35 line pattern 1
+    s35 baseline type 0
+    s35 baseline off
+    s35 dropline off
+    s35 fill type 0
+    s35 fill rule 0
+    s35 fill color 1
+    s35 fill pattern 1
+    s35 avalue off
+    s35 avalue type 2
+    s35 avalue char size 1.000000
+    s35 avalue font 0
+    s35 avalue color 1
+    s35 avalue rot 0
+    s35 avalue format general
+    s35 avalue prec 3
+    s35 avalue prepend ""
+    s35 avalue append ""
+    s35 avalue offset 0.000000 , 0.000000
+    s35 errorbar on
+    s35 errorbar place both
+    s35 errorbar color 11
+    s35 errorbar pattern 1
+    s35 errorbar size 1.000000
+    s35 errorbar linewidth 1.5
+    s35 errorbar linestyle 0
+    s35 errorbar riser linewidth 2.0
+    s35 errorbar riser linestyle 1
+    s35 errorbar riser clip off
+    s35 errorbar riser clip length 0.100000
+    s35 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s35 legend  ""
+    s36 hidden false
+    s36 type xydy
+    s36 symbol 0
+    s36 symbol size 1.000000
+    s36 symbol color 1
+    s36 symbol pattern 1
+    s36 symbol fill color 1
+    s36 symbol fill pattern 0
+    s36 symbol linewidth 1.0
+    s36 symbol linestyle 1
+    s36 symbol char 65
+    s36 symbol char font 0
+    s36 symbol skip 0
+    s36 line type 1
+    s36 line linestyle 1
+    s36 line linewidth 1.5
+    s36 line color 1
+    s36 line pattern 1
+    s36 baseline type 0
+    s36 baseline off
+    s36 dropline off
+    s36 fill type 0
+    s36 fill rule 0
+    s36 fill color 1
+    s36 fill pattern 1
+    s36 avalue off
+    s36 avalue type 2
+    s36 avalue char size 1.000000
+    s36 avalue font 0
+    s36 avalue color 1
+    s36 avalue rot 0
+    s36 avalue format general
+    s36 avalue prec 3
+    s36 avalue prepend ""
+    s36 avalue append ""
+    s36 avalue offset 0.000000 , 0.000000
+    s36 errorbar on
+    s36 errorbar place both
+    s36 errorbar color 11
+    s36 errorbar pattern 1
+    s36 errorbar size 1.000000
+    s36 errorbar linewidth 1.5
+    s36 errorbar linestyle 0
+    s36 errorbar riser linewidth 2.0
+    s36 errorbar riser linestyle 1
+    s36 errorbar riser clip off
+    s36 errorbar riser clip length 0.100000
+    s36 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s36 legend  ""
+    s37 hidden false
+    s37 type xydy
+    s37 symbol 0
+    s37 symbol size 1.000000
+    s37 symbol color 1
+    s37 symbol pattern 1
+    s37 symbol fill color 1
+    s37 symbol fill pattern 0
+    s37 symbol linewidth 1.0
+    s37 symbol linestyle 1
+    s37 symbol char 65
+    s37 symbol char font 0
+    s37 symbol skip 0
+    s37 line type 1
+    s37 line linestyle 1
+    s37 line linewidth 1.5
+    s37 line color 1
+    s37 line pattern 1
+    s37 baseline type 0
+    s37 baseline off
+    s37 dropline off
+    s37 fill type 0
+    s37 fill rule 0
+    s37 fill color 1
+    s37 fill pattern 1
+    s37 avalue off
+    s37 avalue type 2
+    s37 avalue char size 1.000000
+    s37 avalue font 0
+    s37 avalue color 1
+    s37 avalue rot 0
+    s37 avalue format general
+    s37 avalue prec 3
+    s37 avalue prepend ""
+    s37 avalue append ""
+    s37 avalue offset 0.000000 , 0.000000
+    s37 errorbar on
+    s37 errorbar place both
+    s37 errorbar color 11
+    s37 errorbar pattern 1
+    s37 errorbar size 1.000000
+    s37 errorbar linewidth 1.5
+    s37 errorbar linestyle 0
+    s37 errorbar riser linewidth 2.0
+    s37 errorbar riser linestyle 1
+    s37 errorbar riser clip off
+    s37 errorbar riser clip length 0.100000
+    s37 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s37 legend  ""
+    s38 hidden false
+    s38 type xydy
+    s38 symbol 0
+    s38 symbol size 1.000000
+    s38 symbol color 1
+    s38 symbol pattern 1
+    s38 symbol fill color 1
+    s38 symbol fill pattern 0
+    s38 symbol linewidth 1.0
+    s38 symbol linestyle 1
+    s38 symbol char 65
+    s38 symbol char font 0
+    s38 symbol skip 0
+    s38 line type 1
+    s38 line linestyle 1
+    s38 line linewidth 1.5
+    s38 line color 1
+    s38 line pattern 1
+    s38 baseline type 0
+    s38 baseline off
+    s38 dropline off
+    s38 fill type 0
+    s38 fill rule 0
+    s38 fill color 1
+    s38 fill pattern 1
+    s38 avalue off
+    s38 avalue type 2
+    s38 avalue char size 1.000000
+    s38 avalue font 0
+    s38 avalue color 1
+    s38 avalue rot 0
+    s38 avalue format general
+    s38 avalue prec 3
+    s38 avalue prepend ""
+    s38 avalue append ""
+    s38 avalue offset 0.000000 , 0.000000
+    s38 errorbar on
+    s38 errorbar place both
+    s38 errorbar color 11
+    s38 errorbar pattern 1
+    s38 errorbar size 1.000000
+    s38 errorbar linewidth 1.5
+    s38 errorbar linestyle 0
+    s38 errorbar riser linewidth 2.0
+    s38 errorbar riser linestyle 1
+    s38 errorbar riser clip off
+    s38 errorbar riser clip length 0.100000
+    s38 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s38 legend  ""
+    s39 hidden false
+    s39 type xydy
+    s39 symbol 0
+    s39 symbol size 1.000000
+    s39 symbol color 1
+    s39 symbol pattern 1
+    s39 symbol fill color 1
+    s39 symbol fill pattern 0
+    s39 symbol linewidth 1.0
+    s39 symbol linestyle 1
+    s39 symbol char 65
+    s39 symbol char font 0
+    s39 symbol skip 0
+    s39 line type 1
+    s39 line linestyle 1
+    s39 line linewidth 1.5
+    s39 line color 1
+    s39 line pattern 1
+    s39 baseline type 0
+    s39 baseline off
+    s39 dropline off
+    s39 fill type 0
+    s39 fill rule 0
+    s39 fill color 1
+    s39 fill pattern 1
+    s39 avalue off
+    s39 avalue type 2
+    s39 avalue char size 1.000000
+    s39 avalue font 0
+    s39 avalue color 1
+    s39 avalue rot 0
+    s39 avalue format general
+    s39 avalue prec 3
+    s39 avalue prepend ""
+    s39 avalue append ""
+    s39 avalue offset 0.000000 , 0.000000
+    s39 errorbar on
+    s39 errorbar place both
+    s39 errorbar color 11
+    s39 errorbar pattern 1
+    s39 errorbar size 1.000000
+    s39 errorbar linewidth 1.5
+    s39 errorbar linestyle 0
+    s39 errorbar riser linewidth 2.0
+    s39 errorbar riser linestyle 1
+    s39 errorbar riser clip off
+    s39 errorbar riser clip length 0.100000
+    s39 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s39 legend  ""
+    s40 hidden false
+    s40 type xydy
+    s40 symbol 0
+    s40 symbol size 1.000000
+    s40 symbol color 1
+    s40 symbol pattern 1
+    s40 symbol fill color 1
+    s40 symbol fill pattern 0
+    s40 symbol linewidth 1.0
+    s40 symbol linestyle 1
+    s40 symbol char 65
+    s40 symbol char font 0
+    s40 symbol skip 0
+    s40 line type 1
+    s40 line linestyle 1
+    s40 line linewidth 1.5
+    s40 line color 1
+    s40 line pattern 1
+    s40 baseline type 0
+    s40 baseline off
+    s40 dropline off
+    s40 fill type 0
+    s40 fill rule 0
+    s40 fill color 1
+    s40 fill pattern 1
+    s40 avalue off
+    s40 avalue type 2
+    s40 avalue char size 1.000000
+    s40 avalue font 0
+    s40 avalue color 1
+    s40 avalue rot 0
+    s40 avalue format general
+    s40 avalue prec 3
+    s40 avalue prepend ""
+    s40 avalue append ""
+    s40 avalue offset 0.000000 , 0.000000
+    s40 errorbar on
+    s40 errorbar place both
+    s40 errorbar color 11
+    s40 errorbar pattern 1
+    s40 errorbar size 1.000000
+    s40 errorbar linewidth 1.5
+    s40 errorbar linestyle 0
+    s40 errorbar riser linewidth 2.0
+    s40 errorbar riser linestyle 1
+    s40 errorbar riser clip off
+    s40 errorbar riser clip length 0.100000
+    s40 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s40 legend  ""
+    s41 hidden false
+    s41 type xydy
+    s41 symbol 0
+    s41 symbol size 1.000000
+    s41 symbol color 1
+    s41 symbol pattern 1
+    s41 symbol fill color 1
+    s41 symbol fill pattern 0
+    s41 symbol linewidth 1.0
+    s41 symbol linestyle 1
+    s41 symbol char 65
+    s41 symbol char font 0
+    s41 symbol skip 0
+    s41 line type 1
+    s41 line linestyle 1
+    s41 line linewidth 1.5
+    s41 line color 1
+    s41 line pattern 1
+    s41 baseline type 0
+    s41 baseline off
+    s41 dropline off
+    s41 fill type 0
+    s41 fill rule 0
+    s41 fill color 1
+    s41 fill pattern 1
+    s41 avalue off
+    s41 avalue type 2
+    s41 avalue char size 1.000000
+    s41 avalue font 0
+    s41 avalue color 1
+    s41 avalue rot 0
+    s41 avalue format general
+    s41 avalue prec 3
+    s41 avalue prepend ""
+    s41 avalue append ""
+    s41 avalue offset 0.000000 , 0.000000
+    s41 errorbar on
+    s41 errorbar place both
+    s41 errorbar color 11
+    s41 errorbar pattern 1
+    s41 errorbar size 1.000000
+    s41 errorbar linewidth 1.5
+    s41 errorbar linestyle 0
+    s41 errorbar riser linewidth 2.0
+    s41 errorbar riser linestyle 1
+    s41 errorbar riser clip off
+    s41 errorbar riser clip length 0.100000
+    s41 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s41 legend  ""
+    s42 hidden false
+    s42 type xydy
+    s42 symbol 0
+    s42 symbol size 1.000000
+    s42 symbol color 1
+    s42 symbol pattern 1
+    s42 symbol fill color 1
+    s42 symbol fill pattern 0
+    s42 symbol linewidth 1.0
+    s42 symbol linestyle 1
+    s42 symbol char 65
+    s42 symbol char font 0
+    s42 symbol skip 0
+    s42 line type 1
+    s42 line linestyle 1
+    s42 line linewidth 1.5
+    s42 line color 1
+    s42 line pattern 1
+    s42 baseline type 0
+    s42 baseline off
+    s42 dropline off
+    s42 fill type 0
+    s42 fill rule 0
+    s42 fill color 1
+    s42 fill pattern 1
+    s42 avalue off
+    s42 avalue type 2
+    s42 avalue char size 1.000000
+    s42 avalue font 0
+    s42 avalue color 1
+    s42 avalue rot 0
+    s42 avalue format general
+    s42 avalue prec 3
+    s42 avalue prepend ""
+    s42 avalue append ""
+    s42 avalue offset 0.000000 , 0.000000
+    s42 errorbar on
+    s42 errorbar place both
+    s42 errorbar color 11
+    s42 errorbar pattern 1
+    s42 errorbar size 1.000000
+    s42 errorbar linewidth 1.5
+    s42 errorbar linestyle 0
+    s42 errorbar riser linewidth 2.0
+    s42 errorbar riser linestyle 1
+    s42 errorbar riser clip off
+    s42 errorbar riser clip length 0.100000
+    s42 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s42 legend  ""
+    s43 hidden false
+    s43 type xydy
+    s43 symbol 0
+    s43 symbol size 1.000000
+    s43 symbol color 1
+    s43 symbol pattern 1
+    s43 symbol fill color 1
+    s43 symbol fill pattern 0
+    s43 symbol linewidth 1.0
+    s43 symbol linestyle 1
+    s43 symbol char 65
+    s43 symbol char font 0
+    s43 symbol skip 0
+    s43 line type 1
+    s43 line linestyle 1
+    s43 line linewidth 1.5
+    s43 line color 1
+    s43 line pattern 1
+    s43 baseline type 0
+    s43 baseline off
+    s43 dropline off
+    s43 fill type 0
+    s43 fill rule 0
+    s43 fill color 1
+    s43 fill pattern 1
+    s43 avalue off
+    s43 avalue type 2
+    s43 avalue char size 1.000000
+    s43 avalue font 0
+    s43 avalue color 1
+    s43 avalue rot 0
+    s43 avalue format general
+    s43 avalue prec 3
+    s43 avalue prepend ""
+    s43 avalue append ""
+    s43 avalue offset 0.000000 , 0.000000
+    s43 errorbar on
+    s43 errorbar place both
+    s43 errorbar color 11
+    s43 errorbar pattern 1
+    s43 errorbar size 1.000000
+    s43 errorbar linewidth 1.5
+    s43 errorbar linestyle 0
+    s43 errorbar riser linewidth 2.0
+    s43 errorbar riser linestyle 1
+    s43 errorbar riser clip off
+    s43 errorbar riser clip length 0.100000
+    s43 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s43 legend  ""
+    s44 hidden false
+    s44 type xydy
+    s44 symbol 0
+    s44 symbol size 1.000000
+    s44 symbol color 1
+    s44 symbol pattern 1
+    s44 symbol fill color 1
+    s44 symbol fill pattern 0
+    s44 symbol linewidth 1.0
+    s44 symbol linestyle 1
+    s44 symbol char 65
+    s44 symbol char font 0
+    s44 symbol skip 0
+    s44 line type 1
+    s44 line linestyle 1
+    s44 line linewidth 1.5
+    s44 line color 1
+    s44 line pattern 1
+    s44 baseline type 0
+    s44 baseline off
+    s44 dropline off
+    s44 fill type 0
+    s44 fill rule 0
+    s44 fill color 1
+    s44 fill pattern 1
+    s44 avalue off
+    s44 avalue type 2
+    s44 avalue char size 1.000000
+    s44 avalue font 0
+    s44 avalue color 1
+    s44 avalue rot 0
+    s44 avalue format general
+    s44 avalue prec 3
+    s44 avalue prepend ""
+    s44 avalue append ""
+    s44 avalue offset 0.000000 , 0.000000
+    s44 errorbar on
+    s44 errorbar place both
+    s44 errorbar color 11
+    s44 errorbar pattern 1
+    s44 errorbar size 1.000000
+    s44 errorbar linewidth 1.5
+    s44 errorbar linestyle 0
+    s44 errorbar riser linewidth 2.0
+    s44 errorbar riser linestyle 1
+    s44 errorbar riser clip off
+    s44 errorbar riser clip length 0.100000
+    s44 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s44 legend  ""
+    s45 hidden false
+    s45 type xydy
+    s45 symbol 0
+    s45 symbol size 1.000000
+    s45 symbol color 1
+    s45 symbol pattern 1
+    s45 symbol fill color 1
+    s45 symbol fill pattern 0
+    s45 symbol linewidth 1.0
+    s45 symbol linestyle 1
+    s45 symbol char 65
+    s45 symbol char font 0
+    s45 symbol skip 0
+    s45 line type 1
+    s45 line linestyle 1
+    s45 line linewidth 1.5
+    s45 line color 1
+    s45 line pattern 1
+    s45 baseline type 0
+    s45 baseline off
+    s45 dropline off
+    s45 fill type 0
+    s45 fill rule 0
+    s45 fill color 1
+    s45 fill pattern 1
+    s45 avalue off
+    s45 avalue type 2
+    s45 avalue char size 1.000000
+    s45 avalue font 0
+    s45 avalue color 1
+    s45 avalue rot 0
+    s45 avalue format general
+    s45 avalue prec 3
+    s45 avalue prepend ""
+    s45 avalue append ""
+    s45 avalue offset 0.000000 , 0.000000
+    s45 errorbar on
+    s45 errorbar place both
+    s45 errorbar color 11
+    s45 errorbar pattern 1
+    s45 errorbar size 1.000000
+    s45 errorbar linewidth 1.5
+    s45 errorbar linestyle 0
+    s45 errorbar riser linewidth 2.0
+    s45 errorbar riser linestyle 1
+    s45 errorbar riser clip off
+    s45 errorbar riser clip length 0.100000
+    s45 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s45 legend  ""
+    s46 hidden false
+    s46 type xydy
+    s46 symbol 0
+    s46 symbol size 1.000000
+    s46 symbol color 1
+    s46 symbol pattern 1
+    s46 symbol fill color 1
+    s46 symbol fill pattern 0
+    s46 symbol linewidth 1.0
+    s46 symbol linestyle 1
+    s46 symbol char 65
+    s46 symbol char font 0
+    s46 symbol skip 0
+    s46 line type 1
+    s46 line linestyle 1
+    s46 line linewidth 1.5
+    s46 line color 1
+    s46 line pattern 1
+    s46 baseline type 0
+    s46 baseline off
+    s46 dropline off
+    s46 fill type 0
+    s46 fill rule 0
+    s46 fill color 1
+    s46 fill pattern 1
+    s46 avalue off
+    s46 avalue type 2
+    s46 avalue char size 1.000000
+    s46 avalue font 0
+    s46 avalue color 1
+    s46 avalue rot 0
+    s46 avalue format general
+    s46 avalue prec 3
+    s46 avalue prepend ""
+    s46 avalue append ""
+    s46 avalue offset 0.000000 , 0.000000
+    s46 errorbar on
+    s46 errorbar place both
+    s46 errorbar color 11
+    s46 errorbar pattern 1
+    s46 errorbar size 1.000000
+    s46 errorbar linewidth 1.5
+    s46 errorbar linestyle 0
+    s46 errorbar riser linewidth 2.0
+    s46 errorbar riser linestyle 1
+    s46 errorbar riser clip off
+    s46 errorbar riser clip length 0.100000
+    s46 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s46 legend  ""
+    s47 hidden false
+    s47 type xydy
+    s47 symbol 0
+    s47 symbol size 1.000000
+    s47 symbol color 1
+    s47 symbol pattern 1
+    s47 symbol fill color 1
+    s47 symbol fill pattern 0
+    s47 symbol linewidth 1.0
+    s47 symbol linestyle 1
+    s47 symbol char 65
+    s47 symbol char font 0
+    s47 symbol skip 0
+    s47 line type 1
+    s47 line linestyle 1
+    s47 line linewidth 1.5
+    s47 line color 1
+    s47 line pattern 1
+    s47 baseline type 0
+    s47 baseline off
+    s47 dropline off
+    s47 fill type 0
+    s47 fill rule 0
+    s47 fill color 1
+    s47 fill pattern 1
+    s47 avalue off
+    s47 avalue type 2
+    s47 avalue char size 1.000000
+    s47 avalue font 0
+    s47 avalue color 1
+    s47 avalue rot 0
+    s47 avalue format general
+    s47 avalue prec 3
+    s47 avalue prepend ""
+    s47 avalue append ""
+    s47 avalue offset 0.000000 , 0.000000
+    s47 errorbar on
+    s47 errorbar place both
+    s47 errorbar color 11
+    s47 errorbar pattern 1
+    s47 errorbar size 1.000000
+    s47 errorbar linewidth 1.5
+    s47 errorbar linestyle 0
+    s47 errorbar riser linewidth 2.0
+    s47 errorbar riser linestyle 1
+    s47 errorbar riser clip off
+    s47 errorbar riser clip length 0.100000
+    s47 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s47 legend  ""
+    s48 hidden false
+    s48 type xydy
+    s48 symbol 0
+    s48 symbol size 1.000000
+    s48 symbol color 1
+    s48 symbol pattern 1
+    s48 symbol fill color 1
+    s48 symbol fill pattern 0
+    s48 symbol linewidth 1.0
+    s48 symbol linestyle 1
+    s48 symbol char 65
+    s48 symbol char font 0
+    s48 symbol skip 0
+    s48 line type 1
+    s48 line linestyle 1
+    s48 line linewidth 1.5
+    s48 line color 1
+    s48 line pattern 1
+    s48 baseline type 0
+    s48 baseline off
+    s48 dropline off
+    s48 fill type 0
+    s48 fill rule 0
+    s48 fill color 1
+    s48 fill pattern 1
+    s48 avalue off
+    s48 avalue type 2
+    s48 avalue char size 1.000000
+    s48 avalue font 0
+    s48 avalue color 1
+    s48 avalue rot 0
+    s48 avalue format general
+    s48 avalue prec 3
+    s48 avalue prepend ""
+    s48 avalue append ""
+    s48 avalue offset 0.000000 , 0.000000
+    s48 errorbar on
+    s48 errorbar place both
+    s48 errorbar color 11
+    s48 errorbar pattern 1
+    s48 errorbar size 1.000000
+    s48 errorbar linewidth 1.5
+    s48 errorbar linestyle 0
+    s48 errorbar riser linewidth 2.0
+    s48 errorbar riser linestyle 1
+    s48 errorbar riser clip off
+    s48 errorbar riser clip length 0.100000
+    s48 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s48 legend  ""
+    s49 hidden false
+    s49 type xydy
+    s49 symbol 0
+    s49 symbol size 1.000000
+    s49 symbol color 1
+    s49 symbol pattern 1
+    s49 symbol fill color 1
+    s49 symbol fill pattern 0
+    s49 symbol linewidth 1.0
+    s49 symbol linestyle 1
+    s49 symbol char 65
+    s49 symbol char font 0
+    s49 symbol skip 0
+    s49 line type 1
+    s49 line linestyle 1
+    s49 line linewidth 1.5
+    s49 line color 1
+    s49 line pattern 1
+    s49 baseline type 0
+    s49 baseline off
+    s49 dropline off
+    s49 fill type 0
+    s49 fill rule 0
+    s49 fill color 1
+    s49 fill pattern 1
+    s49 avalue off
+    s49 avalue type 2
+    s49 avalue char size 1.000000
+    s49 avalue font 0
+    s49 avalue color 1
+    s49 avalue rot 0
+    s49 avalue format general
+    s49 avalue prec 3
+    s49 avalue prepend ""
+    s49 avalue append ""
+    s49 avalue offset 0.000000 , 0.000000
+    s49 errorbar on
+    s49 errorbar place both
+    s49 errorbar color 11
+    s49 errorbar pattern 1
+    s49 errorbar size 1.000000
+    s49 errorbar linewidth 1.5
+    s49 errorbar linestyle 0
+    s49 errorbar riser linewidth 2.0
+    s49 errorbar riser linestyle 1
+    s49 errorbar riser clip off
+    s49 errorbar riser clip length 0.100000
+    s49 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s49 legend  ""
+    s50 hidden false
+    s50 type xydy
+    s50 symbol 0
+    s50 symbol size 1.000000
+    s50 symbol color 1
+    s50 symbol pattern 1
+    s50 symbol fill color 1
+    s50 symbol fill pattern 0
+    s50 symbol linewidth 1.0
+    s50 symbol linestyle 1
+    s50 symbol char 65
+    s50 symbol char font 0
+    s50 symbol skip 0
+    s50 line type 1
+    s50 line linestyle 1
+    s50 line linewidth 1.5
+    s50 line color 1
+    s50 line pattern 1
+    s50 baseline type 0
+    s50 baseline off
+    s50 dropline off
+    s50 fill type 0
+    s50 fill rule 0
+    s50 fill color 1
+    s50 fill pattern 1
+    s50 avalue off
+    s50 avalue type 2
+    s50 avalue char size 1.000000
+    s50 avalue font 0
+    s50 avalue color 1
+    s50 avalue rot 0
+    s50 avalue format general
+    s50 avalue prec 3
+    s50 avalue prepend ""
+    s50 avalue append ""
+    s50 avalue offset 0.000000 , 0.000000
+    s50 errorbar on
+    s50 errorbar place both
+    s50 errorbar color 11
+    s50 errorbar pattern 1
+    s50 errorbar size 1.000000
+    s50 errorbar linewidth 1.5
+    s50 errorbar linestyle 0
+    s50 errorbar riser linewidth 2.0
+    s50 errorbar riser linestyle 1
+    s50 errorbar riser clip off
+    s50 errorbar riser clip length 0.100000
+    s50 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s50 legend  ""
+    s51 hidden false
+    s51 type xydy
+    s51 symbol 0
+    s51 symbol size 1.000000
+    s51 symbol color 1
+    s51 symbol pattern 1
+    s51 symbol fill color 1
+    s51 symbol fill pattern 0
+    s51 symbol linewidth 1.0
+    s51 symbol linestyle 1
+    s51 symbol char 65
+    s51 symbol char font 0
+    s51 symbol skip 0
+    s51 line type 1
+    s51 line linestyle 1
+    s51 line linewidth 1.5
+    s51 line color 1
+    s51 line pattern 1
+    s51 baseline type 0
+    s51 baseline off
+    s51 dropline off
+    s51 fill type 0
+    s51 fill rule 0
+    s51 fill color 1
+    s51 fill pattern 1
+    s51 avalue off
+    s51 avalue type 2
+    s51 avalue char size 1.000000
+    s51 avalue font 0
+    s51 avalue color 1
+    s51 avalue rot 0
+    s51 avalue format general
+    s51 avalue prec 3
+    s51 avalue prepend ""
+    s51 avalue append ""
+    s51 avalue offset 0.000000 , 0.000000
+    s51 errorbar on
+    s51 errorbar place both
+    s51 errorbar color 11
+    s51 errorbar pattern 1
+    s51 errorbar size 1.000000
+    s51 errorbar linewidth 1.5
+    s51 errorbar linestyle 0
+    s51 errorbar riser linewidth 2.0
+    s51 errorbar riser linestyle 1
+    s51 errorbar riser clip off
+    s51 errorbar riser clip length 0.100000
+    s51 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s51 legend  ""
+    s52 hidden false
+    s52 type xydy
+    s52 symbol 0
+    s52 symbol size 1.000000
+    s52 symbol color 1
+    s52 symbol pattern 1
+    s52 symbol fill color 1
+    s52 symbol fill pattern 0
+    s52 symbol linewidth 1.0
+    s52 symbol linestyle 1
+    s52 symbol char 65
+    s52 symbol char font 0
+    s52 symbol skip 0
+    s52 line type 1
+    s52 line linestyle 1
+    s52 line linewidth 1.5
+    s52 line color 1
+    s52 line pattern 1
+    s52 baseline type 0
+    s52 baseline off
+    s52 dropline off
+    s52 fill type 0
+    s52 fill rule 0
+    s52 fill color 1
+    s52 fill pattern 1
+    s52 avalue off
+    s52 avalue type 2
+    s52 avalue char size 1.000000
+    s52 avalue font 0
+    s52 avalue color 1
+    s52 avalue rot 0
+    s52 avalue format general
+    s52 avalue prec 3
+    s52 avalue prepend ""
+    s52 avalue append ""
+    s52 avalue offset 0.000000 , 0.000000
+    s52 errorbar on
+    s52 errorbar place both
+    s52 errorbar color 11
+    s52 errorbar pattern 1
+    s52 errorbar size 1.000000
+    s52 errorbar linewidth 1.5
+    s52 errorbar linestyle 0
+    s52 errorbar riser linewidth 2.0
+    s52 errorbar riser linestyle 1
+    s52 errorbar riser clip off
+    s52 errorbar riser clip length 0.100000
+    s52 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s52 legend  ""
+    s53 hidden false
+    s53 type xydy
+    s53 symbol 0
+    s53 symbol size 1.000000
+    s53 symbol color 1
+    s53 symbol pattern 1
+    s53 symbol fill color 1
+    s53 symbol fill pattern 0
+    s53 symbol linewidth 1.0
+    s53 symbol linestyle 1
+    s53 symbol char 65
+    s53 symbol char font 0
+    s53 symbol skip 0
+    s53 line type 1
+    s53 line linestyle 1
+    s53 line linewidth 1.5
+    s53 line color 1
+    s53 line pattern 1
+    s53 baseline type 0
+    s53 baseline off
+    s53 dropline off
+    s53 fill type 0
+    s53 fill rule 0
+    s53 fill color 1
+    s53 fill pattern 1
+    s53 avalue off
+    s53 avalue type 2
+    s53 avalue char size 1.000000
+    s53 avalue font 0
+    s53 avalue color 1
+    s53 avalue rot 0
+    s53 avalue format general
+    s53 avalue prec 3
+    s53 avalue prepend ""
+    s53 avalue append ""
+    s53 avalue offset 0.000000 , 0.000000
+    s53 errorbar on
+    s53 errorbar place both
+    s53 errorbar color 11
+    s53 errorbar pattern 1
+    s53 errorbar size 1.000000
+    s53 errorbar linewidth 1.5
+    s53 errorbar linestyle 0
+    s53 errorbar riser linewidth 2.0
+    s53 errorbar riser linestyle 1
+    s53 errorbar riser clip off
+    s53 errorbar riser clip length 0.100000
+    s53 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s53 legend  ""
+    s54 hidden false
+    s54 type xydy
+    s54 symbol 0
+    s54 symbol size 1.000000
+    s54 symbol color 1
+    s54 symbol pattern 1
+    s54 symbol fill color 1
+    s54 symbol fill pattern 0
+    s54 symbol linewidth 1.0
+    s54 symbol linestyle 1
+    s54 symbol char 65
+    s54 symbol char font 0
+    s54 symbol skip 0
+    s54 line type 1
+    s54 line linestyle 1
+    s54 line linewidth 1.5
+    s54 line color 1
+    s54 line pattern 1
+    s54 baseline type 0
+    s54 baseline off
+    s54 dropline off
+    s54 fill type 0
+    s54 fill rule 0
+    s54 fill color 1
+    s54 fill pattern 1
+    s54 avalue off
+    s54 avalue type 2
+    s54 avalue char size 1.000000
+    s54 avalue font 0
+    s54 avalue color 1
+    s54 avalue rot 0
+    s54 avalue format general
+    s54 avalue prec 3
+    s54 avalue prepend ""
+    s54 avalue append ""
+    s54 avalue offset 0.000000 , 0.000000
+    s54 errorbar on
+    s54 errorbar place both
+    s54 errorbar color 11
+    s54 errorbar pattern 1
+    s54 errorbar size 1.000000
+    s54 errorbar linewidth 1.5
+    s54 errorbar linestyle 0
+    s54 errorbar riser linewidth 2.0
+    s54 errorbar riser linestyle 1
+    s54 errorbar riser clip off
+    s54 errorbar riser clip length 0.100000
+    s54 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s54 legend  ""
+    s55 hidden false
+    s55 type xydy
+    s55 symbol 0
+    s55 symbol size 1.000000
+    s55 symbol color 1
+    s55 symbol pattern 1
+    s55 symbol fill color 1
+    s55 symbol fill pattern 0
+    s55 symbol linewidth 1.0
+    s55 symbol linestyle 1
+    s55 symbol char 65
+    s55 symbol char font 0
+    s55 symbol skip 0
+    s55 line type 1
+    s55 line linestyle 1
+    s55 line linewidth 1.5
+    s55 line color 1
+    s55 line pattern 1
+    s55 baseline type 0
+    s55 baseline off
+    s55 dropline off
+    s55 fill type 0
+    s55 fill rule 0
+    s55 fill color 1
+    s55 fill pattern 1
+    s55 avalue off
+    s55 avalue type 2
+    s55 avalue char size 1.000000
+    s55 avalue font 0
+    s55 avalue color 1
+    s55 avalue rot 0
+    s55 avalue format general
+    s55 avalue prec 3
+    s55 avalue prepend ""
+    s55 avalue append ""
+    s55 avalue offset 0.000000 , 0.000000
+    s55 errorbar on
+    s55 errorbar place both
+    s55 errorbar color 11
+    s55 errorbar pattern 1
+    s55 errorbar size 1.000000
+    s55 errorbar linewidth 1.5
+    s55 errorbar linestyle 0
+    s55 errorbar riser linewidth 2.0
+    s55 errorbar riser linestyle 1
+    s55 errorbar riser clip off
+    s55 errorbar riser clip length 0.100000
+    s55 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s55 legend  ""
+    s56 hidden false
+    s56 type xydy
+    s56 symbol 0
+    s56 symbol size 1.000000
+    s56 symbol color 1
+    s56 symbol pattern 1
+    s56 symbol fill color 1
+    s56 symbol fill pattern 0
+    s56 symbol linewidth 1.0
+    s56 symbol linestyle 1
+    s56 symbol char 65
+    s56 symbol char font 0
+    s56 symbol skip 0
+    s56 line type 1
+    s56 line linestyle 1
+    s56 line linewidth 1.5
+    s56 line color 1
+    s56 line pattern 1
+    s56 baseline type 0
+    s56 baseline off
+    s56 dropline off
+    s56 fill type 0
+    s56 fill rule 0
+    s56 fill color 1
+    s56 fill pattern 1
+    s56 avalue off
+    s56 avalue type 2
+    s56 avalue char size 1.000000
+    s56 avalue font 0
+    s56 avalue color 1
+    s56 avalue rot 0
+    s56 avalue format general
+    s56 avalue prec 3
+    s56 avalue prepend ""
+    s56 avalue append ""
+    s56 avalue offset 0.000000 , 0.000000
+    s56 errorbar on
+    s56 errorbar place both
+    s56 errorbar color 11
+    s56 errorbar pattern 1
+    s56 errorbar size 1.000000
+    s56 errorbar linewidth 1.5
+    s56 errorbar linestyle 0
+    s56 errorbar riser linewidth 2.0
+    s56 errorbar riser linestyle 1
+    s56 errorbar riser clip off
+    s56 errorbar riser clip length 0.100000
+    s56 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s56 legend  ""
+    s57 hidden false
+    s57 type xydy
+    s57 symbol 0
+    s57 symbol size 1.000000
+    s57 symbol color 1
+    s57 symbol pattern 1
+    s57 symbol fill color 1
+    s57 symbol fill pattern 0
+    s57 symbol linewidth 1.0
+    s57 symbol linestyle 1
+    s57 symbol char 65
+    s57 symbol char font 0
+    s57 symbol skip 0
+    s57 line type 1
+    s57 line linestyle 1
+    s57 line linewidth 1.5
+    s57 line color 1
+    s57 line pattern 1
+    s57 baseline type 0
+    s57 baseline off
+    s57 dropline off
+    s57 fill type 0
+    s57 fill rule 0
+    s57 fill color 1
+    s57 fill pattern 1
+    s57 avalue off
+    s57 avalue type 2
+    s57 avalue char size 1.000000
+    s57 avalue font 0
+    s57 avalue color 1
+    s57 avalue rot 0
+    s57 avalue format general
+    s57 avalue prec 3
+    s57 avalue prepend ""
+    s57 avalue append ""
+    s57 avalue offset 0.000000 , 0.000000
+    s57 errorbar on
+    s57 errorbar place both
+    s57 errorbar color 11
+    s57 errorbar pattern 1
+    s57 errorbar size 1.000000
+    s57 errorbar linewidth 1.5
+    s57 errorbar linestyle 0
+    s57 errorbar riser linewidth 2.0
+    s57 errorbar riser linestyle 1
+    s57 errorbar riser clip off
+    s57 errorbar riser clip length 0.100000
+    s57 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s57 legend  ""
+    s58 hidden false
+    s58 type xydy
+    s58 symbol 0
+    s58 symbol size 1.000000
+    s58 symbol color 1
+    s58 symbol pattern 1
+    s58 symbol fill color 1
+    s58 symbol fill pattern 0
+    s58 symbol linewidth 1.0
+    s58 symbol linestyle 1
+    s58 symbol char 65
+    s58 symbol char font 0
+    s58 symbol skip 0
+    s58 line type 1
+    s58 line linestyle 1
+    s58 line linewidth 1.5
+    s58 line color 1
+    s58 line pattern 1
+    s58 baseline type 0
+    s58 baseline off
+    s58 dropline off
+    s58 fill type 0
+    s58 fill rule 0
+    s58 fill color 1
+    s58 fill pattern 1
+    s58 avalue off
+    s58 avalue type 2
+    s58 avalue char size 1.000000
+    s58 avalue font 0
+    s58 avalue color 1
+    s58 avalue rot 0
+    s58 avalue format general
+    s58 avalue prec 3
+    s58 avalue prepend ""
+    s58 avalue append ""
+    s58 avalue offset 0.000000 , 0.000000
+    s58 errorbar on
+    s58 errorbar place both
+    s58 errorbar color 11
+    s58 errorbar pattern 1
+    s58 errorbar size 1.000000
+    s58 errorbar linewidth 1.5
+    s58 errorbar linestyle 0
+    s58 errorbar riser linewidth 2.0
+    s58 errorbar riser linestyle 1
+    s58 errorbar riser clip off
+    s58 errorbar riser clip length 0.100000
+    s58 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s58 legend  ""
+    s59 hidden false
+    s59 type xydy
+    s59 symbol 0
+    s59 symbol size 1.000000
+    s59 symbol color 1
+    s59 symbol pattern 1
+    s59 symbol fill color 1
+    s59 symbol fill pattern 0
+    s59 symbol linewidth 1.0
+    s59 symbol linestyle 1
+    s59 symbol char 65
+    s59 symbol char font 0
+    s59 symbol skip 0
+    s59 line type 1
+    s59 line linestyle 1
+    s59 line linewidth 1.5
+    s59 line color 1
+    s59 line pattern 1
+    s59 baseline type 0
+    s59 baseline off
+    s59 dropline off
+    s59 fill type 0
+    s59 fill rule 0
+    s59 fill color 1
+    s59 fill pattern 1
+    s59 avalue off
+    s59 avalue type 2
+    s59 avalue char size 1.000000
+    s59 avalue font 0
+    s59 avalue color 1
+    s59 avalue rot 0
+    s59 avalue format general
+    s59 avalue prec 3
+    s59 avalue prepend ""
+    s59 avalue append ""
+    s59 avalue offset 0.000000 , 0.000000
+    s59 errorbar on
+    s59 errorbar place both
+    s59 errorbar color 11
+    s59 errorbar pattern 1
+    s59 errorbar size 1.000000
+    s59 errorbar linewidth 1.5
+    s59 errorbar linestyle 0
+    s59 errorbar riser linewidth 2.0
+    s59 errorbar riser linestyle 1
+    s59 errorbar riser clip off
+    s59 errorbar riser clip length 0.100000
+    s59 comment "tdmft_1o_DS2_FATBANDS_at0004_O_is1_l0001"
+    s59 legend  ""
+    s60 hidden false
+    s60 type xydy
+    s60 symbol 0
+    s60 symbol size 1.000000
+    s60 symbol color 1
+    s60 symbol pattern 1
+    s60 symbol fill color 1
+    s60 symbol fill pattern 0
+    s60 symbol linewidth 1.0
+    s60 symbol linestyle 1
+    s60 symbol char 65
+    s60 symbol char font 0
+    s60 symbol skip 0
+    s60 line type 1
+    s60 line linestyle 1
+    s60 line linewidth 1.5
+    s60 line color 1
+    s60 line pattern 1
+    s60 baseline type 0
+    s60 baseline off
+    s60 dropline off
+    s60 fill type 0
+    s60 fill rule 0
+    s60 fill color 1
+    s60 fill pattern 1
+    s60 avalue off
+    s60 avalue type 2
+    s60 avalue char size 1.000000
+    s60 avalue font 0
+    s60 avalue color 1
+    s60 avalue rot 0
+    s60 avalue format general
+    s60 avalue prec 3
+    s60 avalue prepend ""
+    s60 avalue append ""
+    s60 avalue offset 0.000000 , 0.000000
+    s60 errorbar on
+    s60 errorbar place both
+    s60 errorbar color 11
+    s60 errorbar pattern 1
+    s60 errorbar size 1.000000
+    s60 errorbar linewidth 1.5
+    s60 errorbar linestyle 0
+    s60 errorbar riser linewidth 2.0
+    s60 errorbar riser linestyle 1
+    s60 errorbar riser clip off
+    s60 errorbar riser clip length 0.100000
+    s60 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s60 legend  ""
+    s61 hidden false
+    s61 type xydy
+    s61 symbol 0
+    s61 symbol size 1.000000
+    s61 symbol color 1
+    s61 symbol pattern 1
+    s61 symbol fill color 1
+    s61 symbol fill pattern 0
+    s61 symbol linewidth 1.0
+    s61 symbol linestyle 1
+    s61 symbol char 65
+    s61 symbol char font 0
+    s61 symbol skip 0
+    s61 line type 1
+    s61 line linestyle 1
+    s61 line linewidth 1.5
+    s61 line color 1
+    s61 line pattern 1
+    s61 baseline type 0
+    s61 baseline off
+    s61 dropline off
+    s61 fill type 0
+    s61 fill rule 0
+    s61 fill color 1
+    s61 fill pattern 1
+    s61 avalue off
+    s61 avalue type 2
+    s61 avalue char size 1.000000
+    s61 avalue font 0
+    s61 avalue color 1
+    s61 avalue rot 0
+    s61 avalue format general
+    s61 avalue prec 3
+    s61 avalue prepend ""
+    s61 avalue append ""
+    s61 avalue offset 0.000000 , 0.000000
+    s61 errorbar on
+    s61 errorbar place both
+    s61 errorbar color 11
+    s61 errorbar pattern 1
+    s61 errorbar size 1.000000
+    s61 errorbar linewidth 1.5
+    s61 errorbar linestyle 0
+    s61 errorbar riser linewidth 2.0
+    s61 errorbar riser linestyle 1
+    s61 errorbar riser clip off
+    s61 errorbar riser clip length 0.100000
+    s61 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s61 legend  ""
+    s62 hidden false
+    s62 type xydy
+    s62 symbol 0
+    s62 symbol size 1.000000
+    s62 symbol color 1
+    s62 symbol pattern 1
+    s62 symbol fill color 1
+    s62 symbol fill pattern 0
+    s62 symbol linewidth 1.0
+    s62 symbol linestyle 1
+    s62 symbol char 65
+    s62 symbol char font 0
+    s62 symbol skip 0
+    s62 line type 1
+    s62 line linestyle 1
+    s62 line linewidth 1.5
+    s62 line color 1
+    s62 line pattern 1
+    s62 baseline type 0
+    s62 baseline off
+    s62 dropline off
+    s62 fill type 0
+    s62 fill rule 0
+    s62 fill color 1
+    s62 fill pattern 1
+    s62 avalue off
+    s62 avalue type 2
+    s62 avalue char size 1.000000
+    s62 avalue font 0
+    s62 avalue color 1
+    s62 avalue rot 0
+    s62 avalue format general
+    s62 avalue prec 3
+    s62 avalue prepend ""
+    s62 avalue append ""
+    s62 avalue offset 0.000000 , 0.000000
+    s62 errorbar on
+    s62 errorbar place both
+    s62 errorbar color 11
+    s62 errorbar pattern 1
+    s62 errorbar size 1.000000
+    s62 errorbar linewidth 1.5
+    s62 errorbar linestyle 0
+    s62 errorbar riser linewidth 2.0
+    s62 errorbar riser linestyle 1
+    s62 errorbar riser clip off
+    s62 errorbar riser clip length 0.100000
+    s62 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s62 legend  ""
+    s63 hidden false
+    s63 type xydy
+    s63 symbol 0
+    s63 symbol size 1.000000
+    s63 symbol color 1
+    s63 symbol pattern 1
+    s63 symbol fill color 1
+    s63 symbol fill pattern 0
+    s63 symbol linewidth 1.0
+    s63 symbol linestyle 1
+    s63 symbol char 65
+    s63 symbol char font 0
+    s63 symbol skip 0
+    s63 line type 1
+    s63 line linestyle 1
+    s63 line linewidth 1.5
+    s63 line color 1
+    s63 line pattern 1
+    s63 baseline type 0
+    s63 baseline off
+    s63 dropline off
+    s63 fill type 0
+    s63 fill rule 0
+    s63 fill color 1
+    s63 fill pattern 1
+    s63 avalue off
+    s63 avalue type 2
+    s63 avalue char size 1.000000
+    s63 avalue font 0
+    s63 avalue color 1
+    s63 avalue rot 0
+    s63 avalue format general
+    s63 avalue prec 3
+    s63 avalue prepend ""
+    s63 avalue append ""
+    s63 avalue offset 0.000000 , 0.000000
+    s63 errorbar on
+    s63 errorbar place both
+    s63 errorbar color 11
+    s63 errorbar pattern 1
+    s63 errorbar size 1.000000
+    s63 errorbar linewidth 1.5
+    s63 errorbar linestyle 0
+    s63 errorbar riser linewidth 2.0
+    s63 errorbar riser linestyle 1
+    s63 errorbar riser clip off
+    s63 errorbar riser clip length 0.100000
+    s63 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s63 legend  ""
+    s64 hidden false
+    s64 type xydy
+    s64 symbol 0
+    s64 symbol size 1.000000
+    s64 symbol color 1
+    s64 symbol pattern 1
+    s64 symbol fill color 1
+    s64 symbol fill pattern 0
+    s64 symbol linewidth 1.0
+    s64 symbol linestyle 1
+    s64 symbol char 65
+    s64 symbol char font 0
+    s64 symbol skip 0
+    s64 line type 1
+    s64 line linestyle 1
+    s64 line linewidth 1.5
+    s64 line color 1
+    s64 line pattern 1
+    s64 baseline type 0
+    s64 baseline off
+    s64 dropline off
+    s64 fill type 0
+    s64 fill rule 0
+    s64 fill color 1
+    s64 fill pattern 1
+    s64 avalue off
+    s64 avalue type 2
+    s64 avalue char size 1.000000
+    s64 avalue font 0
+    s64 avalue color 1
+    s64 avalue rot 0
+    s64 avalue format general
+    s64 avalue prec 3
+    s64 avalue prepend ""
+    s64 avalue append ""
+    s64 avalue offset 0.000000 , 0.000000
+    s64 errorbar on
+    s64 errorbar place both
+    s64 errorbar color 11
+    s64 errorbar pattern 1
+    s64 errorbar size 1.000000
+    s64 errorbar linewidth 1.5
+    s64 errorbar linestyle 0
+    s64 errorbar riser linewidth 2.0
+    s64 errorbar riser linestyle 1
+    s64 errorbar riser clip off
+    s64 errorbar riser clip length 0.100000
+    s64 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s64 legend  ""
+    s65 hidden false
+    s65 type xydy
+    s65 symbol 0
+    s65 symbol size 1.000000
+    s65 symbol color 1
+    s65 symbol pattern 1
+    s65 symbol fill color 1
+    s65 symbol fill pattern 0
+    s65 symbol linewidth 1.0
+    s65 symbol linestyle 1
+    s65 symbol char 65
+    s65 symbol char font 0
+    s65 symbol skip 0
+    s65 line type 1
+    s65 line linestyle 1
+    s65 line linewidth 1.5
+    s65 line color 1
+    s65 line pattern 1
+    s65 baseline type 0
+    s65 baseline off
+    s65 dropline off
+    s65 fill type 0
+    s65 fill rule 0
+    s65 fill color 1
+    s65 fill pattern 1
+    s65 avalue off
+    s65 avalue type 2
+    s65 avalue char size 1.000000
+    s65 avalue font 0
+    s65 avalue color 1
+    s65 avalue rot 0
+    s65 avalue format general
+    s65 avalue prec 3
+    s65 avalue prepend ""
+    s65 avalue append ""
+    s65 avalue offset 0.000000 , 0.000000
+    s65 errorbar on
+    s65 errorbar place both
+    s65 errorbar color 11
+    s65 errorbar pattern 1
+    s65 errorbar size 1.000000
+    s65 errorbar linewidth 1.5
+    s65 errorbar linestyle 0
+    s65 errorbar riser linewidth 2.0
+    s65 errorbar riser linestyle 1
+    s65 errorbar riser clip off
+    s65 errorbar riser clip length 0.100000
+    s65 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s65 legend  ""
+    s66 hidden false
+    s66 type xydy
+    s66 symbol 0
+    s66 symbol size 1.000000
+    s66 symbol color 1
+    s66 symbol pattern 1
+    s66 symbol fill color 1
+    s66 symbol fill pattern 0
+    s66 symbol linewidth 1.0
+    s66 symbol linestyle 1
+    s66 symbol char 65
+    s66 symbol char font 0
+    s66 symbol skip 0
+    s66 line type 1
+    s66 line linestyle 1
+    s66 line linewidth 1.5
+    s66 line color 1
+    s66 line pattern 1
+    s66 baseline type 0
+    s66 baseline off
+    s66 dropline off
+    s66 fill type 0
+    s66 fill rule 0
+    s66 fill color 1
+    s66 fill pattern 1
+    s66 avalue off
+    s66 avalue type 2
+    s66 avalue char size 1.000000
+    s66 avalue font 0
+    s66 avalue color 1
+    s66 avalue rot 0
+    s66 avalue format general
+    s66 avalue prec 3
+    s66 avalue prepend ""
+    s66 avalue append ""
+    s66 avalue offset 0.000000 , 0.000000
+    s66 errorbar on
+    s66 errorbar place both
+    s66 errorbar color 11
+    s66 errorbar pattern 1
+    s66 errorbar size 1.000000
+    s66 errorbar linewidth 1.5
+    s66 errorbar linestyle 0
+    s66 errorbar riser linewidth 2.0
+    s66 errorbar riser linestyle 1
+    s66 errorbar riser clip off
+    s66 errorbar riser clip length 0.100000
+    s66 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s66 legend  ""
+    s67 hidden false
+    s67 type xydy
+    s67 symbol 0
+    s67 symbol size 1.000000
+    s67 symbol color 1
+    s67 symbol pattern 1
+    s67 symbol fill color 1
+    s67 symbol fill pattern 0
+    s67 symbol linewidth 1.0
+    s67 symbol linestyle 1
+    s67 symbol char 65
+    s67 symbol char font 0
+    s67 symbol skip 0
+    s67 line type 1
+    s67 line linestyle 1
+    s67 line linewidth 1.5
+    s67 line color 1
+    s67 line pattern 1
+    s67 baseline type 0
+    s67 baseline off
+    s67 dropline off
+    s67 fill type 0
+    s67 fill rule 0
+    s67 fill color 1
+    s67 fill pattern 1
+    s67 avalue off
+    s67 avalue type 2
+    s67 avalue char size 1.000000
+    s67 avalue font 0
+    s67 avalue color 1
+    s67 avalue rot 0
+    s67 avalue format general
+    s67 avalue prec 3
+    s67 avalue prepend ""
+    s67 avalue append ""
+    s67 avalue offset 0.000000 , 0.000000
+    s67 errorbar on
+    s67 errorbar place both
+    s67 errorbar color 11
+    s67 errorbar pattern 1
+    s67 errorbar size 1.000000
+    s67 errorbar linewidth 1.5
+    s67 errorbar linestyle 0
+    s67 errorbar riser linewidth 2.0
+    s67 errorbar riser linestyle 1
+    s67 errorbar riser clip off
+    s67 errorbar riser clip length 0.100000
+    s67 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s67 legend  ""
+    s68 hidden false
+    s68 type xydy
+    s68 symbol 0
+    s68 symbol size 1.000000
+    s68 symbol color 1
+    s68 symbol pattern 1
+    s68 symbol fill color 1
+    s68 symbol fill pattern 0
+    s68 symbol linewidth 1.0
+    s68 symbol linestyle 1
+    s68 symbol char 65
+    s68 symbol char font 0
+    s68 symbol skip 0
+    s68 line type 1
+    s68 line linestyle 1
+    s68 line linewidth 1.5
+    s68 line color 1
+    s68 line pattern 1
+    s68 baseline type 0
+    s68 baseline off
+    s68 dropline off
+    s68 fill type 0
+    s68 fill rule 0
+    s68 fill color 1
+    s68 fill pattern 1
+    s68 avalue off
+    s68 avalue type 2
+    s68 avalue char size 1.000000
+    s68 avalue font 0
+    s68 avalue color 1
+    s68 avalue rot 0
+    s68 avalue format general
+    s68 avalue prec 3
+    s68 avalue prepend ""
+    s68 avalue append ""
+    s68 avalue offset 0.000000 , 0.000000
+    s68 errorbar on
+    s68 errorbar place both
+    s68 errorbar color 11
+    s68 errorbar pattern 1
+    s68 errorbar size 1.000000
+    s68 errorbar linewidth 1.5
+    s68 errorbar linestyle 0
+    s68 errorbar riser linewidth 2.0
+    s68 errorbar riser linestyle 1
+    s68 errorbar riser clip off
+    s68 errorbar riser clip length 0.100000
+    s68 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s68 legend  ""
+    s69 hidden false
+    s69 type xydy
+    s69 symbol 0
+    s69 symbol size 1.000000
+    s69 symbol color 1
+    s69 symbol pattern 1
+    s69 symbol fill color 1
+    s69 symbol fill pattern 0
+    s69 symbol linewidth 1.0
+    s69 symbol linestyle 1
+    s69 symbol char 65
+    s69 symbol char font 0
+    s69 symbol skip 0
+    s69 line type 1
+    s69 line linestyle 1
+    s69 line linewidth 1.5
+    s69 line color 1
+    s69 line pattern 1
+    s69 baseline type 0
+    s69 baseline off
+    s69 dropline off
+    s69 fill type 0
+    s69 fill rule 0
+    s69 fill color 1
+    s69 fill pattern 1
+    s69 avalue off
+    s69 avalue type 2
+    s69 avalue char size 1.000000
+    s69 avalue font 0
+    s69 avalue color 1
+    s69 avalue rot 0
+    s69 avalue format general
+    s69 avalue prec 3
+    s69 avalue prepend ""
+    s69 avalue append ""
+    s69 avalue offset 0.000000 , 0.000000
+    s69 errorbar on
+    s69 errorbar place both
+    s69 errorbar color 11
+    s69 errorbar pattern 1
+    s69 errorbar size 1.000000
+    s69 errorbar linewidth 1.5
+    s69 errorbar linestyle 0
+    s69 errorbar riser linewidth 2.0
+    s69 errorbar riser linestyle 1
+    s69 errorbar riser clip off
+    s69 errorbar riser clip length 0.100000
+    s69 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s69 legend  ""
+    s70 hidden false
+    s70 type xydy
+    s70 symbol 0
+    s70 symbol size 1.000000
+    s70 symbol color 1
+    s70 symbol pattern 1
+    s70 symbol fill color 1
+    s70 symbol fill pattern 0
+    s70 symbol linewidth 1.0
+    s70 symbol linestyle 1
+    s70 symbol char 65
+    s70 symbol char font 0
+    s70 symbol skip 0
+    s70 line type 1
+    s70 line linestyle 1
+    s70 line linewidth 1.5
+    s70 line color 1
+    s70 line pattern 1
+    s70 baseline type 0
+    s70 baseline off
+    s70 dropline off
+    s70 fill type 0
+    s70 fill rule 0
+    s70 fill color 1
+    s70 fill pattern 1
+    s70 avalue off
+    s70 avalue type 2
+    s70 avalue char size 1.000000
+    s70 avalue font 0
+    s70 avalue color 1
+    s70 avalue rot 0
+    s70 avalue format general
+    s70 avalue prec 3
+    s70 avalue prepend ""
+    s70 avalue append ""
+    s70 avalue offset 0.000000 , 0.000000
+    s70 errorbar on
+    s70 errorbar place both
+    s70 errorbar color 11
+    s70 errorbar pattern 1
+    s70 errorbar size 1.000000
+    s70 errorbar linewidth 1.5
+    s70 errorbar linestyle 0
+    s70 errorbar riser linewidth 2.0
+    s70 errorbar riser linestyle 1
+    s70 errorbar riser clip off
+    s70 errorbar riser clip length 0.100000
+    s70 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s70 legend  ""
+    s71 hidden false
+    s71 type xydy
+    s71 symbol 0
+    s71 symbol size 1.000000
+    s71 symbol color 1
+    s71 symbol pattern 1
+    s71 symbol fill color 1
+    s71 symbol fill pattern 0
+    s71 symbol linewidth 1.0
+    s71 symbol linestyle 1
+    s71 symbol char 65
+    s71 symbol char font 0
+    s71 symbol skip 0
+    s71 line type 1
+    s71 line linestyle 1
+    s71 line linewidth 1.5
+    s71 line color 1
+    s71 line pattern 1
+    s71 baseline type 0
+    s71 baseline off
+    s71 dropline off
+    s71 fill type 0
+    s71 fill rule 0
+    s71 fill color 1
+    s71 fill pattern 1
+    s71 avalue off
+    s71 avalue type 2
+    s71 avalue char size 1.000000
+    s71 avalue font 0
+    s71 avalue color 1
+    s71 avalue rot 0
+    s71 avalue format general
+    s71 avalue prec 3
+    s71 avalue prepend ""
+    s71 avalue append ""
+    s71 avalue offset 0.000000 , 0.000000
+    s71 errorbar on
+    s71 errorbar place both
+    s71 errorbar color 11
+    s71 errorbar pattern 1
+    s71 errorbar size 1.000000
+    s71 errorbar linewidth 1.5
+    s71 errorbar linestyle 0
+    s71 errorbar riser linewidth 2.0
+    s71 errorbar riser linestyle 1
+    s71 errorbar riser clip off
+    s71 errorbar riser clip length 0.100000
+    s71 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s71 legend  ""
+    s72 hidden false
+    s72 type xydy
+    s72 symbol 0
+    s72 symbol size 1.000000
+    s72 symbol color 1
+    s72 symbol pattern 1
+    s72 symbol fill color 1
+    s72 symbol fill pattern 0
+    s72 symbol linewidth 1.0
+    s72 symbol linestyle 1
+    s72 symbol char 65
+    s72 symbol char font 0
+    s72 symbol skip 0
+    s72 line type 1
+    s72 line linestyle 1
+    s72 line linewidth 1.5
+    s72 line color 1
+    s72 line pattern 1
+    s72 baseline type 0
+    s72 baseline off
+    s72 dropline off
+    s72 fill type 0
+    s72 fill rule 0
+    s72 fill color 1
+    s72 fill pattern 1
+    s72 avalue off
+    s72 avalue type 2
+    s72 avalue char size 1.000000
+    s72 avalue font 0
+    s72 avalue color 1
+    s72 avalue rot 0
+    s72 avalue format general
+    s72 avalue prec 3
+    s72 avalue prepend ""
+    s72 avalue append ""
+    s72 avalue offset 0.000000 , 0.000000
+    s72 errorbar on
+    s72 errorbar place both
+    s72 errorbar color 11
+    s72 errorbar pattern 1
+    s72 errorbar size 1.000000
+    s72 errorbar linewidth 1.5
+    s72 errorbar linestyle 0
+    s72 errorbar riser linewidth 2.0
+    s72 errorbar riser linestyle 1
+    s72 errorbar riser clip off
+    s72 errorbar riser clip length 0.100000
+    s72 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s72 legend  ""
+    s73 hidden false
+    s73 type xydy
+    s73 symbol 0
+    s73 symbol size 1.000000
+    s73 symbol color 1
+    s73 symbol pattern 1
+    s73 symbol fill color 1
+    s73 symbol fill pattern 0
+    s73 symbol linewidth 1.0
+    s73 symbol linestyle 1
+    s73 symbol char 65
+    s73 symbol char font 0
+    s73 symbol skip 0
+    s73 line type 1
+    s73 line linestyle 1
+    s73 line linewidth 1.5
+    s73 line color 1
+    s73 line pattern 1
+    s73 baseline type 0
+    s73 baseline off
+    s73 dropline off
+    s73 fill type 0
+    s73 fill rule 0
+    s73 fill color 1
+    s73 fill pattern 1
+    s73 avalue off
+    s73 avalue type 2
+    s73 avalue char size 1.000000
+    s73 avalue font 0
+    s73 avalue color 1
+    s73 avalue rot 0
+    s73 avalue format general
+    s73 avalue prec 3
+    s73 avalue prepend ""
+    s73 avalue append ""
+    s73 avalue offset 0.000000 , 0.000000
+    s73 errorbar on
+    s73 errorbar place both
+    s73 errorbar color 11
+    s73 errorbar pattern 1
+    s73 errorbar size 1.000000
+    s73 errorbar linewidth 1.5
+    s73 errorbar linestyle 0
+    s73 errorbar riser linewidth 2.0
+    s73 errorbar riser linestyle 1
+    s73 errorbar riser clip off
+    s73 errorbar riser clip length 0.100000
+    s73 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s73 legend  ""
+    s74 hidden false
+    s74 type xydy
+    s74 symbol 0
+    s74 symbol size 1.000000
+    s74 symbol color 1
+    s74 symbol pattern 1
+    s74 symbol fill color 1
+    s74 symbol fill pattern 0
+    s74 symbol linewidth 1.0
+    s74 symbol linestyle 1
+    s74 symbol char 65
+    s74 symbol char font 0
+    s74 symbol skip 0
+    s74 line type 1
+    s74 line linestyle 1
+    s74 line linewidth 1.5
+    s74 line color 1
+    s74 line pattern 1
+    s74 baseline type 0
+    s74 baseline off
+    s74 dropline off
+    s74 fill type 0
+    s74 fill rule 0
+    s74 fill color 1
+    s74 fill pattern 1
+    s74 avalue off
+    s74 avalue type 2
+    s74 avalue char size 1.000000
+    s74 avalue font 0
+    s74 avalue color 1
+    s74 avalue rot 0
+    s74 avalue format general
+    s74 avalue prec 3
+    s74 avalue prepend ""
+    s74 avalue append ""
+    s74 avalue offset 0.000000 , 0.000000
+    s74 errorbar on
+    s74 errorbar place both
+    s74 errorbar color 11
+    s74 errorbar pattern 1
+    s74 errorbar size 1.000000
+    s74 errorbar linewidth 1.5
+    s74 errorbar linestyle 0
+    s74 errorbar riser linewidth 2.0
+    s74 errorbar riser linestyle 1
+    s74 errorbar riser clip off
+    s74 errorbar riser clip length 0.100000
+    s74 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s74 legend  ""
+    s75 hidden false
+    s75 type xydy
+    s75 symbol 0
+    s75 symbol size 1.000000
+    s75 symbol color 1
+    s75 symbol pattern 1
+    s75 symbol fill color 1
+    s75 symbol fill pattern 0
+    s75 symbol linewidth 1.0
+    s75 symbol linestyle 1
+    s75 symbol char 65
+    s75 symbol char font 0
+    s75 symbol skip 0
+    s75 line type 1
+    s75 line linestyle 1
+    s75 line linewidth 1.5
+    s75 line color 1
+    s75 line pattern 1
+    s75 baseline type 0
+    s75 baseline off
+    s75 dropline off
+    s75 fill type 0
+    s75 fill rule 0
+    s75 fill color 1
+    s75 fill pattern 1
+    s75 avalue off
+    s75 avalue type 2
+    s75 avalue char size 1.000000
+    s75 avalue font 0
+    s75 avalue color 1
+    s75 avalue rot 0
+    s75 avalue format general
+    s75 avalue prec 3
+    s75 avalue prepend ""
+    s75 avalue append ""
+    s75 avalue offset 0.000000 , 0.000000
+    s75 errorbar on
+    s75 errorbar place both
+    s75 errorbar color 11
+    s75 errorbar pattern 1
+    s75 errorbar size 1.000000
+    s75 errorbar linewidth 1.5
+    s75 errorbar linestyle 0
+    s75 errorbar riser linewidth 2.0
+    s75 errorbar riser linestyle 1
+    s75 errorbar riser clip off
+    s75 errorbar riser clip length 0.100000
+    s75 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s75 legend  ""
+    s76 hidden false
+    s76 type xydy
+    s76 symbol 0
+    s76 symbol size 1.000000
+    s76 symbol color 1
+    s76 symbol pattern 1
+    s76 symbol fill color 1
+    s76 symbol fill pattern 0
+    s76 symbol linewidth 1.0
+    s76 symbol linestyle 1
+    s76 symbol char 65
+    s76 symbol char font 0
+    s76 symbol skip 0
+    s76 line type 1
+    s76 line linestyle 1
+    s76 line linewidth 1.5
+    s76 line color 1
+    s76 line pattern 1
+    s76 baseline type 0
+    s76 baseline off
+    s76 dropline off
+    s76 fill type 0
+    s76 fill rule 0
+    s76 fill color 1
+    s76 fill pattern 1
+    s76 avalue off
+    s76 avalue type 2
+    s76 avalue char size 1.000000
+    s76 avalue font 0
+    s76 avalue color 1
+    s76 avalue rot 0
+    s76 avalue format general
+    s76 avalue prec 3
+    s76 avalue prepend ""
+    s76 avalue append ""
+    s76 avalue offset 0.000000 , 0.000000
+    s76 errorbar on
+    s76 errorbar place both
+    s76 errorbar color 11
+    s76 errorbar pattern 1
+    s76 errorbar size 1.000000
+    s76 errorbar linewidth 1.5
+    s76 errorbar linestyle 0
+    s76 errorbar riser linewidth 2.0
+    s76 errorbar riser linestyle 1
+    s76 errorbar riser clip off
+    s76 errorbar riser clip length 0.100000
+    s76 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s76 legend  ""
+    s77 hidden false
+    s77 type xydy
+    s77 symbol 0
+    s77 symbol size 1.000000
+    s77 symbol color 1
+    s77 symbol pattern 1
+    s77 symbol fill color 1
+    s77 symbol fill pattern 0
+    s77 symbol linewidth 1.0
+    s77 symbol linestyle 1
+    s77 symbol char 65
+    s77 symbol char font 0
+    s77 symbol skip 0
+    s77 line type 1
+    s77 line linestyle 1
+    s77 line linewidth 1.5
+    s77 line color 1
+    s77 line pattern 1
+    s77 baseline type 0
+    s77 baseline off
+    s77 dropline off
+    s77 fill type 0
+    s77 fill rule 0
+    s77 fill color 1
+    s77 fill pattern 1
+    s77 avalue off
+    s77 avalue type 2
+    s77 avalue char size 1.000000
+    s77 avalue font 0
+    s77 avalue color 1
+    s77 avalue rot 0
+    s77 avalue format general
+    s77 avalue prec 3
+    s77 avalue prepend ""
+    s77 avalue append ""
+    s77 avalue offset 0.000000 , 0.000000
+    s77 errorbar on
+    s77 errorbar place both
+    s77 errorbar color 11
+    s77 errorbar pattern 1
+    s77 errorbar size 1.000000
+    s77 errorbar linewidth 1.5
+    s77 errorbar linestyle 0
+    s77 errorbar riser linewidth 2.0
+    s77 errorbar riser linestyle 1
+    s77 errorbar riser clip off
+    s77 errorbar riser clip length 0.100000
+    s77 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s77 legend  ""
+    s78 hidden false
+    s78 type xydy
+    s78 symbol 0
+    s78 symbol size 1.000000
+    s78 symbol color 1
+    s78 symbol pattern 1
+    s78 symbol fill color 1
+    s78 symbol fill pattern 0
+    s78 symbol linewidth 1.0
+    s78 symbol linestyle 1
+    s78 symbol char 65
+    s78 symbol char font 0
+    s78 symbol skip 0
+    s78 line type 1
+    s78 line linestyle 1
+    s78 line linewidth 1.5
+    s78 line color 1
+    s78 line pattern 1
+    s78 baseline type 0
+    s78 baseline off
+    s78 dropline off
+    s78 fill type 0
+    s78 fill rule 0
+    s78 fill color 1
+    s78 fill pattern 1
+    s78 avalue off
+    s78 avalue type 2
+    s78 avalue char size 1.000000
+    s78 avalue font 0
+    s78 avalue color 1
+    s78 avalue rot 0
+    s78 avalue format general
+    s78 avalue prec 3
+    s78 avalue prepend ""
+    s78 avalue append ""
+    s78 avalue offset 0.000000 , 0.000000
+    s78 errorbar on
+    s78 errorbar place both
+    s78 errorbar color 11
+    s78 errorbar pattern 1
+    s78 errorbar size 1.000000
+    s78 errorbar linewidth 1.5
+    s78 errorbar linestyle 0
+    s78 errorbar riser linewidth 2.0
+    s78 errorbar riser linestyle 1
+    s78 errorbar riser clip off
+    s78 errorbar riser clip length 0.100000
+    s78 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s78 legend  ""
+    s79 hidden false
+    s79 type xydy
+    s79 symbol 0
+    s79 symbol size 1.000000
+    s79 symbol color 1
+    s79 symbol pattern 1
+    s79 symbol fill color 1
+    s79 symbol fill pattern 0
+    s79 symbol linewidth 1.0
+    s79 symbol linestyle 1
+    s79 symbol char 65
+    s79 symbol char font 0
+    s79 symbol skip 0
+    s79 line type 1
+    s79 line linestyle 1
+    s79 line linewidth 1.5
+    s79 line color 1
+    s79 line pattern 1
+    s79 baseline type 0
+    s79 baseline off
+    s79 dropline off
+    s79 fill type 0
+    s79 fill rule 0
+    s79 fill color 1
+    s79 fill pattern 1
+    s79 avalue off
+    s79 avalue type 2
+    s79 avalue char size 1.000000
+    s79 avalue font 0
+    s79 avalue color 1
+    s79 avalue rot 0
+    s79 avalue format general
+    s79 avalue prec 3
+    s79 avalue prepend ""
+    s79 avalue append ""
+    s79 avalue offset 0.000000 , 0.000000
+    s79 errorbar on
+    s79 errorbar place both
+    s79 errorbar color 11
+    s79 errorbar pattern 1
+    s79 errorbar size 1.000000
+    s79 errorbar linewidth 1.5
+    s79 errorbar linestyle 0
+    s79 errorbar riser linewidth 2.0
+    s79 errorbar riser linestyle 1
+    s79 errorbar riser clip off
+    s79 errorbar riser clip length 0.100000
+    s79 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s79 legend  ""
+    s80 hidden false
+    s80 type xydy
+    s80 symbol 0
+    s80 symbol size 1.000000
+    s80 symbol color 1
+    s80 symbol pattern 1
+    s80 symbol fill color 1
+    s80 symbol fill pattern 0
+    s80 symbol linewidth 1.0
+    s80 symbol linestyle 1
+    s80 symbol char 65
+    s80 symbol char font 0
+    s80 symbol skip 0
+    s80 line type 1
+    s80 line linestyle 1
+    s80 line linewidth 1.5
+    s80 line color 1
+    s80 line pattern 1
+    s80 baseline type 0
+    s80 baseline off
+    s80 dropline off
+    s80 fill type 0
+    s80 fill rule 0
+    s80 fill color 1
+    s80 fill pattern 1
+    s80 avalue off
+    s80 avalue type 2
+    s80 avalue char size 1.000000
+    s80 avalue font 0
+    s80 avalue color 1
+    s80 avalue rot 0
+    s80 avalue format general
+    s80 avalue prec 3
+    s80 avalue prepend ""
+    s80 avalue append ""
+    s80 avalue offset 0.000000 , 0.000000
+    s80 errorbar on
+    s80 errorbar place both
+    s80 errorbar color 11
+    s80 errorbar pattern 1
+    s80 errorbar size 1.000000
+    s80 errorbar linewidth 1.5
+    s80 errorbar linestyle 0
+    s80 errorbar riser linewidth 2.0
+    s80 errorbar riser linestyle 1
+    s80 errorbar riser clip off
+    s80 errorbar riser clip length 0.100000
+    s80 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s80 legend  ""
+    s81 hidden false
+    s81 type xydy
+    s81 symbol 0
+    s81 symbol size 1.000000
+    s81 symbol color 1
+    s81 symbol pattern 1
+    s81 symbol fill color 1
+    s81 symbol fill pattern 0
+    s81 symbol linewidth 1.0
+    s81 symbol linestyle 1
+    s81 symbol char 65
+    s81 symbol char font 0
+    s81 symbol skip 0
+    s81 line type 1
+    s81 line linestyle 1
+    s81 line linewidth 1.5
+    s81 line color 1
+    s81 line pattern 1
+    s81 baseline type 0
+    s81 baseline off
+    s81 dropline off
+    s81 fill type 0
+    s81 fill rule 0
+    s81 fill color 1
+    s81 fill pattern 1
+    s81 avalue off
+    s81 avalue type 2
+    s81 avalue char size 1.000000
+    s81 avalue font 0
+    s81 avalue color 1
+    s81 avalue rot 0
+    s81 avalue format general
+    s81 avalue prec 3
+    s81 avalue prepend ""
+    s81 avalue append ""
+    s81 avalue offset 0.000000 , 0.000000
+    s81 errorbar on
+    s81 errorbar place both
+    s81 errorbar color 11
+    s81 errorbar pattern 1
+    s81 errorbar size 1.000000
+    s81 errorbar linewidth 1.5
+    s81 errorbar linestyle 0
+    s81 errorbar riser linewidth 2.0
+    s81 errorbar riser linestyle 1
+    s81 errorbar riser clip off
+    s81 errorbar riser clip length 0.100000
+    s81 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s81 legend  ""
+    s82 hidden false
+    s82 type xydy
+    s82 symbol 0
+    s82 symbol size 1.000000
+    s82 symbol color 1
+    s82 symbol pattern 1
+    s82 symbol fill color 1
+    s82 symbol fill pattern 0
+    s82 symbol linewidth 1.0
+    s82 symbol linestyle 1
+    s82 symbol char 65
+    s82 symbol char font 0
+    s82 symbol skip 0
+    s82 line type 1
+    s82 line linestyle 1
+    s82 line linewidth 1.5
+    s82 line color 1
+    s82 line pattern 1
+    s82 baseline type 0
+    s82 baseline off
+    s82 dropline off
+    s82 fill type 0
+    s82 fill rule 0
+    s82 fill color 1
+    s82 fill pattern 1
+    s82 avalue off
+    s82 avalue type 2
+    s82 avalue char size 1.000000
+    s82 avalue font 0
+    s82 avalue color 1
+    s82 avalue rot 0
+    s82 avalue format general
+    s82 avalue prec 3
+    s82 avalue prepend ""
+    s82 avalue append ""
+    s82 avalue offset 0.000000 , 0.000000
+    s82 errorbar on
+    s82 errorbar place both
+    s82 errorbar color 11
+    s82 errorbar pattern 1
+    s82 errorbar size 1.000000
+    s82 errorbar linewidth 1.5
+    s82 errorbar linestyle 0
+    s82 errorbar riser linewidth 2.0
+    s82 errorbar riser linestyle 1
+    s82 errorbar riser clip off
+    s82 errorbar riser clip length 0.100000
+    s82 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s82 legend  ""
+    s83 hidden false
+    s83 type xydy
+    s83 symbol 0
+    s83 symbol size 1.000000
+    s83 symbol color 1
+    s83 symbol pattern 1
+    s83 symbol fill color 1
+    s83 symbol fill pattern 0
+    s83 symbol linewidth 1.0
+    s83 symbol linestyle 1
+    s83 symbol char 65
+    s83 symbol char font 0
+    s83 symbol skip 0
+    s83 line type 1
+    s83 line linestyle 1
+    s83 line linewidth 1.5
+    s83 line color 1
+    s83 line pattern 1
+    s83 baseline type 0
+    s83 baseline off
+    s83 dropline off
+    s83 fill type 0
+    s83 fill rule 0
+    s83 fill color 1
+    s83 fill pattern 1
+    s83 avalue off
+    s83 avalue type 2
+    s83 avalue char size 1.000000
+    s83 avalue font 0
+    s83 avalue color 1
+    s83 avalue rot 0
+    s83 avalue format general
+    s83 avalue prec 3
+    s83 avalue prepend ""
+    s83 avalue append ""
+    s83 avalue offset 0.000000 , 0.000000
+    s83 errorbar on
+    s83 errorbar place both
+    s83 errorbar color 11
+    s83 errorbar pattern 1
+    s83 errorbar size 1.000000
+    s83 errorbar linewidth 1.5
+    s83 errorbar linestyle 0
+    s83 errorbar riser linewidth 2.0
+    s83 errorbar riser linestyle 1
+    s83 errorbar riser clip off
+    s83 errorbar riser clip length 0.100000
+    s83 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s83 legend  ""
+    s84 hidden false
+    s84 type xydy
+    s84 symbol 0
+    s84 symbol size 1.000000
+    s84 symbol color 1
+    s84 symbol pattern 1
+    s84 symbol fill color 1
+    s84 symbol fill pattern 0
+    s84 symbol linewidth 1.0
+    s84 symbol linestyle 1
+    s84 symbol char 65
+    s84 symbol char font 0
+    s84 symbol skip 0
+    s84 line type 1
+    s84 line linestyle 1
+    s84 line linewidth 1.5
+    s84 line color 1
+    s84 line pattern 1
+    s84 baseline type 0
+    s84 baseline off
+    s84 dropline off
+    s84 fill type 0
+    s84 fill rule 0
+    s84 fill color 1
+    s84 fill pattern 1
+    s84 avalue off
+    s84 avalue type 2
+    s84 avalue char size 1.000000
+    s84 avalue font 0
+    s84 avalue color 1
+    s84 avalue rot 0
+    s84 avalue format general
+    s84 avalue prec 3
+    s84 avalue prepend ""
+    s84 avalue append ""
+    s84 avalue offset 0.000000 , 0.000000
+    s84 errorbar on
+    s84 errorbar place both
+    s84 errorbar color 11
+    s84 errorbar pattern 1
+    s84 errorbar size 1.000000
+    s84 errorbar linewidth 1.5
+    s84 errorbar linestyle 0
+    s84 errorbar riser linewidth 2.0
+    s84 errorbar riser linestyle 1
+    s84 errorbar riser clip off
+    s84 errorbar riser clip length 0.100000
+    s84 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s84 legend  ""
+    s85 hidden false
+    s85 type xydy
+    s85 symbol 0
+    s85 symbol size 1.000000
+    s85 symbol color 1
+    s85 symbol pattern 1
+    s85 symbol fill color 1
+    s85 symbol fill pattern 0
+    s85 symbol linewidth 1.0
+    s85 symbol linestyle 1
+    s85 symbol char 65
+    s85 symbol char font 0
+    s85 symbol skip 0
+    s85 line type 1
+    s85 line linestyle 1
+    s85 line linewidth 1.5
+    s85 line color 1
+    s85 line pattern 1
+    s85 baseline type 0
+    s85 baseline off
+    s85 dropline off
+    s85 fill type 0
+    s85 fill rule 0
+    s85 fill color 1
+    s85 fill pattern 1
+    s85 avalue off
+    s85 avalue type 2
+    s85 avalue char size 1.000000
+    s85 avalue font 0
+    s85 avalue color 1
+    s85 avalue rot 0
+    s85 avalue format general
+    s85 avalue prec 3
+    s85 avalue prepend ""
+    s85 avalue append ""
+    s85 avalue offset 0.000000 , 0.000000
+    s85 errorbar on
+    s85 errorbar place both
+    s85 errorbar color 11
+    s85 errorbar pattern 1
+    s85 errorbar size 1.000000
+    s85 errorbar linewidth 1.5
+    s85 errorbar linestyle 0
+    s85 errorbar riser linewidth 2.0
+    s85 errorbar riser linestyle 1
+    s85 errorbar riser clip off
+    s85 errorbar riser clip length 0.100000
+    s85 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s85 legend  ""
+    s86 hidden false
+    s86 type xydy
+    s86 symbol 0
+    s86 symbol size 1.000000
+    s86 symbol color 1
+    s86 symbol pattern 1
+    s86 symbol fill color 1
+    s86 symbol fill pattern 0
+    s86 symbol linewidth 1.0
+    s86 symbol linestyle 1
+    s86 symbol char 65
+    s86 symbol char font 0
+    s86 symbol skip 0
+    s86 line type 1
+    s86 line linestyle 1
+    s86 line linewidth 1.5
+    s86 line color 1
+    s86 line pattern 1
+    s86 baseline type 0
+    s86 baseline off
+    s86 dropline off
+    s86 fill type 0
+    s86 fill rule 0
+    s86 fill color 1
+    s86 fill pattern 1
+    s86 avalue off
+    s86 avalue type 2
+    s86 avalue char size 1.000000
+    s86 avalue font 0
+    s86 avalue color 1
+    s86 avalue rot 0
+    s86 avalue format general
+    s86 avalue prec 3
+    s86 avalue prepend ""
+    s86 avalue append ""
+    s86 avalue offset 0.000000 , 0.000000
+    s86 errorbar on
+    s86 errorbar place both
+    s86 errorbar color 11
+    s86 errorbar pattern 1
+    s86 errorbar size 1.000000
+    s86 errorbar linewidth 1.5
+    s86 errorbar linestyle 0
+    s86 errorbar riser linewidth 2.0
+    s86 errorbar riser linestyle 1
+    s86 errorbar riser clip off
+    s86 errorbar riser clip length 0.100000
+    s86 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s86 legend  ""
+    s87 hidden false
+    s87 type xydy
+    s87 symbol 0
+    s87 symbol size 1.000000
+    s87 symbol color 1
+    s87 symbol pattern 1
+    s87 symbol fill color 1
+    s87 symbol fill pattern 0
+    s87 symbol linewidth 1.0
+    s87 symbol linestyle 1
+    s87 symbol char 65
+    s87 symbol char font 0
+    s87 symbol skip 0
+    s87 line type 1
+    s87 line linestyle 1
+    s87 line linewidth 1.5
+    s87 line color 1
+    s87 line pattern 1
+    s87 baseline type 0
+    s87 baseline off
+    s87 dropline off
+    s87 fill type 0
+    s87 fill rule 0
+    s87 fill color 1
+    s87 fill pattern 1
+    s87 avalue off
+    s87 avalue type 2
+    s87 avalue char size 1.000000
+    s87 avalue font 0
+    s87 avalue color 1
+    s87 avalue rot 0
+    s87 avalue format general
+    s87 avalue prec 3
+    s87 avalue prepend ""
+    s87 avalue append ""
+    s87 avalue offset 0.000000 , 0.000000
+    s87 errorbar on
+    s87 errorbar place both
+    s87 errorbar color 11
+    s87 errorbar pattern 1
+    s87 errorbar size 1.000000
+    s87 errorbar linewidth 1.5
+    s87 errorbar linestyle 0
+    s87 errorbar riser linewidth 2.0
+    s87 errorbar riser linestyle 1
+    s87 errorbar riser clip off
+    s87 errorbar riser clip length 0.100000
+    s87 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s87 legend  ""
+    s88 hidden false
+    s88 type xydy
+    s88 symbol 0
+    s88 symbol size 1.000000
+    s88 symbol color 1
+    s88 symbol pattern 1
+    s88 symbol fill color 1
+    s88 symbol fill pattern 0
+    s88 symbol linewidth 1.0
+    s88 symbol linestyle 1
+    s88 symbol char 65
+    s88 symbol char font 0
+    s88 symbol skip 0
+    s88 line type 1
+    s88 line linestyle 1
+    s88 line linewidth 1.5
+    s88 line color 1
+    s88 line pattern 1
+    s88 baseline type 0
+    s88 baseline off
+    s88 dropline off
+    s88 fill type 0
+    s88 fill rule 0
+    s88 fill color 1
+    s88 fill pattern 1
+    s88 avalue off
+    s88 avalue type 2
+    s88 avalue char size 1.000000
+    s88 avalue font 0
+    s88 avalue color 1
+    s88 avalue rot 0
+    s88 avalue format general
+    s88 avalue prec 3
+    s88 avalue prepend ""
+    s88 avalue append ""
+    s88 avalue offset 0.000000 , 0.000000
+    s88 errorbar on
+    s88 errorbar place both
+    s88 errorbar color 11
+    s88 errorbar pattern 1
+    s88 errorbar size 1.000000
+    s88 errorbar linewidth 1.5
+    s88 errorbar linestyle 0
+    s88 errorbar riser linewidth 2.0
+    s88 errorbar riser linestyle 1
+    s88 errorbar riser clip off
+    s88 errorbar riser clip length 0.100000
+    s88 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s88 legend  ""
+    s89 hidden false
+    s89 type xydy
+    s89 symbol 0
+    s89 symbol size 1.000000
+    s89 symbol color 1
+    s89 symbol pattern 1
+    s89 symbol fill color 1
+    s89 symbol fill pattern 0
+    s89 symbol linewidth 1.0
+    s89 symbol linestyle 1
+    s89 symbol char 65
+    s89 symbol char font 0
+    s89 symbol skip 0
+    s89 line type 1
+    s89 line linestyle 1
+    s89 line linewidth 1.5
+    s89 line color 1
+    s89 line pattern 1
+    s89 baseline type 0
+    s89 baseline off
+    s89 dropline off
+    s89 fill type 0
+    s89 fill rule 0
+    s89 fill color 1
+    s89 fill pattern 1
+    s89 avalue off
+    s89 avalue type 2
+    s89 avalue char size 1.000000
+    s89 avalue font 0
+    s89 avalue color 1
+    s89 avalue rot 0
+    s89 avalue format general
+    s89 avalue prec 3
+    s89 avalue prepend ""
+    s89 avalue append ""
+    s89 avalue offset 0.000000 , 0.000000
+    s89 errorbar on
+    s89 errorbar place both
+    s89 errorbar color 11
+    s89 errorbar pattern 1
+    s89 errorbar size 1.000000
+    s89 errorbar linewidth 1.5
+    s89 errorbar linestyle 0
+    s89 errorbar riser linewidth 2.0
+    s89 errorbar riser linestyle 1
+    s89 errorbar riser clip off
+    s89 errorbar riser clip length 0.100000
+    s89 comment "tdmft_1o_DS2_FATBANDS_at0005_O_is1_l0001"
+    s89 legend  ""

@@ -495,6 +495,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
+ dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
@@ -509,11 +510,15 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
-
+ 
+ dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
+ dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
+ dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
  dtout%ph_ndivsm          = dtin%ph_ndivsm
  dtout%ph_nqpath          = dtin%ph_nqpath
  dtout%ph_ngqpt           = dtin%ph_ngqpt
  if (allocated(dtin%ph_qpath)) call alloc_copy(dtin%ph_qpath, dtout%ph_qpath)
+ if(allocated(dtin%ph_freez_disp_ampl))call alloc_copy(dtin%ph_freez_disp_ampl,dtout%ph_freez_disp_ampl)
 ! end eph variables
 
  dtout%exchn2n3d          = dtin%exchn2n3d
@@ -542,6 +547,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%getdkdk            = dtin%getdkdk
  dtout%getdkde            = dtin%getdkde
  dtout%getden             = dtin%getden
+ dtout%getefmas           = dtin%getefmas
  dtout%getgam_eig2nkq     = dtin%getgam_eig2nkq
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
@@ -616,6 +622,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%irdddb             = dtin%irdddb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
+ dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
  dtout%irdpawden          = dtin%irdpawden
  dtout%irdqps             = dtin%irdqps
@@ -789,6 +796,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtdosm            = dtin%prtdosm
  dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
  dtout%prtefg             = dtin%prtefg
+ dtout%prtefmas           = dtin%prtefmas 
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prtfc              = dtin%prtfc
@@ -942,7 +950,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rf2_pert1_dir(:)   = dtin%rf2_pert1_dir(:)
  dtout%rf2_pert2_dir(:)   = dtin%rf2_pert2_dir(:)
  dtout%supercell_latt(:,:)= dtin%supercell_latt(:,:)
- dtout%supercell(:)       = dtin%supercell(:)
  dtout%ucrpa_bands(:)     = dtin%ucrpa_bands(:)
  dtout%vdw_supercell(:)   = dtin%vdw_supercell(:)
  dtout%vdw_typfrag(:)     = dtin%vdw_typfrag(:)
@@ -1298,6 +1305,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%nband))       then
    ABI_DEALLOCATE(dtset%nband)
+ end if
+ if (allocated(dtset%ph_freez_disp_ampl)) then
+   ABI_DEALLOCATE(dtset%ph_freez_disp_ampl)
  end if
  if (allocated(dtset%ph_qpath)) then
    ABI_DEALLOCATE(dtset%ph_qpath)

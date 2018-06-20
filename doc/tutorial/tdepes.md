@@ -2,11 +2,11 @@
 authors: SP
 ---
 
-# Lesson TDepES  
+# Tutorial TDepES  
 
 ## Temperature-DEPendence of the Electronic Structure.  
 
-This lesson aims at showing how to get the following physical properties, for periodic solids:
+This tutorial aims at showing how to get the following physical properties, for periodic solids:
 
   * The zero-point-motion renormalization (ZPR) of eigenenergies  
 
@@ -36,6 +36,15 @@ There are two ways to compute the temperature dependence with Abinit:
       * netCDF4 and netCDF4 for python 
       * scipy 0.12.0 or higher 
 
+    This can be done with:
+    
+        sudo apt-get install netcdf-bin
+        sudo apt-get install python-dev
+        pip install numpy
+        pip install scipy
+        pip install netcdf4        
+
+
     Abinit must be configured with: `configure --with-config-file=myconf.ac`
     where the configuration file must contain at least:
 
@@ -48,6 +57,17 @@ There are two ways to compute the temperature dependence with Abinit:
         #with_netcdf_libs="-L/usr/local/lib -lnetcdff -lnetcdf -L${HOME}/local/lib -lhdf5_hl -lhdf5"  
         # else if netcdf3:
         #with_netcdf_libs="-L${HOME}/local/lib/ -lnetcdff -lnetcdf"  
+
+    For example, with MPI you might use the following basic myconf.ac file
+
+        with_trio_flavor="netcdf"
+        
+        with_mpi_prefix='/home/XXXXX/local/openmpi1.10/'
+        enable_mpi="yes"
+        enable_mpi_io="yes"
+        enable_openmp="no"
+        
+        prefix='/home/XXXX/abinit/build/'
 
     A list of configuration files for clusters is available in the 
     [abiconfig repository](https://github.com/abinit/abiconfig)
@@ -71,7 +91,7 @@ There are two ways to compute the temperature dependence with Abinit:
 
 ## 1 Calculation of the ZPR of eigenenergies at q=Γ. 
   
-The reference input files for this lesson are located in
+The reference input files for this tutorial are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
 are in ~abinit/tests/tutorespfn/Refs.
 The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to indicate
@@ -388,11 +408,11 @@ self-consistent phonon computation.
 How this different behaviour of k-grids and q-grids can be handled by ABINIT ?
 By convention, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
 without use of symmetries, while the q-point grid with [[qptopt]]=1 with be generated in the irreducible Brillouin Zone,
-despite [[nsym]]=1. In order to generate q-point grids that are not folded in the irreducible Brillouin Zone, use another value of [[qptopt]].
-Especially [[qptopt]]=3 has to be used to generate q points in the full Brillouin zone.
+despite [[nsym]]=1. In order to generate q-point grids that are not folded in the irreducible Brillouin Zone, one need to use another value of [[qptopt]].
+In particular [[qptopt]]=3 has to be used to generate q points in the full Brillouin zone.
 
 Second, the number of ABINIT datasets is expected to be given in the input file, by the user,
-but not determined on-the-flight by ABINIT. Still, this number of datasets is determined by the number of q points...
+but not determined on-the-flight by ABINIT. Still, this number of datasets is determined by the number of q points.
 Thus, the user will have to compute it before being able to launch the real q-point calculations, since it determines [[ndtset]].
 
 How to determine the number of irreducible q points ?
@@ -457,7 +477,7 @@ the converged wavefunctions are already available. The second dataset will corre
 a non-self-consistent ground-state calculation at k+q (it is also quick thanks to previously available wavefunctions), 
 and the third dataset will correspond to the DFPT calculations at k+q (this is the CPU intensive part) .
 
-So, compared to the first run in this lesson, we have to replace   
+So, compared to the first run in this tutorial, we have to replace   
 
     ndtset 3     by      ndtset 24 udtset 8 3
 
@@ -500,7 +520,7 @@ working directory (if not yet done) and launch the python script with:
 {% dialog tests/tutorespfn/Input/tdepes_3.files %}
 
 Examination of the same HOMO band at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
-than previously. Indeed, for the ZPR, one finds
+than previously. Indeed, for the ZPR, one finds (in eV)
 
     Band: 3
     0.0 0.154686616316
@@ -510,7 +530,7 @@ instead of
     Band: 3
     0.0 0.0464876236664
 
-that, is, the ZPR is about three times smaller, and similary for the temperature dependence.
+that, is, the ZPR is now about three times larger, and similary for the temperature dependence.
 
 
 <!--
@@ -518,7 +538,7 @@ that, is, the ZPR is about three times smaller, and similary for the temperature
 -->
 
 As a matter of fact, diamond requires an extremely dense q-point grid (40x40x40) to be converged. 
-On the bright side, each q-point calculation is independent and thus the parallel scaling is ideal...
+On the bright side, each q-point calculation is independent and thus the parallel scaling is ideal.
 Running separate jobs for different q-points is quite easy thanks to the dtset approach.
 
 ## 3 Calculation of the eigenenergy corrections along high-symmetry lines
@@ -638,16 +658,32 @@ Here we show the renormalization at a very high temperature of 1900K in order
 to highlight more the broadening and renormalization that occurs. If you want
 accurate values of the ZPR at 0K you can look at the table above.
 
-**Additional consideration : possible issue while converging your calculations**
 
-If you use an extremely fine q-point grid, the acoustic phonon frequencies for
-q-points close to $\Gamma$ will be wrongly determined by Abinit. Indeed in order to
-have correct phonon frequencies close to $\Gamma$, one has to impose the acousting sum rule
-with anaddb and [[asr@anaddb]]. 
-However, this feature is not available in the python script. Instead, the script reject the
-contribution of the acoustic phonon close to $\Gamma$ if their phonon frequency is
-lower than 1E-6 Ha. Otherwise one gets unphysically large contribution. 
+!!! Important
 
-One can tune this parameter by editing the variable "tol6 = 1E-6" in the beginning of the script.
+    If you use an extremely fine q-point grid, the acoustic phonon frequencies for
+    q-points close to $\Gamma$ will be wrongly determined by Abinit. Indeed in order to
+    have correct phonon frequencies close to $\Gamma$, one has to impose the acousting sum rule
+    with anaddb and [[asr@anaddb]]. 
+    However, this feature is not available in the python script. Instead, the script reject the
+    contribution of the acoustic phonon close to $\Gamma$ if their phonon frequency is
+    lower than 1E-6 Ha. Otherwise one gets unphysically large contribution. 
+    
+    One can tune this parameter by editing the variable "tol6 = 1E-6" in the beginning of the script.
+    
+    For example, for the last 43x43x43 calculation, it was set to 1E-4.
 
-For example, for the last 43x43x43 calculation, it was set to 1E-4.
+!!! important 
+
+    It is possible to speed up the convergence with respect to increasing q-point density by noticing 
+    that the renormalization behaves analytically with increasing q-point grid and smaller broadening. 
+    
+    It is therefore possible to extrapolate the results. Different analytical behavior extists depending 
+    if the material is polar and if the state we are considering is a band extrema or not. 
+    More information can be found in Ref. [[cite:Ponce2015]]
+
+
+
+
+
+

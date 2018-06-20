@@ -73,5 +73,5 @@ D3(Becke-Johnson)), Silvestrelli.
 
 ## Tutorials
 
-* The [[lesson:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA 
+* The [[tutorial:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA 
 

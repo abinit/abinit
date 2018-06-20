@@ -103,5 +103,5 @@ excitations are computed. Spin-polarized case is also available.
 
 ## Tutorials
 
-* The [[lesson:bse]] lesson on the Bethe-Salpeter Equation (BSE) deals with the computation 
+* The [[tutorial:bse]] tutorial on the Bethe-Salpeter Equation (BSE) deals with the computation 
 of the macroscopic dielectric function of Silicon within the Bethe-Salpeter equation. 

@@ -803,7 +803,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,6,[0,1,2,3,4,5],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,7,[0,1,2,3,4,5,6],iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -811,6 +811,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
+
+     cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
 
    end if
 
@@ -2012,13 +2015,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+!  occopt restricted to 1 for rf2_dkdk and rf2_dkde
+   if (dt%rf2_dkdk==1) then
+     cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
+   end if
+   if (dt%rf2_dkde==1) then
+     cond_string(1)='rf2_dkde' ; cond_values(1)=dt%rf2_dkde
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
+   end if
+   if(dt%usepead==0.and.dt%optdriver==RUNL_NONLINEAR)then
+     cond_string(1)='usepead'   ; cond_values(1)=dt%usepead
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
+   end if
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'usepead',dt%usepead,1,(/0/),iout)
-     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
-     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
-     call chkint_eq(1,2,cond_string,cond_values,ierr,'nsppol',nsppol,1,(/1/),iout)
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
@@ -2092,6 +2106,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       'ground-state or response function calculations !',ch10,&
 &       'Action: change paral_atom in input file.'
        MSG_ERROR_NOSTOP(message, ierr)
+     end if
+     if (dt%optdriver==RUNL_NONLINEAR) then
+       cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
      end if
      if (dt%usedmft==1) then
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -2481,6 +2499,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%prtdosm==2.and.dt%pawprtdos/=2)then
      message = ' pawprtdos/=2  and prtdosm=2 are not compatible '
      MSG_ERROR(message)
+   end if
+
+!  prtefmas 
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
+   if(optdriver/=RUNL_RESPFN)then
+     cond_string(1)='optdriver' ; cond_values(1)=optdriver
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
    end if
 
 !  prtelf

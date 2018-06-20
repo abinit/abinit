@@ -189,6 +189,7 @@ type dataset_type
  integer :: chksymbreak
  integer :: cineb_start
  integer :: delayperm
+ integer :: densfor_pred
  integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
@@ -247,6 +248,7 @@ type dataset_type
  integer :: getdkdk
  integer :: getdkde
  integer :: getden
+ integer :: getefmas
  integer :: getgam_eig2nkq
  integer :: getocc
  integer :: getpawden
@@ -310,13 +312,13 @@ type dataset_type
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
- integer :: densfor_pred
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
  integer :: irdddk
  integer :: irdden
+ integer :: irdefmas
  integer :: irdhaydock
  integer :: irdpawden
  integer :: irdqps
@@ -490,6 +492,7 @@ type dataset_type
  integer :: prtdosm
  integer :: prtebands=1
  integer :: prtefg
+ integer :: prtefmas
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
@@ -627,7 +630,6 @@ type dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
- integer :: supercell(3)
  integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
@@ -906,10 +908,16 @@ type dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl 
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
+ integer :: ph_
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl) 
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)
@@ -920,6 +928,7 @@ type dataset_type
  integer :: eph_intmeth ! = 1
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
@@ -1450,12 +1459,13 @@ type dataset_type
 !The following filenames do not depend on itimimage, iimage and itime loops.
 !Note the following convention:
 !  fnameabo_* are filenames used for ouput results (writing)
-!  fnameabi_* are filenames used for data the should be read by the code.
+!  fnameabi_* are filenames used for data that should be read by the code.
 !  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
 !
 !If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
 !that particular file is only used for writing or for reading results, respectively.
 
+  character(len=fnlen) :: fnameabi_efmas
   character(len=fnlen) :: fnameabi_hes
   character(len=fnlen) :: fnameabi_phfrq
   character(len=fnlen) :: fnameabi_phvec
