@@ -60,6 +60,9 @@ module m_kpts
 
  public :: smpbz                      ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
  public :: testkgrid                  ! Test different grids of k points.
+
+ ! FIXME: deprecated
+ public :: mknormpath
 !!***
 
 !----------------------------------------------------------------------

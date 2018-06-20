@@ -35,7 +35,7 @@ module m_inkpts
  use m_symfind,   only : symfind, symlatt
  use m_cgtools,   only : set_istwfk
  use m_parser,    only : intagm
- use m_kpts,      only : getkgrid, testkgrid
+ use m_kpts,      only : getkgrid, testkgrid, mknormpath
 
  implicit none
 
