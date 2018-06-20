@@ -2,11 +2,11 @@
 authors: GZ, MT, EB, MJV
 ---
 
-# Lesson about the spin  
+# Tutorial about the spin  
 
 ## Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).  
 
-This lesson aims at showing how to get the following physical properties:
+This tutorial aims at showing how to get the following physical properties:
 
 * the total magnetization of a ferromagnetic material  
 * the magnetization of an antiferromagnetic material  
@@ -18,12 +18,12 @@ This lesson aims at showing how to get the following physical properties:
 
 You will learn to use features of ABINIT which deal with spin.  
 
-This lesson should take about 1.5 hour.
+This tutorial should take about 1.5 hour.
 
 ## 1 A ferromagnetic material: *bcc* Fe
   
 *Before beginning, you might consider to work in a different subdirectory, as
-for the other lessons. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
+for the other tutorials. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
 
 The file _~abinit/tests/tutorial/Input/tspin\_x.files_ lists the file names and root names. 
 You can copy it in the Work\_spin directory (and change it, when needed, as usual).  
@@ -223,8 +223,7 @@ interpolation of the magnetization at any point in space. cut3d is one of the
 executables of the ABINIT package and is installed together with abinit.  
 For the moment cut3d is interactive, and we will use it through a very primitive script
 (written in Python) to perform a rough estimate of the magnetization on each atom.  
-You can have a look at the ~abinit/doc/tutorial/documents/lesson_spin/magnetization.py
-program, and note
+You can have a look at the [magnetization.py program](spin_assets/magnetization.py), and note
 (or believe) that it does perform an integration of the magnetization in a cube of
 side acell/2 around each atom; if applicable, you might consider adjusting the
 value of the "CUT3D" string in the Python script.  

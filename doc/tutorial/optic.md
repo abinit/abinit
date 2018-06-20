@@ -2,11 +2,11 @@
 authors: SS, XG, YG
 ---
 
-# Lesson on optical properties  
+# Tutorial on optical properties  
 
 ## Frequency-dependent linear and second order nonlinear optical response.  
 
-This lesson aims at showing how to get the following physical properties, for semiconductors:
+This tutorial aims at showing how to get the following physical properties, for semiconductors:
 
   * Frequency dependent linear dielectric tensor
   * Frequency dependent second order nonlinear susceptibility tensor
@@ -14,12 +14,12 @@ This lesson aims at showing how to get the following physical properties, for se
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of the [[help:optic]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Computing the momentum matrix elements
 
 *Before beginning, you might consider working in a different subdirectory from
-for the other lessons. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
+for the other tutorials. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
 
 In order to use the Optic utility, you should first have some theoretical background.
 We strongly suggest that you first read the first two sections of the [[help:optic]].
@@ -154,15 +154,15 @@ For comparison, we have included in the tutorial, three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy
 and a number of bands that should be larger). You can visualize them as follows:
 
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0001-linopt.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0001-linopt.out
 
 for the linear optics, obtained with a 28x28x28 grid (keeping everything else fixed), and
 
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
 
 as well as
 
-    xmgrace ~abinit/doc/tutorial/lesson_optic/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
+    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
 
 for the non-linear optics, obtained with a 18x18x18 grid (keeping everything else fixed).
 

@@ -8,7 +8,7 @@ This document explains the i/o parameters and format needed for the main code (a
 
 The new user is advised to read first the [new user's guide](..),
 before reading the present file. 
-It will be easier to discover the present file with the help of the [[lesson:index|tutorial]].
+It will be easier to discover the present file with the help of the [[tutorial:index|tutorial]].
 
 When the user will be sufficiently familiarized with ABINIT, reading the
 ~abinit/doc/users/tuning.txt file might be useful (this file, as many

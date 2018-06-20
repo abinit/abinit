@@ -6,7 +6,7 @@ authors: XG
 
 ## Atomic displacements, homogeneous electric fields, strain.  
 
-This lesson aims at showing how to use the parallelism for all the properties
+This tutorial aims at showing how to use the parallelism for all the properties
 that are computed on the basis of the density-functional perturbation theory
 (DFPT) part of ABINIT, i.e.:
 
@@ -32,7 +32,7 @@ parameters to adjust to the machine you have at hand. For the other parts of
 the tutorial, a 16-computing-core machine is recommended, in order to perform
 the scalability measurements.
 
-This lesson should take less than two hours to be done if a powerful parallel
+This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
 
 You are supposed to know already some basics of parallelism in ABINIT,
@@ -46,7 +46,7 @@ explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
 The step 1 is done in a preliminary ground-state calculation (either by an
 independent run, or by computing them using an earlier dataset before the DFPT calculation). 
-The parallelisation of this step is examined in a separate lesson.  
+The parallelisation of this step is examined in a separate tutorial.  
 
 The step 2 and step 3 are the time-consuming DFPT steps, to which the present
 tutorial is dedicated, and for which the implementation of the parallelism
@@ -100,7 +100,7 @@ bands can be exploited.
 !!! important
 
     Before continuing you might work in a different subdirectory as for the other
-    lessons. Why not "work_paral_dfpt"? All the input files can be found in the
+    tutorials. Why not "work_paral_dfpt"? All the input files can be found in the
     ~abinit/tests/tutoparal/Input directory. You might have to adapt them to the
     path of the directory in which you have decided to perform your runs. 
     You can compare your results with reference output files located in

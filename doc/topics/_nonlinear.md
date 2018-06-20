@@ -86,7 +86,7 @@ LDA approximation. The extension to the PAW framework is in progress.
 
 ## Tutorials
 
-[[lesson:nlo|The lesson on static non-linear properties]] presents the
+[[tutorial:nlo|The tutorial on static non-linear properties]] presents the
 computation of responses beyond the linear order, within Density-Functional
 Perturbation Theory (beyond the simple Sum-Over-State approximation): Raman
 scattering efficiencies (non-resonant case), non-linear electronic

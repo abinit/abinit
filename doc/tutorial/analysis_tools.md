@@ -2,11 +2,11 @@
 authors: MC, SP
 ---
 
-# Lesson on analysis tools  
+# Tutorial on analysis tools  
 
 ## How to use cut3d
 
-This lesson covers some of the features available in the program cut3d. The
+This tutorial covers some of the features available in the program cut3d. The
 help file of this program can be view at [[help:cut3d]].
 
 The cut3d program can produce output that can be read by several other programs.
@@ -17,7 +17,7 @@ The cut3d program can be used to treat data in a density file (\_DEN), a
 potential file (\_POT) or a wavefunction file (\_WFK). In this lesson will we
 see how to use this program to obtain the value of the density on a line.
 
-This lesson should take about 15 minutes.
+This tutorial should take about 15 minutes.
 
 ## 1 Obtaining the density and wavefunctions files for Silicon
 
@@ -66,7 +66,7 @@ program can be accessed by simply typing its name, now write the command:
     cut3d
 
 The cut3d program will ask you several questions in order to determine what
-you want him to do. In this lesson, the text coming from the cut3d program are
+you want him to do. In this tutorial, the text coming from the cut3d program are
 in black and the input that you have to type in are in  red.
 
 After some text about the version and the licence, you will see the question:

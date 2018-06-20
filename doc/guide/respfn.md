@@ -6,7 +6,7 @@ authors: XG, DCA
 
 This page complements the main [[help:abinit]], for matters related
 to responses to perturbations computed with DFPT.
-It will be easier to discover the present file with the help of the [[lesson:rf1]].  
+It will be easier to discover the present file with the help of the [[tutorial:rf1|DFPT1 tutorial]].  
 
 <a id="intro"></a> 
 ## 0 Introducing the computation of responses

@@ -32,5 +32,5 @@ For the related computation of temperature-dependent properties, see [[topic:Tem
 
 ## Tutorials
 
-* [[lesson:rf2|The lesson Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the [[lesson:rf1]]. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this lesson.
+* [[tutorial:rf2|The tutorial Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the [[tutorial:rf1]]. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this tutorial.
 
