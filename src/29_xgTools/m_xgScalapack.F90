@@ -29,8 +29,6 @@ module m_xgScalapack
   use m_xg
   use m_xomp
 
-  use m_time,     only: timab
-
 #ifdef HAVE_MPI2
  use mpi
 #endif
