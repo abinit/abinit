@@ -112,7 +112,7 @@
 !scalars
  integer,parameter :: max_nband_cprj=100
  integer :: bdtot_index,cplex
- integer :: iatom,iatom_tot,ib,ib1,iband,iband1,ibc1,ibg,ib_this_proc,ierr
+ integer :: iatom,iatom_tot,ib,ib1,iband,ibc1,ibg,ib_this_proc,ierr
  integer :: ikpt,iorder_cprj,isppol,jb_this_proc,jbg,me,my_nspinor,nband_k,nband_k_cprj
  integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij,nsp2
  integer :: option,spaceComm,use_nondiag_occup_dmft
@@ -276,69 +276,51 @@
 !        check if dmft and occupations
 !        write(std_out,*) 'ib,ibc1          ',ib,ibc1
 
+         if(ibc1 /= 1 .and. .not.(paw_dmft%band_in(ib))) cycle
+
 !        DMFT stuff: extract cprj and occupations for additional band
-         if(paw_dmft%use_sc_dmft /= 0) then
+         if(paw_dmft%use_sc_dmft /= 0 .and. paw_dmft%band_in(ib)) then
 
 !          write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
-           iband1 = bdtot_index+ib1
 !          write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
-           if(paw_dmft%band_in(ib)) then
 
-             ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
+           ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
 
-             if(.not.paw_dmft%band_in(ib1))  stop ! Pourquoi ??!
-             use_nondiag_occup_dmft = 1
-             occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
-             if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
-             if(nspinor==1) occup(2) = zero
-             locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
-!            write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
-             if (locc_test .or. mkmem == 0) then
+           use_nondiag_occup_dmft = 1
+           locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
+           occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
 
-!              Get ib1_this_proc from ib1
-               if(xmpi_paral==1)then
-                 if (paral_kgb==1) then
-                   if (mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)/=mpi_enreg%me_band) then
-                     write(msg, '(a,2I5)') "Bande pas dispo (KGB) proc ayant la bande, me_band", &
-&                                          mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band), mpi_enreg%me_band
-                     MSG_ERROR(msg)
-                   else
+           if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
+           if(nspinor==1) occup(2) = zero
 
-                     ib1_this_proc = 0
-                     do ib_loop=1,ib1
-                       if (mod((ib_loop-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)/=mpi_enreg%me_band) cycle
-                       ib1_this_proc=ib1_this_proc+1
-                     end do
+!          write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
+!
+           if (locc_test .or. mkmem == 0) then
 
+!            Get ib1_this_proc from ib1
+             if (paral_kgb==1) then
+               if (mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)/=mpi_enreg%me_band) then
+                 write(msg, '(a,2I5)') "Bande pas dispo (KGB) proc ayant la bande, me_band", &
+&                                      mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band), mpi_enreg%me_band
+                 MSG_ERROR(msg)
+               else ! band available on this proc
+                 ib1_this_proc = 0
+                 do ib_loop=1,ib1-1
+                   if (mod((ib_loop-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)==mpi_enreg%me_band) then
+                     ib1_this_proc=ib1_this_proc+1
                    end if
-                 else
-                   if (mpi_enreg%proc_distrb(ikpt,ib1,isppol)/=me) then
-                     write(msg, '(a,2I5)') "Bande pas dispo (KPT) proc ayant la bande, me_band", &
-&                                          mpi_enreg%proc_distrb(ikpt,ib1,isppol), me
-                     MSG_ERROR(msg)
-                     ! ca ne doit jamais arriver vu que toutes les bandes d'un
-                     ! meme kpt sont sur le meme proc
-                   else
-                     ib1_this_proc = 0
-                     do ib_loop=1,ib1
-                       if (mpi_enreg%proc_distrb(ikpt,ib_loop,isppol)/=me) cycle
-                       ib1_this_proc=ib1_this_proc+1
-                     end do
-                   end if
-                 end if
-               else
-                 ib1_this_proc = paw_dmft%include_bands(ibc1)
+                 end do
+                 ib1_this_proc = ib1_this_proc+1
+                 call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1_this_proc,ibg,ikpt,iorder_cprj,isppol,&
+&                                 mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                                 mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
                end if
-               
+             else ! paral_kgb /= 0
+               ib1_this_proc = ib1
                call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1_this_proc,ibg,ikpt,iorder_cprj,isppol,&
-&               mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
-&               mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+&                               mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                               mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
              end if
-           else
-             use_nondiag_occup_dmft = 0
-             locc_test = (abs(occ(iband))>tol8)
-             occup(1) = occ(iband)
-             if(ibc1 /= 1 .and. .not.(paw_dmft%band_in(ib))) cycle
            end if
          else  ! nbandc1=1
            use_nondiag_occup_dmft=0
@@ -350,19 +332,19 @@
 !        Must read cprj when mkmem=0 (even if unused) to have right pointer inside _PAW file
          if (locc_test.or.mkmem==0) then
            call pawcprj_get(atindx1,cwaveprj,cprj_ptr,natom,ib_this_proc,ibg,ikpt,iorder_cprj,isppol,&
-&           mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
-&           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+&                           mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
 
 !        Accumulate contribution from (occupied) current band
          if (locc_test) then
            if(use_nondiag_occup_dmft == 1) then
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprjb,0,isppol,nrhoij,natom,&
-&             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k,&
-&             occ_k_2=occup(2))
+&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k,&
+&                             occ_k_2=occup(2))
            else
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj ,0,isppol,nrhoij,natom,&
-&             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
+&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
            end if
          end if
        end do ! ib1c
