@@ -33,7 +33,7 @@ AC_DEFUN([ABI_CONNECT_TRIQS], [
   fi
 
   dnl Inform Automake
-  AM_CONDITIONAL([DO_BUILD_01_TRIQS_EXT], [test "${enable_triqs}" = "yes"])
+  AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${enable_triqs}" = "yes"])
 
   dnl Substitute variables
   AC_SUBST(lib_triqs_incs)
