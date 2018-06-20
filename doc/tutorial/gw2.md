@@ -2,18 +2,18 @@
 authors: FBruneval, XG
 ---
 
-# Second lesson on GW  
+# Second tutorial on GW  
 
 ## Treatment of metals.  
 
-This lesson aims at showing how to obtain self-energy corrections to the DFT
+This tutorial aims at showing how to obtain self-energy corrections to the DFT
 Kohn-Sham eigenvalues within the GW approximation, in the metallic case,
 without the use of a plasmon-pole model. 
 The band width and Fermi energy of Aluminum will be computed.  
 
 The user may read the papers
 
-  * F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006), 
+  * F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006) [[cite:Bruneval2006]], 
 for some information and results about the GW treatment of Aluminum. He will
 also find there an analysis of the effect of self-consistency on
 quasiparticles in solids (not present in this tutorial, however available in
@@ -21,27 +21,26 @@ Abinit). The description of the contour deformation technique that bypasses
 the use of a plasmon-pole model to calculate the frequency convolution of G
 and W can be found in
 
-  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B **67**, 155208 (2003), 
+  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B **67**, 155208 (2003) [[cite:Lebegue2003]], 
 
-with the relevant formulas. We will refer to these papers as the [[cite:Bruneval2006]] 
-and the [[cite:Lebegue2003]] papers.
+with the relevant formulas. 
 
 A brief description of the equations implemented in the code can be found in the [[theory:mbt|GW notes]]
 Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT, 
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
-The user should be familiarized with the four basic lessons of ABINIT, see the
-[[lesson:index]] as well as the [[lesson:gw1|first GW lesson]].
+The user should be familiarized with the four basic tutorials of ABINIT, see the
+[tutorial index](.) as well as the [first GW tutorial](gw1).
 
-This lesson should take about one hour to be completed (also including the
+This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
 ## 1 The preliminary Kohn-Sham band structure calculation
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw2"?*
+for the other tutorials. Why not "Work_gw2"?*
 
-In [[lesson:base4|lesson 4]], we have computed different properties of
+In [tutorial 4](base4), we have computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
@@ -49,7 +48,7 @@ significantly if one relies on the GW approximation.
 
 In the directory ~abinit/tests/tutorial/Input/Work_gw2, copy the files
 ~abinit/tests/tutorial/Input/tgw2_x.files and tgw2_1.in, and modify the
-tgw2_x.files file as usual (see [[lesson:base1]]).  
+tgw2_x.files file as usual (see [the tutorial 1](base1).  
 Then (supposing abinit is the proper alias), issue:
     
     abinit < tgw2_x.files >& tgw2_1.log &

@@ -31,5 +31,5 @@ performed.
 
 ## Tutorials
 
-* [[lesson:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
+* [[tutorial:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
 

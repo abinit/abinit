@@ -14,8 +14,7 @@ The present release ABINITv8.9.2 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.9.2, list closed on 2018 06 14
-
+For ABINITv8.9.2, list closed on 2018 06 19
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -359,7 +358,7 @@ Still, should investigate what is the correct answer ...
 P54.7 (XG070601 - actually, much earlier than that, but not documented)
 CRASH : finite electric field with atomic displacements
 Test ffield_7 does not work on my PC, and has been disabled .
-The corresponding section of the ffield lesson of the tutorial has been commented ... 
+The corresponding section of the ffield tutorial has been commented ... 
 
 
 P54.18 (XG070825)

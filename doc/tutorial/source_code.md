@@ -13,7 +13,7 @@ first insight into the internals of ABINIT. In other words, you will look at
 what's under the hood. Being an ABINIT user is not required, though it will help
 a lot, in particular when writing a test case for your contribution. 
 Some experience in programming _is_ necessary if you want to take maximum
-benefit from this lesson. In particular, some ease with Fortran 90, 95 or 2003
+benefit from this tutorial. In particular, some ease with Fortran 90, 95 or 2003
 will be truly welcome. Familiarity with the unix command line will be important as well.
 
 ## 1 Context
@@ -56,7 +56,7 @@ as well as in [[https://docs.abinit.org/developers/abimkdocs|the ABINIT doc]].
 
 ## 2 Objectives
   
-The main goals of this lesson are to provide you with a useful understanding of
+The main goals of this tutorial are to provide you with a useful understanding of
 the source tree structure and the build process, as well as to sensibilize you
 to the rules and procedures followed for the development of ABINIT. In the
 example we have chosen, we will suppose that you want to add an input variable
@@ -71,7 +71,7 @@ exclusively through the libxc library. Here are the steps we will take:
   4. Add a test to the test suite.
   5. Create a patch for the project leader.
 
-For this lesson, your input variable will be a real number called " _lesson_
+For this tutorial, your input variable will be a real number called " _tutorial_
 ". The task devoted to your routine is just to print this variable.
 
 ## 3 Tasks
@@ -147,9 +147,9 @@ Please examine the file _~abinit/doc/developers/programmer_guide.txt_ and
 _~abinit/doc/developers/rules_coding.txt_. This might help writing your own
 subroutine. To actually start, go to the subdirectory you've identified before and type:
 
-sh ../../developers/various/mkroutine.sh handle_lesson
+sh ../../developers/various/mkroutine.sh handle_tutorial
 
-This will create a file named _m_handle_lesson.F90_ , _handle_lesson_ being the
+This will create a file named _m_handle_tutorial.F90_ , _handle_tutorial_ being the
 name of your subroutine. Note that since 2018 all routines in abinit must be contained
 in modules, to ensure interfaces will be generated and tested by the compiler.
 
@@ -230,15 +230,15 @@ test](https://wiki.abinit.org/doku.php?id=developers:addnewtest)
 
 R11. "-u -r -N".
 
-R12. Supposing that you have downloaded ABINIT 8.4.1, the following set of
+R12. Supposing that you have downloaded ABINIT 8.8.3, the following set of
 commands will do:
 
-  * `cd /path/to/my/source/dir/abinit-8.4.1`
+  * `cd /path/to/my/source/dir/abinit-8.8.3`
   * `make distclean`
   * `cd ..`
-  * `mv abinit-8.4.1 abinit-8.4.1-lesson`
-  * `tar xvzf /path/to/abinit/tarball/abinit-8.4.1.tar.gz`
-  * `mv abinit-8.4.1 abinit-8.4.1-orig`
-  * `diff -urN abinit-8.4.1-orig abinit-8.4.1-lesson > abinit-8.4.1-lesson.patch`
-  * `gzip --best abinit-8.4.1-lesson.patch`
+  * `mv abinit-8.8.3 abinit-8.8.3-tutorial`
+  * `tar xvzf /path/to/abinit/tarball/abinit-8.8.3.tar.gz`
+  * `mv abinit-8.8.3 abinit-8.8.3-orig`
+  * `diff -urN abinit-8.8.3-orig abinit-8.8.3-tutorial > abinit-8.8.3-tutorial.patch`
+  * `gzip --best abinit-8.8.3-tutorial.patch`
 
