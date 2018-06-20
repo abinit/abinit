@@ -117,6 +117,7 @@
  integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij,nsp2
  integer :: option,spaceComm,use_nondiag_occup_dmft
  logical :: locc_test,paral_atom,usetimerev
+ integer :: ib1_this_proc, ib_loop
  real(dp) :: wtk_k
  character(len=4) :: wrt_mode
  character(len=500) :: msg
@@ -154,12 +155,15 @@
    msg=' mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
- if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
-   write(msg,'(4a,e14.3,a)') ch10,&
-&   ' Parallelization over bands is not yet compatible with self-consistency in DMFT !',ch10,&
-&   ' Calculation is thus restricted to nstep =1.'
-   MSG_WARNING(msg)
- end if
+! if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
+!   write(msg,'(4a,e14.3,a)') ch10,&
+!&   ' Parallelization over bands is not yet compatible with self-consistency in DMFT !',ch10,&
+!&   ' Calculation is thus restricted to nstep =1.'
+!   MSG_WARNING(msg)
+!!   write(msg, '(a,6I5)') "??? ", paw_dmft%include_bands(:), (mod((ib-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band), ib=21,23)
+!!   MSG_ERROR(msg)
+!
+! end if
 
  if( usewvl==1 .and. (nprocband/=1)) then
    write(msg,'(2a)') ch10,&
@@ -274,12 +278,15 @@
 
 !        DMFT stuff: extract cprj and occupations for additional band
          if(paw_dmft%use_sc_dmft /= 0) then
-           ib1 = paw_dmft%include_bands(ibc1)
+
 !          write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
            iband1 = bdtot_index+ib1
 !          write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
            if(paw_dmft%band_in(ib)) then
-             if(.not.paw_dmft%band_in(ib1))  stop
+
+             ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
+
+             if(.not.paw_dmft%band_in(ib1))  stop ! Pourquoi ??!
              use_nondiag_occup_dmft = 1
              occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
              if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
@@ -287,7 +294,43 @@
              locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
 !            write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
              if (locc_test .or. mkmem == 0) then
-               call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
+
+!              Get ib1_this_proc from ib1
+               if(xmpi_paral==1)then
+                 if (paral_kgb==1) then
+                   if (mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)/=mpi_enreg%me_band) then
+                     write(msg, '(a,2I5)') "Bande pas dispo (KGB) proc ayant la bande, me_band", &
+&                                          mod((ib1-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band), mpi_enreg%me_band
+                     MSG_ERROR(msg)
+                   else
+
+                     ib1_this_proc = 0
+                     do ib_loop=1,ib1
+                       if (mod((ib_loop-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band)/=mpi_enreg%me_band) cycle
+                       ib1_this_proc=ib1_this_proc+1
+                     end do
+
+                   end if
+                 else
+                   if (mpi_enreg%proc_distrb(ikpt,ib1,isppol)/=me) then
+                     write(msg, '(a,2I5)') "Bande pas dispo (KPT) proc ayant la bande, me_band", &
+&                                          mpi_enreg%proc_distrb(ikpt,ib1,isppol), me
+                     MSG_ERROR(msg)
+                     ! ca ne doit jamais arriver vu que toutes les bandes d'un
+                     ! meme kpt sont sur le meme proc
+                   else
+                     ib1_this_proc = 0
+                     do ib_loop=1,ib1
+                       if (mpi_enreg%proc_distrb(ikpt,ib_loop,isppol)/=me) cycle
+                       ib1_this_proc=ib1_this_proc+1
+                     end do
+                   end if
+                 end if
+               else
+                 ib1_this_proc = paw_dmft%include_bands(ibc1)
+               end if
+               
+               call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1_this_proc,ibg,ikpt,iorder_cprj,isppol,&
 &               mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
 &               mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
              end if
