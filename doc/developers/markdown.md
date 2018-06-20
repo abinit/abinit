@@ -192,7 +192,7 @@ that gives: Please consult the [[pdf:howto_chebfi]] document.
     The `.pdf` extension at the end of the file is optional.
 
 This is the recommended approach to link pdf documents in the description of the input variables.
-In the lessons and in the theory notes, on the other hand, you may want to
+In the tutorials and in the theory notes, on the other hand, you may want to
 display the pdf file directly in the HTML page.
 In this case, use the HTML embed element:
 
@@ -244,7 +244,7 @@ Links to external websites are signaled with the [fontawesome](http://fontawesom
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 
 Note that linking to a page that is located in the same directory is trivial in Markdown.
-All the lessons, for example, are placed in the same directory (~doc/tutorial).
+All the tutorials, for example, are placed in the same directory (~doc/tutorial).
 To refer to the first PAW tutorial from the second tutorial, use:
 
     [The first PAW tutorial](paw1)
@@ -348,7 +348,7 @@ The python code issues a warning in the terminal if the link cannot be establish
 Other internal links can be recognized thanks to the namespace.
 
 <!--
-`lesson`, `topic`, `help`, `theorydoc, and `varset` create a link
+`tutorial`, `topic`, `help`, `theorydoc, and `varset` create a link
 to the corresponding Markdown files inside the `tutorials`, `topic`, `user-guide`, `vari
 A first set of allowed internal namespaces are:
 In such cases, provided there is a corresponding generated HTML file
@@ -359,8 +359,8 @@ Examples:
 
 Namespace      | Markdown                         | Result
 -------------  | -------------------------------- |
- `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
- `lesson`      | `[[lesson:index]]`               | [[lesson:index]]
+ `tutorial`    | `[[tutorial:gw1]]`               | [[tutorial:gw1]]
+ `tutorial`    | `[[tutorial:index]]`             | [[tutorial:index]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `topic`       | `[[topic:index]]`                | [[topic:index]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
@@ -553,7 +553,7 @@ Orange
 
 [Admonitions](
 https://python-markdown.github.io/extensions/admonition) are useful
-to stress important sections (useful e.g. in the Abinit lessons).
+to stress important sections (useful e.g. in the Abinit tutorials).
 Admonition are created using the Markdown syntax:
 
 ```md
@@ -609,7 +609,7 @@ It uses the HTML5 `#!html <details><summary>` tags to accomplish this.
 It supports nesting and you can also force the default state to be open.
 This extension is used in the documentation of the input variable to generate
 a container with the list of tests associated to the variable but it can also be used for 
-long FAQs of Q&A sections in the lessons.
+long FAQs of Q&A sections in the tutorials.
 
 Examples:
 
@@ -668,7 +668,7 @@ that produces:
 
 {% modal tests/v1/Input/t01.in %}
 
-This is useful for lessons to give direct access to the input files.
+This is useful for tutorials to give direct access to the input files.
 If multiple files are used such as in:
 
 ```

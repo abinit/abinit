@@ -2,11 +2,11 @@
 authors: XG
 ---
 
-# Lesson on TDDFT  
+# Tutorial on TDDFT  
 
 ## Time-Dependent Density Functional Theory, Casida's approach.  
 
-This lesson aims at showing how to get the following physical properties, for finite systems:
+This tutorial aims at showing how to get the following physical properties, for finite systems:
 
   * Excitation energies 
   * Associated oscillator strengths 
@@ -14,7 +14,7 @@ This lesson aims at showing how to get the following physical properties, for fi
 
 in the Casida approach, within Time-Dependent Density Functional Theory.
 
-This lesson should take about 30 minutes.
+This tutorial should take about 30 minutes.
 
 ## 1 Brief theoretical introduction
   
@@ -51,8 +51,8 @@ of Casida's approach: in the framework of TDDFT, their square give the main
 contribution to the diagonal part of a matrix, whose eigenvalues will be the
 square of the excitation energies. One has to add to the diagonal matrix made
 from the squares of Kohn-Sham energy differences, a coupling matrix, whose
-elements are four-wavefunction integrals of the Coulomb and Exchange-
-Correlation kernel. The exchange-correlation kernel contribution will differ
+elements are four-wavefunction integrals of the Coulomb and exchange-correlation kernel. 
+The exchange-correlation kernel contribution will differ
 in the spin-singlet and in the spin-triplet states, this being the only
 difference between spin-singlet and spin-triplet states. See Eqs.(1.3) and
 (1.4) of [[cite:Casida1998a]], and Eqs.(1-2) of [[cite:Vasiliev1998]].
@@ -94,9 +94,9 @@ hundreds of papers published on the basis of methodology. Still, its accuracy
 might be below the expectations, as you will see. As often, test this method
 to see if it suits your needs, and read the recent literature ...
 
-## 2 A first computation of electronic excitation energies and oscillator strengths, for N2
+## 2 A first computation of electronic excitation energies and oscillator strengths, for N$_2$
   
-We will now compute and analyse the excitation energies of the diatomic molecule N2. 
+We will now compute and analyse the excitation energies of the diatomic molecule N$_2$. 
 This is a rather simple s.ystem, with cylindrical symmetry,
 allowing interesting understanding. Although we will suppose that you are
 familiarized with quantum numbers for diatomic molecules, this should not play
@@ -104,7 +104,7 @@ an important role in the understanding of the way to use Abinit
 implementation of Casida's formalism.
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_tddft"?*
+for the other tutorials. Why not "Work_tddft"?*
 
 Now, you are ready to run ABINIT and prepare the needed file.
 
@@ -157,11 +157,11 @@ are ordered by increasing energy. In order to analyze the TDDFT as well as
 experimental data in the next section, let us mention that the Kohn-Sham
 eigenfunctions in this simulation have the following characteristics:
 
-  * The first and fifth states are (non-degenerate) occupied sigma states (m=0), with even parity 
-  * The second state is a (non-degenerate) occupied sigma state (m=0), with odd parity 
-  * The third and fourth states are degenerate occupied pi states (m=+1,-1), with odd parity 
-  * The sixth and seventh states are degenerate unoccupied pi states (m=+1,-1), with even parity 
-  * The state 8 is a (non-degenerate) unoccupied sigma state (m=0), with even parity 
+  * The first and fifth states are (non-degenerate) occupied $\sigma$ states (m=0), with even parity 
+  * The second state is a (non-degenerate) occupied $\sigma$ state (m=0), with odd parity 
+  * The third and fourth states are degenerate occupied $\pi$ states (m=+1,-1), with odd parity 
+  * The sixth and seventh states are degenerate unoccupied $\pi$ states (m=+1,-1), with even parity 
+  * The state 8 is a (non-degenerate) unoccupied $\sigma$ state (m=0), with even parity 
 
 Combining states 3,4 and 5 with 6, 7 and 8, give the first nine Kohn-Sham energy differences:
     
@@ -274,7 +274,7 @@ corresponding quantum numbers:
     9.16 eV   m=0      even parity (Sigma_g state)
     9.91 eV   m=0      odd parity  (Sigma_u state)
     
-The quantum number related to the effect of a mirror plane, needed for Sigma
+The quantum number related to the effect of a mirror plane, needed for $\Sigma$
 states, could not be attributed on the sole basis of the knowledge of Kohn-
 Sham orbitals quantum numbers.
 
@@ -295,9 +295,9 @@ and the lowest-lying experimental spin-triplet excitations energies are:
 In several cases, the agreement is quite satisfactory, on the order of 0.1-0.2
 eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation:
 
-  * The appearance of the spin-singlet Sigma_g state at 9.86 eV (Spin-singlet state 2)
-  * The inversion between the spin-triplet Pi_g and Sigma_u states (Spin-triplet states 1 and 2)
-  * The appearance of the spin-triplet Sigma_g state at 9.16 eV (Spin-triplet state 4)
+  * The appearance of the spin-singlet $^1\Sigma_g$ state at 9.86 eV (Spin-singlet state 2)
+  * The inversion between the spin-triplet $^3\Pi_g$ and $^3\Sigma_u$ states (Spin-triplet states 1 and 2)
+  * The appearance of the spin-triplet $^3\Sigma_g$ state at 9.16 eV (Spin-triplet state 4)
 
 Still, the agreement between these TDDFT values and the experimental values is
 much better than anything that can be done on the sole basis of Kohn-Sham
@@ -391,7 +391,7 @@ results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
 bands (not fully converged, though !), then compare the results with other
 LDA/TDLDA results (from [[cite:Casida1998]]) and experimental results:
     
-                        present Casida experimental
+                          present Casida experimental
     Singlet Pi_g      :  9.25    9.05     9.31
     Singlet Sigma_u-  :  9.72    9.63     9.92
     Singlet Delta_u   : 10.22   10.22    10.27
@@ -405,7 +405,7 @@ all-electron one. This fact might account for the 0.1-0.2 eV discrepancy
 between both calculations (it is of course the user's responsibility to test
 the influence of different pseudopotentials on his/her calculations). The
 agreement with experimental data is on the order of 0.2 eV, with the exception
-of the Triplet Pi_g state (0.4 eV). In particular, we note that LDA/TDLDA is
+of the $^3\Pi_g$ state (0.4 eV). In particular, we note that LDA/TDLDA is
 not able to get the correct ordering of the lower two triplet states ... One
 of our problems was intrinsic to the LDA/TDLDA approximation ...
 
@@ -414,8 +414,8 @@ of our problems was intrinsic to the LDA/TDLDA approximation ...
 As emphasized in [[cite:Casida1998]], choosing a different functional for the self-consistent part 
 (XC potential) and the generation of the coupling matrix (XC
 kernel) can give a better description of the higher-lying states. Indeed, a
-potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-
-Baerends one, can reproduce fairly well the ionisation energy, giving a much
+potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-Baerends one [[cite:VanLeeuwen1994]], 
+can reproduce fairly well the ionisation energy, giving a much
 better description of the Rydberg states. Still, the LDA kernel works pretty well.
 
 In order to activate this procedure, set the value of [[ixc]] in dataset 1 to the

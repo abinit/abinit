@@ -15,7 +15,7 @@ The user is advised to be familiar with the main [[help:abinit]] before reading 
 A knowledge of the computation of the linear response d/dk perturbation,
 explained in the [[help:respfn]], is also advised.
 
-It will be easier to discover the present file with the help of the [[lesson:optic]].  
+It will be easier to discover the present file with the help of the [[tutorial:optic|optic tutorial]].  
 
 ## 1 Introduction
   

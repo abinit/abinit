@@ -36,7 +36,7 @@ DMFT, local exact exchange,...
 
 ## Tutorials
 
-* The lesson on the use of PAW ([[lesson:paw1|PAW1]]) presents the Projector-Augmented Wave method, implemented in ABINIT as an alternative to norm-conserving pseudopotentials, with a sizeable accuracy and CPU time advantage.
-* The lesson on the generation of PAW atomic data files ([[lesson:paw2|PAW2]]) presents the generation of atomic data for use with the PAW method. Prerequisite: PAW1.
-* The lesson on the validation of a PAW atomic datafile ([[lesson:paw3|PAW3]]) demonstrates how to test a generated PAW dataset using ABINIT, against the ELK all-electron code, for diamond and magnesium. Prerequisite: PAW1 and PAW2.
+* The tutorial on the use of PAW ([[tutorial:paw1|PAW1]]) presents the Projector-Augmented Wave method, implemented in ABINIT as an alternative to norm-conserving pseudopotentials, with a sizeable accuracy and CPU time advantage.
+* The tutorial on the generation of PAW atomic data files ([[tutorial:paw2|PAW2]]) presents the generation of atomic data for use with the PAW method. Prerequisite: PAW1.
+* The tutorial on the validation of a PAW atomic datafile ([[tutorial:paw3|PAW3]]) demonstrates how to test a generated PAW dataset using ABINIT, against the ELK all-electron code, for diamond and magnesium. Prerequisite: PAW1 and PAW2.
 

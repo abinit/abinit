@@ -2,17 +2,17 @@
 authors: JWZ, XG
 ---
 
-# Lesson on properties at the nuclei  
+# Tutorial on properties at the nuclei  
 
 ## Observables near the atomic nuclei.  
 
-The purpose of this lesson is to show how to compute several observables of
+The purpose of this tutorial is to show how to compute several observables of
 interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
 
   * the electric field gradient, 
   * the isomer shift 
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Electric field gradient
   
@@ -40,7 +40,7 @@ and the electric field gradient is
 $$V_{ij} = -\frac{\partial^2}{\partial x_i\partial x_j}V({\mathbf r}).$$
 
 The gradient is computed at each nuclear site, for each source of charge arising
-from the PAW decomposition (see [[lesson:paw1]]). This is done in the code as follows:
+from the PAW decomposition (see [the tutorial PAW1](paw1) ). This is done in the code as follows:
 
   * Valence space described by planewaves: expression for gradient is Fourier-transformed at each nuclear site. 
   * Ion cores: gradient is computed by an Ewald sum method 

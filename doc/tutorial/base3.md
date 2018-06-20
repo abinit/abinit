@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# Third (basic) lesson  
+# Third (basic) tutorial
 
 ## Crystalline silicon.  
 
-This lesson aims at showing you how to get the following physical properties, for an insulator:
+This tutorial aims at showing you how to get the following physical properties, for an insulator:
 
 * the total energy 
 * the lattice parameter 
@@ -14,12 +14,12 @@ This lesson aims at showing you how to get the following physical properties, fo
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Computing the total energy of silicon at fixed number of k points
 
 *Before beginning, you might consider to work in a different subdirectory as
-for lesson_base1 or lesson_base2 . Why not "Work3"?*
+for tutorial 1 or 2 . Why not "Work3"?*
 
 The file ~abinit/tests/tutorial/Input/tbase3_x.files lists the file names and root names. 
 You can copy it in the Work3 directory and change it as you did for the tbase1_x.files and tbase2_x.files files. 
@@ -291,7 +291,7 @@ The minimum of the conduction band is even slightly displaced with respect to X,
 This underestimation of the band gap is well-known (the famous DFT band-gap problem). 
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
 Theory: use the GW approximation. 
-This is described in [[lesson:gw1|the first lesson on the GW approximation]].
+This is described in [the first tutorial on GW](gw1).
 
 For experimental data and band structure representation, see  
 M.L. Cohen and J.R. Chelikowski  

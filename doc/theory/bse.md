@@ -286,7 +286,7 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 
 The WFK file is represented with an ellipsis. The path on the left indicated
 with blue arrows represents the RPA calculation ([[optdriver]]=3) that
-produces the SCR file (see also the [[lesson:gw1|first lesson]] of the GW tutorial).
+produces the SCR file (see also the [[tutorial:gw1|GW1 tutorial]]).
 Once the WFK and the SCR file are available, we can finally construct the
 Hamiltonian and solve the Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
 
