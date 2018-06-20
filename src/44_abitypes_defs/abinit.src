@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "defs_abitypes.F90",
+ "defs_datatypes.F90",
  "m_args_gs.F90",
  "m_distribfft.F90",
  "m_dtset.F90",

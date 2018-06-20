@@ -22,17 +22,11 @@ sources = [
  "m_angles.F90",
  "m_atomdata.F90",
  "m_dummy.F90",
- "m_exp_mat.F90",
- "m_gwls_utility.F90",
  "m_matrix.F90",
- "m_optic_tools.F90",
  "m_pptools.F90",
  "m_special_funcs.F90",
- "m_wfutils.F90",
  "m_symtk.F90",
- "mknormpath.F90",
  "radsintr.F90",
- "m_berrytk.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

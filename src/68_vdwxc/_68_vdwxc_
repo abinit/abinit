@@ -1,9 +1,9 @@
-!!****d* ABINIT/01_macroavnew_ext
+!!****d* ABINIT/20_datashare
 !! NAME
-!! 01_macroavnew_ext
+!! 20_datashare
 !!
 !! DESCRIPTION
-!!  FIXME: Description is missing
+!! This directory contains data and routines for vdw
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group
@@ -13,11 +13,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_01_macroavnew_ext.F90
-!! iorho.F90
-!! numeric.F90
-!! surpla.F90
-!! thetaft.F90
-!! volcel.F90
+!! interfaces_68_vdwxc.F90
+!! m_vdw_dftd2.F90
+!! m_vdw_dftd3.F90
+!! vdw_dftd3_data.F90
+!! m_evdw_wannier.F90
 !!
 !!***
