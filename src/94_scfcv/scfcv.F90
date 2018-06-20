@@ -479,6 +479,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  dielop=0 ; strsxc=zero
  deltae=zero ; elast=zero ;
  vpotzero(:)=zero
+ ! JWZ April 12 2018: Intel 18 compiler seems to require maxfor initialized,
+ ! else it dies in scprqt in some scenarios
+ maxfor=zero
+ !
  results_gs%residm=zero;results_gs%res2=zero
  results_gs%deltae=zero;results_gs%diffor=zero
  call energies_init(energies)

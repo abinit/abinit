@@ -38,8 +38,7 @@
 
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
-!asrq0, &
-&                          prefix, comm)
+&                          asrq0, prefix, comm)
 
 
  use defs_basis
@@ -77,7 +76,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
  type(crystal_t),intent(in) :: crystal
  type(ddb_type),intent(inout) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
-!type(asrq0_t),intent(inout) :: asrq0
+ type(asrq0_t),intent(inout) :: asrq0
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
 !arrays
@@ -176,6 +175,9 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
    call gtblk9(ddb,iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if (iblok /= 0) then
+     ! DEBUG
+     write(*,*) 'DDB found in file for qpt=', qpt
+     ! END DEBUG
 
      ! q-point is present in the ddb. No interpolation needed.
 
@@ -196,8 +198,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
    end if
 
    ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-   ! TODO: I think d2cart is of the wrong shape here
-   !call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+   call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
@@ -206,10 +207,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
 
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
-   ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), &
-&   shape = (/3*mpert*3*mpert/))                                                                          
-   ddb_new%val(2,1:nsize,jblok) = reshape(d2red(2,:,:,:,:), &
-&   shape = (/3*mpert*3*mpert/)) 
+   ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))
+   ddb_new%val(2,1:nsize,jblok) = reshape(d2red(2,:,:,:,:), shape = (/nsize/))
 
    ! Store the q-point
    ddb_new%qpt(1:3,jblok) = qpt

@@ -54,12 +54,15 @@ Make sure you are in the top ABINIT directory.
 Install the python packages required to build the website with:
 
 ```sh
-pip install -r requirements.txt
+pip install -r requirements.txt --user
 ```
 
 !!! note
     Python 3.6 is strongly recommended although the code works with python2.7 as well.
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
+
+!!! note
+    If you have root privileges, suppress the `--user` in the command
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
 Then start *our customized* server 
@@ -280,13 +283,17 @@ After having edited the python modules you **must rerun** `./mksite serve` to se
 
 ## How to add a bibliographic reference
 
-Citations must be in bibtex format and provide enough information so that the python code
-can generate appropriated links in the website.
-For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
-(there are units tests to enforce the presence of particular entries in the bibtex document and
-your bibtex may not fullfill these requirements).
+Bibliographic references must be in bibtex format and should provide enough information so that the python code
+can generate appropriate links in the website.
+The central bibliography database is presently located in `~abinit/doc/abiref.bib`.
 
-If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
+For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your own bibtex file
+to the central bibliography database. Indeed,
+there are units tests to enforce the presence of particular entries in the bibtex document and
+your bibtex may not fullfill these requirements.
+
+Providing bibtex data from the publisher site is a better method.
+If you know the DOI of the article, it is also possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
 BetterBib is available from the Python Package Index, so simply type:
 
@@ -325,6 +332,8 @@ Run the tests with:
     pytest abimkdocs_tests/test_bibtex.py
 
 with pytest to validate your changes.
+
+In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wiki-links) with the "cite" namespace.
 
 ## Topics
 

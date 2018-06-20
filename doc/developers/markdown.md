@@ -226,19 +226,24 @@ built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 ## Links
 
+### Markdown links 
+
 The Markdown syntax for links is:
 
 | Markdown | Result | Extension required |
 | :-- | :-- | :--
+| `[Links for videos](#videos)` | [Links for videos](#videos)  | --
+| `[About topics](abimkdocs#topics)` | [About topics](abimkdocs#topics)  | --
+| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | --
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
-This is the **recommended** approach to create links to external resources or internal links to other pages 
-of the website especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
+This is the **recommended** approach to create links to external resources, or internal links to other pages 
+of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
 Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 
-Remember that linking to a page that is located in the same directory is trivial in Markdown.
+Note that linking to a page that is located in the same directory is trivial in Markdown.
 All the lessons, for example, are placed in the same directory (~doc/tutorial).
 To refer to the first PAW tutorial from the second tutorial, use:
 
@@ -253,10 +258,10 @@ links within our documentation, in particular links to:
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
 For this reason, we use the [extentions API](https://python-markdown.github.io/extensions/api)
-provided by python Markdown to extend the syntax of the parser.
+provided by python Markdown to extend the syntax of the parser, using the "Wikilink" syntax.
 Typical cases are discussed in the next sections.
 
-### Wiki links
+### Wikilinks
 
 The wikilink syntax is used with two pairs of square brackets and possible separators (:, # and |).
 In the simple case, this gives <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [name] &#93;</span> although the more general form is
@@ -710,9 +715,9 @@ G(12) = -i \langle \Theta^N_0|T\bigl[\Psi(1)\Psi^\dagger(2)\bigr]|\Theta^N_0 \ra
 
 Equations can be referenced with:
 
-    The propagator in Eq.\ref{eq:GreenDef}
+    The propagator in Eq.(\ref{eq:GreenDef})
 
-that produces: The propagator in Eq.\ref{eq:GreenDef}
+that produces: The propagator in Eq.(\ref{eq:GreenDef})
 
 Note that MathJax is configured with Latex macros to facilitate the insertion of symbols
 commonly used in our domain:

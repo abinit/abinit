@@ -1591,7 +1591,7 @@ subroutine screen_times_ket(W,npwc,npwx,nspinor,nomega,rhotwgp,omegame0i,zcut,&
  integer :: nomegae,nomegaei,nomegaer
  !character(len=500) :: msg
 !arrays
- complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1_qbz(:,:,:)
+ complex(gwpc), pointer :: epsm1_qbz(:,:,:)
 ! complex(gwpc),pointer :: botsq(:,:),eig(:,:),otq(:,:)
  !botsq(npwc,PPm%dm2_botsq),eig(PPm%dm_eig,PPm%dm_eig),otq(npwc,PPm%dm2_otq)
 

@@ -15,7 +15,7 @@ A.7 Run abilint (to avoid source files be updated by each separate developer)
 
 B. For all merges of a development version
 ------------------------------------------
-B.1 src/make parents , src/make abiauty
+B.1 src/make parents , src/make abiauty  (obsolete - new scripts would be needed)
 
 C. For the final merge of a development version  
 -----------------------------------------------
@@ -37,14 +37,19 @@ D.6 Identify lacking or incomplete documentation and testing !
 D.7 Check and update contributor file
 D.8 Contact the relevant people
 
-Also update install notes and doc/maintainers/statistics.txt
-Look at presentation, theory (doc/make presentation theory)
+Then also
+D.9 Possibly update doc/installation.md
+D.10 Update topics mirroring the most noticeable achievements.
 
-E. For the second and other merges of a production version
+E. For the first release of a production version
+-----------------------------------------------
+E.1 Collect the stats, complete doc/main*/statistics.txt and doc/dev*/statistics.json
+
+F. For the first release and other merges of a production version
 -----------------------------------------------
 Prepare the release, which means (send a letter to JMB) :
-E.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
-E.2 Also update install notes and topics.
-(The delivery of binary packages has been disabled, as of v7.11.5)
+F.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
+F.2 Also update install notes for most noticeable achievements.
+
 *******************************************************************
 [This file can be found at doc/maintainers/check_list.txt]

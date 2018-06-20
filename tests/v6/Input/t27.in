@@ -8,6 +8,7 @@ ntimimage 5
 
 optcell 0
 dilatmx 2.0
+chkdilatmx 0
 
 # number of population elements
 

@@ -460,7 +460,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end if
  
  intarr(1,:)=dtsets(:)%chkdilatmx
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkdilatmx','INT',0)
 
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
