@@ -357,8 +357,8 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
 ! Write the Phij_unitcell.dat and Phij_NN.dat files
   if (InVar%debug) then
     write(InVar%stdout,'(a)') ' See the Phij*.dat file'
-    open(unit=52,file='Phij_unitcell.dat')
-    open(unit=55,file='Phij_NN.dat')
+    open(unit=52,file=trim(InVar%output_prefix)//'Phij_unitcell.dat')
+    open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN.dat')
     do jatom=1,3*InVar%natom
       if (jatom.le.3*InVar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phij_NN(jatom,:)
@@ -678,7 +678,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt)
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file='phonon-bands.yaml')
+  open(unit=52,file=trim(InVar%output_prefix)//'phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'

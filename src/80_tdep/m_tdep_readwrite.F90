@@ -65,6 +65,7 @@ module m_tdep_readwrite
     double precision, allocatable :: etot(:)
 !FB    double precision, allocatable :: sigma(:,:)
     character (len=2), allocatable :: special_qpt(:)
+    character (len=200) :: output_prefix
     
   end type Input_Variables_type
 
@@ -194,8 +195,7 @@ contains
 ! Define output files  
   InVar%stdout=8
   InVar%stdlog=6
-  open(unit=InVar%stdout,file='data.out')
-  open(unit=InVar%stdlog,file='data.log')
+  !open(unit=InVar%stdlog,file='data.log')
 
 ! Define Keywords
   NormalMode='NormalMode'
@@ -241,16 +241,22 @@ contains
 ! Check if a NetCDF file is available
   filename='HIST.nc'
   inputfilename='input.in'
-  write(InVar%stdout,'(a)',err=10) ' Give name for input file '
+  write(InVar%stdlog,'(a)',err=10) ' Give name for input file '
   read(*, '(a)',err=10) inputfilename
-  write(InVar%stdout, '(a)',err=10) '.'//trim(inputfilename)
+  write(InVar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
 10 continue
-  write(InVar%stdout,'(a)',err=11) ' Give name for HIST file '
+  write(InVar%stdlog,'(a)',err=11) ' Give name for HIST file '
   read(*, '(a)',err=11) filename
-  write(InVar%stdout, '(a)',err=11) '.'//trim(filename)
+  write(InVar%stdlog, '(a)',err=11) '.'//trim(filename)
 11 continue
+  write(InVar%stdlog,'(a)', err=12)' Give root name for generic output files:'
+  read (*, '(a)', err=12) InVar%output_prefix
+  write (InVar%stdlog, '(a)', err=12 ) InVar%output_prefix 
+12 continue
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
+
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'_output')
 
 
 #if defined HAVE_NETCDF

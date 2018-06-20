@@ -169,7 +169,7 @@ contains
 !   Write the Phij_NN.dat file
     if (InVar%debug) then
       write(InVar%stdout,'(a)') ' See the Phij_NN.dat file corresponding to the ifc.in file'
-      open(unit=55,file='Phij_NN.dat')
+      open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN.dat')
       do iatom=1,3*InVar%natom
         write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
       end do
@@ -374,9 +374,9 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   ifcout=          min(Ifc%nrpt,200)
   prt_ifc=           1
   if (unitfile.eq.0) then
-    open(unit=7,file='ifc.tdep')
+    open(unit=7,file=trim(InVar%output_prefix)//'ifc.tdep')
   else if (unitfile.eq.1) then
-    open(unit=7,file='ifc.out')
+    open(unit=7,file=trim(InVar%output_prefix)//'ifc.out')
   end if
 #ifdef HAVE_NETCDF
   if (unitfile.eq.0) then

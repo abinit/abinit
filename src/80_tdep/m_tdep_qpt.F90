@@ -340,7 +340,7 @@ contains
   type(QptBound_type), allocatable :: QptBound(:)
 
   nqpt=0
-  open(unit=40,file='qpt.dat')
+  open(unit=40,file=trim(InVar%output_prefix)//'qpt.dat')
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) '########################## Q points generation  #############################'
