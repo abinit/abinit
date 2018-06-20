@@ -32,7 +32,7 @@ module m_chi0
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_blas
+ use m_hide_blas
  use m_time
  use m_wfd
 

@@ -40,7 +40,7 @@ MODULE m_fftw3
  use m_errors
  use m_xomp
  use m_xmpi
- use m_blas
+ use m_hide_blas
  use m_cgtools
  use m_cplxtools
  use m_distribfft

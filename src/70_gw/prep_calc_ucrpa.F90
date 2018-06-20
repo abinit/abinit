@@ -111,7 +111,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_errors
 
  use m_time,          only : timab
- use m_blas,          only : xdotc
+ use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
