@@ -1,9 +1,10 @@
-!!****d* ABINIT/11_qespresso_ext
+!!****d* ABINIT/44_abitools
 !! NAME
-!! 11_qespresso_ext
+!! 44_abitools
 !!
 !! DESCRIPTION
-!!  FIXME: Description is missing
+!!  This directory contains several low-level files including
+!!   tools to be used by ABINIT high-level routines.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group
@@ -13,10 +14,9 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! flib_pwscf.F90
-!! functionals_pwscf.F90
-!! interfaces_11_qespresso_ext.F90
-!! m_pseudo_pwscf.F90
-!! read_upf_pwscf.F90
+!! m_berrytk.F90
+!! m_macroave.F90
+!! m_optic_tools.F90
+!! m_wfutils.F90
 !!
 !!***

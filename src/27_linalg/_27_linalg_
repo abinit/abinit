@@ -1,6 +1,6 @@
-!!****d* ABINIT/linalg_ext
+!!****d* ABINIT/linalg
 !! NAME
-!!  01_linalg_ext
+!!  27_linalg
 !!
 !! DESCRIPTION
 !!  Contains interfaces to the BLAS and LAPACK linear algebra routines.
@@ -14,6 +14,8 @@
 !!  ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
+!! m_hide_blas.F90
+!! m_hide_lapack.F90
 !! m_linalg_interfaces.F90
 !!
 !!***

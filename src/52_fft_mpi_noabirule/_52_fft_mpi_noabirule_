@@ -17,6 +17,7 @@
 !!
 !! CHILDREN
 !! bound.F90
+!! defs_fftdata.F90
 !! dfti_c2c_ip.finc
 !! dfti_c2c_op.finc
 !! dfti_fftpad.finc

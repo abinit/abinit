@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_abilasi
+!!****m* ABINIT/m_hide_lapack
 !! NAME
-!!  m_abilasi
+!!  m_hide_lapack
 !!
 !! FUNCTION
 !!  ABInit Linear Algebra Subroutine Interfaces.
@@ -48,7 +48,7 @@
 
 #include "abi_common.h"
 
-MODULE m_abilasi
+MODULE m_hide_lapack
 
  use defs_basis
  use m_profiling_abi
@@ -168,7 +168,7 @@ MODULE m_abilasi
 CONTAINS  !=========================================================================================================================
 !!***
 
-!!****f* m_abilasi/wrap_CHEEV
+!!****f* m_hide_lapack/wrap_CHEEV
 !! NAME
 !!  wrap_CHEEV
 !!
@@ -272,7 +272,7 @@ end subroutine wrap_CHEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_ZHEEV
+!!****f* m_hide_lapack/wrap_ZHEEV
 !! NAME
 !!  wrap_ZHEEV
 !!
@@ -440,7 +440,7 @@ end subroutine wrap_ZHEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_DSYEV_ZHEEV
+!!****f* m_hide_lapack/wrap_DSYEV_ZHEEV
 !! NAME
 !!  wrap_DSYEV_ZHEEV
 !!
@@ -648,7 +648,7 @@ end subroutine wrap_DSYEV_ZHEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_CHPEV
+!!****f* m_hide_lapack/wrap_CHPEV
 !! NAME
 !!  wrap_CHPEV
 !!
@@ -762,7 +762,7 @@ end subroutine wrap_CHPEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_ZHPEV
+!!****f* m_hide_lapack/wrap_ZHPEV
 !! NAME
 !!  wrap_ZHPEV
 !!
@@ -946,7 +946,7 @@ end subroutine wrap_ZHPEV
 !----------------------------------------------------------------------
 
 
-!!****f* m_abilasi/wrap_ZHEGV
+!!****f* m_hide_lapack/wrap_ZHEGV
 !! NAME
 !!  wrap_ZHEGV
 !!
@@ -1141,7 +1141,7 @@ end subroutine wrap_ZHEGV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_DSYGV_ZHEGV
+!!****f* m_hide_lapack/wrap_DSYGV_ZHEGV
 !! NAME
 !!  wrap_DSYGV_ZHEGV
 !!
@@ -1393,7 +1393,7 @@ end subroutine wrap_DSYGV_ZHEGV
 !----------------------------------------------------------------------
 
 
-!!****f* m_abilasi/wrap_ZHEEVX
+!!****f* m_hide_lapack/wrap_ZHEEVX
 !! NAME
 !!  wrap_ZHEEVX
 !!
@@ -1639,7 +1639,7 @@ end subroutine wrap_ZHEEVX
 !----------------------------------------------------------------------
 
 
-!!****f* m_abilasi/wrap_DSYEVX_ZHEEVX
+!!****f* m_hide_lapack/wrap_DSYEVX_ZHEEVX
 !! NAME
 !!  wrap_DSYEVX_ZHEEVX
 !!
@@ -1928,7 +1928,7 @@ end subroutine wrap_DSYEVX_ZHEEVX
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_ZHEGVX
+!!****f* m_hide_lapack/wrap_ZHEGVX
 !! NAME
 !!  wrap_ZHEGVX
 !!
@@ -2199,7 +2199,7 @@ end subroutine wrap_ZHEGVX
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_DSYGVX_ZHEGVX
+!!****f* m_hide_lapack/wrap_DSYGVX_ZHEGVX
 !! NAME
 !!  wrap_DSYGVX_ZHEGVX
 !!
@@ -2526,7 +2526,7 @@ end subroutine wrap_DSYGVX_ZHEGVX
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_CGEEV
+!!****f* m_hide_lapack/wrap_CGEEV
 !! NAME
 !!  wrap_CGEEV
 !!
@@ -2653,7 +2653,7 @@ end subroutine wrap_CGEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/wrap_ZGEEV
+!!****f* m_hide_lapack/wrap_ZGEEV
 !! NAME
 !!  wrap_ZGEEV
 !!
@@ -2796,7 +2796,7 @@ end subroutine wrap_ZGEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/cginv
+!!****f* m_hide_lapack/cginv
 !! NAME
 !! cginv
 !!
@@ -3001,7 +3001,7 @@ end subroutine cginv
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/zginv
+!!****f* m_hide_lapack/zginv
 !! NAME
 !! zginv
 !!
@@ -3152,7 +3152,7 @@ end subroutine zginv
 
 !----------------------------------------------------------------------
 
-!!****f* m_abilasi/zhpd_invert
+!!****f* m_hide_lapack/zhpd_invert
 !! NAME
 !! zhpd_invert
 !!
@@ -3305,7 +3305,7 @@ end subroutine zhpd_invert
 !----------------------------------------------------------------------
 
 
-!!****f* m_abilasi/test_xginv
+!!****f* m_hide_lapack/test_xginv
 !! NAME
 !!  test_xginv
 !!
@@ -3380,7 +3380,7 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
 end subroutine test_xginv
 !!***
 
-!!****f* m_abilasi/matrginv
+!!****f* m_hide_lapack/matrginv
 !! NAME
 !! matrginv
 !!
@@ -3519,7 +3519,7 @@ subroutine matrginv(a,lda,n)
 end subroutine matrginv
 !!***
 
-!!****f* m_abilasi/matr3eigval
+!!****f* m_hide_lapack/matr3eigval
 !! NAME
 !! matr3eigval
 !!
@@ -3712,7 +3712,7 @@ subroutine jacobi(a,n,np,d,v,nrot)
 end subroutine jacobi
 !!***
 
-!!****f* m_abilasi/ludcmp
+!!****f* m_hide_lapack/ludcmp
 !! NAME
 !!  ludcmp
 !!
@@ -3823,7 +3823,7 @@ SUBROUTINE ludcmp(a,n,np,indx,id,info)
 END SUBROUTINE ludcmp
 !!***
 
-!!****f* m_abilasi/lubksb
+!!****f* m_hide_lapack/lubksb
 !! NAME
 !!  lubksb
 !!
@@ -3900,7 +3900,7 @@ SUBROUTINE lubksb(a,n,np,indx,b)
 END SUBROUTINE LUBKSB
 !!***
 
-!!****f* m_abilasi/dzegdi
+!!****f* m_hide_lapack/dzegdi
 !! NAME
 !!  dzgedi
 !!
@@ -4098,7 +4098,7 @@ subroutine dzgedi(a,lda,n,ipvt,det,work,job)
 end subroutine dzgedi
 !!***
 
-!!****f* m_abilasi/dzgefa
+!!****f* m_hide_lapack/dzgefa
 !! NAME
 !!  dzgefa
 !!
@@ -4259,4 +4259,4 @@ subroutine dzgefa(a,lda,n,ipvt,info)
 end subroutine dzgefa
 !!***
 
-END MODULE m_abilasi
+END MODULE m_hide_lapack

@@ -40,6 +40,8 @@ sources = [
  "spectral_function.F90",
  "psichi_renormalization.F90",
  "testcode_ctqmc.F90"
+ "triqs_cthyb_qmc.cpp",
+ "triqs_interface_ctqmc.F90",
  ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
