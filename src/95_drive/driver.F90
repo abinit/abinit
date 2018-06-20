@@ -265,13 +265,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
 
    if ( dtset%np_slk == 0 ) then
-     call xgScalapack_config(SLK_DISABLED)
+     call xgScalapack_config(SLK_DISABLED,500)
    else if ( dtset%np_slk == 1000000 ) then
-     call xgScalapack_config(SLK_AUTO)
+     call xgScalapack_config(SLK_AUTO,500)
    else if ( dtset%np_slk > 1 ) then
-     call xgScalapack_config(dtset%np_slk)
+     call xgScalapack_config(dtset%np_slk,500)
    else
-     call xgScalapack_config(SLK_AUTO)
+     call xgScalapack_config(SLK_AUTO,500)
    end if
 
 !  Copy input values
