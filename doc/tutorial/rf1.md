@@ -313,7 +313,7 @@ all gathered in the first part of this file. Moreover, the changes with
 respect to trf1_3.in concern only the input variables [[rfatpol]], and [[rfdir]]. 
 Namely, all the atoms will be displaced, in all the directions.
 
-{% dialog tests/tutorespfn/Input/trf1_3.in%}
+{% dialog tests/tutorespfn/Input/trf1_4.in%}
 
 There are six perturbations to consider. 
 So, one might think that the CPU time will raise accordingly. 
