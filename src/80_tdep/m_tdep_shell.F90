@@ -391,14 +391,18 @@ contains
   ABI_FREE(Shell%ncoeff_prev)
   ABI_FREE(Shell%iatref)
   ABI_FREE(Shell%jatref)
-  if (order.gt.2) ABI_FREE(Shell%katref)
+  if (order.gt.2) then
+    ABI_FREE(Shell%katref)
+  end if
   do iatom=1,natom
     do ishell=1,Shell%nshell
       if (Shell%neighbours(iatom,ishell)%n_interactions.ne.0) then 
         ABI_FREE(Shell%neighbours(iatom,ishell)%atomj_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%sym_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%transpose_in_shell)
-        if (order.gt.2) ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
+        if (order.gt.2) then 
+          ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
+        end if
       end if  
     end do  
   end do  

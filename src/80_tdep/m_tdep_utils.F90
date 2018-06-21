@@ -751,7 +751,9 @@ contains
   ABI_FREE(U_MD)
   ABI_FREE(U_TDEP)
   ABI_FREE(PhijUiUj)
-  if (present(Psij_NN)) ABI_FREE(PsijUiUjUk)
+  if (present(Psij_NN)) then
+    ABI_FREE(PsijUiUjUk)
+  endif
 
 ! Compute average on forces on each atom and each direction
   ABI_MALLOC(residualF,(3*InVar%natom)); residualF(:)=zero
