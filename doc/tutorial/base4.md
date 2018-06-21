@@ -19,7 +19,7 @@ This tutorial should take about 1 hour and 30 minutes.
 
 ## 1 Total energy and lattice parameters at fixed smearing and k-point grid
 
-*Before beginning, you might consider to work in a different subdirectory as for tutorials 1, 2 or 3. 
+*Before beginning, you might consider to work in a different subdirectory, as for tutorials 1, 2 or 3. 
 Why not "Work4"?*
 
 The file `~abinit/tests/tutorial/Input/tbase4_x.files` lists the file names and root names. You can copy it in the Work4 directory (and change it, as usual). You can also copy the file `~abinit/tests/tutorial/Input/tbase4_1.in` in `Work4`. This is your input file. You should edit it, read it carefully, and have a
