@@ -858,6 +858,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%slabwsrad          = dtin%slabwsrad
  dtout%slabzbeg           = dtin%slabzbeg
  dtout%slabzend           = dtin%slabzend
+ dtout%slk_rankpp         = dtin%slk_rankpp
  dtout%smdelta            = dtin%smdelta
  dtout%spgaxor            = dtin%spgaxor
  dtout%spgorig            = dtin%spgorig
