@@ -196,7 +196,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   heatcapa=0.d0 ; entropy=0.d0 ; internalE=0.d0 ; freeE=0.d0
   do iomega=1,PHdos%nomega
     xx=PHdos%omega(iomega)*Ha_eV
-    if (xx.lt.0) cycle
+    if (xx.lt.tol8) cycle
     expm2x=exp(-2.d0*wovert*xx)
     ln2shx=wovert*xx+log(1.d0-expm2x)
     cothx=(1.d0+expm2x)/(1.d0-expm2x)
@@ -237,7 +237,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
     freeE=0.d0
     do iomega=1,PHdos%nomega
       xx=PHdos%omega(iomega)*Ha_eV
-      if (xx.lt.0) cycle
+      if (xx.lt.tol8) cycle
       freeE=freeE + log(2*sinh(wovert*xx))*PHdos%phdos(iomega)*domega
     end do
     freeE=freeE*3*k_B
