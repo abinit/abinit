@@ -2809,7 +2809,7 @@ end subroutine cgnc_cholesky
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/cgpaw_cholesky
+!!****f* m_cgtools/cgpaw_cholesky
 !! NAME
 !!  cgpaw_cholesky
 !!

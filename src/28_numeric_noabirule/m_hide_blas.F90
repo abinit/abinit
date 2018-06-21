@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_blas
+!!****m* ABINIT/m_hide_blas
 !! NAME
-!!  m_blas
+!!  m_hide_blas
 !!
 !! FUNCTION
 !! This module defines interfaces for overloading BLAS routines.
@@ -97,7 +97,7 @@
 
 #include "abi_common.h"
 
-MODULE m_blas
+MODULE m_hide_blas
 
  use defs_basis
  use m_profiling_abi
@@ -524,7 +524,7 @@ CONTAINS  !=====================================================================
 
 !!***
 
-!!****f* m_blas/blas_cholesky_ortho_spc
+!!****f* m_hide_blas/blas_cholesky_ortho_spc
 !! NAME
 !!  blas_cholesky_ortho_spc
 !!
@@ -600,7 +600,7 @@ end subroutine blas_cholesky_ortho_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/blas_cholesky_ortho_dpc
+!!****f* m_hide_blas/blas_cholesky_ortho_dpc
 !! NAME
 !!  blas_cholesky_ortho_dpc
 !!
@@ -675,7 +675,7 @@ end subroutine blas_cholesky_ortho_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_itranspose_sp
+!!****f* m_hide_blas/sqmat_itranspose_sp
 !! NAME
 !!  sqmat_itranspose_sp
 !!
@@ -740,7 +740,7 @@ end subroutine sqmat_itranspose_sp
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_itranspose_dp
+!!****f* m_hide_blas/sqmat_itranspose_dp
 !! NAME
 !!  sqmat_itranspose_dp
 !!
@@ -805,7 +805,7 @@ end subroutine sqmat_itranspose_dp
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_itranspose_spc
+!!****f* m_hide_blas/sqmat_itranspose_spc
 !! NAME
 !!  sqmat_itranspose_spc
 !!
@@ -870,7 +870,7 @@ end subroutine sqmat_itranspose_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_itranspose_dpc
+!!****f* m_hide_blas/sqmat_itranspose_dpc
 !! NAME
 !!  sqmat_itranspose_dpc
 !!
@@ -935,7 +935,7 @@ end subroutine sqmat_itranspose_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_otranspose_sp
+!!****f* m_hide_blas/sqmat_otranspose_sp
 !! NAME
 !!  sqmat_otranspose_sp
 !!
@@ -1002,7 +1002,7 @@ end subroutine sqmat_otranspose_sp
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_otranspose_dp
+!!****f* m_hide_blas/sqmat_otranspose_dp
 !! NAME
 !!  sqmat_otranspose_dp
 !!
@@ -1069,7 +1069,7 @@ end subroutine sqmat_otranspose_dp
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_otranspose_spc
+!!****f* m_hide_blas/sqmat_otranspose_spc
 !! NAME
 !!  sqmat_otranspose_spc
 !!
@@ -1136,7 +1136,7 @@ end subroutine sqmat_otranspose_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_otranspose_dpc
+!!****f* m_hide_blas/sqmat_otranspose_dpc
 !! NAME
 !!  sqmat_otranspose_dpc
 !!
@@ -1203,7 +1203,7 @@ end subroutine sqmat_otranspose_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_iconjgtrans_spc
+!!****f* m_hide_blas/sqmat_iconjgtrans_spc
 !! NAME
 !!  sqmat_iconjgtrans_spc
 !!
@@ -1268,7 +1268,7 @@ end subroutine sqmat_iconjgtrans_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_iconjgtrans_dpc
+!!****f* m_hide_blas/sqmat_iconjgtrans_dpc
 !! NAME
 !!  sqmat_iconjgtrans_dpc
 !!
@@ -1333,7 +1333,7 @@ end subroutine sqmat_iconjgtrans_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_oconjgtrans_spc
+!!****f* m_hide_blas/sqmat_oconjgtrans_spc
 !! NAME
 !!  sqmat_oconjgtrans_spc
 !!
@@ -1400,7 +1400,7 @@ end subroutine sqmat_oconjgtrans_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/sqmat_oconjgtrans_dpc
+!!****f* m_hide_blas/sqmat_oconjgtrans_dpc
 !! NAME
 !!  sqmat_oconjgtrans_dpc
 !!
@@ -1467,5 +1467,5 @@ end subroutine sqmat_oconjgtrans_dpc
 
 !----------------------------------------------------------------------
 
-END MODULE m_blas
+END MODULE m_hide_blas
 !!***

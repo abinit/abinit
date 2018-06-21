@@ -30,7 +30,7 @@ module m_berrytk
  use m_errors
 
  use m_cgtools,   only : overlap_g
- use m_abilasi,   only : dzgedi, dzgefa
+ use m_hide_lapack,   only : dzgedi, dzgefa
 
  implicit none
 

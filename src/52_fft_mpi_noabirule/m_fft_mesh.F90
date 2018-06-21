@@ -31,7 +31,7 @@ MODULE m_fft_mesh
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_blas
+ use m_hide_blas
 
  use defs_fftdata,     only : size_goed_fft
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize

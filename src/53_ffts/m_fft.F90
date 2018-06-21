@@ -49,7 +49,7 @@ MODULE m_fft
  use m_numeric_tools, only : r2c
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : metric
- use m_blas,          only : xscal
+ use m_hide_blas,     only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
 &                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq

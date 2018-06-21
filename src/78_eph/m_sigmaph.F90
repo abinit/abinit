@@ -30,7 +30,7 @@ module m_sigmaph
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_blas
+ use m_hide_blas
  use m_ifc
  use m_ebands
  use m_wfk

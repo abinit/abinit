@@ -32,7 +32,7 @@ module m_relaxpol
  use m_fstrings,  only : sjoin, itoa
  use m_symtk,     only : matr3inv
  use m_berrytk,   only : polcart
- use m_abilasi,   only : dzgedi, dzgefa
+ use m_hide_lapack,   only : dzgedi, dzgefa
  use m_geometry,  only : xcart2xred
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t

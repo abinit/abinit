@@ -34,7 +34,7 @@ MODULE m_oscillators
  use m_gwdefs,    only : czero_gw
  use m_fstrings,  only : toupper, itoa, sjoin
  use m_geometry,  only : spinrot_cmat
- use m_blas,      only : xcopy
+ use m_hide_blas, only : xcopy
  use m_gsphere,   only : gsphere_t
 
  implicit none

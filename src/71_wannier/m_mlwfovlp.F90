@@ -41,7 +41,7 @@ module m_mlwfovlp
 
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_numeric_tools, only : uniformrandom, simpson_int
- use m_abilasi,     only : matrginv
+ use m_hide_lapack,     only : matrginv
  use m_special_funcs,   only : besjm
  use m_geometry,  only : xred2xcart, rotmat
  use m_fftcore,  only : sphereboundary
