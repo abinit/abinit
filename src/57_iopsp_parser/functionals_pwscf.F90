@@ -1,15 +1,32 @@
-!
-! Copyright (C) 2004 PWSCF group
-! This file is distributed under the terms of the
-! GNU General Public License. See the file `License'
-! in the root directory of the present distribution,
-! or http://www.gnu.org/copyleft/gpl.txt .
-!
-!  imported into abinit by MJV 20/6/2009
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/functionals_pwscf.F90
+!! NAME
+!!  functionals_pwscf
+!!
+!! FUNCTION
+!! This module contains data defining the DFT functional in use
+!! and a number of functions and subroutines to manage them.
+!! Data are PRIVATE and are accessed and set only by function calls.
+!! Basic drivers to compute XC quantities are also included.
+!!
+!! imported into abinit by MJV 20/6/2009
 !    changed module name
 !    removed DP references
 !    removed functions for explicit calculation of xc (E,V,fxc)
-!  
+!!
+!! COPYRIGHT
+!! Copyright (C) 2004 PWSCF group
+!! This file is distributed under the terms of the
+!! GNU General Public License. See the file `License'
+!! in the root directory of the present distribution,
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!
 !-------------------------------------------------------------------
 
 #if defined HAVE_CONFIG_H
@@ -18,10 +35,6 @@
 
 module funct_pwscf
 !-------------------------------------------------------------------
-! This module contains data defining the DFT functional in use 
-! and a number of functions and subroutines to manage them.
-! Data are PRIVATE and are accessed and set only by function calls.
-! Basic drivers to compute XC quantities are also included.
 !  
 !  setting routines:   set_dft_from_name (previously which_dft)
 !                      set_dft_from_indices
@@ -179,13 +192,30 @@ module funct_pwscf
   data gradc / 'NOGC', 'P86', 'GGC', 'BLYP', 'PBC', 'HCTH', 'META', 'B3LP' /
 
 CONTAINS
+!!***
+
+!!****f* functionals_pwscf/set_dft_from_name
+!!
+!! NAME
+!! set_dft_from_name
+!!
+!! FUNCTION
+!! translates a string containing the exchange-correlation name
+!! into internal indices iexch, icorr, igcx, igcc
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   subroutine set_dft_from_name( dft_ )
-    !-----------------------------------------------------------------------
-    !
-    ! translates a string containing the exchange-correlation name
-    ! into internal indices iexch, icorr, igcx, igcc
-    !
+  !-----------------------------------------------------------------------
+
     use flib_pwscf
 
 !This section has been created automatically by the script Abilint (TD).
@@ -366,13 +396,31 @@ CONTAINS
 
     return
   end subroutine set_dft_from_name
-  !
+!!***
+
+!!****f* functionals_pwscf/set_auxiliary_flags
+!!
+!! NAME
+!! set_auxiliary_flags
+!!
+!! FUNCTION
+!! set logical flags describing the complexity of the xc functional
+!! define the fraction of exact exchange used by hybrid fuctionals
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
   !-----------------------------------------------------------------------
   subroutine set_auxiliary_flags
-    !-----------------------------------------------------------------------
-    ! set logical flags describing the complexity of the xc functional
-    ! define the fraction of exact exchange used by hybrid fuctionals
-    !
+  !-----------------------------------------------------------------------
+
     use flib_pwscf
 
 !This section has been created automatically by the script Abilint (TD).
@@ -394,11 +442,27 @@ CONTAINS
 
     return
   end subroutine set_auxiliary_flags
-  !
+!!***
+
+!!****f* functionals_pwscf/set_dft_value
+!!
+!! NAME
+!! set_dft_value
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   subroutine set_dft_value (m, i)
-    !-----------------------------------------------------------------------
-    !
+  !-----------------------------------------------------------------------
     use flib_pwscf
 
 !This section has been created automatically by the script Abilint (TD).
@@ -417,14 +481,31 @@ CONTAINS
     return
 
   end subroutine set_dft_value
+!!***
+
+!!****f* functionals_pwscf/enforce_input_dft
+!!
+!! NAME
+!! enforce_input_dft
+!!
+!! FUNCTION
+!! translates a string containing the exchange-correlation name
+!! into internal indices and force any subsequent call to set_dft_from_name
+!! to return without changing them
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
   !-----------------------------------------------------------------------
   subroutine enforce_input_dft (dft_)
-    !
-    ! translates a string containing the exchange-correlation name
-    ! into internal indices and force any subsequent call to set_dft_from_name
-    ! to return without changing them
-    !
+  !
     use defs_basis, only : std_out,std_out_default
     use flib_pwscf
 
@@ -452,7 +533,25 @@ CONTAINS
 
      return
   end subroutine enforce_input_dft
-  !-----------------------------------------------------------------------
+!!***
+
+!!****f* functionals_pwscf/start_exx
+!!
+!! NAME
+!! start_exx
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
   subroutine start_exx 
 
     use flib_pwscf
@@ -467,6 +566,25 @@ CONTAINS
         call errore('start_exx','dft is not hybrid, wrong call',1)
      exx_started = .true.
   end subroutine start_exx
+!!***
+
+!!****f* functionals_pwscf/stop_exx
+!!
+!! NAME
+!! stop_exx
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
   !-----------------------------------------------------------------------
   subroutine stop_exx 
 
@@ -482,7 +600,25 @@ CONTAINS
         call errore('stop_exx','dft is not hybrid, wrong call',1)
      exx_started = .false.
   end subroutine stop_exx
-  !-----------------------------------------------------------------------
+!!***
+
+!!****f* functionals_pwscf/exx_is_active
+!!
+!! NAME
+!! exx_is_active
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
   function exx_is_active ()
 
 
@@ -495,7 +631,24 @@ CONTAINS
      logical exx_is_active
      exx_is_active = exx_started
   end function exx_is_active
-  
+!!***
+
+!!****f* functionals_pwscf/get_iexch
+!!
+!! NAME
+!! get_iexch
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_iexch ()
 
@@ -510,6 +663,24 @@ CONTAINS
      get_iexch = iexch
      return
   end function get_iexch
+!!***
+
+!!****f* functionals_pwscf/get_icorr
+!!
+!! NAME
+!! get_icorr
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_icorr ()
 
@@ -524,6 +695,24 @@ CONTAINS
      get_icorr = icorr
      return
   end function get_icorr
+!!***
+
+!!****f* functionals_pwscf/get_igcx
+!!
+!! NAME
+!! get_igcx
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_igcx ()
 
@@ -538,6 +727,24 @@ CONTAINS
      get_igcx = igcx
      return
   end function get_igcx
+!!***
+
+!!****f* functionals_pwscf/get_igcc
+!!
+!! NAME
+!! get_igcc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_igcc ()
 
@@ -552,6 +759,24 @@ CONTAINS
      get_igcc = igcc
      return
   end function get_igcc
+!!***
+
+!!****f* functionals_pwscf/get_exx_fraction
+!!
+!! NAME
+!! get_exx_fraction
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_exx_fraction ()
 
@@ -566,6 +791,24 @@ CONTAINS
      get_exx_fraction = exx_fraction
      return
   end function get_exx_fraction
+!!***
+
+!!****f* functionals_pwscf/get_dft_name
+!!
+!! NAME
+!! get_dft_name
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function get_dft_name ()
 
@@ -580,6 +823,24 @@ CONTAINS
      get_dft_name = dft
      return
   end function get_dft_name
+!!***
+
+!!****f* functionals_pwscf/dft_is_gradient
+!!
+!! NAME
+!! dft_is_gradient
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_gradient ()
 
@@ -594,6 +855,24 @@ CONTAINS
      dft_is_gradient = isgradient
      return
   end function dft_is_gradient
+!!***
+
+!!****f* functionals_pwscf/dft_is_meta
+!!
+!! NAME
+!! dft_is_meta
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_meta ()
 
@@ -608,6 +887,24 @@ CONTAINS
      dft_is_meta = ismeta
      return
   end function dft_is_meta
+!!***
+
+!!****f* functionals_pwscf/dft_is_hybrid
+!!
+!! NAME
+!! dft_is_hybrid
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_hybrid ()
 
@@ -622,8 +919,24 @@ CONTAINS
      dft_is_hybrid = ishybrid
      return
   end function dft_is_hybrid
-  !-----------------------------------------------------------------------
-  
+!!***
+
+!!****f* functionals_pwscf/set_dft_from_indices
+!!
+!! NAME
+!! set_dft_from_indices
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !-----------------------------------------------------------------------
   subroutine set_dft_from_indices(iexch_,icorr_,igcx_,igcc_)
 
@@ -665,12 +978,29 @@ CONTAINS
      call set_auxiliary_flags
      return
   end subroutine set_dft_from_indices
+!!***
+
+!!****f* functionals_pwscf/dft_name
+!!
+!! NAME
+!! dft_name
+!!
+!! FUNCTION
+!! convert the four indices iexch, icorr, igcx, igcc
+!! into user-readable strings
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   !---------------------------------------------------------------------
   subroutine dft_name(iexch_, icorr_, igcx_, igcc_, longname_, shortname_)
   !---------------------------------------------------------------------
-  ! convert the four indices iexch, icorr, igcx, igcc
-  ! into user-readable strings
-  !
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -704,6 +1034,24 @@ CONTAINS
   
   return
 end subroutine dft_name
+!!***
+
+!!****f* functionals_pwscf/write_dft_name
+!!
+!! NAME
+!! write_dft_name
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine write_dft_name
 !-----------------------------------------------------------------------
@@ -726,4 +1074,4 @@ end subroutine write_dft_name
 
 
 end module funct_pwscf
-
+!!***
