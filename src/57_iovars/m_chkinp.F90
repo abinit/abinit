@@ -1711,14 +1711,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  Must be greater or equal to -1
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npwkss',dt%npwkss,-1,iout)
 
-!  np_slk
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_slk',dt%np_slk,0,iout)
-   if (dt%np_slk>0) then
-     if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
-       MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
-     end if
-   end if
-
 !  nqpt
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nqpt',dt%nqpt,2,(/0,1/),iout)
 
@@ -3262,6 +3254,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
      !! TODO check bandpp instead of overwriting it
    end if
+
+!  np_slk
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_slk',dt%np_slk,0,iout)
+   if (dt%np_slk>0 .and. dt%wfoptalg /= 114 ) then
+     if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
+       MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
+     end if
+   end if
+!  slk_rankpp
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'slk_rankpp',dt%slk_rankpp,0,iout)
+
 
 !  wtk
 !  Check that no k point weight is < 0:
