@@ -1895,8 +1895,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           ii = max(val_indeces(ik,spin) + gw_qprange + 1, dtset%mband)
-           new%nbcalc_ks(ik,spin) = ii - new%bstart_ks(ik,spin) + 1
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
          end do
        end do
 
