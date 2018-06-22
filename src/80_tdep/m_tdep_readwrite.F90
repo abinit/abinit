@@ -484,7 +484,7 @@ contains
       write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
     else if (string.eq.Ngqpt2) then  
       read(40,*) string,InVar%ngqpt2(:)
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ngqpt2(:)
+      write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt2(:)
     else if (string.eq.tolmotifinboxmatch) then  
       read(40,*) string,InVar%tolmotif,InVar%tolinbox,InVar%tolmatch
       write(InVar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',InVar%tolmotif
