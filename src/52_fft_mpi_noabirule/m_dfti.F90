@@ -52,7 +52,7 @@ MODULE m_dfti
 #endif
 
  use m_fstrings,  only : basename, strcat, int2char10
- use m_blas,      only : xcopy
+ use m_hide_blas, only : xcopy
  use m_fft_mesh,  only : zpad_t, zpad_init, zpad_free
 
  implicit none

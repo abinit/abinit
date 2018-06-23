@@ -91,7 +91,6 @@ hard_chklibs = [
   "11_memory_mpi",
   "10_dumpinfo",
   "10_defs",
-  "01_linalg_ext",
   ]
 
 # Prepare recognition of extensions

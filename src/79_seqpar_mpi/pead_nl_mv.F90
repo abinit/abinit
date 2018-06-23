@@ -99,9 +99,9 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  use mpi
 #endif
 
- use m_dtfil,      only : status
- use m_abilasi,    only : dzgedi, dzgefa
-use m_mpinfo,      only : proc_distrb_cycle
+ use m_dtfil,       only : status
+ use m_hide_lapack, only : dzgedi, dzgefa
+ use m_mpinfo,      only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

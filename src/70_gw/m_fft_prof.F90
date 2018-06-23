@@ -31,7 +31,7 @@ MODULE m_FFT_prof
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_geometry,       only : metric
- use m_blas,           only : xcopy
+ use m_hide_blas,      only : xcopy
  use m_cgtools,        only : set_istwfk
  use m_fftcore,        only : get_kg, print_ngfft, fftalg_info, kgindex, getng, sphereboundary
  use m_fft_mesh,       only : calc_eigr, calc_ceigr

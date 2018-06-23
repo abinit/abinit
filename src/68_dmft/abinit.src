@@ -39,7 +39,7 @@ sources = [
  "qmc_prep_ctqmc.F90",
  "spectral_function.F90",
  "psichi_renormalization.F90",
- "testcode_ctqmc.F90"
+ "testcode_ctqmc.F90",
  ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

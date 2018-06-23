@@ -63,7 +63,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
 & int_fct,greenldacompute_green,fourier_green
  use m_paw_dmft, only : paw_dmft_type
- use m_abilasi,         only : xginv
+ use m_hide_lapack,         only : xginv
  use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
  use m_self, only : self_type
  use m_matlu, only : matlu_type,sym_matlu, print_matlu, &

@@ -33,7 +33,7 @@ MODULE m_matrix
  use m_errors
  use m_profiling_abi
 
- use m_abilasi,  only : xginv
+ use m_hide_lapack,  only : xginv
 
  implicit none
 

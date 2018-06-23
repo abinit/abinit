@@ -37,7 +37,7 @@ MODULE m_chi0tk
  use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
- use m_blas,     only : xgerc, xgemm
+ use m_hide_blas,     only : xgerc, xgemm
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
  use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
