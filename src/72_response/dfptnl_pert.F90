@@ -804,10 +804,10 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            iddk(2,:) =  s_cwave(1,:)
            call rf2_getidir(idir_phon,idir_elfd,idir_getgh2c)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwavef2,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
-&                                jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                 debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
+&            jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+&            debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
-&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&            mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1a   = sum_psi0H2psi1a   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout1(1) ! be careful : factor 0.5
            sum_psi0H2psi1a_i = sum_psi0H2psi1a_i + half*dtset%wtk(ikpt)*occ_k(jband)*enlout1(2) ! be careful : factor 0.5
 
@@ -821,10 +821,10 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cgj,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
-&                                jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                 debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
+&            jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+&            debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
-&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&            mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1b   = sum_psi0H2psi1b   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout2(1) ! be careful : factor 0.5
            sum_psi0H2psi1b_i = sum_psi0H2psi1b_i + half*dtset%wtk(ikpt)*occ_k(jband)*enlout2(2) ! be careful : factor 0.5
 
