@@ -216,13 +216,13 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
          rho3d=rho3arr(ii,1)-rho3arr(ii,2)
          ff(ii)=&
 !          uuu                                uud
-&          kxc(ii,ipts,1)*rho1u*rho2u*rho3u + kxc(ii,ipts,2)*rho1u*rho2u*rho3d + &
+&         kxc(ii,ipts,1)*rho1u*rho2u*rho3u + kxc(ii,ipts,2)*rho1u*rho2u*rho3d + &
 !          udu                                udd
-&          kxc(ii,ipts,2)*rho1u*rho2d*rho3u + kxc(ii,ipts,3)*rho1u*rho2d*rho3d + &
+&         kxc(ii,ipts,2)*rho1u*rho2d*rho3u + kxc(ii,ipts,3)*rho1u*rho2d*rho3d + &
 !          duu                                dud
-&          kxc(ii,ipts,2)*rho1d*rho2u*rho3u + kxc(ii,ipts,3)*rho1d*rho2u*rho3d + &
+&         kxc(ii,ipts,2)*rho1d*rho2u*rho3u + kxc(ii,ipts,3)*rho1d*rho2u*rho3d + &
 !          ddu                                ddd
-&          kxc(ii,ipts,3)*rho1d*rho2d*rho3u + kxc(ii,ipts,4)*rho1d*rho2d*rho3d
+&         kxc(ii,ipts,3)*rho1d*rho2d*rho3u + kxc(ii,ipts,4)*rho1d*rho2d*rho3d
        end do
      end if
    end if
