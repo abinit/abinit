@@ -56,7 +56,6 @@ abiauty:
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/15_gpu_toolbox >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/16_hideleave >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/18_timing >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/20_datashare >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/27_toolbox_oop >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/32_util >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/41_geometry >> tmp-abiauty.log
