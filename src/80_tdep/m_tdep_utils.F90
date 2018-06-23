@@ -285,7 +285,7 @@ contains
     endif
   end do  
   if (ok) then
-    open(unit=31,file='xred_average.xyz')
+    open(unit=31,file=trim(InVar%output_prefix)//'xred_average.xyz')
     do iatom=1,InVar%natom
       write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
       write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,iatom)
@@ -368,7 +368,7 @@ contains
 ! Then, write them in the xred_average.xyz file.
   write(InVar%stdout,*)' Write the xred_average.xyz file with ideal and average positions...'
   ABI_MALLOC(FromIdeal2Average,(InVar%natom))             ; FromIdeal2Average(:)=0
-  open(unit=31,file='xred_average.xyz')
+  open(unit=31,file=trim(InVar%output_prefix)//'xred_average.xyz')
   write(31,'(i4)') InVar%natom*2
   write(31,'(i4)') 1
   do iatom=1,InVar%natom
@@ -723,12 +723,12 @@ contains
   write(InVar%stdout,'(a)') ' '
   if (present(Psij_NN)) then
     write(InVar%stdout,'(a)') ' See the etotMDvsTDEP3.dat file and (if DEBUG) the fcartMDvsTDEP3.dat file'
-    open(unit=32,file='etotMDvsTDEP3.dat')
-    open(unit=33,file='fcartMDvsTDEP3.dat')
+    open(unit=32,file=trim(InVar%output_prefix)//'etotMDvsTDEP3.dat')
+    open(unit=33,file=trim(InVar%output_prefix)//'fcartMDvsTDEP3.dat')
   else  
     write(InVar%stdout,'(a)') ' See the etotMDvsTDEP2.dat file and (if DEBUG) the fcartMDvsTDEP2.dat file'
-    open(unit=32,file='etotMDvsTDEP2.dat')
-    open(unit=33,file='fcartMDvsTDEP2.dat')
+    open(unit=32,file=trim(InVar%output_prefix)//'etotMDvsTDEP2.dat')
+    open(unit=33,file=trim(InVar%output_prefix)//'fcartMDvsTDEP2.dat')
   end if  
   do istep=1,InVar%nstep
     if (present(Psij_NN)) then
@@ -751,17 +751,19 @@ contains
   ABI_FREE(U_MD)
   ABI_FREE(U_TDEP)
   ABI_FREE(PhijUiUj)
-  if (present(Psij_NN)) ABI_FREE(PsijUiUjUk)
+  if (present(Psij_NN)) then
+    ABI_FREE(PsijUiUjUk)
+  endif
 
 ! Compute average on forces on each atom and each direction
   ABI_MALLOC(residualF,(3*InVar%natom)); residualF(:)=zero
   ABI_MALLOC(Fmean    ,(3*InVar%natom)); Fmean(:)    =zero
   if (present(Psij_NN)) then
     write(InVar%stdout,'(a)') ' See the residual on forces : the residualF3.dat file'
-    open(unit=34,file='residualF3.dat')
+    open(unit=34,file=trim(InVar%output_prefix)//'residualF3.dat')
   else  
     write(InVar%stdout,'(a)') ' See the order 1 and order 2 residual on forces : the residualF1.dat and residualF2.dat files'
-    open(unit=33,file='residualF1.dat')
+    open(unit=33,file=trim(InVar%output_prefix)//'residualF1.dat')
     do istep=1,InVar%nstep
       do iatom=1,InVar%natom
         do ii=1,3
@@ -776,7 +778,7 @@ contains
       write(33,'(i6,1x,6(f17.10,1x))') iatom,(residualF(ii+3*(iatom-1)),ii=1,3),(Fmean(jj+3*(iatom-1)),jj=1,3)
     end do  
     close(33)
-    open(unit=34,file='residualF2.dat')
+    open(unit=34,file=trim(InVar%output_prefix)//'residualF2.dat')
   end if  
 
 ! Compute residual on forces, Chi^2 and Sigma
