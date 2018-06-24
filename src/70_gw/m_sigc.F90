@@ -34,7 +34,7 @@ module m_sigc
 
  use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
                       Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
- use m_blas,          only : xdotc, xgemv, xgemm
+ use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv

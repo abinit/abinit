@@ -1,9 +1,10 @@
-!!****d* ABINIT/20_datashare
+!!****d* ABINIT/44_abitools
 !! NAME
-!! 20_datashare
+!! 44_abitools
 !!
 !! DESCRIPTION
-!! This directory contains data for vdw
+!!  This directory contains several low-level files including
+!!   tools to be used by ABINIT high-level routines.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group
@@ -13,7 +14,9 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_20_datashare.F90
-!! vdw_dftd3_data.F90
+!! m_berrytk.F90
+!! m_macroave.F90
+!! m_optic_tools.F90
+!! m_wfutils.F90
 !!
 !!***

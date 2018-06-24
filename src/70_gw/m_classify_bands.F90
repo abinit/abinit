@@ -35,7 +35,7 @@ module m_classify_bands
 
  use m_numeric_tools,  only : get_trace
  use m_symtk,          only : mati3inv
- use m_blas,           only : xdotc, xdotu, xcopy
+ use m_hide_blas,      only : xdotc, xdotu, xcopy
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
  use m_pawang,         only : pawang_type

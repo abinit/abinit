@@ -96,19 +96,19 @@ subroutine ctocprjb(atindx1,cg,cprj,dtorbmag,icgb,idir,ifor,ikgb,&
 
  ABI_ALLOCATE(ylm_kb,(npwb,mpsang*mpsang))
  do ilm=1,mpsang*mpsang
-    ylm_kb(1:npwb,ilm)=ylm(1+ikgb:npwb+ikgb,ilm)
+   ylm_kb(1:npwb,ilm)=ylm(1+ikgb:npwb+ikgb,ilm)
  end do
  
  do iband = 1, nband_k
 
-    cwavef(1:2,1:npwb) = cg(1:2,icgb+(iband-1)*npwb+1:icgb+iband*npwb)
-    
-    call getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
-     &mpsang,natom,npwb,nspinor,ntypat,pawang,pawrad,pawtab,typat,ylm_kb)
+   cwavef(1:2,1:npwb) = cg(1:2,icgb+(iband-1)*npwb+1:icgb+iband*npwb)
+   
+   call getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
+&   mpsang,natom,npwb,nspinor,ntypat,pawang,pawrad,pawtab,typat,ylm_kb)
 
     ! hard-coded for nspinor 1, nsppol 1
-    call pawcprj_put(atindx1,cwaveprj,cprj,natom,iband,0,0,0,1,&
-&           nband_k,mkmem,natom,1,nband_k,dimlmn,1,1,0)
+   call pawcprj_put(atindx1,cwaveprj,cprj,natom,iband,0,0,0,1,&
+&   nband_k,mkmem,natom,1,nband_k,dimlmn,1,1,0)
 
  end do
 

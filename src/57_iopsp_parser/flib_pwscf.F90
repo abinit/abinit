@@ -27,13 +27,28 @@ module flib_pwscf
   implicit none
 
   contains 
+!!***
 
+!!****f* flib_pwscf/matches
+!!
+!! NAME
+!! matches
+!!
+!! FUNCTION
+!! .TRUE. if string1 is contained in string2, .FALSE. otherwise
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 !-----------------------------------------------------------------------
 FUNCTION matches( string1, string2 )
-  !-----------------------------------------------------------------------
-  !
-  ! ... .TRUE. if string1 is contained in string2, .FALSE. otherwise
-  !
+!-----------------------------------------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -68,20 +83,29 @@ FUNCTION matches( string1, string2 )
   RETURN
   !
 END FUNCTION matches
-!
-! Copyright (C) 2001-2004 Carlo Cavazzoni and PWSCF group
-! This file is distributed under the terms of the
-! GNU General Public License. See the file `License'
-! in the root directory of the present distribution,
-! or http://www.gnu.org/copyleft/gpl.txt .
-!
+!!***
+
+!!****f* flib_pwscf/capital
+!!
+!! NAME
+!! capital
+!!
+!! FUNCTION
+!! converts character to capital if lowercase
+!! copy character to output in all other cases
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 !-----------------------------------------------------------------------
 FUNCTION capital( in_char )
-  !-----------------------------------------------------------------------
-  !
-  ! ... converts character to capital if lowercase
-  ! ... copy character to output in all other cases
-  !
+!-----------------------------------------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -115,14 +139,30 @@ FUNCTION capital( in_char )
   RETURN
   !
 END FUNCTION capital
+!!***
+
+!!****f* flib_pwscf/lowercase
+!!
+!! NAME
+!! lowercase
+!!
+!! FUNCTION
+!! converts character to lowercase if capital
+!! copy character to output in all other cases
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 !
 !-----------------------------------------------------------------------
 FUNCTION lowercase( in_char )
-  !-----------------------------------------------------------------------
-  !
-  ! ... converts character to lowercase if capital
-  ! ... copy character to output in all other cases
-  !
+!-----------------------------------------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -156,6 +196,24 @@ FUNCTION lowercase( in_char )
   RETURN
   !
 END FUNCTION lowercase
+!!***
+
+!!****f* flib_pwscf/errore
+!!
+!! NAME
+!! errore
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine errore (routine, error, code)
 

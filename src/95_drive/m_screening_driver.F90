@@ -2610,7 +2610,7 @@ end subroutine random_stopping_power
 
 subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
 
- use m_abilasi,       only : xginv, xheev
+ use m_hide_lapack, only : xginv, xheev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

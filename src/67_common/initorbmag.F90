@@ -663,7 +663,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !       idx = ifor + 2*(idir-1)
  !       dk(:) = dtorbmag%dkvecs(:,idir)
  !       if (ifor .EQ. 2) dk(:) = -dk(:)
-       
+ 
  !       !    compute Y_LM(\hat{-b}) here
  !       bb(:) = -dk(:)
  !       !    reference bb to cartesian axes
@@ -686,7 +686,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !          !depends on |b| so only do this for the +b, not -b
  !          bnorm = two_pi*bnorm
  !          do itypat = 1, dtset%ntypat
-             
+ 
  !             mesh_size = pawtab(itypat)%mesh_size
  !             do ir=1,mesh_size
  !                arg=bnorm*pawrad(itypat)%rad(ir)
@@ -694,10 +694,10 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !                call sbf8(pawang%l_size_max,arg,sb_out) 
  !                dtorbmag%jb_bessel(idir,itypat,ir,:) = sb_out
  !             end do ! end loop over mesh
-          
+ 
  !          end do ! end loop over ntypat
  !       end if ! end check on ifor
-    
+ 
  !    end do ! end loop over ifor
  ! end do ! end loop over idir
 
@@ -730,7 +730,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !             dtorbmag%jkg_bessel(itypat,ir,ikpt,ipw,:)=sb_out(:)
  !          end do ! end loop over mesh_size
  !       end do ! end loop over ntypat
-       
+ 
  !    end do ! end loop over npw_k
 
  ! end do ! end loop over fnkpt
@@ -780,7 +780,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !    end do ! end loop over ilmn
 
  !    ABI_DEALLOCATE(ff)
-    
+ 
  ! end do ! end loop over itypat
  
 

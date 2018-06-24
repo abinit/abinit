@@ -26,7 +26,7 @@ MODULE m_vkbr
 
  use defs_basis
  use defs_datatypes
- use m_blas
+ use m_hide_blas
  use m_errors
  use m_profiling_abi
 

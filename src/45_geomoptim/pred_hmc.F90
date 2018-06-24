@@ -154,26 +154,26 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  kbtemp=(ab_mover%mdtemp(1)+((ab_mover%mdtemp(2)-ab_mover%mdtemp(1))/dble(ntime-1))*(itime-1))*kb_HaK ! correct temperature taking into account the possible heating/cooling
 
  if(itime==1.and.icycle==1) then
-     if (allocated(xred_hmc_prev))  then
-       ABI_DEALLOCATE(xred_hmc_prev)
-     end if
-     if (allocated(fcart_hmc_prev))  then
-       ABI_DEALLOCATE(fcart_hmc_prev)
-     end if
+   if (allocated(xred_hmc_prev))  then
+     ABI_DEALLOCATE(xred_hmc_prev)
+   end if
+   if (allocated(fcart_hmc_prev))  then
+     ABI_DEALLOCATE(fcart_hmc_prev)
+   end if
 
-     ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
-     ABI_ALLOCATE(fcart_hmc_prev,(3,ab_mover%natom))
+   ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
+   ABI_ALLOCATE(fcart_hmc_prev,(3,ab_mover%natom))
 
-     seed=-239
+   seed=-239
 
-     rprimd_original(:,:)=rprimd(:,:)
-     strain(:,:) = 0.0_dp
-     strain_steps=0
-     dstrain=0.001
+   rprimd_original(:,:)=rprimd(:,:)
+   strain(:,:) = 0.0_dp
+   strain_steps=0
+   dstrain=0.001
 
-     strain_updated=.FALSE.
-     xred_updated=.FALSE.
- endif
+   strain_updated=.FALSE.
+   xred_updated=.FALSE.
+ end if
 
 
  !IN CASE THE SWEEP IS FOR UPDATE OF ATOMIC COORDINATES************************************************
@@ -182,45 +182,45 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
    ! *---->*
    ! 1     n
 
-   if (icycle==1) then
+ if (icycle==1) then
 
-     if(itime==1) then
-       iacc=1
-       etotal = epot + ekin
-       de=zero
-     else
-       etotal = epot + ekin
-       de = etotal - etotal_hmc_prev
-       call metropolis_check(seed,de,kbtemp,iacc)
-     endif
-
-     if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates and energies
-       xred(:,:)= xred_hmc_prev(:,:)
-       epot     = epot_hmc_prev
-       hist%fcart(:,:,hist%ihist) = fcart_hmc_prev(:,:)
-     else
-       xred_hmc_prev(:,:)=xred(:,:)
-       fcart_hmc_prev(:,:) = hist%fcart(:,:,hist%ihist)
-       epot_hmc_prev   = epot         !update reference potential energy
-     end if
-
-     write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
-&                                            epot,' ekin=',ekin,' de=',de
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-
-     call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
-     hist%vel(:,:,hist%ihist)=vel(:,:)
-     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-     etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
-
-     call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
-
-   else !icycle/=1
-
-    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
-
+   if(itime==1) then
+     iacc=1
+     etotal = epot + ekin
+     de=zero
+   else
+     etotal = epot + ekin
+     de = etotal - etotal_hmc_prev
+     call metropolis_check(seed,de,kbtemp,iacc)
    end if
+
+   if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates and energies
+     xred(:,:)= xred_hmc_prev(:,:)
+     epot     = epot_hmc_prev
+     hist%fcart(:,:,hist%ihist) = fcart_hmc_prev(:,:)
+   else
+     xred_hmc_prev(:,:)=xred(:,:)
+     fcart_hmc_prev(:,:) = hist%fcart(:,:,hist%ihist)
+     epot_hmc_prev   = epot         !update reference potential energy
+   end if
+
+   write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
+&   epot,' ekin=',ekin,' de=',de
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+
+   call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
+   hist%vel(:,:,hist%ihist)=vel(:,:)
+   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+   etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
+
+   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+
+ else !icycle/=1
+
+   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+
+ end if
 
  !end if
  !END OF ATOMIC COORDINATES SWEEP************************************************

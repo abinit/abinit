@@ -1146,7 +1146,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
    ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
    call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),&
-&              'ph_freez_disp_ampl',tread,'DPR')
+&   'ph_freez_disp_ampl',tread,'DPR')
    if (tread==0) then
      MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
    end if
@@ -1646,9 +1646,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- endif
+   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1804,7 +1804,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'impose dmft_dc = 5'
      MSG_WARNING(message)
      dtset%dmft_dc=5
-   endif
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')

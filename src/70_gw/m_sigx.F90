@@ -138,7 +138,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_errors
  use m_time
 
- use m_blas,          only : xdotc, xgemv
+ use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t

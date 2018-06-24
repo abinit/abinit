@@ -1,7 +1,7 @@
-!!****d* ABINIT/_01_triqs_ext_
+!!****d* ABINIT/_67_triqs_ext_
 !!
 !! NAME
-!!  _01_triqs_ext_
+!!  _67_triqs_ext_
 !!
 !! DESCRIPTION
 !!  This directory contains wrappers to TRIQS routines.

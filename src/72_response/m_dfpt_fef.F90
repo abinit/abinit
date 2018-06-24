@@ -2639,7 +2639,7 @@ end subroutine dfptff_bec
 
 subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsppol,pwindall)
 
- use m_abilasi,   only : dzgedi, dzgefa
+ use m_hide_lapack, only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

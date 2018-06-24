@@ -710,7 +710,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_abilasi
+ use m_hide_lapack
 
  use m_crystal, only : crystal_t
  use m_pawtab, only : pawtab_type
