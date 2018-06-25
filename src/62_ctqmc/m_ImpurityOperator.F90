@@ -94,9 +94,10 @@ PUBLIC  :: ImpurityOperator_activateParticle
 PUBLIC  :: ImpurityOperator_getAvailableTime
 PUBLIC  :: ImpurityOperator_getAvailedTime
 PUBLIC  :: ImpurityOperator_add
-PRIVATE :: ImpurityOperator_getSegment
+PUBLIC :: ImpurityOperator_getSegment
+PUBLIC :: ImpurityOperator_getsign
 PUBLIC  :: ImpurityOperator_remove
-PRIVATE :: ImpurityOperator_getNewOverlap
+PUBLIC :: ImpurityOperator_getNewOverlap
 PUBLIC  :: ImpurityOperator_getTraceAdd
 PUBLIC  :: ImpurityOperator_getTraceRemove
 PRIVATE :: ImpurityOperator_overlapSegFlav
@@ -701,7 +702,9 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
+!!  this=ImpurityOperatoroffdiag
+!!   this%particles(aF)%list is updated
+!!   this%overlaps  is updated
 !! NOTES
 !!
 !! PARENTS
@@ -746,14 +749,25 @@ SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
     IF ( (this%particles(aF)%tail .EQ. 0) .AND. (this%particles(aF)%list(0,C_) .EQ. 0d0)) THEN ! should be full orbital
       IF ( CdagC_1(Cdag_) .GT. this%beta ) THEN
 !        CALL CdagC_init(C2add,CdagC_1%Cdag-this%beta,CdagC_1%C)
+        ! From the IF condition and the creation of CdagC in TryAddRemove, we have
+        ! CdagC_1(Cdag_) > beta
+        ! CdagC_1(C_)    < beta
         C2add(Cdag_) = CdagC_1(Cdag_)-this%beta
         C2add(C_   ) = CdagC_1(C_)
+        ! Now C2add(Cdag_) < beta
+        ! still C2add(C_)  < beta
       ELSE
 !        CALL CdagC_init(C2add,CdagC_1%Cdag,CdagC_1%C+this%beta)
+        ! CdagC_1(Cdag_) < beta
+        ! CdagC_1(C_)    < beta
         C2add(Cdag_) = CdagC_1(Cdag_)
         C2add(C_   ) = CdagC_1(C_)+this%beta
+        ! C2add(Cdag_) < beta
+        ! C2ass(C_)    > beta
       END IF
       position = 0
+      ! See impurityoperator_init to understand this. This is due to the
+      ! convention for the full orbital case.
       this%particles(aF)%list(0,C_   ) = this%beta
       this%particles(aF)%list(0,Cdag_) = 0.d0
     ELSE IF ( this%particles(aF)%tail .GT. 0 ) THEN
@@ -1038,6 +1052,134 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
   ImpurityOperator_getNewOverlap = totalOverlap
 
 END FUNCTION ImpurityOperator_getNewOverlap
+!!***
+
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_getsign
+!! NAME
+!!  ImpurityOperator_getsign
+!!
+!! FUNCTION
+!!  Get the sign of the ratio of impurity traces
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2014 ABINIT group (B. Amadon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this     = ImpurityOperator
+!!  time2    = for segment/antisegment addition, end of segment
+!!  position = for segment/antisegment removal, position  of segment/antisegment removed
+!!  action = > 0.5 addition 
+!!           < 0.5 removal
+!!
+!! OUTPUT
+!!  ImpurityOperator_getsign = sign of ratio of impurity traces
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Ctqmc_tryAddRemove
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+DOUBLE PRECISION FUNCTION ImpurityOperator_getsign(this, time2, i, action, position)
+
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ImpurityOperator_getsign'
+!End of the abilint section
+
+  TYPE(ImpurityOperator), INTENT(IN) :: this
+  DOUBLE PRECISION, INTENT(IN) :: time2, action
+  INTEGER ,  INTENT(IN) :: i,position
+!Local variables ------------------------------
+  INTEGER                            :: tailint
+  DOUBLE PRECISION                   :: sign_imp
+! ************************************************************************
+  tailint=this%particles(this%activeflavor)%tail
+  if(action < 0.5d0) then
+    if(tailint>=1) then
+      if ( this%particles(this%activeFlavor)%list(tailint,2)>this%beta ) then ! segment winds around
+        if (i==1) then ! add segment do not change winding
+           sign_imp = 1
+        else if (i==2) then ! antisegment
+           if(time2>this%beta) then ! suppress winding around
+             sign_imp = -1
+           else   ! winding around still here
+             sign_imp = 1
+           endif
+        endif
+      else ! segment do not wind around
+        if (i==1) then ! segment
+          if(time2>this%beta) then ! create winding
+            sign_imp = -1
+          else   ! do not create winding
+            sign_imp = 1
+          endif
+        else if (i==2) then ! no winding in any case
+          sign_imp = 1
+        endif
+      endif
+    else if (tailint==0) then
+      if (i==1) then ! segment
+        if(time2>this%beta) then ! create winding
+           sign_imp = -1
+        else   ! do not create winding
+           sign_imp = 1
+        endif
+      else if (i==2) then ! antisegment
+        if(time2>this%beta) then ! do not create winding
+          sign_imp = 1
+        else   ! create winding
+          sign_imp = -1
+        endif
+      endif
+    endif
+  else
+    if ( this%particles(this%activeFlavor)%list(tailint,2)>this%beta ) then ! segment winds around
+      if (i==1) then ! remove segment
+        if(position==tailint) then ! suppress winding around
+          sign_imp = -1
+        else  ! winding around still here
+          sign_imp = 1
+        endif
+      else if (i==2) then ! remove antisegment
+        if(tailint==1) then ! if tailint=1, create full orbital
+          sign_imp = -1
+        else  ! if tailint >1 preserve winding
+          sign_imp = 1
+        endif
+      endif
+    else ! segments do not wind around
+      if (i==1) then ! suppress segment do not change winding
+        sign_imp = 1
+      else if (i==2) then ! antisegment 
+        if(abs(position)==tailint) then  ! create winding around only tailint >=1
+          if(tailint==1)  then 
+            sign_imp = 1
+          else 
+            sign_imp = -1
+          endif
+        else  !do not create winding around
+          sign_imp = 1
+        endif
+      endif
+    endif
+  endif
+
+  ImpurityOperator_getsign=sign_imp
+
+
+END FUNCTION ImpurityOperator_getsign
 !!***
 
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_getTraceAdd

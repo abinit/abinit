@@ -22,7 +22,6 @@ sources = [
  "m_Ctqmcoffdiag.F90",
  "m_CtqmcoffdiagInterface.F90",
  "m_GreenHyboffdiag.F90",
- "m_ImpurityOperatoroffdiag.F90",
  ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

@@ -12,7 +12,7 @@
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ MODULE m_Ctqmcoffdiag
  USE m_Global
  USE m_GreenHyboffdiag
  USE m_BathOperatoroffdiag
- USE m_ImpurityOperatoroffdiag
+ USE m_ImpurityOperator
  USE m_Stat
  USE m_FFTHyb
  USE m_OurRng
@@ -287,7 +287,7 @@ TYPE Ctqmcoffdiag
   TYPE(BathOperatoroffdiag)              :: Bath
 
 
-  TYPE(ImpurityOperatoroffdiag)          :: Impurity
+  TYPE(ImpurityOperator)          :: Impurity
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: density
 
@@ -534,10 +534,10 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
   op%inv_dt         = op%samples / op%beta
 !#endif
 
-  !CALL ImpurityOperatoroffdiag_init(op%Impurity,op%flavors,op%beta, op%samples)
-  CALL ImpurityOperatoroffdiag_init(op%Impurity,op%flavors,op%beta)
+  !CALL ImpurityOperator_init(op%Impurity,op%flavors,op%beta, op%samples)
+  CALL ImpurityOperator_init(op%Impurity,op%flavors,op%beta)
   IF ( op%U .GE. 0.d0 ) THEN
-    CALL ImpurityOperatoroffdiag_setU(op%Impurity,op%U,0.d0)
+    CALL ImpurityOperator_computeU(op%Impurity,op%U,0.d0)
     op%setU = .TRUE.
   END IF
 !  op%mu = op%mu + op%Impurity%shift_mu
@@ -718,6 +718,7 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 #undef ABI_FUNC
 #define ABI_FUNC 'Ctqmcoffdiag_allocateAll'
 !End of the abilint section
+
   implicit none
 
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
@@ -1004,7 +1005,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !  IF ( .NOT. op%para ) &
 !    CALL ERROR("Ctqmcoffdiag_setBand : Ctqmcoffdiag_setParameters never called      ")
 !
-!  CALL ImpurityOperatoroffdiag_setU(op%Impurity, U, 0.d0)
+!  CALL ImpurityOperator_setU(op%Impurity, U, 0.d0)
 !  !op%mu = mu + op%Impurity%shift_mu
 !END SUBROUTINE Ctqmcoffdiag_setBand
 !!***
@@ -1057,7 +1058,7 @@ SUBROUTINE Ctqmcoffdiag_setU(op,matU)
   IF ( SIZE(matU) .NE. op%flavors*op%flavors ) &
     CALL ERROR("Ctqmcoffdiag_setU : Wrong interaction matrix (size)        ")
 
-  CALL ImpurityOperatoroffdiag_setU(op%Impurity, matU)
+  CALL ImpurityOperator_setUmat(op%Impurity, matU)
   op%setU = .TRUE.
 END SUBROUTINE Ctqmcoffdiag_setU
 !!***
@@ -1202,7 +1203,7 @@ SUBROUTINE Ctqmcoffdiag_reset(op)
 
   CALL GreenHyboffdiag_reset(op%Greens)
   CALL Ctqmcoffdiag_clear(op)
-  CALL ImpurityOperatoroffdiag_reset(op%Impurity)
+  CALL ImpurityOperator_reset(op%Impurity)
   CALL BathOperatoroffdiag_reset    (op%Bath)
   op%measN(3,:) = 0.d0
   !complete restart -> measN=0
@@ -1919,7 +1920,7 @@ include 'mpif.h'
 ! OPTIONS of the run
   IF ( PRESENT( opt_check ) ) THEN
     op%opt_check = opt_check
-    CALL ImpurityOperatoroffdiag_doCheck(op%Impurity,opt_check)
+    CALL ImpurityOperator_doCheck(op%Impurity,opt_check)
     CALL BathOperatoroffdiag_doCheck(op%Bath,opt_check)
   END IF
   IF ( PRESENT( opt_movie ) ) &
@@ -2192,7 +2193,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     END IF
     
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN ! default is always 
-      CALL ImpurityOperatoroffdiag_measDE(op%Impurity,op%measDE)
+      CALL ImpurityOperator_measDE(op%Impurity,op%measDE)
       IF ( op%opt_spectra .GE. 1 .AND. MOD(isweep,measurements*op%opt_spectra) .EQ. 0 ) THEN
         op%density(1:flavors,indDensity) = op%measN(3,1:flavors)
         indDensity = indDensity+1
@@ -2206,7 +2207,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
       NRJ_old1 = NRJ_new
 
       !! Try to limit accumulation error
-      CALL ImpurityOperatoroffdiag_cleanOverlaps(op%Impurity)
+      CALL ImpurityOperator_cleanOverlaps(op%Impurity)
 
       IF ( op%opt_noise .EQ. 1 ) THEN
         DO ifl1 = 1, flavors
@@ -2252,7 +2253,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
     IF ( op%opt_movie .EQ. 1 ) THEN
       WRITE(ilatex,'(A11,I9)') "%iteration ", isweep
-      CALL ImpurityOperatoroffdiag_printLatex(op%Impurity,ilatex,isweep)
+      CALL ImpurityOperator_printLatex(op%Impurity,ilatex,isweep)
     END IF
 
   END DO
@@ -2326,7 +2327,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperatoroffdiag), INTENT(INOUT) :: Impurity 
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
   LOGICAL               , INTENT(  OUT) :: updated
 !Local variables ------------------------------
   INTEGER                               :: position
@@ -2397,10 +2398,10 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       ! time_avail is the distance between between time1 and 
       !   - the next start of a segment for a segment addition
       !   - the next end of a segment for an antisegment addition
-      ! ImpurityOperatoroffdiag_getAvailableTime > 0 for a segment      (signe>0) -> time_avail>0
-      ! ImpurityOperatoroffdiag_getAvailableTime < 0 for an antisegment (signe<0) -> time_avail>0
+      ! ImpurityOperator_getAvailableTime > 0 for a segment      (signe>0) -> time_avail>0
+      ! ImpurityOperator_getAvailableTime < 0 for an antisegment (signe<0) -> time_avail>0
       !====================================================================
-      time_avail = ImpurityOperatoroffdiag_getAvailableTime(op%Impurity,time1,position) * signe
+      time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position) * signe
      !ii  write(6,*) "        =try: time_avail",time_avail,time1
       IF ( time_avail .GT. 0.d0 ) THEN
 
@@ -2436,8 +2437,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
 
 !      -----  Computes the overlap
-        overlap   = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1)
-        signdetprev  = ImpurityOperatoroffdiag_getsign(op%Impurity, time2, i, action, position)
+        overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
+        signdetprev  = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
 
         !write(6,*) "      overlap   ", overlap
         CALL OurRng(op%seed,time1)
@@ -2466,7 +2467,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
              .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
 !          write(*,*) "before"
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
-          CALL ImpurityOperatoroffdiag_add(op%Impurity,CdagC_1,position)
+          CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
 !          write(*,*) "after "
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
           CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles) 
@@ -2503,18 +2504,18 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         CALL OurRng(op%seed,time1)
         position = INT(((time1 * tail) + 1.d0) * signe )
         !prt!if(op%prtopt==1)  write(6,*) "         position",position 
-        time_avail = ImpurityOperatoroffdiag_getAvailedTime(op%Impurity,position)
+        time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)
         det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)
         !write(6,*) "        det_ratio", det_ratio
-        CdagC_1    = ImpurityOperatoroffdiag_getSegment(op%Impurity,position)
+        CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)
 !        length     = CdagC_length(CdagC_1)
         length     = CdagC_1(C_) - CdagC_1(Cdag_)
         !write(6,*) "        length   ", length
-        overlap    = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1)
+        overlap    = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
         !write(6,*) "        overlap  ", overlap
         CALL OurRng(op%seed,time1)
         !write(6,*) "        Random   ",time1
-        signdetprev = ImpurityOperatoroffdiag_getsign(op%Impurity, time2, i, action, position)
+        signdetprev = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
         det_ratio=det_ratio*signdetprev
         signdet=1.d0
         IF ( det_ratio .LT. 0.d0 ) THEN
@@ -2531,7 +2532,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
        !ii  write(6,*) "                  DET",det_ratio
         IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
              .LT. (tail * det_ratio ) ) THEN
-          CALL ImpurityOperatoroffdiag_remove(op%Impurity,position)
+          CALL ImpurityOperator_remove(op%Impurity,position)
           CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles) 
           !op%seg_removed = op%seg_removed  + 1.d0
           op%stats(nature(i)+CTQMC_REMOV) = op%stats(nature(i)+CTQMC_REMOV)  + 1.d0
@@ -2565,7 +2566,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 
 !!SUBROUTINE Ctqmcoffdiag_trySegment(op,updated)
 !!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!!!  TYPE(ImpurityOperatoroffdiag), INTENT(INOUT) :: Impurity 
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2592,7 +2593,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  IF ( action .LT. .5d0 ) THEN ! Ajout de segment
 !!    CALL RANDOM_NUMBER(time1)
 !!    time1 = time1 * beta
-!!    time_avail = ImpurityOperatoroffdiag_getAvailableTime(op%Impurity,time1,position)
+!!    time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position)
 !!    IF ( time_avail .GT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time2)
 !!      time2     = time1 + time2 * time_avail
@@ -2602,7 +2603,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!!      length    = CdagC_length(CdagC_1)
 !!      length    = time2 - time1 
 !!      det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles(op%Impurity%activeFlavor))
-!!      overlap   = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1)
+!!      overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
 !!      CALL RANDOM_NUMBER(time1)
 !!      IF ( det_ratio .LT. 0.d0 ) THEN
 !!        det_ratio   = -det_ratio
@@ -2611,7 +2612,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      IF ( (time1 * (tail + 1.d0 )) &
 !!           .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
 !!        write(*,*) position
-!!        CALL ImpurityOperatoroffdiag_add(op%Impurity,CdagC_1,position)
+!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
 !!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        op%stats(CTQMC_SEGME+CTQMC_ADDED) = op%stats(CTQMC_SEGME+CTQMC_ADDED)  + 1.d0
 !!        updated = .TRUE.
@@ -2622,12 +2623,12 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!    IF ( tail .GT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time1)
 !!      position = INT(time1 * tail) + 1
-!!      time_avail = ImpurityOperatoroffdiag_getAvailedTime(op%Impurity,position)
+!!      time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)
 !!      det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)
-!!      CdagC_1    = ImpurityOperatoroffdiag_getSegment(op%Impurity,position)
+!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)
 !!!      length     = CdagC_length(CdagC_1)
 !!      length     = CdagC_1(C_) - CdagC_1(Cdag_)
-!!      overlap    = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1)
+!!      overlap    = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
 !!      CALL RANDOM_NUMBER(time1)
 !!      IF ( det_ratio .LT. 0.d0 ) THEN
 !!        det_ratio   = -det_ratio
@@ -2637,7 +2638,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
 !!           .LT. (tail * det_ratio ) ) THEN
 !!        write(*,*) position
-!!        CALL ImpurityOperatoroffdiag_remove(op%Impurity,position)
+!!        CALL ImpurityOperator_remove(op%Impurity,position)
 !!        CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        !op%seg_removed = op%seg_removed  + 1.d0
 !!        op%stats(CTQMC_SEGME+CTQMC_REMOV) = op%stats(CTQMC_SEGME+CTQMC_REMOV)  + 1.d0
@@ -2650,7 +2651,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!
 !!SUBROUTINE Ctqmcoffdiag_tryAntiSeg(op, updated)
 !!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!!!  TYPE(ImpurityOperatoroffdiag), INTENT(INOUT) :: Impurity 
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2677,7 +2678,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  IF ( action .LT. .5d0 ) THEN ! Ajout d'un antiseg
 !!    CALL RANDOM_NUMBER(time1)
 !!    time1 = time1 * beta
-!!    time_avail = ImpurityOperatoroffdiag_getAvailableTime(op%Impurity,time1,position)
+!!    time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position)
 !!    IF ( time_avail .LT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time2)
 !!      time2     = time1 - time2 * time_avail
@@ -2687,7 +2688,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!!      length    = CdagC_length(CdagC_1) ! /!\ length is negative
 !!      length = time1 - time2
 !!      det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles(op%Impurity%activeFlavor))
-!!      overlap   = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1) ! OK
+!!      overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1) ! OK
 !!      CALL RANDOM_NUMBER(time1)
 !!      IF ( det_ratio .LT. 0.d0 ) THEN
 !!        det_ratio    = -det_ratio
@@ -2696,7 +2697,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      END IF
 !!      IF ( (time1 * (tail + 1.d0 )) & 
 !!           .LT. (beta * ABS(time_avail) * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
-!!        CALL ImpurityOperatoroffdiag_add(op%Impurity,CdagC_1,position) 
+!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position) 
 !!        !write(*,*) position
 !!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor)) 
 !!        !op%anti_added = op%anti_added  + 1.d0
@@ -2708,12 +2709,12 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!    IF ( tail .GT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time1)
 !!      position = -(INT(time1 * tail) + 1)
-!!      time_avail = ImpurityOperatoroffdiag_getAvailedTime(op%Impurity,position)!OK
+!!      time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)!OK
 !!      det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)!OK
-!!      CdagC_1    = ImpurityOperatoroffdiag_getSegment(op%Impurity,position)!OK 
+!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)!OK 
 !!!      length     = CdagC_length(CdagC_1) ! /!\ length is negative
 !!      length = CdagC_1(C_) - CdagC_1(Cdag_)
-!!      overlap    = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1) !OK
+!!      overlap    = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1) !OK
 !!      CALL RANDOM_NUMBER(time1)
 !!      IF ( det_ratio .LT. 0.d0 ) THEN
 !!        det_ratio   = -det_ratio
@@ -2722,7 +2723,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      END IF
 !!      IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
 !!           .LT. (tail * det_ratio ) ) THEN
-!!        CALL ImpurityOperatoroffdiag_remove(op%Impurity,position)
+!!        CALL ImpurityOperator_remove(op%Impurity,position)
 !!        !write(*,*) position
 !!        CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        !op%anti_removed = op%anti_removed  + 1.d0
@@ -2778,7 +2779,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
   TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperatoroffdiag), INTENT(INOUT) :: Impurity 
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
   INTEGER               , INTENT(  OUT) :: flav_i
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
@@ -2843,13 +2844,13 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
     call BathOperatoroffdiag_recomputeM(op%Bath,op%impurity%particles,flavor_i,flavor_j) ! compute op%Bath%M_update
     detnew     = BathOperatoroffdiag_getDetF(op%Bath,option=1) ! use op%Bath%M_update
 
-    lengthi    = ImpurityOperatoroffdiag_measN(op%Impurity,flavor_i)
-    lengthj    = ImpurityOperatoroffdiag_measN(op%Impurity,flavor_j)
-    overlapic1 = ImpurityOperatoroffdiag_overlapFlavor(op%Impurity,flavor_i)
-    overlapjc1 = ImpurityOperatoroffdiag_overlapFlavor(op%Impurity,flavor_j)
+    lengthi    = ImpurityOperator_measN(op%Impurity,flavor_i)
+    lengthj    = ImpurityOperator_measN(op%Impurity,flavor_j)
+    overlapic1 = ImpurityOperator_overlapFlavor(op%Impurity,flavor_i)
+    overlapjc1 = ImpurityOperator_overlapFlavor(op%Impurity,flavor_j)
     ! lengths unchanged
-    overlapic2 = ImpurityOperatoroffdiag_overlapSwap(op%Impurity,flavor_i,flavor_j)
-    overlapjc2 = ImpurityOperatoroffdiag_overlapSwap(op%Impurity,flavor_j,flavor_i)
+    overlapic2 = ImpurityOperator_overlapSwap(op%Impurity,flavor_i,flavor_j)
+    overlapjc2 = ImpurityOperator_overlapSwap(op%Impurity,flavor_j,flavor_i)
 
 !    IF ( detic1*detjc1 .EQ. detic2*detjc2 ) THEN
 !      det_ratio = 1.d0
@@ -2879,7 +2880,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
    !ii      write(6,'(a,100f12.3)') " update M after ",(op%Bath%M_update%mat(it,it1),it1=1,op%Bath%sumtails)
    !ii    enddo
    !ii    write(6,*) "Gmove accepted",rnd,local_ratio*det_ratio
-      CALL ImpurityOperatoroffdiag_swap(op%Impurity, flavor_i,flavor_j)
+      CALL ImpurityOperator_swap(op%Impurity, flavor_i,flavor_j)
       CALL BathOperatoroffdiag_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
       
       op%swap = op%swap + 1.d0
@@ -2957,7 +2958,7 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 !End of the abilint section
 
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
-  !TYPE(ImpurityOperatoroffdiag), INTENT(IN   )     :: impurity
+  !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
   LOGICAL               , INTENT(IN   )     :: updated
 
@@ -2976,7 +2977,7 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 !  --- Compute the occupation for this configuration (will be put in
 !  --- op%measN(1,iflavor) at the next occurence of updated=.true.), with
 !  --- the corresponding weight  op%measN(4,iflavor) (we do not now it yet)
-    op%measN(3,iflavor) = ImpurityOperatoroffdiag_measN(op%impurity)
+    op%measN(3,iflavor) = ImpurityOperator_measN(op%impurity)
 
 !  --- set weight: as update=true, it is a new measurement , so put it to one
     op%measN(4,iflavor) = 1.d0
@@ -3031,7 +3032,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 !End of the abilint section
 
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)       :: op
-  !TYPE(ImpurityOperatoroffdiag), INTENT(IN   )       :: impurity
+  !TYPE(ImpurityOperator), INTENT(IN   )       :: impurity
   INTEGER               , INTENT(IN   )       :: iflavor
 !Local variables ------------------------------
   INTEGER                                     :: iCdag
@@ -3130,7 +3131,7 @@ SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
 !End of the abilint section
 
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
-  !TYPE(ImpurityOperatoroffdiag), INTENT(IN   )     :: impurity
+  !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
 !Local variables ------------------------------
   INTEGER                                   :: index
@@ -3246,7 +3247,7 @@ include 'mpif.h'
 
 !#ifdef CTCtqmcoffdiag_CHECK
   IF ( op%opt_check .GT. 0 ) THEN
-    op%errorImpurity = ImpurityOperatoroffdiag_getError(op%Impurity) * inv_flavors 
+    op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors 
     op%errorBath     = BathOperatoroffdiag_getError    (op%Bath    ) * inv_flavors 
   END IF
 !#endif
@@ -3503,7 +3504,7 @@ include 'mpif.h'
 
   !op%measDE(1,1) = SUM(op%measNoise(1)%vec(1:op%measNoise(1)%tail))/(DBLE(op%measNoise(1)%tail*op%modNoise1)*op%beta)
   !op%measDE(2:flavors,1:flavors) = op%measDE(2:flavors,1:flavors) /(DBLE(op%sweeps)*op%beta)
-  CALL ImpurityOperatoroffdiag_getErrorOverlap(op%Impurity,op%measDE)
+  CALL ImpurityOperator_getErrorOverlap(op%Impurity,op%measDE)
   ! Add the difference between true calculation and quick calculation of the
   ! last sweep overlap to measDE(2,2)
   !op%measDE = op%measDE * DBLE(op%measurements) 
@@ -4952,7 +4953,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 
   flavors = op%flavors
 
-  CALL ImpurityOperatoroffdiag_destroy(op%Impurity)
+  CALL ImpurityOperator_destroy(op%Impurity)
   CALL BathOperatoroffdiag_destroy(op%Bath)
   CALL Vector_destroy(op%measNoise(1))
   CALL Vector_destroy(op%measNoise(2))
