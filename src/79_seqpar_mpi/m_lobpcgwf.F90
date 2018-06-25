@@ -220,6 +220,59 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
 
+!------------------------ TEST --------------------------!
+
+! Copy initial xgx0
+ABI_MALLOC(first,(2,l_npw*l_nspinor*nband))
+call xgBlock_get(xgx0,first,0,l_npw*l_nspinor)
+
+! Get full number of npw
+call xmpi_sum(l_npw,mpi_enreg%comm_bandspinorfft,iband)
+! Allocate memory
+ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*nband/dtset%npband))
+! Map a xgBlock onto this memory
+call xgBlock_map(xgeigen,l_gvnlc,space,l_icplx*l_npw*l_nspinor,nband/dtset%npband,l_mpi_enreg%comm_fft)
+
+cputime = 0
+ncpuCols = dtset%npband
+ncpuRows = dtset%npfft*dtset%npspinor
+
+
+! Debug
+!call xgBlock_map(xgx0,cg,space,l_icplx*4,8,l_mpi_enreg%comm_bandspinorfft)
+!ABI_MALLOC(l_gvnlc,(2,l_icplx*4*4*2))
+!call xgBlock_map(xgeigen,l_gvnlc,space,l_icplx*4*4,2,l_mpi_enreg%comm_fft)
+!call xgBlock_print(xgx0,6)
+
+write(*,*) dtset%useric
+l_istwf = 1
+call xgTransposer_init(xgTransposer,xgx0,xgeigen,ncpuRows,ncpuCols,STATE_LINALG,dtset%useric)
+do iband =1 , l_istwf
+  walltime = abi_wtime()
+  call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
+  call xgBlock_scale(xgx0,0.d0,1)
+  call xgBlock_print(xgeigen,6)
+  call xgTransposer_transpose(xgTransposer,STATE_LINALG)
+  call xgBlock_print(xgx0,6)
+  call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
+  walltime = abi_wtime() - walltime
+  cputime = cputime + walltime
+  call xmpi_max(walltime,maxt,mpi_enreg%comm_bandspinorfft,nthreads)
+  write(std_out,*) "walltime", maxt
+end do
+ABI_FREE(l_gvnlc)
+call xmpi_max(cputime,maxt,mpi_enreg%comm_bandspinorfft,nthreads)
+call xgTransposer_free(xgTransposer)
+write(std_out,*) "mean", maxt/l_istwf
+errmax = (sum(first-cg))/nband
+call xmpi_sum(errmax,l_mpi_enreg%comm_bandspinorfft,nthreads)
+write(std_out,*) "difference:",errmax
+call flush(std_out)
+ABI_FREE(first)
+call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
+call xmpi_abort()
+!!------------------------ TEST --------------------------!
+
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################

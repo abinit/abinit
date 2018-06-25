@@ -342,7 +342,6 @@ module m_xgScalapack
 #ifdef HAVE_MPI
     if ( any(req/=-1)  ) then
       call MPI_WaitAll(2,req,status,ierr)
-      write(*,*) "I wait"
       if ( ierr /= 0 ) then
           MSG_ERROR("Error waiting data")
       endif
