@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2009-2017 ABINIT Group (Damien Caliste)
+# Copyright (C) 2009-2018 ABINIT Group (Damien Caliste)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,7 +22,7 @@ top_dir        = os.path.join(test_dir,"..")
 doc_dir        = os.path.join(top_dir,"doc")
 
 # The documentation resources:
-inp_dir        = os.path.join(doc_dir, "input_variables")
+inp_dir        = os.path.join(doc_dir, "variables")
 doc_index_file = os.path.join(inp_dir, "generated_files/varset_allvars.html")
 
 # The source resource:

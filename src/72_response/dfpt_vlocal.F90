@@ -10,7 +10,7 @@
 !! electric (magnetic Zeeman) field perturbation, the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MM)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.

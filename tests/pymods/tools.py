@@ -86,13 +86,11 @@ def unzip(gz_fname, dest=None):
         out_fh.close()
 
 
-def touch(fname):
+def touch(fname, times=None):
     """Emulate unix touch."""
-    try:
-        open(fname, "w").close()
-        return 0
-    except:
-        raise IOError("trying to create file = %s" % fname)
+    import os
+    with open(fname, 'a'):
+        os.utime(fname, times)
 
 
 def tail_file(fname, n, aslist=False):

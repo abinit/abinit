@@ -12,7 +12,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2015 ABINIT group (YG)
+!! Copyright (C) 2001-2018 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,15 +32,16 @@ module m_eprenorms
  use defs_datatypes
  use m_errors
  use m_xmpi
-
- use m_crystal, only :       crystal_t
-
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
 
+ use m_crystal,  only : crystal_t
+ use m_kpts,     only : listkk
+
  implicit none
+
  private
 !!***
 
@@ -397,7 +398,6 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'renorm_bst'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -463,7 +463,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
      ! Upgrade energies
      Bst%eig(1:nband_tmp,ikpt,isppol) = BSt%eig(1:nband_tmp,ikpt,isppol) + Epren%renorms(1,1:nband_tmp,ik_eph,isppol,itemp)
 
-     if(do_lifetime) then
+     if (do_lifetime) then
        Bst%lifetime(1:nband_tmp,ikpt,isppol) = Epren%lifetimes(1,1:nband_tmp,ik_eph,isppol,itemp)
      end if
    end do

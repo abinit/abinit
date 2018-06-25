@@ -30,7 +30,7 @@
 !! * macro_uj_type : TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (XG)
+!! Copyright (C) 2001-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,6 +169,7 @@ type dataset_type
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
+ integer :: auxc_ixc
  integer :: awtr
  integer :: bandpp
  integer :: bdeigrf
@@ -187,8 +188,8 @@ type dataset_type
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
- integer :: cgtyphf
  integer :: delayperm
+ integer :: densfor_pred
  integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
@@ -235,7 +236,6 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
- integer :: fockaux_ixc
  integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
@@ -248,6 +248,7 @@ type dataset_type
  integer :: getdkdk
  integer :: getdkde
  integer :: getden
+ integer :: getefmas
  integer :: getgam_eig2nkq
  integer :: getocc
  integer :: getpawden
@@ -301,6 +302,8 @@ type dataset_type
  integer :: gw_sctype
  integer :: gwmem
  integer :: gwpara
+ integer :: hmcsst
+ integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -309,13 +312,13 @@ type dataset_type
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
- integer :: densfor_pred
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
  integer :: irdddk
  integer :: irdden
+ integer :: irdefmas
  integer :: irdhaydock
  integer :: irdpawden
  integer :: irdqps
@@ -336,7 +339,9 @@ type dataset_type
  integer :: istatr
  integer :: istatshft
  integer :: ixc
+ integer :: ixc_sigma
  integer :: ixcpositron
+ integer :: ixcrot
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt
@@ -394,6 +399,7 @@ type dataset_type
  integer :: nomegasf
  integer :: nomegasi
  integer :: nomegasrd
+ integer :: nonlinear_info
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -433,6 +439,7 @@ type dataset_type
  integer :: optforces
  integer :: optnlxccc
  integer :: optstress
+ integer :: orbmag
  integer :: ortalg
  integer :: paral_atom
  integer :: paral_kgb
@@ -485,9 +492,11 @@ type dataset_type
  integer :: prtdosm
  integer :: prtebands=1
  integer :: prtefg
+ integer :: prtefmas
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
+ integer :: prtfull1wf
  integer :: prtfsurf
  integer :: prtgsr=1
  integer :: prtgden
@@ -541,6 +550,7 @@ type dataset_type
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: signperm
+ integer :: slk_rankpp
  integer :: smdelta
  integer :: spgaxor
  integer :: spgorig
@@ -552,6 +562,7 @@ type dataset_type
  integer :: symsigma
  integer :: td_mexcit
  integer :: tfkinfunc
+ integer :: tim1rev
  integer :: timopt
  integer :: tl_nprccg
  integer :: ucrpa
@@ -565,6 +576,7 @@ type dataset_type
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
+ integer :: usepead
  integer :: usepotzero
  integer :: userec
  integer :: useria=0
@@ -603,6 +615,7 @@ type dataset_type
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: fockdownsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -618,7 +631,7 @@ type dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
- integer :: supercell(3)
+ integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
@@ -634,6 +647,7 @@ type dataset_type
  integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
  integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
  integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
  integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
  integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
  integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)
@@ -649,6 +663,7 @@ type dataset_type
 
 !Real
  real(dp) :: adpimd_gamma
+ real(dp) :: auxc_scal
  real(dp) :: bmass
  real(dp) :: boxcutmin
  real(dp) :: bxctmindg
@@ -685,7 +700,6 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
- real(dp) :: fockaux_scal
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin
@@ -696,9 +710,12 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
- real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
+ real(dp) :: hyb_mixing
+ real(dp) :: hyb_mixing_sr
+ real(dp) :: hyb_range_dft
+ real(dp) :: hyb_range_fock
  real(dp) :: kptnrm
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda
@@ -775,6 +792,7 @@ type dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
+ real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
  real(dp) :: wvl_crmult
@@ -827,6 +845,7 @@ type dataset_type
  real(dp), allocatable :: kptgw(:,:)        !SET2NULL  ! kptgw(3,nkptgw)
  real(dp), allocatable :: kptns(:,:)        !SET2NULL  ! kptns(3,nkpt) k-points renormalized and shifted.
                                         !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
@@ -890,10 +909,16 @@ type dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl 
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
+ integer :: ph_
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl) 
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)
@@ -904,6 +929,7 @@ type dataset_type
  integer :: eph_intmeth ! = 1
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
@@ -920,6 +946,7 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
+ real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
 
  end type dataset_type
 !!***
@@ -1280,10 +1307,12 @@ type dataset_type
   integer :: unscr   ! unit number for SCR file
   integer :: unwff1  ! unit number for wavefunctions, number one
   integer :: unwff2  ! unit number for wavefunctions, number two
+  integer :: unwff3  ! unit number for wavefunctions, number three
   integer :: unwffgs ! unit number for ground-state wavefunctions
   integer :: unwffkq ! unit number for k+q ground-state wavefunctions
   integer :: unwft1  ! unit number for wavefunctions, temporary one
   integer :: unwft2  ! unit number for wavefunctions, temporary two
+  integer :: unwft3  ! unit number for wavefunctions, temporary three
   integer :: unwftgs ! unit number for ground-state wavefunctions, temporary
   integer :: unwftkq ! unit number for k+q ground-state wavefunctions, temporary
   integer :: unylm   ! unit number for Ylm(k) data
@@ -1431,12 +1460,13 @@ type dataset_type
 !The following filenames do not depend on itimimage, iimage and itime loops.
 !Note the following convention:
 !  fnameabo_* are filenames used for ouput results (writing)
-!  fnameabi_* are filenames used for data the should be read by the code.
+!  fnameabi_* are filenames used for data that should be read by the code.
 !  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
 !
 !If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
 !that particular file is only used for writing or for reading results, respectively.
 
+  character(len=fnlen) :: fnameabi_efmas
   character(len=fnlen) :: fnameabi_hes
   character(len=fnlen) :: fnameabi_phfrq
   character(len=fnlen) :: fnameabi_phvec

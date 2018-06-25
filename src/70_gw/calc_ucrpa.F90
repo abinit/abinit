@@ -7,7 +7,7 @@
 !! Calculate the screening interaction in the correlated orbitals
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (TApplencourt,BA)
+!! Copyright (C) 1999-2018 ABINIT group (TApplencourt,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,8 +17,8 @@
 !! npwe : number of plane wave for the dielectric constant
 !! npw : number of plane wave
 !! nomega  : number of frequencis
-!! bandinf,bandsup : kohn sham band 
-!! optimisation : string for the optimisation 
+!! bandinf,bandsup : kohn sham band
+!! optimisation : string for the optimisation
 !! Wfd:: MPI communicator
 !! mesh <kmesh_t>
 !!    %nbz=Number of points in the BZ
@@ -29,7 +29,7 @@
 !!    %ktabi(nbz)= for each k-point in the BZ defines whether inversion has to be considered
 !!    %ktabp(nbz)= phase factor associated to tnons
 !! M1_q_m(bandinf:bandsup,bandinf:bandsup,npw,Qmesh%nibz): Oscillator strengh in Wannier basis
-!! rhot1_q_m(bandinf:bandsup,bandinf:bandsup,npw,Qmesh%nibz): Oscillator strengh 
+!! rhot1_q_m(bandinf:bandsup,bandinf:bandsup,npw,Qmesh%nibz): Oscillator strengh
 !!                                          multiplied by coulomb potential in Wannier basis
 !! OUTPUT
 !!
@@ -89,52 +89,52 @@
  character(len=fnlen), intent(in) :: fname
  character(len=*), intent(in) :: optimisation
  real(dp), intent(in) :: ucvol,omegamin,omegamax
- 
+
  type(wfd_t),intent(inout) :: Wfd
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
  complex(dpc), intent(in) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
  complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
- 
+
 !Local variables ------------------------------
 !scalars
  real(dp) :: x
  real(dp) :: t1,t2
  real(dp):: tol,eVnorme
  complex(dpc) :: uu,jj
- 
+
  complex :: nC,ualter
- 
+
  integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
  integer :: isym_kgw,iik,unt
  complex(dpc) ::ph_mkt
- 
+
  logical :: wannier=.TRUE.
  logical :: verbose=.FALSE.
  logical :: bug=.FALSE.
  logical :: lscr_one
- 
+
  character(len=500) :: message
 
 !arrays
  complex(dpc), allocatable :: V_m(:,:,:,:)
  complex(dpc), allocatable :: U_m(:,:,:,:)
- 
+
 ! complex(dpc), allocatable :: coeffW_BZ(:,:,:),coeffW_IBZ(:,:,:)
  complex(dpc), allocatable :: rhot_q_m(:,:,:,:,:,:)
  complex(dpc), allocatable :: rhot_q_m_npwe(:,:,:,:,:,:),trrho(:,:),sumrhorhoeps(:)
  complex(gwpc), allocatable :: scr(:,:,:,:)
- 
+
  real(dp),allocatable :: k_coord(:,:)!,k_coordIBZ(:,:)
  real(dp),allocatable :: q_coord(:,:)
  real(dp),allocatable:: normG(:)
  complex(dpc),allocatable:: uomega(:),jomega(:)
  real(dp),allocatable:: omega(:)
- 
+
  integer,allocatable:: ikmq_bz_t(:,:)
- 
+
  logical,allocatable :: bijection(:)
 !************************************************************************
 
@@ -147,7 +147,7 @@
  nkbz = Kmesh%nbz
  nqibz= Qmesh%nibz
  nspinor=Wfd%nspinor
- 
+
  nbband=1+bandsup-bandinf
 !  _  __            ____
 ! | |/ /   ___     / __ \
@@ -159,7 +159,7 @@
  write(message,*) "Read K and Q mesh"
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- 
+
  ABI_ALLOCATE(k_coord,(nkbz,3))
  ABI_ALLOCATE(q_coord,(nqibz,4))
 
@@ -171,8 +171,8 @@
 
  do ik_bz=1,nkbz
    call get_BZ_item(Kmesh,ik_bz,k_coord(ik_bz,:),ik_ibz,isym_kgw,iik,ph_mkt)
- end do 
- 
+ end do
+
 ! open(unit=2012,file='iqbz_COORD',form='formatted',status='unknown')
 ! read(2012,*)
  do i=1,nqibz
@@ -187,7 +187,7 @@
 !   end if
  end do
 ! close(2012)
- 
+
 !==Bijection and array for k-q==!
  ABI_ALLOCATE(bijection,(nkbz))
  ABI_ALLOCATE(ikmq_bz_t,(nkbz,nqibz))
@@ -201,17 +201,17 @@
        MSG_ERROR(message)
      end if
      bijection(ikmq_bz_t(ik_bz,iq_ibz))=.TRUE.
-   end do 
- 
+   end do
+
    if (count(bijection).NE.nqibz.and.nsym==1) then
    BUG=.TRUE.
    write(message,*) 'No bijection ',ik_bz
    MSG_ERROR(message)
    end if
- 
+
    bijection(:)=.FALSE.
  end do
- 
+
  if (.NOT.BUG.and.nsym==1) then
    write(message,*)  "Bijection Ok."
    call wrtout(std_out,message,'COLL')
@@ -235,7 +235,7 @@
    !!False norme for G=0 idd G is the inverse of the potential inverse du potentiel (q=0)
    normG(1)=0
  end if
- 
+
 !========================================================================
 !------------------------------------------------------------------------
 
@@ -251,7 +251,7 @@
 !  | '_ ` _ \      | '_ \| '_ \
 !  | | | | | |     | | | | | | |
 !  |_| |_| |_|     |_| |_|_| |_|
- 
+
 !==========================================================
 !==========================================================
 ! tol=1E-1
@@ -281,9 +281,9 @@
    call wrtout(std_out,message,'COLL')
  endif
  tol=1E+1
- 
+
  if (.NOT.wannier) RETURN
- 
+
 !========================================================================
 !------------------------------------------------------------------------
 
@@ -297,7 +297,7 @@
 !   \ \/  \/ / _` | '_ \| '_ \| |/ _ \ '__|
 !    \  /\  / (_| | | | | | | | |  __/ |
 !     \/  \/ \__,_|_| |_|_| |_|_|\___|_|
- 
+
 !==========================================================
 !==========================================================
 !== Read Wannier coefficient in forlb.ovlp
@@ -309,7 +309,7 @@
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  nkibz=Kmesh%nibz
- 
+
 !Read "l"
  if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
    MSG_ERROR(message)
@@ -324,15 +324,15 @@
  endif
 !!Read the bandinf, bandinf redondance information
  mbband=2*lpawu_read+1
- 
+
 !*******************************************************
 !if (3==4) then
 !!  USELESS START
 !!*******************************************************
 ! ABI_ALLOCATE(coeffW_IBZ,(bandinf:bandsup,nkibz,mbband))
 ! coeffW_IBZ=czero
-! 
-! 
+!
+!
 ! if(Wfd%my_rank==0) then
 !   do ik_ibz=1,nkibz
 !     !read k
@@ -349,13 +349,13 @@
 !      end do
 !   end do
 ! endif
-! call xmpi_barrier(Wfd%comm) 
+! call xmpi_barrier(Wfd%comm)
 ! call xcast_mpi(coeffW_IBZ,0,Wfd%comm,ierr)
-! call xmpi_barrier(Wfd%comm) 
+! call xmpi_barrier(Wfd%comm)
 ! close(2012)
-!      
-! ABI_ALLOCATE(coeffW_BZ,(bandinf:bandsup,nkbz,mbband)) 
-! 
+!
+! ABI_ALLOCATE(coeffW_BZ,(bandinf:bandsup,nkbz,mbband))
+!
 ! if (nkbz==nkibz) then
 !   coeffW_BZ=coeffW_IBZ
 ! else
@@ -363,9 +363,9 @@
 !   call wrtout(std_out,message,'COLL')
 !   call wrtout(ab_out,message,'COLL')
 !   ABI_ALLOCATE(k_coordIBZ,(nkibz,3))
-! 
+!
 !!   k_coordIBZ(:,:)=q_coord(:,1:3)
-! 
+!
 !   bijection(:)=.FALSE.
 !   write(message,*) "Indice in iBZ | Indice in BZ | Inverse in BZ"
 !   call wrtout(std_out,message,'COLL')
@@ -382,13 +382,13 @@
 !!       bijection(inverse_ik_bz)=.TRUE.
 !     endif
 !   enddo
-!   
+!
 !   if (count(bijection).NE.nkbz) then
 !    BUG=.TRUE.
 !    write(message,*) 'Miss somme K point for the Wannier',count(bijection),"/",nkbz
 !    MSG_ERROR(message)
 !   end if
-!   
+!
 !   if (.NOT.BUG) then
 !     write(message,*) "Reconstruction Success"
 !     call wrtout(std_out,message,'COLL')
@@ -396,45 +396,45 @@
 !   end if
 !   ABI_DEALLOCATE(k_coordIBZ)
 ! end if
-! 
+!
 ! ABI_DEALLOCATE(coeffW_IBZ)
-! 
+!
 ! wk=1.0/nkbz
-! 
+!
 ! write(message,*) 'Orthogonality check'
 ! call wrtout(std_out,message,'COLL')
 ! write(message,*)  'Sum on all the k point ,on all the Kohn-Sham band of C_(m1)*C_m(2)'
 ! call wrtout(std_out,message,'COLL')
-! 
+!
 !! tolerance for the sum over k-points of the Wannier functions (orthogonality)
 ! tol=1E-5
-! 
+!
 !! Sum for one k-point (should be around 0.1).
 ! tol2=10E0
-! 
+!
 ! write(message,*) 'Tolerance : k',tol2,'m',tol
 ! call wrtout(std_out,message,'COLL')
-! 
+!
 !
 ! ! Here checks on Wannier coeff are done (ortho, norm..)
 ! nC=cmplx(0,0)
 ! BUG=.FALSE.
-! 
+!
 ! do m1=1,mbband
 !   do m2=1,mbband
 !     do ik_bz=1,nkbz
 !       nCt=sum(conjg(coeffW_BZ(:,ik_bz,m1))*coeffW_BZ(:,ik_bz,m2))
 !       if (  ((m1==m2).and.(abs(abs(ncT)-1)>tol2)).OR.&
-!       ((m1.NE.m2).and.(abs(ncT)>tol2)) ) then     
+!       ((m1.NE.m2).and.(abs(ncT)>tol2)) ) then
 !         BUG=.TRUE.
 !         write(message,*)  "No orthogonality for m1,m2",m1,m2,"kpt",ik_bz,abs(nCt)
 !         MSG_ERROR(message)
 !       end if
 !       nC=nC+wk*nCt
 !     end do
-!   
+!
 !     if (  ((m1==m2).and.(abs(abs(nC)-1)>tol)).OR.&
-!     ((m1.NE.m2).and.(abs(nC)>tol)) ) then     
+!     ((m1.NE.m2).and.(abs(nC)>tol)) ) then
 !       bug=.TRUE.
 !       write(message,*) "No orthogonality for",m1,m2,abs(nC)
 !       MSG_ERROR(message)
@@ -463,54 +463,54 @@
 
  if(real(M1_q_m(1,1,1,1,1,1,1))>0) then
  endif
- 
+
 !                                       _
 !                                      ( )
 !   _ __ ___        _ __ ___  _ __ ___ |/
 !  | '_ ` _ \      | '_ ` _ \| '_ ` _ \
 !  | | | | | |     | | | | | | | | | | |
 !  |_| |_| |_|     |_| |_| |_|_| |_| |_|
- 
- 
+
+
 !!!==Calculation of M_G^(mm')(q)==!
- 
+
  write(message,*) 'Calculation of M  m'
  call wrtout(std_out,message,'COLL')
- 
+
 !=================================================================!
 !==Compute V_{m,m'}(q,z): Oscillator strengh in the Wannier basis
 !=================================================================!
- 
+
 ! Sum over k-points for the oscillator strengh in the Wannier basis
- 
- if (verbose) then 
+
+ if (verbose) then
 !   call  Sauvegarde_M_q_m(M1_q_m,normG,nqibz,npw,mbband)
  end if
- 
+
 ! write(message,*)  "M1_q_m,m for iG=53 and iq=8"
 !    call wrtout(std_out,message,'COLL')
- 
+
 !        _                                     _
 !       | |                                   ( )
 !   _ __| |__   ___        _ __ ___  _ __ ___ |/
 !  | '__| '_ \ / _ \      | '_ ` _ \| '_ ` _ \
 !  | |  | | | | (_) |     | | | | | | | | | | |
 !  |_|  |_| |_|\___/      |_| |_| |_|_| |_| |_|
- 
+
  write(message,*) ""
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 !==Calcul de Ro_G^(mm')(q)==!
  write(message,*) 'Calculation of rhotwilde  m'
  call wrtout(std_out,message,'COLL')
- 
+
 !===============================================================!
 !===============================================================!
 !==Compute V_{m,m'}(q,z): bare interaction in the Wannier basis
 !===============================================================!
 !===============================================================!
  ABI_DEALLOCATE(ikmq_bz_t)
- 
+
  ABI_ALLOCATE(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
 
  do iat=1,Cryst%nattyp(itypatcor)
@@ -518,8 +518,8 @@
    call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
    rhot_q_m(:,:,:,:,:,:)=rhot1_q_m(iat,:,:,:,:,:,:)
-   
-   if (verbose) then 
+
+   if (verbose) then
      !==Ecriture de Ro_G^(mm')(q)==!:
      eVnorme=sqrt(Ha_eV/ucvol)
      if (open_file('Ro_mm11(q)',message,newunit=unt,form='formatted',status='unknown') /= 0) then
@@ -539,22 +539,22 @@
      write(unt,*) q_coord
      close(unt)
    end if
-   
+
 !    __      __
 !    \ \    / /
 !     \ \  / /      _ __ ___
 !      \ \/ /      | '_ ` _ \
 !       \  /       | | | | | |
 !        \/        |_| |_| |_|
-   
-   
+
+
    ABI_ALLOCATE(V_m,(mbband*nspinor,mbband*nspinor,mbband*nspinor,mbband*nspinor))
    write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
    write(message,*)  "==Calculation of the bare interaction  V m=="
     call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
    V_m=czero
    call cpu_time ( t1 )
-   im_paral=0 
+   im_paral=0
    nprocs  = xmpi_comm_size(Wfd%comm)
    do ispinor1=1,nspinor
      do ispinor2=1,nspinor
@@ -612,7 +612,7 @@
 
 !  ------------------------------------------------------------------------
 !  ========================================================================
-   
+
 !      _____                          _
 !     / ____|                        (_)
 !    | (___   ___ _ __ ___  ___ _ __  _ _ __   __ _
@@ -629,7 +629,7 @@
    call wrtout(ab_out,message,'COLL')
  !  write(message,*) "==Read the dielectric matrix=="
  !  call wrtout(ab_out,message,'COLL'); call wrtout(std_out,message,'COLL')
-  
+
    lscr_one=.true.
 
    ! if symetry is not enabled then a large number of q-point are used
@@ -638,7 +638,7 @@
    !-------------------------------------------------------------------
    if(nsym>1.and..not.lscr_one) nqalloc=nqibz
    if(nsym==1.or.lscr_one) nqalloc=1
-       
+
    ABI_ALLOCATE(scr,(npwe,npwe,nomega,nqalloc))
    scr=czero
    if(nsym>1.and..not.lscr_one) then
@@ -646,8 +646,8 @@
      call wrtout(ab_out,message,'COLL'); call wrtout(std_out,message,'COLL')
      call read_screening(em1_ncname,fname,npwe,nqibz,nomega,scr,IO_MODE_MPI,Wfd%comm)
    endif
-   
-!   if (verbose) then 
+
+!   if (verbose) then
 !     open(unit=2211,file='Screening',form='formatted',status='unknown')
 !     do iG1=1,npwe
 !       do iG2=1,npwe
@@ -656,7 +656,7 @@
 !     end do
 !     close(2211)
 !   end if
-!   
+!
    if(nsym>1.and..not.lscr_one) then
      write(message,*) "Check the hermiticity"
       call wrtout(ab_out,message,'COLL')
@@ -686,7 +686,7 @@
      write(message,*)  "Done: Hermiticity of dielectric matrix checked"
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
-   endif 
+   endif
 
 !  ========================================================================
 !  ------------------------------------------------------------------------
@@ -702,7 +702,7 @@
 !    | |  | |     | '_ ` _ \
 !    | |__| |     | | | | | |
 !     \____/      |_| |_| |_|
-!  
+!
    write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
    write(message,*)  "== Calculation of the screened interaction on the correlated orbital U m =="
    call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
@@ -729,9 +729,9 @@
 !   do iG1=1,npwe
 !     do iq_ibz=1,nqibz
 !        write(6,*) iG1,iq_ibz,trrho(iG1,iq_ibz)
-!     enddo 
+!     enddo
 !   enddo
-!   write(6,*) 
+!   write(6,*)
 
    ! Loop over frequencies to compute cRPA U(w)
    !--------------------------------------------
@@ -744,19 +744,19 @@
      call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
      sumrhorhoeps(:)=czero
      ualter=czero
-    
+
      write(std_out,*) Optimisation
      U_m=cmplx(0,0)
      SELECT CASE(trim(Optimisation))
      CASE("naif")
-     CASE("onlyG") 
-     CASE("Gsum2") 
-     CASE("Gsum") 
+     CASE("onlyG")
+     CASE("Gsum2")
+     CASE("Gsum")
       ! write(message,*)  "Optimisation on G and sum"
       ! call wrtout(std_out,message,'COLL')
        U_m=cmplx(0,0)
        nc=cmplx(0,0)
-       im_paral=0 
+       im_paral=0
        call cpu_time ( t1 )
        nprocs  = xmpi_comm_size(Wfd%comm)
        do iq_ibz=1,nqibz
@@ -804,7 +804,7 @@
            do iG2=1,npwe
 !              sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz)+conjg(trrho(iG1,iq_ibz))*trrho(iG2,iq_ibz)*scr(iG2,iG1,iomega,1)
               sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz) + scr(iG2,iG1,iomega,iqalloc)
-           enddo 
+           enddo
          enddo
          ualter=ualter+sumrhorhoeps(iq_ibz)*q_coord(iq_ibz,4)*Ha_eV/ucvol/(mbband)**2
 !         write(6,*) "sumrhorhoeps",iq_ibz,sumrhorhoeps(iq_ibz)
@@ -823,14 +823,14 @@
                          ms4=m4+(ispinor4-1)*mbband
                          im_paral=im_paral+1
                          if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
-                         
+
                       !     sum q sum G1 sum G2 f(G1,q)f(G2,q)G(G1,G2,q)
                       !     sum q sum G1 f(g1,q) sum G2 f(G2,q)G(G1,G2,q)
                              do iG1=1,npwe
                                   nc=nc+conjg(rhot_q_m_npwe(ispinor3,ispinor1,m3,m1,iG1,iq_ibz))*&
  &                                sum(rhot_q_m_npwe(ispinor2,ispinor4,m2,m4,:,iq_ibz)*scr(:,iG1,iomega,iqalloc))
                              end do
-     
+
                              U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)
 !                   if(m1==1.and.m2==1.and.m3==1.and.m4==1) then
 !                     write(6,*) "TEST2"
@@ -899,11 +899,11 @@
    ABI_DEALLOCATE(U_m)
  enddo
 
-!    Print dielectric matrix 
+!    Print dielectric matrix
 !   do iq_ibz=1,nqibz
 !       call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_FORTRAN,Wfd%comm,iqiA=iq_ibz)
 !   enddo
- 
+
  ABI_DEALLOCATE(rhot_q_m)
  ABI_DEALLOCATE(k_coord)
  ABI_DEALLOCATE(q_coord)
@@ -912,16 +912,16 @@
 ! ABI_DEALLOCATE(coeffW_BZ)
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
  CONTAINS
- 
+
 !!    __                 _   _
 !!   / _|               | | (_)
 !!  | |_ ___  _ __   ___| |_ _  ___  _ __
 !!  |  _/ _ \| '_ \ / __| __| |/ _ \| '_ \
 !!  | || (_) | | | | (__| |_| | (_) | | | |
 !!  |_| \___/|_| |_|\___|\__|_|\___/|_| |_|
-! 
+!
  integer FUNCTION fi(nkbz,k_coord,kprime_coord)
 
 
@@ -935,14 +935,14 @@
        integer,intent(in) :: nkbz
       real(dp),dimension(nkbz,3),intent(in) ::k_coord
       real(dp),dimension(3),intent(in) :: kprime_coord(3)
- 
+
  do fi=1,nkbz
-   if (ALL(abs(kprime_coord(:)-k_coord(fi,:))<0.001)) then 
+   if (ALL(abs(kprime_coord(:)-k_coord(fi,:))<0.001)) then
      exit
    end if
  end do
  END FUNCTION fi
- 
+
  integer FUNCTION findkmq(ik_bz,k_coord,q_coord,nkbz)
 
 
@@ -958,19 +958,19 @@
       real(dp),dimension(4),intent(in) ::q_coord
       real(dp),dimension(3) :: kprime_coord
       integer :: i,j,k
- 
- 
+
+
  kprime_coord(:)=k_coord(ik_bz,:)-q_coord(1:3)
- 
+
  where (kprime_coord > 0.5)
-   kprime_coord(:)= kprime_coord(:)-1 
- elsewhere(kprime_coord < -0.5) 
+   kprime_coord(:)= kprime_coord(:)-1
+ elsewhere(kprime_coord < -0.5)
    kprime_coord(:)= kprime_coord(:)+1
  end where
- 
+
 !! indice of k -q
  findkmq=fi(nkbz,k_coord,kprime_coord)
- 
+
 !!Test if k-q exists
  if (findkmq.EQ.(nkbz+1)) then
 !!The prb comes from PBC included born_inf,born_sup]
@@ -989,7 +989,7 @@
    end do
  end if
  END FUNCTION findkmq
- 
+
  SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype)
 
 
@@ -1009,7 +1009,7 @@
  integer     :: i,j
  integer :: prtopt
  logical        :: bug=.FALSE.
- 
+
 !==Check correctness
  write(message,*)  "== Check == "
  call wrtout(std_out,message,'COLL')
@@ -1023,14 +1023,14 @@
 !&      ,i,j,abs(Interaction(i,i,i,i)),abs(Interaction(j,j,j,j))
       !     call wrtout(std_out,message,'COLL')
       !end if
-   
+
      if (abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))>tol) then
        BUG=.TRUE.
        write(message,*) "Warning in the symetry of U'",i,j,abs(Interaction(i,j,i,j)),&
 &       abs(Interaction(j,i,j,i)),abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))
        call wrtout(std_out,message,'COLL')
      end if
-   
+
      if (abs(Interaction(i,i,j,j)-Interaction(j,j,i,i))>tol) then
        BUG=.TRUE.
        write(message,*) "Warning in the symetry of J'",i,j,abs(Interaction(i,i,j,j)),&
@@ -1039,8 +1039,8 @@
      end if
    end do
  end do
- 
- 
+
+
 ! do i=m_inf,m_sup
 !   do j=m_inf,m_sup
 !     if (i.EQ.j) cycle
@@ -1052,19 +1052,19 @@
 !     end if
 !   end do
 ! end do
- 
+
 ! if (.not.BUG) then
 !    call wrtout(std_out,'Calcul is possibly correct','COLL')
 !    call Affichage(Interaction,m_inf,m_sup,2)
-! else 
+! else
 !     call wrtout(std_out,'Maybe somme error','COLL')
 !     call Affichage(Interaction,m_inf,m_sup,1)
 ! end if
- 
+
  if(prtopt>0)  call Affichage(Interaction,m_inf,m_sup,1,ifreq,uu,jj,utype)
- 
+
  END SUBROUTINE checkk
- 
+
  SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype)
 
 
@@ -1080,26 +1080,26 @@
   complex(dpc), intent(in) :: Interaction(m_inf:m_sup,m_inf:m_sup,m_inf:m_sup,m_inf:m_sup)
   complex(dpc),intent(out) :: UU,JJ
   character(len=*), intent(in) :: utype
-  complex(dpc) :: UU1
+  complex(dpc) :: UU1,UUmJJ,JJ1,JJ2
   integer :: m1,m2
-  logical :: lprint 
+  logical :: lprint
   character(len=500) :: message
- 
+
 
   if(utype=="cRPA interaction".or.utype=="bare interaction") then
-   lprint=.true. 
-  else 
-   lprint=.false. 
+   lprint=.true.
+  else
+   lprint=.false.
   endif
   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-  
+
   if(lprint) then
     write(message,*)" Diagonal ",utype
     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
   endif
- 
+
   do m1=m_inf,m_sup
-    if (option.EQ.1) then 
+    if (option.EQ.1) then
       write(message,'(a,i3,14f7.3)') " ",m1,real(Interaction(m1,m1,m1,m1))
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
@@ -1110,7 +1110,7 @@
     write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
     write(message,*)" U'=U(m1,m2,m1,m2) for the ",utype
     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
- 
+
     write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
     do m1=m_inf,m_sup
@@ -1120,7 +1120,7 @@
       end if
     end do
   endif
- 
+
  write(message,*) ""
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
@@ -1148,7 +1148,7 @@
  if(lprint) then
    write(message,*)' Hund coupling J=U(m1,m1,m2,m2) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   
+
    write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do m1=m_inf,m_sup
@@ -1159,20 +1159,49 @@
    end do
  endif
 
- JJ=czero
+ UUmJJ=czero
  do m1=m_inf,m_sup
    do m2=m_inf,m_sup
-     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
    enddo
  enddo
- JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
- write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,' value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=',JJ,ch10
+ UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
+ JJ1=UU-UUmJJ
+
+! JJ=czero
+! do m1=m_inf,m_sup
+!   do m2=m_inf,m_sup
+!     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+!   enddo
+! enddo
+! JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
+ write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+& ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
- 
+
+ UUmJJ=czero
+ do m1=m_inf,m_sup
+   do m2=m_inf,m_sup
+      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+   enddo
+ enddo
+ UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
+ JJ2=UU-UUmJJ
+
+
+ if(abs(JJ1-JJ2)<0.0001) then
+   JJ=JJ1
+ else
+   write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+&   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
+   call wrtout(std_out,message,'COLL')
+   stop
+ endif
+
  if(lprint) then
    write(message,*)' Hund coupling J2=U(m1,m2,m2,m1) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   
+
    write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do m1=m_inf,m_sup
@@ -1185,9 +1214,9 @@
 ! write(message,*) "U'=U-2J for the t2g should be checked"
 ! call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
  endif
- 
+
  END SUBROUTINE Affichage
- 
+
  SUBROUTINE Sauvegarde_M_q_m(M_q_m,normG,nqibz,npw,mbband)
 
 
@@ -1203,7 +1232,7 @@
  real(dp), intent(in) :: normG(npw)
  integer :: i,j,iq_ibz,iG,unt
  character(len=500) :: msg
- 
+
 !==Ecriture de M_(G=0)^(mm')(q) ==!
  if (open_file('M_mimj(n=1_2_3)(q,G=0)',msg,newunit=unt,form='formatted',status='unknown') /=0) then
    MSG_ERROR(msg)
@@ -1212,7 +1241,7 @@
     write(unt,*) iq_ibz,((abs(M_q_m(i,j,1,iq_ibz)),i=1,mbband),j=1,mbband)
  end do
  close(unt)
- 
+
 !==Ecriture de M_G^(mm')(q=0) ==!
  if (open_file('M_mm(m=1..mbband)(q=0)',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
    MSG_ERROR(msg)

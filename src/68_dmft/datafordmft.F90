@@ -7,7 +7,7 @@
 !!  Compute psichi (and print some data for check)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +85,13 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  use m_paw_ij, only : paw_ij_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
  use m_paw_dmft, only: paw_dmft_type
+ use m_mpinfo,   only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'datafordmft'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_68_dmft, except_this_one => datafordmft
 !End of the abilint section
 
@@ -373,7 +373,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !                    if(ilmn==13) then
 !                    write(std_out,*) "M-2c",isppol,ikpt,iband,iatom
 !                    write(std_out,*) "M-2b",isppol,ikpt,ibandc,&
-!                    &             (cwaveprj(iatom,ispinor)%cp(1,13)**2+cwaveprj(iatom,ispinor)%cp(2,13)**2) 
+!                    &             (cwaveprj(iatom,ispinor)%cp(1,13)**2+cwaveprj(iatom,ispinor)%cp(2,13)**2)
 !                    endif
 !                    write(std_out,*) "inside paw_dmft%band_in",iband
                      jj1=jj1+1
@@ -449,15 +449,15 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !write(std_out,*) "psichi IB3 iAT1 IM1",&
 !&             real(paw_dmft%psichi(isppol,ikpt,3,ispinor,1,1)), imag(paw_dmft%psichi(isppol,ikpt,3,ispinor,1,1))
 !
-!enddo 
-!enddo 
-!enddo 
+!enddo
+!enddo
+!enddo
 !call leave_new('COLL')
  if(abs(dtset%pawprtvol)>=3) then
    write(message,*) "chinorm used here =",chinorm
    call wrtout(std_out,  message,'COLL')
  end if
- 
+
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
@@ -520,10 +520,10 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !&             real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,1,1))**2+&
 !&             imag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,1,1))**2
 !
-!enddo 
-!enddo 
-!enddo 
-!enddo 
+!enddo
+!enddo
+!enddo
+!enddo
 
  call xmpi_barrier(spaceComm)
 !if(mpi_enreg%me.eq.0) write(177,*) "end",psichi
@@ -622,7 +622,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
            isppol=1
            ispinor=1
            ispinor1=1
-         else 
+         else
            write(message,'(2a)') " BUG in datafordmft: nsploop should be equal to 2 or 4"
            call wrtout(std_out,message,'COLL')
          end if

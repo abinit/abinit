@@ -34,7 +34,7 @@ ndtset 3
 
  prtwf3 0                  # By default, WFs would be printed with mpiio. However, the NAG compiler (on petrus) takes forever to do so. Since these WFs are totally unuseful and this is not a mpiio test, printing WFs is disabled. 
  prtden3 0                 # Same reason as WFs.
- gwls_recycle3 1           # The writing to file (gwls_recycle3 2) is more desirable as it saves a lot of RAM on production runs, but petrus + NAG 5.3.1 + OpenMPI 1.6.2 cause a BUG with writing / rreading unformatted fortran files. For the time being, we won't test this, then.
+ gwls_recycle3 1           # The writing to file (gwls_recycle3 2) is more desirable as it saves a lot of RAM on production runs, but petrus + NAG 5.3.1 + OpenMPI 1.6.2 cause a BUG with writing / reading unformatted fortran files. For the time being, we won't test this, then.
 
 ### Common variables
 

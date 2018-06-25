@@ -6,17 +6,19 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! inpspheads.F90
-!! interfaces_57_iopsp_parser.F90
+!! flib_pwscf.F90
+!! functionals_pwscf.F90
+!! m_pseudo_pwscf.F90
+!! m_pspheads.F90
 !! m_psxml2ab.F90
-!! pawpsxml2ab.F90
-!! upfheader2abi.F90
+!! read_upf_pwscf.F90
+!! interfaces_57_iopsp_parser.F90
 !!
 !!***

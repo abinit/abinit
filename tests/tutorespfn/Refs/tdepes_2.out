@@ -1,9 +1,9 @@
 
-.Version 8.5.3 of ANADDB 
+.Version 8.7.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
- ANADDB comes with ABSOLUTELY NO WARRANTY.
+.Copyright (C) 1998-2018 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
  see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
@@ -14,235 +14,159 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Sep 2017.
-- ( at 12h52 )
+.Starting date : Sun 18 Mar 2018.
+- ( at 18h13 )
   
+- input  file    -> tdepes_2.in
+- output file    -> tdepes_2.out
+- root for input  files -> tdepes_2i
+- root for output files -> tdepes_2o
 
+
+ DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          12        mffmem =           1         mkmem =           8
+       mpw =         125          nfft =        3375          nkpt =           8
+================================================================================
+P This job should need less than                       1.656 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
- -outvars_anaddb: echo values of input variables ----------------------
-
- Flags :
-     ifcflag         1
-     thmflag         3
- Miscellaneous information :
-         asr         1
-      chneut         1
- Interatomic Force Constants Inputs :
-      dipdip         0
-      ifcana         0
-      ifcout         0
- Description of grid 1 :
-        brav         1
-       ngqpt         1         1         1
-      nqshft         1
-      q1shft
-                     0.00000000E+00  0.00000000E+00  0.00000000E+00
- Thermal information :
-       nchan       800
-      nwchan        10
-      dostol         2.50000000E-01
-      thmtol         2.50000000E-01
-     ntemper        20
-   temperinc         5.00000000E+01
-   tempermin         1.00000000E+00
- Description of grid 2 :
-      ng2qpt         0         0         0
-      ngrids         4
-      q2shft         0.00000000E+00  0.00000000E+00  0.00000000E+00
- First list of wavevector (reduced coord.) :
-       nph1l         1
-       qph1l
-                     0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
-
-================================================================================
-
- read the DDB information and perform some checks
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  3.3375000  3.3375000  G(1)= -0.1498127  0.1498127  0.1498127
- R(2)=  3.3375000  0.0000000  3.3375000  G(2)=  0.1498127 -0.1498127  0.1498127
- R(3)=  3.3375000  3.3375000  0.0000000  G(3)=  0.1498127  0.1498127 -0.1498127
- Unit cell volume ucvol=  7.4352199E+01 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
-
-================================================================================
-
- Calculation of the interatomic forces 
-
--begin at tcpu      0.008  and twall      0.008 sec
-       Homogeneous q point set in the B.Z.
- Grid q points  :        1
-  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
-
- The interatomic forces have been obtained
-
-================================================================================
-
- Treat the first list of vectors 
-
-
-  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
- Phonon energies in Hartree :
-  -1.033852E-08 -1.010511E-08  0.000000E+00  6.739630E-03  6.739744E-03
-   6.739824E-03
- Phonon frequencies in cm-1    :
-- -2.269043E-03 -2.217815E-03  0.000000E+00  1.479178E+03  1.479203E+03
--  1.479220E+03
-
- Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
- Symmetry characters of vibration mode #   1
-       degenerate with vibration modes #   2 to    3
-  3.0
- Symmetry characters of vibration mode #   4
-       degenerate with vibration modes #   5 to    6
-  3.0
-
-================================================================================
- Computation of the electron-phonon changes to the electronic eigenenergies
-
- thmeig : list of q wavevectors, with integration weights
-     1    0.000000E+00    0.000000E+00    0.000000E+00        1.000000E+00
-
- Will write phonon DOS in file tdepes_2.out_ep_PDS
-
- For checking purposes, write ten values in the present file.
-       Index    Energy (in Ha)      DOS
-         1      0.000000E+00      8.491776E-14
-        51      7.430508E-04      0.000000E+00
-       101      1.486102E-03      0.000000E+00
-       151      2.229152E-03      0.000000E+00
-       201      2.972203E-03      0.000000E+00
-       251      3.715254E-03      0.000000E+00
-       301      4.458305E-03      0.000000E+00
-       351      5.201355E-03      0.000000E+00
-       401      5.944406E-03      0.000000E+00
-       451      6.687457E-03      5.741346E+01
- 
 --------------------------------------------------------------------------------
- 
- Electron-phonon change of electronic structure.
- The temperature-dependent values are written in the _TBS file.
- Here follows, for each electronic wavevector and band :
-      zero-point renormalisation (Ha) and linear slope (Ha/Kelvin)
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      6.6750000000E+00  6.6750000000E+00  6.6750000000E+00 Bohr
+              amu      1.20110000E+01
+           diemac      6.00000000E+00
+             ecut      1.00000000E+01 Hartree
+    elph2_imagden      3.67493254E-03 Hartree
+           enunit           2
+-          fftalg         312
+           istwfk        1    0    1    0    0    0    1    0
+           jdtset        1
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+         kptrlatt        4    0    0      0    4    0      0    0    4
+          kptrlen      1.88797511E+01
+P           mkmem           8
+            natom           2
+            nband          12
+           ndtset           1
+            ngfft          15      15      15
+             nkpt           8
+            nstep           0
+             nsym          48
+           ntypat           1
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+           prtvol          -1
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         227
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+           tolvrs      1.00000000E-08
+            typat      1  1
+              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       8.8306446683E-01  8.8306446683E-01  8.8306446683E-01
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.6687500000E+00  1.6687500000E+00  1.6687500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl        6.00000
 
- Kpt number      1, with reduced coordinates :    0.000000E+00    0.000000E+00    0.000000E+00
-     1       -5.488209E-04       -6.060282E-07
-     2       -2.363156E-04       -2.578954E-07
-     3       -2.339852E-04       -2.644906E-07
-     4       -2.290579E-04       -2.498710E-07
-     5        2.675496E-05        2.428218E-08
-     6        2.784585E-05        4.112213E-08
-     7        2.810157E-05        2.591209E-08
-     8       -1.001332E-03       -1.105707E-06
-     9       -1.344804E-03       -1.484982E-06
-    10        3.657803E-04        4.082696E-07
-    11        1.198314E-03        1.317897E-06
-    12       -7.080970E-04       -7.835592E-07
+================================================================================
 
- Kpt number      2, with reduced coordinates :    5.000000E-01    0.000000E+00    0.000000E+00
-     1       -6.836201E-04       -7.565863E-07
-     2       -7.326709E-04       -8.069903E-07
-     3        1.130181E-04        1.169627E-07
-     4        1.144246E-04        1.369254E-07
-     5       -3.132231E-03       -3.463081E-06
-     6        1.139079E-03        1.258941E-06
-     7        1.141855E-03        1.261430E-06
-     8       -7.400855E-04       -8.183583E-07
-     9       -2.390564E-03       -2.637838E-06
-    10        2.819231E-03        3.118444E-06
-    11        1.187059E-03        1.313002E-06
-    12       -3.197434E-04       -3.536666E-07
+ chkinp: Checking input parameters for consistency, jdtset=   1.
 
- Kpt number      3, with reduced coordinates :    0.000000E+00    5.000000E-01    0.000000E+00
-     1       -6.835846E-04       -7.541299E-07
-     2       -7.324896E-04       -8.096935E-07
-     3        1.130204E-04        1.307565E-07
-     4        1.142759E-04        1.190963E-07
-     5       -3.132187E-03       -3.456866E-06
-     6        1.138392E-03        1.252286E-06
-     7        1.141888E-03        1.264988E-06
-     8       -7.400327E-04       -8.167024E-07
-     9       -2.390063E-03       -2.639988E-06
-    10        2.819146E-03        3.116303E-06
-    11        1.187105E-03        1.305803E-06
-    12       -3.185271E-04       -3.514818E-07
+ abinit : before driver, prtvol=-1, debugging mode => will skip driver
 
- Kpt number      4, with reduced coordinates :    5.000000E-01    5.000000E-01    0.000000E+00
-     1       -1.406214E-03       -1.552737E-06
-     2       -8.526012E-04       -9.413525E-07
-     3       -1.937750E-04       -2.143505E-07
-     4       -1.936761E-04       -2.137103E-07
-     5       -1.916061E-03       -2.115709E-06
-     6       -1.612578E-03       -1.780558E-06
-     7        4.783443E-03        5.283361E-06
-     8        4.783832E-03        5.281002E-06
-     9       -1.024755E-02       -1.131601E-05
-    10       -5.736141E-04       -6.324710E-07
-    11        6.441342E-03        7.106066E-06
-    12        6.442207E-03        7.119555E-06
+== END DATASET(S) ==============================================================
+================================================================================
 
- Kpt number      5, with reduced coordinates :    0.000000E+00    0.000000E+00    5.000000E-01
-     1       -6.837507E-04       -7.573510E-07
-     2       -7.313969E-04       -8.048413E-07
-     3        1.130793E-04        1.332349E-07
-     4        1.135676E-04        1.207717E-07
-     5       -3.132279E-03       -3.464718E-06
-     6        1.138239E-03        1.260390E-06
-     7        1.139705E-03        1.257301E-06
-     8       -7.401567E-04       -8.188468E-07
-     9       -2.387784E-03       -2.634084E-06
-    10        2.820249E-03        3.110775E-06
-    11        1.187564E-03        1.316126E-06
-    12       -3.138373E-04       -3.473778E-07
+ abinit : before driver, prtvol=-1, debugging mode => will skip outvars
 
- Kpt number      6, with reduced coordinates :    5.000000E-01    0.000000E+00    5.000000E-01
-     1       -1.406119E-03       -1.548172E-06
-     2       -8.525216E-04       -9.309204E-07
-     3       -1.938338E-04       -2.228422E-07
-     4       -1.937910E-04       -2.240912E-07
-     5       -1.916034E-03       -2.109514E-06
-     6       -1.612475E-03       -1.771103E-06
-     7        4.783433E-03        5.272489E-06
-     8        4.783657E-03        5.277359E-06
-     9       -1.024717E-02       -1.134020E-05
-    10       -5.737684E-04       -5.550497E-07
-    11        6.441618E-03        7.100686E-06
-    12        6.440810E-03        7.051537E-06
 
- Kpt number      7, with reduced coordinates :    0.000000E+00    5.000000E-01    5.000000E-01
-     1       -1.406312E-03       -1.557476E-06
-     2       -8.526354E-04       -9.520951E-07
-     3       -1.936643E-04       -2.037645E-07
-     4       -1.935937E-04       -2.047323E-07
-     5       -1.916107E-03       -2.122154E-06
-     6       -1.612717E-03       -1.790380E-06
-     7        4.783555E-03        5.286863E-06
-     8        4.783842E-03        5.292460E-06
-     9       -1.024819E-02       -1.129120E-05
-    10       -5.739615E-04       -7.132698E-07
-    11        6.442038E-03        7.160683E-06
-    12        6.442197E-03        7.140448E-06
+- Timing analysis has been suppressed with timopt=0
 
- Kpt number      8, with reduced coordinates :    5.000000E-01    5.000000E-01    5.000000E-01
-     1       -6.835939E-04       -7.515220E-07
-     2       -7.321809E-04       -8.124960E-07
-     3        1.127551E-04        1.190860E-07
-     4        1.143023E-04        1.263021E-07
-     5       -3.132116E-03       -3.450107E-06
-     6        1.137937E-03        1.254580E-06
-     7        1.141516E-03        1.259184E-06
-     8       -7.400451E-04       -8.149859E-07
-     9       -2.390689E-03       -2.643607E-06
-    10        2.819036E-03        3.110571E-06
-    11        1.187159E-03        1.306845E-06
-    12       -3.170338E-04       -3.489123E-07
+
+
+ abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
 - Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.149  and wall time      0.149 sec
-
- anaddb : the run completed succesfully.
+ Calculation completed.
+.Delivered   0 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.1  wall=          0.1

@@ -9,7 +9,7 @@
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG,MM,FF)
+!! Copyright (C) 2009-2018 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,6 +58,7 @@ subroutine indefo1(dtset)
 
 !Local variables -------------------------------
 !scalars
+ integer :: ii
 
 !******************************************************************
 !
@@ -81,6 +82,7 @@ subroutine indefo1(dtset)
  dtset%bfield(:)=zero
 !C
  dtset%cd_customnimfrqs=0
+ dtset%chkprim=1
 !D
  dtset%densty(:,:)=zero
  dtset%dfield(:)=zero    !!HONG
@@ -106,6 +108,7 @@ subroutine indefo1(dtset)
  dtset%kptopt=0
 !L
  dtset%lexexch(:)=-1
+ dtset%ldaminushalf(:)=0
  dtset%lpawu(:)=-1
 !M
  dtset%maxestep=0.005d0
@@ -165,6 +168,10 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
+ dtset%supercell_latt(:,:) = 0
+ do ii=1,3
+   dtset%supercell_latt(ii,ii) = 1
+ end do
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0

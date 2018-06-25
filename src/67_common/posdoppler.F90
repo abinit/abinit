@@ -7,7 +7,7 @@
 !! Calculate the momentum distribution annihilating electrons-positron (Doppler broadening)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (JW,GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (JW,GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,6 +108,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_wffile
  use m_electronpositron
 
+ use m_special_funcs,  only : sbf8
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
 &                      pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
  use m_pawang,  only : pawang_type, realgaunt
@@ -119,20 +120,18 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_paw_sphharm, only : initylmr
  use m_pawpsp,  only : pawpsp_read_corewf
  use m_crystal, only : crystal_t
- use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg
+ use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_io_tools,only : open_file,close_unit,get_unit
+ use m_fftcore, only : sphereboundary
+ use m_drivexc, only : mkdenpos
+ use m_gammapositron, only : gammapositron_fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_xc_lowlevel
- use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => posdoppler

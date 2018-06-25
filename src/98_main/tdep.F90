@@ -7,7 +7,7 @@
 !! Calculations of phonons using molecular dynamic simulations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FB,JB)
+!! Copyright (C) 1998-2018 ABINIT group (FB,JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      Abinit routines, our own routines and lapack/blas ones
+!!      tdep_build_phijnn,tdep_calc_dij,tdep_calc_elastic,tdep_calc_model
+!!      tdep_calc_moorepenrose,tdep_calc_phdos,tdep_calc_phijfcoeff
+!!      tdep_calc_thermo,tdep_destroy_shell,tdep_init_crystal,tdep_init_ddb
+!!      tdep_init_eigen2nd,tdep_init_ifc,tdep_init_shell2at,tdep_make_latt
+!!      tdep_make_qptpath,tdep_make_sym,tdep_matchideal2average
+!!      tdep_print_aknowledgments,tdep_readecho,tdep_write_dij,tdep_write_yaml
+!!      xmpi_end,xmpi_init
 !!
 !! SOURCE
 
@@ -64,6 +70,7 @@ program tdep
 #ifdef HAVE_NETCDF
   use netcdf
 #endif
+  use m_io_tools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -73,19 +80,16 @@ program tdep
 
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,ntotcoeff,ncoeff,iatcell,nshell_max
-  integer :: order,ishell,stdout,norder,katom,iqpt
+  integer :: natom,natom_unitcell,ntotcoeff,nshell_max
+  integer :: order,stdout,norder,iqpt
   double precision :: U0,DeltaFree_AH2
-  double precision, allocatable :: ucart(:,:,:),proj(:,:,:),proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+  double precision, allocatable :: ucart(:,:,:),proj(:,:,:),proj_tmp(:,:,:),Forces_TDEP(:)
 !FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
   double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
-  double precision, allocatable :: Psij_coeff(:,:),Psij_NN(:,:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: omega (:)
-  double precision, allocatable :: dynmat(:,:,:,:,:,:)
   double precision :: qpt_cart(3)
   double complex  , allocatable :: dij(:,:),eigenV(:,:)
-  double complex  , allocatable :: Gruneisen(:)
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice
@@ -94,7 +98,7 @@ program tdep
   type(ifc_type) :: Ifc
   type(ddb_type) :: DDB
   type(crystal_t) :: Crystal
-  type(Shell_Variables_type) :: Shell2at,Shell3at
+  type(Shell_Variables_type) :: Shell2at
   type(Coeff_Moore_type) :: CoeffMoore
   type(Eigen_Variables_type) :: Eigen2nd
 
@@ -139,13 +143,16 @@ program tdep
  ABI_MALLOC(ucart,(3,natom,InVar%nstep))    ; ucart(:,:,:)=0.d0
  ABI_MALLOC(Forces_MD,(3*natom*InVar%nstep)); Forces_MD(:)=0.d0
 
+ write(InVar%stdout,*) "Matching structure"
+ call flush_unit(InVar%stdout)
  call tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,Rlatt_cart,Rlatt4Abi,Sym,ucart)
+ call flush_unit(InVar%stdout)
 
 !==========================================================================================
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
 !==========================================================================================
  call tdep_init_crystal(Crystal,InVar,Lattice,Sym)
- call tdep_init_ddb(Crystal,DDB,InVar,Lattice)
+ call tdep_init_ddb(DDB,InVar,Lattice)
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -160,6 +167,7 @@ program tdep
  write(InVar%stdout,*) '################ Now, find the number of coefficients for ###################'
  write(InVar%stdout,*) '########################## a reference interaction ##########################'
  write(InVar%stdout,*) '#############################################################################'
+ call flush_unit(InVar%stdout)
  
 !==========================================================================================
 !============== Initialize the Shell2at datatype ==========================================
@@ -204,7 +212,7 @@ program tdep
 !==========================================================================================
 !===================== Compute the phonons density of states ==============================
 !==========================================================================================
- call tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
+ call tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
  ABI_FREE(Rlatt4Abi)
  call tdep_destroy_shell(natom,order,Shell2at)
 
@@ -216,9 +224,9 @@ program tdep
  write(stdout,*) '#############################################################################'
  write(stdout,*) '######################## Dynamical matrix ###################################'
  write(stdout,*) '#############################################################################'
- open(unit=53,file='omega.dat')
- open(unit=52,file='dij.dat')
- open(unit=51,file='eigenvectors.dat')
+ open(unit=53,file=trim(InVar%output_prefix)//'omega.dat')
+ open(unit=52,file=trim(InVar%output_prefix)//'dij.dat')
+ open(unit=51,file=trim(InVar%output_prefix)//'eigenvectors.dat')
  ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(omega,(3*InVar%natom_unitcell))
@@ -237,7 +245,7 @@ program tdep
  close(53)
  close(52)
  close(51)
- call tdep_write_yaml(Eigen2nd,Lattice,Qpt)
+ call tdep_write_yaml(Eigen2nd,Qpt,InVar%output_prefix)
  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
 !==========================================================================================
 !===================== Compute the elastic constants ======================================

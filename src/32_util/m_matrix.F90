@@ -8,7 +8,7 @@
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (BA)
+!! Copyright (C) 2009-2018 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_matrix
  use m_errors
  use m_profiling_abi
 
- use m_abilasi,  only : xginv
+ use m_hide_lapack,  only : xginv
 
  implicit none
 
@@ -67,10 +67,6 @@ CONTAINS  !===========================================================
 
 subroutine invsqrt_matrix(matrix,tndim)
 
-
- use defs_basis
-! use defs_abitypes
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

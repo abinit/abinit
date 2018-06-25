@@ -6,9 +6,9 @@
 !! FUNCTION
 !! This modules defines arrays and data used for the real-space kerker
 !! preconditionning of potential residuals.
-!! 
+!!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (PMA).
+!! Copyright (C) 2009-2018 ABINIT group (PMA).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,7 +16,7 @@
 !!
 !! NOTES
 !!  FIXME: this is highly non-kosher. Should be a datastructure which is declared dynamically
-!!  MG: I completely agree! We don't use modules to share data and I don't see why we should 
+!!  MG: I completely agree! We don't use modules to share data and I don't see why we should
 !!  break the rule here.
 !!
 !! SOURCE
@@ -55,7 +55,7 @@ public :: prc_mem_free
 !!
 !! FUNCTION
 !! This subroutine allocates the module's main component
-!! 
+!!
 !! PARENTS
 !!      prcrskerker1
 !!
@@ -97,7 +97,7 @@ integer, intent(in) :: nfft
 !!
 !! FUNCTION
 !! This subroutine deallocates the module's main component
-!! 
+!!
 !! PARENTS
 !!      scfcv
 !!

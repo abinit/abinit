@@ -10,7 +10,7 @@
 !! (and derivatives) on this grid (g_l=radial shape function).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms in unit cell
 !!  optcut= option for the cut-off radius of spheres:
 !!          if optcut=0, cut-off radius=pawtab%rshp=cut-off radius of compensation charge
@@ -79,6 +79,7 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,         only : timab
  use m_xmpi,         only : xmpi_comm_self,xmpi_comm_rank,xmpi_comm_size
  use m_pawtab,       only : pawtab_type
  use m_pawfgrtab,    only : pawfgrtab_type
@@ -90,7 +91,6 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nhatgrid'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -6,20 +6,24 @@ energy_reference = -173.52217240339399
 prt_model = 2
 
 dipdip = 0
+dipdip_prt = 1
+
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
 fit_coeff = 1
 fit_rangePower = 3 4
 fit_cutoff = 7
-fit_ncycle = 4
+fit_ncoeff = 10
+fit_nfixcoeff  = 2
+fit_fixcoeff  = 48 50
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% test_chain = t13.in,t14.in
+#%% test_chain = t13.in,t14.in,t15.in
 #%% input_ddb = t13_ddb.in
 #%% md_hist = t13_HIST
 #%% [files]

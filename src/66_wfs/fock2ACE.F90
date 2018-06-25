@@ -5,11 +5,11 @@
 !!
 !! FUNCTION
 !! Compute nonlocal contribution to the Fock part of the hamiltonian in the ACE formalism.
-!! optionally contribution to Fock forces 
-!! 
+!! optionally contribution to Fock forces
+!!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,21 +27,20 @@
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang=
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell.
 !!  nband(nkpt)=number of bands at each k point
 !!  nfft=number of FFT grid points
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points in Brillouin zone
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at each k
 !!  nspden=Number of spin Density components
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
-!!  nsym=number of elements in symmetry group
 !!  ntypat=number of types of atoms
 !!  occ(mband*nkpt*nsppol)=occupation numbers for each band over all k points
 !!  optfor=1 if computation of forces is required
@@ -50,7 +49,6 @@
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
 !!  use_gpu_cuda= 0 or 1 to know if we use cuda for nonlop call
@@ -71,8 +69,8 @@
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
 !!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum
-!!      zpotrf,ztrtrs
+!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum,zpotrf
+!!      ztrtrs
 !!
 !! SOURCE
 
@@ -83,8 +81,9 @@
 #include "abi_common.h"
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
-&  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
-&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
+&  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
+&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
+
 
  use defs_basis
  use defs_datatypes
@@ -93,6 +92,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_xmpi
  use m_errors
  use m_fock
+ use m_cgtools
+
+ use m_time,             only : timab
+ use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -100,15 +103,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
- use m_cgtools
+ use m_mkffnl,           only : mkffnl
+ use m_mpinfo,           only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => fock2ACE
 !End of the abilint section
 
@@ -117,14 +118,14 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
- integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor
+ integer,intent(in) :: nspden,nsppol,nspinor,ntypat,optfor
  integer,intent(in) :: usecprj,use_gpu_cuda
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
- integer,intent(in) :: symrec(3,3,nsym),typat(natom)
+ integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: kpt(3,nkpt)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
@@ -136,12 +137,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  type(fock_type),pointer, intent(inout) :: fock
 !Local variables-------------------------------
 !scalars
- integer :: bandpp,bdtot_index,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
- integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
+ integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
+ integer :: idir,ierr,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
  integer :: use_ACE_old
  integer :: blocksize,iblock,jblock,iblocksize,jblocksize,nblockbd
+!integer, save :: counter=0
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound
  character(len=500) :: msg
@@ -162,6 +164,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
  call timab(920,1,tsec)
  call timab(921,1,tsec)
+
+!DEBUG
+!if(counter>0)return
+!counter=counter+1
+!ENDDEBUG
 
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
@@ -304,11 +311,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
-!   
+!
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
      occblock=zero;weight=zero
-     
+
      if (fockcommon%optfor) then
        fockcommon%forces_ikpt=zero
      end if
@@ -344,7 +351,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        if (mpi_enreg%paral_kgb==1) then
          msg='fock2ACE: Paral_kgb is not yet implemented for fock calculations'
          MSG_BUG(msg)
-       end if 
+       end if
        ndat=mpi_enreg%bandpp
        if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
 
@@ -360,7 +367,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          if (fockcommon%optfor) then
            fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
          end if
-       end do 
+       end do
 
 
      end do ! End of loop on block of bands
@@ -415,9 +422,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        end do
      end do
 
+!    DEBUG
+!    fock%fockACE(ikpt,isppol)%xi=zero
+!    ENDDEBUG
+
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
-     
+
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)

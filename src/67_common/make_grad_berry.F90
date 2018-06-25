@@ -8,7 +8,7 @@
 !! electric field case
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,14 +81,14 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 
  use m_pawcprj,     only : pawcprj_type, pawcprj_get, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_symkn
  use m_hamiltonian, only : gs_hamiltonian_type
+ use m_nonlop,      only : nonlop
+ use m_berrytk,     only : smatrix
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_grad_berry'
- use interfaces_32_util
  use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

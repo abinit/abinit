@@ -1,0 +1,557 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+September 2014 and May 2016. These release notes
+are relative to modifications/improvements of ABINITv8.0 with respect to v7.10.
+
+Moreover, most of them are also described in the Computer Physics Communications 2016 ABINIT paper, 
+doi:10.1016/j.cpc.2016.04.003
+
+The list of contributors includes :
+F. Abreu, B. Amadon, G. Antonius, F. Arnardi, L. Baguet, J.-M. Beuken, J. Bieder, 
+A. Bokhanchuk, E. Bousquet, F.Bruneval, D. Caliste, W. Chen, M. C&ocirc;t&eacute;, J.F. Danel,
+M. Delaveau, C. Espejo, A. Gerossier, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet,
+J. Laflamme Janssen, R. Laasner, A. Martin, C. Martins, A. Pasquarello, V. Planes, 
+S. Ponc&eacute;, Y. Pouillon, T. Rangel, V. Recoules, F. Ricci, G.-M. Rignanese, B. Rousseau,
+O. Rubel, A. Shukri, M. Torrent, M. Van Setten, B. van Troeye, M. Verstraete, 
+D. Waroquiers, J. Wiktor, Bin Xu, J. Zwanziger
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 8.0, released on May 16, 2016.
+
+Changes with respect to version 7.10 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The automatic renaming of the output file when there is already a old output file present with the same name has been modified : 
+    now the name of the old file is changed instead of the name of the new file. (From J. Bieder).
+
+A.2 The ABINIT header for many binary files has been updated, and backward compatibility has not been maintained.
+    This is a major move forward : the code developers can assume that the new content of the header is available
+    for their development.
+    So, the user should not be surprised not being able to read old files produced by ABINITv7 with ABINITv8. 
+    Either use ABINITv7.10.5 (the last official version of ABINITv7) with these files, or regenerate them
+    with ABINITv8. 
+    Mostly, work by M. Giantomassi.
+
+A.3 Cleaning of ABINIT capabilities and input variables.
+    Some deprecated capabilities of ABINIT have been suppressed, as well as
+    the corresponding input variables, documentation, and tests. There has been a similar cleaning
+    of some unfinished development. The source code has been accordingly cleaned.
+    In particular, items related to the following have been removed :
+    the CML interfacing, the old RPA or ACFD approach to Van Der Waals energy 
+    (that was only implemented at k=Gamma, and separate from the GW part and the RPA computation of total energy), 
+    the Thomas-Fermi Von Weiszacker preconditioning, some items related to orbital magnetism, reading of KSS files,
+    the documentation about the unsupported OpenDX software, an old methodology to compute Wannier functions (oddly present in cut3D),
+    the ETSF_IO related input variables, the Effective Energy Technique (EET), and the LOBPCG II algorithm.
+    Suppression of input variables : etsfgroups, etsfmain, freqsusin, freqsuslo, fft_opt_lob, getkss, 
+    gw_eet, gw_eet_inclvkb, gw_eet_nband, gw_eet_scale, idyson, 
+    ikhxc, intexact, iprctfvw, irdkss, LaticeConstant, ldgapp,
+    nbandsus, ndyson, nfreqsus, optfreqsus, suskxcrs, chkgwcomp, orbmag, prtcs, npweps, 
+    npwsigx, npwwfn, nsheps, nshsigx, nshwfn .
+    The following input variables are now internal : npwwfn and npwecut.
+    Suppression of tests : v2#57, v2#78-80, v3#68 and 69 (CML), v4#10, 47, 48, 49, v5#47, v67mbpt#10 and 28 (EET), seq#tsv5_101 
+    This work was done by many ABINIT developers.
+
+A.4 Cleaning the use of libraries
+    The use of FoX and Libpspio has been disabled. Fox is actually superseded by PSML. 
+    The use of ETSF-IO library is deprecated (should be replaced in the long term by the ESL library).
+    Still, the use of netcdf and of the ETSF-IO standard is maintained (and will likely spread due to the COST EUSpec efforts).
+    Work by Y. Pouillon and M. Giantomassi
+
+A.5 Changing input variable names
+    Some input variable names, that were not fully appropriate, have been changed, breaking backwards compatibility.
+    In particular :
+    sciss is now dfpt_sciss 
+    soenergy is now mbpt_sciss
+    iprcch is now densfor_pred
+    nloalg has been split in two input variables : nloc_alg and nloc_mem
+    accesswff is now iomode (the previous values used to select Fortran-IO, MPI-IO and ETSF-IO 
+    are unchanged while netcdf mode has been removed. Note that the policy used for IO has been changed. See docs)
+    rfd2dk is now rf2_dkdk
+    rfXatpol is now d3e_pertX_atpol (for X=1, 2, 3)
+    rfXdir is now d3e_pertX_dir (for X=1, 2, 3)
+    rfXelfd is now d3e_pertX_elfd (for X=1, 2, 3)
+    rfXphon is now d3e_pertX_phon (for X=1, 2, 3)
+    Work by X. Gonze M. Torrent and M. Giantomassi 
+
+A.6 Other cleaning or renumbering.
+    All the reference output files have been updated, because the reference machine has changed 
+    (the old "testf" has been replaced by the new "abiref"),
+    and also due to the switch from ABINITv7 to ABINITv8. Some additional information
+    (e.g. related to magnetization) is now present in the standard output file.
+    The enable_clib option of configure has been removed because clib is now required.
+    Some tests in tests/v7 have been reordered and renumbered (with respect to their numbering in 
+    Computer Physics Communications (2016)) : 
+    test v7#67 has become v7#16, 
+    tests v7#114-115 have become v7#47-48.
+    Other renumberings : 
+    tests v3#90-95 have become v3#92-97,
+    tests v3#100-101 have become v3#90-91,
+    tests v7#100-101 have become v7#83-84,
+    tests v7#110-113 have become v7#85-88.
+    The "special" directory, that contains scripts and directories to perform a series of checks of ABINIT,
+    not in the mainstream of the automatic tests (coding rules, build systems, etc),
+    has been renamed "abichecks".
+    The old "psps" directory has been removed (superseded by the pseudo-dojo project).
+    The GW lessons of the tutorial have been cleaned, the input files are now using the standard default values in general.
+    Many automatic tests have also been cleaned, thanks to the use of the default values 
+    (e.g. for the following input variables : asr, inclvkb, iscf, 
+    ntemper, prtdensph, pawxcdev, symchi, symdynmat, tempermin, temperinc).
+    Although they can still be generated, KSS files are not used anymore in ABINIT 
+    (especially they are not used anymore in the GW part).
+    Work by many ABINIT developers
+
+A.7 The default writing of status file has been disabled.
+    By X. Gonze
+
+A.8 restartxf=1 has been removed 
+    By M. Giantomassi
+
+A.9 Linking with NetCDF is strongly suggested as particular features such as 
+    the computation of the temperature-dependence of the electronic structure and other post-processing 
+    tools (e.g. AbiPy) rely on files produced in this format. Note that Abinit8, supports netcdf4 + Hdf5 + MPI-IO
+    Users who want to produce their results in netcdf format are strongly encouraged to link against  
+    an external library providing these capabilities. 
+    See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+    By M. Giantomassi
+
+A.10 Calculations done with nprocs greater than 1 will produce a file (__ABI_MPIABORTFILE__)
+     in the working directory with the error message of the first processor 
+     that encounters the problem. This is particularly useful for runs done on many CPUs 
+     since log files are disabled. Note that the logic used by Abinit breaks down if 
+     users run multiple instances of abinit in the same working directory.
+    By M. Giantomassi
+
+A.11 cut3d user interface has been changed. This modification could break third-party scripts
+     written by users. Some capabilities of cut3d have been removed : Wannier (see above), densfileformat, DX .
+    By M. Giantomassi
+
+A.12 New defaults and different behaviour in the GW section of ABINIT.
+    * inclvkb now defaults to 2 (was 1 previously)
+    * awtr defaults to 1 (was 0 previously)
+    * getkss and irdkss have been removed. Use getwkf and irdwfk to start a GW calculation from the WFK file.
+    * prtsuscep now defaults to 0 (was 1 previously)
+      GW calculations using a cutoff in the Coulomb interaction must set prtsuscep == 1 in the screening part
+      so that ABINIT can recompute the screening in the sigma part
+      starting from the SUS file (polarizabilty) with the truncated interaction.  
+      Same restriction applies when gwgamma=1 is used.
+    * npweps, npwsigx, npwwfn are now internal variables.
+      The basis set for GW calculations should be defined via ecuteps, ecutsigx, ecutwfn
+    * kptopt = 0 should not be used to produce the WFK used in GW calculations.
+    By M. Giantomassi
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 Implementation of the Van der Waals D3 functional proposed by Grimme (vdw_xc=6) 
+    and also the modified flavour by Becke and Johnson (vdw_xc=7).
+    Computation of the ground state energy, force and stresses, but also the dynamical matrices at arbitrary q points (DFPT).
+    Elastic tensor and internal strain are available as well in DFPT.
+    There is no specific contribution to derivatives with respect to electric field of the Van der Waals D3 functional
+    (so the computation reduces to the one of the underlying DFT functional only),
+    so these derivatives are available as well.
+    The dynamical matrices, elastic tensor and internal strain 
+    have also been implemented for the Van der Waals D2 functional, previously made available (vdw_xc=5)
+    See B. Van Troeye, M. Torrent, and X. Gonze. Phys. Rev. B93, 144304 (2016) for the dynamical matrices. 
+    Another paper is in preparation, concerning the elastic tensor and internal strain.
+    Input variables :  vdw_xc , vdw_tol, vdw_tol_3bt
+    Tests : v7#97 to 99.
+    Work by Benoit Van Troeye, XG, and M. Torrent.
+
+B.2 The efforts related to the generation of pseudopotentials have lead to well-tested
+    pseudopotential tables for both PAW and Norm-conserving cases (GGA-PBE), available at
+    https://www.abinit.org/downloads/atomic-data-files .
+    The ABINIT package v8.0 and beyond is compatibible with these new pseudopotentials.
+    See the description of both efforts in the forthcoming paper in Computer Physics Communication ABINIT2016,
+    a preprint is available at https://www.abinit.org/about/ABINIT16.pdf .
+    See also K. Lejaeghere et al, Science 351 aad3000 (2016).
+    Work by M. Torrent, F. Jollet, M. Giantomassi, M. van Setten, G.-M. Rignanese, X. Gonze.
+
+B.3 The efforts related to Dynamical Mean Field Theory (DMFT) have lead to an operational framework
+    combined with the ab initio computation of the U value for projected local orbital Wannier functions, thanks
+    to cRPA (see several previous release_notes of ABINITv7). 
+    A tutorial has been written, describing the DFT+DMFT calculation on SrVO3.
+    See ~abinit/doc/tutorial/lesson_dmft.html (or https://www.abinit.org/doc/helpfiles/for-v8.0/tutorial/lesson_dmft.html)
+    See also ~abinit/tests/tutoparal/Input/tdmft_1.in and tdmft_2.in . 
+    A new input variable dmftctqmc_basis has been introduced.
+    ABINIT has been interfaced with TRIQS/CTHYB library (Toolbox for Research on Interacting Quantum Systems).
+    See https://triqs.ipht.cnrs.fr/1.4/applications/cthyb/. See directory src/01_triqs_ext
+    This library provides a rotationally invariant CTHYB solver for the Anderson model, 
+    complementary to the density-density CTHYB solver available in ABINIT.
+    Work by B. Amadon and V. Planes 
+
+B.4 Bethe-Salpeter equation : implementation of the Rohlfing-Louie approach (Phys. Rev. B62, 4927 (2000)), 
+    coupled with the Haydock recursion algorithm,
+    and different (more complex) interpolation schemes, also coupled with the Haydock algorithm.
+    The simple Rohlfing-Louie scheme apparently seems to perform better than the more sophisticated approaches.
+    These different algorithms have been described in Y. Gillet, M. Giantomassi and X. Gonze,
+    Computer Physics Communications, 203, 83 (2016).
+    Related input variables : bs_interp_* variables, bs_interp_m3_width, bs_method, bs_interp_rl_nb.
+    Related tests : v67mbpt#30 to 35.
+    Work by Y. Gillet and M. Giantomassi .
+
+B.5 The new main executable fold2Bloch allows to extract, from supercell computations (that include e.g.
+    defects), the components (and weight) of wavefunctions in the underlying small primitive cell.
+    See O. Rubel, Phys. Rev. B 90, 115202 (2014).
+    Tests : tutorial#tfold1bloch_1 and tfold1bloch_2
+    Related tutorial : lesson_fold2Bloch.
+    Contribution by Anton Bokhanchuk (supervised by Oleg Rubel).
+
+B.6 Direct computation of the DFT effective mass tensor, in the framework of DFPT (ddk perturbation).
+    A paper is accepted for publication in Phys. Rev. B.
+    Work for NCPP as well as PAW. Also spin-polarized and with spin-orbit interaction (the latter only in the case of PAW).
+    Input variables : efmas (turn on effective mass tensor calculation), efmas_bands, 
+    efmas_calc_dirs, efmas_deg, efmas_deg_tol, efmas_dim, efmas_dirs, efmas_n_dirs, efmas_ntheta
+    Tests : v7#80 (Norm-conserving), v7#81 (PAW), v7#82 (PAW with spin-orbit)..
+    Work by Jonathan Laflamme Janssen, Marc Torrent and XG, with contributions from Y. Gillet, S. Ponc&eacute;, A. Martin .
+
+B.7 GW Lanczos-Sternheimer
+    This new methodology to perform GW calculations is described in Phys. Rev. B 91, 125120 (2015).
+    At present, however, it is implemented for system with only one k-point.
+    New input variables :
+    gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles gwls_kmax_analytic gwls_kmax_numeric
+    gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle
+    gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad
+    gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation
+    Related tests : paral#77, v67mbpt#15 .
+    Work by Jonathan Laflamme Janssen, B. Rousseau and Michel Côté.
+
+B.8 Implementation of the strain perturbation in PAW+DFPT, and associated computation of elastic constants, 
+    internal strains and piezoelectric coefficients.
+    See tests v7#95, 96
+    Also, associated debugging of Born effective charge and phonon calculations in DFPT+PAW.
+    Work by A. Martin and M. Torrent.
+
+B.9 Electron positron Doppler broadening can be computed in PAW.
+    Input variable : posdoppler
+    Test : v7#35
+    Work by J. Wiktor and M. Torrent
+
+B.10 Achievements related to the treatment of the Fock operator, and hybrid functionals :
+     Hartree-Fock is available with PAW (self-consistent, based on plane waves). However, forces and strains are not yet available.
+     The Spencer-Alavi scheme if used for Coulomb operator
+     Test v7#70.
+     The HSE functional is available in the case of norm-conserving pseudopotentials, via libXC. 
+     Note that forces are available in this case (not yet the strains). 
+     The PBE0 functional is also available in the case of norm-conserving pseudopotentials (via libXC as well as via ixc=41/42).
+     Work by C. Martins, F. Arnardi, M. Torrent and F. Jollet.
+
+B.11 Different improvements in the computation of the temperature-dependence of the
+     electronic structure (and zero-point motion effect), as listed below.
+     Implementation of the calculation of the spectral function 
+     and dynamical lifetimes in ElectronPhononCoupling. 
+     See G. Antonius, et al, Phys. Rev. B 92, 085137 (2015).
+     Implementation of the correction to impose the charge neutrality sum rule also on the matrix elements of the
+     electron-phonon, in case of IR-active insulators, see S. Ponc&eacute; et al, J. Chem. Phys. 143, 102813 (2015).
+     Also, improvement of the flow, by the possibility of separate treatment of all q wavevectors.
+     Also, print Fan and DDW decomposition inside _EP.nc .
+     Implementation of g2F Eliashberg function and PDOS .
+     Creation of GKK.nc files (much better from the memory point of view)
+     Related input variables : getddb, irdddb, wtq .
+     Test v7#57, 58, 59 .
+     Spin-dependent version of the temperature-dependence of the gap, tests in v7#100, 101.
+     Parallelized electron-phonon change of electronic structure.
+     Printing of the mode-by-mode decomposition of the Fan and DDW terms.
+     Work by S. Ponc&eacute;, G. Antonius and Y. Gillet.
+
+B.12 Implementation of inelastic variational approximation for the computation of the thermoelectricity (Seebeck effect).
+     See tests v7#90, 91, 92, 93, 94.
+     However, due to instabilities, the diff on the output with respect to a reference has been disabled ...
+     Work by Bin Xu and M. Verstraete
+
+B.13 The electronic contribution to the linear electro-optic coefficients in the independent particle approximation
+     is available, following the framework of Hughes and Sipe (Phys. Rev. B, 53:10751, 1996).
+     Moreover, the anti-resonant contributions have been added to all second-order susceptibilities,
+     as well as the possibility to do scissor corrected calculations.
+     Finally the optic postprocessor has been parallelized.
+     The tutorials tutorespfn#toptic_1 to 4 have been updated. Test for the new routines are also available in v7#47-48.
+     Work by Y. Gillet.
+
+B.14 Stopping power ( kinetic energy lost by an impinging charged particle by unit of path length)
+     Implemented in the linear response approximation.
+     Input variables : npel and pvelmax.
+     See test v7#16 (initially test v7#67).
+     Work by A. Shukri and F. Bruneval
+
+B.15 Quasi-particle self-consistent GW calculation, with the bootstrap kernel in W, has been developed.
+     This is described in the publication W. Chen and A. Pasquarello, PRB 92, 041115(R) (2015).
+     Use gwgamma -4
+     See test v67mbpt#36 .
+     Also the Gygi-Baldereschi auxiliary function is available (icutcoul 7).
+     Work by Wei Chen and A. Pasquarello.
+
+B.16 Magnetic nuclear dipoles can be introduced, to allow computation of the Nuclear Magnetic Shielding tensor
+    through the converse method (change of magnetization due to magnetic nuclear dipole).
+    Input variable : nucdipmom
+    Test : v7#32
+    Work by J. Zwanziger
+
+B.17 Many of the ABINIT post-processors are now NetCDF-ready (can use NetCDF-based files).
+     Also, for DFPT, modules to write / read in NetCDF have been introduced (in view of high-throughput).
+     Please note the following changes:
+     
+        * The `-etsf.nc` extension has been removed from the netcdf file. 
+          The new name is created by appending ".nc" to the standard Abinit name.
+        * The HIST file has been renamed HIST.nc.
+        * The output of OUT.nc has been disabled when ndtset &gt; 10
+        * The netcdcf files:
+
+             - AE_ONSITE_WFK.nc 
+             - PS_WFK.nc
+             - AE_WFK.nc
+             - PS_ONSITE_WFK.nc
+
+          produced by pawprtwf=1 have been removed and replaced with a single netcdf file with extension _PAWAVES.nc
+          The different PAW terms are stored in the netcdf variables: ur_ae, ur_pw, ur_ps_onsite, ur_ae_onsite
+     Work by M. Giantomassi and D. Waroquiers..
+
+B.18 Bigdft + PAW work in parallel
+     Test : bigdft_paral # 01 and 02, execute on 4 and 10 procs.
+     Issues related to fitting of Gaussians have been fixed.
+     Work by M. Torrent and T. Rangel
+
+B.19 MPI and GPU work together. Compatibility with MAGMA 1.5 has been achieved.
+     Test gpu#05 .
+     New input variable : gpu_device
+     Work by M. Torrent and J.-M. Beuken.
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1. Creation of separate build systems (incl. config and makefiles) for different directories, e.g. tests, and doc .
+     Work by Y. Pouillon .
+
+C.2 (Beautification) The whole input variable documentation is now written using yml , in the doc/input_variables/abinit_vars.yml file
+    A java editor allows to view and modify this file. The html is automatically generated from this yml database.
+    Group effort lead by Y. Gillet . 
+    When possible, the pointers have been replaced by allocatable.
+    The coverage of ABINIT has been improved as well.
+    Numerous contributors :
+    Bernard Amadon, Gabriel Antonius, Jean-Michel Beuken, Jordan Bieder, Fabien Bruneval, 
+    Michel C&ocirc;t&eacute;, Muriel Delaveau, Gregory Geneste, Matteo Giantomassi, Vincent Gosselin,
+    François Jollet, Jonathan Laflamme Janssen, Aurelien Lherbier, Alexandre Martin, 
+    Micael Oliveira, Samuel Ponc&eacute;, Yann Pouillon, Gian-Marco Rignanese, 
+    Marc Torrent, Michiel Van Setten, Matthieu Verstraete, Bin Xu, Joe Zwanziger
+
+C.3 Cleaning of the arguments of routines with a very long argument list, e.g. nonlop, passed through
+    structured datatype arguments (e.g. gs_ham).
+    Work by M. Torrent
+
+C.4 Upgraded Wannier90 fallback to its 2.0 version and Atompaw to its 4.0.0.12 version.
+    (Y. Pouillon and M. Torrent)
+
+C.5 Got rid of src/quarantine/ to avoid stupid conflicts
+    (Y. Pouillon)
+
+C.6 Migration of the Web site to Plone 4.
+    Work by JM Beuken.
+
+C.7 Creation of the LibPAW library, presently contained in src/42_libpaw
+    It does not rely on defs_basis and abi_common.h .
+    Can be used by BigDFT.
+    Work by T. Rangel and M. Torrent (and D. Caliste for the BigDFT side).
+
+C.8 Preparation of the migration to Git/GitLab instead of bzr as version management system.
+    Work by J.M. Beuken, with help by M. Giantomassi, Y. Pouillon, Y. Gillet and other core developers.
+
+C.9 Work on the memory profiling, replace the old machinery by new code. In practice :
+    - Replace memcheck.py with abimem.py
+    - Get rid of ABI_ALLOC_STAT_ABI, use ABI_STAT_ALLOC(arr, shape, ierr)
+    - Remove ABI_STAT_CALLOC
+    - Remove ABI_ALLOC_SIZE_ABI, use sizeof to support datatypes ifdef HAVE_MEM_PROFILING
+    - Support np &gt; 1
+    Work by M. Giantomassi and M. Torrent
+
+C.10 The python scripts for automatic testing are now compatible with python3 (incl. 3.5, 3.6, 3.7)
+    Support for python &lt; 2.6 has been removed.
+    Work by M. Giantomassi
+
+C.11 Replaced many statement functions (obsolete) by internal functions
+     Work by X. Gonze, F. Jollet, and others
+
+C.12 The test farm now supports a subset of F2003 (g95 had to be discarded).
+     Work by JM Beuken and M. Giantomassi
+
+C.13 Support for ELPA 2015 has been added
+     Work by M. Torrent.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Several shortcomings of the recognition of space groups, and automatic correction of
+    inaccurate primitive lattice parameters using the tolsym input variable have been removed,
+    so that ABINIT is now much more robust in this respect.
+    See test v7#13
+    Work by X. Gonze
+
+D.2 Use of psml instead of fox (to read XML)
+    Renaming tests/fox to tests/psml
+    New pseudos files : 14Si.psml , 26fe.GGA.psml
+    Work by M. Verstraete (also support by JM Beuken).
+
+D.3 The extrapolation of the wavefunction from one structural relaxation time step to the next one has been implemented.
+    Input variable : extrapwf
+    Test : v7#9 .
+    Work by M. Torrent 
+
+D.4 Generalisation of DFPT for non-collinear magnetic cases.
+    Work by F. Ricci and E. Bousquet
+    On-going.
+
+D.5 Several new input variables have been introduced, to allow and control the output
+    of several quantities in specific files :
+    prtgsr (for the GSR file), prtpsps (for the pseudopotential, in the netcdf format), prtvclmb (for the Coulomb potential),
+    prtvpsp (for the local potential), prtwf_full (to generate a WFK file in the full Brillouin Zone after a run done in the
+    irreducible wedge, useful to interface Abinit with post-processing tools that do not support symmetries.)
+    See Tests v3#30, v6#04, v7#10, v7#12, v7#36, v7#12 and v7#36.
+    Also, the new test mpiio#26 exercise IO routines in parallel with different combination of parameters in the GS eigensolvers
+    while the new test mpiio#51 exercise IO routines in parallel with different combination of parameters in the DFPT eigensolvers
+    Done mostly by M. Giantomassi and M. Verstraete
+
+D.6 Work on the distribution of MPI data (band and FFT) for the DFPT code, by M. Delaveau (supervision M. Torrent).
+
+D.7 Work on Vdw-DF. The new input variable prtvdw has been introduced, to allow storing a VdW-DF kernel after computation.
+    See test vdwxc#03.
+    Also, vdw_xc 14 (vdW-QHO-WF from Silvestrelli) can be used in periodic systems.
+    Work by C. Espejo and Y. Pouillon
+
+D.8 Work on VWL+PAW, and disentangling of BigDFT and ABINIT
+    Work by M. Torrent and D. Caliste.
+
+D.9 Implementation of the Beigi treatment of q-> 0 for surfaces
+    Requires additional testing
+    Work by Y. Gillet
+
+D.10 Implement Quantum Thermal Bath (QTB) formalism in Langevin PIMD
+     Corresponds to imgmov=10 (to be documented, to be tested).
+     Work by M. Torrent
+
+D.11 Implementation of prtdos 5 .
+     This allows to output the spin-spin DOS in the nspinor=2 case.
+     No test yet. 
+     Work by M. Verstraete
+
+D.12 Work on ABINIT GUI by F. Abreu and Y. Gillet
+
+D.13 Update of the tutorial map in doc/tutorial/welcome.html
+
+D.14 Work in progress on the Implementation of Raman intensity computation in PAW.
+     Associated input variable rf2_dkdk
+     By L. Baguet and M. Torrent.
+
+D.15 Work in progress, concerning the capability to read DFPT potentials, 
+     in order to compute the phonon linewidths and the electron-phonon coupling parameters in a fine grid.
+     Activated using optdriver=7.
+     Some new input variables have been introduced, but also
+     many input variables of anaddb have to be "reused" inside the main ABINIT for that purpose,
+     and have thus been introduced (possibly with a prefix) and documented :
+     asr, chneut, ddb_ngqpt, dipdip, eph_intmeth, eph_extrael, eph_fermie, eph_fsmear, eph_fsewin,
+     eph_mustar, eph_ngqpt_fine, ph_intmeth, ph_ndivsm, ph_ngqpt, ph_nqpath, ph_nqshift, ph_qpath,
+     ph_qshift, ph_smear, ph_wstep, symdynmat.
+     See the tests v7#85 to 88.
+     Work done by M. Giantomassi.
+
+D.16 Different treatments are now possible for the invalid frequencies possibly obtained
+     with the GW Hybertsen-Louie plasmon pole model.
+     See input variable gw_invalid_freq, and test v67mbpt#41 .
+     From T. Rangel
+
+D.17 The non-linear core correction can now be treated in G-space, which might be
+     more accurate than the real-space treatment, depending on the pseudopotential.
+     See input variable nc_xccc_gspace, and test v7#10, 11 and 45.
+     From M. Giantomassi
+
+D.18 A new criterion for stopping the geometry optimization (ntime loop) has been introduced :
+     the maximum change of energy, with input variable tolmxde.
+     See test v7#15 .
+     Work from D. Waroquiers
+
+D.19 Work is continuing at the level of high-temperature DFT computations with orbitals,
+     based on Thomas-Fermi approach (and corrections). See the new test v7#11, and 
+     input variables tfkinfunc, tfw_toldfe, ixc=50.
+     Work by JF Danel and M. Torrent.
+
+D.20 The merge utility mrgscr has now the capability of q point recovery.
+     See test v3#100 and 101.
+     Work by M. Giantomassi .
+
+D.21 mrgscr can now merge partial screening files produced with different frequencies. 
+     See test v67mbpt#37, 38, 39.
+     Work by M. Giantomassi
+
+D.22 GW computations with istwfk /=1 , as well as using norm-conserving pseudopotentials with multiple projectors
+     can now be done. inclvkb == 2 is not supported yet.
+     See test v67mbpt#40
+     Work by M. Giantomassi
+
+D.23 Implemented capability to check MD5 sum for pseudopotentials.
+     Work by M. Giantomassi and Y. Pouillon
+
+D.24 APPA library : minor improvements from A. Martin.
+
+D.25 Anaddb utility : frequencies with non analytical contributions added to anaddb.nc, by G. Petretto
+
+D.26 A new value for prtvclmb is introduced. prtvclmb=2. By F. Bruneval.
+
+D.27 In the case of different images of the original system (e.g. string method, path-integral molecular dynamics, etc ...),
+     several quantities related to LDA+U can be different in different images : the "U" value, as well as the occupation matrix (dmatpawu).
+     Work by M. Torrent.
+
+D.28 A new value for prtwf is introduced: prtwf = -1
+     Abinit won't write the WFK (1WFK) file if prtwf == -1 and the calculation is converged.
+     Implemented in the GS and in the DFPT part.
+     From M. Giantomassi
+
+D.29 New command line option added to abinit: --timelimit days-hours-minutes-seconds
+     The code will exit the iterative algorithm if the calculation
+     cannot be completed within the given time limit.
+     Available for GS, structural relaxations, and DFPT with one perturbation.
+     This option should not be used in conjunction with multiple datasets.
+     Use `abinit --help` to get the list of supported options.
+     From M. Giantomassi
+
+D.30 New check on the correct editing of the doc/*/*yml documents (forbidding \n as carriage return)
+     has been introduced. See test abirules#19 .
+     From X. Gonze
+
+D.31 Introduce miniBZ technique in GW, to sample the Brillouin zone around the divergence
+     From Fabien Bruneval
+
+D.32 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
+     including patches for the fallbacks), and improvements of documentation by :
+     G. Antonius, F. Bruneval, D. Caliste, M. Delaveau, C. Espejo
+     M. Giantomassi, Y. Gillet, Raul Laasner (on the forum), Y. Pouillon,
+     V. Recoules, M. Verstraete, M. Torrent, Bin Xu
+</pre>
+

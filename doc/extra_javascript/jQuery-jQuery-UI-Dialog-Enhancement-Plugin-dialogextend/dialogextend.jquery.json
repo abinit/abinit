@@ -1,0 +1,38 @@
+{
+    "name": "dialogextend",
+    "title": "jQuery DialogExtend",
+    "description": "Maximize and Minimize Buttons for UI Dialog.",
+    "keywords": [
+        "dialog",
+        "minimize",
+        "maximize",
+        "collapse",
+        "extend"
+    ],
+    "version": "2.0.4",
+    "author": {
+        "name": "ROMB",
+        "url": "https://github.com/ROMB"
+    },
+    "maintainers": [
+        {
+            "name": "ROMB",
+            "url": "https://github.com/ROMB"
+        }
+    ],
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/ROMB/jquery-dialogextend/blob/master/LICENSE.md"
+        }
+    ],
+    "bugs": "https://github.com/ROMB/jquery-dialogextend/issues",
+    "homepage": "http://romb.github.io/jquery-dialogextend/",
+    "docs": "http://romb.github.io/jquery-dialogextend/",
+    "download": "https://github.com/ROMB/jquery-dialogextend",
+    "demo": "http://romb.github.io/jquery-dialogextend/example.html",
+    "dependencies": {
+        "jquery": "~1.11.1",
+        "jquery-ui": "~1.11.0"
+    }
+}

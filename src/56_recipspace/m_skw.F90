@@ -7,7 +7,7 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,6 +218,9 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  lpratio = abs(params(1))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym) / two) ** third)
+ if (new%has_inversion) then
+   rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym / 2) / two) ** third)
+ end if
  nrwant = lpratio * new%nkpt
 
  call cwtime(cpu, wall, gflops, "start")
@@ -358,7 +361,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 
      do ib=1,bcount
        band = ib + new%band_block(1) - 1
-       call skw_eval_bks(new, cryst, band, kpts(:,ik), spin, oeig(ib))
+       call skw_eval_bks(new, band, kpts(:,ik), spin, oeig(ib))
 
        adiff_meV = abs(eig(band,ik,spin) - oeig(ib)); rel_err = zero
        if (abs(eig(band,ik,spin)) > tol16) rel_err = adiff_meV / abs(eig(band,ik,spin))
@@ -458,7 +461,6 @@ end subroutine skw_print
 !!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
 !!
 !! INPUTS
-!!  cryst<crystal_t>=Crystalline structure.
 !!  band=Band index.
 !!  kpt(3)=K-point in reduced coordinates.
 !!  spin=Spin index.
@@ -479,7 +481,7 @@ end subroutine skw_print
 !!
 !! SOURCE
 
-subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
+subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -494,7 +496,6 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
 !scalars
  integer,intent(in) :: band,spin
  type(skw_t),intent(inout) :: skw
- type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: oeig
@@ -560,7 +561,7 @@ end subroutine skw_eval_bks
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
 !!  nfft=Number of points in FFT mesh.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  band=Band index.
 !!  spin=Spin index.
 !!
@@ -579,7 +580,7 @@ end subroutine skw_eval_bks
 !!
 !! SOURCE
 
-subroutine skw_eval_fft(skw, cryst, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
+subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -594,7 +595,6 @@ subroutine skw_eval_fft(skw, cryst, ngfft, nfft, band, spin, oeig_mesh, oder1_me
 !scalars
  integer,intent(in) :: nfft,band,spin
  type(skw_t),intent(in) :: skw
- type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(out) :: oeig_mesh(nfft)

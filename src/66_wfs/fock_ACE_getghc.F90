@@ -7,7 +7,7 @@
 !!  Compute the matrix elements <G|Vx|psi> of the Fock operator in the ACE context.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (CMartins,FJ,MT)
+!!  Copyright (C) 2013-2018 ABINIT group (CMartins,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,10 +48,11 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_cgtools, only :dotprod_g
  use m_fock
- use m_hamiltonian, only : gs_hamiltonian_type
- use defs_datatypes, only: pseudopotential_type
+
+ use m_cgtools,      only : dotprod_g
+ use m_hamiltonian,  only : gs_hamiltonian_type
+ use defs_datatypes, only : pseudopotential_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -79,8 +80,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 
 
 ! *************************************************************************
-!return
-!write(81,*) "fock ACE"
+
  ABI_CHECK(associated(gs_ham%fockcommon),"fock must be associated!")
  fockcommon => gs_ham%fockcommon
 
@@ -122,7 +122,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
-!* inspired from the routine 53_spacepar/meanvalue_g but without the reference to parallelism and filtering
+!* inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
    if(gs_ham%istwf_k==2) then
      eigen=half*cwavef(1,1)*ghc1(1,1)
    else
@@ -134,9 +134,6 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
    if(gs_ham%istwf_k>=2) eigen=two*eigen
 !   call xmpi_sum(eigen,mpi_enreg%comm_kpt,ier)
    fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
-
-!write(81,*) ghc1(:,1:10)
-!write(81,*)fockcommon%ieigen,fockcommon%eigen_ikpt(fockcommon%ieigen)
    fockcommon%ieigen = 0
  end if
 

@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,25 +28,32 @@
 MODULE m_ddb
 
  use defs_basis
+ use defs_abitypes
+ use defs_datatypes
  use m_profiling_abi
  use m_errors
  use m_xmpi
-
  use m_ddb_hdr
+ use m_dtset
+
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
+ use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
- use m_geometry,       only : phdispl_cart2red
+ use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens
+ use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
+ use m_psps,           only : psps_copy, psps_free
 
  implicit none
 
  private
 
  public :: ddb_write_blok   ! Writes blocks of data in the DDBs.
+ public :: dfptnl_doutput   ! Write the matrix of third-order derivatives to the output file and the DDB
  public :: gtblk9           ! Finds the block containing the derivatives of the total energy.
  public :: read_blok8       ! This routine reads blocks of data in the DDBs.
  public :: rdddb9           ! This routine reads the derivative database entirely,
@@ -141,6 +148,12 @@ MODULE m_ddb
                                     ! a direct diagonalizatin of the dynamical matrix.
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
                                     ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
+ public :: ddb_to_dtset             ! Transfer ddb_hdr to dtset datatype
+
+ public :: mblktyp1                 ! This routine merges the derivative databases of type 0-4:
+
+ ! TODO: This routine is deprecated and will be removed
+ public :: mblktyp5                 ! This routine merges the derivative databases of type 5:
 
  ! TODO: Add option to change amu.
  !public :: ddb_change_amu
@@ -221,6 +234,7 @@ CONTAINS  !===========================================================
 !!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -277,6 +291,7 @@ end subroutine ddb_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -338,6 +353,7 @@ end subroutine ddb_copy
 !!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -402,6 +418,7 @@ end subroutine ddb_malloc
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -508,6 +525,7 @@ end subroutine ddb_bcast
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -775,6 +793,7 @@ end subroutine gtblk9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -856,6 +875,7 @@ end subroutine gamma9
 !!      m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1097,7 +1117,6 @@ end subroutine read_blok8
 !! indsym(4,msym,natom)=indirect indexing array for symmetries
 !! natom=number of atoms in cell
 !! nsym=number of space group symmetries
-!! occopt=occupation option
 !! rmet(3,3)=metric tensor in real space (bohr^2)
 !! rprim(3,3)= primitive translation vectors
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
@@ -1106,7 +1125,6 @@ end subroutine read_blok8
 !! tnons(3,nsym)=fractional nonsymmorphic translations
 !! typat(natom)=type integer for each atom in cell
 !! ucvol=unit cell volume in bohr**3
-!! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xcart(3,natom)=atomic cartesian coordinates
 !! xred(3,natom)=fractional dimensionless atomic coordinates
 !! zion(ntypat)=charge on each type of atom (real number)
@@ -1116,15 +1134,16 @@ end subroutine read_blok8
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
 subroutine rdddb9(acell,atifc,amu,ddb,&
-& ddbun,dimekb,filnam,gmet,gprim,indsym,iout,&
-& lmnmax,mband,mpert,msize,msym,&
+& ddbun,filnam,gmet,gprim,indsym,iout,&
+& mband,mpert,msize,msym,&
 & natifc,natom,nkpt,nsym,ntypat,&
-& occopt,rmet,rprim,symrec,symrel,symafm,&
-& tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+& rmet,rprim,symrec,symrel,symafm,&
+& tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1132,8 +1151,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdddb9'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1145,8 +1162,8 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
- integer,intent(in) :: ddbun,dimekb,iout,lmnmax,mband,mpert,msize,msym,natifc
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,usepaw
+ integer,intent(in) :: ddbun,iout,mband,mpert,msize,msym,natifc
+ integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
  character(len=*),intent(in) :: filnam
  type(ddb_type),intent(inout) :: ddb
@@ -1368,6 +1385,7 @@ end subroutine rdddb9
 !!      m_ddb,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1463,6 +1481,7 @@ end subroutine chkin9
 !!      m_ddb,nonlinear
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1600,7 +1619,7 @@ end subroutine nlopt
 !!
 !! INPUTS
 !!  filename=DDB filename.
-!!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
+!!  brav = 1 or -1 -> simple lattice; 2 -> face-centered cubic;
 !!         3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
 !!  natom=Number of atoms in the unit cell
 !!  atifc(natom)=list of the atom ifc to be analysed
@@ -1622,6 +1641,7 @@ end subroutine nlopt
 !!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1632,7 +1652,6 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_from_file'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1682,6 +1701,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  dimekb = ddb_hdr%psps%dimekb
  lmnmax = ddb_hdr%psps%lmnmax
 
+ ! JWZ occopt was used below before being initialized
+ ! 13 April 2018
+ occopt = ddb_hdr%occopt
+ !
+
  call ddb_hdr_free(ddb_hdr)
 
  if (ddb_natom /= natom) then
@@ -1715,11 +1739,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    call ddb_malloc(ddb,msize,nblok,natom,ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,dimekb,filename,gmet,gprim,indsym,ab_out,&
-&   lmnmax,mband,mpert,msize,msym,&
+&   ddbun,filename,gmet,gprim,indsym,ab_out,&
+&   mband,mpert,msize,msym,&
 &   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   occopt,rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+&   rmet,rprim,symrec,symrel,symafm,&
+&   tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -1727,9 +1751,9 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ABI_FREE(indsym)
    ABI_FREE(xcart)
 
-   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when brav/=1
+   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
    ! This section is needed to preserver the behaviour of the old implementation.
-   if (brav/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
+   if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
 &       'The input DDB value of brav is ',brav,',',ch10,&
@@ -1848,6 +1872,7 @@ end subroutine ddb_from_file
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1967,6 +1992,7 @@ end subroutine carttransf
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2078,6 +2104,7 @@ end subroutine carteig2d
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2178,6 +2205,7 @@ end subroutine dtech9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2602,7 +2630,7 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 &   dielt(3,1),dielt(3,2),dielt(3,3)
 
    call wrtout(std_out,message,'COLL')
-   
+
    ABI_FREE(tmpval)
  end if ! iblok not found
 
@@ -2768,18 +2796,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
 
- ! TODO: Tests with asr = 3,4  [v5][t83] and [v5][t84]
- ! fail if I don't allocated these arrays because the code
- ! is accessing the data without checking if the correction has been computed....
- dims = 3*ddb%natom*(3*ddb%natom-1) / 2
- ABI_CALLOC(asrq0%uinvers, (dims, dims))
- ABI_CALLOC(asrq0%vtinvers,(dims, dims))
- ABI_CALLOC(asrq0%singular, (dims))
-
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
 
- select case (asr)
+ select case (asrq0%asr)
  case (0)
    continue
 
@@ -2789,10 +2809,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
    ! Compute uinvers, vtinvers and singular matrices.
-   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
-   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
-   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
-   !ABI_CALLOC(asrq0%singular, (dims))
+   dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   ABI_CALLOC(asrq0%singular, (dims))
 
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
      ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
@@ -2853,6 +2873,7 @@ end function ddb_get_asrq0
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2953,6 +2974,7 @@ end subroutine ddb_diagoq
 !!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3010,6 +3032,7 @@ end subroutine asrq0_apply
 !!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3098,20 +3121,13 @@ end subroutine asrq0_free
 !!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
 
- use defs_basis
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3136,7 +3152,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  integer :: nelmts
 
 ! *********************************************************************
- 
+
 
 !Count the number of elements
  nelmts=0
@@ -3278,6 +3294,1006 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 end subroutine ddb_write_blok
 !!***
 
+!!****f* m_ddb/dfptnl_doutput
+!! NAME
+!! dfptnl_doutput
+!!
+!! FUNCTION
+!! Write the matrix of third-order derivatives to the output file and the DDB
+!!
+!! INPUTS
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  mpert =maximum number of ipert
+!!  natom=Number of atoms
+!!  ntypat=Number of type of atoms
+!!  unddb = unit number for DDB output
+!!
+!! NOTES
+!!  d3 holds the third-order derivatives before computing
+!!  the permutations of the perturbations.
+!!
+!! PARENTS
+!!      nonlinear
+!!
+!! CHILDREN
+!!      ddb_free,ddb_malloc,ddb_write_blok,wrtout
+!!
+!! SOURCE
+
+subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfptnl_doutput'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mband,mpert,nkpt,unddb,natom,ntypat
+!arrays
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: choice,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,index,msize
+ character(len=500) :: message
+ type(ddb_type) :: ddb
+
+!*************************************************************************
+
+ msize = 27*mpert*mpert*mpert
+ call ddb_malloc(ddb,msize,1,natom,ntypat)
+
+ choice = 2
+
+ ddb%typ = 3
+ ddb%nrm = one
+ ddb%qpt = zero   ! this has to be changed in case anharmonic
+!force constants have been computed
+
+
+!Write blok of third-order derivatives to ouput file
+
+ write(message,'(a,a,a,a,a)')ch10,&
+& ' Matrix of third-order derivatives (reduced coordinates)',ch10,&
+& ' before computing the permutations of the perturbations',ch10
+ call wrtout(ab_out,message,'COLL')
+
+ write(ab_out,*)'    j1       j2       j3              matrix element'
+ write(ab_out,*)' dir pert dir pert dir pert           real part           imaginary part'
+
+ do i1pert=1,mpert
+   do i1dir=1,3
+
+     do i2pert=1,mpert
+       do i2dir=1,3
+
+         do i3pert=1,mpert
+           do i3dir=1,3
+
+             index = i1dir + &
+&             3*((i1pert-1)+mpert*((i2dir-1) + &
+&             3*((i2pert-1)+mpert*((i3dir-1) + 3*(i3pert-1)))))
+             ddb%flg(index,1) = blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             ddb%val(:,index,1)= d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+             if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=0) then
+
+               write(ab_out,'(3(i4,i5),2f22.10)')&
+&               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,&
+&               d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+             end if
+
+           end do
+         end do
+
+       end do
+     end do
+
+   end do
+ end do
+
+!Write blok of third-order derivatives to DDB
+ call ddb_write_blok(ddb,1,choice,mband,mpert,msize,nkpt,unddb)
+
+ call ddb_free(ddb)
+
+end subroutine dfptnl_doutput
+!!***
+
 !----------------------------------------------------------------------
 
-END MODULE m_ddb
+
+!!****f* m_ddb/ddb_to_dtset
+!! NAME
+!! ddb_to_dtset
+!!
+!! FUNCTION
+!!   Initialize a dataset object from ddb.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
+!!
+!! SOURCE
+
+
+subroutine ddb_to_dtset(comm,dtset,filename,psps)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_to_dtset'
+!End of the abilint section
+
+ implicit none
+
+ !Arguments ------------------------------------
+ integer,intent(in) :: comm
+ type(dataset_type),intent(inout) :: dtset
+ type(pseudopotential_type),intent(inout) :: psps
+ ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ character(len=*),intent(in) :: filename
+ !Local variables -------------------------
+ integer :: mxnimage,ddbun
+!integer :: ii, nn
+ type(ddb_hdr_type) :: ddb_hdr
+
+! ************************************************************************
+
+ ABI_UNUSED(psps%usepaw)
+
+!Set variables
+ mxnimage = 1 ! Only 1 image in the DDB
+
+! Must read natom from the DDB before being able to allocate some arrays needed for invars9
+ ddbun = get_unit()
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm)
+!close ddb file, just want to read the headers
+ close(ddbun)
+ dtset%ngfft = ddb_hdr%ngfft
+
+! call psps_copy(psps, ddb_hdr%psps)
+
+! Copy scalars from ddb
+ dtset%natom = ddb_hdr%natom
+ dtset%mband = ddb_hdr%mband
+ dtset%nkpt = ddb_hdr%nkpt
+ dtset%nsym = ddb_hdr%msym
+ dtset%ntypat = ddb_hdr%ntypat
+ dtset%nspden = ddb_hdr%nspden
+ dtset%nspinor = ddb_hdr%nspinor
+ dtset%nsppol = ddb_hdr%nsppol
+ dtset%occopt = ddb_hdr%occopt
+ dtset%usepaw = ddb_hdr%usepaw
+ dtset%intxc = ddb_hdr%intxc
+ dtset%ixc = ddb_hdr%ixc
+ dtset%iscf = ddb_hdr%iscf
+ dtset%dilatmx = ddb_hdr%dilatmx
+ dtset%ecut = ddb_hdr%ecut
+ dtset%ecutsm = ddb_hdr%ecutsm
+ dtset%pawecutdg = ddb_hdr%pawecutdg
+ dtset%kptnrm = ddb_hdr%kptnrm
+ dtset%dfpt_sciss = ddb_hdr%dfpt_sciss
+ dtset%tolwfr = 1.0_dp  ! dummy
+ dtset%tphysel = ddb_hdr%tphysel
+ dtset%tsmear = ddb_hdr%tsmear
+
+ ! Copy arrays from ddb
+ if (allocated(dtset%acell_orig)) then
+   ABI_DEALLOCATE(dtset%acell_orig)
+ end if
+ ABI_ALLOCATE(dtset%acell_orig,(3,mxnimage))
+ dtset%acell_orig(1:3,1) = ddb_hdr%acell(:)
+
+ if (allocated(dtset%rprim_orig)) then
+   ABI_DEALLOCATE(dtset%rprim_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprim_orig,(3,3,mxnimage))
+ dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
+
+ if (allocated(dtset%rprimd_orig)) then
+   ABI_DEALLOCATE(dtset%rprimd_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprimd_orig,(3,3,mxnimage))
+ dtset%rprimd_orig(:,1,1) = ddb_hdr%rprim(:,1) * dtset%acell_orig(1,1)
+ dtset%rprimd_orig(:,2,1) = ddb_hdr%rprim(:,2) * dtset%acell_orig(2,1)
+ dtset%rprimd_orig(:,3,1) = ddb_hdr%rprim(:,3) * dtset%acell_orig(3,1)
+
+ if (allocated(dtset%amu_orig)) then
+   ABI_DEALLOCATE(dtset%amu_orig)
+ end if
+ ABI_ALLOCATE(dtset%amu_orig,(dtset%ntypat,mxnimage))
+ dtset%amu_orig(:,1) = ddb_hdr%amu(:)
+
+ if (allocated(dtset%typat)) then
+   ABI_DEALLOCATE(dtset%typat)
+ end if
+ ABI_ALLOCATE(dtset%typat,(dtset%natom))
+ dtset%typat(:) = ddb_hdr%typat(1:ddb_hdr%matom)
+
+ if (allocated(dtset%spinat)) then
+   ABI_DEALLOCATE(dtset%spinat)
+ end if
+ ABI_ALLOCATE(dtset%spinat,(3,dtset%natom))
+ dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
+
+ if (allocated(dtset%xred_orig)) then
+   ABI_DEALLOCATE(dtset%xred_orig)
+ end if
+ ABI_ALLOCATE(dtset%xred_orig,(3,dtset%natom,mxnimage))
+ dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
+
+ if (allocated(dtset%ziontypat)) then
+   ABI_DEALLOCATE(dtset%ziontypat)
+ end if
+ ABI_ALLOCATE(dtset%ziontypat,(dtset%ntypat))
+ dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
+
+ if (allocated(dtset%znucl)) then
+   ABI_DEALLOCATE(dtset%znucl)
+ end if
+ ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
+ dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)
+
+ if (allocated(dtset%nband)) then
+   ABI_DEALLOCATE(dtset%nband)
+ end if
+ ABI_ALLOCATE(dtset%nband,(dtset%nkpt))
+ dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
+
+ if (allocated(dtset%symafm)) then
+   ABI_DEALLOCATE(dtset%symafm)
+ end if
+ ABI_ALLOCATE(dtset%symafm,(dtset%nsym))
+ dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
+
+ if (allocated(dtset%symrel)) then
+   ABI_DEALLOCATE(dtset%symrel)
+ end if
+ ABI_ALLOCATE(dtset%symrel,(3,3,dtset%nsym))
+ dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
+
+ if (allocated(dtset%tnons)) then
+   ABI_DEALLOCATE(dtset%tnons)
+ end if
+ ABI_ALLOCATE(dtset%tnons,(3,dtset%nsym))
+ dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
+
+ if (allocated(dtset%kpt)) then
+   ABI_DEALLOCATE(dtset%kpt)
+ end if
+ ABI_ALLOCATE(dtset%kpt,(3,dtset%nkpt))
+ dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
+
+ if (allocated(dtset%wtk)) then
+   ABI_DEALLOCATE(dtset%wtk)
+ end if
+ ABI_ALLOCATE(dtset%wtk,(dtset%nkpt))
+ dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
+
+ ! GA: I had way too much problems implementing pawtab_copy.
+ !     The script check-libpaw would report all sorts of errors.
+ !     Therefore, I do a cheap copy here, copying only the relevant info.
+ !call pawtab_copy(pawtab, ddb_hdr%pawtab)
+ ! nn=size(pawtab)
+ ! if (nn.gt.0) then
+ !   do ii=1,nn
+ !     pawtab(ii)%basis_size =ddb_hdr%pawtab(ii)%basis_size
+ !     pawtab(ii)%lmn_size =ddb_hdr%pawtab(ii)%lmn_size
+ !     pawtab(ii)%lmn2_size =ddb_hdr%pawtab(ii)%lmn2_size
+ !     pawtab(ii)%rpaw =ddb_hdr%pawtab(ii)%rpaw
+ !     pawtab(ii)%rshp =ddb_hdr%pawtab(ii)%rshp
+ !     pawtab(ii)%shape_type =ddb_hdr%pawtab(ii)%shape_type
+ !    if (allocated(pawtab(ii)%dij0)) then
+ !      call alloc_copy(ddb_hdr%pawtab(ii)%dij0,  pawtab(ii)%dij0)
+ !    end if
+ !   end do
+ ! end if
+
+ call ddb_hdr_free(ddb_hdr)
+
+end subroutine ddb_to_dtset
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/mblktyp1
+!!
+!! NAME
+!! mblktyp1
+!!
+!! FUNCTION
+!! This routine merges the derivative databases of type 0-4:
+!! Total energy, (2nd derivatives (non-stat.),2nd derivatives (stationary),
+!! 3rd derivatives, 1st derivatives
+!!
+!! The heading of the database is read, then the heading
+!! of the temporary database to be added is read,
+!! the code check their compatibility, and create a new
+!! database that mixes the old and the temporary ones.
+!! This process can be iterated.
+!! The whole database will be stored in central memory.
+!!
+!! INPUTS
+!!     chkopt=option for consistency checks between DDB files
+!!     ddbun=define input and output unit numbers
+!!     dscrpt=description of the output file
+!!     filnam=name of input or output file
+!!     mddb=maximum number of databases (cannot be made dynamic)
+!!     nddb=number of input DDBs
+!!     vrsddb=current version of the DDB
+!!
+!! OUTPUT
+!!     msym=maximum number of symmetry elements in space group
+!!     Merge the file
+!!
+!! PARENTS
+!!      mrgddb
+!!
+!! CHILDREN
+!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
+!!
+!! SOURCE
+
+subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mblktyp1'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: chkopt,ddbun,mddb,nddb,vrsddb
+ integer,intent(out) :: msym
+ character(len=fnlen),intent(in) :: dscrpt
+ character(len=fnlen),intent(in) :: filnam(mddb+1)
+
+!Local variables -------------------------
+!scalars
+!Define input and output unit numbers:
+ integer :: choice,dimekb,iblok,iblok1,iblok2
+ integer :: iddb,ii,lmnmax,matom
+ integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
+ integer :: nblok,nblokt,nq
+ integer :: tmerge,usepaw
+ integer,allocatable :: mgblok(:)!,lloc(:)
+ real(dp),parameter :: qtol=2.0d-8
+ real(dp) :: diff
+ type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
+!arrays
+ character(len=500) :: message
+
+! *********************************************************************
+
+ ! Make sure there is more than one ddb to be read
+ if(nddb==1)then
+   write(message, '(a,a,a,a,a)' )&
+&   'The initialisation mode of MRGDDB, that uses nddb=1,',&
+&   'has been disabled in version 2.1 of ABINIT.',&
+&   'Action: you should use DDBs that include the symmetry',&
+&   'information (and that can be used and merged without',&
+&   'initialisation), or you should use ABINITv2.0.'
+   MSG_ERROR(message)
+ end if
+
+!Evaluate the maximal dimensions of arrays
+ dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0
+ msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0 ; mblktyp = 1
+ msym=192
+
+ do iddb=1,nddb
+
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
+&   dimonly=1)
+
+   mblok=mblok+ddb_hdr%nblok
+   mblktyp=max(mblktyp,ddb_hdr%mblktyp)
+   matom=max(matom,ddb_hdr%matom)
+   mkpt=max(mkpt,ddb_hdr%mkpt)
+   mtypat=max(mtypat,ddb_hdr%mtypat)
+   msym=max(msym,ddb_hdr%msym)
+   mband=max(mband,ddb_hdr%mband)
+   dimekb=max(dimekb,ddb_hdr%psps%dimekb)
+   lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
+   usepaw=max(usepaw,ddb_hdr%usepaw)
+
+   call ddb_hdr_free(ddb_hdr)
+
+ end do
+
+ mpert=matom+6
+ msize=3*mpert*3*mpert
+ if(mblktyp==3)msize=msize*3*mpert
+
+ call ddb_malloc(ddb,msize,mblok,matom,mtypat)
+
+!Allocate arrays
+ ABI_ALLOCATE(mgblok,(mblok))
+
+!**********************************************************************
+
+!Read the first database
+
+ write(std_out,*)' read the input derivative database information'
+ call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
+& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+
+ if(ddb_hdr%nblok>=1)then
+!  Read the blocks from the input database.
+   write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, &
+&   ' blocks from the input DDB '
+   call wrtout(std_out,message,'COLL')
+   do iblok=1,ddb_hdr%nblok
+     call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+!    Setup merged indicator
+     mgblok(iblok)=0
+   end do
+ else
+   write(message, '(a)' )' No bloks in the first ddb '
+   call wrtout(std_out,message,'COLL')
+ end if
+!Close the first ddb
+ close(ddbun)
+
+!*********************************************
+
+ nblok = ddb_hdr%nblok
+!In case of merging of DDBs, iterate the reading
+ do iddb=2,nddb
+
+!  Open the corresponding input DDB,
+!  and read the database file information
+   write(message, '(a,a,i6)' )ch10,&
+&   ' read the input derivative database number',iddb
+   call wrtout(std_out,message,'COLL')
+
+   call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
+&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+
+   if (chkopt==1)then
+!    Compare the current DDB and input DDB information.
+!    In case of an inconsistency, halt the execution.
+     write(message, '(a)' )' compare the current and input DDB information'
+     call wrtout(std_out,message,'COLL')
+
+     call ddb_hdr_compare(ddb_hdr, ddb_hdr8)
+
+   else if(chkopt==0)then
+!    No comparison between the current DDB and input DDB information.
+     write(message, '(a)' )' no comparison between the current and input DDB information'
+     call wrtout(std_out,message,'COLL')
+     write(message, '(a,a,a)' )&
+&     'No comparison/check is performed for the current and input DDB information ',&
+&     'because argument --nostrict was passed to the command line. ',&
+&     'Use at your own risk !'
+     MSG_COMMENT(message)
+   end if
+
+   call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
+
+!  First estimate of the total number of bloks, and error
+!  message if too large
+   write(message, '(a,i5)' ) ' Current number of bloks =',nblok
+   call wrtout(std_out,message,'COLL')
+   write(message, '(a,i5,a)' )' Will read ',ddb_hdr8%nblok,' blocks from the input DDB '
+   call wrtout(std_out,message,'COLL')
+   nblokt=nblok+ddb_hdr8%nblok
+   if(nblokt>mblok)then
+     write(message, '(a,i5,a,a,a,i5,a)' )&
+&     'The expected number of blocks',nblokt,' is larger than',ch10,&
+&     'the maximum number of blocks',mblok,'.'
+     MSG_ERROR(message)
+   end if
+
+!  Read the bloks from the temporary database, and close it.
+!  Also setup the merging indicator
+   do iblok=nblok+1,nblokt
+     call read_blok8(ddb,iblok,ddb_hdr8%nband(1),mpert,msize,ddb_hdr8%nkpt,ddbun)
+     mgblok(iblok)=0
+   end do
+   close(ddbun)
+
+   nblok=nblokt
+   write(message, '(a,i5)' ) ' Now, current number of bloks =',nblok
+   call wrtout(std_out,message,'COLL')
+
+   ! In certain cases, the different DDB will have different information
+   ! on the pseudos (depending on fullinit)
+   ! Here, we copy the information of the last DDB file,
+   ! only to make the tests pass...
+   ddb_hdr%psps%indlmn(:,:,:) = ddb_hdr8%psps%indlmn(:,:,:)
+   ddb_hdr%psps%pspso(:) = ddb_hdr8%psps%pspso(:)
+   ddb_hdr%psps%ekb(:,:) = ddb_hdr8%psps%ekb(:,:)
+
+   call ddb_hdr_free(ddb_hdr8)
+
+ end do
+
+
+ call wrtout(std_out,' All DDBs have been read ','COLL')
+
+!*********************************************************
+
+!Check the equality of blocks, and eventually merge them
+
+ if(nblok>=1)then
+   call wrtout(std_out,' check the equality of blocks, and eventually merge ','COLL')
+   do iblok2=2,nblok
+     do iblok1=1,iblok2-1
+       tmerge=0
+
+!      Check the block type identity
+       if(ddb%typ(iblok1)==ddb%typ(iblok2))then
+
+!        Check the wavevector identities
+         tmerge=1
+         if(ddb%typ(iblok1)==1.or.ddb%typ(iblok1)==2)then
+           nq=1
+         else if(ddb%typ(iblok1)==3)then
+!          Note : do not merge permutation related elements ....
+           nq=3
+         else if(ddb%typ(iblok1)==4 .or. ddb%typ(iblok1)==0)then
+           nq=0
+         end if
+         if(nq/=0)then
+           do ii=1,nq
+             diff=ddb%qpt(1+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
+&             -ddb%qpt(1+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if(abs(diff)>qtol)tmerge=0
+             diff=ddb%qpt(2+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
+&             -ddb%qpt(2+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if(abs(diff)>qtol)tmerge=0
+             diff=ddb%qpt(3+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
+&             -ddb%qpt(3+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if(abs(diff)>qtol)tmerge=0
+           end do ! ii
+         end if
+
+!        Now merges,
+         if(tmerge==1)then
+           write(message, '(a,i5,a,i5)' )' merge block #',iblok2,' to block #',iblok1
+           call wrtout(std_out,message,'COLL')
+           mgblok(iblok2)=1
+           do ii=1,msize
+             if(ddb%flg(ii,iblok2)==1)then
+               ddb%flg(ii,iblok1)=1
+               ddb%val(1,ii,iblok1)=ddb%val(1,ii,iblok2)
+               ddb%val(2,ii,iblok1)=ddb%val(2,ii,iblok2)
+             end if
+           end do
+         end if
+
+       end if
+     end do
+   end do
+
+!  Count the final number of bloks
+   tmerge=0
+   do ii=1,nblok
+     if(mgblok(ii)==1)tmerge=tmerge+1
+   end do
+   nblok=nblok-tmerge
+
+!  Summarize the merging phase
+   write(message, '(i6,a,i6,a)' )&
+&   tmerge,' blocks are merged; the new DDB will have ',nblok,' blocks.'
+   call wrtout(std_out,message,'COLL')
+
+!  End the condition on existence of more than one blok in current DDB
+ end if
+
+!**********************************************************************
+
+ write(message, '(a,a)' )' open the output database, write the',' preliminary information '
+ call wrtout(std_out,message,'COLL')
+
+ ddb_hdr%dscrpt = trim(dscrpt)
+ ddb_hdr%nblok = nblok
+ ddb_hdr%mblktyp = mblktyp
+
+ call ddb_hdr_open_write(ddb_hdr, filnam(1), ddbun, fullinit=1)
+
+ if(nddb>1)then
+
+!  Write the whole database
+   call wrtout(std_out,' write the DDB ','COLL')
+   choice=2
+   do iblok=1,nblok+tmerge
+     if(mgblok(iblok)==0)then
+       write(std_out,'(a,i4)' ) ' Write bloc number',iblok
+       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+     else
+       write(message, '(a,i4,a)' )&
+&       ' Bloc number',iblok,' was merged, so do not write it'
+       call wrtout(std_out,message,'COLL')
+     end if
+   end do
+
+!  Also write summary of bloks at the end
+   write(ddbun, '(/,a)' )' List of bloks and their characteristics '
+   choice=3
+   do iblok=1,nblok+tmerge
+     if(mgblok(iblok)==0)then
+       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+     end if
+   end do
+
+ end if
+
+ close (ddbun)
+
+!*********************************************************************
+
+!Deallocate arrays
+
+ ABI_DEALLOCATE(mgblok)
+
+ call ddb_hdr_free(ddb_hdr)
+ call ddb_free(ddb)
+
+end subroutine mblktyp1
+!!***
+
+!!****f* m_ddb/mblktyp5
+!!
+!! NAME
+!! mblktyp5
+!!
+!! FUNCTION
+!! This routine merges the derivative databases of type 5:
+!! second-order eigenvalue derivatives
+!!   why is this separate from mblktyp1? Should be merged at some point for consistency
+!!
+!! NOTES
+!! The heading of the database is read, then the heading
+!! of the temporary database to be added is read,
+!! the code check their compatibility, and create a new
+!! database that mixes the old and the temporary ones.
+!!
+!! TODO
+!!  This routine is deprecated and will be removed
+!!
+!! INPUTS
+!!     chkopt=option for consistency checks between DDB files
+!!     codename=MRGDDB
+!!     ddbun=define input and output unit numbers
+!!     dscrpt=description of the output file
+!!     filnam=name of input or output file
+!!     mddb=maximum number of databases (cannot be made dynamic)
+!!     nddb=number of input DDBs
+!!
+!! OUTPUT
+!!     msym=maximum number of symmetry elements in space group
+!!     Merge the file
+!!
+!! PARENTS
+!!      mrgddb
+!!
+!! CHILDREN
+!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
+!!
+!! SOURCE
+
+subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mblktyp5'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: ddbun,mddb,nddb,vrsddb
+ integer,intent(out) :: msym
+ character(len=fnlen),intent(in) :: dscrpt,filnam(mddb+1)
+
+!Local variables -------------------------
+!scalars
+!Define input and output unit numbers:
+ integer,parameter :: ddbuntmp=3
+ integer :: chkopt,choice,dimekb,iblok,iblok1,iblok2
+ integer :: iddb,ii,lmnmax,matom
+ integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
+ integer :: nblok,nblokt
+ integer :: temp,tmerge,usepaw
+ integer,allocatable :: mgblok(:)
+ real(dp),parameter :: qtol=2.0d-8
+ real(dp) :: diff
+ type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
+!arrays
+ real(dp),allocatable :: blkval2(:,:,:,:),kpnt(:,:,:)
+ character(len=500) :: message
+
+! *********************************************************************
+
+ ! Make sure there is more than one ddb to be read
+ if(nddb==1)then
+   write(message, '(a,a,a,a,a)' )&
+&   'The initialisation mode of MRGDDB, that uses nddb=1,',&
+&   'has been disabled in version 2.1 of ABINIT.',&
+&   'Action: you should use DDBs that include the symmetry',&
+&   'information (and that can be used and merged without',&
+&   'initialisation), or you should use ABINITv2.0.'
+   MSG_ERROR(message)
+ end if
+
+!Evaluate the maximal dimensions of arrays
+ dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0
+ msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0 ; mblktyp = 1
+ msym=192
+
+ do iddb=1,nddb
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
+&   dimonly=1)
+
+   mblok=mblok+ddb_hdr%nblok
+   mblktyp=max(mblktyp,ddb_hdr%mblktyp)
+   matom=max(matom,ddb_hdr%matom)
+   mkpt=max(mkpt,ddb_hdr%mkpt)
+   mtypat=max(mtypat,ddb_hdr%mtypat)
+   msym=max(msym,ddb_hdr%msym)
+   mband=max(mband,ddb_hdr%mband)
+   dimekb=max(dimekb,ddb_hdr%psps%dimekb)
+   lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
+   usepaw=max(usepaw,ddb_hdr%usepaw)
+
+
+   call ddb_hdr_free(ddb_hdr)
+
+ end do
+
+ mpert=matom+6
+ msize=3*mpert*3*mpert
+ if(mblktyp==3)msize=msize*3*mpert
+
+!write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
+ call ddb_malloc(ddb,msize,mblok,matom,mtypat)
+
+!Allocate arrays
+ ABI_ALLOCATE(mgblok,(mblok))
+
+
+!**********************************************************************
+
+!Read the first database
+
+ write(std_out,*)' read the input derivative database information'
+ call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
+& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+
+ ABI_ALLOCATE(blkval2,(2,msize,ddb_hdr%nband(1),mkpt))
+ ABI_ALLOCATE(kpnt,(3,mkpt,mblok))
+
+ nblok = ddb_hdr%nblok
+
+ if(nblok>=1)then
+!  Read the blocks from the input database.
+   write(message, '(a,i5,a)' ) ' read ',nblok,' blocks from the input DDB '
+   call wrtout(std_out,message,'COLL')
+   choice=1
+   do iblok=1,nblok
+     call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,&
+&     msize,ddb_hdr%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
+!    Setup merged indicator
+     mgblok(iblok)=1
+   end do
+ else
+   call wrtout(std_out,' No bloks in the first ddb ','COLL')
+ end if
+!Close the first ddb
+ close(ddbun)
+
+!*********************************************
+
+!In case of merging of DDBs, iterate the reading
+ do iddb=2,nddb
+
+!  Open the corresponding input DDB,
+!  and read the database file information
+   write(message, '(a,a,i6)' )ch10,&
+&   ' read the input derivative database number',iddb
+   call wrtout(std_out,message,'COLL')
+
+   call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
+&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+
+   if (chkopt==1)then
+!    Compare the current DDB and input DDB information.
+!    In case of an inconsistency, halt the execution.
+     write(message, '(a)' )' compare the current and input DDB information'
+     call wrtout(std_out,message,'COLL')
+
+     call ddb_hdr_compare(ddb_hdr, ddb_hdr8)
+
+   else if(chkopt==0)then
+!    No comparison between the current DDB and input DDB information.
+     write(message, '(a)' )' no comparison between the current and input DDB information'
+     call wrtout(std_out,message,'COLL')
+     write(message, '(a,a,a)' )&
+&     'No comparison/check is performed for the current and input DDB information ',&
+&     'because argument --nostrict was passed to the command line. ',&
+&     'Use at your own risk !'
+     MSG_COMMENT(message)
+   end if
+
+   call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
+
+!  First estimate of the total number of bloks, and error
+!  message if too large
+   write(message, '(a,i5)' ) ' Current number of bloks =',nblok
+   call wrtout(std_out,message,'COLL')
+   write(message, '(a,i5,a)' )' Will read ',ddb_hdr8%nblok,' blocks from the input DDB '
+   call wrtout(std_out,message,'COLL')
+   nblokt=nblok+ddb_hdr8%nblok
+   if(nblokt>mblok)then
+     write(message, '(a,i0,a,a,a,i0,a)' )&
+&     'The expected number of blocks',nblokt,' is larger than',ch10,&
+&     'the maximum number of blocks',mblok,'.'
+     MSG_ERROR(message)
+   end if
+
+!  Read the bloks from the temporary database, and close it.
+!  Also setup the merging indicator
+   choice=1
+   do iblok=nblok+1,nblokt
+     call read_blok8(ddb,iblok,ddb_hdr8%nband(1),mpert,&
+&     msize,ddb_hdr8%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
+     mgblok(iblok)=1
+   end do
+   close(ddbun)
+
+   nblok=nblokt
+   write(message, '(a,i5)' ) ' Now, current number of bloks =',nblok
+   call wrtout(std_out,message,'COLL')
+
+   ! In certain cases, the different DDB will have different information
+   ! on the pseudos (depending on fullinit)
+   ! Here, we copy the information of the last DDB file,
+   ! only to make the tests pass...
+   ddb_hdr%psps%indlmn(:,:,:) = ddb_hdr8%psps%indlmn(:,:,:)
+   ddb_hdr%psps%pspso(:) = ddb_hdr8%psps%pspso(:)
+   ddb_hdr%psps%ekb(:,:) = ddb_hdr8%psps%ekb(:,:)
+
+   call ddb_hdr_free(ddb_hdr8)
+
+ end do
+
+ call wrtout(std_out,' All DDBs have been read ','COLL')
+
+!*********************************************************
+
+!Check the equality of blocks, and eventually merge them
+
+ if(nblok>=1)then
+   call wrtout(std_out,' check the equality of blocks, and eventually merge ','COLL')
+   do iblok2=2,nblok
+     do iblok1=1,iblok2-1
+!      Check the block type identity
+       if(ddb%typ(iblok1)==ddb%typ(iblok2))then
+!        Check the wavevector identities
+         diff=abs(ddb%qpt(1,iblok1)-ddb%qpt(1,iblok2))
+         diff=diff+abs(ddb%qpt(2,iblok1)-ddb%qpt(2,iblok2))
+         diff=diff+abs(ddb%qpt(3,iblok1)-ddb%qpt(3,iblok2))
+         if(abs(diff)<qtol)mgblok(iblok2)=0
+       end if
+     end do
+   end do
+
+!  Count the final number of bloks
+   tmerge=0
+   do ii=1,nblok
+     if(mgblok(ii)==1)tmerge=tmerge+1
+   end do
+   temp = nblok-tmerge
+   nblok=tmerge
+
+!  Summarize the merging phase
+   write(message, '(i6,a,i6,a)' )&
+&   temp,' blocks are merged; the new DDB will have ',nblok,' blocks.'
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!**********************************************************************
+
+ write(message, '(a,a)' )' open the output database, write the',' preliminary information '
+ call wrtout(std_out,message,'COLL')
+
+ ddb_hdr%dscrpt = trim(dscrpt)
+ ddb_hdr%nblok = nblok !nblokt
+ ddb_hdr%mblktyp = mblktyp
+
+ call ddb_hdr_open_write(ddb_hdr, filnam(1), ddbun, fullinit=1)
+
+ if(nddb>1)then
+
+!  Write the whole database
+   call wrtout(std_out,' write the DDB ','COLL')
+   ii = 1 !unit indicator of what will be merged
+!  Create a temporary file to decrease memory need.
+   do iddb=1,nddb
+     call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbuntmp, vrsddb)
+
+     do iblok=1,ddb_hdr8%nblok
+       if(mgblok(ii)==1) then
+         call read_blok8(ddb,ii,ddb_hdr8%nband(1),mpert,&
+&         msize,ddb_hdr8%nkpt,ddbuntmp,blkval2(:,:,:,:),kpnt(:,:,ii))
+         choice=2
+         call ddb_write_blok(ddb,ii,choice,ddb_hdr%nband(1),mpert,&
+&         msize,ddb_hdr8%nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,ii))
+       else
+         write(message, '(a,i4,a,i4,a)' )&
+&         ' Bloc number',iblok,' of DDB ',iddb,&
+&         ' was merged, so do not write it'
+         call wrtout(std_out,message,'COLL')
+       end if
+       ii = ii+1
+     end do
+     close(ddbuntmp)
+     call ddb_hdr_free(ddb_hdr8)
+   end do !iddb=1,nddb
+
+!  Also write summary of bloks at the end
+   write(ddbun, '(/,a)' )' List of bloks and their characteristics '
+   choice=3
+   do iblok=1,nblokt
+     if(mgblok(iblok)==1)then
+       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,&
+&       msize,ddb_hdr%nkpt,ddbun)
+     end if
+   end do
+
+ end if
+
+ close (ddbun)
+
+!*********************************************************************
+
+ call ddb_hdr_free(ddb_hdr)
+
+!Deallocate arrays
+ ABI_DEALLOCATE(mgblok)
+ ABI_DEALLOCATE(blkval2)
+ ABI_DEALLOCATE(kpnt)
+
+ call ddb_free(ddb)
+
+end subroutine mblktyp5
+!!***
+
+end module m_ddb
+!!***

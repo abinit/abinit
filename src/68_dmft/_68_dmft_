@@ -6,7 +6,7 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,5 +36,7 @@
 !! qmc_prep_ctqmc.F90
 !! spectral_function.F90
 !! testcode_ctqmc.F90
+!! triqs_cthyb_qmc.cpp
+!! triqs_interface_ctqmc.F90
 !!
 !!***

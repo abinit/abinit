@@ -8,7 +8,7 @@
 !! as well as kinetic energy contribution to stress tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,7 @@
 !!  natom=number of atoms in cell.
 !!  nband(nkpt)=number of bands at each k point
 !!  nfft=number of FFT grid points
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points in Brillouin zone
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at each k
@@ -105,25 +105,28 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_xmpi
  use m_errors
  use m_fock
- use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
-&                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
-&                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+ use m_cgtools
+
+ use m_time,             only : timab
+ use m_geometry,         only : stresssym
+ use m_kg,               only : mkkpg
+ use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
+&                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+&                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
- use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
-use m_cgtools
+ use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_reorder
+ use m_spacepar,         only : meanvalue_g
+ use m_mkffnl,           only : mkffnl
+ use m_mpinfo,           only : proc_distrb_cycle
+ use m_nonlop,            only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstrnps'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_spacepar
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -171,7 +174,7 @@ use m_cgtools
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:)
+ real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
@@ -231,12 +234,12 @@ use m_cgtools
      compute_gbound=.true.
    end if
  end if
- 
+
  usecprj_local=usecprj
 
  if ((usefock_loc).and.(psps%usepaw==1)) then
    usecprj_local=1
-   if(optfor==1)then 
+   if(optfor==1)then
      fockcommon%optfor=.true.
      if (.not.allocated(fockcommon%forces_ikpt)) then
        ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
@@ -257,7 +260,6 @@ use m_cgtools
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
-
  call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
@@ -429,8 +431,8 @@ use m_cgtools
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(fockcommon%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
-       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fockcommon%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+       ABI_ALLOCATE(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      end if
@@ -489,6 +491,11 @@ use m_cgtools
          call timab(923,1,tsec)
          weight(:)=wtk(ikpt)*occblock(:)
 
+!        gs_hamk%ffnl_k is changed in fock_getghc, so that it is necessary to restore it when stresses are to be calculated.
+         if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl)
+         end if
+
 !        Load contribution from n,k
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
@@ -509,7 +516,9 @@ use m_cgtools
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
          end if
-
+         if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl_str)
+         end if
          call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
@@ -564,7 +573,7 @@ use m_cgtools
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                MSG_BUG(msg)
-             end if 
+             end if
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
              ABI_ALLOCATE(ghc_dum,(0,0))
@@ -582,7 +591,7 @@ use m_cgtools
                if (fockcommon%optfor) then
                  fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
                end if
-             end do 
+             end do
              ABI_DEALLOCATE(ghc_dum)
            end if
          end if
@@ -634,7 +643,7 @@ use m_cgtools
        ABI_DEALLOCATE(kstr6)
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(fockcommon%ffnl_str)
+       ABI_DEALLOCATE(ffnl_str)
      end if
 
    end do ! End k point loop

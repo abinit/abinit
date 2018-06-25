@@ -1,0 +1,173 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2009-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between September 2008 and January 2009. These release notes
+are relative to improvements of ABINITv5.7 with respect to v5.6.
+
+The list of contributors includes :
+D. Berkholz, F. Bottin, F. Bruneval, D. Caliste, M. Delaveau, T. Deutsch, G.A. Franco, M. Giantomassi, 
+D. Hamann, A. Jacques, A. Lherbier, M. Oliveira, M. Mancini, M. Marques, M. Mikami,
+H. Peelaers, Y. Pouillon, T. Rangel, G.-M. Rignanese, L. Sindic, M. stankowski,
+M. Torrent, M. Verstraete, G. Zerah, Zhenhua Zeng, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.7, released on January 10, 2009.
+
+Changes with respect to version 5.6 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A.1 The content of tests paral M, N, and R has changed, to decrease the CPU time needed for them.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The ETSF LibXC, from Miguel Marques, can now be used in production.
+    See the input variable ixc, as well as the automatic tests provided
+    in tests/etsf_xc . This library is a plug-in to ABINIT, and in order to benefit
+    from the LibXC, the user must have build ABINIT with the enable etsf-xc flag.
+    The LibXC (version 0.9 as of December 2008) comes with 16 functional forms of the LDA type,
+    and 41 functional forms of the GGA type. It is also an important step towards
+    using hybrids and meta-GGAs.
+    At present the LibXC cannot be used for response function calculations.
+    The interfacing with ABINIT has been done by M. Oliveira and Y. Pouillon.
+
+B.2 The Wannier90 interpolation of band structure can be used to interpolate 
+    self-consistent GW calculations. See test Wannier90#03.
+    Work done by Tonatiuh Rangel, Don Hamann, Matteo Giantomassi, Gian-Marco Rignanese.
+    However, the testing procedure is still rather incomplete. Only the .out is tested.
+    Wannier90 tutorial has been improved
+
+B.3 Implemented broadening of the electronic states due to interaction with phonon (electronic lifetime).
+    Use of the tetrahedron method to produce the phonon DOS, as well as the
+    temperature dependence of the electronic structure (including the gap).
+    Work by P. Boulanger. See the input variable smdelta in anaddb.
+    Test and doc to be provided. Note independent work by M. Giantomassi on the phonon DOS.
+
+B.4. Large improvement of the band FFT parallelism by M. Delaveau and F. Bottin.
+    In particular, solved many problems with preconditioning,
+    ability to write in parallel the binary files, in an efficient way,
+    using MPI OI, implementation of restart within LOBPCG in order to avoid crash during the minimization. 
+    Introduction of the cpp directive MPI_IO_MORE.
+
+B.5 Spin generalisation (nspden=2, 4) of the ability to compute the Fermi contact interaction at each nuclear
+    site, as well as to compute the electric field gradient  by Joe Zwanziger.
+    See new test v5#36, as well as updated test v5#34.
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 The robustness of the build system (bug fixing) has been
+    improved a lot by Y. Pouillon . Also, several problems have been
+    observed, isolated, fixed by Y. Pouillon, J.-M. Beuken, D. Caliste and A. Jacques.
+
+C.2 Restructuring of the set of source directories. In particular, the interfaces*F90 files
+    are now generated in a separate directory.
+
+C.3 Constitution of several modules, gathering coherent sets of smaller routines, by Matteo Giantomassi.
+
+C.4 Enable user-specified Fortran compiler vendor and version by Y. Pouillon
+
+C.5 Added build-system support for the PAPI library, added --enable-mpi-io-buggy option,
+    added the support for modules, worked on Scalapack support.
+    By Y. Pouillon
+
+C.6 Print the information about the build, the compilation, bazaar branch, etc, inside the log file.
+    Work by Y. Pouillon.
+
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Ability to compute the characters of the symmetries applied to electronic states,
+     to find irreducible representations, by M. Giantomassi. No test available yet.
+
+D.2 Ability to compute the Fermi contact interaction at each nuclear
+    site has been extended to the spin-dependent case, by Joe Zwanziger.
+    See test v5#36.
+
+D.3 Ability to mix separately the magnetization from the density
+    in the PAW scheme, see the input variable diemixmag, by M. Torrent.
+    See test v5#16.
+
+D.4 Ability to output the full physical density in PAW, using the input variable pawprtden.
+    Work by J. Zwanziger, some help by M. Torrent.
+
+D.5 Preservation of symmetry when optcell 2 for body tetragonal lattice,
+    see test v5#37.
+    Bug fix by Joe Zwanziger
+
+D.6 Maintenance work on abilint by T. Deutsch, fix of small problems, and followed the
+    evolution of the build system.
+
+D.7 Work on LDA+U+GW, also non-collinear spin and spin-orbit by M. Giantomassi.
+    Possibility to restart a sigma calculation from a SUSC file using mqmem==0,
+    see automatic test v5#70.
+
+D.8 Improvement of the direct computation
+    of the density based on the recursion method (instead of the
+    iterative determination of the eigenfunctions) : use of two grids (to speed up the calculation)
+    Introduction of the new input variables recgratio.
+    Still to be documented. 
+    Work by Marco Mancini and Gilles Zerah.
+
+D.9. Suggestions for acknowledgments are now automatically generated, at the end of the output file.
+
+D.10 Memory saving for Godby-Needs plasmon-pole model, by F. Bruneval
+
+D.11. Introduced new input variable irdden, by F. Bruneval. (COMMENT : seem to be disabled ?!)
+
+D.12 Introduced short-range-only Coulomb interaction 'ERFC',k by F. Bruneval. No automatic test, not documented.
+
+D.12 Improvements in BigDFT by D. Caliste. Introduction of the BigDFT 1.2.
+     To be documented.
+
+D.13 Restart of of SCF mixing for PAW+U
+
+D.14 X Spectroscopy implemented by S. Mazevet.
+
+D.15 Modified paw routines to be compatible with complex rhoij, for the PAW spin orbit case,
+     introduction of the new input variable pawcpxocc, by M. Torrent and J. Zwanziger
+
+D.16. Introduction of the new input variable spnorbscl, to be able to scale the strength
+    of the spin-orbit interaction for PAW with spin-orbit. Work by Micael Oliveira.
+    No test available yet, not documented.
+
+D.17 Work on magnetic response by J. Zwanziger.
+
+D.18 In addition, miscellaneous bug fixes by many developers (see the list of contributors),
+     many bug fixes in documentation, ...
+</pre>
+

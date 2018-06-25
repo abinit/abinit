@@ -43,6 +43,7 @@
 # Calculation of the HF corrections
  optdriver3     4
  gwcalctyp3     5
+ ixc_sigma3     40
     getwfk3     1
     getscr3     2
 

@@ -1,0 +1,107 @@
+
+     Notes written by DRHamann, related to the
+     computation of the piezoelectric tensor.
+
+     Later, these notes will be placed inside a help file.
+
+     Copyright (C) 2004-2018 ABINIT group (DRH)
+     This file is distributed under the terms of the
+     GNU General Public License, see ~abinit/COPYING
+     or http://www.gnu.org/copyleft/gpl.txt .
+     For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+     ========================================
+
+11/4/03
+
+Modifications by D. R. Hamann to add calculations of the rigid-ion
+piezoelectric tensor to the existing response function calculations
+for the strain perturbation.
+
+This tensor is computed by setting rfeld = 3 and rfstrs = 1, 2, or 3.
+The d/dk wave functions should be available from a preceding calculation.
+Note that even if only a limited number of piezoelectric tensor terms are
+wanted (as determined by rfstrs and idir in this calculation) it is
+necessary to set idir = 1 1 1 in the d/dk calculation for most structures.
+The only obvious exception to this requirement is cases in which the
+primitive lattice vectors are all aligned with the cartesian axes.
+The code will omit terms in the output piezoelectric tensor for which
+the available d/dk set is incomplete.
+
+The full (relaxed-ion) piezoelectric tensor is obtained by adding the
+contribution from internal strains weighted by Born effective charges.
+This requires combining force-constant matrix, internal strain coupling
+parameter, and Born effective charge information from the DDB files,
+and should be automated in anaddb.  The effective charges are calculated
+when rfeld = 2, and thus are obtained simultaneously with the rigid-ion
+piezoelectric tensor.
+
+Note that the piezoelectric terms in the 2nd-order matrix output (as
+well as DDB) correspond to derivatives of the Berry phase for the
+reciprocal lattice direction conjugate to the leading idir index
+with respect to the strain components, and thus do not have the
+expected dimensions (bohr).  Also note that the response function
+piezoelectric tensor is the "proper" piezoelectric tensor, while
+numerical differentiation of the ground-state polarization yields
+the "improper" tensor (see D. Vanderbilt, J. Phys. Chem. Solids 61,
+147 (2000)).
+
+Note further that comparisons of the response-function piezoelectric
+tensor results with finite-difference ground-state polarization
+calculations are not straightforward.  The README notes for
+Test_v4#65 and 66 discuss the relevant issues in more detail.
+
+
+Rigid-ion piezoelectric tensor test             11/04/03
+
+AlP with randomly distorted zincblende structure:
+
+ rprim -0.007  0.548  0.473
+        0.468  0.038  0.512
+        0.481  0.514 -0.032
+
+  xred  0.0000 0.0000 0.0000
+        0.2715 0.2465 0.2540
+
+Finite-difference d/dk used for response-function calculation.
+"Improper" to "Proper" corrections applied to numerical derivatives.
+"idir" below refers to cartesian coordinates. "istr" = (1,...,6) is
+a strain index.
+
+   i    i   i    i    response         i   i    numerical         delta
+   d    p   d    p    function         d   s    derivative
+   i    e   i    e    piezoelectric    i   t    of
+   r    r   r    r    tensor           r   r    polarization
+        t        t
+
+   1    4   1    5    0.0003662414     1   1    3.66241383E-04   -1.7000e-11
+   1    4   2    5   -0.0015088664     1   2   -1.50886638E-03    2.0000e-11
+   1    4   3    5    0.0019905373     1   3    1.99053730E-03    0.0000e+00
+   1    4   1    6   -0.0121920868     1   4   -1.21920868E-02    0.0000e+00
+   1    4   2    6   -0.0005417539     1   5   -5.41753867E-04    3.3000e-11
+   1    4   3    6   -0.0001328516     1   6   -1.32851555E-04    4.5000e-11
+
+   2    4   1    5    0.0012894250     2   1    1.28942506E-03    6.0000e-11
+   2    4   2    5   -0.0015381276     2   2   -1.53812756E-03    4.0000e-11
+   2    4   3    5    0.0003834910     2   3    3.83491031E-04    3.1000e-11
+   2    4   1    6   -0.0005521035     2   4   -5.52103529E-04   -2.9000e-11
+   2    4   2    6   -0.0115938482     2   5   -1.15938481E-02    1.0000e-10
+   2    4   3    6   -0.0016492703     2   6   -1.64927028E-03    2.0000e-11
+
+   3    4   1    5    0.0003691675     3   1    3.69167513E-04    1.3000e-11
+   3    4   2    5    0.0002598317     3   2    2.59831666E-04   -3.4000e-11
+   3    4   3    5   -0.0007158592     3   3   -7.15859169E-04    3.1000e-11
+   3    4   1    6   -0.0009563458     3   4   -9.56345781E-04    1.9000e-11
+   3    4   2    6    0.0016306286     3   5    1.63062861E-03    1.0000e-11
+   3    4   3    6   -0.0116492025     3   6   -1.16492026E-02   -1.0000e-10
+
+
+Finite-difference d/dk versus analytic d/dk piezoelectric tensor
+comparison:
+
+        ngkpt = 4 4 4 (above)   7.82E-4 rms difference
+        ngkpt = 8 8 8           1.01E-4 rms difference
+
+
+
+

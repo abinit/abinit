@@ -18,7 +18,7 @@
 
 #Definition of the unit cell
 acell 3*10.61          # This is equivalent to   10.61 10.61 10.61
-rprim  0.0  0.5  0.5   # In lessons 1 and 2, these primitive vectors 
+rprim  0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors 
        0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1 
        0.5  0.5  0.0   # that is, the default.
 
@@ -77,7 +77,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = X. Gonze
 #%% keywords =  NC, DFPT
 #%% description =  Crystalline AlAs : computation of the dynamical matrix at Gamma
 #%%<END TEST_INFO>

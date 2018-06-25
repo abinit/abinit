@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Conduct Fourier transform of REAL or COMPLEX function f(r)=fofr defined on
-!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid 
+!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid
 !! in reciprocal space, in full storage mode, or the reverse operation.
 !! For the reverse operation, the final data is divided by nfftot.
 !! REAL case when cplex=1, COMPLEX case when cplex=2
@@ -19,7 +19,7 @@
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +28,11 @@
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! isign=sign of Fourier transform exponent: current convention uses
-!!  +1 for transforming from G to r 
+!!  +1 for transforming from G to r
 !!  -1 for transforming from r to G.
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! paral_kgb=Flag related to the kpoint-band-fft parallelism
 !! tim_fourdp=timing code of the calling routine (can be set to 0 if not attributed)
 !!
@@ -48,14 +48,13 @@
 !!      atm2fft,bethe_salpeter,calc_smeared_density,dfpt_atm2fft,dfpt_dyfro
 !!      dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dfpt_vlocal
 !!      dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d,fresidrsp
-!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian
-!!      m_dvdb,m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc
-!!      m_ppmodel,m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace
-!!      moddiel,moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix
-!!      pawmknhat,pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA
-!!      recursion,recursion_nl,redgr,respfn,rotate_rho,scfcv,screening
-!!      setup_positron,sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden
-!!      xcpot
+!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian,m_dvdb
+!!      m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc,m_ppmodel
+!!      m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace,moddiel
+!!      moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix,pawmknhat
+!!      pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA,recursion
+!!      recursion_nl,redgr,respfn,rotate_rho,scfcv,screening,setup_positron
+!!      sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden,xcpot
 !!
 !! CHILDREN
 !!      ccfft,dfti_seqfourdp,fftw3_mpifourdp,fftw3_seqfourdp,fourdp_mpi
@@ -76,7 +75,8 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  use m_profiling_abi
  use m_errors
  use m_fftcore
- 
+
+ use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sgfft,       only : sg_fft_rc
  use m_sg2002,      only : sg2002_mpifourdp, sg2002_back, sg2002_forw
@@ -88,7 +88,6 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourdp'
- use interfaces_18_timing
  use interfaces_53_ffts, except_this_one => fourdp
 !End of the abilint section
 
@@ -121,7 +120,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 ! *************************************************************************
 
  ABI_UNUSED(paral_kgb)
- 
+
  ! Keep track of timing
  call timab(260+tim_fourdp,1,tsec)
 
@@ -161,7 +160,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
- ! Branch immediately depending on nproc_fft 
+ ! Branch immediately depending on nproc_fft
  if (nproc_fft > 1) then
    call fourdp_mpi(cplex,nfft,ngfft,ndat1,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    goto 100
@@ -181,7 +180,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
    call timab(260+tim_fourdp,2,tsec); return
  end if
 
- if (fftalga==FFT_DFTI) then 
+ if (fftalga==FFT_DFTI) then
    ! Call sequential or MPI MKL.
    if (nproc_fft == 1) then
      call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat1,isign,fofg,fofr)
@@ -345,9 +344,9 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
    else if (isign==-1) then
 
      ! Insert fofr into the augmented fft box
-     if (cplex==1) then 
+     if (cplex==1) then
        ! REAL case
-!$OMP PARALLEL DO PRIVATE(base) 
+!$OMP PARALLEL DO PRIVATE(base)
        do i3=1,n3
          do i2=1,n2
            base=n1*(i2-1+n2*(i3-1))

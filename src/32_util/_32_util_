@@ -10,7 +10,7 @@
 !! physics data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (TD)
+!! Copyright (C) 1998-2018 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,18 +33,14 @@
 !! littlegroup_q.F90
 !! m_atomdata.F90
 !! m_exp_mat.F90
-!! m_gwls_utility.F90
 !! m_matrix.F90
-!! m_optic_tools.F90
 !! m_pptools.F90
 !! m_special_funcs.F90
-!! m_wfutils.F90
 !! mati3det.F90
 !! mati3inv.F90
 !! matr3eigval.F90
 !! matr3inv.F90
 !! matrginv.F90
-!! mknormpath.F90
 !! overlap_g.F90
 !! proc_distrb_cycle.F90
 !! radsintr.F90

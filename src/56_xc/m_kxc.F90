@@ -5,23 +5,23 @@
 !!
 !! FUNCTION
 !! Helper functions to compute the XC kernel in reciprocal space.
-!! WARNING: At present (10/01/14) these routines are not tested 
+!! WARNING: At present (10/01/14) these routines are not tested
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES:
 !!  libxc_functionals.F90 uses a global structure (funcs) to store the XC parameters.
-!!  This structure is initialized in driver with the value of ixc specified by the user in the input file. 
-!!  In order to change the value of ixc at run-time, we have to reinitialize the global structure 
+!!  This structure is initialized in driver with the value of ixc specified by the user in the input file.
+!!  In order to change the value of ixc at run-time, we have to reinitialize the global structure
 !!  with the new value of ixc before computing XC quantities.
 !!  Moreover one has to reinstate the old functional before returning so that the other routines
 !!  will continue to used the previous ixc. This task can be accomplished with the following pseudocode
-!!  
+!!
 !!   ! Reinitialize the libxc module with the overriden values
 !!   if (old_ixc<0)  call libxc_functionals_end()
 !!   if (new_ixc<0) call libxc_functionals_init(new_ixc,nspden)
@@ -48,6 +48,7 @@ MODULE m_kxc
  use m_xmpi
  use m_crystal
  use m_distribfft
+ use m_xcdata
  use libxc_functionals
 
  use defs_abitypes,   only : MPI_type, dataset_type
@@ -56,11 +57,15 @@ MODULE m_kxc
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_fft,           only : fourdp_6d
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_spacepar,      only : hartre
+ use m_rhotoxc,       only : rhotoxc
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: kxc_rpa         ! Hartree kernel
@@ -100,8 +105,9 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -198,8 +204,9 @@ end subroutine kxc_rpa
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -401,21 +408,20 @@ end subroutine kxc_local
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_alda'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -439,14 +445,14 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
- integer :: ifft,ikxc,intxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
+ integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  real(dp),parameter :: gsqcut=1._dp
  real(dp) :: enxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0),qphon(3)
+ real(dp) :: dum(0)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -471,9 +477,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vhartree,(nfft))
  ABI_MALLOC(vxc,(nfft,nspden))
 
- intxc=0
- call xcdata_init(intxc,ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -530,7 +534,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -585,7 +590,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -663,8 +669,9 @@ end subroutine kxc_alda
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -891,8 +898,9 @@ end subroutine kxc_pgg
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1034,7 +1042,7 @@ end subroutine kxc_eok
 !! Cryst<crystal_t>=Info on the crystal structure.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft_tot = Total number of points on the FFT grid.
 !! nspden=Number of independent spin densities.
 !! rhor(nfft_tot,nspden) = the charge density on the full FFT grid.
@@ -1057,23 +1065,21 @@ end subroutine kxc_eok
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_driver'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -1092,12 +1098,12 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: cplex,i1,i2,i3,ig,igp,intxc,iq,ir,n3xccc,ngfft1,ngfft2,izero
+ integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
- type(MPI_type) :: MPI_enreg_seq 
+ type(MPI_type) :: MPI_enreg_seq
 !arrays
  real(dp) :: qphon(3),strsxc(6),dum(0)
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
@@ -1120,9 +1126,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  write(msg,'(a,i3)') ' kxc_driver: calculating exchange-correlation kernel using ixc = ',ixc
  call wrtout(std_out,msg,'COLL')
 
- intxc=0
- call xcdata_init(intxc,ixc,&
-&  Dtset%nelect,Dtset%tphysel,Dtset%usekden,Dtset%vdw_xc,Dtset%xc_tb09_c,Dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=Dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
@@ -1150,8 +1154,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ABI_MALLOC(vhartr,(nfft_tot))
  rhog(:,:)=zero
 !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction 
- n3xccc=0       
+!should implement the non linear core correction
+ n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft_tot,nspden))
 
@@ -1174,7 +1178,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1242,7 +1247,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
        gpqy=dble(gvec(2,ig))
        gpqz=dble(gvec(3,ig))
        do ir=1,nfft_tot
-         expo=gpqx*xx(1,ir)+gpqy*xx(2,ir)+gpqz*xx(3,ir)              
+         expo=gpqx*xx(1,ir)+gpqy*xx(2,ir)+gpqz*xx(3,ir)
          phas(2*ir-1,ig,1)= cos(two_pi*expo)
          phas(2*ir,ig,1) =  sin(two_pi*expo)
        end do
@@ -1300,7 +1305,7 @@ end subroutine kxc_driver
 !! Cryst<crystal_t>=Info on the unit cell.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft = total number of points on the FFT grid.
 !! rhor(nfft,nspden) = the charge density on the FFT grid.
 !!  (total in first half and spin-up in second half if nsppol=2)
@@ -1321,24 +1326,22 @@ end subroutine kxc_driver
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
 
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_ADA'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -1360,14 +1363,14 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: i1,i2,i3,ig,igp,intxc,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
+ integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  real(dp) :: enxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
- type(MPI_type) :: MPI_enreg_seq 
+ type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
@@ -1408,15 +1411,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call wrtout(std_out,msg,'COLL')
  inv_kappa_sq = one/(kappa*kappa)
 
- intxc=0
- call xcdata_init(intxc,ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
    MSG_ERROR(msg)
  end if
- 
+
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
@@ -1428,7 +1429,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
    MSG_ERROR("GGA functional not implemented for ADA vertex")
  end if
- 
+
  ABI_MALLOC(kxcr,(nfft,nkxc))
 
 !gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
@@ -1438,8 +1439,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(vhartr,(nfft))
  rhog(:,:)=zero
 !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction 
- n3xccc=0       
+!should implement the non linear core correction
+ n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft,nspden))
 
@@ -1473,7 +1474,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  my_rhor = rhor
 !do isp = 1,nsppol
 !call calc_smeared_density(my_rhor(:,isp),1,rhotilder(:,isp),nfft,ngfft,npw,&
-!&   gvec,Cryst%gprimd,Cryst%ucvol,MPI_enreg_seq,paral_kgb0,kappa_in=kappa) 
+!&   gvec,Cryst%gprimd,Cryst%ucvol,MPI_enreg_seq,paral_kgb0,kappa_in=kappa)
 !my_rhor(:,isp) = rhotilder(:,isp)
 !end do
 
@@ -1501,7 +1502,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values
@@ -1510,7 +1512,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !end do
 
 !DEBUG test with direct way of calculating Kxc
-!do i1=1,nfft  
+!do i1=1,nfft
 !rs = (three/(four_pi*my_rhor(i1,1)))**third
 !Kx = 16._dp/27._dp*0.3141592653589793e1_dp*(rs**2)*(-0.4581652_dp)
 !
@@ -1573,7 +1575,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ierr=0
  do iqbz=1,nqibz
    q_point(:) = qibz(:,iqbz)
-!  
+!
    do ig=1,npw
      do igp=1,npw
 !      Calculate |q+G| and |q+G'|
@@ -1581,17 +1583,17 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
        qpgp(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:)+gvec(:,igp))
        abs_qpg_sq = 1.0_dp/(1.0_dp+dot_product(qpg,qpg)*inv_kappa_sq)
        abs_qpgp_sq = 1.0_dp/(1.0_dp+dot_product(qpgp,qpgp)*inv_kappa_sq)
-       
+
        gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfft)
        if (gmgp_idx>0) then
          my_fxc_ADA_ggpq(ig,igp,iqbz) = half*CMPLX(my_kxcg(1,gmgp_idx), my_kxcg(2,gmgp_idx))*(abs_qpg_sq+abs_qpgp_sq)
-       else 
+       else
          ierr=ierr+1
          my_fxc_ADA_ggpq(ig,igp,iqbz) = czero
        end if
      end do
    end do
-   if (ierr/=0) then 
+   if (ierr/=0) then
      write(msg,'(a,i4,3a)')&
 &     ' Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     ' Enlarge the FFT mesh to get rid of this problem. '
@@ -1599,7 +1601,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    end if
  end do
 
- fxc_ADA = my_fxc_ADA_ggpq 
+ fxc_ADA = my_fxc_ADA_ggpq
 
 !do iqbz=1,nqibz
 !call hermitianize(my_fxc_ADA_ggpq(:,:,iqbz),"All")
@@ -1621,7 +1623,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !  end do
 !  end do
 !  end do
-   
+
 !  write(std_out,*)"kxcr(r=0)",kxcr(1,1)
 !  write(std_out,*)"my_kxg(G=0)",my_kxcg(:,1)
 !  write(std_out,*)"SUM kxcr/nfft ",SUM(kxcr(:,1))/nfft
@@ -1637,7 +1639,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_MALLOC(rvec,(3,nfft))
    ABI_MALLOC(dummy,(nfft,nfft))
    my_fxc_ADA_rrp=zero; FT_fxc_ADA_ggpq=czero; dummy=czero; rvec=zero
-   
+
 !  First find coordinates of real-space fft points
    igrid = 0
    ngfft1 = ngfft(1)
@@ -1656,13 +1658,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
        end do
      end do
    end do
-   if (igrid/=nfft) then 
+   if (igrid/=nfft) then
      MSG_ERROR('kxc_ADA: igrid not equal to nfft')
    end if
-   
+
 !  Construct kernel in real space
    do ir=1,nfft
-     do irp=ir,nfft 
+     do irp=ir,nfft
        rmrp(:) = rvec(:,ir)-rvec(:,irp)
        abs_rmrp = sqrt(dot_product(rmrp,rmrp))
        my_fxc_ADA_rrp(ir,irp) = eighth*kappa*kappa*piinv* &
@@ -1674,7 +1676,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
      end do
    end do
 
-!  Find FFT index for all G   
+!  Find FFT index for all G
    n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 !  Use the following indexing (N means ngfft of the adequate direction)
 !  0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
@@ -1733,7 +1735,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_FREE(rvec)
    ABI_FREE(my_fxc_ADA_rrp)
    ABI_FREE(FT_fxc_ADA_ggpq)
-   
+
    if (xcdata%xclevel==2) then
      MSG_ERROR(" GGA not implemented for kxc_ADA")
    end if !xclevel==2

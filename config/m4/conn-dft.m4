@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -508,7 +508,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           ;;
 
         libxc)
-          _ABI_DFT_CHECK_LIBXC(2,2,3,1)
+          _ABI_DFT_CHECK_LIBXC(2,2,4,0)
           if test "${abi_dft_libxc_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
             AC_DEFINE([HAVE_LIBXC],1,

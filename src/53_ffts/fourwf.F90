@@ -33,7 +33,7 @@
 !! and for zeroing arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FF)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@
 !! mgfft=maximum size of 1D FFTs
 !! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in //
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
 !! n4,n5,n6=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -132,6 +132,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  use m_errors
  use m_cgtools
 
+ use m_time,      only : timab
  use m_mpinfo,    only : ptabs_fourwf
  use m_fftcore,   only : sphere_fft, sphere
  use m_sgfft,     only : sg_fftpad, sg_fftrisc, sg_fftrisc_2
@@ -143,7 +144,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourwf'
- use interfaces_18_timing
  use interfaces_53_ffts, except_this_one => fourwf
 !End of the abilint section
 
@@ -168,10 +168,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !scalars
  integer :: fftalg,fftalga,fftalgc,fftcache,i1,i2,i2_local,i3,i3_local,i3_glob,idat,ier
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
- integer :: nfftot,nproc_fft,option_ccfft 
+ integer :: nfftot,nproc_fft,option_ccfft
  real(dp) :: fim,fre,xnorm
  character(len=500) :: message
- logical ::  luse_gpu_cuda,luse_ndo 
+ logical ::  luse_gpu_cuda,luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
@@ -179,7 +179,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
- real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:) 
+ real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
 
 ! *************************************************************************
 
@@ -197,16 +197,16 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !if (ndat/=1) then
  !  write(std_out,*)fftalg
  !  MSG_ERROR("Really? I thought nobody uses ndat > 1")
- !end if 
+ !end if
 
  !if (weight_r /= weight_i) then
  !  write(std_out,*)fftalg
  !  MSG_ERROR("Really? I thought nobody uses weight_r != weight_i")
- !end if 
+ !end if
 
  !if (option == 0 .and. fftalgc == 0) then
  !  MSG_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
- !end if 
+ !end if
 
 !Cuda version of fourwf
  luse_gpu_cuda=PRESENT(use_gpu_cuda)
@@ -234,7 +234,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    write(message, '(a,i4,5a)' )&
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'The first digit must be 1,3,4 when the last digit is not 0.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -262,18 +262,18 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  ! DMFT uses its own FFT algorithm (that should be wrapped in a different routine!)
  luse_ndo=.false.
  if (present(use_ndo).and.present(fofginb)) then
-   if(use_ndo==1) then 
+   if(use_ndo==1) then
      luse_ndo=.true.
      if((size(fofginb,2)==0)) then
        write(message, '(a,a,a,i4,i5)' )&
 &       'fofginb has a dimension equal to zero and use_ndo==1',ch10,&
-&       'Action : check dimension of fofginb',size(fofginb,2),use_ndo
+&       'Action: check dimension of fofginb',size(fofginb,2),use_ndo
        MSG_ERROR(message)
      end if
    end if
  end if
 
- if (luse_ndo) then 
+ if (luse_ndo) then
    if (.not.(fftalgc==2 .and. option/=3)) then
      MSG_ERROR("luse_ndo but not .not.(fftalgc==2 .and. option/=3)")
    end if
@@ -284,12 +284,12 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &   istwf_k,kg_kin,kg_kout,&
 &   mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2=weight_i,luse_ndo=luse_ndo,fofgin_p=fofginb)
    goto 100
- end if 
+ end if
 
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
  call ptabs_fourwf(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
- ! Branch immediately depending on nproc_fft 
+ ! Branch immediately depending on nproc_fft
  if (nproc_fft > 1 .and. fftalg /= 412) then
    call fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 &   istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,mpi_enreg%distribfft,n1,n2,n3,npwin,npwout,&
@@ -309,7 +309,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      MSG_ERROR("Not coded")
    end if
 
- case (FFT_DFTI) 
+ case (FFT_DFTI)
    if (luse_ndo) MSG_ERROR("luse_ndo not supported by DFTI")
    if (nproc_fft == 1) then
 !     call wrtout(std_out,"DFTI_SEQFOURWF","COLL")
@@ -319,7 +319,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      MSG_ERROR("Not coded")
    end if
 
- case default 
+ case default
    ! TODO: Clean this code!
 
    ! Here, use routines that make forwards FFT separately of backwards FFT,
@@ -329,7 +329,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
      ABI_ALLOCATE(work1,(2,n4,n5,n6*ndat))
 
-     if (option/=3)then 
+     if (option/=3)then
        ! Insert fofgin into the fft box (array fofr)
 
        if (fftalga/=4)then
@@ -413,10 +413,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        ! Fourier transform fofr (reciprocal to real space)
        ! The output might be in work1 or fofr, depending on inplace
        if (fftalgc==0) then
-         if (fftalga/=4) then 
-           ! Call usual 3DFFT library routines 
+         if (fftalga/=4) then
+           ! Call usual 3DFFT library routines
            call ccfft(ngfft,+1,n1,n2,n3,n4,n5,n6,ndat,2,fofr,work1,comm_fft)
-         else 
+         else
            ! SG simplest complex-to-complex routine
            call ccfft(ngfft,+1,n1,n2,n3,n4,n5,n6,ndat,option_ccfft,work3,work4,comm_fft)
            ABI_DEALLOCATE(work2)
@@ -430,20 +430,20 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
      ! Note that if option==0 everything is alright already, the output is available in fofr.
      ! MG: TODO: Rewrite this mess in human-readable form!
-     if (option==0) then 
+     if (option==0) then
        if (fftalgc==0) then
-         if (fftalga/=4) then 
+         if (fftalga/=4) then
            call DCOPY(2*n4*n5*n6*ndat,work1,1,fofr,1)
-         else 
+         else
            call DCOPY(2*n4*n5*n6*ndat,work4,1,fofr,1)
          end if
        else
          ! Results are copied to fofr.
          call DCOPY(2*n4*n5*n6*ndat,work1,1,fofr,1)
        end if
-     end if 
+     end if
 
-     if (option==1) then 
+     if (option==1) then
        ! Accumulate density
        if ((fftalgc==0) .and. (fftalga==4)) then
          do idat=1,ndat
@@ -465,12 +465,12 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        end if
      end if ! option==1
 
-     if (option==2) then 
+     if (option==2) then
        ! Apply local potential
        if (cplex==1) then
 
          if ((fftalgc==0) .and. (fftalga==4)) then
-!$OMP PARALLEL DO PRIVATE(i3_local,i3_glob) 
+!$OMP PARALLEL DO PRIVATE(i3_local,i3_glob)
            do idat=1,ndat
              do i3=1,n3
                if( me_fft == fftn3_distrib(i3) ) then
@@ -505,7 +505,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
        else if (cplex==2) then
          if ((fftalgc==0) .and. (fftalga==4)) then
-!$OMP PARALLEL DO PRIVATE(fre,fim,i3_local,i3_glob) 
+!$OMP PARALLEL DO PRIVATE(fre,fim,i3_local,i3_glob)
            do idat=1,ndat
              do i3=1,n3
                if( me_fft == fftn3_distrib(i3) ) then
@@ -549,7 +549,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      ! The data for option==2 or option==3 is now in fofr.
      if (option==2 .or. option==3) then
 
-       if (fftalgc==0) then 
+       if (fftalgc==0) then
          ! Call usual 3DFFT library routines or SG simplest complex-to-complex routine
          if (fftalga==FFT_SG2002) then
            ABI_DEALLOCATE(work1)
@@ -601,7 +601,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
              end if
              option_ccfft=1
 
-           else 
+           else
              if (nproc_fft /=1 .or. ndat /= 1 ) then
                do idat=1,ndat
                  do i3=1,n3
@@ -678,7 +678,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
        if (fftalga/=4) then
          call cg_box2gsph(n1,n2,n3,n4,n5,n6,ndat,npwout,kg_kout,work1,fofgout, rscal=xnorm)
-       else 
+       else
          ! if fftalga==4
          if ((paral_kgb==1) .and. ( istwf_k == 1 )) then
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i2_local)
@@ -694,7 +694,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
            end do
            ABI_DEALLOCATE(work2)
          else
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3) 
+!$OMP PARALLEL DO PRIVATE(i1,i2,i3)
            do idat=1,ndat
              do ig=1,npwout
                i1=kg_kout(1,ig); if(i1<0)i1=i1+n1; i1=i1+1
@@ -713,7 +713,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      end if
    end if
 
-   ! Here, call more sophisticated specialized 3-dimensional fft
+   ! Here, call more specialized 3-dimensional fft
    ! (zero padding as well as maximize cache reuse) based on S Goedecker routines.
    ! Specially tuned for cache architectures.
    if (fftalga==FFT_SG .and. fftalgc==2 .and. option/=3) then

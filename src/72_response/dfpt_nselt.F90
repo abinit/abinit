@@ -9,7 +9,7 @@
 !! mixed strain derivatives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@
 !!  nband_rbz(nkpt_rbz*nsppol)=number of bands at each RF k point for each spin
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_rbz=number of k points in the reduced BZ for this perturbation
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
@@ -125,17 +125,18 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_geometry,   only : stresssym
+ use m_cgtools,    only : dotprod_vn
  use m_pawtab,     only : pawtab_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
+ use m_spacepar,   only : hartrestr
+use m_mpinfo,      only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_72_response, except_this_one => dfpt_nselt
 !End of the abilint section
 

@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (DRH,XG)
+!! Copyright (C) 2001-2018 ABINIT group (DRH,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nkxc=second dimension of the kxc array
@@ -70,12 +70,13 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  use m_errors
  use m_profiling_abi
 
+ use m_time,      only : timab
+ use m_symtk,     only : matr3inv
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxcstr'
- use interfaces_18_timing
- use interfaces_32_util
  use interfaces_72_response, except_this_one => dfpt_mkvxcstr
 !End of the abilint section
 
@@ -89,7 +90,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),target,intent(in) :: nhat(nfft,nspden)
- real(dp),target,intent(in) :: nhat1(cplex*nfft,nspden) 
+ real(dp),target,intent(in) :: nhat1(cplex*nfft,nspden)
  real(dp),intent(in) :: kxc(nfft,nkxc),qphon(3)
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3)
@@ -105,7 +106,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  real(dp) :: gprimd(3,3),tsec(2)
  real(dp),allocatable :: rhor1tmp(:,:),rhowk1(:,:)
  real(dp),pointer :: rhor_(:,:),rhor1_(:,:)
- 
+
 ! *************************************************************************
 
  call timab(181,1,tsec)

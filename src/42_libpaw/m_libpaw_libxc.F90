@@ -8,7 +8,7 @@
 !!  correlation potentials and energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2017 ABINIT group (MO, MT)
+!! Copyright (C) 2015-2018 ABINIT group (MO, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1651,6 +1651,11 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
    if (is_hse) then
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
    end if
+#else
+!  This is to avoid unused arguments
+   if(.false. .and. present(hyb_mixing) .and. present(hyb_mixing_sr) .and. present(hyb_range))then
+     msg='One should not be here'
+   endif
 #endif
 
  end do
@@ -2004,7 +2009,7 @@ end module m_libpaw_libxc_funcs
 !!   - Use of embedded m_libpaw_libxc_funcs module
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (MT)
+!! Copyright (C) 2014-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

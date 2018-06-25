@@ -8,7 +8,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2018 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,9 +81,11 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_info_null      = 0
 #endif
 
+#ifdef HAVE_MPI
  integer,save,private  :: xmpi_tag_ub=32767
  ! The tag upper bound value must be at least 32767. An MPI implementation is free to make
  ! the value of MPI_TAG_UB larger than this hence xmpi_tag_ub is redefined when MPI is init in xmpi_init.
+#endif
 
  ! Size in bytes of the entries used in MPI datatypes.
  integer,save, public ABI_PROTECTED:: xmpi_bsize_ch =0
@@ -434,6 +436,7 @@ interface xmpi_irecv
   module procedure xmpi_irecv_intv
   module procedure xmpi_irecv_int1d
   module procedure xmpi_irecv_dp1d
+  module procedure xmpi_irecv_dp2d
 end interface xmpi_irecv
 
 !----------------------------------------------------------------------
@@ -452,6 +455,7 @@ end interface xmpi_scatterv
 interface xmpi_isend
   module procedure xmpi_isend_int1d
   module procedure xmpi_isend_dp1d
+  module procedure xmpi_isend_dp2d
 end interface xmpi_isend
 
 !----------------------------------------------------------------------
@@ -578,9 +582,9 @@ CONTAINS  !===========================================================
 !!  None
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,dummy_tests
+!!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
+!!      mrgscr,multibinit,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -720,7 +724,7 @@ end function xmpi_get_unit
 !!
 !! PARENTS
 !!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,eph,fold2Bloch
-!!      lapackprof,macroave,mrggkk,optic,ujdet,vdw_kernelgen
+!!      lapackprof,macroave,mrggkk,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1819,14 +1823,14 @@ end subroutine xmpi_comm_translate_ranks
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi,cohsex_me
+!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
 !!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff
 !!      m_green,m_haydock,m_hdr,m_io_redirect,m_ioarr,m_iowf,m_plowannier
-!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss
-!!      pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft,vtorho,vtorhorec
-!!      wfk_analyze
+!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,m_xgScalapack,mlwfovlp,mlwfovlp_pw
+!!      mover,mover_effpot,outkss,pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft
+!!      vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct

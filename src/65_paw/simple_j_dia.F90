@@ -7,7 +7,7 @@
 !! simple test current for H atoms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (JJ,MT)
+!! Copyright (C) 2005-2018 ABINIT group (JJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,13 +38,13 @@ subroutine simple_j_dia(jdia,natom,nfft,pawfgrtab)
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,  only : acrossb
  use m_pawfgrtab, only : pawfgrtab_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'simple_j_dia'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

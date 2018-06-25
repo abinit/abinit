@@ -7,7 +7,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!    %ktab(nbz)= table giving for each k-point in the BZ (kBZ), the corresponding
 !!    %ktabi(nbz)= for each k-point in the BZ defines whether inversion has to be considered
 !!    %ktabp(nbz)= phase factor associated to tnons
-!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/variables/vargs.htm#ngfft
 !! gwx_nfftot=number of points of the FFT grid for GW wavefunctions
 !! Vcp <vcoul_t datatype> containing information on the cutoff technique
 !!    %vc_sqrt(npwx,nqibz)= square-root of the coulombian potential for q-points in the IBZ
@@ -110,7 +110,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_defs_ptgroups
  use m_errors
 
- use m_blas,          only : xdotc
+ use m_time,          only : timab
+ use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
@@ -133,7 +134,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => prep_calc_ucrpa
 !End of the abilint section
@@ -167,9 +167,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !scalars
  integer,parameter :: use_pawnhat=0,ider0=0,ndat1=1
  integer :: bandinf,bandsup
- integer :: izero,ib_sum,ib,ib1,ib2,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,ib_sum,ib,ib1,ib2,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,itypatcor_read,jb,iat
- integer :: jik,jk_bz,jk_ibz,lcor,m1,m3,mod100,nspinor,nsppol,ifft
+ integer :: jik,jk_bz,jk_ibz,lcor,m1,m3,nspinor,nsppol,ifft
  integer :: ibsp,dimcprj_gw
  integer :: spad
  integer :: comm
@@ -218,7 +218,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
  call timab(430,1,tsec) ! csigme (SigX)
 
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
  !
  ! === Initialize MPI variables ===
  comm = Wfd%comm
@@ -288,7 +288,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  can_symmetrize = .FALSE.
  if (Sigp%symsigma>0) then
    can_symmetrize = .TRUE.
-   if (mod100 >= 20) then
+   if (gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
       can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then
@@ -715,7 +715,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
                  write(std_out,*) "Warning: precision is low, oscillator strengh should be one and is :",rhotwg_ki(1,jb)
                !else
                !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
-               endif 
+               endif
              endif
            endif
            if (Psps%usepaw==1.and.pawcross==1) then ! Add paw cross term

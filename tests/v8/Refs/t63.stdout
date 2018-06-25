@@ -2,7 +2,7 @@
 .Version 8.5.3 of MRGDV 
 .(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -38,10 +38,11 @@ File path: t63o_DVDB
 Number of v1scf potentials: 4
 Number of q-points in DVDB: 3
 Activate symmetrization of v1scf(r): no
-List of q-points:
+List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 [ 3 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+Have dielectric tensor and Born effective charges: no
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes

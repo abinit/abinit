@@ -9,7 +9,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2018 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ MODULE m_pawfgr
  use m_xmpi
 
  use defs_abitypes, only : dataset_type
+ use m_kg,       only : getcut
 
  implicit none
 
@@ -154,7 +155,7 @@ CONTAINS
 !!  nfftf=(effective) number of FFT grid points (for this proc), for dense FFT mesh
 !!  mgfftf=maximum size of 1D FFTs, for dense FFT mesh
 !!  ngfftc(18),ngfftf(18)=contain all needed information about 3D FFT, for coarse and dense FFT mesh, resp.
-!!                        see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                        see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Pawfgr<pawfgr_type>=For PAW, Fine rectangular GRid parameters and related data
 !!
 !! PARENTS
@@ -173,7 +174,6 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 #undef ABI_FUNC
 #define ABI_FUNC 'pawfgr_init'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -404,7 +404,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -414,9 +414,9 @@ end subroutine pawfgr_nullify
 !! nfftc=total number of FFt grid=n1*n2*n3 for the coarse grid
 !! nfftf=total number of FFt grid=n1*n2*n3 for the fine grid
 !! ngfftc(18)=contain all needed information about 3D FFT, for the coarse grid,
-!!        see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!        see ~abinit/doc/variables/vargs.htm#ngfft
 !! ngfftf(18)=contain all needed information about 3D FFT, for the fine grid,
-!!        see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!        see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !! coatofin(nfftc)= index of the points of the coarse grid on the fine grid

@@ -7,7 +7,7 @@
 !! This method allocates and initialises wavefunctions with values from disk.
 !! See wvl_wfsinp_scratch() or wvl_wfsinp_reformat() from other initialisation
 !! routines.
-!! 
+!!
 !! When initialised from scratch or from disk, wvl%wfs%ks%[h]psi comes unallocated
 !! and will be allocated inside this routine.
 !! When initialised from memory (reformating), wvl%wfs%ks%[h]psi will be reallocated.
@@ -17,7 +17,7 @@
 !! this routine.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (DC)
+!! Copyright (C) 2005-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,12 +59,14 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  use m_errors
  use m_xmpi
 
+ use m_geometry,  only : xred2xcart
+
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : copy_old_wavefunctions, reformatmywaves, first_orthon, &
 & deallocate_wfd, wavefunctions_descriptors, deallocate_lr, &
 & local_potential_dimensions, copy_coulomb_operator, &
 & deallocate_coulomb_operator, nullify_gaussian_basis
- use dynamic_memory 
+ use dynamic_memory
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -72,7 +74,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_reformat'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_43_wvl_wrappers
  use interfaces_62_poisson
 !End of the abilint section
@@ -213,7 +214,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 & wvl%den%denspot%dpbox%ngatherarr(0,1))
 
 !it seems that the table "wvl%projectors%G" is no more used
-!but it's not allocated -> fortran runtime error 
+!but it's not allocated -> fortran runtime error
 #if defined HAVE_BIGDFT
  ABI_DATATYPE_ALLOCATE(wvl%projectors%G,(dtset%ntypat))
  do itypat=1,dtset%ntypat

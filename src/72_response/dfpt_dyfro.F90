@@ -9,7 +9,7 @@
 !! Also (when installed) symmetrize the different part and their sum.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG,MT)
+!! Copyright (C) 2000-2018 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of types of atoms
@@ -104,19 +104,20 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use m_profiling_abi
  use m_errors
 
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab,      only : pawtab_type
+ use m_time,          only : timab
+ use defs_datatypes,  only : pseudopotential_type
+ use m_pawtab,        only : pawtab_type
+ use m_fft,           only : zerosym
+ use m_atm2fft,       only : atm2fft
+ use m_dynmat,        only : dfpt_sydy
+ use m_mklocl,        only : mklocl_recipspace
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyfro'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
- use interfaces_67_common
- use interfaces_72_response, except_this_one => dfpt_dyfro
 !End of the abilint section
 
  implicit none

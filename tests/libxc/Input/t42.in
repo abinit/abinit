@@ -28,10 +28,9 @@ getwfk1     0
 getwfk      1        # Obtain WFK file from previous dataset
 ecutwfn     11.5     # Planewaves to be used to represent the wavefunctions
 ecutsigx    11.5     # Planewaves to be used to represent the exchange operator
-gwcalctyp   125
- icutcoul   5          # short-range exchange only
-     rcut   9.090909   # corresponds to omega = 1/rc = 0.11 bohr^1
+gwcalctyp   25
 getqps     -1
+ixc_sigma  -428
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 
@@ -40,11 +39,11 @@ optdriver2  4
 optdriver3  4
    getqps3 -1
 
-# Dataset3: Calculation of the 3rd HSE06 iteration
+# Dataset4: Calculation of the 3rd HSE06 iteration
 optdriver4  4
    getqps4 -1
 
-# Interpolate energis at the end of the sigma run.
+# Interpolate energies at the end of the sigma run.
 # Use k-path specified by nkpath, ndivsm, kptbounds and write energies in gnuplot format.
 #
 prtebands4 2      # gnuplot format.

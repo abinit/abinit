@@ -315,7 +315,7 @@ enable_optim="no"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-Wno-implicit-interface"
+FCFLAGS_EXTRA="-Wall"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -468,7 +468,7 @@ enable_fc_wrapper="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="no"
+enable_mpi="yes"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -489,7 +489,7 @@ enable_mpi="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="no"
+enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of accesswff)   
@@ -531,7 +531,7 @@ enable_mpi_io="no"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="/usr/local/openmpi_gcc53"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option

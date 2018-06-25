@@ -8,7 +8,7 @@
 !! Initialize the code multibinit: write heading and make the first i/os
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,8 +102,9 @@ subroutine init10(filnam,comm)
 &                  ' (netcdf file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(5)
    write(std_out,'(a,a)' )'-   ',trim(filnam(5))
-
+! TODO hexu: shift ii, add possible file format for spin when needed
    ii = 6
+   !TODO hexu: shift ii
    do while (io>=0 .and. ii<18)
      write(std_out,*)' Give name for input derivative database (DDB or XML file): '
      read(std_in, '(a)',IOSTAT=io) filnam(ii)

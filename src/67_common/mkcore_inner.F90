@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@
 #include "abi_common.h"
 
 subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,natom,ncmax,nfft,&
-&          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rprimd,rr,strdia,vxc,xccc3d,&
+&          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
 
  use defs_basis
@@ -62,7 +62,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
  real(dp),intent(out) :: grxc1,grxc2,grxc3,strdia
 !arrays
  integer,intent(in) :: ifftsph(ncmax)
- real(dp),intent(in) :: rmet(3,3),rprimd(3,3),rr(ncmax),vxc(nfft,nspden)
+ real(dp),intent(in) :: rmet(3,3),rr(ncmax),vxc(nfft,nspden)
  real(dp),intent(in),optional :: rred(:,:)
  real(dp),intent(inout) :: corfra(3,3),dyfrx2(3,3,natom),xccc3d(n3xccc)
  type(pawrad_type),intent(in) :: core_mesh

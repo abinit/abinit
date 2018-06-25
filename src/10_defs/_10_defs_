@@ -17,21 +17,13 @@
 !! of derived datatypes.
 
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (TD)
+!! Copyright (C) 1998-2018 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! defs_aimfields.F90
-!! defs_aimprom.F90
 !! defs_basis.F90
-!! defs_datatypes.F90
-!! defs_fftdata.F90
-!! defs_parameters.F90
-!! defs_suscep.F90
-!! defs_time.F90
-!! defs_wannier90.F90
 !!
 !!***

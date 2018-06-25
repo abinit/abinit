@@ -1,6 +1,5 @@
 # CH system, PBE0 and HSE06, interatomic distance optimization. Non spin polarized.
 
-#ndtset    3  # Set to 2 or 3 to see the crash 
  ndtset 2
  ionmov2 0
  nstep2 25
@@ -42,8 +41,6 @@
  typat  1 2
  xcart -0.562   0 0  0.562  0 0 Angstrom   
  znucl  6 1
-
- optstress 0
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>

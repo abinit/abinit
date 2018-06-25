@@ -8,7 +8,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2018 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ MODULE m_wffile
  use m_errors
  use m_profiling_abi
  use m_xmpi
-#ifdef HAVE_MPI2 
+#ifdef HAVE_MPI2
  use mpi
 #endif
  use m_nctk
@@ -51,7 +51,7 @@ MODULE m_wffile
 
  private
 
-#ifdef HAVE_MPI1 
+#ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
 
@@ -108,8 +108,8 @@ include 'mpif.h'
    module procedure xderiveRead_int2d           !  read integer array 2d
    module procedure xderiveRead_dp              !  read double precision value
    module procedure xderiveRead_dp1d            !  read double precision array 1d
-   module procedure xderiveRead_dp2d            !  read double precision array 2d 
-   module procedure xderiveRead_int2d_displ     !  read integer array 2d non-contiguous 
+   module procedure xderiveRead_dp2d            !  read double precision array 2d
+   module procedure xderiveRead_int2d_displ     !  read integer array 2d non-contiguous
    module procedure xderiveRead_dp2d_displ      !  read double precision array 2d non-contiguous
    module procedure xderiveReadVal_char         !  read character string
    module procedure xmpi_read_int2d
@@ -122,7 +122,7 @@ include 'mpif.h'
   module procedure xderiveWrite_int2d           ! write integer array 2d
   module procedure xderiveWrite_dp              ! write double precision value
   module procedure xderiveWrite_dp1d            ! write double precision array 1d
-  module procedure xderiveWrite_dp2d            ! write double precision array 2d 
+  module procedure xderiveWrite_dp2d            ! write double precision array 2d
   module procedure xderiveWrite_dp2d_seq        ! write double precision array 2d in sequential
   module procedure xderiveWrite_int2d_displ     ! write integer array 2d non contiguous
   module procedure xderiveWrite_dp2d_displ      ! write double precision array 2d non contiguous
@@ -567,7 +567,7 @@ subroutine xnullifyOff(wff)
  type(wffile_type),intent(inout) :: wff
 
 ! *************************************************************************
- 
+
 #if defined HAVE_MPI_IO
  wff%offwff    = 0
  wff%off_recs  = 0
@@ -623,7 +623,7 @@ subroutine xmoveOff(wff,n_int,n_dp,n_ch,n_mark)
  type(wffile_type),intent(inout) :: wff
 
 ! *************************************************************************
- 
+
 #if defined HAVE_MPI_IO
  if (present(n_int) ) wff%offwff=wff%offwff+n_int *wff%nbOct_int
  if (present(n_dp)  ) wff%offwff=wff%offwff+n_dp  *wff%nbOct_dp
@@ -929,7 +929,7 @@ end subroutine xderiveRRecInit
 !----------------------------------------------------------------------
 
 !!****f* m_wffile/clsopn
-!! NAME 
+!! NAME
 !! clsopn
 !!
 !! FUNCTION
@@ -985,7 +985,7 @@ subroutine clsopn(wff)
 &     '  Attempt to inquire about unit=',unit,&
 &     '  indicates error condition iostat=',ios,&
 &     '  May be due to temporary problem with file, disks or network.',&
-&     '  Action : check whether there might be some external problem,',&
+&     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
      MSG_ERROR(message)
 
@@ -998,7 +998,7 @@ subroutine clsopn(wff)
 &     '  Tried to inquire about unit',unit,&
 &     '  and found it not connected to a file.',&
 &     '  May be due to temporary problem with file, disks or network.',&
-&     '  Action : check whether there might be some external problem,',&
+&     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
      MSG_ERROR(message)
 #endif
@@ -1020,7 +1020,7 @@ subroutine clsopn(wff)
 &       '  Tried to inquire about unit',unit,&
 &       '  and found it not connected to a file.',&
 &       '  May be due to temporary problem with file, disks or network.',&
-&       '  Action : disregard this error and continue the process anyway.'
+&       '  Action: disregard this error and continue the process anyway.'
        MSG_WARNING(message)
      end if
 #endif
@@ -1041,7 +1041,7 @@ end subroutine clsopn
 !----------------------------------------------------------------------
 
 !!****f* m_wffile/wff_usef90
-!! NAME 
+!! NAME
 !! wff_usef90
 !!
 !! FUNCTION
@@ -1082,7 +1082,7 @@ end function wff_usef90
 !----------------------------------------------------------------------
 
 !!****f* m_wffile/wff_ireadf90
-!! NAME 
+!! NAME
 !! wff_ireadf90
 !!
 !! FUNCTION
@@ -1201,10 +1201,10 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 #if defined HAVE_MPI
 ! This case occurs when wff is connected to a DENSITY file
 ! abinit_comm_output is generally equal to MPI_COMM_WORLD (except if paral. over images)
-  if (spaceComm==MPI_COMM_SELF) wff%spaceComm=abinit_comm_output 
+  if (spaceComm==MPI_COMM_SELF) wff%spaceComm=abinit_comm_output
 ! if (spaceComm==MPI_COMM_SELF) wff%spaceComm=MPI_COMM_WORLD
   call MPI_COMM_SIZE(wff%spaceComm,wff%nproc,ier)
-! Redefine the default MPIIO communicator if MPI, although MPIIO features should not be used unless 
+! Redefine the default MPIIO communicator if MPI, although MPIIO features should not be used unless
 ! present(spaceComm_mpiio).and.wff%iomode==1
   wff%spaceComm_mpiio=wff%spaceComm
   wff%me_mpiio=wff%me
@@ -1603,7 +1603,7 @@ subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
    call xderiveRead(wff,dparray,ndp,MPI_COMM_SELF,ierr)
    call xderiveRRecEnd(wff,ierr)
 #endif
- else 
+ else
    write(msg,'(a,i0)')"Wrong iomode: ",wff%iomode
    MSG_ERROR(msg)
  end if
@@ -1764,16 +1764,16 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
    NCF_CHECK(nf90_get_var(wff%unwff, vid, nband_disk, start=[ikpt, isppol]))
 #endif
 
- else 
+ else
    ! MG: I don't understand why we have to use this ugly code!!!!!!!!
    ! Only master knows npw,nspinor,nband_disk in IO_MODE_FORTRAN_MASTE mode
    ! To the person who wrote this stuff:
-   ! Have you ever heard about the "IF" statement of Fortran and the typical construct 
+   ! Have you ever heard about the "IF" statement of Fortran and the typical construct
    !
    !      if (rank==master) call mpifoo_seq()
 
    MSG_WARNING("Skipping read in WffReadNpwRec. Keep fingers crossed")
-   ! MG: Must initialze these values somehow to avoid overflows. 
+   ! MG: Must initialze these values somehow to avoid overflows.
    npw = 0; nspinor = 0; nband_disk = 0
  end if
 
@@ -1975,7 +1975,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 
 !Open file
  call MPI_FILE_OPEN(wff%spaceComm_mpiio,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
- ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname)) 
+ ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname))
 
 !----------------------------------------------------------
 !Loop blocks of bands (to decrease offsets inside the file)
@@ -2466,7 +2466,7 @@ subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
  integer :: me
 #endif
  character(len=500) :: msg
-  
+
 ! *************************************************************************
 
  ierr=0
@@ -2650,7 +2650,7 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 
 !new offset
  wff%offwff = wff%offwff + totoct
- return 
+ return
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
@@ -3121,7 +3121,7 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
- ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname)) 
+ ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname))
  call MPI_FILE_SET_VIEW(wfftempo,wff%offwff,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
  call MPI_FILE_READ_ALL(wfftempo,val,nbval,MPI_INTEGER,statux,ierr)
  call MPI_FILE_CLOSE(wfftempo,ierr)
@@ -3267,7 +3267,7 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
- ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname)) 
+ ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname))
  call MPI_FILE_SET_VIEW(wfftempo,wff%offwff,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
  call MPI_FILE_READ_ALL(wfftempo,val,nbval,MPI_DOUBLE_PRECISION,statux,ierr)
  call MPI_FILE_CLOSE(wfftempo,ierr)
@@ -3955,7 +3955,7 @@ subroutine xderiveWrite_dp2d_seq(wff,xval,ierr)
  wff%offwff = wff%offwff+wff%nbOct_dp*n1*n2
 #endif
 
-end subroutine xderiveWrite_dp2d_seq 
+end subroutine xderiveWrite_dp2d_seq
 !!***
 
 !----------------------------------------------------------------------
@@ -4068,7 +4068,7 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
- ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname)) 
+ ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname))
  call MPI_FILE_SET_VIEW(wfftempo,wff%offwff,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
  call MPI_FILE_WRITE_ALL(wfftempo,val,nbval,MPI_INTEGER,statux,ierr)
  call MPI_FILE_CLOSE(wfftempo,ierr)
@@ -4198,7 +4198,7 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
- ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname)) 
+ ABI_CHECK_MPI(ierr, sjoin("MPI_FILE_OPEN:", wff%fname))
  call MPI_FILE_SET_VIEW(wfftempo,wff%offwff,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
  call MPI_FILE_WRITE_ALL(wfftempo,val,nbval,MPI_DOUBLE_PRECISION,statux,ierr)
  call MPI_FILE_CLOSE(wfftempo,ierr)
@@ -4295,7 +4295,7 @@ end subroutine xderiveWrite_char
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  nband(nkpt*nsppol) = number of bands at each k point, for each polarization
 !!  npwarr(nkpt) = number of planewaves at each k point
-!!  mpi_enreg <type(MPI_type)> = informations about MPI parallelization
+!!  mpi_enreg <type(MPI_type)> = information about MPI parallelization
 !!
 !! OUTPUT
 !!  (no output)
