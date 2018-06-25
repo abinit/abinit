@@ -31,7 +31,7 @@ MODULE m_GreenHyboffdiag
  USE m_MatrixHyboffdiag
  USE m_Vector
  USE m_VectorInt
- USE m_ListCdagCoffdiag
+ USE m_ListCdagC
  USE m_MapHyboffdiag
 #ifdef HAVE_MPI2
  USE mpi
@@ -498,7 +498,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !! INPUTS
 !!  op=Green
 !!  Mmatrix=M matrix for the current flavor
-!!  ListCdagCoffdiag_1=list of all creator and annhilator operators
+!!  ListCdagC_1=list of all creator and annhilator operators
 !!  updated=should we accumulate or not
 !!
 !! OUTPUT
@@ -515,7 +515,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !!
 !! SOURCE
 
-SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,signvalue,activeflavor)
+SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalue,activeflavor)
 
 !Arguments ------------------------------------
 
@@ -527,7 +527,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
 
   TYPE(GreenHyboffdiag)    , INTENT(INOUT) :: op
   TYPE(MatrixHyboffdiag)   , INTENT(IN   ) :: Mmatrix
-  TYPE(ListCdagCoffdiag)   , INTENT(IN   ) :: ListCdagCoffdiag_1(op%nflavors)
+  TYPE(ListCdagC)   , INTENT(IN   ) :: ListCdagC_1(op%nflavors)
   DOUBLE PRECISION  , INTENT(IN   ) :: signvalue
   LOGICAL        , INTENT(IN   ) :: updated
   INTEGER, OPTIONAL  , INTENT(IN  ) :: activeflavor
@@ -568,7 +568,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
     CALL ERROR("GreenHyboffdiag_measHybrid : green operator not set         ")
   stail=0
   do iflavor=1,op%nflavors
-    stail=stail + ListCdagCoffdiag_1(iflavor)%tail
+    stail=stail + ListCdagC_1(iflavor)%tail
   enddo
   iflavorbegin = 1
   iflavorend   = op%nflavors
@@ -582,7 +582,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
   endif
 
   IF ( stail .NE. Mmatrix%tail ) &
-      CALL ERROR("GreenHyboffdiag_measHybrid : ListCdagCoffdiag & M unconsistent     ")
+      CALL ERROR("GreenHyboffdiag_measHybrid : ListCdagC & M unconsistent     ")
 
   IF ( updated .EQV. .TRUE. ) THEN ! NEW change in the configuration
     ! FIXME SHOULD be much more faster
@@ -632,7 +632,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
       ! op%map%tail
       ! update size of map and map%tail
           CALL MapHyboffdiag_setSize(op%map(iflavor,iflavorbis),&
-&          ListCdagCoffdiag_1(iflavor)%tail*ListCdagCoffdiag_1(iflavorbis)%tail)
+&          ListCdagC_1(iflavor)%tail*ListCdagC_1(iflavorbis)%tail)
         END DO
       END DO
       op%signvaluemeas = op%signvaluemeas + op%signvalueold * argument
@@ -662,20 +662,20 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
       iC_m=0
       iC_m_add=0
       DO iflavor=1,op%nflavors
-        tail=ListCdagCoffdiag_1(iflavor)%tail
+        tail=ListCdagC_1(iflavor)%tail
         !write(6,*) " measHybrid  iflavor",iflavor,tail
 
         iCdag_m=0
         iCdag_m_add=0
         DO iflavorbis=1,op%nflavors
-          tailbis=ListCdagCoffdiag_1(iflavorbis)%tail
+          tailbis=ListCdagC_1(iflavorbis)%tail
           !write(6,*) " measHybrid  iflavorbis",iflavorbis,tailbis
           idx_old = 0
 
           DO iC  = 1, tail
             ! tC is the annihilation (C_) time for segment iC and flavor iflavor
             !-------------------------------------------------------------------
-            tC   = ListCdagCoffdiag_1(iflavor)%list(iC,C_)
+            tC   = ListCdagC_1(iflavor)%list(iC,C_)
 
             !iC_m=iC_m+1  ! for Mmatrix%mat
             ! For each flavor iflavor, iC start at \sum_{iflavor1<iflavor} tail(iflavor1)
@@ -693,7 +693,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
              !write(6,*) " measHybrid  iCdag_m",iCdag_m
 
               ! tCdag is the creation time for segment iCdag and flavor iflavorbis
-              tCdag  = ListCdagCoffdiag_1(iflavorbis)%list(iCdag,Cdag_)
+              tCdag  = ListCdagC_1(iflavorbis)%list(iCdag,Cdag_)
 
 !  ---        time is equivalent to  time=(tc-tcdag)*(beta-tc) and is only
 !  ---        useful for signe
@@ -718,7 +718,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
               ! --- tc<tcdag and beta>tc signe=-1 ! antisegment in the middle 
               !                                   ! tc-tcdag  < 0 (with tc'=tc-beta)  -> signe < 0
               ! 22/09/14:
-              ! ListCdagCoffdiag_1 is the list of segment, so we are dealing
+              ! ListCdagC_1 is the list of segment, so we are dealing
               ! only with segment here. However all combination of Cdag
               ! and C are taken, this it is possible that tc<tcdag
 
@@ -726,9 +726,9 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
               ! 0 and beta). If tauC>tauCdag signe=+1
               !              If tauC<tauCdag signe=-1
               ! if(tc<tcdag.and.(iflavor==iflavorbis)) then
-              !   write(6,*)  ListCdagCoffdiag_1(iflavorbis)%tail
-              !   do ii=1, ListCdagCoffdiag_1(iflavorbis)%tail
-              !     write(6,*)  ListCdagCoffdiag_1(iflavorbis)%list(ii,1), ListCdagCoffdiag_1(iflavorbis)%list(ii,2)
+              !   write(6,*)  ListCdagC_1(iflavorbis)%tail
+              !   do ii=1, ListCdagC_1(iflavorbis)%tail
+              !     write(6,*)  ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
               !   enddo
               !   write(6,*) "tc<tcdag", tc,tcdag,beta,iflavor,iflavorbis
               !   stop
@@ -776,10 +776,10 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
                 !prt!if(prtopt==1) write(6,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
                 !prt!if(prtopt==1) write(6,*) "       ", tc-tcdag,tc_phys-tcdag
                 do ii=1, tail
-                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagCoffdiag_1(iflavor)%list(ii,1), ListCdagCoffdiag_1(iflavor)%list(ii,2)
+                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
                 enddo
                 do ii=1, tailbis
-                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagCoffdiag_1(iflavorbis)%list(ii,1), ListCdagCoffdiag_1(iflavorbis)%list(ii,2)
+                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
                 enddo
                 !prt!if(prtopt==1) write(6,*) "---------------------------"
               endif
@@ -788,10 +788,10 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
                 !prt!if(prtopt==1) write(66,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
                 !prt!if(prtopt==1) write(66,*) "       ", tc-tcdag,tc_phys-tcdag
                 do ii=1, tail
-                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagCoffdiag_1(iflavor)%list(ii,1), ListCdagCoffdiag_1(iflavor)%list(ii,2)
+                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
                 enddo
                 do ii=1, tailbis
-                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagCoffdiag_1(iflavorbis)%list(ii,1), ListCdagCoffdiag_1(iflavorbis)%list(ii,2)
+                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
                 enddo
                 !prt!if(prtopt==1) write(66,*) "---------------------------"
               endif
@@ -823,9 +823,9 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
     !  pi_invBeta = ACOS(-1.d0)/beta
     !  omegaSamples = op%samples-1
     !  DO iC  = 1, tail
-    !    tC   = ListCdagCoffdiag_1%list(iC,C_)
+    !    tC   = ListCdagC_1%list(iC,C_)
     !    DO iCdag = 1, tail
-    !      tCdag  = ListCdagCoffdiag_1%list(iCdag,Cdag_)
+    !      tCdag  = ListCdagC_1%list(iCdag,Cdag_)
     !      time = tC - tCdag
 
     !      signe = SIGN(1.d0,time)

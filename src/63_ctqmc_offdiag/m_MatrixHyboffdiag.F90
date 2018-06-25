@@ -11,7 +11,7 @@
 !!  Perform varius operation on matrices.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder, J. Denier, B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

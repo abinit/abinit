@@ -32,7 +32,7 @@ USE m_MatrixHyboffdiag
 USE m_Vector
 USE m_VectorInt
 USE m_Global
-USE m_ListCdagCoffdiag
+USE m_ListCdagC
 IMPLICIT NONE
 
 ! subroutines
@@ -193,7 +193,7 @@ TYPE BathOperatoroffdiag
 !#ifdef CTQMC_CHECK
   INTEGER                                     :: checkNumber
   DOUBLE PRECISION                            :: meanError
-!  TYPE(ListCdagCoffdiag)                             :: ListCdagCoffdiag 
+!  TYPE(ListCdagC)                             :: ListCdagC 
 !#endif
 END TYPE BathOperatoroffdiag
 !!***
@@ -470,7 +470,7 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, p
   TYPE(BathOperatoroffdiag)      , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER                 , INTENT(IN   ) :: position  
-  TYPE(ListCdagCoffdiag), INTENT(IN   ) :: particle(:)
+  TYPE(ListCdagC), INTENT(IN   ) :: particle(:)
 !Local variables-------------------------------
   INTEGER                                 :: it1
   INTEGER                                 :: it2
@@ -682,7 +682,7 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, p
       !write(6,*) " getdetAdd",ratio,BathOperatoroffdiag_getDetAdd
   op%MAddFlag   = .TRUE.
 !#ifdef CTQMC_CHECK
-!  op%ListCdagCoffdiag = particle
+!  op%ListCdagC = particle
 !!write(*,*) op%Stilde
 !!write(*,*) op%antishift
 !!write(*,*)    op%updatePosRow 
@@ -778,9 +778,9 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetRemove(op,position)
   !!sui!write(6,*) "        getdetRemove M",(op%M%mat(it,it1),it1=1,op%sumtails)
   !enddo
 !#ifdef CTQMC_CHECK
-!  op%ListCdagCoffdiag = particle
+!  op%ListCdagC = particle
 !!write(*,*) op%updatePosRow, op%updatePosCol, position
-!!CALL ListCdagCoffdiag_print(particle)
+!!CALL ListCdagC_print(particle)
 !#endif
 
 END FUNCTION BathOperatoroffdiag_getDetRemove
@@ -833,7 +833,7 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetF(op,particle,option)
 !End of the abilint section
 
   TYPE(BathOperatoroffdiag)       , INTENT(INOUT)      :: op
-  TYPE(ListCdagCoffdiag), OPTIONAL, INTENT(IN   )  :: particle(:)
+  TYPE(ListCdagC), OPTIONAL, INTENT(IN   )  :: particle(:)
   INTEGER , optional :: option
 !Local arguments-------------------------------
   INTEGER :: iCdag
@@ -945,7 +945,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
 !End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
-  TYPE(ListCdagCoffdiag)   , INTENT(IN   ) :: particle(:)
+  TYPE(ListCdagC)   , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
   INTEGER                           :: tail
   INTEGER                           :: new_tail
@@ -1366,7 +1366,7 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
 !End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(INOUT)  :: op
-  TYPE(ListCdagCoffdiag)   , INTENT(IN   )  :: particle(:)
+  TYPE(ListCdagC)   , INTENT(IN   )  :: particle(:)
 !Local variables ------------------------------
   INTEGER                            :: tail,tailb,taile
   INTEGER                            :: new_tail
@@ -1459,7 +1459,7 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
 !CALL MatrixHyboffdiag_print(M)
 !CALL Vector_print(op%R)
 !CALL Vector_print(op%Q)
-!CALL ListCdagCoffdiag_print(op%ListCdagCoffdiag)
+!CALL ListCdagC_print(op%ListCdagC)
 
   col      = 1
   DO col_move = 1, new_tail 
@@ -2156,7 +2156,7 @@ SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
 !End of the abilint section
 
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
-  TYPE(ListCdagCoffdiag)    , INTENT(IN   ) :: particle(:)
+  TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
 !  TYPE(MatrixHyboffdiag)                    :: checkMatrix
   LOGICAL :: checkTau
@@ -2202,7 +2202,7 @@ SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
     !write(6,*) "        checkM begin M_update%mat_tau",(op%M_update%mat_tau(it,it1),it1=1,op%sumtails)
   enddo
   ! --- build matrix
-!CALL ListCdagCoffdiag_print(particle)
+!CALL ListCdagC_print(particle)
   DO iflavora = 1, op%flavors
   DO iCdag = 1, op%tails(iflavora)
     tCdag  = particle(iflavora)%list(iCdag,Cdag_)
@@ -2323,7 +2323,7 @@ SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
 !End of the abilint section
 
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
-  TYPE(ListCdagCoffdiag)    , INTENT(IN   ) :: particle(:)
+  TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
   INTEGER :: flav_i,flav_j
 !Local variables ------------------------------
 !  TYPE(MatrixHyboffdiag)                    :: checkMatrix
@@ -2372,7 +2372,7 @@ SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
     !write(6,*) "        checkM begin M_update%mat_tau",(op%M_update%mat_tau(it,it1),it1=1,op%sumtails)
   enddo
   ! --- build matrix
-!CALL ListCdagCoffdiag_print(particle)
+!CALL ListCdagC_print(particle)
   DO iflavora = 1, op%flavors
     iflavora_imp=iflavora
     if(iflavora==flav_i) iflavora_imp=flav_j

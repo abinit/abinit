@@ -27,7 +27,7 @@
 
 #include "defs.h"
 MODULE m_ImpurityOperatoroffdiag
-USE m_ListCdagCoffdiag
+USE m_ListCdagC
 USE m_Global
 IMPLICIT NONE
 
@@ -55,7 +55,7 @@ TYPE ImpurityOperatoroffdiag
   INTEGER                   :: activeFlavor
    !  Flavor considered e.g when a segment is added
 
-!  TYPE(ListCdagCoffdiag) , POINTER :: activeParticle => NULL()
+!  TYPE(ListCdagC) , POINTER :: activeParticle => NULL()
   DOUBLE PRECISION          :: beta
    !  Inverse of temperature.
 
@@ -74,7 +74,7 @@ TYPE ImpurityOperatoroffdiag
    !  For a given flavor (activeflavor), gives for each other flavors, the
    !  supplementary overlaps, called updates(otherflavor).
 
-  TYPE(ListCdagCoffdiag) , ALLOCATABLE, DIMENSION(:  ) :: particles 
+  TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  ) :: particles 
    !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
    !  gives the beginning and end of each segment.
 
@@ -162,7 +162,7 @@ SUBROUTINE ImpurityOperatoroffdiag_init(op, flavors, beta)
  ! DT_FREEIF(op%particles)
   IF(ALLOCATED(op%particles)) THEN
     DO IT = 1,flavors
-      CALL ListCdagCoffdiag_destroy(op%particles(IT)) 
+      CALL ListCdagC_destroy(op%particles(IT)) 
     END DO
     ABI_DATATYPE_DEALLOCATE(op%particles) 
   END IF
@@ -188,10 +188,10 @@ SUBROUTINE ImpurityOperatoroffdiag_init(op, flavors, beta)
  
   !op%shift_mu = SUM(op%mat_U(:,1)) * .5d0 
   DO IT = 1,flavors
-    !CALL ListCdagCoffdiag_init(op%particles(IT), DBLE(N)/beta,100) !FIXME size of the List
+    !CALL ListCdagC_init(op%particles(IT), DBLE(N)/beta,100) !FIXME size of the List
 
 !  ----- For Each flavor, construct op%particles(IT)%list(100,2)
-    CALL ListCdagCoffdiag_init(op%particles(IT),100) !FIXME size of the List
+    CALL ListCdagC_init(op%particles(IT),100) !FIXME size of the List
     op%particles(IT)%list(0,C_   ) = beta ! Empty orbital 
     op%particles(IT)%list(0,Cdag_) = 0.d0
 
@@ -257,7 +257,7 @@ SUBROUTINE ImpurityOperatoroffdiag_reset(op)
   op%doCheck      = .FALSE.
 !#endif
   DO IT = 1,op%flavors
-    CALL ListCdagCoffdiag_clear(op%particles(IT)) 
+    CALL ListCdagC_clear(op%particles(IT)) 
     op%particles(IT)%list(0,C_   )    = op%beta ! Empty orbital 
     op%particles(IT)%list(0,Cdag_) = 0.d0
    ! op%particles(IT)%list(0,Cdag_) = op%beta ! Full orbital 
@@ -505,7 +505,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_getAvailableTime(op, time, pos
   DOUBLE PRECISION                      :: t_avail
   INTEGER                               :: position_dwn
   INTEGER                               :: aF
-#include "ListCdagCoffdiag_firstHigher.h"
+#include "ListCdagC_firstHigher.h"
   aF = op%activeFlavor
   IF ( aF .LE. 0 ) &
     CALL ERROR("ImpurityOperatoroffdiag_getAvailableTime : no active flav")
@@ -514,9 +514,9 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_getAvailableTime(op, time, pos
     t_avail = op%particles(aF)%list(0,C_) - op%particles(aF)%list(0,Cdag_)
     position = SIGN(1,INT(t_avail))
   ELSE
-!    position = ListCdagCoffdiag_firstHigher( op%particles(aF), time ) 
+!    position = ListCdagC_firstHigher( op%particles(aF), time ) 
 #define list_1 op%particles(aF) 
-#include "ListCdagCoffdiag_firstHigher"
+#include "ListCdagC_firstHigher"
 #undef list_1
 ! FirstHigher is the index of the segment just higher.
 ! FirstHigher is positive, except if the next segment is found after
@@ -732,7 +732,7 @@ SUBROUTINE ImpurityOperatoroffdiag_add(op, CdagC_1, position_val)
     END IF
     position = position + 1
   END IF
-  CALL ListCdagCoffdiag_insert(op%particles(aF), C2add, position)
+  CALL ListCdagC_insert(op%particles(aF), C2add, position)
   DO i = 1, op%flavors
     op%overlaps(i,aF) = op%overlaps(i,aF) + op%updates(i)
     op%overlaps(aF,i) = op%overlaps(i,aF)
@@ -901,7 +901,7 @@ SUBROUTINE ImpurityOperatoroffdiag_remove(op,ieme)
         op%particles(aF)%list(0,Cdag_) = op%beta
     END SELECT
   END IF
-  CALL ListCdagCoffdiag_erase(op%particles(aF),position)
+  CALL ListCdagC_erase(op%particles(aF),position)
   DO i = 1, op%flavors
     op%overlaps(i,aF) = op%overlaps(i,aF) - op%updates(i)
     op%overlaps(aF,i) = op%overlaps(i,aF)
@@ -1191,7 +1191,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_overlapSegFlav(op,CdagC_1,flav
   INTEGER                            :: imax 
   INTEGER                            :: loops
   INTEGER                            :: iloop
-#include "ListCdagCoffdiag_firstHigher.h"
+#include "ListCdagC_firstHigher.h"
 
   beta = op%beta
   Tmin = CdagC_1(Cdag_)
@@ -1208,10 +1208,10 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_overlapSegFlav(op,CdagC_1,flav
   IF ( tail .NE. 0 ) THEN
     tp1  = tail + 1
     loop = 0.d0
-!    imin = ListCdagCoffdiag_firstHigher( op%particles(flavor), Tmin ) - 1
+!    imin = ListCdagC_firstHigher( op%particles(flavor), Tmin ) - 1
     Time = Tmin
 #define list_1 op%particles(flavor) 
-#include "ListCdagCoffdiag_firstHigher"
+#include "ListCdagC_firstHigher"
     imin = firstHigher - 1
 
     SELECT CASE ( imin ) 
@@ -1223,9 +1223,9 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_overlapSegFlav(op,CdagC_1,flav
       CASE DEFAULT
         scanning = imin
     END SELECT
-!    imax = ListCdagCoffdiag_firstHigher( op%particles(flavor), TmaxBeta ) !- 1 Jamais atteint
+!    imax = ListCdagC_firstHigher( op%particles(flavor), TmaxBeta ) !- 1 Jamais atteint
     Time = TmaxBeta
-#include "ListCdagCoffdiag_firstHigher"
+#include "ListCdagC_firstHigher"
 #undef list_1
     imax = firstHigher
 
@@ -1487,7 +1487,7 @@ SUBROUTINE ImpurityOperatoroffdiag_swap(op,flavor1, flavor2)
 !Local variables ------------------------------
   INTEGER                               :: iflavor
   DOUBLE PRECISION                      :: overlap_tmp
-  TYPE(ListCdagCoffdiag)                       :: list_tmp
+  TYPE(ListCdagC)                       :: list_tmp
 
   DO iflavor = 1, op%flavors
     IF ( iflavor .NE. flavor1  .AND. iflavor .NE. flavor2) THEN
@@ -1499,15 +1499,15 @@ SUBROUTINE ImpurityOperatoroffdiag_swap(op,flavor1, flavor2)
     END IF
   END DO
 
-  !CALL ListCdagCoffdiag_print(op%particles(flavor1),233)
-  !CALL ListCdagCoffdiag_print(op%particles(flavor2),233)
+  !CALL ListCdagC_print(op%particles(flavor1),233)
+  !CALL ListCdagC_print(op%particles(flavor2),233)
   list_tmp = op%particles(flavor1)
   op%particles(flavor1) = op%particles(flavor2)
   op%particles(flavor2) = list_tmp
-  CALL ListCdagCoffdiag_destroy(list_tmp)
-  !CALL ListCdagCoffdiag_swap(op%particles(flavor1),op%particles(flavor2))
-  !CALL ListCdagCoffdiag_print(op%particles(flavor1),233)
-  !CALL ListCdagCoffdiag_print(op%particles(flavor2),233)
+  CALL ListCdagC_destroy(list_tmp)
+  !CALL ListCdagC_swap(op%particles(flavor1),op%particles(flavor2))
+  !CALL ListCdagC_print(op%particles(flavor1),233)
+  !CALL ListCdagC_print(op%particles(flavor2),233)
 
 END SUBROUTINE ImpurityOperatoroffdiag_swap
 !!***
@@ -1559,7 +1559,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperatoroffdiag_overlapIJ(op,i,j)
   INTEGER               , INTENT(IN) :: i
   INTEGER               , INTENT(IN) :: j
 !Local variables ------------------------------
-!  TYPE(ListCdagCoffdiag)       , POINTER    :: particle1 => NULL()
+!  TYPE(ListCdagC)       , POINTER    :: particle1 => NULL()
 !  DOUBLE PRECISION, DIMENSION(:,:), POINTER :: list1 => NULL()
   INTEGER                            :: tail1
   DOUBLE PRECISION, DIMENSION(1:2)   :: CdagC_1
@@ -1834,7 +1834,7 @@ SUBROUTINE ImpurityOperatoroffdiag_destroy(op)
 
   IF ( ALLOCATED(op%particles) ) THEN
     DO IT = 1, op%flavors
-      CALL ListCdagCoffdiag_destroy(op%particles(IT))
+      CALL ListCdagC_destroy(op%particles(IT))
     END DO
     DT_FREE(op%particles)
   ENDIF

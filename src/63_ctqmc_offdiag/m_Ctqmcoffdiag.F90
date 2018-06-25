@@ -43,8 +43,8 @@ MODULE m_Ctqmcoffdiag
  USE m_GreenHyboffdiag
  USE m_BathOperatoroffdiag
  USE m_ImpurityOperatoroffdiag
- USE m_Statoffdiag
- USE m_FFTHyboffdiag
+ USE m_Stat
+ USE m_FFTHyb
  USE m_OurRng
 #ifdef HAVE_MPI2
  USE mpi
@@ -3230,7 +3230,7 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
-  TYPE(FFTHyboffdiag) :: FFTmrka
+  TYPE(FFTHyb) :: FFTmrka
 
   IF ( .NOT. op%done ) &
     CALL ERROR("Ctqmcoffdiag_getResult : Simulation not run                ")
@@ -3322,10 +3322,10 @@ include 'mpif.h'
         op%measNoiseG(itau,iflavor,1)%vec = -op%measNoiseG(itau,iflavor,1)%vec*op%inv_dt &  
                                            /(op%beta*DBLE(op%modNoise1))
         n2 = op%measNoiseG(itau,iflavor,2)%tail
-        TabY(1) = Statoffdiag_deviation(op%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
+        TabY(1) = Stat_deviation(op%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
         n1 = op%measNoiseG(itau,iflavor,1)%tail
-        TabY(2) = Statoffdiag_deviation(op%measNoiseG(itau,iflavor,1)%vec(1:n1))!*SQRT(n1/(n1-1))
-        CALL Statoffdiag_powerReg(TabX,SQRT(2.d0*LOG(2.d0))*TabY,alpha(itau,iflavor),beta(itau,iflavor),r)
+        TabY(2) = Stat_deviation(op%measNoiseG(itau,iflavor,1)%vec(1:n1))!*SQRT(n1/(n1-1))
+        CALL Stat_powerReg(TabX,SQRT(2.d0*LOG(2.d0))*TabY,alpha(itau,iflavor),beta(itau,iflavor),r)
         ! ecart type -> 60%
         ! largeur a mi-hauteur d'une gaussienne -> sqrt(2*ln(2))*sigma
       END DO
@@ -3462,10 +3462,10 @@ include 'mpif.h'
 !  DO iflavor=1,10
 !    debut = (iflavor-1)*n2/10+1
 !    fin   = iflavor*n2/10
-!    TabY(iflavor) = Statoffdiag_deviation(op%measNoise(2)%vec(debut:fin))
+!    TabY(iflavor) = Stat_deviation(op%measNoise(2)%vec(debut:fin))
 !    debut = (iflavor-1)*n1/10+1
 !    fin   = iflavor*n1/10
-!    TabY(10+iflavor) = Statoffdiag_deviation(op%measNoise(1)%vec(debut:fin))
+!    TabY(10+iflavor) = Stat_deviation(op%measNoise(1)%vec(debut:fin))
 !  END DO
 !!  TabY(1:n) = (op%measNoise(2)%vec(1:n)   &
 !!              )
@@ -3483,18 +3483,18 @@ include 'mpif.h'
 !
 
 
-  TabY(1) = Statoffdiag_deviation(op%measNoise(2)%vec(1:n2))!*SQRT(n2/(n2-1))
+  TabY(1) = Stat_deviation(op%measNoise(2)%vec(1:n2))!*SQRT(n2/(n2-1))
 !!  write(op%rank+10,*) TabX(2)
 !!  write(op%rank+40,*) TabX(1)
 !!  CALL Vector_print(op%measNoise(1),op%rank+10)
 !!  CALL Vector_print(op%measNoise(2),op%rank+40)
 !!  CLOSE(op%rank+10)
 !!  CLOSE(op%rank+40)
-  TabY(2) = Statoffdiag_deviation(op%measNoise(1)%vec(1:n1))!*SQRT(n1/(n1-1))
+  TabY(2) = Stat_deviation(op%measNoise(1)%vec(1:n1))!*SQRT(n1/(n1-1))
 !!  ! Ecart carre moyen ~ ecart type mais non biaise. Serait moins precis. Aucun
   ! impact sur la pente, juste sur l'ordonnee a l'origine.
 
-  CALL Statoffdiag_powerReg(TabX,SQRT(2.d0*LOG(2.d0))*TabY,a,b,r)
+  CALL Stat_powerReg(TabX,SQRT(2.d0*LOG(2.d0))*TabY,a,b,r)
 !  FREE(TabX)
 !  FREE(TabY)
   ! ecart type -> 60%
@@ -3644,18 +3644,18 @@ include 'mpif.h'
     endDensity = SIZE(op%density,2)
     IF ( op%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
-    CALL FFTHyboffdiag_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
+    CALL FFTHyb_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
     ! Not very Beauty 
     MALLOC(freqs,(1:FFTmrka%size/2))
     DO iflavor = 1, flavors
       ! mean value is removed to supress the continue composent 
-      CALL FFTHyboffdiag_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+op%Greens%oper(op%samples+1,iflavor,iflavor))
-      CALL FFTHyboffdiag_run(FFTmrka,1)
-      CALL FFTHyboffdiag_getData(FFTmrka,endDensity,op%density(iflavor,:),freqs)
+      CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+op%Greens%oper(op%samples+1,iflavor,iflavor))
+      CALL FFTHyb_run(FFTmrka,1)
+      CALL FFTHyb_getData(FFTmrka,endDensity,op%density(iflavor,:),freqs)
     END DO
     op%density(flavors+1,:) = -1.d0
     op%density(flavors+1,1:FFTmrka%size/2) = freqs
-    CALL FFTHyboffdiag_destroy(FFTmrka)
+    CALL FFTHyb_destroy(FFTmrka)
     FREE(freqs)
   END IF
 
