@@ -10,7 +10,7 @@
 !!  manage all related to Impurity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -175,9 +175,9 @@ SUBROUTINE ImpurityOperatoroffdiag_init(op, flavors, beta)
  ! if(.NOT.ALLOCATED(op%updates)) write(6,*) "NOT ALLOCATED"
   !FREEIF(op%updates)
   IF(ALLOCATED(op%updates)) THEN 
-    write(6,*) "ALLOCATED",size(op%updates)
+  !  write(6,*) "ALLOCATED",size(op%updates)
     ABI_DEALLOCATE(op%updates) 
-    write(6,*) "ALLOCATED",size(op%updates)
+  !  write(6,*) "ALLOCATED",size(op%updates)
   END IF
   MALLOC(op%updates,(1:flavors))
   op%updates = 0.d0

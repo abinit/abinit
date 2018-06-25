@@ -28,11 +28,12 @@
 #include "defs.h"
 MODULE m_GreenHyboffdiag
 
- USE m_MatrixHyboffdiag
+ USE m_global
+ USE m_MatrixHyb
  USE m_Vector
  USE m_VectorInt
  USE m_ListCdagC
- USE m_MapHyboffdiag
+ USE m_MapHyb
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -153,7 +154,7 @@ MODULE m_GreenHyboffdiag
   TYPE(VectorInt)                         :: index_old          
    ! useless data
 
-  TYPE(MapHyboffdiag), ALLOCATABLE, DIMENSION(:,:)  :: map
+  TYPE(MapHyb), ALLOCATABLE, DIMENSION(:,:)  :: map
    ! value of time and Green's functions computed in GreenHyboffdiag_measHybrid
    ! These values are used to fill op%oper in the same routine.
 
@@ -289,7 +290,7 @@ include 'mpif.h'
   MALLOC(op%map,(nflavors,nflavors))
   do iflavor=1,nflavors
     do iflavorbis=1,nflavors
-      CALL MapHyboffdiag_init(op%map(iflavor,iflavorbis),10000)
+      CALL MapHyb_init(op%map(iflavor,iflavorbis),10000)
     enddo
   enddo
 
@@ -401,7 +402,7 @@ SUBROUTINE GreenHyboffdiag_clear(op)
   !CALL VectorInt_clear(op%index_old)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
-      CALL MapHyboffdiag_clear(op%map(iflavor,iflavorbis))
+      CALL MapHyb_clear(op%map(iflavor,iflavorbis))
     enddo
   enddo
   op%measurements = 0
@@ -526,7 +527,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
 !End of the abilint section
 
   TYPE(GreenHyboffdiag)    , INTENT(INOUT) :: op
-  TYPE(MatrixHyboffdiag)   , INTENT(IN   ) :: Mmatrix
+  TYPE(MatrixHyb)   , INTENT(IN   ) :: Mmatrix
   TYPE(ListCdagC)   , INTENT(IN   ) :: ListCdagC_1(op%nflavors)
   DOUBLE PRECISION  , INTENT(IN   ) :: signvalue
   LOGICAL        , INTENT(IN   ) :: updated
@@ -628,10 +629,10 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
             endif
           END DO
       ! tail**2 is the number of possible t-t'
-      ! MapHyboffdiag_setSize with resize map tail*tail will thus be the new
+      ! MapHyb_setSize with resize map tail*tail will thus be the new
       ! op%map%tail
       ! update size of map and map%tail
-          CALL MapHyboffdiag_setSize(op%map(iflavor,iflavorbis),&
+          CALL MapHyb_setSize(op%map(iflavor,iflavorbis),&
 &          ListCdagC_1(iflavor)%tail*ListCdagC_1(iflavorbis)%tail)
         END DO
       END DO
@@ -1951,7 +1952,7 @@ SUBROUTINE GreenHyboffdiag_destroy(op)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
      !sui!write(6,*) "test",iflavor,iflavorbis
-      CALL MapHyboffdiag_destroy(op%map(iflavor,iflavorbis))
+      CALL MapHyb_destroy(op%map(iflavor,iflavorbis))
     enddo
   enddo
   DT_FREEIF(op%map)
@@ -2005,7 +2006,9 @@ END SUBROUTINE GreenHyboffdiag_destroy
        real*8     :: rincopy(L+1),a(L),b(L),c(L),d(L),u(L+1), q(L+1),XM(L+1)
        complex*16 :: cdummy,explus,ex,j_dpc
        real*8     :: one,two,zero,three,six,wn,tau,xpi,delta,om
+       complex*16     :: czero
 !***********************************************
+       czero=cmplx(0.d0,0.d0)
        zero=0.d0
        one=1.d0
        two=2.d0

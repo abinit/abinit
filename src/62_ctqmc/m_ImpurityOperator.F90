@@ -53,13 +53,32 @@ PRIVATE
 TYPE, PUBLIC :: ImpurityOperator
   LOGICAL          _PRIVATE :: doCheck = .FALSE.
   INTEGER          _PRIVATE :: flavors
+   !  Number of flavors
   INTEGER                   :: activeFlavor
+   !  Flavor considered e.g when a segment is added
+
+
   DOUBLE PRECISION _PRIVATE          :: beta
+   !  Inverse of temperature.
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: mat_U 
+   !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
+   !  coulomb interaction between iflavor1 and iflavor2.
+
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: overlaps   ! total overlaps
+   !  for iflavor1 and iflavor2 overlaps(iflavor1,iflavor2) is the total
+   !  overlap between segments of iflavor1 and segments of iflavor2.
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) _PRIVATE :: updates    ! new_(anti)seg 
+   !  For a given flavor (activeflavor), gives for each other flavors, the
+   !  supplementary overlaps, called updates(otherflavor).
+
   TYPE(ListCdagC)                               _PRIVATE :: list_swap
   TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  )          :: particles 
+   !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
+   !  gives the beginning and end of each segment.
+
   DOUBLE PRECISION _PRIVATE :: checkNumber
   DOUBLE PRECISION _PRIVATE :: tolerance
   DOUBLE PRECISION _PRIVATE :: meanError
@@ -399,7 +418,7 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  ImpurityOperator_setMu
 !!
 !! FUNCTION
-!!  Set directly the chimical potential
+!!  Set directly the chemical potential
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)

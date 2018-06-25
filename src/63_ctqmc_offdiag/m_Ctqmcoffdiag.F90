@@ -718,6 +718,7 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 #undef ABI_FUNC
 #define ABI_FUNC 'Ctqmcoffdiag_allocateAll'
 !End of the abilint section
+  implicit none
 
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------

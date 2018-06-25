@@ -17,12 +17,7 @@
 !! m_BathOperatoroffdiag.F90
 !! m_Ctqmcoffdiag.F90
 !! m_CtqmcoffdiagInterface.F90
-!! m_FFTHyboffdiag.F90
 !! m_GreenHyboffdiag.F90
 !! m_ImpurityOperatoroffdiag.F90
-!! m_ListCdagCoffdiag.F90
-!! m_MapHyboffdiag.F90
-!! m_MatrixHyboffdiag.F90
-!! m_Statoffdiag.F90
 !!
 !!***
