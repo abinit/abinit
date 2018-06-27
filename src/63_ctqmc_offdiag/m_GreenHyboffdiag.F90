@@ -618,15 +618,15 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
                          + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
            !if(op%map(iflavor,iflavorbis)%listINT(iC)==1.and.iflavor==iflavorbis) then
-            if(iflavor==iflavorbis) then
-             !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor
-            endif
-            if(iflavor==1.and.iflavorbis==6.and.op%map(iflavor,iflavorbis)%listINT(iC)==1) then
-                    !prt!if(prtopt==1) write(6,*) "G16(0)", op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold*argument,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),op%signvalueold
-            endif
-            if(iflavor==6.and.iflavorbis==1.and.op%map(iflavor,iflavorbis)%listINT(iC)==1) then
-                    !prt!if(prtopt==1) write(6,*) "G61(0)", op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold*argument,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),op%signvalueold
-            endif
+          !  if(iflavor==iflavorbis) then
+          !   !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor
+          !  endif
+          !  if(iflavor==1.and.iflavorbis==6.and.op%map(iflavor,iflavorbis)%listINT(iC)==1) then
+          !          !prt!if(prtopt==1) write(6,*) "G16(0)", op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold*argument,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),op%signvalueold
+          !  endif
+          !  if(iflavor==6.and.iflavorbis==1.and.op%map(iflavor,iflavorbis)%listINT(iC)==1) then
+          !          !prt!if(prtopt==1) write(6,*) "G61(0)", op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold*argument,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),op%signvalueold
+          !  endif
           END DO
       ! tail**2 is the number of possible t-t'
       ! MapHyb_setSize with resize map tail*tail will thus be the new
@@ -772,40 +772,40 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
               op%map(iflavor,iflavorbis)%listINT(idx_old)  = Mmatrix%mat_tau(iCdag_m,iC_m)
              !write(6,*) " measHybrid  idx_old listINT ",idx_old,op%map(iflavor,iflavorbis)%listINT(idx_old)
              !write(6,*) " measHybrid  iCdag_m, iC_m, mat_tau",iCdag_m,iC_m,Mmatrix%mat_tau(iCdag_m,iC_m)
-              if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
-                !prt!if(prtopt==1) write(6,*) "---------------------------"
-                !prt!if(prtopt==1) write(6,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
-                !prt!if(prtopt==1) write(6,*) "       ", tc-tcdag,tc_phys-tcdag
-                do ii=1, tail
-                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
-                enddo
-                do ii=1, tailbis
-                  !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
-                enddo
-                !prt!if(prtopt==1) write(6,*) "---------------------------"
-              endif
-              if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==999) then
-                !prt!if(prtopt==1) write(66,*) "---------------------------"
-                !prt!if(prtopt==1) write(66,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
-                !prt!if(prtopt==1) write(66,*) "       ", tc-tcdag,tc_phys-tcdag
-                do ii=1, tail
-                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
-                enddo
-                do ii=1, tailbis
-                  !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
-                enddo
-                !prt!if(prtopt==1) write(66,*) "---------------------------"
-              endif
-              !if(iflavor==2.and.iflavorbis==1.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
+            !  if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
+            !    !prt!if(prtopt==1) write(6,*) "---------------------------"
+            !    !prt!if(prtopt==1) write(6,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
+            !    !prt!if(prtopt==1) write(6,*) "       ", tc-tcdag,tc_phys-tcdag
+            !    do ii=1, tail
+            !      !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
+            !    enddo
+            !    do ii=1, tailbis
+            !      !prt!if(prtopt==1)  write(6,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
+            !    enddo
+            !    !prt!if(prtopt==1) write(6,*) "---------------------------"
+            !  endif
+            !  if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==999) then
+            !    !prt!if(prtopt==1) write(66,*) "---------------------------"
+            !    !prt!if(prtopt==1) write(66,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
+            !    !prt!if(prtopt==1) write(66,*) "       ", tc-tcdag,tc_phys-tcdag
+            !    do ii=1, tail
+            !      !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavor)%list(ii,1), ListCdagC_1(iflavor)%list(ii,2)
+            !    enddo
+            !    do ii=1, tailbis
+            !      !prt!if(prtopt==1)  write(66,*) ii, ListCdagC_1(iflavorbis)%list(ii,1), ListCdagC_1(iflavorbis)%list(ii,2)
+            !    enddo
+            !    !prt!if(prtopt==1) write(66,*) "---------------------------"
+            !  endif
+            !  !if(iflavor==2.and.iflavorbis==1.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
               !   !prt!if(prtopt==1) write(6,*) "GG21(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe
               !endif
 
 
             END DO
           END DO
-          do ii=1,tail*tailbis
-           !write(6,*) " measHybrid  ii,op%map(iflavor,iflavorbis)%listINT(ii)", ii,op%map(iflavor,iflavorbis)%listINT(ii)
-          enddo
+        !  do ii=1,tail*tailbis
+        !   !write(6,*) " measHybrid  ii,op%map(iflavor,iflavorbis)%listINT(ii)", ii,op%map(iflavor,iflavorbis)%listINT(ii)
+        !  enddo
           iCdag_m_add=iCdag_m_add+tailbis
         END DO ! iflavorbis
        iC_m_add=iC_m_add+tail

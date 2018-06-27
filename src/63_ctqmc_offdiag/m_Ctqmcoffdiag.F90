@@ -197,12 +197,6 @@ TYPE Ctqmcoffdiag
   INTEGER :: Wmax
 ! Max freq for FT
 
-!  DOUBLE PRECISION :: seg_added
-!  DOUBLE PRECISION :: anti_added
-!  DOUBLE PRECISION :: seg_removed
-!  DOUBLE PRECISION :: anti_removed
-!  DOUBLE PRECISION :: seg_sign
-!  DOUBLE PRECISION :: anti_sign
   DOUBLE PRECISION, DIMENSION(1:6) :: stats
 ! to now how many negative determinant, antisegments,seeme.e.twfs...j
 
@@ -210,8 +204,6 @@ TYPE Ctqmcoffdiag
 ! nb of successfull GM
 
   DOUBLE PRECISION :: signvalue
-!  DOUBLE PRECISION :: signvaluecurrent
-!  DOUBLE PRECISION :: signvaluemeas
 
   INTEGER :: MY_COMM
 ! 
@@ -228,7 +220,6 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION :: beta
 !
 
-!  DOUBLE PRECISION :: mu
   DOUBLE PRECISION :: U
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
@@ -247,7 +238,6 @@ TYPE Ctqmcoffdiag
 !  (flavor,flavor) double occupancies
 !  (1,1): total energy of correlation.
 
-!  DOUBLE PRECISION, POINTER, DIMENSION(:    ) :: newDE     => NULL()
   DOUBLE PRECISION :: a_Noise
 ! Noise a exp (-bx) for the  noise
 
