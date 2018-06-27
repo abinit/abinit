@@ -1,7 +1,0 @@
-noinst_HEADERS = \
-                 defs.h  \
-                 BathOperatoroffdiag_hybrid.h 
-
-EXTRA_DIST += BathOperatoroffdiag_hybrid 
-
-
