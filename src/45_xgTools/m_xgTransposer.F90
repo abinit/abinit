@@ -34,13 +34,16 @@ module m_xgTransposer
   use m_xmpi
   use m_errors
   use m_xg
-#if defined HAVE_MPI2 && !defined FC_G95
+
+#ifdef HAVE_MPI2
  use mpi
-#elif defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
- include 'mpif.h'
 #endif
 
   implicit none
+
+#ifdef HAVE_MPI1
+ include 'mpif.h'
+#endif
 
   private
 
@@ -91,6 +94,7 @@ module m_xgTransposer
 
   subroutine xgTransposer_init(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -109,19 +113,20 @@ module m_xgTransposer
     integer :: nrows
     integer :: ierr
     integer :: icol
+    integer :: icplx
     character(len=500) :: message
 
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
-    commLinalg = getComm(xgBlock_linalg)
+    commLinalg = comm(xgBlock_linalg)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
     xgTransposer%mpiData(MPI_LINALG)%size = xmpi_comm_size(commLinalg)
 
-    if ( getSpace(xgBlock_linalg) /= getSpace(xgBlock_colsrows) ) then
-      MSG_ERROR("Linalg xgBlock and ColsRows xgBlocks are not in the same space")
-    end if
+!    if ( space(xgBlock_linalg) /= space(xgBlock_colsrows) ) then
+!      MSG_ERROR("Linalg xgBlock and ColsRows xgBlocks are not in the same space")
+!    end if
 
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
       write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communcation (", &
@@ -160,6 +165,18 @@ module m_xgTransposer
         end if
       end if
 
+      select case ( space(xgBlock_linalg) )
+        case (SPACE_CR, SPACE_R)
+          write(*,*) "SPACE R"
+          icplx = 1
+        case (SPACE_C)
+          write(*,*) "SPACE C"
+          icplx = 2
+        case default
+          MSG_ERROR("Space value unknown !")
+      end select
+
+      write(*,*) "There is ", nrows, "rows of real or complex for ", ncpuRows, "fft cpu"
       if ( MOD(nrows,ncpuRows) /=0 ) then
         if ( nrows > ncpuRows ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", nrows, " rows for ", ncpuRows, " MPI"
@@ -199,7 +216,7 @@ module m_xgTransposer
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_free'
+#define ABI_FUNC 'xgTransposer_makeComm'
 !End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
@@ -256,10 +273,11 @@ module m_xgTransposer
 
   subroutine xgTransposer_transpose(xgTransposer,toState)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_free'
+#define ABI_FUNC 'xgTransposer_transpose'
 !End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
@@ -300,10 +318,11 @@ module m_xgTransposer
 
   subroutine xgTransposer_toLinalg(xgTransposer)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_free'
+#define ABI_FUNC 'xgTransposer_toLinalg'
 !End of the abilint section
 
    type(xgTransposer_t), intent(inout) :: xgTransposer
@@ -327,7 +346,7 @@ module m_xgTransposer
    comm = xgTransposer%mpiData(MPI_COLS)%comm
    me   = xgTransposer%mpiData(MPI_COLS)%rank
    
-   select case ( getSpace(xgTransposer%xgBlock_colsrows) )
+   select case ( space(xgTransposer%xgBlock_colsrows) )
      case (SPACE_CR, SPACE_R)
        icplx = 2
      case (SPACE_C)
@@ -337,19 +356,19 @@ module m_xgTransposer
    end select
    
    ABI_MALLOC(nrowsInd,(ncpu))
-   nrowsTotal = getRows(xgTransposer%xgBlock_linalg)/icplx
+   nrowsTotal = rows(xgTransposer%xgBlock_linalg)/icplx
 
    call xmpi_allgather(nrowsTotal,nrowsInd,comm,i)
    if ( i /= MPI_SUCCESS ) then
      MSG_ERROR("Error while gathering number of rows")
    end if 
    nrowsTotal = sum(nrowsInd)
-   ncolsInd = getCols(xgTransposer%xgBlock_colsrows)
+   ncolsInd = cols(xgTransposer%xgBlock_colsrows)
 
-   if ( nrowsTotal /= getRows(xgTransposer%xgBlock_colsrows)/icplx ) then
+   if ( nrowsTotal /= rows(xgTransposer%xgBlock_colsrows)/icplx ) then
      MSG_ERROR("Missmatch number of rows")
    end if
-   if ( ncolsInd*ncpu /= getCols(xgTransposer%xgBlock_linalg) ) then
+   if ( ncolsInd*ncpu /= cols(xgTransposer%xgBlock_linalg) ) then
      MSG_ERROR("Missmatch number of rows")
    end if
 
@@ -373,7 +392,7 @@ module m_xgTransposer
      rdispls(i) = rdispls(i-1)+recvcounts(i-1)
    end do
 
-   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,icplx,getCols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
+   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
    select case(xgTransposer%mpiAlgo)
    case (TRANS_ALL2ALL)
      ABI_MALLOC(sendcounts,(ncpu))
@@ -411,7 +430,7 @@ module m_xgTransposer
 
    ABI_FREE(nrowsInd)
 
-   if ( getCols(xgTransposer%xgBlock_colsrows)*getRows(xgTransposer%xgBlock_colsrows)/icplx /= nrowsTotal*ncolsInd ) then
+   if ( cols(xgTransposer%xgBlock_colsrows)*rows(xgTransposer%xgBlock_colsrows)/icplx /= nrowsTotal*ncolsInd ) then
      MSG_ERROR("Wrong size for xgBlock linalg")
    end if
 
@@ -461,16 +480,17 @@ module m_xgTransposer
 
   subroutine xgTransposer_toColsRows(xgTransposer)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_free'
+#define ABI_FUNC 'xgTransposer_toColsRows'
 !End of the abilint section
 
    type(xgTransposer_t), intent(inout) :: xgTransposer
    double precision, pointer :: sendbuf(:,:)
    double precision, allocatable :: recvbuf(:,:)
-   double precision, pointer :: buffer(:,:)
+   double precision, allocatable :: buffer(:,:)
    integer, allocatable :: sendcounts(:), recvcounts(:)
    integer, allocatable :: sdispls(:), rdispls(:)
    integer :: ncpu, comm, me
@@ -478,6 +498,7 @@ module m_xgTransposer
    integer :: i
    integer :: nrowsTotal, ncolsInd
    integer :: col, icpu, shiftCpu, bufiCol
+   integer :: licpu
    integer :: myrequest
    integer, allocatable :: nrowsInd(:)
    integer, allocatable :: request(:), status(:)
@@ -488,7 +509,7 @@ module m_xgTransposer
    comm = xgTransposer%mpiData(MPI_COLS)%comm
    me   = xgTransposer%mpiData(MPI_COLS)%rank
    
-   select case ( getSpace(xgTransposer%xgBlock_linalg) )
+   select case ( space(xgTransposer%xgBlock_linalg) )
      case (SPACE_CR, SPACE_R)
        icplx = 2
      case (SPACE_C)
@@ -497,21 +518,24 @@ module m_xgTransposer
        MSG_ERROR("Space value unknown !")
    end select
    
-   ABI_MALLOC(nrowsInd,(ncpu))
-   nrowsTotal = getRows(xgTransposer%xgBlock_linalg)/icplx
+   ABI_MALLOC(nrowsInd,(xgTransposer%mpiData(MPI_LINALG)%size))
+   nrowsTotal = rows(xgTransposer%xgBlock_linalg)/icplx !number of pair of reals
 
-   call xmpi_allgather(nrowsTotal,nrowsInd,comm,i)
+   call xmpi_allgather(nrowsTotal,nrowsInd,xgTransposer%mpiData(MPI_LINALG)%comm,i)
    if ( i /= MPI_SUCCESS ) then
      MSG_ERROR("Error while gathering number of rows")
    end if 
-   nrowsTotal = sum(nrowsInd)
-   ncolsInd = getCols(xgTransposer%xgBlock_linalg)/ncpu
+   icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+   nrowsTotal = sum(nrowsInd(icpu+1:icpu+ncpu))
+   ncolsInd = cols(xgTransposer%xgBlock_linalg)/xgTransposer%mpiData(MPI_COLS)%size
+   write(*,*) xgTransposer%mpiData(MPI_ROWS)%rank, "in transpose to col_row there is a total of ", nrowsTotal, "real in rows to gather"
+   write(*,*) nrowsInd
 
    ABI_MALLOC(recvbuf,(2,nrowsTotal*ncolsInd))
    ABI_MALLOC(recvcounts,(ncpu))
    ABI_MALLOC(rdispls,(ncpu))
 
-   recvcounts(:) = 2*nrowsInd(:)*ncolsInd
+   recvcounts(:) = 2*nrowsInd(icpu+1:icpu+ncpu)*ncolsInd
    rdispls(1) = 0
    do icpu = 2, ncpu
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
@@ -524,13 +548,13 @@ module m_xgTransposer
      ABI_MALLOC(request,(1))
      myrequest = 1
 
-     sendcounts(:) = 2*nrowsInd(me+1)*ncolsInd !! Thank you fortran for not starting at 0 !
+     sendcounts(:) = 2*nrowsInd(xgTransposer%mpiData(MPI_LINALG)%rank+1)*ncolsInd !! Thank you fortran for not starting at 0 !
      sdispls(1) = 0
      do i = 2, ncpu
        sdispls(i) = sdispls(i-1)+sendcounts(i-1)
      end do
 
-     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf,icplx,getCols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
+     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
      !call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
      !                    recvbuf, recvcounts, rdispls, & 
      !                    comm, i)
@@ -544,7 +568,7 @@ module m_xgTransposer
 
      ABI_ALLOCATE(sendptrbuf,(1:ncpu))
      do icpu = 0, ncpu-1
-       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsInd+1,getRows(xgTransposer%xgBlock_linalg),ncolsInd)
+       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsInd+1,rows(xgTransposer%xgBlock_linalg),ncolsInd)
        call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me+1)%ptr,icplx,ncolsInd*nrowsInd(me+1))
        !call xmpi_gatherv(sendptrbuf(me+1)%ptr,2*ncolsInd*nrowsInd(me+1),recvbuf,recvcounts,rdispls,icpu,comm,i)
        call mpi_igatherv(sendptrbuf(me+1)%ptr,2*ncolsInd*nrowsInd(me+1),MPI_DOUBLE_PRECISION,&
@@ -555,11 +579,8 @@ module m_xgTransposer
      MSG_BUG("This algo does not exist")
    end select
 
-   if ( getCols(xgTransposer%xgBlock_colsrows)*getRows(xgTransposer%xgBlock_colsrows)/icplx /= nrowsTotal*ncolsInd ) then
-     write(*,*)  getCols(xgTransposer%xgBlock_colsrows), getRows(xgTransposer%xgBlock_colsrows), nrowsTotal, ncolsInd
-     MSG_ERROR("Wrong size for xgBlock ColsRows")
-   end if
-   call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,buffer,icplx,nrowsTotal*ncolsInd)
+!call xgBlock_map(xgeigen,l_gvnlc,space,l_icplx*l_npw*l_nspinor,nband/dtset%npband,l_mpi_enreg%comm_fft)
+!   call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,buffer,icplx,nrowsTotal*ncolsInd)
    xgTransposer%state = STATE_COLSROWS
 
 
@@ -569,14 +590,18 @@ module m_xgTransposer
      MSG_ERROR("Error while waiting for mpi")
    end if 
 
-   !$omp parallel do private(shiftCpu), collapse(2)
+   licpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+   ABI_MALLOC(buffer,(2,nrowsTotal*ncolsInd))
+   !!!!!!$omp parallel do private(shiftCpu), collapse(2)
    do col = 1, ncolsInd
      do icpu = 1, ncpu
-       shiftCpu = ncolsInd*sum(nrowsInd(1:icpu-1))
-       buffer(:,((col-1)*nrowsTotal+sum(nrowsInd(1:icpu-1))+1):((col-1)*nrowsTotal+sum(nrowsInd(1:icpu)))) = &
-       recvbuf(:,(shiftCpu+(col-1)*nrowsInd(icpu)+1):(shiftCpu+col*nrowsInd(icpu)))
+       shiftCpu = ncolsInd*sum(nrowsInd(licpu+1:licpu+icpu-1))
+
+       buffer(:,((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu-1))+1):((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu)))) = &
+       recvbuf(:,(shiftCpu+(col-1)*nrowsInd(licpu+icpu)+1):(shiftCpu+col*nrowsInd(licpu+icpu)))
      end do
    end do
+   call xgBlock_map(xgTransposer%xgBlock_colsrows,buffer,space(xgTransposer%xgBlock_linalg),icplx*nrowsTotal,ncolsInd,xgTransposer%mpiData(MPI_ROWS)%comm)
 
    ABI_FREE(nrowsInd)
 

@@ -42,9 +42,9 @@ module m_lobpcgwf
  use m_xomp
  use m_fstrings
  use m_xg
+ use m_xgTransposer
  use m_lobpcg2
 
- use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
@@ -125,6 +125,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
+
+ real(dp), allocatable :: first(:,:)
+ integer :: ncpuCols, ncpuRows
+ real(dp) :: errmax, maxt
+ type(xgTransposer_t) :: xgTransposer
 
 ! *********************************************************************
 
@@ -216,9 +221,9 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
 
- ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
+ !ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
+ !call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
 
 !------------------------ TEST --------------------------!
 
@@ -229,9 +234,9 @@ call xgBlock_get(xgx0,first,0,l_npw*l_nspinor)
 ! Get full number of npw
 call xmpi_sum(l_npw,mpi_enreg%comm_bandspinorfft,iband)
 ! Allocate memory
-ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*nband/dtset%npband))
+!ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*nband/dtset%npband))
 ! Map a xgBlock onto this memory
-call xgBlock_map(xgeigen,l_gvnlc,space,l_icplx*l_npw*l_nspinor,nband/dtset%npband,l_mpi_enreg%comm_fft)
+!call xgBlock_map(xgeigen,l_gvnlc,space,l_icplx*l_npw*l_nspinor,nband/dtset%npband,l_mpi_enreg%comm_fft)
 
 cputime = 0
 ncpuCols = dtset%npband
