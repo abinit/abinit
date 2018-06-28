@@ -85,7 +85,6 @@ abiauty:
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_poisson >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_wvl_wfs >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/63_bader >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_ctqmc_offdiag >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/64_atompaw >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/64_psp >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/65_lotf_base >> tmp-abiauty.log
