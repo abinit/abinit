@@ -1724,7 +1724,7 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
 
    paw_dmft%bandc_proc(ibc) = proc
 
-   paw_dmft%use_bandc(proc) = .true.
+   paw_dmft%use_bandc(proc+1) = .true.
  end do
 end subroutine init_sc_dmft_paralkgb
 
