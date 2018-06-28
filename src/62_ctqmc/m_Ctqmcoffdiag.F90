@@ -1359,7 +1359,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 
 SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 
- use m_abilasi,  only : xginv
+ use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).

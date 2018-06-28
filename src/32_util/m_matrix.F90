@@ -287,7 +287,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
    Permutcol(im1,im1)=1.d0
  end do
 
- prtopt=1
+ prtopt=0
 
  ABI_ALLOCATE(nonnul,(tndim))
  do im1=1,tndim
