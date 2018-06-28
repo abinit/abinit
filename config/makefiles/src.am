@@ -15,6 +15,7 @@ parents:
 # Note : the _ext, _noabirule should not treated because they are not expected to follow the abirules
 # Note : 02_clib only includes C files
 # Note : 43_ptgroup should not be treated because the routines have been generated automatically
+# Note : 57_iopsp_parser should not be treated because it contains now routines from pwscf, not respecting abirules (XG20180623).
 # Note : 69_wfdesc, 70_gw and 71_bse  should not be treated due a special request of Matteo
 # Note : the "Warning" occurences have been eliminated on 10 May 2011.
 # Note : the "ERROR" occurences have been eliminated on 25 December 2011, also documenting the solution for each type of problem !!
@@ -56,7 +57,6 @@ abiauty:
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/15_gpu_toolbox >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/16_hideleave >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/18_timing >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/20_datashare >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/27_toolbox_oop >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/32_util >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/41_geometry >> tmp-abiauty.log
@@ -77,7 +77,6 @@ abiauty:
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_mixing >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_recipspace >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_xc >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/57_iopsp_parser >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/57_iovars >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/59_ionetcdf >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/61_occeig >> tmp-abiauty.log

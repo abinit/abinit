@@ -30,5 +30,5 @@ The trajectories can be analyzed thanks to the [[topic:APPA|APPA postprocessor]]
 
 ## Tutorials
 
-* [[lesson:paral_moldyn]] Parallelism for molecular dynamics calculations
+* [[tutorial:paral_moldyn]] Parallelism for molecular dynamics calculations
 

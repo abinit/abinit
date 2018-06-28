@@ -42,7 +42,7 @@ MODULE m_hexc
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : ebands_t, pseudopotential_type
- use m_blas,              only : xdotc, xgemv
+ use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item

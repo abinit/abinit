@@ -1,4 +1,4 @@
-!{\src2tex{textfont=tt}}
+!!{\src2tex{textfont=tt}}
 !!****f* ABINIT/invars2
 !!
 !! NAME
@@ -433,9 +433,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
- if(tread==1) dtset%supercell(1:3)=intarr(1:3)
-
 !RESPFN integer input variables (needed here to get the value of response
 !Presently, rfmeth is not used.
 !Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
@@ -788,11 +785,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symchi',tread,'INT')
  if(tread==1) dtset%symchi=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getefmas',tread,'INT')
+ if(tread==1) dtset%getefmas=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdefmas',tread,'INT')
+ if(tread==1) dtset%irdefmas=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdsuscep',tread,'INT')
  if(tread==1) dtset%irdsuscep=intarr(1)
@@ -1097,6 +1100,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_frohlichm',tread,'INT')
+ if(tread==1) dtset%eph_frohlichm=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsmear',tread,'ENE')
  if(tread==1) dtset%eph_fsmear=dprarr(1)
 
@@ -1126,6 +1132,26 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_addStrain',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_addStrain=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_option',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_option=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_nampl',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_nampl=intarr(1)
+
+ if(dtset%ph_freez_disp_nampl > 0)then
+   ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
+   ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
+   call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),&
+&   'ph_freez_disp_ampl',tread,'DPR')
+   if (tread==0) then
+     MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
+   end if
+   dtset%ph_freez_disp_ampl=reshape(dprarr(1:5*dtset%ph_freez_disp_nampl),[5,dtset%ph_freez_disp_nampl])
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
@@ -1535,7 +1561,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restartxf',tread,'INT')
  if(tread==1) dtset%restartxf=intarr(1)
  if (dtset%restartxf == 1) then
-   MSG_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2")
+   MSG_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
@@ -1620,9 +1646,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- endif
+   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1778,7 +1804,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'impose dmft_dc = 5'
      MSG_WARNING(message)
      dtset%dmft_dc=5
-   endif
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -2112,6 +2138,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
  if(tread==1) dtset%prtefg=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefmas',tread,'INT')
+ if(tread==1) dtset%prtefmas=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteig',tread,'INT')
  if(tread==1) dtset%prteig=intarr(1)

@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# First (basic) lesson  
+# First (basic) tutorial
 
 ## The H<sub>2</sub> molecule, without convergence studies
 
-This lesson aims at showing how to get the following physical properties:
+This tutorial aims at showing how to get the following physical properties:
 
 * the (pseudo) total energy 
 * the bond length 
@@ -16,14 +16,14 @@ This lesson aims at showing how to get the following physical properties:
 You will learn about the two input files, the basic input variables, the
 existence of defaults, the actions of the parser, and the use of the multi-dataset feature. 
 You will also learn about the two output files as well as the density file.
-This first lesson covers the first sections of the [[help:abinit]].
+This first tutorial covers the first sections of the [[help:abinit]].
 
 The very first step is a detailed tour of the input and output files: you are
 like a tourist, and you discover a town in a coach. 
 You will have a bit more freedom after that first step.
 It is supposed that you have some good knowledge of UNIX/Linux.
 
-This lesson should take about 2 hours.
+This tutorial should take about 2 hours.
 
 ## Computing the (pseudo) total energy, and some associated quantities
   
@@ -42,7 +42,7 @@ Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`).
   
 In that directory, you will find the necessary input files to run the examples related to this tutorial. 
 Take a few seconds to read the names of the files already present in `~abinit/tests/tutorial/Input`. 
-Compare with the lessons mentioned in the index of the [Tutorial home page](index.md).
+Compare with the tutorials mentioned in the index of the [Tutorial home page](index.md).
 You will find other input files, specific for the Density Functional
 Perturbation Theory ("Response functions") capabilities in the directory `~abinit/tests/tutorespfn/Input`. 
 
@@ -56,7 +56,7 @@ Change the working directory of windows 2 to `Work`:
 You will do most of the actions of this tutorial in this working directory.
 Copy `tbase1_x.files` in `Work`:
 
-    cp ../tbase1_x.files
+    cp ../tbase1_x.files .
 
 Edit the `tbase1_x.files`. It is not very long (only 6 lines). 
 It gives the information needed for the code to build other file names.
@@ -77,7 +77,7 @@ Later, you will again modify these lines, to treat more cases.
 Make sure that the last line, gives the correct location of the pseudopotential file.
 Close `tbase1_x.files` then copy [[tests/tutorial/Input/tbase1_1.in]] in `Work`:  
 
-    cp ../tbase1_1.in
+    cp ../tbase1_1.in .
 
 Also later, we will look at this file, and learn about its content. 
 For now, you will try to run the code. Its name is `abinit`. 
@@ -122,7 +122,7 @@ tbase1_xo_DEN  tbase1_xo_EIG.nc  tbase1_xo_GSR.nc  tbase1_xo_OUT.nc  tbase1_xo_W
 
 Different output files have been created, including a `log` file and the output file `tbase1_1.out`. 
 To check that everything is correct, you can make a diff of
-`tbase1_1.out` with a reference file [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
+`tbase1_1.out` with the reference file [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
 
 ```sh
 diff tbase1_1.out ../../Refs/tbase1_1.out | less
@@ -136,15 +136,15 @@ files or timing differences, e.g.:
 
 ```diff
 2,3c2,3
-< .Version 8.0.8 of ABINIT
+< .Version 8.8.3 of ABINIT
 < .(MPI version, prepared for a x86_64_linux_gnu5.4 computer)
 ---
-> .Version 8.0.7  of ABINIT
+> .Version 8.8.0  of ABINIT
 > .(MPI version, prepared for a x86_64_linux_gnu5.3 computer)
 17c17
-< .Starting date : Fri 27 May 2016.
+< .Starting date : Fri 27 May 2018.
 ---
-> .Starting date : Thu 26 May 2016.
+> .Starting date : Thu 26 May 2018.
 27c27
 < - input  file    -> tbase1_1.in
 ---
@@ -309,6 +309,7 @@ Look at the `tbase1_1.out` file at the same time.
 
 You have read completely an output file! 
 Could you answer the following questions?
+(There might be numerical differences, from platform to platform, in the quoted results!)
 
 ??? note "Q1. How many SCF cycles were needed to have the [[toldfe]] criterion satisfied?"
 
@@ -333,7 +334,7 @@ Could you answer the following questions?
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
     the target tolerance, defined by one of the "tolXXX" input variables. However,
-    this is not always the case (e.g. the test case 1 of the [[lesson:rf1|lesson DFPT 1]] 
+    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](rf1) 
     because of some portability problems, that could only be
     solved by stopping the SCF cycles before the required tolerance.
 
@@ -356,7 +357,7 @@ Could you answer the following questions?
     On the first atom (located at -0.7 0 0 in cartesian coordinates, in Bohr), the
     force vector is pointing in the minus x direction, and in the plus x direction
     for the second atom located at +0.7 0 0 .  
-    The H2 molecule would like to expand...
+    The H$_2$ molecule would like to expand...
 
 ??? note "Q4. What is the difference of eigenenergies between the two electronic states?"
 
@@ -373,7 +374,7 @@ Could you answer the following questions?
     experimental excitation energies! (Well, more is to be said later about this ...).
 
 
-??? note "Q5. Can you insert [[prtvol]] = 2 in the input file, run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?"
+??? note "Q5. Can you set [[prtvol]] to 2 in the input file, run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?"
 
     The maximum electronic density in electron per Bohr cube is reached at the mid-point between the two H atoms: 
     
@@ -381,14 +382,23 @@ Could you answer the following questions?
         ,     Maximum=    2.6907E-01  at reduced coord.    0.0000    0.0000    0.0000
 
 
-!!! warning
+!!! tip
 
-    There might be numerical differences, from platform to platform, in the quoted results!
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the SCF cycle from the main output file:
+
+        abiopen.py tbase1_1.out --expose --seaborn
+
+    ![](base1_assets/abiopen_tbase1_1.png)
+
+    For further info, please consult this 
+    [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/base1/lesson_base1.ipynb)
+    that reformulates the present tutorial using AbiPy.
 
 
 ## Computation of the interatomic distance (method 1)
   
-Starting from now, everytime a new input variable is mentioned, 
+Starting from now, every time a new input variable is mentioned, 
 you should read the corresponding descriptive section in the ABINIT help file.
 
 We will now complete the description of the meaning of each term: there are
@@ -537,6 +547,15 @@ often observed for a value converging to zero (remember, we ask the code to
 determine the equilibrium geometry, that is, forces should be zero) when the
 same computation is done on different platforms.
 
+!!! tip
+
+    With |AbiPy|, we can analyze easily the results of the structural relaxation 
+    with the |abiopen| script:
+
+        abiopen.py tbase1_3o_HIST.nc --expose --seaborn
+
+    ![](base1_assets/abiopen_tbase1_3o_HIST.png)
+
 ## Computation of the charge density
 
 The charge density has already been computed, for all geometries, in the
@@ -571,20 +590,27 @@ For further treatment, you might choose to select another option than 6. In
 particular, if you have access to MATLAB, choose option 5. With minor
 modifications (set ngx=ngy=ngz to 30) you will be able to use the file [dim.m](base1_assets/dim.m)
 to visualize the 3-Dimensional isosurfaces. 
-Another option might be to use the XCrysDen software, for which you need to use option 9.
+Another option might be to use the |xcrysden| software, for which you need to use option 9.
+
+If you have a density file in netcdf format, it's possibile to use |AbiPy| to
+export the data in different formats and invoke an external graphical tool. 
+This is, for example, the density isosurface produced with |vesta|
+as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/base1/lesson_base1.ipynb#Analysis-of-the-charge-density)
+
+![](https://github.com/abinit/abipy_assets/blob/master/h2_density.png?raw=true)
 
 ## Computation of the atomisation energy
   
 The atomisation energy is the energy needed to separate a molecule in its constituent atoms, each being neutral.   
 In the present case, one must compute first the total energy of an isolated
 hydrogen atom. The atomisation energy will be the difference between the total
-energy of H2 and twice the total energy of H.  
+energy of H$_2 and twice the total energy of H.  
 There are some subtleties in the calculation of an isolated atom.
 
 * in many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]] ; 
 
 * the highest occupied level might be degenerate with the lowest unoccupied level of the same spin, 
-  in which case the techniques usually appropriate for metals are to be used (see [lesson base4](base4)) 
+  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](base4)) 
 
 * also often, the symmetry of the ground-state charge density will NOT be spherical, so that the automatic 
   determination of symmetries by the code, based on the atomic coordinates, should be disabled, 
@@ -618,7 +644,7 @@ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -0.11112
 ```
 
-If you run again, while having inserted in the input file [[prtvol]] 2, because [[occopt]], 
+If you run again, while having set [[prtvol]] to 2 in the input file, because [[occopt]], 
 the charge density and spin polarisation at each point of the FFT grid is also analyzed: 
     
 ```
@@ -661,12 +687,12 @@ The total energy is
     
     etotal   -4.7010531489E-01
 
-while the total energy of the H2 molecule is (see test 13):
+while the total energy of the H$_2$ molecule is (see test 13):
     
     etotal   -1.1058360644E+00
 
 The atomisation energy is thus 0.1656 Ha (The difference between the total
-energy of the H2 molecule and twice the energy of an isolated Hydrogen atom).
+energy of the H$_2$ molecule and twice the energy of an isolated Hydrogen atom).
 
 At this stage, we can compare our results:
 
@@ -674,7 +700,7 @@ At this stage, we can compare our results:
   * atomisation energy at that bond length: 0.1656 Ha = 4.506 eV 
 
 with the experimental data as well as theoretical data using a much more
-accurate technique (see Kolos and Roothaan, Rev. Mod. Phys. 32, 219 (1960), especially p.225)
+accurate technique (see [[cite:Kolos1960]], especially p.225)
 
   * bond length: 1.401 Bohr 
   * atomisation energy: 4.747 eV 
@@ -698,7 +724,7 @@ These are:
   
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
 (as well as the local-spin-density approximation) in the
-Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table (Phys. Rev. B 54, 1703 (1996)).
+Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table [[cite:Goedecker1996]].
 
-We will see in the [[lesson:base2|next lesson]] how to address the choice
+We will see in the [next tutorial](base2) how to address the choice
 of these parameters (except the pseudopotential).

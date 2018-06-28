@@ -35,7 +35,7 @@ MODULE m_ppmodel
  use m_linalg_interfaces
 
  use m_fstrings,       only : sjoin, itoa
- use m_abilasi,        only : xhegv
+ use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item

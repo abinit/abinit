@@ -36,7 +36,7 @@ MODULE m_esymm
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
- use m_abilasi,        only : xgeev, xginv
+ use m_hide_lapack,    only : xgeev, xginv
  use m_crystal,        only : crystal_t, idx_spatial_inversion
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&

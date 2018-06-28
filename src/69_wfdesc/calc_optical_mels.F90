@@ -54,7 +54,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  use m_xmpi
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
- use m_abilasi,           only : matrginv
+ use m_hide_lapack,       only : matrginv
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm

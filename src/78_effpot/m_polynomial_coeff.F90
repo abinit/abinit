@@ -58,7 +58,7 @@ module m_polynomial_coeff
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
  private :: computeNorder
- private :: computeCombinaisonFromList
+ private :: computeCombinationFromList
  private :: getCoeffFromList
  private :: generateTermsFromList
 !!***
@@ -1229,7 +1229,6 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 
 !               Set the power_disp of the displacement:
                 power_disp = coefficients(icoeff)%terms(iterm)%power_disp(idisp2)
-
                 tmp2 = tmp2 * (disp1-disp2)**power_disp
                 tmp3 = tmp3 * (disp1-disp2)**power_disp
 
@@ -1864,7 +1863,7 @@ end subroutine polynomial_coeff_getList
 !! cutoff = cut-off for the inter atomic forces constants
 !! crystal<type(crystal_t)> = datatype with all the information for the crystal
 !! power_disps(2) = array with the minimal and maximal power_disp to be computed
-!! max_power_strain = maximum power of the strain
+!! max_power_strain = maximum order of the strain of the strain phonon coupling
 !! option = 0 compute all terms
 !!          1 still in development
 !! sc_size(3) = size of the supercell used for the fit.
@@ -1923,7 +1922,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff3,ierr,ii,irpt,irpt_ref,iterm
  integer :: lim1,lim2,lim3
- integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombinaison,ncoeff_max,ncoeff_sym
+ integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombination,ncoeff_max,ncoeff_sym
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
  integer :: my_icoeff,rank_to_send,rank_to_receive,rank_to_send_save
  real(dp):: norm
@@ -1933,8 +1932,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
- integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combinaison(:,:)
- integer,allocatable :: list_combinaison_tmp(:,:)
+ integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
+ integer,allocatable :: list_combination_tmp(:,:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:)
  real(dp) :: rprimd(3,3),range_ifc(3)
  real(dp),allocatable :: dist(:,:,:,:),rpt(:,:)
@@ -1944,7 +1943,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  character(len=500) :: message
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_tmp
  type(polynomial_term_type),dimension(:),allocatable :: terms
-
+! character(len=fnlen) :: filename
 ! *************************************************************************
 
  !MPI variables
@@ -2125,40 +2124,40 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end do
 
 
-!  Compute all the combinaison of coefficient up to the given order  (get the number)
+!  Compute all the combination of coefficient up to the given order  (get the number)
    if(need_verbose)then
-     write(message,'(1a)')' Compute the number of possible combinaisons'
+     write(message,'(1a)')' Compute the number of possible combinations'
      call wrtout(std_out,message,'COLL')
    end if
 
    ABI_ALLOCATE(list_coeff,(0))
-   ABI_ALLOCATE(list_combinaison,(0,0))
+   ABI_ALLOCATE(list_combination,(0,0))
    icoeff  = 1
    icoeff2 = 0
-   call computeCombinaisonFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
-&                   list_coeff,list_combinaison,icoeff,max_power_strain,icoeff2,natom,ncoeff_sym,&
+   call computeCombinationFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
+&                   list_coeff,list_combination,icoeff,max_power_strain,icoeff2,natom,ncoeff_sym,&
 &                   nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,nbody=option,&
 &                   compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
-   ncombinaison  = icoeff2
+   ncombination  = icoeff2
    ABI_DEALLOCATE(list_coeff)
-   ABI_DEALLOCATE(list_combinaison)
+   ABI_DEALLOCATE(list_combination)
 
-!  Compute all the combinaison of coefficient up to the given order
+!  Compute all the combination of coefficient up to the given order
    if(need_verbose)then
-     write(message,'(1a)')' Compute the combinaisons'
+     write(message,'(1a)')' Compute the combinations'
      call wrtout(std_out,message,'COLL')
    end if
 
    ABI_ALLOCATE(list_coeff,(0))
-   ABI_ALLOCATE(list_combinaison_tmp,(power_disps(2),ncombinaison))
+   ABI_ALLOCATE(list_combination_tmp,(power_disps(2),ncombination))
 
    icoeff  = 1
    icoeff2 = 0
-   list_combinaison_tmp = 0
-   call computeCombinaisonFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
-&                   list_coeff,list_combinaison_tmp,icoeff,max_power_strain,icoeff2,natom,&
-&                   ncoeff_sym,nstr_sym,ncombinaison,nrpt,nsym,1,power_disps(1),power_disps(2),&
+   list_combination_tmp = 0
+   call computeCombinationFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
+&                   list_coeff,list_combination_tmp,icoeff,max_power_strain,icoeff2,natom,&
+&                   ncoeff_sym,nstr_sym,ncombination,nrpt,nsym,1,power_disps(1),power_disps(2),&
 &                   symbols,nbody=option,compute=.true.,&
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
@@ -2166,7 +2165,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    ABI_DEALLOCATE(compatibleCoeffs)
 
  else
-   ABI_ALLOCATE(list_combinaison_tmp,(1,1))
+   ABI_ALLOCATE(list_combination_tmp,(1,1))
  end if
 
  ABI_DEALLOCATE(xcart)
@@ -2174,14 +2173,14 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
 !MPI
  if(need_verbose .and. nproc > 1)then
-   write(message,'(1a)')' Distribute the combinaisons over the CPU'
+   write(message,'(1a)')' Distribute the combinations over the CPU'
    call wrtout(std_out,message,'COLL')
  end if
 
- call xmpi_bcast(ncombinaison, master, comm, ierr)
+ call xmpi_bcast(ncombination, master, comm, ierr)
 
- ncoeff_alone = mod(ncombinaison,nproc)
- my_ncoeff = int(aint(real(ncombinaison,sp)/(nproc)))
+ ncoeff_alone = mod(ncombination,nproc)
+ my_ncoeff = int(aint(real(ncombination,sp)/(nproc)))
 
  if(my_rank >= (nproc-ncoeff_alone)) then
    my_ncoeff = my_ncoeff  + 1
@@ -2191,7 +2190,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ABI_ALLOCATE(buffsize,(nproc))
  ABI_ALLOCATE(buffdispl,(nproc))
  do ii = 1,nproc
-   buffsize(ii) = int(aint(real(ncombinaison,sp)/(nproc))*power_disps(2))
+   buffsize(ii) = int(aint(real(ncombination,sp)/(nproc))*power_disps(2))
    if(ii > (nproc-ncoeff_alone)) then
      buffsize(ii) = buffsize(ii) + power_disps(2)
    end if
@@ -2202,18 +2201,18 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    buffdispl(ii) = buffdispl(ii-1) + buffsize(ii-1)
  end do
 
- ABI_ALLOCATE(list_combinaison,(power_disps(2),my_ncoeff))
- list_combinaison = 0
+ ABI_ALLOCATE(list_combination,(power_disps(2),my_ncoeff))
+ list_combination = 0
 
  my_size = my_ncoeff*power_disps(2)
- call xmpi_scatterv(list_combinaison_tmp,buffsize,buffdispl,list_combinaison,my_size,master,&
+ call xmpi_scatterv(list_combination_tmp,buffsize,buffdispl,list_combination,my_size,master,&
 &                   comm,ierr)
 
  ABI_DEALLOCATE(buffdispl)
  ABI_DEALLOCATE(buffsize)
- ABI_DEALLOCATE(list_combinaison_tmp)
+ ABI_DEALLOCATE(list_combination_tmp)
 
- !Compute the coefficients from the list of combinaison
+ !Compute the coefficients from the list of combination
  if(need_verbose .and. nproc > 1)then
    write(message,'(1a)')' Compute the coefficients'
    call wrtout(std_out,message,'COLL')
@@ -2224,7 +2223,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ncoeff_max = my_ncoeff
  ABI_ALLOCATE(terms,(nterm))
  do ii=1,my_ncoeff
-   call generateTermsFromList(cell,list_combinaison(:,ii),list_symcoeff,list_symstr,ncoeff_sym,&
+   call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_sym,&
 &                             ndisp_max,nrpt,nstr_sym,nsym,nterm,terms)
    call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),check=.true.)
 !  Free the terms array
@@ -2236,7 +2235,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ABI_DEALLOCATE(cell)
 
 
- ABI_DEALLOCATE(list_combinaison)
+ ABI_DEALLOCATE(list_combination)
  ABI_DEALLOCATE(list_symcoeff)
  ABI_DEALLOCATE(list_symstr)
 
@@ -2408,6 +2407,11 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end if
  end do
 
+ ! if(iam_master)then
+ !   filename = "terms_set.xml"
+ !   call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+ ! end if
+  
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
    call wrtout(ab_out,message,'COLL')
@@ -2422,6 +2426,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(allocated(coeffs_tmp))then
    ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
  end if
+ 
 end subroutine polynomial_coeff_getNorder
 !!***
 
@@ -2673,9 +2678,9 @@ end subroutine computeNorder
 !!***
 
 
-!!****f* m_polynomial_coeff/computeCombinaisonFromList
+!!****f* m_polynomial_coeff/computeCombinationFromList
 !! NAME
-!! computeCombinaisonFromList
+!! computeCombinationFromList
 !!
 !! FUNCTION
 !! Recursive routine to compute the order N of a all the possible coefficient
@@ -2696,9 +2701,9 @@ end subroutine computeNorder
 !!                                       6 = indexes of the symmetric
 !! list_str(nstr_sym,nsym) = array with the list of the strain  and the symmetrics
 !! index_coeff_in(power_disp-1) = list of previous coefficients computed (start with 0)
-!! icoeff = current indexes of the combinaison (start we 1)
-!! max_power_strain = maximum order of the strain
-!! nmodel_tot = current number of combinaison already computed (start we 0)
+!! icoeff = current indexes of the combination (start we 1)
+!! max_power_strain = maximum order of the strain of the strain phonon coupling
+!! nmodel_tot = current number of combination already computed (start we 0)
 !! natom = number of atoms in the unit cell
 !! ncoeff = number of coefficient for related to the atomic displacment into list_symcoeff
 !! nstr = number of coefficient for related to the strain into list_symstr
@@ -2727,7 +2732,7 @@ end subroutine computeNorder
 !! OUTPUT
 !! icoeff = current indexes of the cofficients (start we 1)
 !! nmodel_tot = current number of coefficients already computed (start we 0)
-!! list_combinaison = list of the possible combinaison of coefficients
+!! list_combination = list of the possible combination of coefficients
 !!
 !! PARENTS
 !!
@@ -2735,8 +2740,8 @@ end subroutine computeNorder
 !!
 !! SOURCE
 
-recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                  index_coeff_in,list_combinaison,icoeff,max_power_strain,nmodel_tot,&
+recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
+&                                  index_coeff_in,list_combination,icoeff,max_power_strain,nmodel_tot,&
 &                                  natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp,power_disp_min,&
 &                                  power_disp_max,symbols,nbody,only_odd_power,only_even_power,&
 &                                  compute,anharmstr,spcoupling)
@@ -2745,7 +2750,7 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'computeCombinaisonFromList'
+#define ABI_FUNC 'computeCombinationFromList'
 !End of the abilint section
 
  implicit none
@@ -2762,7 +2767,7 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
  integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym,2)
  integer,intent(in) :: index_coeff_in(power_disp-1)
- integer,intent(out) :: list_combinaison(power_disp_max,nmodel)
+ integer,intent(out) :: list_combination(power_disp_max,nmodel)
  character(len=5),intent(in) :: symbols(natom)
 !Local variables ---------------------------------------
 !scalar
@@ -2829,12 +2834,12 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
      if(any(index_coeff < ncoeff) .and. any(index_coeff > ncoeff))then
        possible   = need_spcoupling
        compatible = need_spcoupling
+       if(count(index_coeff > ncoeff) > max_power_strain)then
+         possible = .false.
+         compatible = .false.
+       end if
      end if
 
-     if(count(index_coeff > ncoeff) > max_power_strain)then
-       possible = .false.
-       compatible = .false.
-     end if
 
      if(power_disp >= power_disp_min) then
 
@@ -2869,15 +2874,15 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 !        increase coefficients and set it
          nmodel_tot = nmodel_tot + 1
          if(need_compute)then
-           list_combinaison(1:power_disp,nmodel_tot) = index_coeff
+           list_combination(1:power_disp,nmodel_tot) = index_coeff
          end if
        end if
      end if!end if power_disp < power_disp_min
 
 !    If the model is still compatbile with the input flags, we continue.
      if(compatible)then
-       call computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                     index_coeff,list_combinaison,icoeff1,max_power_strain,&
+       call computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
+&                                     index_coeff,list_combination,icoeff1,max_power_strain,&
 &                                     nmodel_tot,natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
 &                                     power_disp_min,power_disp_max,symbols,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
@@ -2888,7 +2893,7 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
    ABI_DEALLOCATE(index_coeff)
  end if
 
-end subroutine computeCombinaisonFromList
+end subroutine computeCombinationFromList
 !!***
 
 !!****f* m_polynomial_coeff/getCoeffFromList

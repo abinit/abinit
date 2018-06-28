@@ -754,6 +754,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_fermie
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fermie','ENE',0)
 
+ intarr(1,:)=dtsets(:)%eph_frohlichm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_frohlichm','INT',0)
+
  dprarr(1,:)=dtsets(:)%eph_fsmear
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsmear','ENE',0)
 
@@ -1023,6 +1026,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%getden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getden','INT',0)
+
+ intarr(1,:)=dtsets(:)%getefmas
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getefmas','INT',0)
 
  intarr(1,:)=dtsets(:)%getgam_eig2nkq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getgam_eig2nkq','INT',0)

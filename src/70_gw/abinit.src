@@ -43,7 +43,7 @@ sources = [
  "m_gwls_Projected_BT.F90",
  "m_gwls_ComputePoles.F90",
  "m_gwls_ComputeCorrelationEnergy.F90",
- "m_mlwfovlp_qp.F90",
+ "m_gwls_utility.F90",
  "m_chi0tk.F90",
  "m_dyson_solver.F90",
  "m_fft_prof.F90",
