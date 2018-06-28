@@ -37,6 +37,7 @@ MODULE m_ldau_self
  private 
 
  public :: ldau_self
+!!***
 
 contains
 !{\src2tex{textfont=tt}}

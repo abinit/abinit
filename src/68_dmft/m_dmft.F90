@@ -38,6 +38,7 @@ MODULE m_dmft
  public :: impurity_solve
  public :: dyson
  public :: spectral_function
+!!***
 
 contains
 

@@ -39,6 +39,7 @@ MODULE m_forctqmc
 
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
+!!***
 
 contains
 !!****f* m_forctqmc/qmc_prep_ctqmc

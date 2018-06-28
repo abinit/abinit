@@ -35,6 +35,7 @@ MODULE m_calc_ucrpa
  private 
 
  public :: calc_ucrpa
+!!***
 
 contains
 !{\src2tex{textfont=tt}}

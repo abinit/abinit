@@ -39,6 +39,7 @@ MODULE m_hubbard_one
  private 
 
  public :: hubbard_one
+!!***
 
 contains
 
@@ -367,6 +368,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  end do
  ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
  ABI_DATATYPE_DEALLOCATE(udens_atoms)
+!!***
 
 contains
 

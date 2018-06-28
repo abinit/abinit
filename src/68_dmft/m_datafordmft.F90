@@ -41,6 +41,7 @@ MODULE m_datafordmft
  public :: compute_levels
  public :: psichi_renormalization
  public :: hybridization_asymptotic_coefficient
+!!***
 
 contains
 
@@ -720,6 +721,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 &     nsppol,paw_dmft,pawtab,psps,t2g)
    end if ! proc=me
  end if
+!!***
 
  CONTAINS
 
