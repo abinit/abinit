@@ -229,7 +229,7 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_tolfreq
   ! Required precision on local correlated density matrix  (depends on
-  ! frequency mesh), used in dmft_solve.
+  ! frequency mesh), used in m_dmft/dmft_solve
 
   real(dp) :: dmft_lcpr
   ! Required precision on local correlated charge  in order to stop SCF

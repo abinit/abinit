@@ -1,5 +1,48 @@
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/hubbard_one
+!!****m* ABINIT/m_hubbard_one
+!! NAME
+!!  m_hubbard_one
+!!
+!! FUNCTION
+!! 
+!! Solve Anderson model with the density/density Hubbard one approximation
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_hubbard_one
+
+
+ use defs_basis
+
+ implicit none
+
+ private 
+
+ public :: hubbard_one
+
+contains
+
+!!****f* m_hubbard_one/hubbard_one
 !! NAME
 !! hubbard_one
 !!
@@ -55,13 +98,13 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  use m_matlu, only : matlu_type,sym_matlu, print_matlu, gather_matlu,&
 & diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu
  use m_hu, only : hu_type,rotatevee_hu
+ use m_datafordmft, only : compute_levels
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hubbard_one'
  use interfaces_14_hidewrite
- use interfaces_68_dmft, except_this_one => hubbard_one
 !End of the abilint section
 
  implicit none
@@ -325,10 +368,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
  ABI_DATATYPE_DEALLOCATE(udens_atoms)
 
- CONTAINS
-!!***
+contains
 
-!!****f* hubbard_one/green_atomic_hubbard
+!!****f* m_hubbard_one/green_atomic_hubbard
 !! NAME
 !! green_atomic_hubbard
 !!
@@ -744,10 +786,9 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    call destroy_green(green_hubbard_realw)
 
  end subroutine green_atomic_hubbard
-
 !!***
 
-!!****f* hubbard_one/combin
+!!****f* m_hubbard_one/combin
 !! NAME
 !! combin
 !!
@@ -844,7 +885,10 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    end do
 
  end subroutine combin
+!!***
 
 end subroutine hubbard_one
+!!***
 
+END MODULE m_hubbard_one
 !!***

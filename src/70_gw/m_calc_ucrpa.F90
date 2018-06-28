@@ -1,10 +1,49 @@
+!!****m* ABINIT/m_calc_ucrpa
+!! NAME
+!!  m_calc_ucrpa
+!!
+!! FUNCTION
+!! Calculate the effective interaction in the correlated orbitals
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_calc_ucrpa
+
+ use defs_basis
+ implicit none
+
+ private 
+
+ public :: calc_ucrpa
+
+contains
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_ucrpa
 !! NAME
 !! calc_ucrpa
 !!
 !! FUNCTION
-!! Calculate the screening interaction in the correlated orbitals
+!! Calculate the effective interaction in the correlated orbitals
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (TApplencourt,BA)
@@ -1253,4 +1292,7 @@
  END SUBROUTINE Sauvegarde_M_q_m
 
  end subroutine calc_ucrpa
+!!***
+
+END MODULE m_calc_ucrpa
 !!***

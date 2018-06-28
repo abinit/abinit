@@ -101,6 +101,8 @@ module m_sigma_driver
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
+ use m_calc_ucrpa,    only : calc_ucrpa
+ use m_prep_calc_ucrpa,only : prep_calc_ucrpa
 
  implicit none
 
@@ -197,7 +199,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_65_paw
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none

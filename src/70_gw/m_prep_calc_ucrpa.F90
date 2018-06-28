@@ -1,3 +1,43 @@
+!!****m* ABINIT/m_prep_calc_ucrpa
+!! NAME
+!!  m_prep_calc_ucrpa
+!!
+!! FUNCTION
+!! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_prep_calc_ucrpa
+
+ use defs_basis
+ implicit none
+
+ private 
+
+ public :: prep_calc_ucrpa
+
+contains
+
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/prep_calc_ucrpa
 !! NAME
@@ -128,6 +168,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
+ use m_read_plowannier, only : read_plowannier
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -135,7 +176,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => prep_calc_ucrpa
 !End of the abilint section
 
  implicit none
@@ -904,4 +944,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  DBG_EXIT("COLL")
 
 end subroutine prep_calc_ucrpa
+!!***
+
+END MODULE m_prep_calc_ucrpa
 !!***

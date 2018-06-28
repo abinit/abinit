@@ -1,5 +1,46 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/read_plowannier
+!!****m* ABINIT/m_read_plowannier
+!! NAME
+!!  m_read_plowannier
+!!
+!! FUNCTION
+!!  Read Wannier coefficient in the file forlb.ovlp for ucrpa calculation
+!!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_read_plowannier
+
+ use defs_basis
+ implicit none
+
+ private 
+
+ public :: read_plowannier
+
+contains
+
+!!****m* m_read_plowannier/read_plowannier
 !! NAME
 !! read_plowannier
 !!
@@ -203,4 +244,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 
 
 end subroutine read_plowannier
+!!***
+
+END MODULE m_read_plowannier
 !!***

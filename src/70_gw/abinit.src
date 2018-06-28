@@ -18,9 +18,9 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_calc_ucrpa.F90",
  "m_sigc.F90",
  "m_sigx.F90",
- "calc_ucrpa.F90",
  "m_vhxc_me.F90",
  "m_chi0.F90",
  "m_cohsex.F90",
@@ -49,11 +49,11 @@ sources = [
  "m_fft_prof.F90",
  "m_model_screening.F90",
  "m_ppmodel.F90",
+ "m_prep_calc_ucrpa.F90",
  "m_qparticles.F90",
+ "m_read_plowannier.F90",
  "m_screening.F90",
  "m_screen.F90",
  "m_sigma.F90",
- "prep_calc_ucrpa.F90",
- "read_plowannier.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
