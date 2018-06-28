@@ -1359,10 +1359,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !                write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
 &                 eknk_nd(isppol,ikpt,1,iband,iband1)
-                 if(dtset%nspinor==2) then
-                   ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
-&                   eknk_nd(isppol,ikpt,2,iband,iband1)
-                 end if
+                 ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
+&                 eknk_nd(isppol,ikpt,2,iband,iband1)
 !                write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
                end if
              end do

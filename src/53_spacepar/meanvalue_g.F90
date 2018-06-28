@@ -155,7 +155,10 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end if
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
+       if(.not.present(ar_im)) then
+         MSG_BUG("use_ndo true and ar_im not present")
+       end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(0.0d0)*1.d-11)then

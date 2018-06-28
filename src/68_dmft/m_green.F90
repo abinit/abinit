@@ -1753,17 +1753,12 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      do ikpt = 1, nkpt
    do is = 1 , nsppol
            paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&           paw_dmft%include_bands(ib1),ikpt,is)=real(green%occup%ks(is,ikpt,ib,ib1))
-           if(nspinor==1) then
-             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=zero
-             if(nsppol==1) then
-               paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&               paw_dmft%include_bands(ib1),ikpt,is)=two*real(green%occup%ks(is,ikpt,ib,ib1))
-             endif
-           else if (nspinor==2) then  ! and SOC
-             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=aimag(green%occup%ks(is,ikpt,ib,ib1))
+&           paw_dmft%include_bands(ib1),ikpt,is)=dreal(green%occup%ks(is,ikpt,ib,ib1))
+           paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
+&           paw_dmft%include_bands(ib1),ikpt,is)=dimag(green%occup%ks(is,ikpt,ib,ib1))
+           if(nspinor==1 .and. nsppol==1) then
+             paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dreal(green%occup%ks(is,ikpt,ib,ib1))
            endif
          enddo
        enddo

@@ -339,8 +339,7 @@
            locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
            occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
 
-           if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
-           if(nspinor==1) occup(2) = zero
+           occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
 
 !          write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
 !
