@@ -24,6 +24,7 @@ sources = [
  "calc_fc.F90",
  "chern_number.F90",
  "m_conducti.F90",
+ "diag_occ_rot_cg.F90",
  "emispec_paw.F90",
  "m_dft_energy.F90",
  "m_extraprho.F90",
