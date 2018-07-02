@@ -1759,6 +1759,8 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
            if(nspinor==1 .and. nsppol==1) then
              paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
 &             paw_dmft%include_bands(ib1),ikpt,is)=two*dreal(green%occup%ks(is,ikpt,ib,ib1))
+             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dimag(green%occup%ks(is,ikpt,ib,ib1))
            endif
          enddo
        enddo

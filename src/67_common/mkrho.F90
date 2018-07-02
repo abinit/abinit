@@ -537,18 +537,21 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                do ib=1,blocksize
                  cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
-                 if(.not.paw_dmft%band_in(ib)) then
-                   paw_dmft%occnd(1,ib,ib,ikpt,isppol) = occ_k(ib)
+                 if(paw_dmft%occnd(1,1,1,1,1) < 1d-2_dp) then
+                   MSG_ERROR("occupation trop faible")
                  end if
+!                if(.not.paw_dmft%band_in(ib)) then
+!                  paw_dmft%occnd(1,ib,ib,ikpt,isppol) = occ_k(ib)
+!                end if
                end do
 
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
 &                          dtset%nspinor, occ_diag) 
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
-                 if(.not.paw_dmft%band_in(ib)) then
-                   paw_dmft%occnd(1,ib,ib,ikpt,isppol) = zero
-                 end if
+!                if(.not.paw_dmft%band_in(ib)) then
+!                  paw_dmft%occnd(1,ib,ib,ikpt,isppol) = zero
+!                end if
                end do
                
                occ_k(:) = occ_diag(:)
