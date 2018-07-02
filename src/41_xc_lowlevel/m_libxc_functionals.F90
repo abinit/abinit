@@ -1055,7 +1055,7 @@ function libxc_functionals_ismgga(xc_functionals)
 !DEBUG
 ! write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
 !write(std_out,*)' libxc_functionals_ismgga : xc_func%abi_ixc=',xc_func%abi_ixc
-! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga
+! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga 
 !ENDDEBUG
 
 end function libxc_functionals_ismgga

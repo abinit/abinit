@@ -3,7 +3,7 @@
 
 ndtset 3
 
-orbmag 1 # activates Chern number calculation
+orbmag 3 # activates Chern number and orbital magnetization
 
 nucdipmom1
 0.0 0.0 0.0
@@ -29,6 +29,7 @@ optforces3 0
 optstress3 0
 pawcpxocc3 2
 
+usexcnhat 0
 
 kptopt 3
 nsym 1

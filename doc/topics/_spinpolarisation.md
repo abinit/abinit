@@ -29,5 +29,5 @@ be constrained.
 
 ## Tutorials
 
-* [[lesson:spin|The lesson on spin in ABINIT]] presents the properties related to spin: spin-polarized calculations and spin-orbit coupling. 
+* [[tutorial:spin|The tutorial on spin in ABINIT]] presents the properties related to spin: spin-polarized calculations and spin-orbit coupling. 
 

@@ -89,6 +89,9 @@ MODULE m_paw_dmft
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
 
+!  integer :: dmft_mag
+!  ! 0 if non magnetic calculation, 1 if magnetic calculation
+
   integer :: dmft_nwlo
   ! dmft frequencies
 
@@ -228,7 +231,7 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_tolfreq
   ! Required precision on local correlated density matrix  (depends on
-  ! frequency mesh), used in dmft_solve.
+  ! frequency mesh), used in m_dmft/dmft_solve
 
   real(dp) :: dmft_lcpr
   ! Required precision on local correlated charge  in order to stop SCF
@@ -608,6 +611,13 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    endif
  enddo
 
+! paw_dmft%dmft_mag=0
+! do iatom=1,dtset%natom
+!   do  ii=1,3
+!     if ( dtset(ii,iatom) > 0.001 ) paw_dmft%dmft_mag=1
+!   enddo
+! enddo
+
 !=======================
 !==  Define integers and reals
 !=======================
@@ -681,7 +691,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    MSG_BUG(message)
  endif
  paw_dmft%dmft_log_freq=1 ! use logarithmic frequencies.
- if(paw_dmft%dmft_solv>=6) then
+ if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
    paw_dmft%dmft_log_freq=0 ! do not use logarithmic frequencies.
  endif
  paw_dmft%dmft_nwli=dtset%dmft_nwli
@@ -1563,13 +1573,8 @@ subroutine saveocc_dmft(paw_dmft)
    do ikpt = 1, paw_dmft%nkpt
      do ib = 1, paw_dmft%mbandc
        do ib1 = 1, paw_dmft%mbandc
-         if (paw_dmft%nspinor==1) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
-         if (paw_dmft%nspinor==2) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
+         write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&         paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
        enddo
      enddo
    enddo
@@ -1654,15 +1659,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
      do ikpt = 1, paw_dmft%nkpt
        do ib = 1, paw_dmft%mbandc
          do ib1 = 1, paw_dmft%mbandc
-           if (paw_dmft%nspinor==1) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
-           if (paw_dmft%nspinor==2) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&             paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
+           read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
+&           paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
          enddo
        enddo
      enddo
@@ -1735,7 +1734,7 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
 
    paw_dmft%bandc_proc(ibc) = proc
 
-   paw_dmft%use_bandc(proc) = .true.
+   paw_dmft%use_bandc(proc+1) = .true.
  end do
 end subroutine init_sc_dmft_paralkgb
 

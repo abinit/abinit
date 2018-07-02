@@ -82,5 +82,5 @@ file ab_out.out.
 
 ## Tutorials
 
-* [[lesson:fold2bloch|The lesson on unfolding supercell band structures]]
+* [[tutorial:fold2bloch|The tutorial on unfolding supercell band structures]]
 

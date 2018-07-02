@@ -192,8 +192,8 @@ that gives: Please consult the [[pdf:howto_chebfi]] document.
     The `.pdf` extension at the end of the file is optional.
 
 This is the recommended approach to link pdf documents in the description of the input variables.
-In the lessons and in the theory notes, on the other hand, you may want to
-to display the pdf file directly in the HTML page.
+In the tutorials and in the theory notes, on the other hand, you may want to
+display the pdf file directly in the HTML page.
 In this case, use the HTML embed element:
 
 ```html
@@ -226,20 +226,25 @@ built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 ## Links
 
+### Markdown links 
+
 The Markdown syntax for links is:
 
 | Markdown | Result | Extension required |
 | :-- | :-- | :--
+| `[Links for videos](#videos)` | [Links for videos](#videos)  | --
+| `[About topics](abimkdocs#topics)` | [About topics](abimkdocs#topics)  | --
+| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | --
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
-This is the **recommended** approach to create links to external resources or internal links to other pages 
-of the website especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
+This is the **recommended** approach to create links to external resources, or internal links to other pages 
+of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
 Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 
-Remember that linking to a page that is located in the same directory is trivial in Markdown.
-All the lessons, for example, are placed in the same directory (~doc/tutorial).
+Note that linking to a page that is located in the same directory is trivial in Markdown.
+All the tutorials, for example, are placed in the same directory (~doc/tutorial).
 To refer to the first PAW tutorial from the second tutorial, use:
 
     [The first PAW tutorial](paw1)
@@ -253,10 +258,10 @@ links within our documentation, in particular links to:
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
 For this reason, we use the [extentions API](https://python-markdown.github.io/extensions/api)
-provided by python Markdown to extend the syntax of the parser.
+provided by python Markdown to extend the syntax of the parser, using the "Wikilink" syntax.
 Typical cases are discussed in the next sections.
 
-### Wiki links
+### Wikilinks
 
 The wikilink syntax is used with two pairs of square brackets and possible separators (:, # and |).
 In the simple case, this gives <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [name] &#93;</span> although the more general form is
@@ -328,7 +333,7 @@ that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic 
     Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
 
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
-in the case of a bibliographic reference, and add "~abinit/" in the case of a path.
+in the case of a bibliographic reference, and addd *~abinit/* in the case of a path.
 The syntax `[[test:libxc_41]]` is preferable when documenting new tests in the release notes.
 The python code issues a warning in the terminal if the link cannot be established.
 
@@ -343,7 +348,7 @@ The python code issues a warning in the terminal if the link cannot be establish
 Other internal links can be recognized thanks to the namespace.
 
 <!--
-`lesson`, `topic`, `help`, `theorydoc, and `varset` create a link
+`tutorial`, `topic`, `help`, `theorydoc, and `varset` create a link
 to the corresponding Markdown files inside the `tutorials`, `topic`, `user-guide`, `vari
 A first set of allowed internal namespaces are:
 In such cases, provided there is a corresponding generated HTML file
@@ -354,8 +359,8 @@ Examples:
 
 Namespace      | Markdown                         | Result
 -------------  | -------------------------------- |
- `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
- `lesson`      | `[[lesson:index]]`               | [[lesson:index]]
+ `tutorial`    | `[[tutorial:gw1]]`               | [[tutorial:gw1]]
+ `tutorial`    | `[[tutorial:index]]`             | [[tutorial:index]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `topic`       | `[[topic:index]]`                | [[topic:index]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
@@ -369,16 +374,12 @@ Namespace      | Markdown                         | Result
  `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
 
 
-`#files-file` is an HTML id defined in ~abinit/doc/guide/abinit.md with:
+`#files-file` is an HTML id defined in *~abinit/doc/guide/abinit.md with*:
 
 ```html
 <a id="files-file"></a>
 ## 4 More detailed presentation of the files file
 ```
-
-!!! important
-
-    `theorydoc` and bib are deprecated and replaced by `theory` and `cite`, respectively.
 
 Also in this case, it's possible to specify the name of the link with the
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
@@ -402,7 +403,8 @@ To refer to a particular git commit inside a Markdown document use:
 
     Solved in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
-that produces: [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
+that produces: [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
+This extension is useful to generate nice changelogs and [release notes](/about/release-notes).
 
 <!--
 It's also possible to mention a particular github issue with the syntax:
@@ -411,10 +413,6 @@ It's also possible to mention a particular github issue with the syntax:
 
 that produces: Fix https://github.com/abinit/abinit/issues/1
 -->
-
-!!! note
-    This extension is useful to generate nice changelogs and [release notes](/about/release-notes).
-
 
 ### External links
 
@@ -429,7 +427,17 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `https://www.abinit.org` | https://www.abinit.org
 
 It's also possible to specify the name of the link with the `|` separator:
-`[[https://wiki.abinit.org|The ABINIT Wiki]]` that gives [[https://wiki.abinit.org|The ABINIT Wiki]]
+For example, `[[https://wiki.abinit.org|The ABINIT Wiki]]` produces [[https://wiki.abinit.org|The ABINIT Wiki]]
+
+The markdown parser supports aliases for commonly used links.
+The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_aliases`):
+
+| Markdown | Result |
+| :-- | :-- |
+| `|AbiPy|` | |AbiPy| |
+| `|AbipyStructureNb|` | |AbipyStructureNb| |
+| `|xmgrace|` | |xmgrace| |
+| `|gnuplot|` | |gnuplot| |
 
 
 ### Permalinks
@@ -545,7 +553,7 @@ Orange
 
 [Admonitions](
 https://python-markdown.github.io/extensions/admonition) are useful
-to stress important sections (useful e.g. in the Abinit lessons).
+to stress important sections (useful e.g. in the Abinit tutorials).
 Admonition are created using the Markdown syntax:
 
 ```md
@@ -601,7 +609,7 @@ It uses the HTML5 `#!html <details><summary>` tags to accomplish this.
 It supports nesting and you can also force the default state to be open.
 This extension is used in the documentation of the input variable to generate
 a container with the list of tests associated to the variable but it can also be used for 
-long FAQs of Q&A sections in the lessons.
+long FAQs of Q&A sections in the tutorials.
 
 Examples:
 
@@ -660,7 +668,7 @@ that produces:
 
 {% modal tests/v1/Input/t01.in %}
 
-This is useful for lessons to give direct access to the input files.
+This is useful for tutorials to give direct access to the input files.
 If multiple files are used such as in:
 
 ```
@@ -710,9 +718,9 @@ G(12) = -i \langle \Theta^N_0|T\bigl[\Psi(1)\Psi^\dagger(2)\bigr]|\Theta^N_0 \ra
 
 Equations can be referenced with:
 
-    The propagator in Eq.\ref{eq:GreenDef}
+    The propagator in Eq.(\ref{eq:GreenDef})
 
-that produces: The propagator in Eq.\ref{eq:GreenDef}
+that produces: The propagator in Eq.(\ref{eq:GreenDef})
 
 Note that MathJax is configured with Latex macros to facilitate the insertion of symbols
 commonly used in our domain:

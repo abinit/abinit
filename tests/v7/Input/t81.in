@@ -52,6 +52,7 @@ jdtset 1 2 3 4
 # WARNING : Degenerate bands can only be treated at their extrema. The code will print and error and stop otherwise. 
 
 # Dataset 3 is just the first non-degenerate conduction band at gamma, so there is nothing more to specify for that dataset.
+# Note that this does NOT correspond to the bottom of the conduction band.
 
 # Dataset 4 is the 4 valence bands at gamma and the first conduction at 1/4 0 0. Some valences are degenerate, which triggers additional computations.
   efmas_bands4   1 4
@@ -106,6 +107,6 @@ jdtset 1 2 3 4
 #%% description = 
 #%%  Silicon.
 #%%  Silicon effective mass tensor in PAW for multiple bands and k-points. 
-#%% topics = EffMass
+#%% topics = EffectiveMass
 #%%<END TEST_INFO>
 

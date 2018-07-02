@@ -16,11 +16,11 @@
 !!  mpi_enreg          = informations about mpi parallelization
 !!  bandpp             = number of groups of couple of waves functions
 !!  nspinor            = number of spin
-!!  ndatarecv          = number of values received by the processor and sended 
+!!  ndatarecv          = number of values received by the processor and sended
 !!                       by the other processors band
-!!  ndatarecv_tot      = total number of received values 
+!!  ndatarecv_tot      = total number of received values
 !!                       (ndatarecv   + number of received opposited planewave coordinates)
-!!  ndatasend_sym      = number of sended values to the processors fft to create opposited 
+!!  ndatasend_sym      = number of sended values to the processors fft to create opposited
 !!                       planewave coordinates
 !!  idatarecv0         = position of the planewave coordinates (0,0,0)
 !!  sendcounts_sym     = number of sended values by the processor to each processor fft
@@ -29,15 +29,15 @@
 !!  recvcounts_sym     = number of the received values by the processor to each processor fft
 !!!  rdispls_sym        = postions of the received values by the processor to each processor fft
 !!
-!!  gwavef_alltoall_sym = planewave coefficients of wavefunction 
-!!                        initial of the processor + 
+!!  gwavef_alltoall_sym = planewave coefficients of wavefunction
+!!                        initial of the processor +
 !!                        sended by other processors band +
 !!                        sended by other processors fft  +
-!!                        and composited if bandpp >1                                       
+!!                        and composited if bandpp >1
 !!  index_wavef_send    = index to send the values by block to the other processor fft
 !!
 !! OUTPUT
-!!  gwavef_alltoall     = planewave coefficients of wavefunction 
+!!  gwavef_alltoall     = planewave coefficients of wavefunction
 !!                        ( for of the processor + to send to other processors band)
 !!
 !! SIDE EFFECTS
@@ -156,19 +156,19 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !----------------------------------------------------
  do ibandpp = 1,bandpp_sym
 
-!  -------------------------------------------------  
+!  -------------------------------------------------
 !  Deplacment of the sended values because of bandpp
 !  -------------------------------------------------
    sdispls_sym_loc(:) = sdispls_sym(:) + ndatasend_sym * (ibandpp-1)
    sdispls_sym_loc    = sdispls_sym_loc   *2
-   
+
 !  ---------------------------------------------------
 !  Deplacment of the received values because of bandpp
 !  ---------------------------------------------------
    rdispls_sym_loc(:) = rdispls_sym(:) + ndatarecv_tot * (ibandpp-1)
    rdispls_sym_loc    = rdispls_sym_loc   *2
 
-   
+
    call xmpi_alltoallv(&
 &   gwavef_alltoall_sym(:,:) ,recvcounts_sym_loc,rdispls_sym_loc,&
 &   gwavef_alltoall_rcv(:,:) ,sendcounts_sym_loc,sdispls_sym_loc,&
@@ -196,25 +196,25 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !Build of hwavef_alltoall
 !
 !We have got :
-!bandpp_sym blocks to dissociate 
+!bandpp_sym blocks to dissociate
 !or   bandpp_sym blokcs to not dissociate
 !--------------------------------------------------
  do kbandpp=1,bandpp_sym
-   
-!  position of the 2 blocks  
+
+!  position of the 2 blocks
 !  ----------------------------------
    ibandpp = (kbandpp-1) * 2
    jbandpp =  ibandpp    + 1
-   
+
    idebe = (kbandpp-1) * ndatarecv_tot + 1
    ifine = idebe       + ndatarecv     - 1
 
    idebc = ibandpp * ndatarecv     + 1
    ifinc = idebc   + ndatarecv     - 1
-   
+
    idebd = jbandpp * ndatarecv     + 1
    ifind = idebd   + ndatarecv     - 1
-   
+
    ideb_loc = (kbandpp-1) * ndatarecv  + 1
    ifin_loc = ideb_loc    + ndatarecv  - 1
 
@@ -224,7 +224,7 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !    calcul cwavef(G)
 !    ----------------
      gwavef_alltoall(1,idebc:ifinc) =   gwavef_alltoall_sym(1,idebe:ifine)  &
-&     + gwavef_alltoall_loc(1,ideb_loc:ifin_loc) 
+&     + gwavef_alltoall_loc(1,ideb_loc:ifin_loc)
      gwavef_alltoall(2,idebc:ifinc) =   gwavef_alltoall_sym(2,idebe:ifine)  &
 &     - gwavef_alltoall_loc(2,ideb_loc:ifin_loc)
 
@@ -234,12 +234,12 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 &     + gwavef_alltoall_loc(2,ideb_loc:ifin_loc)
      gwavef_alltoall(2,idebd:ifind) = - gwavef_alltoall_sym(1,idebe:ifine) &
 &     + gwavef_alltoall_loc(1,ideb_loc:ifin_loc)
-   else 
+   else
 
 !    calcul cwavef(G)
 !    ----------------
      gwavef_alltoall(1,idebc:ifinc) =   gwavef_alltoall_sym(1,idebe:ifine)  &
-&     + gwavef_alltoall_loc(1,ideb_loc:ifin_loc) 
+&     + gwavef_alltoall_loc(1,ideb_loc:ifin_loc)
      gwavef_alltoall(2,idebc:ifinc) =   gwavef_alltoall_sym(2,idebe:ifine)  &
 &     - gwavef_alltoall_loc(2,ideb_loc:ifin_loc)
    end if
@@ -257,7 +257,7 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
  ABI_DEALLOCATE(recvcounts_sym_loc)
  ABI_DEALLOCATE(sdispls_sym_loc)
  ABI_DEALLOCATE(rdispls_sym_loc)
- 
+
  ABI_DEALLOCATE(gwavef_alltoall_loc)
  ABI_DEALLOCATE(gwavef_alltoall_rcv)
 

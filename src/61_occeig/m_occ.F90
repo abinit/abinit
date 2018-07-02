@@ -32,8 +32,10 @@ module m_occ
  use m_splines
  use m_xmpi
 
+ use m_time,         only : timab
  use m_fstrings,     only : sjoin, itoa
  use defs_abitypes,  only : MPI_type
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 
@@ -407,7 +409,6 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 #undef ABI_FUNC
 #define ABI_FUNC 'newocc'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1622,8 +1623,6 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pareigocc'
- use interfaces_18_timing
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

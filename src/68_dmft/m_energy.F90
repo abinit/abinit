@@ -33,6 +33,7 @@ MODULE m_energy
  use defs_basis
  use m_errors
  use m_profiling_abi
+
  use m_pawtab, only : pawtab_type
 
  implicit none
@@ -78,7 +79,7 @@ MODULE m_energy
 
   real(dp) :: natom
 
-  real(dp), allocatable :: e_dc(:) 
+  real(dp), allocatable :: e_dc(:)
 
   real(dp), allocatable :: e_hu(:)
 
@@ -111,7 +112,7 @@ CONTAINS  !=====================================================================
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -174,7 +175,7 @@ end subroutine init_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -330,7 +331,7 @@ end subroutine print_energy
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -403,7 +404,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! == Compute Band Energy Alternative version: two steps
 !                 == Compute Tr[ln G^{-1}] and -Tr[(Self-hdc)G_dmft]
 ! -----------------------------------------------------------------------
-   if(part=='band') then ! ie if thdyn="fcalc" in dmft_solve.F90
+   if(part=='band') then ! ie if thdyn="fcalc" in m_dmft.F90
 !     call compute_B3(cryst_struc,energies_dmft,eband2,green,mpi_enreg,paw_dmft,2,pawang,self,occ_type,0)
 !     write(message,'(2a,f10.6)') ch10,"Compute Band energy test KS           ",eband2
 !     call wrtout(std_out,message,'COLL')
@@ -836,7 +837,7 @@ end subroutine compute_migdal_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,m_energy
+!!      m_dmft,m_energy
 !!
 !! CHILDREN
 !!      wrtout
@@ -976,7 +977,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        prt_pawuenergy=0
      else
        upawu = pawtab(cryst_struc%typat(iatom))%upawu
-       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu        
+       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu
        prt_pawuenergy=3
      end if
 

@@ -14,14 +14,14 @@ the cell, their type, and position. This is described by [[natom]], [[typat]]
 and one of [[xred]], [[xcart]] and [[xangst]].
 
 ABINIT can automatically detect the Bravais lattice and space group, and
-generate symmetries (e.g. [[nsym]],[[symrel]],[[tnons]]), from the primitive
+generate symmetries (e.g. [[nsym]], [[symrel]], [[tnons]]), from the primitive
 cell and the position of atoms (provided they are not too inaccurate, see
 [[tolsym]]). For this purpose, in the magnetic case, ABINIT will also take
 into account the input atomic spin, through the knowledge of [[spinat]].
 
 Alternatively, ABINIT can start from the specification of symmetries (either
 from [[spgroup]] or from the list of symmetries -
-[[nsym]],[[symrel]],[[tnons]]) and generate the atomic positions from the
+[[nsym]], [[symrel]], [[tnons]]) and generate the atomic positions from the
 asymmetric (irreducible) part of the primitive cell. This is described in the
 [[topic:SmartSymm|Smart Symmetrizer]] topic.
 
@@ -31,17 +31,19 @@ In ABINIT, a database with the 230 spatial groups of symmetry (see
 [[spgroup]]) and the 1191 Shubnikov anti-ferromagnetic space groups is present
 (see also [[spgroupma]] and [[genafm]]).
 
-There is also a (non-graphical) atom manipulator in ABINIT, see
-[[topic:AtomManipulator]].
+There is also a (non-graphical) atom manipulator in ABINIT, see [[topic:AtomManipulator]].
 
 ABINIT can read XYZ files, see [[xyzfile]].
 
 Atomic positions can also be generated at random, see [[random_atpos]].
 
-Details about the way the crystal structure is defined in ABINIT can be found
-[[pdf:geometry|here]].
+Details about the way the crystal structure is defined in ABINIT can be found [[theory:geometry|here]].
 
+!!! tip
 
+    If |AbiPy| in installed on your machine, you can use the |abistruct| script
+    to automate several operations related to crystalline structures.
+    Further details about the python API are available in the |AbipyStructureNb|.
 
 ## Related Input Variables
 
@@ -53,8 +55,8 @@ Details about the way the crystal structure is defined in ABINIT can be found
 
 ## Tutorials
 
-* [[lesson:base1|The lesson 1]] deals with the H2 molecule : get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
-* [[lesson:base2|The lesson 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
-* [[lesson:base3|The lesson 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
-* [[lesson:base4|The lesson 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
+* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule : get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
+* [[tutorial:base4|The tutorial 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
 

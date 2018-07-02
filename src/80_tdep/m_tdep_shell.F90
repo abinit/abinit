@@ -13,6 +13,7 @@ module m_tdep_shell
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_2at, tdep_SearchS_3at
   use m_tdep_utils,       only : tdep_calc_nbcoeff
+  use m_io_tools
 
   implicit none
 
@@ -71,6 +72,7 @@ contains
 ! - Store the reference atoms for each shell
 ! - Compute the symetry operation between the reference atom and another one
   write(InVar%stdout,*) ' Build the ref2at and Isym2at tables...'
+  call flush_unit(InVar%stdout)
   ABI_MALLOC(ref2at ,(natom,natom,3)) ; ref2at (:,:,:)=zero
   ABI_MALLOC(Isym2at,(natom,natom,2)) ; Isym2at(:,:,:)=zero
   ishell=0
@@ -119,6 +121,7 @@ contains
 
 ! Store all the previous quantities in a better way than in ref2at (without using too memory).
   write(InVar%stdout,*) ' Build the Shell2at datatype...'
+  call flush_unit(InVar%stdout)
   ABI_MALLOC(Shell2at%neighbours,(natom,Shell2at%nshell))
   ABI_MALLOC(Shell2at%iatref          ,(Shell2at%nshell)); Shell2at%iatref(:)=zero
   ABI_MALLOC(Shell2at%jatref          ,(Shell2at%nshell)); Shell2at%jatref(:)=zero
@@ -151,13 +154,15 @@ contains
   end do
   ABI_FREE(ref2at)
   ABI_FREE(Isym2at)
+  write(InVar%stdout,*) "done"
+  call flush_unit(InVar%stdout)
 
 ! Find the number of coefficients of the (3x3) Phij for a given shell
   ABI_MALLOC(Shell2at%ncoeff     ,(Shell2at%nshell)); Shell2at%ncoeff(:)=zero
   ABI_MALLOC(Shell2at%ncoeff_prev,(Shell2at%nshell)); Shell2at%ncoeff_prev(:)=zero
   write(InVar%stdout,*) ' Number of shells=',Shell2at%nshell
   write(InVar%stdout,*) '============================================================================'
-  open(unit=16,file='nbcoeff-phij.dat')
+  open(unit=16,file=trim(InVar%output_prefix)//'nbcoeff-phij.dat')
   ncoeff_prev=0
   do ishell=1,Shell2at%nshell
     ncoeff=0
@@ -342,7 +347,7 @@ contains
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) 'Number of shells=',Shell3at%nshell
   write(InVar%stdout,*) '============================================================================'
-  open(unit=16,file='nbcoeff-psij.dat')
+  open(unit=16,file=trim(InVar%output_prefix)//'nbcoeff-psij.dat')
   ncoeff_prev=0
   do ishell=1,Shell3at%nshell
     ncoeff=0
@@ -386,14 +391,18 @@ contains
   ABI_FREE(Shell%ncoeff_prev)
   ABI_FREE(Shell%iatref)
   ABI_FREE(Shell%jatref)
-  if (order.gt.2) ABI_FREE(Shell%katref)
+  if (order.gt.2) then
+    ABI_FREE(Shell%katref)
+  end if
   do iatom=1,natom
     do ishell=1,Shell%nshell
       if (Shell%neighbours(iatom,ishell)%n_interactions.ne.0) then 
         ABI_FREE(Shell%neighbours(iatom,ishell)%atomj_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%sym_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%transpose_in_shell)
-        if (order.gt.2) ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
+        if (order.gt.2) then 
+          ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
+        end if
       end if  
     end do  
   end do  

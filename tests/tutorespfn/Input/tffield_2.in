@@ -78,7 +78,7 @@ ndtset 3
 #%% test_chain = tffield_2.in, tffield_3.in
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_2.out, tolnlines=  2, tolabs=  5.000e-07, tolrel=  5.000e-08, fld_options=-medium
+#%%   tffield_2.out, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
 #%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2

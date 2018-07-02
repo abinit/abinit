@@ -318,6 +318,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%getdkdk =0
    dtsets(idtset)%getdkde =0
    dtsets(idtset)%getden  =0
+   dtsets(idtset)%getefmas=0
    dtsets(idtset)%getgam_eig2nkq  =0
    dtsets(idtset)%gethaydock=0
    dtsets(idtset)%getocc  =0
@@ -356,6 +357,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_correlation=3
    dtsets(idtset)%gwls_first_seed=0
 !  H
+   dtsets(idtset)%hmcsst=3
+   dtsets(idtset)%hmctt=4
    dtsets(idtset)%hyb_mixing=-999.0_dp
    dtsets(idtset)%hyb_mixing_sr=-999.0_dp
    dtsets(idtset)%hyb_range_dft=-999.0_dp
@@ -390,6 +393,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%irdddb=0
    dtsets(idtset)%irdddk=0
    dtsets(idtset)%irdden=0
+   dtsets(idtset)%irdefmas=0
    dtsets(idtset)%irdhaydock=0
    dtsets(idtset)%irdpawden=0
    dtsets(idtset)%irdqps=0
@@ -513,6 +517,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nomegasf=100
    dtsets(idtset)%nomegasrd=9
    dtsets(idtset)%nomegasi=12
+   dtsets(idtset)%nonlinear_info=0
    dtsets(idtset)%noseinert=1.0d5
    dtsets(idtset)%npvel=0
    dtsets(idtset)%npweps=0
@@ -578,6 +583,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%ph_nqshift = 0
+   if(dtsets(idtset)%ph_nqshift > 0)then
+     dtsets(idtset)%ph_qshift = zero
+   end if
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
@@ -615,9 +624,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
+   dtsets(idtset)%prtefmas=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
+   dtsets(idtset)%prtfull1wf=0
    dtsets(idtset)%prtfsurf=0
    dtsets(idtset)%prtgden=0
    dtsets(idtset)%prtgeo=0
@@ -659,7 +670,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
 !  R
-   dtsets(idtset)%random_atpos=zero
+   dtsets(idtset)%random_atpos=0
    dtsets(idtset)%ratsph_extra=two
    dtsets(idtset)%recefermi=zero
    dtsets(idtset)%recgratio=1
@@ -690,6 +701,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%shiftk_orig(:,:)=one
    dtsets(idtset)%signperm=1
    dtsets(idtset)%slabwsrad=zero
+   dtsets(idtset)%slk_rankpp=1000
    dtsets(idtset)%smdelta=0
    dtsets(idtset)%spbroad=0.1
    dtsets(idtset)%spgaxor = -1
@@ -702,7 +714,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%string_algo=1
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
-   dtsets(idtset)%supercell(:)=1
    dtsets(idtset)%symchi=1
    dtsets(idtset)%symsigma=0
 !  T
@@ -728,6 +739,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ucrpa_bands(:)=-1
    dtsets(idtset)%ucrpa_window(:)=-1.0_dp
    dtsets(idtset)%upawu(:,:)=zero
+   dtsets(idtset)%usepead=1
    dtsets(idtset)%usefock=0
    dtsets(idtset)%usekden=0
    dtsets(idtset)%use_gemm_nonlop=0
@@ -825,6 +837,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chneut = 0
    dtsets(idtset)%symdynmat = 1
 
+   dtsets(idtset)%ph_freez_disp_addStrain = 0
+   dtsets(idtset)%ph_freez_disp_option = 0
+   dtsets(idtset)%ph_freez_disp_nampl = 0
+   if(dtsets(idtset)%ph_freez_disp_nampl>0)dtsets(idtset)%ph_freez_disp_ampl = zero
    dtsets(idtset)%ph_ndivsm = 20
    dtsets(idtset)%ph_nqpath = 0
    dtsets(idtset)%ph_ngqpt = [20, 20, 20]
@@ -833,6 +849,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_intmeth = 2
    dtsets(idtset)%eph_extrael = zero
    dtsets(idtset)%eph_fermie = zero
+   dtsets(idtset)%eph_frohlichm = 0
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]

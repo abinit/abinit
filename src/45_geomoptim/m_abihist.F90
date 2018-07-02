@@ -174,6 +174,7 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
+ 
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
@@ -1243,7 +1244,7 @@ end subroutine abihist_compare_and_copy
 !!  ifirst=1 if first access to the file
 !!  itime = index of the step in the hist file
 !!  natom=Number of atoms.
-!!  nctime=NetCdf TIME between output of molecular dynamics informations
+!!  nctime=NetCdf TIME between output of molecular dynamics information
 !!  ntypat=Number of type of atoms.
 !!  typat(natom)=Type of each natom
 !!   amu(ntypat)=mass of the atoms (atomic mass unit)

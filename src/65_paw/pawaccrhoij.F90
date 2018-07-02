@@ -154,7 +154,7 @@
 
  weight=wtk_k*occ_k
  weight_2=zero
- if(present(occ_k_2).and.nspinor==2) weight_2=wtk_k*occ_k_2
+ if(present(occ_k_2)) weight_2=wtk_k*occ_k_2
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
  if (option==1) then
@@ -256,7 +256,7 @@
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight*(ro11_im-ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_im,2)+weight*(ro12_im+ro21_im)
                end if
-               if (present(occ_k_2).and.nspinor==2) then
+               if (present(occ_k_2)) then
                  pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight_2*(-ro11_im-ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,1)=pawrhoij(iatom)%rhoij_(klmn_im,1)+weight_2*( ro11_re+ro22_re)
                  pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight_2*(-ro21_im-ro12_im)

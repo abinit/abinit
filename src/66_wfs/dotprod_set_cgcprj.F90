@@ -31,8 +31,10 @@
 !!  cprj2(natom,mcprj2) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors in the second set,
 !!  dimcprj(natom)=number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom
 !!  hermitian= if 1, consider that the Smn matrix is hermitian, and do not recompute already computed matrix elements.
-!!  ibg1=shift in cprj1 array to locate current k-point ! Might be 0, in which case cprj1 is not copied internally, which saves some time/space
-!!  ibg2=shift in cprj2 array to locate current k-point ! Might be 0, in which case cprj2 is not copied internally, which saves some time/space
+!!  ibg1=shift in cprj1 array to locate current k-point.
+!!    Might be 0, in which case cprj1 is not copied internally, which saves some time/space
+!!  ibg2=shift in cprj2 array to locate current k-point.
+!!    Might be 0, in which case cprj2 is not copied internally, which saves some time/space
 !!  icg1=shift in cg1 array to locate current k-point
 !!  icg2=shift in cg2 array to locate current k-point
 !!  ikpt=current k point index
@@ -40,8 +42,8 @@
 !!  istwf=input option parameter that describes the storage of wfs
 !!  mcg1=second dimension of cg1 array (mpw*nspinor*mband1*mkmem*nsppol)
 !!  mcg2=second dimension of cg2 array (mpw*nspinor*mband2*mkmem*nsppol)
-!!  mcprj1=second dimension of cprj1 array 
-!!  mcprj2=second dimension of cprj2 array 
+!!  mcprj1=second dimension of cprj1 array
+!!  mcprj2=second dimension of cprj2 array
 !!  mkmem=number of k points which can fit in memory
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms

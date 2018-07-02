@@ -46,7 +46,7 @@ ndtset 9   ecut: 8. ecut+  2.
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_2.out, tolnlines=  2, tolabs=  1.001e-08, tolrel=  4.000e-05
+#%%   tpaw1_2.out, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
 #%% psp_files =  6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4

@@ -95,12 +95,6 @@ and compute $\rho(\rr)$ and $\vec m(\rr)$ with the help of:
 m_z(\rr)&=&\rho^{11}(\rr) - \rho^{22}(\rr)
 \end{eqnarray*}
 
-Note that only the forurier transform are performed in *mkrho.f*, while the final transformation to
-$\rho(\rr)$, $\vec m(\rr)$ is performed in *symrhg.f*.
-
-The computation of $V_{xc}$ is performed in *rhohxc.f*. The only transformation to this routine, is
-to compute $|\vec m(\rr)|$ and yield back the four component $V_{xc}$, from the expression 
-of ${\delta E_{xc} \over \delta |m (\rr)| }$.
 
 For more information about noncollinear magnetism see [[cite:Hobbs2000]] 
 and [[cite:Perdew1992]] for the xc functional.

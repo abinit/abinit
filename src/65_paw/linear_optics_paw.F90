@@ -57,15 +57,14 @@
 
  use m_geometry,     only : metric
  use m_io_tools,   only : open_file, get_unit
- use m_abilasi,    only : matrginv
- use m_mpinfo,     only : destroy_mpi_enreg, nullify_mpi_enreg
+ use m_hide_lapack,    only : matrginv
+ use m_mpinfo,     only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
  use m_numeric_tools,  only : kramerskronig
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linear_optics_paw'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

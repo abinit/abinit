@@ -122,7 +122,7 @@ CONTAINS
 !! PARENTS
 !!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,chern_number
-!!      classify_bands,cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools
+!!      classify_bands,cohsex_me,ctocprj,d2frnl,m_datafordmft,debug_tools
 !!      dfpt_accrho,dfpt_cgwf,dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk
 !!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr

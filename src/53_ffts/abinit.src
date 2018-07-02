@@ -19,11 +19,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "ccfft.F90",
- "fftpac.F90",
  "fourdp.F90",
- "fourdp_6d.F90",
  "fourwf.F90",
- "kgindex.F90",
  "m_fft.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

@@ -46,6 +46,6 @@ particular, considerably higher effective values for U are found.
 
 ## Tutorials
 
-* The [[lesson:ucalc_crpa|lesson]] on the calculation of effective interactions U and J by the cRPA method shows how to determine the U value with the constrained Random Phase Approximation [[cite:Aryasetiawan2004]] using projected Wannier orbitals. Prerequisite: DFT+U.
-* [[lesson:udet|The lesson on the determination of U]] for DFT+U shows how to determine the U value with the linear response method [[cite:Cococcioni2005]], to be used in the DFT+U approach. Prerequisite: DFT+U.
+* The [[tutorial:ucalc_crpa|tutorial]] on the calculation of effective interactions U and J by the cRPA method shows how to determine the U value with the constrained Random Phase Approximation [[cite:Aryasetiawan2004]] using projected Wannier orbitals. Prerequisite: DFT+U.
+* [[tutorial:udet|The tutorial on the determination of U]] for DFT+U shows how to determine the U value with the linear response method [[cite:Cococcioni2005]], to be used in the DFT+U approach. Prerequisite: DFT+U.
 
