@@ -89,13 +89,13 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_mover,            only : mover
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
 
 implicit none
@@ -110,13 +110,14 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: icoeff_bound,ii
+ integer :: filetype,icoeff_bound,ii
 !integer :: iexit,initialized
  integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
+! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST
@@ -185,17 +186,18 @@ implicit none
 !Initialisaton of variable
  if(option == -1.or.option == -2) then
 !  Bound process option
-   sc_size(:) = inp%fit_boundCell
+   sc_size(:) = inp%bound_cell
  else if(option == -3) then
 !  Heff option
    sc_size(:) = (/1,1,1/)
  else
 !  Normal dynamics
-   sc_size(:) = inp%n_cell
+   sc_size(:) = inp%ncell
  end if
 
  if(option/=0)then
 
+!  acell is always set to one, only rprimd is used for the effective potential
    acell = one
    rprimd = effective_potential%crystal%rprimd
 
@@ -207,7 +209,7 @@ implicit none
 &   effective_potential%crystal%xcart,xred)
    call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 !  Generate supercell for the simulation
-   call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+   call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
 
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xcart)
@@ -215,7 +217,12 @@ implicit none
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
-
+!NOTE:ARGUMENTS OF MOVER SHOULD BE CLEAN
+!     We may just need to provide AB_MOVER wich is the main object
+!     for mover and set  scfcv_args as an optional and depending on
+!     the king of calculation (abinit or multibinit), we provide
+!     to mover scfcv_args or effective_potential...
+!***************************************************************
 !  Free dtset
    call dtset_free(dtset)
 
@@ -245,10 +252,19 @@ implicit none
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
    dtset%nnos = inp%nnos   ! Number of nose masses Characteristic
+   do ii=1,3 ! Only copy the diagonal part
+             ! might be adapt with ngqpt(9) instead of ngqpt(3) because is needed in wght9.f
+     dtset%ph_ngqpt(ii) = inp%ngqpt((ii))
+   end do
+   dtset%ph_nqshift = inp%nqshft
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
    dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%supercell_latt(:,:) = 0
+   do ii=1,3
+     dtset%supercell_latt(ii,ii) = sc_size(ii)
+   end do
    dtset%tolmxf = 2.0d-5
    dtset%tsmear = 0.009500446 !
    dtset%vis = 100      ! VIScosity
@@ -295,6 +311,8 @@ implicit none
    dtset%prtatlist(:) = 0
    ABI_ALLOCATE(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
    dtset%mixalch_orig(:,:,:)=zero
+   ABI_ALLOCATE(dtset%ph_qshift,(3,dtset%ph_nqshift))
+   dtset%ph_qshift = inp%q1shft
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -311,12 +329,12 @@ implicit none
      verbose = .false.
      writeHIST = .false.
      dtset%restartxf = 0  ! RESTART from (X,F) history
-     dtset%dtion = 100  ! Delta Time for IONs
+     dtset%dtion = inp%dtion  ! Delta Time for IONs
      dtset%ionmov = 13  ! Number for the dynamic
-     dtset%ntime = inp%fit_boundStep  ! Number of TIME steps
+     dtset%ntime = inp%bound_step  ! Number of TIME steps
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
-     dtset%mdtemp(1) = inp%fit_boundTemp   !Molecular Dynamics Temperatures
-     dtset%mdtemp(2) = inp%fit_boundTemp !Molecular Dynamics Temperatures
+     dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures
+     dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures
      dtset%strtarget(1:6) = zero
    end if
 
@@ -339,19 +357,27 @@ implicit none
      !   freq_b = 0.02
      ! end if
 
-     !TEST_AM
-     freq_q = 0.1
-     freq_b = 0.01
-     !TEST_AM
+!TEST_AM_old way 
+!     freq_q = 0.1
+!     freq_b = 0.01
+!     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
+!     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
+!TEST_AM
+     
 
-     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
-     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
-
+!TEST_AM
+     freq_q = 800  / Ha_cmm1
+     freq_b = 800  / Ha_cmm1
+     qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
+     bmass = 10000*qmass
+!TEST_AM
+     
+     
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
-       write(message,'(3a,F20.1,a)')&
+       write(message,'(3a,F30.10,a)')&
 &       ' WARNING: nnos is set to zero in the input',ch10,&
 &       '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
@@ -361,7 +387,7 @@ implicit none
      end if
      if (abs(inp%bmass) < tol10) then
        dtset%bmass = bmass
-       write(message,'(3a,F20.4,a)')&
+       write(message,'(3a,F30.10,a)')&
 &       ' WARNING: bmass is set to zero in the input',ch10,&
 &       '          value by default for bmass: ',dtset%bmass,ch10
        if(verbose)call wrtout(std_out,message,"COLL")
@@ -370,6 +396,17 @@ implicit none
      end if
    end if
 
+!  Do a check
+   if(dtset%ionmov == 27)then
+     call effective_potential_file_getType(filnam(3),filetype)
+     if(filetype /= 1)then
+       write(message, '(5a)' )&
+&       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
+&       ' It is not compatible with ionmov 27'
+       MSG_ERROR(message)
+     end if
+
+   end if
 
 !  set psps
    psps%useylm = dtset%useylm
@@ -464,9 +501,6 @@ implicit none
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
 
-   acell(1) = dtset%rprimd_orig(1,1,1)
-   acell(2) = dtset%rprimd_orig(2,2,1)
-   acell(3) = dtset%rprimd_orig(3,3,1)
 
    ABI_ALLOCATE(xred,(3,dtset%natom))
    ABI_ALLOCATE(xred_old,(3,dtset%natom))
@@ -495,7 +529,8 @@ implicit none
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&     effective_potential=effective_potential,filename_ddb=filnam(3),&
+&     verbose=verbose,writeHIST=writeHIST)
 
    else if(option== -1.or.option==-2)then
      !*************************************************************
@@ -536,9 +571,9 @@ implicit none
 
 !        Get the additional coeff
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&         inp%fit_boundPower,0,inp%fit_boundTerm,ncoeff,1,comm,cutoff_in=inp%fit_boundCutoff,&
-&         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%fit_SPCoupling==1,&
-&         anharmstr=inp%fit_anhaStrain==1,only_even_power=.true.)
+&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -562,6 +597,7 @@ implicit none
 &           'with ', ii,' additional term'
            if(ii>1)write(message,'(2a)') trim(message),'s'
            call wrtout(std_out,message,'COLL')
+           call wrtout(ab_out,message,'COLL')
 
 !          Copy the new model in coeffs_tmp(jj)
 !          Free the coeffs_tmp array before
@@ -585,11 +621,9 @@ implicit none
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &           -1,1,comm,verbose=.true.,positive=.false.)
-           call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+           call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
-           acell(1) = dtset%rprimd_orig(1,1,1)
-           acell(2) = dtset%rprimd_orig(2,2,1)
-           acell(3) = dtset%rprimd_orig(3,3,1)
+           acell(:) = one
            call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &           effective_potential%supercell%xcart,xred)
            xred_old = xred
@@ -628,9 +662,9 @@ implicit none
 !TEST_AM!
          sc_size_TS = (/2,2,2/)
          call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&         ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,inp%fit_boundPower(2),2,sc_size_TS,&
-&         comm,anharmstr=inp%fit_anhaStrain==1,&
-&         spcoupling=inp%fit_SPCoupling==1,verbose=.false.,distributed=.false.,&
+&         ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
+&         comm,anharmstr=inp%bound_anhaStrain==1,&
+&         spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
 &         only_even_power=.true.,only_odd_power=.false.)
 
          if(iam_master)then
@@ -682,7 +716,7 @@ implicit none
          model_bound = 0
          model_ncoeffbound = 0
 
-         do ii=2,inp%fit_boundTerm
+         do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
            nmodels = 1
            ABI_ALLOCATE(list_bound,(nmodels,ii))
@@ -772,11 +806,9 @@ implicit none
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
 &                 -1,1,comm,verbose=.false.,positive=.false.)
-                 call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+                 call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
-                 acell(1) = dtset%rprimd_orig(1,1,1)
-                 acell(2) = dtset%rprimd_orig(2,2,1)
-                 acell(3) = dtset%rprimd_orig(3,3,1)
+                 acell(:) = one
                  call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &                 effective_potential%supercell%xcart,xred)
                  xred_old = xred

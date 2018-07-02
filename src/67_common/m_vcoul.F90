@@ -43,13 +43,13 @@ MODULE m_vcoul
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
- use m_abilasi,         only : matrginv
+ use m_hide_lapack,     only : matrginv
  use m_geometry,        only : normv, metric
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item
  use m_gsphere,         only : gsphere_t
  use m_paw_numeric,     only : paw_jbessel
-
+ use m_dtfil,           only : isfile
 
  implicit none
 
@@ -1176,7 +1176,6 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_plot'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

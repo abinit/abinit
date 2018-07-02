@@ -32,5 +32,5 @@ to 1 (output to `_NEST`).
 
 ## Tutorials
 
-* The lesson on the [[lesson:eph|electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+* The tutorial on the [[tutorial:eph|electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 

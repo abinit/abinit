@@ -40,7 +40,6 @@
 
 subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,index_wavef)
 
-
  use defs_basis
  use m_profiling_abi
 

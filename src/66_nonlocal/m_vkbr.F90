@@ -26,7 +26,7 @@ MODULE m_vkbr
 
  use defs_basis
  use defs_datatypes
- use m_blas
+ use m_hide_blas
  use m_errors
  use m_profiling_abi
 
@@ -36,6 +36,7 @@ MODULE m_vkbr
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_kg,            only : mkkin
+ use m_mkffnl,        only : mkffnl
 
  implicit none
 
@@ -458,7 +459,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vkb'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

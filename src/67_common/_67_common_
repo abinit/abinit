@@ -54,7 +54,6 @@
 !! initberry.F90
 !! initmv.F90
 !! initro.F90
-!! interfaces_67_common.F90
 !! ionion_realspace.F90
 !! ionion_surface.F90
 !! jellium.F90
@@ -63,7 +62,6 @@
 !! m_epjdos.F90
 !! m_ioarr.F90
 !! m_iowf.F90
-!! m_plowannier.F90
 !! m_vcoul.F90
 !! mag_constr.F90
 !! mag_constr_e.F90
@@ -81,15 +79,6 @@
 !! mkresi.F90
 !! mkrho.F90
 !! mksubham.F90
-!! mlwfovlp.F90
-!! mlwfovlp_proj.F90
-!! mlwfovlp_projpaw.F90
-!! mlwfovlp_pw.F90
-!! mlwfovlp_radial.F90
-!! mlwfovlp_seedname.F90
-!! mlwfovlp_setup.F90
-!! mlwfovlp_ylmfac.F90
-!! mlwfovlp_ylmfar.F90
 !! moddiel.F90
 !! msig.F90
 !! newkpt.F90

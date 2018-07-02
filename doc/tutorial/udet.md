@@ -2,64 +2,67 @@
 authors: DJA
 ---
 
-# Calculation of U and J using Cococcioni's approach  
+# Calculation of *U* and J using Cococcioni's approach  
 
-## How to determine U for DFT+U in ABINIT ? Cococcioni's approach.  
+## How to determine *U* for DFT+*U* in ABINIT ? Cococcioni's approach.  
 
-This lesson aims to show how you can determine U for further DFT+U
+This tutorial aims to show how you can determine *U* for further DFT+*U*
 calculations consistently and in a fast an easy way. You will learn to prepare
 the input files for the determination and to use the main parameters implemented for this aim.  
-It is supposed that you already know how to run ABINIT in the PAW mode (lesson [PAW1](paw1)). 
-Obviously, you should also read the lesson [DFT+U](dftu), and likely the lesson  [PAW2](paw2), 
+It is supposed that you already know how to run ABINIT in the PAW mode (tutorial [PAW1](paw1)). 
+Obviously, you should also read the tutorial [DFT+U](dftu), and likely the tutorial  [PAW2](paw2), 
 to generate PAW atomic data.  
 
-This lesson should take about 1/2 hour.
+This tutorial should take about 1/2 hour.
 
-## 1 Summary of linear response method to determine U
+## 1 Summary of linear response method to determine *U*
   
-The linear response method has been introduced by several authors [1-6]. It is
-based on the fact that U corresponds to the energy to localize an additional
-electron on the same site: U=E[n+1]+E[n-1]-2E[n] [4]. This can be reformulated
+The linear response method has been introduced by several authors 
+[[cite:Cococcioni2002]], [[cite:Cococcioni2005]],[[cite:Dederichs1984]],[[cite:Hybertsen1989]],
+[[cite:Anisimov1991]],[[cite:Pickett1998]]. It is
+based on the fact that *U* corresponds to the energy to localize an additional
+electron on the same site: *U=E[n+1]+E[n-1]-2E[n]* [[cite:Hybertsen1989]]. This can be reformulated
 as the response to an infinitesimal change of of occupation of the orbital by
-the electrons dn. Then U is the second derivative of the energy with respect
-to the occupation U=d^2E/ d^2n. The first method fixed the occupation by
+the electrons dn. Then *U* is the second derivative of the energy with respect
+to the occupation $U=\frac{\delta^2 E}{\delta^2 n}$. The first method fixed the occupation by
 cutting the hopping terms of localized orbitals. Later propositions
-constrained the occupation through Lagrange multipliers [3,5]. The Lagrange
-multiplier \alpha corresponds to a local potential that has to be applied to
-augment or decrease the occupation by +/-1 electron. Note that the occupation
+constrained the occupation through Lagrange multipliers [[cite:Dederichs1984]],[[cite:Anisimov1991]]. The Lagrange
+multiplier $\alpha$ corresponds to a local potential that has to be applied to
+increase or decrease the occupation by +/-1 electron. Note that the occupation
 need not to vary by 1 electron, but the occupation shift can be infinitesimal.
 
 It is recommended to read the following papers to understand the basic
-concepts of the linear response calculations to calculate U:
+concepts of the linear response calculations to calculate *U*:
 
-[1] "A LDA+U study of selected iron compounds ", M. Cococcioni, Ph.D. thesis,
-International School for Advanced Studies (SISSA), Trieste (2002)  
+[1] "A LDA+*U* study of selected iron compounds ", M. Cococcioni, Ph.D. thesis,
+International School for Advanced Studies (SISSA), Trieste (2002)  [[cite:Cococcioni2002]]
+
 [2] "Linear response approach to the calculation of the effective interaction
-parameters in the LDA + U method", M. Cococcioni and S. de Gironcoli, Physical
-Review B 71, 035105 (2005)  
+parameters in the LDA + *U* method", M. Cococcioni and S. de Gironcoli, Physical
+Review B 71, 035105 (2005)  [[cite:Cococcioni2005]]
 
 Some further reading:
 
 [3] "Ground States of Constrained Systems: Application to Cerium Impurities",
-P. H. Dederichs, S. Blugel, R. Zeller, and H. Akai, Phys. Rev. Lett. 53, 2512 (1984)  
+P. H. Dederichs, S. Blugel, R. Zeller, and H. Akai, Phys. Rev. Lett. 53, 2512 (1984)   [[cite:Dederichs1984]]
+
 [4] "Calculation of Coulomb-interaction parameters for La2CuO4 using a
 constrained-density-functional approach", M. S. Hybertsen, M. Schluter, and N.
-E. Christensen, Phys. Rev. B 39, 9028 (1989)  
+E. Christensen, Phys. Rev. B 39, 9028 (1989)   [[cite:Hybertsen1989]]
+
 [5] "Density-functional calculation of effective Coulomb interactions in
-metals", V. I. Anisimov and O. Gunnarsson, Phys. Rev. B42, 7570 (1991)  
-[6] "Reformulation of the LDA+U method for a local-orbital basis", W. E.
-Pickett, S. C. Erwin, and E. C. Ethridge, Phys. Rev. B58, 1201 (1998)  
+metals", V. I. Anisimov and O. Gunnarsson, Phys. Rev. B42, 7570 (1991)  [[cite:Anisimov1991]]
 
-The implementation of the determination of U in ABINIT is described in the
-following paper, soon to appear:
+[6] "Reformulation of the LDA+*U* method for a local-orbital basis", W. E.
+Pickett, S. C. Erwin, and E. C. Ethridge, Phys. Rev. B58, 1201 (1998)  [[cite:Pickett1998]]
 
-[7] "Consistent determination of U in the PAW approximation", D. Adams, B.
-Amadon, S. Biermann, unpublished (2010)
+The implementation of the determination of *U* in ABINIT is briefly discussed in 
+[[cite:Gonze2016]].
 
-## 2 Determine U in ABINIT
+## 2 Determine *U* in ABINIT
   
 *Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_udet"?* 
+for the other tutorials. Why not "Work_udet"?* 
 
 !!! important
 
@@ -77,7 +80,7 @@ Copy the files tudet_1.in and tudet_1.files in your work directory, and run ABIN
     abinit < tudet_1.files > tudet_1.log  
 
 In the meantime, you can read the input file and see that this is a usual
-DFT+U calculation, with U=0. 
+DFT+U calculation, with *U*=0. 
 
 {% dialog tests/tutorial/Input/tudet_1.files tests/tutorial/Input/tudet_1.in %}
 
@@ -124,11 +127,11 @@ you read the number of symmetries ([[nsym]]), the symmetry relations
 done here and inserted in the tudet_2.in file. Note that you can alternatively
 just break all the symmetries ([[nsym]]=1), or break specific symmetries by
 displacing the impurity atom in the preliminary run. However, for the
-determination of U, the positions should be the ideal positions and only the
+determination of *U*, the positions should be the ideal positions and only the
 symmetry should be reduced.
 
 For the rest, usually it is enough to set [[macro_uj]] 1 to run the
-calculation of U. Note also, that the [[irdwfk]] 1 and the [[tolvrs]] 1d-8
+calculation of *U*. Note also, that the [[irdwfk]] 1 and the [[tolvrs]] 1d-8
 need not be set explicitly, because they are the defaults with [[macro_uj]] 1.
 
 Once the calculation tudet_2 is converged, you can have look at the output.
@@ -154,23 +157,23 @@ The lines starting with URES
      URES       4    128    18.77540     9.25647     7.17772     6.24472
      URES       5    250    23.46930     9.28509     7.19991     6.26403
     
-contain U for different supercells. The column "nat" indicates how many atoms
+contain *U* for different supercells. The column "nat" indicates how many atoms
 were involved in the supercell, r_max indicates the maximal distance of the
-impurity atoms in that supercell. The column U indicates the actual U you
+impurity atoms in that supercell. The column *U* indicates the actual *U* you
 calculated and should use in your further calculations. U_ASA is an estimate
-of U for more extended projectors and U_\inf is the estimate for a projector
+of *U* for more extended projectors and U_\inf is the estimate for a projector
 extended even further.
 
 Although it is enough to set [[macro_uj]] 1, you can further tune your runs.
-As a standard, the potential shift to the 1st atom treated in DFT+U, with a
-potential shift of 0.1 eV. If you wish to determine U on the second atom you
+As a standard, the potential shift to the 1st atom treated in DFT+*U*, with a
+potential shift of 0.1 eV. If you wish to determine *U* on the second atom you
 put [[pawujat]] 2. To change the size of the potential shift use e.g.
 [[pawujv]] 0.05 eV. Our tests show that 0.1 eV is the optimal value, but the
 linear response is linear in a wide range (1-0.001 eV).
 
 ## 3 The ujdet utility
   
-In general the calculation of U with abinit as described above is sufficient.
+In general the calculation of *U* with abinit as described above is sufficient.
 For some post-treatment that goes beyond the standard applications, a separate
 executable ujdet was created. The output of abinit is formatted so that you
 can easily "cut" the part with the ujdet input variables : you can generate
@@ -182,10 +185,10 @@ Note that the input for the ujdet utility is always called ujdet.in
 
 It contains the potential shifts applied vsh (there are 4 shifts: vsh1, vsh3
 for non-selfconsistent calculations that allows to extract the contribution to
-U originating from a non-interacting electron gas, and vsh2, vsh4 for positive
+*U* originating from a non-interacting electron gas, and vsh2, vsh4 for positive
 and negative potential shift). The same applies for the occupations occ[1-4].
 
-We now calculate U for an even larger supercell: Uncomment the line scdim in ujdet.in and add
+We now calculate *U* for an even larger supercell: Uncomment the line scdim in ujdet.in and add
     
      scdim 6 6 6 
 
@@ -208,11 +211,11 @@ to specify the maximum total number of atoms in the supercell. Then, run ujdet:
      URES       6    432    28.16310     9.29738     7.20944     6.27232
     
 
-As you can see, U has now been extrapolated to a supercell containing 432 atoms.
+As you can see, *U* has now been extrapolated to a supercell containing 432 atoms.
 
-The value of U depends strongly on the extension of the projectors used in the
-calculation. If you want to use U in LMTO-ASA calculations you can use the
-keyword [[pawujrad]] in the ujdet.in file to get grips of the U you want to
+The value of *U* depends strongly on the extension of the projectors used in the
+calculation. If you want to use *U* in LMTO-ASA calculations you can use the
+keyword [[pawujrad]] in the ujdet.in file to get grips of the *U* you want to
 use there. Just uncomment the line and add the ASA-radius of the specific atom e.g.
     
       pawujrad 2.5 
@@ -222,4 +225,4 @@ Running
     rm ujdet.[ol]* ; ujdet > ujdet.log    
 
 gives now higher values in the column U_ASA than in the runs before (8.07 eV
-compared to 7.21 eV): For more localized projectors the U value has to be bigger.
+compared to 7.21 eV): For more localized projectors the *U* value has to be bigger.

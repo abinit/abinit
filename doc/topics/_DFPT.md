@@ -36,6 +36,9 @@ calculations.
 All the tutorials dedicated to response functions can be followed both with
 norm-conserving pseudopotentials and with PAW atomic datasets.
 
+DFPT in ABINIT is implemented for non-magnetic, collinear as well as non-collinear systems [[nsppol]]=1, 2 as well as 4.
+However, the treatment of the strain perturbation is not yet implemented with [[nsppol]]=4 (non-collinear systems).
+
 More detailed explanations to perform a response calculation are given in the [[help:respfn]].
 
 
@@ -49,9 +52,9 @@ More detailed explanations to perform a response calculation are given in the [[
 
 ## Tutorials
 
-* [[lesson:rf1|The lesson Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
-* [[lesson:rf2|The lesson Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the preceeding lesson RF1. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this lesson.
-* [[lesson:elastic|The lesson on the elastic properties]] presents the computation with respect to the strain perturbation and its responses: elastic constants, piezoelectricity.
-* [[lesson:paral_dfpt|Parallelism of response-function calculations]]. Additional information to use the DFPT in parallel.
-* [[lesson:nlo|Lesson on static non-linear properties]]. Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
+* [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
+* [[tutorial:rf2|The tutorial Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the preceeding tutorial RF1. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this tutorial.
+* [[tutorial:elastic|The tutorial on the elastic properties]] presents the computation with respect to the strain perturbation and its responses: elastic constants, piezoelectricity.
+* [[tutorial:paral_dfpt|Parallelism of response-function calculations]]. Additional information to use the DFPT in parallel.
+* [[tutorial:nlo|Tutorial on static non-linear properties]]. Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
 

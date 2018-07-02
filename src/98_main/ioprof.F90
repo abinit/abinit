@@ -47,6 +47,7 @@ program ioprof
 #endif
 
  use defs_abitypes,    only : hdr_type
+ use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
 
@@ -88,7 +89,7 @@ program ioprof
 
  ! Initialize MPI
  call xmpi_init()
- comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm) 
+ comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
 
 !Initialize memory profiling if it is activated
 !if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
@@ -114,7 +115,7 @@ program ioprof
    call get_command_argument(ii, arg)
    if (arg == "-v" .or. arg == "--version") then
      write(std_out,"(a)") trim(abinit_version); goto 100
-     
+
    else if (arg == "-h" .or. arg == "--help") then
      ! Document the options.
      write(std_out,*)"-v, --version                 Show version number and exit."
@@ -146,7 +147,7 @@ program ioprof
    call get_command_argument(2, wfk_source)
    call get_command_argument(3, wfk_dest)
 
-   if (file_exists(wfk_dest)) then 
+   if (file_exists(wfk_dest)) then
      MSG_ERROR(sjoin("Cannot overwrite:", wfk_dest, ". Remove file and rerun"))
    end if
 
@@ -167,9 +168,9 @@ program ioprof
    do ii=1,count(hdr_fnames/=ABI_NOFILE)
 
      ! Read the header from an external netcdf file
-     ! This trick is needed because the initialization of 
+     ! This trick is needed because the initialization of
      ! the header is *IMPOSSIBLE* if we don't have a full ABINIT input file!
-     !    
+     !
      call hdr_read_from_fname(hdr,hdr_fnames(ii),fform,comm)
      ABI_CHECK(fform/=0,"fform==0")
 
@@ -178,7 +179,7 @@ program ioprof
      do feg=1,size(formeigs)
        formeig = formeigs(feg)
        do io=1,size(io_modes)
-         iomode = io_modes(io) 
+         iomode = io_modes(io)
 
          new_fname = "NEW_WFK"
          if (iomode==IO_MODE_ETSF) new_fname = "NEW_WFK.nc"
@@ -239,7 +240,7 @@ program ioprof
            end if
          end if
 
-         ABI_DT_FREE(Kvars) 
+         ABI_DT_FREE(Kvars)
        end do ! iomode
      end do ! formeig
 

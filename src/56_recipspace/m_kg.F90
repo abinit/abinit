@@ -32,8 +32,9 @@ MODULE m_kg
  use m_errors
  use m_xmpi
 
- use m_fftcore, only : kpgsph
+ use m_fftcore,     only : kpgsph, bound
  use defs_abitypes, only : MPI_type
+ use m_mpinfo,      only : proc_distrb_cycle
 
  implicit none
 
@@ -47,6 +48,7 @@ MODULE m_kg
  public :: ph1d3d       ! Compute the three-dimensional phase factor $e^{i 2 \pi (k+G) cdot xred}$
  public :: getph        ! Compute three factors of one-dimensional structure factor phase
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
+ public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
 
 contains
 !!***
@@ -108,7 +110,6 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 #undef ABI_FUNC
 #define ABI_FUNC 'getcut'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none
@@ -184,7 +185,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Action : try larger ngfft or smaller ecut.',ch10,&
+&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
 &       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
        if(iout/=std_out) then
          call wrtout(iout,message,'COLL')
@@ -382,7 +383,6 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  integer,intent(in) :: npw
  integer,intent(in) :: idir1,idir2
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
-
 !arrays
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
@@ -506,7 +506,7 @@ end subroutine mkkin
 !!  character(len=4) : mode_paral=either 'COLL' or 'PERS', tells whether
 !!   the loop over k points must be done by all processors or not,
 !!   in case of parallel execution.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
 !!  nkpt=number of k points
@@ -540,7 +540,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'kpgio'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -585,7 +584,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 &         '  of spin up and spin down bands, but input is :',ch10,&
 &         '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
 &         '  for ikpt=',ikpt,'.',ch10,&
-&         '  Action : correct nband in your input file.'
+&         '  Action: correct nband in your input file.'
 !        MG: Tests v3(10,11,17) and v6(67) fail if this test is enabled
 !        call wrtout(std_out,message,mode_paral)
        end if
@@ -627,7 +626,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
-!  &   '  Action : change either ecut or nband in input file.'
+!  &   '  Action: change either ecut or nband in input file.'
 !  MSG_ERROR(message)
 !  end if
 
@@ -1009,6 +1008,103 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
  end do
 
 end subroutine kpgstr
+!!***
+
+!!****f* m_kg/mkkpg
+!! NAME
+!! mkkpg
+!!
+!! FUNCTION
+!! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point,
+!! from integer coordinates of G vectors.
+!! Eventually compute related data.
+!!
+!! INPUTS
+!!  kg(3,npw)=integer coords of planewaves in basis sphere
+!!  kpt(3)=k point in terms of recip. translations
+!!  nkpg=second dimension of array kpg
+!!  npw=number of plane waves in reciprocal space
+!!
+!! OUTPUT
+!!  kpg(npw,3)= (k+G) components
+!!  === if nkpg==9 ===
+!!    kpg(npw,4:9)= [(k+G)_a].[(k+G)_b] quantities
+!!
+!! PARENTS
+!!      ctocprj,d2frnl,debug_tools,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
+!!      dfptnl_resp,fock2ACE,forstrnps,getcprj,getgh1c,ks_ddiago,m_io_kss
+!!      m_shirley,m_wfd,nonlop_test,nonlop_ylm,prep_bandfft_tabs,vtorho
+!!      wfd_vnlpsi
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkkpg'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpg,npw
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: kpg(npw,nkpg)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipw,mu,mua,mub
+ character(len=500) :: message
+!arrays
+ integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if (nkpg==0) return
+
+!-- Test nkpg --
+ if (nkpg/=3.and.nkpg/=9) then
+   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
+   MSG_BUG(message)
+ end if
+
+!-- Compute (k+G) --
+!$OMP PARALLEL DO COLLAPSE(2) &
+!$OMP PRIVATE(mu,ipw)
+ do ipw=1,npw
+   do mu=1,3
+     kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
+   end do
+ end do
+!$OMP END PARALLEL DO
+
+!-- Compute [(k+G)_a].[(k+G)_b] --
+ if (nkpg==9) then
+!$OMP PARALLEL DO COLLAPSE(2) &
+!$OMP PRIVATE(ipw,mu,mua,mub)
+   do ipw=1,npw
+     do mu=4,9
+       mua=alpha(mu-3);mub=beta(mu-3)
+       kpg(ipw,mu)=kpg(ipw,mua)*kpg(ipw,mub)
+     end do
+   end do
+!$OMP END PARALLEL DO
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine mkkpg
 !!***
 
 end module m_kg

@@ -41,6 +41,7 @@ MODULE m_exc_diago
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
  use m_crystal,         only : crystal_t
+ use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
@@ -48,8 +49,8 @@ MODULE m_exc_diago
  use m_pawhr,           only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
- use m_abilasi,         only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv
- use m_blas,            only : xdotc, xgemm
+ use m_hide_lapack,     only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv
+ use m_hide_blas,       only : xdotc, xgemm
  use m_bse_io,          only : exc_fullh_from_blocks, offset_in_file, rrs_of_glob, ccs_of_glob, &
 &                              exc_read_bshdr, exc_skip_bshdr_mpio, exc_read_rblock_fio
  use m_exc_spectra,     only : build_spectra
@@ -243,7 +244,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_resonant'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

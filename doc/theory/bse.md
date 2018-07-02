@@ -7,8 +7,8 @@ authors: MG, MS
 ##   
 
 These notes provide a brief introduction to the Bethe-Salpeter (BS) formalism
-outlining the most important equations involved in the theory. The approach
-used to compute the BS kernel and the macroscopic dielectric in an
+outlining the most important equations involved in the theory. 
+The approach used to compute the BS kernel and the macroscopic dielectric in an
 implementation based on planewaves and norm-conserving pseudopotentials is also discussed.
 
 The conventions used in the equations are explained in the [[theory:mbt|Many-body theory notes]].
@@ -29,9 +29,9 @@ related to the irreducible polarizability by the following relation
 
 from which the inverse dielectric function is obtained via matrix inversion.
 
-The _**macroscopic**_ dielectric function, $\ee_M^{\text{LF}}(\ww)$, can be directly related
+The *macroscopic* dielectric function, $\ee_M^{\text{LF}}(\ww)$, can be directly related
 to the inverse of a single element, the first ($\GG_1 = 0, \GG_2 =0$) element
-of the inverse of the _**microscopic**_ dielectric matrix by means of:
+of the inverse of the *microscopic* dielectric matrix by means of:
 
 \begin{equation}\label{eq:abs_LFE} 
 \ee_M^{\text{LF}}(\ww) = \lim_{\qq \rightarrow 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)} 
@@ -39,7 +39,8 @@ of the inverse of the _**microscopic**_ dielectric matrix by means of:
 
 The microscopic dielectric matrix is the one usually calculated within the RPA in
 a GW calculation. The optical absorption spectrum is simply given by the
-imaginary part of $\ee_M^{\text{LF}}(\ww)$ . Sometimes, especially when comparing with
+imaginary part of $\ee_M^{\text{LF}}(\ww)$. 
+Sometimes, especially when comparing with
 experimental spectra, the real part is simply called $\ee_1$ and the imaginary part $\ee_2$.
 
 Note that above equation differs from
@@ -49,14 +50,14 @@ Note that above equation differs from
 \end{equation} 
 
 due to the so called local-field effects introduced by the presence of the crystalline environment. 
-The former quantity _with_ local fields (LF) is more accurate than the latter one with _no_ local field (NLF). 
+The former quantity *with* local fields (LF) is more accurate than the latter one *without* local field (NLF). 
 
 !!! important
 
     The reason the two equations are different is
     because in the first, the expression in the denominator is the first element
-    of the inverse of the _whole_ microscopic dielectric matrix. This element
-    depends on the _entire_ matrix and cannot simply be calculated by taking the
+    of the inverse of the *whole* microscopic dielectric matrix. This element
+    depends on the *entire* matrix and cannot simply be calculated by taking the
     inverse of the first element of the non-inverted matrix.
 
 In the [[theory:mbt#RPA_Fourier_space|GW_notes]], we have discussed how
@@ -70,9 +71,9 @@ response of the fully interacting system.
 
 Important discrepancies with experiment are found even when the DFT gap is
 corrected by replacing the KS eigenvalues by quasiparticle energies calculated
-in the _GW_ approximation. This indicates that, as far as optical properties
+in the GW approximation. This indicates that, as far as optical properties
 are concerned, there is some important physics that is not correctly captured
-by the _GW_ approximation.
+by the GW approximation.
 
 The fundamental reason for the failure of the RPA can be traced back to the
 neglect of the electron-hole interaction that, in the many-body language,
@@ -93,19 +94,18 @@ spectra available in ABINIT is given below.
 
 The Bethe-Salpeter theory is formulated in terms of two-particle propagators.
 These are four-point functions describing the motion through the system of two
-particles at once. We will label them $L^0$ and $L$ , where the subscript zero
+particles at once. We will label them $L^0$ and $L$, where the subscript zero
 indicates that the particles are non-interacting. By restricting the starting
 and ending point of the particles, the two-point contraction of $L^0$ gives
 the reducible independent-particle polarizability according to
 
 $$ \chi^0(12) = L^0(11, 22) $$ while the two-point contraction of $L$ gives
-the reducible many-body polarizability. $$ \hat\chi(12) = L(11, 22) $$ that
-should not be confused with the _irreducible_ polarizability of the many-body
+the reducible many-body polarizability $$ \hat\chi(12) = L(11, 22) $$ that
+should not be confused with the *irreducible* polarizability of the many-body
 system (denoted with a tilde in the formulas in the [[theory:mbt#RPA_Fourier_space|GW_notes]]).
 
 The utility of working in terms of the reducible quantities is that the macroscopic dielectric function
-_**with**_ local field effects is obtained directly from the reducible
-polarizability using  
+*with* local field effects is obtained directly from the reducible polarizability using  
 
 \begin{equation} 
 \ee_M^{\text{LF}}(\ww) = 1 - \lim_{\qq \rightarrow 0} v(\qq)\,\tchi_{00}(\qq;\ww) 
@@ -138,7 +138,7 @@ v(\qq)} = v(\qq) \quad {\text{if}}\; \qq \neq 0 \\\ \\\ {\bar v(\qq=0)} = 0
 As discussed in [[cite:Onida2002]], local field effects (LF) are included in the
 formalism through the exchange term while the Coulomb term describes the
 screened electron-hole interaction that is responsible for the creation of the
-excitons. All interaction is in principle already contained in _W_ , and the
+excitons. All interaction is in principle already contained in $W$, and the
 rewriting of the kernel in this way is mostly an algebraic trick which allows
 one to easily separate the contributions and calculate the optical spectrum
 both with and without the LF.
@@ -146,7 +146,7 @@ both with and without the LF.
 The Dyson-like equation for $L$ becomes a matrix problem once a particular
 basis set is chosen to expand the four-point functions involved in the
 problem. In the standard approach, the polarisabilities and the BS kernel are
-expressed in the so-called _transition_ space (i.e. as products of single-particle orbitals) using:
+expressed in the so-called *transition* space (i.e. as products of single-particle orbitals) using:
 
 \begin{equation} F(1234) = 
 \sum_{ \substack{(n_1 n_2) \\\ (n_3 n_4)} }
@@ -240,8 +240,8 @@ Note, in particular, that only the static limit ($\omega = 0$) of $W$ is involve
 The coupling matrix elements are usually smaller than the resonant ones. This
 is especially true in bulk systems due to the different spatial behavior of
 conduction and valence states. In solid state calculations, it is therefore
-common practice to ignore the $C$ block (the so-called Tamm-Dancoff
-approximation). Under this assumption the excitonic Hamiltonian is given by a Hermitian operator.
+common practice to ignore the $C$ block (the so-called Tamm-Dancoff approximation). 
+Under this assumption the excitonic Hamiltonian is given by a Hermitian operator.
 
 ![](bse_assets/TDA.svg)
 
@@ -249,7 +249,8 @@ The variable [[bs_coupling]] defines whether the coupling block should be includ
 
 The macroscopic dielectric function is obtained by contracting the many-body
 $L$ and then taking the optical limit of the $\GG = \GG' = 0$ component along
-a particular direction in $\qq$-space. The final result reads:
+a particular direction in $\qq$-space. 
+The final result reads:
 
 \begin{equation} 
 \ee_M(\ww) = 1 - \lim_{\qq \rightarrow 0} v(\qq)\,\langle
@@ -283,16 +284,16 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 
 ![](bse_assets/bse_flowchart.svg)
 
-The KSS file is represented with an ellipsis. The path on the left indicated
+The WFK file is represented with an ellipsis. The path on the left indicated
 with blue arrows represents the RPA calculation ([[optdriver]]=3) that
-produces the SCR file (see also the [[lesson:gw1|first lesson]] of the GW tutorial).
-Once the KSS and the SCR file are available, we can finally construct the
+produces the SCR file (see also the [[tutorial:gw1|GW1 tutorial]]).
+Once the WFK and the SCR file are available, we can finally construct the
 Hamiltonian and solve the Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
 
 For BS computations, it is common practice to simulate the self-energy
 corrections by employing the scissors operator whose value can be obtained
-either from experiments or from ab-initio calculations. The scissors operator
-allows one to avoid a costly _GW_ calculation that should performed for all
+either from experiments or from ab-initio calculations. 
+The scissors operator allows one to avoid a costly GW calculation that should performed for all
 the $\kk$-points and bands included in the transition space (the optional
 path on the right indicated with yellow arrows that corresponds to [[optdriver]]=4).
 
@@ -316,7 +317,7 @@ spectral representation of $H$ in terms of eigenvalues and right eigenvectors of
 \langle\lambda'| \end{cases} 
 \end{equation} 
 
-Then, as discussed in [2], the inverse of $H - \ww$ is obtained according to 
+Then, as discussed in [[cite:Albrecht1998]], the inverse of $H - \ww$ is obtained according to 
 
 \begin{equation} \bigl[ H -\ww
 \bigr]^{-1} = \sum_{\lambda \lambda'} |\lambda\rangle \dfrac{O_{\lambda
@@ -326,9 +327,10 @@ Then, as discussed in [2], the inverse of $H - \ww$ is obtained according to
 We do not elaborate this point further since the direct diagonalization is advantageous
 only in particular circumstances, as explained in the documentation.
 
-[[bs_algorithm]]=2 avoids the diagonalization using an iterative algorithm
-that constructs a basis set in which _H_ is represented by a real symmetric
-tridiagonal matrix [3]. Without entering into detail, one can schematically
+[[bs_algorithm]] = 2 avoids the diagonalization using an iterative algorithm
+that constructs a basis set in which $H$ is represented by a real symmetric
+tridiagonal matrix [[cite:Haydock1980]].
+Without entering into detail, one can schematically
 represent the Haydock technique as an algorithmic procedure that transforms a
 dense (hermitian) matrix into a sparse (tridiagonal) one:
 
@@ -367,7 +369,7 @@ Another distinct advantage is that the Haydock method is less
 memory demanding than the direct diagonalization since only three temporary
 vectors are required instead of the full set of eigenvectors.
 
-Note that the original formulation of the method presented in [[cite:Haydock1980]
+Note that the original formulation of the method presented in [[cite:Haydock1980]]
 assumes an Hermitian operator thus it can be used only for TDA calculations.
 We refer the reader to [[cite:Gruning2009]] for a generalization of the method to
 the case in which the coupling term cannot be neglected. The main drawback of
@@ -376,9 +378,9 @@ hence it cannot be used to calculate binding energies or to plot the excitonic
 wavefunctions. Moreover, for the time being, [[bs_algorithm]] = 2 cannot be used
 for calculations in which the coupling term is included.
 
-[[bs_algorithm]]=3 employs the conjugate-gradient method to calculate the
-lowest eigenstates of the Hamiltonian. At present, this method is still under
-testing and does not support calculations with the coupling term.
+[[bs_algorithm]] = 3 employs a standard conjugate-gradient method to calculate the
+lowest eigenstates of the Hamiltonian. 
+At present, this method is still under testing and does not support calculations with the coupling term.
 
 ## 4 Kernel matrix elements in reciprocal space
   
@@ -403,17 +405,17 @@ v'\kk'|e^{i(\qq +\GG_1)\cdot \rr}|v\kk \rangle \langle c \kk
 |e^{-i(\qq+\GG_2)\cdot\rr} |c'\kk' \rangle 
 \end{equation} 
 
-The number of **G**-vectors in W and in the modified Coulomb interaction is specified through
+The number of $\GG$-vectors in $W$ and in the modified Coulomb interaction is specified through
 [[ecuteps]] while the wavefuctions entering the oscillator matrix elements are
-expanded on a **G** -sphere of energy [[ecutwfn]]. The computation of the
-oscillator matrix elements is discussed in 
-[[theory:mbt#oscillator_notes|this section]] of the _GW_ Notes.
+expanded on a $\GG$-sphere of energy [[ecutwfn]]. 
+The computation of the oscillator matrix elements is discussed in 
+[[theory:mbt#oscillator_notes|this section]] of the GW Notes.
 
 The input variable [[bs_exchange_term]] can be used to disable the computation
 of the exchange term, this option is mainly used for performing optical
 calculations without local field effects. The variable [[bs_coulomb_term]]
 governs the computation of the Coulomb term, the most CPU-demanding part due
-to the presence of the double sum over **G** -vectors.
+to the presence of the double sum over $\GG$ -vectors.
 
 It is also important to stress that, in the two equations above, the **k**-point 
 index runs over the full Brillouin zone hence the size of the
@@ -461,14 +463,14 @@ calculations: the QP corrections are obtained by performing an integration in
 $\qq$-space and only the $\qq \rightarrow 0$ component of the inverse dielectric
 matrix is affected by the commutator of the non-local part of the pseudopotential.
 
-For this reason it is common practice, especially during the _GW_ convergence
-tests, to neglect this contribution by setting [[inclvkb]]=0. Strictly
-speaking, however, this approximation is justified only in the case of
+For this reason it is common practice, especially during the GW convergence
+tests, to neglect this contribution by setting [[inclvkb]] = 0. 
+Strictly speaking, however, this approximation is justified only in the case of
 calculations in bulk crystals provided that the BZ sampling is well converged.
-Particular care has to be taken when performing _GW_ calculations in non-
-periodic systems due to the reduced dimensionality of the BZ.
+Particular care has to be taken when performing GW calculations in non-periodic systems 
+due to the reduced dimensionality of the BZ.
 
-Please note that the commutator of the nonlocal part should ALWAYS be included
-when studying optical properties, both at the RPA and at the BS level. We
-suggest the use of [[inclvkb]]=2 that is faster and less memory demanding than
-the algorithm coded for [[inclvkb]]=1.
+!!! important
+
+    The commutator of the nonlocal part should ALWAYS be included
+    when studying optical properties, both at the RPA and at the BS level.

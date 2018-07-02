@@ -565,7 +565,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
  logical :: hasameq
 !arrays
  integer,allocatable :: kln2ln(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  real(dp),allocatable :: ff1(:),ff2(:),tmp_integrals(:)
  real(dp),ABI_CONTIGUOUS pointer :: phi_i(:),phi_j(:)
  real(dp),allocatable,target :: phi_spl(:,:)
@@ -781,7 +781,7 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
 !arrays
  integer :: opt_l_index(0,0),pack2ij(0)
  integer,allocatable :: kln2ln(:,:),klm2lm(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  type(slatang_cshell_t),allocatable :: Slatang3l(:)
  type(slatrad_cshell_t),allocatable :: Slatrad3l(:)
 
@@ -1159,7 +1159,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kln2ln(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  real(dp),allocatable :: uiuj(:),ukul(:),tuituj(:),tuktul(:),tuituj_tqgl(:),tuktul_tqgl(:)
  real(dp),allocatable :: tmp_integrals(:),ff(:)
  real(dp),ABI_CONTIGUOUS pointer :: phi_i(:),phi_j(:),phi_k(:),phi_l(:)

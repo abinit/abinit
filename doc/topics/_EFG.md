@@ -99,5 +99,5 @@ on a variety of compounds.
 
 ## Tutorials
 
-* [[lesson:nuc|The lesson on the properties of the nuclei]] shows how to compute the electric field gradient. Prerequisite: PAW1.
+* [[tutorial:nuc|The tutorial on the properties of the nuclei]] shows how to compute the electric field gradient. Prerequisite: PAW1.
 

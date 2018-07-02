@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,8 +67,9 @@ MODULE m_numeric_tools
  public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
+ public :: pack_matrix           ! Packs a matrix into hermitian format
  public :: print_arr             ! Print a vector/array
- public :: pade,dpade            ! Functions for Pade approximation (complex case)
+ public :: pade, dpade           ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
  public :: OPERATOR(.x.)         ! Cross product of two 3D vectors
  public :: l2norm                ! Return the length (ordinary L2 norm) of a vector
@@ -93,6 +94,10 @@ MODULE m_numeric_tools
  public :: uniformrandom         ! Returns a uniform random deviate between 0.0 and 1.0.
  public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
+ public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
+
+ !MG FIXME: deprecated: just to avoid updating refs while refactoring.
+ public :: dotproduct
 
  interface arth
    module procedure arth_int
@@ -4112,6 +4117,67 @@ subroutine symmetrize_dpc(mat,uplo)
 end subroutine symmetrize_dpc
 !!***
 
+!!****f* m_numeric_tools/pack_matrix
+!! NAME
+!! pack_matrix
+!!
+!! FUNCTION
+!! Packs a matrix into hermitian format
+!!
+!! INPUTS
+!! N: size of matrix
+!! cplx: is the matrix complex
+!! mat_in(2, N*N)= matrix to be packed
+!!
+!! OUTPUT
+!! mat_out(N*N+1)= packed matrix
+!!
+!! PARENTS
+!!      rayleigh_ritz
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pack_matrix(mat_in, mat_out, N, cplx)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pack_matrix'
+!End of the abilint section
+
+ implicit none
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pack_matrix'
+!End of the abilint section
+
+ integer, intent(in) :: N, cplx
+ real(dp), intent(in) :: mat_in(cplx, N*N)
+ real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+ integer :: isubh, i, j
+
+ ! *************************************************************************
+
+ isubh = 1
+ do j=1,N
+   do i=1,j
+     mat_out(isubh)    = mat_in(1, (j-1)*N+i)
+     ! bad for vectorization, but it's not performance critical, so ...
+     if(cplx == 2) then
+       mat_out(isubh+1)  = mat_in(2, (j-1)*N+i)
+     end if
+     isubh=isubh+cplx
+   end do
+ end do
+
+end subroutine pack_matrix
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/print_arr1d_spc
@@ -5314,7 +5380,6 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
    msg = "Wrong direction: "//TRIM(direction)
    MSG_ERROR(msg)
  END SELECT
-
 
 end function isordered_rdp
 !!***
@@ -6842,6 +6907,160 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  call wrtout(std_out,msg,'COLL')
 
 end subroutine kramerskronig
+!!***
+
+!!****f* ABINIT/dotproduct
+!! NAME
+!! dotproduct
+!!
+!! FUNCTION
+!! scalar product of two vectors
+!!
+!! INPUTS
+!! v1 and v2: two real(dp) vectors
+!!
+!! OUTPUT
+!! scalar product of the two vectors
+!!
+!! SIDE EFFECTS
+!!
+!! WARNINGS
+!! vector size is not checked
+!!
+!! NOTES
+!! I've benchmarked this to be speedier than the intrinsic dot_product even on
+!! big vectors. The point is that less check is performed.
+!!
+!! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
+!! Now I dont' have time to update ref files
+!!
+!! PARENTS
+!! cgpr,brent
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+function dotproduct(nv1,nv2,v1,v2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dotproduct'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nv1,nv2
+ real(dp) :: dotproduct
+!arrays
+ real(dp),intent(in) :: v1(nv1,nv2),v2(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,j
+
+! *************************************************************************
+ dotproduct=zero
+ do j=1,nv2
+  do i=1,nv1
+   dotproduct=dotproduct+v1(i,j)*v2(i,j)
+  end do
+ end do
+end function dotproduct
+!!***
+
+!!****f* m_numeric_tools/invcb
+!! NAME
+!! invcb
+!!
+!! FUNCTION
+!! Compute a set of inverse cubic roots as fast as possible :
+!! rspts(:)=rhoarr(:)$^\frac{-1}{3}$
+!!
+!! INPUTS
+!!  npts=number of real space points on which density is provided
+!!  rhoarr(npts)=input data
+!!
+!! OUTPUT
+!!  rspts(npts)=inverse cubic root of rhoarr
+!!
+!! PARENTS
+!!      drivexc,gammapositron,xchcth,xcpbe,xcpositron,xctfw
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine invcb(rhoarr,rspts,npts)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'invcb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npts
+!arrays
+ real(dp),intent(in) :: rhoarr(npts)
+ real(dp),intent(out) :: rspts(npts)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ipts
+ real(dp),parameter :: c2_27=2.0e0_dp/27.0e0_dp,c5_9=5.0e0_dp/9.0e0_dp
+ real(dp),parameter :: c8_9=8.0e0_dp/9.0e0_dp,m1thrd=-third
+ real(dp) :: del,prod,rho,rhom1,rhomtrd
+ logical :: test
+!character(len=500) :: message
+
+! *************************************************************************
+
+!Loop over points : here, brute force algorithm
+!do ipts=1,npts
+!rspts(ipts)=sign( (abs(rhoarr(ipts)))**m1thrd,rhoarr(ipts))
+!end do
+!
+
+ rhomtrd=sign( (abs(rhoarr(1)))**m1thrd, rhoarr(1) )
+ rhom1=one/rhoarr(1)
+ rspts(1)=rhomtrd
+ do ipts=2,npts
+   rho=rhoarr(ipts)
+   prod=rho*rhom1
+!  If the previous point is too far ...
+   if(prod < 0.01_dp .or. prod > 10._dp )then
+     rhomtrd=sign( (abs(rho))**m1thrd , rho )
+     rhom1=one/rho
+   else
+     del=prod-one
+     do ii=1,5
+!      Choose one of the two next lines, the last one is more accurate
+!      rhomtrd=((one+third*del)/(one+two_thirds*del))*rhomtrd
+       rhomtrd=((one+c5_9*del)/(one+del*(c8_9+c2_27*del)))*rhomtrd
+       rhom1=rhomtrd*rhomtrd*rhomtrd
+       del=rho*rhom1-one
+!      write(std_out,*)rhomtrd,del
+       test = del*del < 1.0e-24_dp
+       if(test) exit
+     end do
+     if( .not. test) then
+       rhomtrd=sign( (abs(rho))**m1thrd , rho )
+     end if
+   end if
+   rspts(ipts)=rhomtrd
+ end do
+
+end subroutine invcb
 !!***
 
 END MODULE m_numeric_tools

@@ -72,6 +72,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,       only : timab
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
  use m_xmpi,       only : xmpi_comm_self,xmpi_sum
 
@@ -79,7 +80,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eltxccore'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -244,7 +244,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
        do ishift1=1,1+2*irange(1)
          rdiff1=rrdiff(ishift1,1)
-         
+
 !        Compute (rgrid-tau-Rprim)**2
          difmag2= difmag2_part+rdiff1*(difmag2_fact+rmet(1,1)*rdiff1)
 
@@ -269,7 +269,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
              aa = 1.0_dp-bb
              cc = aa*(aa**2-1.0_dp)*delta2div6
              dd = bb*(bb**2-1.0_dp)*delta2div6
-             
+
 !            Evaluate spline fit of 1st der of core charge density
 !            from xccc1d(:,2,:) and (:,4,:)
              func1=aa*xccc1d(jj,2,typat(iatom))+bb*xccc1d(jj+1,2,typat(iatom)) +&
@@ -280,10 +280,10 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
              func2=aa*xccc1d(jj,3,typat(iatom))+bb*xccc1d(jj+1,3,typat(iatom)) +&
 &             cc*xccc1d(jj,5,typat(iatom))+dd*xccc1d(jj+1,5,typat(iatom))
              term2=func2*rangem1**2
-             
+
              ifft=i1+n1*(i2-1+n2*(i3-1))
              tt(:)=rmet(:,1)*rdiff1+rmet(:,2)*rdiff2+rmet(:,3)*rdiff3
-             
+
 !            Add contributions to 2nd derivative tensor
              drss2=&
 &             (rdiff1*(drm(1,1,is2_in)*rdiff1+drm(1,2,is2_in)*rdiff2&
@@ -295,7 +295,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
 !            Loop over 1st strain index
              do is1=1,6
-               
+
                drss1=&
 &               (rdiff1*(drm(1,1,is1)*rdiff1+drm(1,2,is1)*rdiff2&
 &               +drm(1,3,is1)*rdiff3)&
@@ -303,7 +303,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 &               +drm(2,3,is1)*rdiff3)&
 &               +rdiff3*(drm(3,1,is1)*rdiff1+drm(3,2,is1)*rdiff2&
 &               +drm(3,3,is1)*rdiff3))
-               
+
                d2rss=&
 &               (rdiff1*(d2rm(1,1,is1,is2_in)*rdiff1+d2rm(1,2,is1,is2_in)*rdiff2&
 &               +d2rm(1,3,is1,is2_in)*rdiff3)&
@@ -323,7 +323,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 &               vxc10_core(ifft)*drss1*term1/difmag
                eltfrxc_core(is2_in,is1)=eltfrxc_core(is2_in,is1)+0.25_dp*&
 &               vxc10_core(ifft)*drss1*term1/difmag
-               
+
 !              End loop in is1
              end do
 !            Internal strain contributions
@@ -340,7 +340,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
 !          End of condition to be inside the range
          end if
-         
+
 !        End loop on ishift1
        end do
 
@@ -358,7 +358,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
    call timab(48,1,tsec)
    call xmpi_sum(eltfrxc_core,my_comm_atom,ierr)
    call timab(48,2,tsec)
- end if 
+ end if
 
 !Add core contribution to XC elastic tensor
  eltfrxc(:,:)=eltfrxc(:,:)+eltfrxc_core(:,:)

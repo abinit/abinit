@@ -7,7 +7,7 @@
 !! This method allocates and initialises wavefunctions with values from disk.
 !! See wvl_wfsinp_scratch() or wvl_wfsinp_reformat() from other initialisation
 !! routines.
-!! 
+!!
 !! When initialised from scratch or from disk, wvl%wfs%[h]psi comes unallocated
 !! and will be allocated inside this routine.
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.

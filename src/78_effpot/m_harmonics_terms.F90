@@ -770,8 +770,8 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
        cij = strain_coupling(alpha,mu,ii)
 !      Accumulte for this atom
        energy = energy + half*cij*strain(alpha)*disp(mu,ia)
-       fcart(mu,ia)  = fcart(mu,ia)  + cij*strain(alpha)
-       strten(alpha) = strten(alpha) + cij*disp(mu,ia)
+       fcart(mu,ia)  = fcart(mu,ia)  + half*cij*strain(alpha)
+       strten(alpha) = strten(alpha) + half*cij*disp(mu,ia)
      end do
    end do
    ii = ii +1

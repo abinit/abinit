@@ -81,9 +81,9 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
  integer  :: ierr,info
  character(len=500) :: message
  character, dimension(2) :: cparam
- 
+
  ! *********************************************************************
- 
+
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then
      call timab(tim_xortho,1,tsec)
@@ -92,20 +92,20 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 
  cparam(1)='t'
  cparam(2)='c'
- 
+
  call abi_xgemm(cparam(x_cplx),'n',blocksize,blocksize,vectsize,cone,blockvectorx,&
 &   vectsize,blockvectorbx,vectsize,czero,sqgram,blocksize,x_cplx=x_cplx)
- 
- call xmpi_sum(sqgram,spaceComm,ierr) 
- 
+
+ call xmpi_sum(sqgram,spaceComm,ierr)
+
  !Cholesky factorization of sqgram (ouside upper Triangular of sqgram)
  call abi_xpotrf('u',blocksize,sqgram,blocksize,info,x_cplx=x_cplx)
- 
+
  if (info /= 0 )  then
    write(message,'(a,i0)')'abi_xpotrf, info=',info
    MSG_ERROR(message)
  end if
- 
+
  !Find X  X*sqgram=blockvectorx
  call abi_xtrsm('r','u','n','n',vectsize,blocksize,cone,sqgram,blocksize,&
 &   blockvectorx,vectsize,x_cplx=x_cplx)
@@ -115,7 +115,7 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
      call timab(tim_xortho,2,tsec)
    end if
  end if
- 
+
 end subroutine xorthonormalize
 !!***
 
@@ -187,12 +187,12 @@ subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vect
 
  call abi_xgemm('t','n',blocksize,blocksize,vectsize,cone,blockvectorx,&
 &   vectsize,blockvectorbx,vectsize,czero,sqgram,blocksize)
- 
+
  call xmpi_sum(sqgram,spaceComm,ierr)
- 
+
  !Cholesky factorization of sqgram (ouside upper Triangular of sqgram)
  call abi_d2zpotrf('u',blocksize,sqgram,blocksize,info) !vz_d
- 
+
  if (info /= 0 )  then
    write(message,'(a,i0)')'dpotrf, info=',info
    MSG_ERROR(message)
@@ -272,7 +272,7 @@ subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 & vectsize,blockvectorbx,vectsize,czero,sqgram,blocksize)
 
  call xmpi_sum(sqgram,spaceComm,ierr)
- 
+
  call abi_xpotrf('u',blocksize,sqgram,blocksize,info)
 
  if (info /= 0 )  then

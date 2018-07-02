@@ -8,7 +8,7 @@
 #
 
 #
-# Source files making up the 45_psp_parser library
+# Source files making up the 57_iopsp_parser library
 #
 
 # Source file attributes
@@ -18,9 +18,12 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "inpspheads.F90",
- "pawpsxml2ab.F90",
+ "flib_pwscf.F90",
+ "functionals_pwscf.F90",
+ "m_pseudo_pwscf.F90",
+ "m_pspheads.F90",
  "m_psxml2ab.F90",
- "upfheader2abi.F90"]
+ "m_read_upf_pwscf.F90"
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

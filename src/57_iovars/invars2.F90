@@ -1,4 +1,4 @@
-!{\src2tex{textfont=tt}}
+!!{\src2tex{textfont=tt}}
 !!****f* ABINIT/invars2
 !!
 !! NAME
@@ -81,21 +81,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
+ use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_symtk,     only : matr3inv
  use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
+ use m_inkpts,    only : inkpts
+ use m_ingeo,     only : invacuum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_56_recipspace
- use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
  implicit none
@@ -433,9 +433,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
- if(tread==1) dtset%supercell(1:3)=intarr(1:3)
-
 !RESPFN integer input variables (needed here to get the value of response
 !Presently, rfmeth is not used.
 !Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
@@ -496,6 +493,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      if (sum(abs(dtset%rf2_pert2_dir)) == 0) dtset%rf2_pert2_dir(:) = 1
    end if
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
+ if(tread==1) dtset%nonlinear_info=intarr(1)
 
 !NONLINEAR integer input variables (same definition as for rfarr)
 !Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
@@ -569,6 +569,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
+   if(tread==1) dtset%usepead=intarr(1)
 
  end if
 
@@ -782,11 +785,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symchi',tread,'INT')
  if(tread==1) dtset%symchi=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getefmas',tread,'INT')
+ if(tread==1) dtset%getefmas=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdefmas',tread,'INT')
+ if(tread==1) dtset%irdefmas=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdsuscep',tread,'INT')
  if(tread==1) dtset%irdsuscep=intarr(1)
@@ -1091,6 +1100,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_frohlichm',tread,'INT')
+ if(tread==1) dtset%eph_frohlichm=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsmear',tread,'ENE')
  if(tread==1) dtset%eph_fsmear=dprarr(1)
 
@@ -1120,6 +1132,26 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_addStrain',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_addStrain=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_option',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_option=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_nampl',tread,'INT')
+ if(tread==1) dtset%ph_freez_disp_nampl=intarr(1)
+
+ if(dtset%ph_freez_disp_nampl > 0)then
+   ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
+   ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
+   call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),&
+&   'ph_freez_disp_ampl',tread,'DPR')
+   if (tread==0) then
+     MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
+   end if
+   dtset%ph_freez_disp_ampl=reshape(dprarr(1:5*dtset%ph_freez_disp_nampl),[5,dtset%ph_freez_disp_nampl])
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
@@ -1230,6 +1262,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  else
    if (dtset%paral_kgb==1) dtset%densfor_pred=6
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmcsst',tread,'INT')
+ if(tread==1) dtset%hmcsst=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmctt',tread,'INT')
+ if(tread==1) dtset%hmctt=intarr(1)
 
 !--For the moment LOTF does not use different from 2
  if(dtset%ionmov==23) then
@@ -1523,7 +1561,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restartxf',tread,'INT')
  if(tread==1) dtset%restartxf=intarr(1)
  if (dtset%restartxf == 1) then
-   MSG_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2")
+   MSG_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
@@ -1608,9 +1646,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- endif
+   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1766,7 +1804,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'impose dmft_dc = 5'
      MSG_WARNING(message)
      dtset%dmft_dc=5
-   endif
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -1840,7 +1878,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &       'Action: add dmftqmc_therm keyword in input file.'
        MSG_ERROR(message)
      end if
-     if(dtset%dmft_solv==5) then
+     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8) then
+    ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')
@@ -2100,6 +2139,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
  if(tread==1) dtset%prtefg=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefmas',tread,'INT')
+ if(tread==1) dtset%prtefmas=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteig',tread,'INT')
  if(tread==1) dtset%prteig=intarr(1)
 
@@ -2108,6 +2150,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
+ if(tread==1) dtset%prtfull1wf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
  if(tread==1) dtset%prtfsurf=intarr(1)
@@ -2372,9 +2417,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread_key==1) then
    if(dtset%nsym/=1) then
      write(message,"(a,i0,3a)")&
-&     '  Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
-&     '(because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_bands(1:2)=intarr(1:2)
@@ -2384,9 +2429,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) then
    if(dtset%nsym/=1) then
      write(message,*)&
-&     '  Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
-&     '  (because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)
@@ -2394,9 +2439,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  if(tread==1.and.tread_key==1) then
    write(message, '(a,a,a,a,a)' )&
-&   ' ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
-&   ' for the same dataset.',ch10,&
-&   ' Action : check the input file.'
+&   'ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
+&   'for the same dataset.',ch10,&
+&   'Action: check the input file.'
    MSG_ERROR(message)
  end if
 

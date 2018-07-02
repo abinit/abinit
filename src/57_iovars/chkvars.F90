@@ -60,6 +60,7 @@ subroutine chkvars (string)
 
 !************************************************************************
 
+
 !Here, list all admitted variable names (max 10 per line, to fix the ideas)
 !Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
 !<ABINIT_VARS>
@@ -70,6 +71,8 @@ subroutine chkvars (string)
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
+ list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff'
+ list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_rangePower bound_step bound_temp'
  list_vars=trim(list_vars)//' bs_algorithm bs_calctype bs_coulomb_term bs_coupling'
  list_vars=trim(list_vars)//' bs_interp_kmult bs_interp_m3_width bs_interp_method bs_interp_mode bs_interp_prep'
  list_vars=trim(list_vars)//' bs_interp_rl_nb bs_eh_cutoff bs_exchange_term bs_freq_mesh'
@@ -80,11 +83,12 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dmatpawu dmatpuopt dmatudiag'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip  dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
  list_vars=trim(list_vars)//' dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
@@ -93,7 +97,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_nleg'
  list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
- list_vars=trim(list_vars)//' dosdeltae dtion dynimage'
+ list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
@@ -101,13 +105,16 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
- list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift'
- list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf'
- list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_fsmear eph_fsewin eph_mustar '
- list_vars=trim(list_vars)//' eph_ngqpt_fine eph_task eph_transport'
+ list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
+ list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
+ list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fit_SPCoupling fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
+ list_vars=trim(list_vars)//' fit_generateCoeff fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
+ list_vars=trim(list_vars)//' fit_rangePower fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
@@ -116,7 +123,7 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getefmas getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine'
  list_vars=trim(list_vars)//' getsuscep '
@@ -134,13 +141,13 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
- list_vars=trim(list_vars)//' hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
+ list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
@@ -163,15 +170,15 @@ subroutine chkvars (string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
+ list_vars=trim(list_vars)//' ncell ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
- list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd noseinert npband'
- list_vars=trim(list_vars)//' npfft nphf npimage npkpt nppert npsp npspinor'
+ list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
+ list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq'
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
@@ -185,7 +192,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
  list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv'
- list_vars=trim(list_vars)//' pawusecp pawxcdev pimass pimd_constraint'
+ list_vars=trim(list_vars)//' pawusecp pawxcdev pimass pimd_constraint ph_freez_disp_addStrain'
+ list_vars=trim(list_vars)//' ph_freez_disp_option ph_freez_disp_nampl ph_freez_disp_ampl'
  list_vars=trim(list_vars)//' pitransform ph_ndivsm ph_nqpath ph_qpath ph_ngqpt'
  list_vars=trim(list_vars)//' ph_wstep ph_intmeth ph_smear ph_nqshift ph_qshift'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
@@ -193,14 +201,14 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prteig prtelf'
- list_vars=trim(list_vars)//' prtfc prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
+ list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
+ list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' qmass qprtrb qpt qptdm qptnrm '
+ list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'
@@ -214,16 +222,19 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
- list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp'
- list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth'
- list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
- list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
+ list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
+ list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
+ list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics spin_mag_field spin_nctime spin_ntime'
+ list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint spin_temperature spin_tolavg spin_tolvar'
+ list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
+ list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat' 
 !U
- list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usedmatpu'
+ list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
@@ -277,6 +288,7 @@ subroutine chkvars (string)
 
 end subroutine chkvars
 !!***
+
 
 !!****f* ABINIT/chkvars_in_string
 !! NAME

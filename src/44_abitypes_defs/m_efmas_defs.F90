@@ -29,21 +29,28 @@ module m_efmas_defs
  !Put eventual module variables here...
 !!***
 
-!!****t* m_efmas_defs/efmasfr_type
+!!****t* m_efmas_defs/efmasval_type
 !! NAME
-!! efmasfr_type
+!! efmasval_type
 !!
 !! FUNCTION
-!! The efmasfr_type structured datatype
+!! The efmasval_type structured datatype, related to one band or one degenerated set of bands, for one k-point
 !!
 !! SOURCE
 
- type efmasfr_type
-   
-   !For k-point
-   complex(dpc),allocatable :: ch2c(:,:,:,:)
+ type efmasval_type
 
- end type efmasfr_type
+   !For k-point
+   complex(dpc),allocatable :: ch2c(:,:,:,:) ! ch2c(mdim,mdim,1:deg_dim,1:deg_dim) 
+                                             ! where mdim=3 labels reciprocal space directions
+                                             ! See Eq.(50) of Laflamme2016 : 2nd-order Hamiltonian contribution
+                                             ! Two first indices are for number of directions
+                                             ! Two last indices are for band indices within degenerate subspace
+   complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(mdim,mdim,1:deg_dim,1:deg_dim) 
+                                             ! where mdim=3 labels reciprocal space directions
+                                             ! See Eq.(50) of Laflamme2016 : generalized second-order k-derivative
+
+ end type efmasval_type
 !!***
 
 !!****t* m_efmas_defs/efmasdeg_type
@@ -51,19 +58,23 @@ module m_efmas_defs
 !! efmasdeg_type
 !!
 !! FUNCTION
-!! The efmasdeg_type structured datatype
+!! The efmasdeg_type structured datatype, related to one k-point
 !!
 !! SOURCE
 
  type efmasdeg_type
-   
+
    !For k-point
-   integer :: ndegs
-   integer, allocatable :: degs_bounds(:,:)
+   integer :: nband                           ! Number of bands (related to one specific k point)
+   integer :: ndegs                           ! Number of (degenerate) sets of eigenvalues (related to one specific k point)
+   integer, allocatable :: degs_bounds(:,:)   ! degs_bounds(2,ndegs) 
+                                              ! Minimal and maximal band indices for each possibly degenerate set of eigenvalues
+                                              ! actually the second dimension is declared as nband_k
    !For band
-   logical,allocatable :: degenerate(:), treated(:)
-   integer :: band_range(2), deg_range(2)
-   integer,allocatable :: deg_dim(:), degl(:), ideg(:)
+   integer :: deg_range(2)                    ! Indices of the sets that corresponds to the interval of bands for which
+                                              ! the generalized second-order k-derivative eig2_diag is computed,
+                                              ! possibly extended due to the degeneracies.
+   integer,allocatable :: ideg(:)             ! ideg(nband_k)  index of the set to which a particular band belongs
 
  end type efmasdeg_type
 !!***

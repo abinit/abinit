@@ -45,7 +45,6 @@ program vdw_kernelgen
  use defs_abitypes
  use m_build_info
  use m_errors
- use m_io_tools, only : flush_unit
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
@@ -53,12 +52,14 @@ program vdw_kernelgen
  use mpi
 #endif
 
+ use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_io_tools,    only : flush_unit
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_kernelgen'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# Second (basic) lesson  
+# Second (basic) tutorial
 
 ## The H<sub>2</sub> molecule, with convergence studies.  
 
-This lesson aims at showing how to get converged values for the following physical properties:
+This tutorial aims at showing how to get converged values for the following physical properties:
 
 * the bond length 
 * the atomisation energy 
@@ -18,12 +18,12 @@ problems related to the use of different pseudopotential are not examined.
 
 You will also finish to read the [[help:abinit]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
-## Summary of the previous lesson
+## Summary of the previous tutorial
   
-We studied the H2 molecule in a big box. 
-We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
+We studied the H$_2$ molecule in a big box. 
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr$^3$ supercell, the local-density approximation 
 (as well as the local-spin-density approximation) in the Teter parametrization ([[ixc]]=1, the
 default), and a pseudopotential from the Goedecker-Hutter-Teter table.
 
@@ -43,14 +43,14 @@ The bond length is awful (nearly 10% off), and the atomisation energy is a bit t
 
 **2.1.a** **Computing the bond length and corresponding atomisation energy in one run.**
 
-*Before beginning, you might consider to work in a different subdirectory as for lesson_base1. 
+*Before beginning, you might consider to work in a different subdirectory as for tutorial 1. 
 Why not "Work2"?*
 
 Because we will compute many times the bond length and atomisation energy, it
 is worth to make a single input file that will do all the associated operations. 
 You should try to use 2 datasets (try to combine ~abinit/tests/tutorial/Input/tbase1_3.in with
 ~abinit/tests/tutorial/Input/tbase1_5.in!). 
-Do not try to have the same position of the H atom as one of the H2 atoms in the optimized geometry.
+Do not try to have the same position of the H atom as one of the H$_2$ atoms in the optimized geometry.
 
 The input file ~abinit/tests/tutorial/Input/tbase2_1.in is an example of file
 that will do the job, 
@@ -62,7 +62,7 @@ while ~abinit/tests/tutorial/Refs/tbase2_1.out is an example of output file.
 {% dialog tests/tutorial/Refs/tbase2_1.out %}
 
 You might use ~abinit/tests/tutorial/Input/tbase2_x.files as "files" file (do not forget to
-modify it, like in lesson 1), although it does not differ from
+modify it, like in tutorial 1), although it does not differ from
 ~abinit/tests/tutorial/Input/tbase1_x.files. 
 
 {% dialog tests/tutorial/Input/tbase2_x.files %}
@@ -79,14 +79,14 @@ and
         xcart1  -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
                  7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
     
-These are similar to those determined in [lesson 1](base1),
+These are similar to those determined in [tutorial 1](base1),
 although they have been obtained in one run. 
 You can also check that the residual forces are lower than `5.0d-4`. 
 Convergence issues are discussed in [[help:abinit#7|section 7]] of the abinit help file.  
 You should read it. 
 By the way, you have read many parts of the abinit_help file! 
 You are missing the sections
-[help:abinit#2|2]], [help:abinit#5|5]],  [help:abinit#7|7]].
+[[help:abinit#2|2]], [[help:abinit#5|5]],  [[help:abinit#7|7]].
 
 You are also missing the description of many input variables. 
 We suggest that you finish reading entirely the abinit_help file now, while 
@@ -232,7 +232,7 @@ We will use `acell 12 12 12` for the final run.
 
 For most solids the size of the unit cell will be smaller than that. 
 We are treating a lot of vacuum in this supercell! 
-So, the H2 study, with this pseudopotential, turns out to be not really easy. 
+So, the H$_2$ study, with this pseudopotential, turns out to be not really easy. 
 Of course, the number of states to be treated is minimal! 
 This allows to have reasonable CPU time still.
 
@@ -240,7 +240,7 @@ This allows to have reasonable CPU time still.
   
 We now use the correct values of both [[ecut]] and [[acell]]. 
 Well, you should modify the tbase2_3.in file to make a calculation with `acell 12 12 12` and `ecut 30`. 
-You can still use the double loop feature with `[[udtset]] 1 2`
+You can still use the double loop feature with `udtset 1 2`
 (which reduces to a single loop), to minimize the modifications to the file.
 The file ~abinit/tests/tutorial/Input/tbase2_4.in can be taken as an example
 of input file, and ~abinit/tests/tutorial/Refs/tbase2_4.out as an example of output file.
@@ -265,7 +265,7 @@ The output data are:
 * These are our final data for the local (spin) density approximation. 
 
 We have used [[ixc]]=1. 
-Other expressions for the local (spin) density approximation [2, 3 .. 7] are possible. 
+Other expressions for the local (spin) density approximation [2, 3 ... 7] are possible. 
 The values 1, 2, 3 and 7 should give about the same results, since they all start 
 from the XC energy of the homogeneous electron gas, as determined by Quantum Monte Carlo calculations.  
 Other possibilities (ixc = 4, 5, 6) are older local density functionals, that could not rely on these data.
