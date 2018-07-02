@@ -1573,13 +1573,8 @@ subroutine saveocc_dmft(paw_dmft)
    do ikpt = 1, paw_dmft%nkpt
      do ib = 1, paw_dmft%mbandc
        do ib1 = 1, paw_dmft%mbandc
-         if (paw_dmft%nspinor==1) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
-         if (paw_dmft%nspinor==2) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
+         write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&         paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
        enddo
      enddo
    enddo
@@ -1664,15 +1659,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
      do ikpt = 1, paw_dmft%nkpt
        do ib = 1, paw_dmft%mbandc
          do ib1 = 1, paw_dmft%mbandc
-           if (paw_dmft%nspinor==1) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
-           if (paw_dmft%nspinor==2) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&             paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
+           read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
+&           paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
          enddo
        enddo
      enddo
@@ -1745,7 +1734,7 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
 
    paw_dmft%bandc_proc(ibc) = proc
 
-   paw_dmft%use_bandc(proc) = .true.
+   paw_dmft%use_bandc(proc+1) = .true.
  end do
 end subroutine init_sc_dmft_paralkgb
 

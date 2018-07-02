@@ -251,7 +251,7 @@
 !    In case of band parallelism combined with self consistent DMFT, need to
 !    exchange bands cprj
      if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
-       if (paw_dmft%use_bandc(mpi_enreg%me_band)) then
+       if (paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
          do ibc1=1,nbandc1
            proc_sender = paw_dmft%bandc_proc(ibc1)
            if(proc_sender == mpi_enreg%me_band) then
@@ -271,8 +271,8 @@
 &                             iorder_cprj,isppol,mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,&
 &                             unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
 
-             do proc_recver=1,mpi_enreg%nproc_band
-               if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver)) then
+             do proc_recver=0,mpi_enreg%nproc_band-1
+               if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
                  ! send to proc_recver
                  ierr = 0
                  call pawcprj_mpi_send(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),&
@@ -325,36 +325,46 @@
 !        check if dmft and occupations
 !        write(std_out,*) 'ib,ibc1          ',ib,ibc1
 
-         if(ibc1 /= 1 .and. .not.(paw_dmft%band_in(ib))) cycle
+         if(ibc1 /= 1) then
+           if (paw_dmft%use_sc_dmft == 0) then
+             cycle
+           else
+             if (.not.(paw_dmft%band_in(ib))) cycle
+           end if
+         end if
 
 !        DMFT stuff: extract cprj and occupations for additional band
-         if(paw_dmft%use_sc_dmft /= 0 .and. paw_dmft%band_in(ib)) then
+         if(paw_dmft%use_sc_dmft /= 0) then
+           if(paw_dmft%band_in(ib)) then
+!            write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
+!            write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
 
-!          write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
-!          write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
+             ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
 
-           ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
+             use_nondiag_occup_dmft = 1
+             locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
+             occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
 
-           use_nondiag_occup_dmft = 1
-           locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
-           occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
+             occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
 
-           if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
-           if(nspinor==1) occup(2) = zero
-
-!          write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
+!            write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
 !
-           if (locc_test .or. mkmem == 0) then
+             if (locc_test .or. mkmem == 0) then
 
-!            Get ib1_this_proc from ib1
-             if (paral_kgb==1) then
-!              cprj have already been extracted
-               call pawcprj_copy(cprj_correl(:,:,ibc1),cwaveprjb)
-             else ! paral_kgb /= 0
-               call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
-&                               mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
-&                               mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+!              Get ib1_this_proc from ib1
+               if (paral_kgb==1) then
+!                cprj have already been extracted
+                 call pawcprj_copy(cprj_correl(:,:,ibc1),cwaveprjb)
+               else ! paral_kgb /= 0
+                 call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
+&                                 mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                                 mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+               end if
              end if
+           else  ! nbandc1=1
+             use_nondiag_occup_dmft=0
+             locc_test = (abs(occ(iband))>tol8)
+             occup(1) = occ(iband)
            end if
          else  ! nbandc1=1
            use_nondiag_occup_dmft=0
