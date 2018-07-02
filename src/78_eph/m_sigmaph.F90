@@ -2197,7 +2197,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !call ebands_free(tmp_ebands)
    else
      downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
-     if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%nshiftk /= my_shiftq)
+     if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%shiftk /= my_shiftq)
      if (downsample) then
        MSG_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
        tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
