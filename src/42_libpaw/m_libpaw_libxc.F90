@@ -215,6 +215,14 @@ module m_libpaw_libxc_funcs
  end interface
 !
  interface
+   subroutine libpaw_xc_func_set_density_threshold(xc_func,dens_threshold) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE) :: dens_threshold
+     type(C_PTR) :: xc_func
+   end subroutine libpaw_xc_func_set_density_threshold
+ end interface
+!
+ interface
    subroutine libpaw_xc_get_singleprecision_constant(xc_cst_singleprecision) &
 &             bind(C,name="libpaw_xc_get_singleprecision_constant")
      use iso_c_binding, only : C_INT
@@ -1216,6 +1224,15 @@ end function libpaw_libxc_nspin
  is_gga =libpaw_libxc_isgga (xc_funcs)
  is_mgga=libpaw_libxc_ismgga(xc_funcs)
 
+ if (is_gga.and.(.not.present(grho2))) then
+   msg='GGA needs gradient of density!'
+   MSG_BUG(msg)
+ end if
+ if (is_mgga.and.((.not.present(lrho)).or.(.not.present(tau)))) then
+   msg='meta-GGA needs laplacian of density or tau!'
+   MSG_BUG(msg)
+ endif    
+
 !Inititalize all output arrays to zero
  exc=zero ; vxc=zero
  if (present(dvxc)) dvxc=zero
@@ -1417,7 +1434,7 @@ end function libpaw_libxc_nspin
      end if
 
 !    Convert the quantities returned by Libxc
-     if (is_gga.or.is_mgga) then
+     if ((is_gga.or.is_mgga).and.present(vxcgr)) then
        if (nspden==1) then
          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(1)*two
        else
@@ -1426,8 +1443,10 @@ end function libpaw_libxc_nspin
          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(2)
        end if
      end if
-     if (is_mgga) then
+     if (is_mgga.and.present(vxclrho)) then
        vxclrho(ipts,1:nspden) = vxclrho(ipts,1:nspden) + vlrho(1:nspden)
+     end if
+     if (is_mgga.and.present(vxctau)) then
        vxctau(ipts,1:nspden)  = vxctau(ipts,1:nspden)  + vtau(1:nspden)
      end if
 
