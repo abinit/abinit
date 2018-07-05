@@ -726,6 +726,7 @@ end subroutine printocc_green
 !!         2 print KS green function
 !!         3 print both local and KS green function
 !!         4 print spectral function is green%w_type="real"
+!!         5 print k-resolved spectral function is green%w_type="real"
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  pawprtvol = printing option
 !!  opt_wt=1 print green function as a function of frequency
@@ -768,7 +769,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !local variables-------------------------------
  integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor,isppol,itau
- integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spcorb_unt
+ integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spfkresolved_unt,spcorb_unt
  character(len=2000) :: message
  integer,allocatable :: unitgreenfunc_arr(:)
  integer,allocatable :: unitgreenloc_arr(:)
@@ -941,27 +942,53 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    ABI_DEALLOCATE(unitgreenloc_arr)
  endif
 
- if((green%w_type=="real".and.option==4).and.green%oper(1)%has_operks==1) then
+ if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
    write(message,'(a,a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
-   tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
-   if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(message)
-   end if
+   if (option==4) then
+     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
+   if (option==5) then
+     tmpfil = trim(paw_dmft%filapp)//'SpFunc_kresolved_'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
    ABI_ALLOCATE(sf,(green%nw))
    ABI_ALLOCATE(sf_corr,(green%nw))
    iall=0
-   sf=czero
-   do isppol = 1 , nsppol
-     do ikpt = 1, nkpt
-       do ib=1,mbandc
-         iall=iall+1
+   if (option==5) then
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         sf=czero
          do ifreq=1,green%nw
-           sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
+           do ib=1,mbandc
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+           enddo
+           write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+           call wrtout(spfkresolved_unt,message,'COLL')
+         enddo
+           write(message,*)
+           call wrtout(spfkresolved_unt,message,'COLL')
+       enddo
+       write(message,*) ch10
+       call wrtout(spfkresolved_unt,message,'COLL')
+     enddo
+   endif
+   if (option==4) then
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         do ib=1,mbandc
+           do ifreq=1,green%nw
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
+           enddo
          enddo
        enddo
      enddo
-   enddo
+   endif
    sf_corr=czero
    do iatom=1,natom
      call int2char4(iatom,tag_at)
@@ -992,10 +1019,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
      enddo
      close(spcorb_unt)
    enddo
-   do ifreq=1,green%nw
-     write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
-     call wrtout(spf_unt,message,'COLL')
-   enddo
+   if (option==4) then
+     do ifreq=1,green%nw
+       write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
+       call wrtout(spf_unt,message,'COLL')
+     enddo
+   endif
    close(spf_unt)
    ABI_DEALLOCATE(sf)
    ABI_DEALLOCATE(sf_corr)
@@ -1194,7 +1223,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),0.03/27.211_dp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)

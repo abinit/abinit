@@ -1260,7 +1260,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call init_oper(paw_dmft,lda_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
+         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,iscf,&
 &         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)

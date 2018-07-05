@@ -686,7 +686,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  else
    paw_dmft%dmft_nwlo=dtset%dmft_nwli
  endif
- paw_dmft%dmft_nwr=32
+ paw_dmft%dmft_nwr=800
  paw_dmft%dmft_rslf=dtset%dmft_rslf
  paw_dmft%dmft_mxsf=dtset%dmft_mxsf
  paw_dmft%dmftqmc_l=dtset%dmftqmc_l
@@ -754,7 +754,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  ABI_ALLOCATE(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
 
 ! Set up real frequencies for spectral function in Hubbard one.
- step=0.0015_dp
+ step=0.00005_dp
  paw_dmft%omega_r(2*paw_dmft%dmft_nwr)=pi*step*(two*float(paw_dmft%dmft_nwr-1)+one)
  do ifreq=1,2*paw_dmft%dmft_nwr-1
   paw_dmft%omega_r(ifreq)=pi*step*(two*float(ifreq-1)+one)-paw_dmft%omega_r(2*paw_dmft%dmft_nwr)

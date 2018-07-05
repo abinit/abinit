@@ -102,7 +102,7 @@ contains
 !!
 !! SOURCE
 
-subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
+subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 & lda_occup,mband,mband_cprj,mkmem,mpi_enreg,nkpt,my_nspinor,nsppol,occ,&
 & paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,unpaw,nbandkss)
 
@@ -137,7 +137,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mband_cprj,mkmem
+ integer,intent(in) :: iscf,mband,mband_cprj,mkmem
  integer,intent(in) :: nkpt,my_nspinor,nsppol
  integer,intent(in) :: unpaw,usecprj
  integer, optional, intent(in) :: nbandkss
@@ -715,7 +715,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
    if(me.eq.0.and.nbandkss/=0) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm=3
-     if(dtset%ucrpa>=1) opt_renorm=2
+     if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2
      call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
      call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
 &     nsppol,paw_dmft,pawtab,psps,t2g)

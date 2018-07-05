@@ -208,7 +208,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawmkaewf,        only : pawmkaewf
  use m_dens,             only : mag_constr_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
- use m_datafordmft,       only : datafordmft
+ use m_datafordmft,      only : datafordmft
+ use m_green,            only : green_type,compute_green,&
+&                      fourier_green,print_green,init_green,destroy_green,init_green_tau
+ use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -306,6 +309,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
+ type(self_type) :: selfr
+ type(green_type) :: greenr
 
 ! *************************************************************************
 
@@ -1090,11 +1095,30 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !    ==  compute psichi
      call init_oper(paw_dmft,lda_occup)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
-&     lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
+     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,-1 &
+&     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
+
+     if(dtset%iscf<0) then
+      write(6,*) "datafordmft done"
+       call initialize_self(selfr,paw_dmft,wtype='real')
+      write(6,*) "init self done"
+       call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
+      write(6,*) "init green done with allocation of green%oper"
+       !call rw_self(self,paw_dmft,prtopt=5,opt_rw=1)
+      write(6,*) "read self done"
+       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=1,opt_nonxsum=0)
+      write(6,*) "compute green done"
+       if(me==master) then
+         call print_green("forspectralfunction",greenr,5,paw_dmft,pawprtvol=3,opt_wt=1)
+        write(6,*) "print green done"
+       endif
+
+       call destroy_green(greenr)
+       call destroy_self(selfr)
+     endif
      call destroy_dmft(paw_dmft)
      call destroy_oper(lda_occup)
    end if
