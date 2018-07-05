@@ -256,7 +256,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !gs_hamk123 is used to apply vlocal in <u_nk1|Hk2|u_mk3>
  ! my_nucdipmom can be used to override the input nuclear dipoles
  call init_hamiltonian(gs_hamk123,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=my_nucdipmom)
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom)
 
  !---------construct local potential------------------
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
@@ -590,6 +590,22 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
              nkpg = 0
              ABI_ALLOCATE(kpg_k_dummy,(npw_kb,nkpg))
+
+             !     compute and load nuclear dipole Hamiltonian at current k point
+             if(any(abs(gs_hamk123%nucdipmom)>0.0)) then
+                if(allocated(nucdipmom_k)) then
+                   ABI_DEALLOCATE(nucdipmom_k)
+                end if
+                ABI_ALLOCATE(nucdipmom_k,(npw_kb*(npw_kb+1)/2))
+                call mknucdipmom_k(gmet,kg_kb,kpointb,dtset%natom,gs_hamk123%nucdipmom,&
+                     &           nucdipmom_k,npw_kb,rprimd,ucvol,xred)
+                if(allocated(gs_hamk123%nucdipmom_k)) then
+                   ABI_DEALLOCATE(gs_hamk123%nucdipmom_k)
+                end if
+                ABI_ALLOCATE(gs_hamk123%nucdipmom_k,(npw_kb*(npw_kb+1)/2))
+                call load_k_hamiltonian(gs_hamk123,nucdipmom_k=nucdipmom_k)
+                ABI_DEALLOCATE(nucdipmom_k)
+             end if
 
                    ! this is minimal Hamiltonian information, to apply vlocal (and only vlocal) to |u_kb>
              call load_k_hamiltonian(gs_hamk123,kpt_k=kpointb(:),istwf_k=istwf_k,npw_k=npw_kb,&
