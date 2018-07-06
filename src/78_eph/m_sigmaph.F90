@@ -728,7 +728,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Distribute q-points and bands.
      ABI_MALLOC(distrib_bq, (nbsum, sigma%nqibz_k))
-     if (sigma%nqibz_k >= nprocs .and. mod(sigma%nqibz_k, nprocs) == 0) then
+     !if (sigma%nqibz_k >= nprocs .and. mod(sigma%nqibz_k, nprocs) == 0) then
+     if (sigma%nqibz_k >= nprocs) then
        do iq_ibz=1,sigma%nqibz_k
          distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
        end do
