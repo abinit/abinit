@@ -88,6 +88,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  use m_fftcore,  only : kpgsph
  use m_berrytk,  only : smatrix
+ use m_paw_overlap,only : overlap_k1k2_paw
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type

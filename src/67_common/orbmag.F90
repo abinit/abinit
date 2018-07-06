@@ -86,7 +86,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_xmpi
  use m_errors
  use m_profiling_abi
+
  use m_orbmag
+ use m_paw_overlap,only : overlap_k1k2_paw
 
  use m_geometry,     only : metric
  use m_berrytk,      only : smatrix

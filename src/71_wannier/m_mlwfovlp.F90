@@ -50,6 +50,7 @@ module m_mlwfovlp
  use m_pawtab,   only : pawtab_type
  use m_pawcprj,  only : pawcprj_type
  use m_paw_sphharm, only : ylm_cmplx, initylmr
+ use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
 
  implicit none

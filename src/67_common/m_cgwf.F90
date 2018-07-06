@@ -42,6 +42,7 @@ module m_cgwf
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
  use m_getghc,        only : getghc
  use m_berrytk,       only : smatrix
+ use m_paw_overlap, only : smatrix_k_paw
 
  implicit none
 

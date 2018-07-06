@@ -38,6 +38,7 @@ module m_orbmag
  use m_errors
 
  use m_pawcprj, only : pawcprj_type, pawcprj_free
+ use m_paw_overlap, only : expibi
 
  implicit none
 

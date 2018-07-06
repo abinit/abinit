@@ -107,7 +107,8 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_pawang,  only : pawang_type
  use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
+ use m_pawcprj, only : pawcprj_alloc,pawcprj_getdim
+ use m_paw_overlap, only : qijb_kk,expibi
  use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).

@@ -83,6 +83,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
  use m_berrytk,     only : smatrix
+ use m_paw_overlap, only : smatrix_k_paw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
