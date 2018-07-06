@@ -1974,8 +1974,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     ' rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,' rfstrs=',dt%rfstrs,' rfuser=',dt%rfuser,&
 &     ' d3e_pert1_elfd=',dt%d3e_pert1_elfd,' d3e_pert2_elfd=',dt%d3e_pert2_elfd,' d3e_pert3_elfd=',dt%d3e_pert3_elfd,&
 &     ' d3e_pert1_phon=',dt%d3e_pert1_phon,' d3e_pert2_phon=',dt%d3e_pert2_phon,' d3e_pert3_phon=',dt%d3e_pert3_phon,ch10,&
-&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs,',ch10,&
-&     'rfuser, d3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
+&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs, rfuser,',ch10,&
+&     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
    if(usepaw==1)then
@@ -2147,8 +2147,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     ' rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,' rfstrs=',dt%rfstrs,' rfuser=',dt%rfuser,&
 &     ' d3e_pert1_elfd=',dt%d3e_pert1_elfd,' d3e_pert2_elfd=',dt%d3e_pert2_elfd,' d3e_pert3_elfd=',dt%d3e_pert3_elfd,&
 &     ' d3e_pert1_phon=',dt%d3e_pert1_phon,' d3e_pert2_phon=',dt%d3e_pert2_phon,' d3e_pert3_phon=',dt%d3e_pert3_phon,ch10,&
-&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs,',ch10,&
-&     'rfuser, d3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
+&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs, rfuser,',ch10,&
+&     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 
