@@ -505,7 +505,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (pawprtden>1.AND.pawprtden<6) then ! We will need the core density
      ABI_ALLOCATE(rhor_paw_core,(pawfgr%nfft,nspden))
-     call read_atomden(mpi_enreg,natom,nspden,ntypat,pawfgr,rhor_paw_core,&
+     call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_core,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='core   ')
 
      if (prtvol>9) then  ! Check normalisation
@@ -518,7 +518,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (pawprtden>2.AND.pawprtden<6) then ! We will need the valence protodensity
      ABI_ALLOCATE(rhor_paw_val,(pawfgr%nfft,nspden))
-     call read_atomden(mpi_enreg,natom,nspden,ntypat,pawfgr,rhor_paw_val,&
+     call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_val,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='valence')
 
      if (prtvol>9) then ! Check normalisation
