@@ -224,6 +224,14 @@ module libxc_functionals
  end interface
 !
  interface
+   subroutine xc_func_set_density_threshold(xc_func,dens_threshold) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE) :: dens_threshold
+     type(C_PTR) :: xc_func
+   end subroutine xc_func_set_density_threshold
+ end interface
+!
+ interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
      use iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_singleprecision
@@ -1252,6 +1260,7 @@ end function libxc_functionals_nspin
  logical :: is_gga,is_mgga
  real(dp) :: xc_tb09_c_
  real(dp),target :: exctmp
+ character(len=500) :: msg
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
@@ -1279,6 +1288,15 @@ end function libxc_functionals_nspin
 
  is_gga =libxc_functionals_isgga (xc_funcs)
  is_mgga=libxc_functionals_ismgga(xc_funcs)
+
+ if (is_gga.and.(.not.present(grho2))) then
+   msg='GGA needs gradient of density!'
+   MSG_BUG(msg)
+ end if
+ if (is_mgga.and.((.not.present(lrho)).or.(.not.present(tau)))) then
+   msg='meta-GGA needs laplacian of density or tau!'
+   MSG_BUG(msg)
+ endif    
 
 !Inititalize all output arrays to zero
  exc=zero ; vxc=zero
@@ -1481,7 +1499,7 @@ end function libxc_functionals_nspin
      end if
 
 !    Convert the quantities returned by Libxc to the ones needed by ABINIT
-     if (is_gga.or.is_mgga) then
+     if ((is_gga.or.is_mgga).and.present(vxcgr)) then
        if (nspden==1) then
          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(1)*two
        else
@@ -1490,8 +1508,10 @@ end function libxc_functionals_nspin
          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(2)
        end if
      end if
-     if (is_mgga) then
+     if (is_mgga.and.present(vxclrho)) then
        vxclrho(ipts,1:nspden) = vxclrho(ipts,1:nspden) + vlrho(1:nspden)
+     end if
+     if (is_mgga.and.present(vxctau)) then
        vxctau(ipts,1:nspden)  = vxctau(ipts,1:nspden)  + vtau(1:nspden)
      end if
 
