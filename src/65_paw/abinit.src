@@ -25,7 +25,6 @@ sources = [
  "m_paw_slater.F90",
  "m_paw_pwaves_lmn.F90",
  "m_pawfgr.F90",
- "atomden.F90",
  "calc_ubare.F90",
  "chkpawovlp.F90",
  "convert_notation.F90",
@@ -72,14 +71,12 @@ sources = [
  "paw_mknewh0.F90",
  "paw_symcprj.F90",
  "qijb_kk.F90",
- "read_atomden.F90",
  "setnoccmmp.F90",
  "setrhoijpbe0.F90",
  "setsymrhoij.F90",
  "simple_j_dia.F90",
  "smatrix_k_paw.F90",
  "smatrix_pawinit.F90",
- "spline_paw_fncs.F90",
  "transgrid.F90",
  "wvl_nhatgrid.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
