@@ -1107,7 +1107,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
       write(6,*) "init self done"
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
       write(6,*) "init green done with allocation of green%oper"
-       !call rw_self(self,paw_dmft,prtopt=5,opt_rw=1)
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1)
       write(6,*) "read self done"
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=1,opt_nonxsum=0)
       write(6,*) "compute green done"

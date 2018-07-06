@@ -240,11 +240,12 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
    green%w_type="imag"
  endif
 
+
  if(green%w_type=="imag") then
    nw=paw_dmft%dmft_nwlo
    green%omega=>paw_dmft%omega_lo
  else if(green%w_type=="real") then
-   nw=2*paw_dmft%dmft_nwr
+   nw=size(paw_dmft%omega_r)
    green%omega=>paw_dmft%omega_r
  endif
 
@@ -1223,7 +1224,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.03/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),0.001/27.211_dp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)

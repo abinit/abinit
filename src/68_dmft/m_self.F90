@@ -168,7 +168,7 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
    self%nw=paw_dmft%dmft_nwlo
    self%omega=>paw_dmft%omega_lo
  else if(self%w_type=="real") then
-   self%nw=2*paw_dmft%dmft_nwr
+   self%nw=size(paw_dmft%omega_r)
    self%omega=>paw_dmft%omega_r
  endif
 
