@@ -1,6 +1,7 @@
 # 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
-# Test on AlAs, with PAW pseudopotentials
-# (L. Baguet, 04.2018)
+# Test on AlAs, with norm conserving pseudopotentials
+# (L. Baguet, 05.2018)
+# nsppol = 2
 
 # Enable ouput for nonliner (full DFPT only)
 #*****************************************************
@@ -30,16 +31,24 @@
 #********************************
    ixc 7
 
+# Polarization
+#*******************************
+          nsppol    2
+  spinmagntarget    0
+
 # SCF procedure
 #*******************************
    nstep    100
-   nband    4
+
+# Bands
+#*******************************
+  occopt    1
+   nband    8
 
 # Plane wave basis set
 #**************************************
        ecut  3
      ecutsm  0
-  pawecutdg  6
 
 # K point grid
 #**************************************
@@ -54,14 +63,10 @@
 #**************************************
     ndtset   7
 
-# PAW option
-#*******************************
-  pawxcdev   0 # non-zero pawxcdev is not allowed for dataset 7, so we use pawxcdev=0 for all
-
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   2
-    tolwfr   1.0d-28
+    tolwfr   1.0d-26
     getden   2
     getwfk   2
 
@@ -142,14 +147,15 @@ optdriver7    5 # for nonlinear calculation
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t101.out,  tolnlines =11, tolabs =1.1E-4, tolrel = 5.0E-3, fld_options = -medium;
-#%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
+#%%    t101.out, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%% psp_files = 13al.pspnc,33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW, DFPT, NONLINEAR
+#%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
-#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
+#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7). 
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t100.in
 #%%<END TEST_INFO>

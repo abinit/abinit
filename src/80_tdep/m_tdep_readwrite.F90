@@ -65,6 +65,7 @@ module m_tdep_readwrite
     double precision, allocatable :: etot(:)
 !FB    double precision, allocatable :: sigma(:,:)
     character (len=2), allocatable :: special_qpt(:)
+    character (len=200) :: output_prefix
     
   end type Input_Variables_type
 
@@ -178,7 +179,8 @@ contains
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
-  character(len=7) :: filename
+  character(len=500) :: filename
+  character(len=500) :: inputfilename
   integer :: values(8)  
   type(Input_Variables_type),intent(out) :: InVar
   type(abihist) :: Hist
@@ -191,10 +193,9 @@ contains
   real(dp), allocatable :: znucl(:)
 
 ! Define output files  
-  InVar%stdout=8
+  InVar%stdout=7
   InVar%stdlog=6
-  open(unit=InVar%stdout,file='data.out')
-  open(unit=InVar%stdlog,file='data.log')
+  !open(unit=InVar%stdlog,file='data.log')
 
 ! Define Keywords
   NormalMode='NormalMode'
@@ -239,15 +240,33 @@ contains
 
 ! Check if a NetCDF file is available
   filename='HIST.nc'
+  inputfilename='input.in'
+  write(InVar%stdlog,'(a)',err=10) ' Give name for input file '
+  read(*, '(a)',err=10) inputfilename
+  write(InVar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
+10 continue
+  write(InVar%stdlog,'(a)',err=11) ' Give name for HIST file '
+  read(*, '(a)',err=11) filename
+  write(InVar%stdlog, '(a)',err=11) '.'//trim(filename)
+11 continue
+  write(InVar%stdlog,'(a)', err=12)' Give root name for generic output files:'
+  read (*, '(a)', err=12) InVar%output_prefix
+  write (InVar%stdlog, '(a)', err=12 ) InVar%output_prefix 
+12 continue
+  if ( inputfilename == "" ) inputfilename='input.in'
+  if ( filename == "" ) filename='HIST.nc'
+
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'_output')
+
 
 #if defined HAVE_NETCDF
  !Open netCDF file
   ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(InVar%stdout,'(3a)') 'Could no open ',trim(filename),', starting from scratch'
+    write(InVar%stdout,'(3a)') '.'//'Could no open ',trim(filename),', starting from scratch'
     InVar%netcdf=.false.
   else
-    write(InVar%stdout,'(3a)') 'Succesfully open ',trim(filename),' for reading'
+    write(InVar%stdout,'(3a)') '.'//'Succesfully open ',trim(filename),' for reading'
     write(InVar%stdout,'(a)') 'Extracting information from NetCDF file...'
     InVar%netcdf=.true.
   end if
@@ -256,7 +275,7 @@ contains
     call get_dims_hist(ncid,InVar%natom,InVar%ntypat,nimage,mdtime,&
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
-    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=zero
+    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=0
     ABI_MALLOC(znucl,(InVar%ntypat))
     call read_csts_hist(ncid,dtion,InVar%typat,znucl,InVar%amu)
     ABI_FREE(znucl)
@@ -273,7 +292,7 @@ contains
 
 ! Write version, copyright, date...
   write(InVar%stdout,*) ' '
-  open(unit=40,file='input.in')
+  open(unit=40,file=inputfilename)
   read(40,*) string
   if (string.eq.NormalMode) then
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS'
@@ -466,7 +485,7 @@ contains
       write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
     else if (string.eq.Ngqpt2) then  
       read(40,*) string,InVar%ngqpt2(:)
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ngqpt2(:)
+      write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt2(:)
     else if (string.eq.tolmotifinboxmatch) then  
       read(40,*) string,InVar%tolmotif,InVar%tolinbox,InVar%tolmatch
       write(InVar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',InVar%tolmotif

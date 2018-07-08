@@ -32,7 +32,7 @@ module m_pawmkaewf
  use defs_wvltypes
  use m_profiling_abi
  use m_xmpi
- use m_blas
+ use m_hide_blas
  use m_splines
  use m_errors
  use m_nctk
@@ -195,7 +195,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  character(len=nctk_slen) :: shape_str
 !arrays
  integer,allocatable :: l_size_atm(:)
- integer, ABI_CONTIGUOUS pointer :: my_atmtab(:)
+ integer, pointer :: my_atmtab(:)
  integer,allocatable :: gbound(:,:),kg_k(:,:)
  real(dp) :: red(3),shift(3),rfft(3),kpoint(3),cp_fact(2)
  real(dp),allocatable :: r0shift(:,:,:),phk_atm(:,:,:)

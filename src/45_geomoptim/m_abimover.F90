@@ -141,6 +141,12 @@ integer,pointer  :: jellslab
 integer,pointer  :: natom
 ! Number of CONstraint EQuations
 integer,pointer  :: nconeq
+! Option to add strain when FREEZe DISPlacement
+integer,pointer :: ph_freez_disp_addStrain
+! Option for the PHonon FREEZe DISPlacement AMPLitude 
+integer,pointer :: ph_freez_disp_option
+! Number of PHonon FREEZe DISPlacement AMPLitude
+integer,pointer :: ph_freez_disp_nampl
 ! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
 integer,pointer  :: ph_nqshift
 ! Use by pred_isothermal only
@@ -184,6 +190,8 @@ integer,pointer  :: typat(:)            ! typat(natom)
 integer,pointer  :: prtatlist(:)        ! prtatlist(natom)
 ! Qpoint grid (used for ionmov 26 and 27)
 integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
+! List of PHonon FREEZe DISPlacement AMPLitude
+real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
 real(dp),pointer :: ph_qshift(:,:)       ! symrel(3,nsym)
 ! Mass of each atom (NOT IN DTSET)
@@ -459,8 +467,9 @@ subroutine abimover_ini(ab_mover,specs,&
 & natom,nconeq,nnos,nsym,ntypat,&
 & optcell,restartxf,signperm,ionmov,&
 & bmass,dtion,friction,mdwall,noseinert,strprecon,vis,&
-& iatfix,symrel,ph_ngqpt,ph_nqshift,ph_qshift,typat,prtatlist,amass,goprecprm,mdtemp,strtarget,&
-& qmass,znucl,fnameabi_hes,filnam_ds)
+& iatfix,symrel,ph_freez_disp_addStrain,ph_freez_disp_ampl,&
+& ph_freez_disp_nampl,ph_freez_disp_option,ph_ngqpt,ph_nqshift,ph_qshift,typat,prtatlist,&
+& amass,goprecprm,mdtemp,strtarget,qmass,znucl,fnameabi_hes,filnam_ds)
 
 !Arguments ------------------------------------
 !scalars
@@ -487,7 +496,13 @@ integer,target, intent(in)  :: natom
 integer,target, intent(in)  :: nconeq
 ! Use by pred_isothermal only
 integer,target, intent(in)  :: nnos
-! Number of SYMmetry operations
+! Option to add strain when FREEZe DISPlacement
+integer,target,intent(in) :: ph_freez_disp_addStrain
+! Option for the PHonon FREEZe DISPlacement AMPLitude 
+integer,target,intent(in)  :: ph_freez_disp_option
+! Number of PHonon FREEZe DISPlacement AMPLitude
+integer,target,intent(in)  :: ph_freez_disp_nampl
+! Number of q shift
 integer,target, intent(in)  :: ph_nqshift
 ! Number of SYMmetry operations
 integer,target, intent(in)  :: nsym
@@ -535,6 +550,8 @@ real(dp),target, intent(in) :: amass(:)            ! amass(natom)
 real(dp),target, intent(in) :: goprecprm(:)
 ! Molecular Dynamics Initial and Final Temperature
 real(dp),target, intent(in) :: mdtemp(:)           ! mdtemp(2) (initial,final)
+! List of PHonon FREEZe DISPlacement AMPLitude
+real(dp),target,intent(in) :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid
 real(dp),target, intent(in)  :: ph_qshift(:,:)     ! ph_qshift(3,nqshift)
 ! STRess TARGET
@@ -611,10 +628,14 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
  ab_mover%iatfix=>iatfix(:,1:natom)
 !SYMmetry in REaL space
  ab_mover%symrel=>symrel
-!Phonon q grid in the DDB (ionmov 26 and 27)
+ !Phonon q grid in the DDB (ionmov 26 and 27)
+ ab_mover%ph_freez_disp_addStrain=>ph_freez_disp_addStrain
+ ab_mover%ph_freez_disp_option=>ph_freez_disp_option
+ ab_mover%ph_freez_disp_nampl=>ph_freez_disp_nampl
  ab_mover%ph_ngqpt=>ph_ngqpt
  ab_mover%ph_nqshift=>ph_nqshift
  ab_mover%ph_qshift=>ph_qshift
+ ab_mover%ph_freez_disp_ampl=>ph_freez_disp_ampl
 !TYPe of ATom
  ab_mover%typat => typat(1:natom)
 !PRTint QTom LIST

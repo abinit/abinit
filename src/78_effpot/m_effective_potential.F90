@@ -55,7 +55,7 @@ module m_effective_potential
  use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
- use m_geometry,       only : fcart2fred, xcart2xred, xred2xcart, metric
+ use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
@@ -86,7 +86,8 @@ module m_effective_potential
  !AM_EXPERIMENTAL
  public :: effective_potential_computeGradient
 ! public :: effective_potential_effpot2ddb
-! public :: effective_potential_printPDOS
+ ! public :: effective_potential_printPDOS
+ public :: effective_potential_checkDEV
  public :: effective_potential_writeNETCDF
  public :: OPERATOR(==)
  !AM_EXPERIMENTAL
@@ -788,11 +789,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(msg, '(6a,3I4,5a)' )ch10,&
+       write(msg, '(6a,3I4,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
-&        '     The previous harmonic part was build for bigger cell,',ch10,&
-&        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
-&        '     The simulation might be completely wong',ch10,&
+&        '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
+&        '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
 &        ' ---'
        call wrtout(std_out,msg,"COLL")
        if (abs(min1) < abs(min1_cell)) min1 = min1_cell
@@ -2517,6 +2517,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 2 - Transfert the reference values
 !------------------------------------
 
+! Set the value of the energy
   energy = eff_pot%energy * ncell
 
   if(need_verbose)then
@@ -2526,6 +2527,25 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(std_out,msg,'COLL')
   end if
 
+!Set the value of the initial strees (should be zero if the system is relaxed)
+!According to the original definition of the model, the reference should always be
+! a critical point of the PES so the first order derivative should not be take into account...
+!  do ii=1,6
+!   energy = energy + ncell * eff_pot%strten(ii)*strain_tmp(ii)
+! end do
+! strten(:) = ncell * eff_pot%strten(:)
+!Set the value of the initial forces (should be zero if the system is relaxed)
+! ii = 1
+! This next part is not working, need to apply strain to the original fcart
+! do ia=1,eff_pot%supercell%natom
+!   fcart(:,ia) = eff_pot%fcart(:,ii)
+!   do mu=1,3
+!     energy = energy + eff_pot%fcart(mu,ii)*disp_tmp(mu,ii)
+!   end do
+!   ii = ii + 1
+!   if(ii > eff_pot%crystal%natom) ii = 1
+! end do
+ 
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -2649,7 +2669,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     energy_part = zero
     fcart_part(:,:)  = zero
     strten_part(:) = zero
-
     call polynomial_coeff_evaluate(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
@@ -2663,7 +2682,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       call wrtout(std_out,msg,'COLL')
     end if
     energy = energy + energy_part
-    fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
+    fcart(:,:) = fcart(:,:) + fcart_part(:,:)
     strten(:) = strten(:) + strten_part(:)
   end if
 
@@ -3500,7 +3519,8 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !!
 !! FUNCTION
 !! Routine for develloper Check by finite differences the equations in
-!! effective_potential_evaluate
+!! effective_potential_evaluate need to provide HIST file, so you need to
+!! activate the fit_process or bound_process to activate the reading of the HIST
 !!
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
@@ -3541,8 +3561,10 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  real(dp):: energy,delt,delta,ucvol
  !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3)
- real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),deltalist(5)
- real(dp):: disp(3,natom),strain(6),du_delta(6,3,natom),diff(5)
+ real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3)
+ real(dp):: rprimd_def(3,3),rprimd_ref(3,3),deltalist(5)
+ real(dp):: disp(3,natom),disp_red(3,natom),strain(6),du_delta(6,3,natom),diff(5)
+ real(dp),allocatable :: xred(:,:)
  integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
  character(len=500) :: msg
 
@@ -3558,51 +3580,62 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
    write(msg,'(a)')'natom is not correct'
    MSG_BUG(msg)
  end if
- rprimd =  eff_pot%supercell%rprimd
- istep = 127
- call effective_potential_getDisp(disp,du_delta,natom,eff_pot%supercell%rprimd,&
-&                                 eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
-&                                 xcart_ref=eff_pot%supercell%xcart,&
-&                                 compute_displacement = .true.,compute_duDelta = .true.)
 
+
+ ABI_ALLOCATE(xred,(3,natom))
+ xred = zero
+
+!option 1 => set the reference for the test
+! call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+!&                eff_pot%supercell%xcart,xred)
+! rprimd =  eff_pot%supercell%rprimd
+
+!option 2 => set a specific step for the test
+ istep = 4
+ xred = hist%xred(:,:,istep)
+ rprimd =  hist%rprimd(:,:,istep)
+ 
+ rprimd_ref =  eff_pot%supercell%rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
  npt=5
- delta = 0.005
+ delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
- rprimd =  hist%rprimd(:,:,istep)
+ 
    do ia=1,natom
      do mu=1,3
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
-!         strain = zero
 
+!        Get the initial displacement        
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
-&                                         eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                         eff_pot%supercell%rprimd,1,xred_hist=xred,&
 &                                         xcart_ref=eff_pot%supercell%xcart,&
 &                                         compute_displacement = .true.,compute_duDelta = .true.)
 
-
-           disp(mu,ia) = disp(mu,ia) + delt * eff_pot%supercell%rprimd(mu,mu)
+!        Add the delta         
+         call xcart2xred(natom, rprimd, disp, disp_red)
+         disp_red(mu,ia) = disp_red(mu,ia) + delt
+         call xred2xcart(natom, rprimd, disp, disp_red)
 
          call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                      xred=hist%xred(:,:,istep),du_delta=du_delta,&
-&                                      displacement=disp,strain=strain,&
-&                                      compute_anharmonic=.true.,verbose=.false.)
+&                                          xred=xred,du_delta=du_delta,&
+&                                          displacement=disp,compute_anharmonic=.true.,verbose=.false.)
          diff(ii) = energy
 
        end do
 
-       call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
-&                                     eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
-&                                     xcart_ref=eff_pot%supercell%xcart,&
-&                                     compute_displacement = .true.,compute_duDelta = .true.)
+!  Get the initial displacement
+   call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
+&                                   eff_pot%supercell%rprimd,1,xred_hist=xred,&
+&                                   xcart_ref=eff_pot%supercell%xcart,&
+&                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,eff_pot%supercell%rprimd,&
-&                                  xred=hist%xred(:,:,istep),du_delta=du_delta,&
-&                                  displacement=disp,strain=strain,&
-&                                  compute_anharmonic=.true.,verbose=.false.)
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                    xred=xred,du_delta=du_delta,&
+&                                    displacement=disp,compute_anharmonic=.true.,verbose=.false.)
 
    write(std_out,*) "Analyti:",fred(mu,ia)
    write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta)
@@ -3618,7 +3651,7 @@ identity = zero
 forall(ii=1:3)identity(ii,ii)=1
 
  npt=5
- delta = 0.005
+ delta = 0.0005
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
 
  do jj=1,6
@@ -3632,36 +3665,46 @@ forall(ii=1:3)identity(ii,ii)=1
      mat_def(alpha(jj),beta(jj)) = mat_def(alpha(jj),beta(jj)) + half * strain(jj)
      mat_def(beta(jj),alpha(jj)) = mat_def(beta(jj),alpha(jj)) + half * strain(jj)
 
+     rprimd_def =  matmul(identity(:,:)+mat_def(:,:),rprimd)
 
-     rprimd =  matmul(eff_pot%supercell%rprimd,identity(:,:)+mat_def(:,:))
-!     rprimd = eff_pot%supercell%rprimd
-     call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
-&                                     eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
-&                                     xcart_ref=eff_pot%supercell%xcart,&
-&                                     compute_displacement = .true.,compute_duDelta = .true.)
+! The two options should give the same result
+! Option 1 => compute the disps and provide them to evaluate
+!      call effective_potential_getDisp(disp,du_delta,natom,rprimd_def,&
+! &                                     rprimd_ref,1,xred_hist=xred,&
+! &                                     xcart_ref=eff_pot%supercell%xcart,&
+! &                                     compute_displacement = .true.,compute_duDelta = .true.)
 
-!   disp_tmp = dips_tmp + delta *  eff_pot%supercell%rprimd(1,1)
+!      call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+! &                                      xred=xred,du_delta=du_delta,&
+! &                                      displacement=disp,strain=strain,&
+! &                                      compute_anharmonic=.true.,verbose=.false.)
 
-     call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                      xred=hist%xred(:,:,istep),du_delta=du_delta,&
-&                                      displacement=disp,strain=strain,&
-&                                      compute_anharmonic=.true.,verbose=.false.)
+!   Option 2 => compute the disps within evaluate
+    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+&                                     xred=xred,compute_anharmonic=.true.,verbose=.false.)
+
+
+
      diff(ii) = energy
 
-   end do
+   end do 
 
-   ! write(std_out,*) "Diff:",diff(:)
+!  The two options should give the same result
+!  Option 1 => compute the disps and provide them to evaluate
+!    call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
+! &                                   rprimd_ref,1,xred_hist=xred,&
+! &                                   xcart_ref=eff_pot%supercell%xcart,&
+! &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-   call effective_potential_getDisp(disp,du_delta,natom,eff_pot%supercell%rprimd,&
-&                                   eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
-&                                   xcart_ref=eff_pot%supercell%xcart,&
-&                                   compute_displacement = .true.,compute_duDelta = .true.)
+!    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+! &                                    xred=xred,du_delta=du_delta,&
+! &                                    displacement=disp,&
+! &                                    compute_anharmonic=.true.,verbose=.false.)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,eff_pot%supercell%rprimd,&
-&                                  xred=hist%xred(:,:,istep),du_delta=du_delta,&
-&                                  displacement=disp,&
-&                                  compute_anharmonic=.true.,verbose=.false.)
-
+!  Option 2 => compute the disps within evaluate
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
+   
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
  write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&

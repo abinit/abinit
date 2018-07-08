@@ -133,7 +133,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
 !!Various inits
- opt_compch=0;!optvxc=1;optexc=3
+ opt_compch=0; !optvxc=1;optexc=3
  usecore=0;usetcore=0  ! This is true for phonons and Efield pert.
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
 
@@ -186,15 +186,15 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_DEALLOCATE(lmselect_tmp)
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
-&                 lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
-&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
-                  rho1_1,rho1_2,rho1_3,0)
+&   lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
+&   paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
+&   rho1_1,rho1_2,rho1_3,0)
    d3exc = d3exc + d3exc1_iat
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xct1,lm_size_all,&
-&                 lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
-&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
-                  trho1_1,trho1_2,trho1_3,usexcnhat)
+&   lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
+&   paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
+&   trho1_1,trho1_2,trho1_3,usexcnhat)
    d3exc = d3exc - d3exc1_iat
 
    ABI_DEALLOCATE(lmselect_1)

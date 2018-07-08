@@ -38,8 +38,8 @@ module m_a2ftr
 
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
- use m_abilasi,         only : matrginv
- use m_geometry,         only : phdispl_cart2red
+ use m_hide_lapack,     only : matrginv
+ use m_geometry,        only : phdispl_cart2red
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_dynmat,          only : ftgam_init, ftgam

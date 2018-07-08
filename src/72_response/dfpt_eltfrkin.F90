@@ -217,7 +217,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 
  DBG_EXIT("COLL")
 
-contains
+  contains
 !!***
 
 !!****f* ABINIT/d2kindstr2
@@ -297,109 +297,109 @@ subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 ! *************************************************************************
 !
 !htpisq is (1/2) (2 Pi) **2:
- htpisq=0.5_dp*(two_pi)**2
+   htpisq=0.5_dp*(two_pi)**2
 
- ecutsm_inv=0.0_dp
- if(ecutsm>1.0d-20)ecutsm_inv=1/ecutsm
+   ecutsm_inv=0.0_dp
+   if(ecutsm>1.0d-20)ecutsm_inv=1/ecutsm
 
 !Loop over 2nd strain index
- do istr2=1,6
+   do istr2=1,6
 !  Loop over 1st strain index, upper triangle only
-   do istr1=1,istr2
+     do istr1=1,istr2
 
-     ka=idx(2*istr1-1);kb=idx(2*istr1);kg=idx(2*istr2-1);kd=idx(2*istr2)
+       ka=idx(2*istr1-1);kb=idx(2*istr1);kg=idx(2*istr2-1);kd=idx(2*istr2)
 
-     do ii = 1,3
-       dgm01(:,ii)=-(gprimd(ka,:)*gprimd(kb,ii)+gprimd(kb,:)*gprimd(ka,ii))
-       dgm10(:,ii)=-(gprimd(kg,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(kg,ii))
-     end do
+       do ii = 1,3
+         dgm01(:,ii)=-(gprimd(ka,:)*gprimd(kb,ii)+gprimd(kb,:)*gprimd(ka,ii))
+         dgm10(:,ii)=-(gprimd(kg,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(kg,ii))
+       end do
 
-     d2gm(:,:)=0._dp
-     do ii = 1,3
-       if(ka==kg) d2gm(:,ii)=d2gm(:,ii)&
-&       +gprimd(kb,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(kb,ii)
-       if(ka==kd) d2gm(:,ii)=d2gm(:,ii)&
-&       +gprimd(kb,:)*gprimd(kg,ii)+gprimd(kg,:)*gprimd(kb,ii)
-       if(kb==kg) d2gm(:,ii)=d2gm(:,ii)&
-&       +gprimd(ka,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(ka,ii)
-       if(kb==kd) d2gm(:,ii)=d2gm(:,ii)&
-&       +gprimd(ka,:)*gprimd(kg,ii)+gprimd(kg,:)*gprimd(ka,ii)
-     end do
-     d2gm(:,:)=0.5_dp*d2gm(:,:)
+       d2gm(:,:)=0._dp
+       do ii = 1,3
+         if(ka==kg) d2gm(:,ii)=d2gm(:,ii)&
+&         +gprimd(kb,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(kb,ii)
+         if(ka==kd) d2gm(:,ii)=d2gm(:,ii)&
+&         +gprimd(kb,:)*gprimd(kg,ii)+gprimd(kg,:)*gprimd(kb,ii)
+         if(kb==kg) d2gm(:,ii)=d2gm(:,ii)&
+&         +gprimd(ka,:)*gprimd(kd,ii)+gprimd(kd,:)*gprimd(ka,ii)
+         if(kb==kd) d2gm(:,ii)=d2gm(:,ii)&
+&         +gprimd(ka,:)*gprimd(kg,ii)+gprimd(kg,:)*gprimd(ka,ii)
+       end do
+       d2gm(:,:)=0.5_dp*d2gm(:,:)
 
-     d2kinacc=0._dp
+       d2kinacc=0._dp
 
 !    loop on spinor index
-     do ispinor=1,nspinor
-       igs=(ispinor-1)*npw
+       do ispinor=1,nspinor
+         igs=(ispinor-1)*npw
 !      loop on plane waves
-       do ig=1,npw
-         gpk1=dble(kg_k(1,ig))+kpt(1)
-         gpk2=dble(kg_k(2,ig))+kpt(2)
-         gpk3=dble(kg_k(3,ig))+kpt(3)
-         kpg2=htpisq*&
-&         ( gmet(1,1)*gpk1**2+         &
-&         gmet(2,2)*gpk2**2+         &
-&         gmet(3,3)*gpk3**2          &
-&         +2.0_dp*(gpk1*gmet(1,2)*gpk2+  &
-&         gpk1*gmet(1,3)*gpk3+  &
-&         gpk2*gmet(2,3)*gpk3 )  )
-         dkpg21=htpisq*&
-&         ( dgm01(1,1)*gpk1**2+         &
-&         dgm01(2,2)*gpk2**2+         &
-&         dgm01(3,3)*gpk3**2          &
-&         +2.0_dp*(gpk1*dgm01(1,2)*gpk2+  &
-&         gpk1*dgm01(1,3)*gpk3+  &
-&         gpk2*dgm01(2,3)*gpk3 )  )
-         dkpg22=htpisq*&
-&         ( dgm10(1,1)*gpk1**2+         &
-&         dgm10(2,2)*gpk2**2+         &
-&         dgm10(3,3)*gpk3**2          &
-&         +2.0_dp*(gpk1*dgm10(1,2)*gpk2+  &
-&         gpk1*dgm10(1,3)*gpk3+  &
-&         gpk2*dgm10(2,3)*gpk3 )  )
-         d2kpg2=htpisq*&
-&         ( d2gm(1,1)*gpk1**2+         &
-&         d2gm(2,2)*gpk2**2+         &
-&         d2gm(3,3)*gpk3**2          &
-&         +2.0_dp*(gpk1*d2gm(1,2)*gpk2+  &
-&         gpk1*d2gm(1,3)*gpk3+  &
-&         gpk2*d2gm(2,3)*gpk3 )  )
+         do ig=1,npw
+           gpk1=dble(kg_k(1,ig))+kpt(1)
+           gpk2=dble(kg_k(2,ig))+kpt(2)
+           gpk3=dble(kg_k(3,ig))+kpt(3)
+           kpg2=htpisq*&
+&           ( gmet(1,1)*gpk1**2+         &
+&           gmet(2,2)*gpk2**2+         &
+&           gmet(3,3)*gpk3**2          &
+&           +2.0_dp*(gpk1*gmet(1,2)*gpk2+  &
+&           gpk1*gmet(1,3)*gpk3+  &
+&           gpk2*gmet(2,3)*gpk3 )  )
+           dkpg21=htpisq*&
+&           ( dgm01(1,1)*gpk1**2+         &
+&           dgm01(2,2)*gpk2**2+         &
+&           dgm01(3,3)*gpk3**2          &
+&           +2.0_dp*(gpk1*dgm01(1,2)*gpk2+  &
+&           gpk1*dgm01(1,3)*gpk3+  &
+&           gpk2*dgm01(2,3)*gpk3 )  )
+           dkpg22=htpisq*&
+&           ( dgm10(1,1)*gpk1**2+         &
+&           dgm10(2,2)*gpk2**2+         &
+&           dgm10(3,3)*gpk3**2          &
+&           +2.0_dp*(gpk1*dgm10(1,2)*gpk2+  &
+&           gpk1*dgm10(1,3)*gpk3+  &
+&           gpk2*dgm10(2,3)*gpk3 )  )
+           d2kpg2=htpisq*&
+&           ( d2gm(1,1)*gpk1**2+         &
+&           d2gm(2,2)*gpk2**2+         &
+&           d2gm(3,3)*gpk3**2          &
+&           +2.0_dp*(gpk1*d2gm(1,2)*gpk2+  &
+&           gpk1*d2gm(1,3)*gpk3+  &
+&           gpk2*d2gm(2,3)*gpk3 )  )
 
-         if(kpg2>ecut-tol12)then
-           dfkin=0._dp
-           d2fkin=0._dp
-         elseif(kpg2>ecut-ecutsm)then
+           if(kpg2>ecut-tol12)then
+             dfkin=0._dp
+             d2fkin=0._dp
+           elseif(kpg2>ecut-ecutsm)then
 !          This kinetic cutoff smoothing function and its xx derivatives
 !          were produced with Mathematica and the fortran code has been
 !          numerically checked against Mathematica.
-           xx=(ecut-kpg2)*ecutsm_inv
-           fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
-           dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
-           d2fsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*&
-&           (-144+45*xx))))))*fsm**3
-           dfkin=fsm-ecutsm_inv*kpg2*dfsm
-           d2fkin=ecutsm_inv*(-2.0_dp*dfsm+ecutsm_inv*kpg2*d2fsm)
-         else
-           dfkin=1._dp
-           d2fkin=0._dp
-         end if
+             xx=(ecut-kpg2)*ecutsm_inv
+             fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
+             dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
+             d2fsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*&
+&             (-144+45*xx))))))*fsm**3
+             dfkin=fsm-ecutsm_inv*kpg2*dfsm
+             d2fkin=ecutsm_inv*(-2.0_dp*dfsm+ecutsm_inv*kpg2*d2fsm)
+           else
+             dfkin=1._dp
+             d2fkin=0._dp
+           end if
 
 !        accumulate kinetic energy 2nd derivative with wavefunction components
-         term=d2fkin*dkpg21*dkpg22 + dfkin*d2kpg2
-         if(istwfk==2 .and. ig/=1)term=2.0_dp*term
-         if(istwfk>2)term=2.0_dp*term
-         d2kinacc=d2kinacc + term*(cwavef(re,ig+igs)**2 + cwavef(im,ig+igs)**2)
+           term=d2fkin*dkpg21*dkpg22 + dfkin*d2kpg2
+           if(istwfk==2 .and. ig/=1)term=2.0_dp*term
+           if(istwfk>2)term=2.0_dp*term
+           d2kinacc=d2kinacc + term*(cwavef(re,ig+igs)**2 + cwavef(im,ig+igs)**2)
 
-       end do  !ig
-     end do !ispinor
+         end do  !ig
+       end do !ispinor
 
-     ekinout(istr1+6*(istr2-1))=d2kinacc/effmass_free
+       ekinout(istr1+6*(istr2-1))=d2kinacc/effmass_free
 
-   end do !istr1
- end do !istr2
+     end do !istr1
+   end do !istr2
 
-end subroutine d2kindstr2
+  end subroutine d2kindstr2
 !!***
 
 end subroutine dfpt_eltfrkin

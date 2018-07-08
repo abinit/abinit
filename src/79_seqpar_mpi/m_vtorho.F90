@@ -73,6 +73,8 @@ module m_vtorho
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
  use m_common,             only : prteigrs
+ use m_dmft,               only : dmft_solve
+ use m_datafordmft,         only : datafordmft
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -285,7 +287,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_dmft
 !End of the abilint section
 
  implicit none

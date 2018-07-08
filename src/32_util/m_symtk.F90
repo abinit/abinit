@@ -31,7 +31,7 @@ module m_symtk
  use m_profiling_abi
 
  use m_numeric_tools,  only : isinteger, wrap2_pmhalf
- use m_abilasi,        only : matrginv
+ use m_hide_lapack,    only : matrginv
 
  implicit none
 

@@ -32,7 +32,7 @@ module m_chi0
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_blas
+ use m_hide_blas
  use m_time
  use m_wfd
 
@@ -61,6 +61,7 @@ module m_chi0
  use m_pawpwij,         only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
+ use m_read_plowannier, only : read_plowannier
 
  implicit none
 
@@ -191,7 +192,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 #define ABI_FUNC 'cchi0q0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -1151,7 +1151,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 #define ABI_FUNC 'cchi0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none

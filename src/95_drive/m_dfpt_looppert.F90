@@ -60,7 +60,7 @@ module m_dfpt_loopert
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main, efmas_analysis
+ use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -230,8 +230,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
  use interfaces_14_hidewrite
+ use interfaces_29_kpoints
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -812,13 +812,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      maxocc = maxval(abs(occ_pert))
      if (maxocc>1.0d-6.and.abs(maxocc-occ(1))>1.0d-6) then ! True if non-zero occupation numbers are not equal
        write(message, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
-       ' This perturbation will not be computed.'
-       MSG_WARNING(message)
-       ABI_DEALLOCATE(occ_pert)
-       cycle
-     end if
-     if (ipert==dtset%natom+11.and.minval(occ)<1.0d-6) then
-       write(message, '(3a)' ) ' ipert=natom+11 does not work with empty bands.',ch10,&
        ' This perturbation will not be computed.'
        MSG_WARNING(message)
        ABI_DEALLOCATE(occ_pert)
@@ -2418,6 +2411,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(istwfk_pert)
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
+
+   if(dtset%prtefmas==1)then
+     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
+     write(std_out,*)' dfpt_looppert : will write ',fname
+#ifdef HAVE_NETCDF
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
+     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     NCF_CHECK(nf90_close(ncid))
+#endif
+   endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
 

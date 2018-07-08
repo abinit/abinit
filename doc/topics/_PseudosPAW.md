@@ -51,7 +51,7 @@ Many pseudopotentials (norm-conserving as well as PAW) have been tested
 against all-electron calculations, see the section "Documents and tools"
 paragraph about the "Delta" project on
 [[https://www.abinit.org/downloads/PAW2|the ABINIT web site PAW
-page]]. In [[lesson:paw3]] it is explained How to perform more detailed
+page]]. In [[tutorial:paw3]] it is explained How to perform more detailed
 comparisons with an all-electron code.
 
 **Generation**
@@ -82,6 +82,6 @@ pseudoatoms, see [[topic:AtomTypes]].
 
 ## Tutorials
 
-* [[lesson:paw2|Second lesson on the projector-augmented wave technique]] The generation of atomic data. 
-* [[lesson:paw3|Third lesson on the projector-augmented wave technique]] Testing PAW datasets against an all-electron code.
+* [[tutorial:paw2|Second tutorial on the projector-augmented wave technique]] The generation of atomic data. 
+* [[tutorial:paw3|Third tutorial on the projector-augmented wave technique]] Testing PAW datasets against an all-electron code.
 

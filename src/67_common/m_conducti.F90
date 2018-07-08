@@ -41,7 +41,7 @@ module m_conducti
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
  use m_symtk,        only : matr3inv
- use m_abilasi,      only : jacobi
+ use m_hide_lapack,  only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric
  use m_splines,      only : intrpl

@@ -44,7 +44,7 @@ module m_exc_build
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
- use m_blas,         only : xdotc, xgemv
+ use m_hide_blas,    only : xdotc, xgemv
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t, gsph_fft_tabs

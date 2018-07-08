@@ -27,7 +27,7 @@ MODULE m_screening
 
  use defs_basis
  use defs_abitypes
- use m_blas
+ use m_hide_blas
  use m_linalg_interfaces
  use m_xmpi
  use m_errors
@@ -46,7 +46,7 @@ MODULE m_screening
  use m_numeric_tools,   only : print_arr, hermitianize
  use m_special_funcs,   only : k_fermi, k_thfermi
  use m_geometry,        only : normv, vdotw, metric
- use m_abilasi,         only : xginv
+ use m_hide_lapack,     only : xginv
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item, box_len
  use m_fft_mesh,        only : g2ifft

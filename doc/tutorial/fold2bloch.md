@@ -2,7 +2,7 @@
 authors: SS, XG
 ---
 
-# Lesson on fold2bloch  
+# Tutorial on fold2bloch  
 
 ## Unfolding the electronic structure of a lattice of Hydrogen atoms.  
 
@@ -10,9 +10,9 @@ Supercells are often used in electronic structure calculations in order to
 model compound alloys, defects, etc. The band structure obtained directly from
 these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
-unperturbed host unit cell.  
+unperturbed host unit cell. The unfolding technique used in Abinit is the one presented in Ref. [[cite:Rubel2014]]. 
 
-This lesson aims at demonstrating how to unfold the band structure of a
+This tutorial aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
 inherent to the unperturbed unit cell. We will construct a supercell of 6
 hydrogen atoms, perform self-consistent cycle and plot the corresponding band
@@ -20,7 +20,7 @@ structure. At the end, we will recover the familiar dispersion relation using
 the fold2Bloch utility.  
 See also the [[help:fold2bloch]].
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Creating a Hydrogen supercell structure
   
@@ -57,7 +57,7 @@ they will be affected by the zone folding.
 Fig. 2: Brillouin zone of the supercell.
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_fold2Bloch"?*
+for the other tutorials. Why not "Work_fold2Bloch"?*
 
 In order to use the fold2Bloch, you need to first generate a wave function file (_WFK file).
 
@@ -86,7 +86,7 @@ order to do this you will need the following scripts:
     energy_eig-abinit.sh; and
     plot_band.m
     
-which are located at /abinit/doc/tutorial/lesson_fold2Bloch/
+which are located at /abinit/doc/tutorial/fold2Bloch_assets/
 
 Execute the energy_eig-avinit.sh script
 

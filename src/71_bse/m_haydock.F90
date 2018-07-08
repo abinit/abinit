@@ -44,8 +44,8 @@ MODULE m_haydock
  use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
- use m_blas,              only : xdotc, xgemv
- use m_abilasi,           only : matrginv
+ use m_hide_blas,         only : xdotc, xgemv
+ use m_hide_lapack,       only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
  use m_kpts,              only : listkk

@@ -870,7 +870,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
          write(msg,'(2(a,es22.13E3))') ' < cwave_j | rhs_j > =',dotr,',',doti
          call wrtout(std_out,msg)
          write(msg,'(2(a,es22.13E3))') '           lambda_jj =',&
-&          rf2%lambda_mn(1,jband+(jband-1)*nband_k),',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
+&         rf2%lambda_mn(1,jband+(jband-1)*nband_k),',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
          call wrtout(std_out,msg)
        else
          if (dot2r<tol9) dot2r = zero ! in order to hide the numerical noise

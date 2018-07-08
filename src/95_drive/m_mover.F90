@@ -348,6 +348,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & scfcv_args%dtset%vis,&
 & scfcv_args%dtset%iatfix,&
 & scfcv_args%dtset%symrel,&
+& scfcv_args%dtset%ph_freez_disp_addStrain,&
+& scfcv_args%dtset%ph_freez_disp_ampl,&
+& scfcv_args%dtset%ph_freez_disp_nampl,&
+& scfcv_args%dtset%ph_freez_disp_option,&
 & scfcv_args%dtset%ph_ngqpt,&
 & scfcv_args%dtset%ph_nqshift,&
 & scfcv_args%dtset%ph_qshift,&
@@ -505,9 +509,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
    end if
    INQUIRE(FILE=filename, EXIST=file_exists)
-   call generate_training_set(acell,fname_ddb,hist,ab_mover%natom,ntime,ab_mover%ph_ngqpt,&
-&                             ab_mover%ph_nqshift,ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
+
+   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
+&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
+&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
+&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
 &                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
+
 
    !Fill history with the values of xred, acell and rprimd of the first configuration
    acell(:)   =hist%acell(:,1)
@@ -683,7 +691,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
-           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then

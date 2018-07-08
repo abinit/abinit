@@ -271,13 +271,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
 
    if ( dtset%np_slk == 0 ) then
-     call xgScalapack_config(SLK_DISABLED)
+     call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
    else if ( dtset%np_slk == 1000000 ) then
-     call xgScalapack_config(SLK_AUTO)
+     call xgScalapack_config(SLK_AUTO,dtset%slk_rankpp)
    else if ( dtset%np_slk > 1 ) then
-     call xgScalapack_config(dtset%np_slk)
+     call xgScalapack_config(dtset%np_slk,dtset%slk_rankpp)
    else
-     call xgScalapack_config(SLK_AUTO)
+     call xgScalapack_config(SLK_AUTO,dtset%slk_rankpp)
    end if
 
 !  Copy input values
@@ -659,6 +659,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
 
    call timab(642,2,tsec)
+
+!  ****************************************************************************
+!  Main case selection in driver
 
    select case(dtset%optdriver)
 

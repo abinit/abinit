@@ -7,7 +7,8 @@
 !!  m_MatrixHyb
 !! 
 !! FUNCTION 
-!!  this 
+!!  Module to deals with a matrix (mainly used for M matrix in m_BathOperatoroffdiag).
+!!  Perform varius operation on matrices.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
@@ -51,12 +52,26 @@ PRIVATE
 
 TYPE, PUBLIC :: MatrixHyb
   INTEGER _PRIVATE :: size
+  ! size of the matrix
+
   INTEGER          :: tail
+  ! the size of the matrix that is actually used.
+
   INTEGER _PRIVATE :: iTech = -1
+  ! precise if time or frequency values will be used.
+
   INTEGER _PRIVATE :: Wmax
+  ! size if the frequency grid for mat_omega
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)           :: mat
+  ! matrix of size "size"
+
   INTEGER         , ALLOCATABLE, DIMENSION(:,:)           :: mat_tau
+  ! matrix of size "size"
+
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:,:,:)         :: mat_omega
+  ! array of size (Wmax, size, size)
+
 END TYPE MatrixHyb
 !!***
 
@@ -215,7 +230,7 @@ END SUBROUTINE MatrixHyb_setSize
 !!  MatrixHyb_enlarge
 !!
 !! FUNCTION
-!!  enlarge memory space
+!!  This subroutine enlarges memory space
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
@@ -268,6 +283,8 @@ SUBROUTINE MatrixHyb_enlarge(this, size)
     tail  = this%tail 
     size_val = width
     IF ( PRESENT(size) ) size_val = size 
+
+!   change size of mat
     MALLOC(this_temp,(1:tail,1:tail))
     this_temp(1:tail,1:tail) = this%mat(1:tail,1:tail)
     FREE(this%mat)
@@ -277,6 +294,8 @@ SUBROUTINE MatrixHyb_enlarge(this, size)
     FREE(this_temp)
     SELECT CASE(this%iTech)
     CASE (GREENHYB_TAU)
+
+!   change size of mat_tau
       MALLOC(this_temp_tau,(1:tail,1:tail))
       this_temp_tau(1:tail,1:tail) = this%mat_tau(1:tail,1:tail)
       FREE(this%mat_tau)
@@ -284,6 +303,8 @@ SUBROUTINE MatrixHyb_enlarge(this, size)
       this%mat_tau(1:tail,1:tail) = this_temp_tau(1:tail,1:tail)
       FREE(this_temp_tau)
     CASE (GREENHYB_OMEGA)
+
+!   change size of mat_omega
       MALLOC(this_temp_omega,(1:this%Wmax,1:tail,1:tail))
       this_temp_omega(1:this%Wmax,1:tail,1:tail) = this%mat_omega(1:this%Wmax,1:tail,1:tail)
       FREE(this%mat_omega)

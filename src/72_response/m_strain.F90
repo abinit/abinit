@@ -342,15 +342,11 @@ subroutine strain_apply(rprim,rprim_def,strain)
 !scalar
  integer :: i
 !arrays
- real(dp) :: identity(3,3)
 ! *************************************************************************
 
  rprim_def(:,:) = zero
 ! Fill the identity matrix
- identity = zero
- forall(i=1:3)identity(i,i)=1
-
- rprim_def(:,:) = matmul(identity(:,:)+strain%strain(:,:),transpose(rprim(:,:)))
+ rprim_def(:,:) = matmul(strain%strain(:,:),transpose(rprim(:,:)))
 
 end subroutine strain_apply
 !!***
