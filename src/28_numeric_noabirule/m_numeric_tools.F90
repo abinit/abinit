@@ -44,6 +44,7 @@ MODULE m_numeric_tools
  public :: get_trace             ! Calculate the trace of a square matrix
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
+ public :: l2int                 ! convert logical data to int array
  public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
@@ -132,6 +133,12 @@ MODULE m_numeric_tools
    module procedure isdiagmat_rdp
    !module procedure isdiagmat_cdp
  end interface isdiagmat
+
+ interface l2int
+   module procedure l2int_1D
+   module procedure l2int_2D
+   module procedure l2int_3D
+ end interface l2int
 
  interface r2c
    module procedure rdp2cdp_1D
@@ -1012,7 +1019,124 @@ end function isdiagmat_rdp
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/rdp2cdp_1D
+!!****f* m_numeric_tools/l2int_1D
+!! NAME
+!!  l2int_1D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_1D(larr) result(int_arr)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:)
+ integer :: int_arr(size(larr))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_1D
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/l2int_2D
+!! NAME
+!!  l2int_2D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_2D(larr) result(int_arr)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_3D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:,:)
+ integer :: int_arr(size(larr,1), size(larr,2))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_2D
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/l2int_3D
+!! NAME
+!!  l2int_3D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_3D(larr) result(int_arr)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_3D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:,:,:)
+ integer :: int_arr(size(larr,1), size(larr,2), size(larr,3))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_3D
+
+!----------------------------------------------------------------------
+
+!!***!!****f* m_numeric_tools/rdp2cdp_1D
 !! NAME
 !!  rdp2cdp_1D
 !!

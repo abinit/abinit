@@ -1702,7 +1702,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  ! Get dimids
  do ii=1,cnt
    !write(std_out,*)trim(sarr(ii))
-   NCF_CHECK(nf90_inq_dimid(ncid, sarr(ii), dimids(ii)))
+   NCF_CHECK_MSG(nf90_inq_dimid(ncid, sarr(ii), dimids(ii)), sarr(ii))
    NCF_CHECK(nf90_inquire_dimension(ncid, dimids(ii), len=dimvals(ii)))
  end do
 
