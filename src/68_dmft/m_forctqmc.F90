@@ -1,5 +1,48 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/qmc_prep_ctqmc
+!!****m* ABINIT/m_forctqmc
+!! NAME
+!!  m_forctqmc
+!!
+!! FUNCTION
+!! Prepare CTQMC and call CTQMC
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_forctqmc
+
+ use defs_basis
+
+ implicit none
+
+ private 
+
+ public :: qmc_prep_ctqmc
+ public :: testcode_ctqmc
+!!***
+
+contains
+!!****f* m_forctqmc/qmc_prep_ctqmc
 !! NAME
 !! qmc_prep_ctqmc
 !!
@@ -73,11 +116,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
  use m_Ctqmc
  use m_CtqmcInterface
+ use m_Ctqmcoffdiag
+ use m_CtqmcoffdiagInterface
  use m_GreenHyb
  use m_data4entropyDMFT
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
  use m_io_tools, only : flush_unit, open_file
  use m_paw_numeric, only : jbessel=>paw_jbessel
+ use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
 
 #if defined HAVE_TRIQS
  use TRIQS_CTQMC !Triqs module
@@ -89,7 +135,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 #undef ABI_FUNC
 #define ABI_FUNC 'qmc_prep_ctqmc'
  use interfaces_14_hidewrite
- use interfaces_68_dmft, except_this_one => qmc_prep_ctqmc
 !End of the abilint section
 
  implicit none
@@ -114,7 +159,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
  complex(dpc) :: omega_current,integral(2,2)
- real(dp) :: omega
+ real(dp) :: doccsum,noise,omega
  real(dp) :: facd,facnd
  logical :: nondiaglevels
 ! arrays
@@ -146,6 +191,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  !type(self_type) :: self
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
+ type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
@@ -250,9 +296,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  opt_nondiag should be 0 by default
  opt_diag    = 1
  if(paw_dmft%dmft_solv>=6)  then
-   opt_nondiag = 1 ! Use cthyb in triqs
+   opt_nondiag = 1 ! Use cthyb in triqs or ctqmc in abinit with offdiag terms in F
  else
-   opt_nondiag = 0 ! use fast ctqmc in ABINIT without non diagonal terms.
+   opt_nondiag = 0 ! use fast ctqmc in ABINIT without off diagonal terms in F
  end if
 
  useylm=0
@@ -323,7 +369,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    opt_diag=0
  end if
  call wrtout(std_out,message,'COLL')
-
  if(opt_diag==1) then
    write(std_out,*) "  ==  The atomic levels are diagonalized"
  else if(opt_diag==2) then
@@ -375,7 +420,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! function to be real)
      ! ---------------------------------------------------------------
      call diag_matlu(energy_level%matlu,level_diag,natom,&
-&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1)
+&     prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1,&
+&     test=paw_dmft%dmft_solv)  ! temporary: test should be extended to all cases.
 
 !     call rotate_matlu(energy_level%matlu,eigvectmatlu,natom,3,1)
 !       write(message,'(a,2x,a,f13.5)') ch10,&
@@ -1300,7 +1346,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    Main calls to CTQMC code in ABINIT
 ! =================================================================
-     if(paw_dmft%dmft_solv==5) then
+     if(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
 
        write(message,'(a,2x,a)') ch10,&
 &       " == Initializing CTQMC"
@@ -1308,17 +1354,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 !    Initialisation
 ! =================================================================
+     if(paw_dmft%dmft_solv==5) then
        nomega=paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
 &       std_out,paw_dmft%spacecomm)
-
-!  for non diagonal code
-!     call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
-!&         paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
-!&         paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-!&         std_out,paw_dmft%spacecomm,opt_nondiag)
-
 !    options
 ! =================================================================
        call CtqmcInterface_setOpts(hybrid,&
@@ -1330,20 +1370,41 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
 &       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
 &       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
+     if(paw_dmft%dmft_solv==8) then
+       nomega=paw_dmft%dmftqmc_l
+       call CtqmcoffdiagInterface_init(hybridoffdiag,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
+&        paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
+&        paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
+&        std_out,paw_dmft%spacecomm,opt_nondiag)
+!    options
+! =================================================================
+       call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
+       opt_Fk      =opt_fk,&
+&       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
+&       opt_analysis=paw_dmft%dmftctqmc_correl,&
+&       opt_check   =paw_dmft%dmftctqmc_check ,&
+&       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
+&       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
+&       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
        write(message,'(a,2x,2a)') ch10,&
 &       " == Initialization CTQMC done", ch10
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv>=6) then
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+         open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
-       ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
 !     use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
-         gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
          gw_tmp_nd(ifreq,nflavor,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        end do
      end if
@@ -1383,7 +1444,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    CTQMC run TRIQS
 ! =================================================================
-       else if (paw_dmft%dmft_solv>=6) then
+       else if (paw_dmft%dmft_solv==8) then
+         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         docc(:,:) = zero
+         call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+&        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
+&        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+         ABI_DEALLOCATE(docc)
+       ! TODO: Handle de luj0 case for entropy
+
+       else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
 
        ! fw1_nd: Hybridation
        ! levels_ctqmc: niveaux
@@ -1738,7 +1808,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
 ! < HACK >
-       if(paw_dmft%dmft_solv>=6) then
+       if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
          if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /=0) then
            MSG_ERROR(message)
          end if
@@ -1747,26 +1817,88 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
          close(unt)
        else
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         !call Ctqmc_printGreen(paw_dmft%hybrid(iatom)%hybrid,unt) !Problem here
-         do itau=1,paw_dmft%dmftqmc_l
-           write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-           (gtmp(itau,iflavor), iflavor=1, nflavor)
-         end do
-         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
-         close(unt)
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             (gtmp(itau,iflavor), iflavor=1, nflavor)
+           end do
+           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
+           close(unt)
+         endif
+         if(paw_dmft%dmft_solv==8) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
+&           message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+           end do
+           close(unt)
+           ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+           call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
+           do itau=1,paw_dmft%dmftqmc_l
+             do isppol=1,nsppol
+               do ispinor1=1,nspinor
+                 do im1=1,tndim
+                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+                   do ispinor2=1,nspinor
+                     do im2=1,tndim
+                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+                       matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+&                        gtmp_nd(itau,iflavor1,iflavor2)
+                     end do  ! im2
+                   end do  ! ispinor2
+                 end do  ! im1
+               end do  ! ispinor
+             end do ! isppol
+             call rotate_matlu(matlu1,eigvectmatlu,natom,3,0)
+             call slm2ylm_matlu(matlu1,natom,2,0)
+             call sym_matlu(cryst_struc,matlu1,pawang)
+             call slm2ylm_matlu(matlu1,natom,1,0)
+             call rotate_matlu(matlu1,eigvectmatlu,natom,3,1)
+             do isppol=1,nsppol
+               do ispinor1=1,nspinor
+                 do im1=1,tndim
+                   iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+                   do ispinor2=1,nspinor
+                     do im2=1,tndim
+                       iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+                       gtmp_nd(itau,iflavor1,iflavor2)=&
+                        matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+                     end do  ! im2
+                   end do  ! ispinor2
+                 end do  ! im1
+               end do  ! ispinor
+             end do ! isppol
+           end do  !itau
+           call destroy_matlu(matlu1,natom)
+           ABI_DATATYPE_DEALLOCATE(matlu1)
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
+&           message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+           end do
+           close(unt)
+         endif
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
          !close(4243)
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         do ifreq=1,paw_dmft%dmft_nwlo
-           write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
-&           (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
-         end do
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do ifreq=1,paw_dmft%dmft_nwlo
+             write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
+&             (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
+           end do
+         endif
          close(unt)
        end if
 ! </ HACK >
@@ -1775,13 +1907,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      !----------------------------------------
      ! </DEBUG>
      !----------------------------------------
-     if(paw_dmft%dmft_solv>=6) then
+     if(paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
      !Nothing just hybrid var problem
      else
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC"
        call wrtout(std_out,message,'COLL')
-       call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==5) call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==8) call CtqmcoffdiagInterface_finalize(hybridoffdiag)
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC done"
        call wrtout(std_out,message,'COLL')
@@ -1903,7 +2036,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
        end do
      end if
-     if(paw_dmft%dmft_solv<6) ABI_DEALLOCATE(gw_tmp)
+     if(paw_dmft%dmft_solv<6) then
+      ! write(6,*) "dmft_solv",paw_dmft%dmft_solv
+       ABI_DEALLOCATE(gw_tmp)
+     endif
      ABI_DEALLOCATE(gw_tmp_nd)
      ABI_DEALLOCATE(gtmp)
      ABI_DEALLOCATE(gtmp_nd)
@@ -2155,4 +2291,320 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ABI_DATATYPE_DEALLOCATE(hybri_coeff)
 
 end subroutine qmc_prep_ctqmc
+!!***
+
+
+!!****f* m_forctqmc/testcode_ctqmc
+!! NAME
+!! testcode_ctqmc
+!!
+!! FUNCTION
+!! Setup ultra simple hybridization to test CTQMC in simple situations.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! gtmp_nd
+!! gw_tmp_nd
+!! temp = temperature
+!! dmftqmc_l = number of times slices
+!! nflavor = number of flavor
+!! testrot = 0/1 if rotation of hybridization is tested or not
+!! testcode = 1 if tests are activated.
+!! opt = 1/2 if pre or postprocessing of CTQMC data.
+!!
+!! OUTPUT
+!! fw1_nd = non diagonal hybridization
+!! fw1 = hybridization
+!! umod = value of U 
+!!  
+!!
+!! SIDE EFFECTS
+!!  gtmp_nd  
+!!  gw_tmp_nd
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      qmc_prep_ctqmc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hybri_limit,&
+&   nflavor,opt,temp,testrot,testcode,umod)
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_errors
+ use m_ctqmc
+ use m_CtqmcInterface
+ use m_greenhyb
+ !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
+ use m_io_tools, only : flush_unit
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'testcode_ctqmc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: dmftqmc_l,nflavor,testrot,testcode,opt
+ real(dp), intent(in) :: temp
+ real(dp), intent(out) :: umod(2,2)
+ complex(dpc), intent(inout) :: gw_tmp_nd(:,:,:)
+ real(dp),  intent(inout) :: gtmp_nd(:,:,:)
+ complex(dpc), intent(out) :: fw1(:,:)
+ complex(dpc), intent(out) :: fw1_nd(:,:,:)
+ real(dp),  intent(inout) :: levels_ctqmc(:)
+ complex(dpc),  intent(inout) :: hybri_limit(:,:)
+
+!Local variables ------------------------------
+ character(len=500) :: message
+ integer :: ifreq, itau,realrot,simplehyb
+ real(dp) :: omega
+ real(dp) :: tbi1,tbi2,e2,tbi3,tbi4,e3,e4,tbi21,tbi12,e3b,e4b,tbi21b,tbi12b
+ complex(dpc) :: e1
+! arrays
+ complex(dpc) :: RR(2,2)
+ complex(dpc) :: RR1(2,2)
+ complex(dpc) :: RRi(2,2)
+ complex(dpc) :: RRt(2,2)
+! ************************************************************************
+ if (testcode==0) return
+ if (nflavor/=2) then
+   write(message,'(2a)') ch10,' testcode nflavor.ne.2'
+   MSG_ERROR(message)
+ end if
+
+ simplehyb=2
+ simplehyb=1
+ simplehyb=3
+ !=========================
+ ! Built rotation matrix
+ !=========================
+ realrot=0
+ realrot=2
+ if (realrot==1) then
+   ! Real rotation
+   !=========================
+   RR(1,1)  =  SQRT(3.d0)/2.d0
+   RR(1,2)  = -1.d0/2.d0
+   RR(2,1)  =  1.d0/2.d0
+   RR(2,2)  =  SQRT(3.d0)/2.d0
+ else if (realrot==2) then
+   ! Real rotation
+   !=========================
+   RR(1,1)  =  SQRT(1.d0/2.d0)
+   RR(1,2)  = -SQRT(1.d0/2.d0)
+   RR(2,1)  =  SQRT(1.d0/2.d0)
+   RR(2,2)  =  SQRT(1.d0/2.d0)
+ else
+   ! Complex rotation
+   !=========================
+   RR(1,1)  =  CMPLX(one,two)
+   RR(1,2)  =  CMPLX(one,one)
+   RR(2,1)  =  CMPLX(one,-one)
+   RR(2,2)  =  CMPLX(-one,two)
+   RR=RR/sqrt(seven)
+ end if
+ ! Check rotation is unitary
+ !==========================
+ RRi(1,1) =  conjg(RR(1,1))
+ RRi(1,2) =  conjg(RR(2,1))
+ RRi(2,1) =  conjg(RR(1,2))
+ RRi(2,2) =  conjg(RR(2,2))
+ RR1(:,:)  = MATMUL ( RR(:,:) , RRi(:,:)          )
+ !write(6,*) "RR1",RR1
+ if(abs(RR1(1,1)-one).gt.tol7.or.abs(RR1(1,2)).gt.tol7.or.abs(RR1(2,2)-one).gt.tol7.or.abs(RR1(2,1)).gt.tol7) then
+   write(message,'(2a)') ch10,' testcode error in rotation matrix'
+   MSG_ERROR(message)
+ end if
+
+
+ !=================================
+ ! Built hybridization  for CTQMC
+ !=================================
+ if (opt==1) then
+
+ !  Parameters: tight-binding + U
+ !  firt test of the code try umod=0, and (tbi1,tbi2,e1,e2)=(2,1,0.5,0.0) testrot=1
+ !  second test of the code try umod=four, and (tbi1,tbi2,e1,e2)=(2,1,0.0,0.0) testrot=1
+ !=======================================================================================
+   fw1_nd(:,:,:)= czero
+   tbi1=2.0_dp
+   tbi2=1.0_dp
+   tbi3=1.0_dp
+   tbi4=1.0_dp
+   tbi12=2.5_dp
+   tbi12b=2.5_dp
+   tbi21=2.5_dp
+   tbi21b=2.5_dp
+   e1=cmplx(0.0,0.0,8)
+   e2=zero
+   e3=0.2
+   e4=0.3
+   e3b=0.3
+   e4b=-0.2
+   umod(:,:)=0.d0
+
+   if(testrot==1.and.(abs(tbi1-tbi2)<tol6)) then
+     write(message,'(3a)') ch10,' testrot=1 with tbi1=tbi2 is equivalent' &
+     ,'to testrot=0: change testrot'
+     MSG_WARNING(message)
+   end if
+   ! Built fw1_nd
+   !==============
+   do ifreq=1,dmftqmc_l
+
+     omega=pi*temp*(two*float(ifreq)-1)
+
+     if(simplehyb==1) then
+       fw1_nd(ifreq,1,1) =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)
+       fw1_nd(ifreq,2,2) =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)
+       fw1(ifreq,1)      =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)
+       fw1(ifreq,2)      =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)
+       hybri_limit(1,1)=tbi1**2
+       hybri_limit(2,2)=tbi2**2
+       hybri_limit(1,2)=0.d0
+       hybri_limit(2,1)=0.d0
+     else if(simplehyb==2) then
+       fw1_nd(ifreq,1,1) =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)+tbi3**2/(dcmplx(0.d0,omega)-e3)
+       fw1_nd(ifreq,2,2) =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)+tbi4**2/(dcmplx(0.d0,omega)-e4)
+       fw1(ifreq,1)      =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)
+       fw1(ifreq,2)      =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)
+     else if(simplehyb==3) then
+       fw1_nd(ifreq,1,1) =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)
+       fw1_nd(ifreq,2,2) =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)
+       fw1_nd(ifreq,1,2) =  tbi12**2/(dcmplx(0.d0,omega)-e3)+tbi12b**2/(dcmplx(0.d0,omega)-e3b)
+       fw1_nd(ifreq,2,1) =  tbi21**2/(dcmplx(0.d0,omega)-e4)+tbi21b**2/(dcmplx(0.d0,omega)-e4b)
+       fw1(ifreq,1)      =  -umod(1,1)/two+tbi1**2/(dcmplx(0.d0,omega)-e1)
+       fw1(ifreq,2)      =  -umod(1,1)/two+tbi2**2/(dcmplx(0.d0,omega)-e2)
+       hybri_limit(1,1)=tbi1**2
+       hybri_limit(2,2)=tbi2**2
+       hybri_limit(1,2)=tbi12**2+tbi12b**2
+       hybri_limit(2,1)=tbi21**2+tbi21b**2
+     end if
+     write(132,*) omega,real(fw1_nd(ifreq,1,1)),aimag(fw1_nd(ifreq,1,1))
+     write(133,*) omega,real(fw1_nd(ifreq,1,2)),aimag(fw1_nd(ifreq,1,2))
+     write(134,*) omega,real(fw1_nd(ifreq,2,1)),aimag(fw1_nd(ifreq,2,1))
+     write(135,*) omega,real(fw1_nd(ifreq,2,2)),aimag(fw1_nd(ifreq,2,2))
+     write(1234,*) omega, real(fw1(ifreq,1)),aimag(fw1(ifreq,1))
+   end do
+   ! Built level and limit of hybridization
+   !=======================================
+   levels_ctqmc(1:nflavor)=-umod(1,1)/two
+
+   write(std_out,*) "fw1_nd"
+   write(std_out,*) fw1_nd(1,1,1), fw1_nd(1,1,2)
+   write(std_out,*) fw1_nd(1,2,1), fw1_nd(1,2,2)
+   write(std_out,*) "fw1"
+   write(std_out,*) fw1(1,1), fw1(1,2)
+   write(std_out,*) fw1(2,1), fw1(2,2)
+
+ ! Rotate hybridization if testrot=1
+ !==================================
+   if(testrot==1) then
+
+     do ifreq=1,dmftqmc_l
+       RRt(:,:)  = MATMUL ( RR(:,:)  , fw1_nd(ifreq,:,:) )
+   !write(6,*) "RRt"
+   !write(6,*) RRt(1,1), RRt(1,2)
+   !write(6,*) RRt(2,1), RRt(2,2)
+       RR1(:,:)  = MATMUL ( RRt(:,:) , RRi(:,:)          )
+   !write(6,*) "RR1"
+   !write(6,*) RR1(1,1), RR1(1,2)
+   !write(6,*) RR1(2,1), RR1(2,2)
+       fw1_nd(ifreq,:,:)=RR1(:,:)
+       omega=pi*temp*(two*float(ifreq)+1)
+       write(3322,*) omega,real(fw1_nd(ifreq,1,1)),aimag(fw1_nd(ifreq,1,1))
+       write(232,*) omega,real(fw1_nd(ifreq,1,1)),aimag(fw1_nd(ifreq,1,1))
+       write(233,*) omega,real(fw1_nd(ifreq,1,2)),aimag(fw1_nd(ifreq,1,2))
+       write(234,*) omega,real(fw1_nd(ifreq,2,1)),aimag(fw1_nd(ifreq,2,1))
+       write(235,*) omega,real(fw1_nd(ifreq,2,2)),aimag(fw1_nd(ifreq,2,2))
+     end do
+
+     ! Rotate limit of hybridization
+     !=======================================
+     RRt(:,:)  = MATMUL ( RR(:,:)  , hybri_limit(:,:)  )
+     RR1(:,:)  = MATMUL ( RRt(:,:) , RRi(:,:)          )
+     hybri_limit(:,:)=RR1(:,:)
+
+   end if
+   ! rajouter test real(fw1_nd(1,:,:)) doit etre diagonale
+
+ !======================================
+ ! Rotate Green's function from CTQMC
+ !======================================
+ else if(opt==2) then
+
+   write(std_out,*) "gw_tmp_nd"
+   write(std_out,*) gw_tmp_nd(1,1,1), gw_tmp_nd(1,1,2)
+   write(std_out,*) gw_tmp_nd(1,2,1), gw_tmp_nd(1,2,2)
+   ! Rotate Green's function back
+   !==============================
+   if(testrot==1) then
+     do ifreq=1,dmftqmc_l
+       RRt(1:nflavor,1:nflavor) = MATMUL ( RRi(1:nflavor,1:nflavor),gw_tmp_nd(ifreq,1:nflavor,1:nflavor) )
+       RR1(1:nflavor,1:nflavor) = MATMUL ( RRt(1:nflavor,1:nflavor),RR(1:nflavor,1:nflavor) )
+       gw_tmp_nd(ifreq,1:nflavor,1:nflavor)=RR1(1:nflavor,1:nflavor)
+     end do
+
+     write(std_out,*) "gw_tmp_nd after rotation"
+     write(std_out,*) gw_tmp_nd(1,1,1), gw_tmp_nd(1,1,2)
+     write(std_out,*) gw_tmp_nd(1,2,1), gw_tmp_nd(1,2,2)
+
+     do itau=1,dmftqmc_l
+       RRt(1:nflavor,1:nflavor) = MATMUL ( RRi(1:nflavor,1:nflavor),gtmp_nd(itau,1:nflavor,1:nflavor) )
+       RR1(1:nflavor,1:nflavor)  = MATMUL ( RRt(1:nflavor,1:nflavor),RR(1:nflavor,1:nflavor) )
+       gtmp_nd(itau,1:nflavor,1:nflavor)=real(RR1(1:nflavor,1:nflavor))
+     end do
+
+   ! Rotate Green's function for comparison with testrot=1
+   !======================================================
+   else if (testrot==0) then ! produce rotated green's function to compare to testrot=1 case
+
+     do itau=1,dmftqmc_l
+       RRt(1:nflavor,1:nflavor) = MATMUL ( RR(1:nflavor,1:nflavor),gtmp_nd(itau,1:nflavor,1:nflavor) )
+       RR1(1:nflavor,1:nflavor)  = MATMUL ( RRt(1:nflavor,1:nflavor),RRi(1:nflavor,1:nflavor) )
+       write(444,*) real(itau-1)/(temp*real(dmftqmc_l)),real(RR1(1,1)),real(RR1(2,2)),real(RR1(1,2)),real(RR1(2,1))
+     end do
+
+   end if 
+
+   ! Print out rotated Green's function
+   !=====================================
+   do itau=1,dmftqmc_l
+     write(555,'(e14.5,4(2e14.5,3x))') real(itau-1)/(temp*real(dmftqmc_l)),gtmp_nd(itau,1,1),&
+&     gtmp_nd(itau,2,2),gtmp_nd(itau,1,2),gtmp_nd(itau,2,1)
+   end do
+   
+   write(message,'(2a)') ch10,' testcode end of test calculation'
+   MSG_ERROR(message)
+
+ end if
+ close(444)
+ close(555)
+
+end subroutine testcode_ctqmc
+!!***
+
+END MODULE m_forctqmc
 !!***

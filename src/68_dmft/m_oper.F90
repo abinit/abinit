@@ -947,7 +947,7 @@ end subroutine identity_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,psichi_renormalization
+!!      m_dmft,psichi_renormalization
 !!
 !! CHILDREN
 !!      prod_matlu

@@ -175,7 +175,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
-input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets
+input file for a typical cRPA calculation (tucrpa_2.in) contains four datasets
 (as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third

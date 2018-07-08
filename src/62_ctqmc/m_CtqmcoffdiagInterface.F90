@@ -2,16 +2,16 @@
 #include "config.h"
 #endif
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_CtqmcInterface
+!!****m* ABINIT/m_CtqmcoffdiagInterface
 !! NAME
-!!  m_CtqmcInterface
+!!  m_CtqmcoffdiagInterface
 !! 
 !! FUNCTION 
 !!  Manage a ctqmc simulation. 
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,67 +27,59 @@
 !! SOURCE
 
 #include "defs.h"
-MODULE m_CtqmcInterface
-USE m_Ctqmc
+MODULE m_CtqmcoffdiagInterface
+USE m_Ctqmcoffdiag
 
 IMPLICIT NONE
 
 !!***
 
-PRIVATE
-
-!!****t* m_CtqmcInterface/CtqmcInterface
+!!****t* m_CtqmcoffdiagInterface/CtqmcoffdiagInterface
 !! NAME
-!!  CtqmcInterface
+!!  CtqmcoffdiagInterface
 !!
 !! FUNCTION
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
 
-TYPE, PUBLIC :: CtqmcInterface
-  TYPE(Ctqmc)         :: Hybrid
-  INTEGER _PRIVATE :: opt_fk       = 0
-  INTEGER _PRIVATE :: opt_order    = 0
-  INTEGER _PRIVATE :: opt_movie    = 0
-  INTEGER _PRIVATE :: opt_analysis = 0
-  INTEGER _PRIVATE :: opt_check    = 0
-  INTEGER _PRIVATE :: opt_spectra  = 0
-  INTEGER _PRIVATE :: opt_noise    = 0
-  INTEGER _PRIVATE :: opt_gMove    = 0
-END TYPE CtqmcInterface
+TYPE CtqmcoffdiagInterface
+  TYPE(Ctqmcoffdiag) :: Hybrid
+  INTEGER :: opt_fk       = 0
+  INTEGER :: opt_order    = 0
+  INTEGER :: opt_movie    = 0
+  INTEGER :: opt_analysis = 0
+  INTEGER :: opt_check    = 0
+  INTEGER :: opt_spectra  = 0
+  INTEGER :: opt_noise    = 0
+  INTEGER :: opt_gMove    = 0
+END TYPE CtqmcoffdiagInterface
 !!***
-
-PUBLIC :: CtqmcInterface_init
-PUBLIC :: CtqmcInterface_setOpts
-PUBLIC :: CtqmcInterface_run
-PUBLIC :: CtqmcInterface_setSweeps
-PUBLIC :: CtqmcInterface_finalize
 
 CONTAINS
 !!***
 
-!!****f* ABINIT/m_CtqmcInterface/CtqmcInterface_init
+!!****f* ABINIT/m_CtqmcoffdiagInterface/CtqmcoffdiagInterface_init
 !! NAME
-!!  CtqmcInterface_init
+!!  CtqmcoffdiagInterface_init
 !!
 !! FUNCTION
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  this=ctqmcinterface
+!!  op=ctqmcinterface
 !!  iseed=seed for rng
 !!  sweeps=number of sweeps for the run
 !!  thermalization=number of sweeps to thermalize
@@ -113,17 +105,18 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM)
+SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
+&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_init'
+#define ABI_FUNC 'CtqmcoffdiagInterface_init'
 !End of the abilint section
 
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
   INTEGER, INTENT(IN) :: iseed
   DOUBLE PRECISION, INTENT(IN) :: sweeps
@@ -133,13 +126,13 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   INTEGER, INTENT(IN) :: samples
   !INTEGER, INTENT(IN) :: Wmax
   INTEGER, INTENT(IN) :: ostream
+  INTEGER, INTENT(IN) :: opt_nondiag
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
-  INTEGER          :: ifstream!,opt_nondiag
-  DOUBLE PRECISION, DIMENSION(1:9) :: buffer
- ! opt_nondiag=0
+  INTEGER          :: ifstream
+  DOUBLE PRECISION, DIMENSION(1:10) :: buffer
 
   ifstream = 42
 
@@ -152,40 +145,40 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   buffer(7)=beta
   buffer(8)=U
   buffer(9)=GREENHYB_TAU
- ! buffer(10)=DBLE(opt_nondiag)
+  buffer(10)=DBLE(opt_nondiag)
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
 
   IF ( PRESENT( MPI_COMM ) ) THEN
-    CALL Ctqmc_init(this%Hybrid, ostream, ifstream, .FALSE., MY_COMM=MPI_COMM,iBuffer=buffer)
+    CALL Ctqmcoffdiag_init(op%Hybrid, ostream, ifstream, .FALSE., MPI_COMM,buffer)
   ELSE
-    CALL Ctqmc_init(this%Hybrid, ostream, ifstream, .FALSE.,iBuffer=buffer)
+    CALL Ctqmcoffdiag_init(op%Hybrid, ostream, ifstream, .FALSE.,iBuffer=buffer)
   END IF
-  this%opt_fk       = 0
-  this%opt_order    = 0
-  this%opt_movie    = 0
-  this%opt_analysis = 0
-  this%opt_check    = 0
-  this%opt_noise    = 0
-  this%opt_spectra  = 0
-END SUBROUTINE CtqmcInterface_init
+  op%opt_fk       = 0
+  op%opt_order    = 0
+  op%opt_movie    = 0
+  op%opt_analysis = 0
+  op%opt_check    = 0
+  op%opt_noise    = 0
+  op%opt_spectra  = 0
+END SUBROUTINE CtqmcoffdiagInterface_init
 !!***
 
-!!****f* ABINIT/m_CtqmcInterface/CtqmcInterface_setOpts
+!!****f* ABINIT/m_CtqmcoffdiagInterface/CtqmcoffdiagInterface_setOpts
 !! NAME
-!!  CtqmcInterface_setOpts
+!!  CtqmcoffdiagInterface_setOpts
 !!
 !! FUNCTION
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  this=ctqmcinterface
+!!  op=ctqmcinterface
 !!  opt_Fk=0 if we give us Gw0 and 1 if 1/Gw0+iwn
 !!  opt_order=maximal perturbation order to scope(>0)
 !!  opt_movie=print a latex file (0 or 1)
@@ -213,17 +206,17 @@ END SUBROUTINE CtqmcInterface_init
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_setOpts'
+#define ABI_FUNC 'CtqmcoffdiagInterface_setOpts'
 !End of the abilint section
 
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
@@ -234,40 +227,40 @@ SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,o
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_gMove
 
   IF ( PRESENT(opt_Fk) ) &
-    this%opt_Fk = opt_fk
+    op%opt_Fk = opt_fk
   IF ( PRESENT(opt_order) ) &
-    this%opt_order = opt_order
+    op%opt_order = opt_order
   IF ( PRESENT(opt_analysis) ) &
-    this%opt_analysis = opt_analysis
+    op%opt_analysis = opt_analysis
   IF ( PRESENT(opt_check) ) &
-    this%opt_check = opt_check
+    op%opt_check = opt_check
   IF ( PRESENT(opt_movie) ) &
-    this%opt_movie = opt_movie
+    op%opt_movie = opt_movie
   IF ( PRESENT(opt_noise) ) &
-    this%opt_noise = opt_noise
+    op%opt_noise = opt_noise
   IF ( PRESENT(opt_spectra) ) &
-    this%opt_spectra = opt_spectra
+    op%opt_spectra = opt_spectra
   IF ( PRESENT(opt_gMove) ) &
-    this%opt_gMove = opt_gMove
+    op%opt_gMove = opt_gMove
 
-END SUBROUTINE CtqmcInterface_setOpts
+END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!***
 
-!!****f* ABINIT/m_CtqmcInterface/CtqmcInterface_run
+!!****f* ABINIT/m_CtqmcoffdiagInterface/CtqmcoffdiagInterface_run
 !! NAME
-!!  CtqmcInterface_run
+!!  CtqmcoffdiagInterface_run
 !!
 !! FUNCTION
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  this=ctqmcinterface
+!!  op=ctqmcinterface
 !!  G0omega=Gw0 (according to opt_Fk)
 !!  matU=interaction matrice
 !!  opt_sym=weight factors to symmetrise G
@@ -292,102 +285,111 @@ END SUBROUTINE CtqmcInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels) 
+SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit) 
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_run'
+#define ABI_FUNC 'CtqmcoffdiagInterface_run'
 !End of the abilint section
 
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
-  COMPLEX(KIND=8) , DIMENSION(:,:)          , INTENT(IN   ) :: G0omega
-  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(  OUT) :: Gtau
-  COMPLEX(KIND=8) , DIMENSION(:,:), OPTIONAL, INTENT(INOUT) :: Gw
-  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(  OUT) :: D
-  DOUBLE PRECISION                , OPTIONAL, INTENT(  OUT) :: E
-  DOUBLE PRECISION                , OPTIONAL, INTENT(  OUT) :: Noise
-  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN   ) :: matU
-  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN   ) :: opt_sym
-  DOUBLE PRECISION, DIMENSION(:  ), OPTIONAL, INTENT(IN   ) :: opt_levels
+  TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
+  COMPLEX(KIND=8)      , DIMENSION(:,:,:), INTENT(IN ) :: G0omega
+  DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
+  COMPLEX(KIND=8)      , DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: D
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: E
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: Noise
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: matU
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(OUT ) :: Docc
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: opt_sym
+  DOUBLE PRECISION, DIMENSION(:),OPTIONAL,  INTENT(IN ) :: opt_levels
+  COMPLEX(KIND=8) , DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: hybri_limit
 
-  CALL Ctqmc_reset(this%Hybrid)
+  CALL Ctqmcoffdiag_reset(op%Hybrid)
 
 !  ifstream = 42
 !
 !  OPEN(UNIT=ifstream, FILE="Gw.dat")
-!  CALL Ctqmc_setG0w(Hybrid, ifstream)
+!  CALL Ctqmcoffdiag_setG0w(Hybrid, ifstream)
 !  CLOSE(ifstream)
 !  
 
-  IF ( PRESENT(opt_levels) ) &
-    CALL Ctqmc_setMu(this%Hybrid, opt_levels)
+  IF ( PRESENT(opt_levels)) &
+    CALL Ctqmcoffdiag_setMu(op%Hybrid, opt_levels)
 
-  CALL Ctqmc_setG0wTab(this%Hybrid, G0omega,this%opt_fk)
+  IF ( PRESENT(hybri_limit)) &
+    CALL Ctqmcoffdiag_sethybri_limit(op%Hybrid, hybri_limit)
+
+  CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
 
   IF ( PRESENT(matU) ) &
-    CALL Ctqmc_setU(this%Hybrid, matU)
+    CALL Ctqmcoffdiag_setU(op%Hybrid, matU)
 
-  CALL Ctqmc_run(this%Hybrid,opt_order=this%opt_order, &
-                           opt_movie=this%opt_movie, &
-                           opt_analysis=this%opt_analysis, &
-                           opt_check=this%opt_check, &
-                           opt_noise=this%opt_noise, &
-                           opt_spectra=this%opt_spectra, &
-                           opt_gMove=this%opt_gMove)
+  CALL Ctqmcoffdiag_run(op%Hybrid,opt_order=op%opt_order, &
+                           opt_movie=op%opt_movie, &
+                           opt_analysis=op%opt_analysis, &
+                           opt_check=op%opt_check, &
+                           opt_noise=op%opt_noise, &
+                           opt_spectra=op%opt_spectra, &
+                           opt_gMove=op%opt_gMove)
 
-  CALL Ctqmc_getResult(this%Hybrid)
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+ ! write(6,*) "opt_gMove",op%opt_gMove
+
+  CALL Ctqmcoffdiag_getResult(op%Hybrid)
 
   IF ( PRESENT(opt_sym) ) THEN
-    CALL Ctqmc_symmetrizeGreen(this%Hybrid,opt_sym)
+    CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)
   END IF
 
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+
   IF ( PRESENT(Gtau) .AND. PRESENT(Gw) ) THEN
-    CALL Ctqmc_getGreen(this%Hybrid, Gtau=Gtau, Gw=Gw)
+    CALL Ctqmcoffdiag_getGreen(op%Hybrid, Gtau=Gtau, Gw=Gw)
   !      write(6,*) "size",size(Gw,dim=1),size(gw,dim=2)
   !      IF ( hybrid%rank .EQ. 0 ) write(389,*) Gw(:,hybrid%flavors+1)
   !      call flush(389)
   ELSE IF ( PRESENT(Gtau) .AND. .NOT. PRESENT(Gw) ) THEN
-    CALL Ctqmc_getGreen(this%Hybrid, Gtau=Gtau)
+    CALL Ctqmcoffdiag_getGreen(op%Hybrid, Gtau=Gtau)
   ELSE IF ( .NOT. PRESENT(Gtau) .AND. PRESENT(Gw) ) THEN
-    CALL Ctqmc_getGreen(this%Hybrid, Gw=Gw)
+    CALL Ctqmcoffdiag_getGreen(op%Hybrid, Gw=Gw)
   END IF
+
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
 
   IF ( PRESENT(D) ) &
-  CALL Ctqmc_getD(this%Hybrid, D)
+  CALL Ctqmcoffdiag_getD(op%Hybrid, D)
+  Docc=op%Hybrid%measDE
 
-  IF ( PRESENT(E) .AND. PRESENT(Noise) ) THEN
-    CALL Ctqmc_getE(this%Hybrid, E=E, Noise=Noise)
-  ELSE IF ( PRESENT(E) .AND. .NOT. PRESENT(Noise) ) THEN
-    CALL Ctqmc_getE(this%Hybrid, E=E)
-  ELSE IF ( .NOT. PRESENT(E) .AND. PRESENT(Noise) ) THEN
-    CALL Ctqmc_getE(this%Hybrid, Noise=noise)
-  END IF
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
 
+  IF ( PRESENT(E) .AND. PRESENT(Noise) ) &
+  CALL Ctqmcoffdiag_getE(op%Hybrid, E, Noise)
 
-  CALL Ctqmc_printAll(this%Hybrid)
-  !CALL Ctqmc_printQMC(this%Hybrid)
+  CALL Ctqmcoffdiag_printAll(op%Hybrid)
+  !CALL Ctqmcoffdiag_printQMC(op%Hybrid)
 
-END SUBROUTINE CtqmcInterface_run
+END SUBROUTINE CtqmcoffdiagInterface_run
 !!***
 
-!!****f* ABINIT/m_CtqmcInterface/CtqmcInterface_setSweeps
+!!****f* ABINIT/m_CtqmcoffdiagInterface/CtqmcoffdiagInterface_setSweeps
 !! NAME
-!!  CtqmcInterface_setSweeps
+!!  CtqmcoffdiagInterface_setSweeps
 !!
 !! FUNCTION
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  this=ctqmcinterface
+!!  op=ctqmcinterface
 !!  sweeps=new number of sweeps
 !!
 !! OUTPUT
@@ -404,38 +406,38 @@ END SUBROUTINE CtqmcInterface_run
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_setSweeps(this, sweeps)
+SUBROUTINE CtqmcoffdiagInterface_setSweeps(op, sweeps)
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_setSweeps'
+#define ABI_FUNC 'CtqmcoffdiagInterface_setSweeps'
 !End of the abilint section
 
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   DOUBLE PRECISION, INTENT(IN) :: sweeps
 
-  CALL Ctqmc_setSweeps(this%Hybrid,sweeps)
-END SUBROUTINE CtqmcInterface_setSweeps
+  CALL Ctqmcoffdiag_setSweeps(op%Hybrid,sweeps)
+END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 !!***
 
-!!****f* ABINIT/m_CtqmcInterface/CtqmcInterface_finalize
+!!****f* ABINIT/m_CtqmcoffdiagInterface/CtqmcoffdiagInterface_finalize
 !! NAME
-!!  CtqmcInterface_finalize
+!!  CtqmcoffdiagInterface_finalize
 !!
 !! FUNCTION
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  this=ctqmcinterface
+!!  op=ctqmcinterface
 !!
 !! OUTPUT
 !!
@@ -451,25 +453,26 @@ END SUBROUTINE CtqmcInterface_setSweeps
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_finalize(this)
+SUBROUTINE CtqmcoffdiagInterface_finalize(op)
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_finalize'
+#define ABI_FUNC 'CtqmcoffdiagInterface_finalize'
 !End of the abilint section
 
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
 
-  !IF ( this%Hybrid%init .EQV. .TRUE. ) THEN
-!    CALL Ctqmc_printAll(this%Hybrid)
-    CALL Ctqmc_destroy(this%Hybrid)
+  !IF ( op%Hybrid%init .EQV. .TRUE. ) THEN
+!    CALL Ctqmcoffdiag_printAll(op%Hybrid)
+         !write(6,*) "before ctqmc_destroy in Ctqmcoffdiaginterface_finalize"
+    CALL Ctqmcoffdiag_destroy(op%Hybrid)
   !END IF
 
-END SUBROUTINE CtqmcInterface_finalize
+END SUBROUTINE CtqmcoffdiagInterface_finalize
 !!***
 
-END MODULE m_CtqmcInterface
+END MODULE m_CtqmcoffdiagInterface
 !!***

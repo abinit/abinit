@@ -1,5 +1,47 @@
+!!****m* ABINIT/m_ldau_self
+!! NAME
+!!  m_ldau_self
+!!
+!! FUNCTION
+!! Compute DFT+U self energy for DMFT
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include "abi_common.h"
+
+MODULE m_ldau_self
+
+ use defs_basis
+
+ implicit none
+
+ private 
+
+ public :: ldau_self
+!!***
+
+contains
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/ldau_self
+!!****f* m_ldau_self/ldau_self
 !! NAME
 !! ldau_self
 !!
@@ -257,4 +299,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  end if
 
 end subroutine ldau_self
+!!***
+
+END MODULE m_ldau_self
 !!***

@@ -208,6 +208,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawmkaewf,        only : pawmkaewf
  use m_dens,             only : mag_constr_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
+ use m_datafordmft,       only : datafordmft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -216,7 +217,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_14_hidewrite
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_68_dmft
 !End of the abilint section
 
  implicit none
