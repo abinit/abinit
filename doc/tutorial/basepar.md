@@ -57,7 +57,7 @@ and that you are familiar with the peculiarities of your system.
 Please remember that, as there is no standard way of setting up a parallel
 environment, we are not able to provide you with support beyond ABINIT itself.
 
-## 2 Characteristics of parallel environments
+## Characteristics of parallel environments
   
 Different software solutions can be used to benefit from parallelism. 
 Most of ABINIT parallelism is based on MPI, but significant additional speed-up (or a better
@@ -113,7 +113,11 @@ algebra). It can play some role in the parallelism of several parts of ABINIT,
 especially the LOBPCG algorithm in ground state calculations, and the parallelism for the Bethe-
 Salpether equation. ScaLAPACK being itself based on MPI, we will not discuss
 its use in ABINIT in this tutorial.  
-**Important** : Scalapack is not thread-safe in many versions. Combining OpenMP and Scalapack can result is unpredictable behaviours.
+
+!!! warning
+
+    Scalapack is not thread-safe in many versions. 
+    Combining OpenMP and Scalapack can result is unpredictable behaviours.
 
 ### Fast/slow communications
 
@@ -121,7 +125,7 @@ Characterizing the data-transfer efficiency between two computing cores (or
 the whole set of cores) is a complex task. At a quite basic level, one has to
 recognize that not only the quantity of data that can be transferred per unit
 of time is important, but also the time that is needed to initialize such a
-transfer (so called "latency").
+transfer (so called *latency*).
 
 Broadly speaking, one can categorize computers following the speed of
 communications. In the fast communication machines, the latency is very low
@@ -137,7 +141,7 @@ then, you might not be able to benefit from the speed-up announced in the
 tutorials. You have to perform some tests on your actual machine to gain
 knowledge of it, and perhaps consider using multithreading.
 
-## 3 What parts of ABINIT are parallel?
+## What parts of ABINIT are parallel?
   
 Parallelizing a code is a very delicate and complicated task, thus do not
 expect that things will systematically go faster just because you are using a
@@ -164,24 +168,40 @@ Actually, the two levels based on
 are, on the contrary, quite easy to use. An example of such parallelism will
 be given in the next section.
 
-## 4 A simple example of parallelism in ABINIT
+## A simple example of parallelism in ABINIT
+
+[TUTORIAL_README]
   
 ### Running a job
 
 *Before starting, you might consider working in a different subdirectory as
-for the other tutorials. Why not "Work_paral"?*
+for the other tutorials. Why not Work_paral?*
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_paral
+cd Work_paral
+cp ../tbasepar_1.files .   # You will need to edit this file.
+cp ../tbasepar_1.in .
+```
 
 Copy the `files` file and the input file from the `~abinit/tests/tutorial`
 directory to your work directory. They are named `tbasepar_1.files` and
-`tbasepar_1.in`. You can start immediately a sequential run, to have a
-reference CPU time. On a 2.8GHz PC, it runs in about one minute.
+`tbasepar_1.in`. 
+
+You can start immediately a sequential run with
+
+    abinit < tbasepar_1.files > log 2> err 
+
+to have a reference CPU time. 
+On a 2.8GHz PC, it runs in about one minute.
 
 Contrary to the sequential case, it is worth to have a look at the `files`
 file, and to modify it for the parallel execution, as one should avoid
 unnecessary network communications. If every node has its own temporary or
 scratch directory, you can achieve this by providing a path to a local disk
 for the temporary files in `abinit.files`. Supposing each processor has access
-to a local temporary disk space named `/scratch/user` , then you might modify
+to a local temporary disk space named `/scratch/user`, then you might modify
 the 5th line of the `files` file so that it becomes:
     
     tbasepar_1.in
@@ -193,19 +213,22 @@ the 5th line of the `files` file so that it becomes:
     
 Note that determining ahead of time the precise resources you will need for
 your run will save you a lot of time if you are using a batch queue system.
-Also, for parallel runs, note that the _log_ files **will not** be written execpt the main log file.
+Also, for parallel runs, note that the _log_ files **will not** be written exept the main log file.
+
 You can change this behaviour by creating a file named `_LOG` to enforce the creation of all log files
+
 ```bash
 touch _LOG
 ```
-At *contrario* you can create a `_NOLOG` file if you want to avoid all log files.
+
+On the contrary, you can create a *_NOLOG* file if you want to avoid all log files.
 
 ### Parallelism over the k-points
 
 The most favorable case for a parallel run is to treat the k-points
 concurrently, since the calculations can be done independently for each one of them.
 
-Actually, `tbasepar_1.in` corresponds to the investigation of a fcc crystal of
+Actually, *tbasepar_1.in* corresponds to the investigation of a *fcc* crystal of
 lead, which requires a large number of k-points if one wants to get an
 accurate description of the ground state. Examine this file. Note that the
 cut-off is realistic, as well as the grid of k-points (giving 60 k points in
@@ -222,11 +245,11 @@ implementation, and mention the number of processors you want to use, as well
 as the abinit command:
     
 ```bash
-    mpirun -n 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+mpirun -n 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
 ```
 
-Depending on your particular machine, "mpirun" might have to be replaced by
-"mpiexec", and "-n" by some other option.
+Depending on your particular machine, *mpirun* might have to be replaced by
+*mpiexec*, and `-n` by some other option.
 
 On a cluster, with the MPICH implementation of MPI, you have to set up a file
 with the addresses of the different CPUs. Let's suppose you call it _cluster_.
@@ -241,15 +264,14 @@ For a cluster of four machines, you might have something like:
     tux2
     tux3
 
-More possibilities are mentioned in the file `~abinit/doc/users/paral_use`.
-
 Then, you have to issue the run command for your MPI implementation, and
 mention the number of processors you want to use, as well as the abinit
 command and the file containing the CPU addresses.
 
 On a PC bi-processor machine, this gives the following:
+
 ```bash
-    mpirun -np 2 -machinefile cluster ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+mpirun -np 2 -machinefile cluster ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
 ```
 
 Now, examine the corresponding output file. If you have kept the output from
@@ -343,7 +365,7 @@ k-point and spin parallelism indeed work concurrently.
 Balancing efficiently the load on the processors is not always
 straightforward. When using k-point- and spin-parallelism, the ideal numbers
 of processors to use are those that divide the product of [[nsppol]] by
-[[nkpt]] (e.g. for [[nsppol]]*[[nkpt]], it is quite efficient to use 2, 3, 4,
+[[nkpt]] (e.g. for [[nsppol]] * [[nkpt]], it is quite efficient to use 2, 3, 4,
 6 or 12 processors). ABINIT will nevertheless handle correctly other numbers
 of processors, albeit slightly less efficiently, as the final time will be
 determined by the processor that will have the biggest share of the work to do.
@@ -356,7 +378,7 @@ resulting from the increasing amount of communication between the processors.
 The loss of efficiency is highly dependent on the implementation and linked to
 the decreasing charge on each processor too.
 
-## 5 Details of the implementation
+## Details of the implementation
   
 ### The MPI toolbox in ABINIT
 

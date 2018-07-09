@@ -236,12 +236,11 @@ markdown_extensions:
   - markdown.extensions.tables
   - markdown.extensions.def_list
   - markdown.extensions.sane_lists
-  - mdx_math:
-        enable_dollar_delimiter: True
-  #- pymdownx.arithmatex:
+  #- mdx_math:
+  #      enable_dollar_delimiter: True
+  - pymdownx.arithmatex:
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
-        #insert_as_script: True
   - pymdownx.betterem:
       smart_enable: all
   - pymdownx.caret

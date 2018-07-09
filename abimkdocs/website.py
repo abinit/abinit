@@ -838,7 +838,63 @@ The bibtex file is available [here](../abiref.bib).
         """Preprocess markdown lines."""
         lines = self._preprocess_aliases(lines)
         lines = self._preprocess_include(lines)
+        lines = self._preprocess_macros(lines)
         return lines
+
+    def _preprocess_macros(self, lines):
+        """Preprocess markdown lines and replace [TUTORIAL_README] string."""
+
+        tutorial_readme = """
+
+!!! important
+
+    All the necessary input files to run the examples can be found in the *~abinit/tests/* directory
+    where *~abinit* is the absolute path of the abinit top-level directory.
+
+    To execute the tutorials, you are supposed to create a working directory (`Work*`) and
+    copy there the input files and the *files* file of the lesson.
+
+    The *files* file ending with *_x* (e.g. *tbase1_x.files*) **must be edited** every time you start to use a new input file.
+    You will discover more about the *files* file in [[help:abinit#intro|section 1.1]] of the help file.
+
+    To make things easier, we suggest to define some handy environment variables by
+    executing the following lines in the terminal:
+
+    ```bash
+    export ABI_HOME=Replace_with_the_absolute_path_to_the_abinit_top_level_dir
+    export ABI_TESTS=$ABI_HOME/tests/
+    export ABI_TUTORIAL=$ABI_TESTS/tutorial/
+    export ABI_TUTORESPFN=$ABI_TESTS/tutorespfn/
+    export ABI_TUTOPARAL=$ABI_TESTS/tutoparal/
+    export ABI_TUTOPLUGS=$ABI_TESTS/tutoplugs/
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/
+
+    export PATH=$ABI_HOME/src/98_main/:$PATH
+    ```
+
+    The examples in this tutorial will use these shell variables so that one can easily copy and paste
+    the code snippets into the terminal (**remember to set ABI_HOME first!**)
+
+    The last line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
+    so that one can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
+
+    Finally, to run the examples in parallel with e.g. 2 MPI processes, use *mpirun* (*mpiexec*) and the syntax:
+
+        mpirun -n 2 abinit < files_file > log 2> err
+
+    The standard output of the application is redirect to `log` while `err` collects the standard error
+    (runtime error messages will be written here).
+
+"""
+
+        new_lines = []
+        for line in lines:
+            if "[TUTORIAL_README]" in line:
+                new_lines.extend(tutorial_readme.splitlines())
+            else:
+                new_lines.append(line)
+
+        return new_lines
 
     def _preprocess_aliases(self, lines):
         """
