@@ -48,7 +48,7 @@
 !!      outscfcv
 !!
 !! CHILDREN
-!!      hdr_io,int_ang,nderiv_gen,pawcprj_alloc,pawcprj_free,pawcprj_get
+!!      hdr_io,setnabla_ylm,pawcprj_alloc,pawcprj_free,pawcprj_get
 !!      pawcprj_mpi_allgather,pawrad_deducer0,simp_gen,timab,wffclose,wffopen
 !!      xmpi_exch,xmpi_sum,xmpi_sum_master
 !!
@@ -74,10 +74,11 @@
 
  use m_time,      only : timab
  use m_io_tools,  only : get_unit
- use m_pawrad,    only : pawrad_type, pawrad_deducer0, simp_gen, nderiv_gen
+ use m_pawrad,    only : pawrad_type, pawrad_deducer0, simp_gen
  use m_pawtab,    only : pawtab_type
  use m_pawcprj,   only : pawcprj_type, pawcprj_alloc, pawcprj_get, &
 &                        pawcprj_free,pawcprj_mpi_allgather
+ use m_paw_onsite,only : pawnabla_init
  use m_mpinfo,    only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
@@ -108,26 +109,20 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: iomode,basis_size,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibg,ibsp
- integer :: icg,ierr,ij_size,ikg,ikpt,il,ilm,ilmn,iln,ount
+ integer :: iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibg,ibsp
+ integer :: icg,ierr,ikg,ikpt,ilmn,ount
  integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
- integer :: jb,jbsp,jl,jlm,jlmn,jln,jwavef,lmn_size,mband_cprj
- integer :: me,me_kpt,mesh_size,my_nspinor,nband_k,nband_cprj_k,npw_k,sender
+ integer :: jb,jbsp,jlmn,jwavef,lmn_size,mband_cprj
+ integer :: me,me_kpt,my_nspinor,nband_k,nband_cprj_k,npw_k,sender
  integer :: spaceComm_band,spaceComm_bandfftspin,spaceComm_fft,spaceComm_k,spaceComm_spin,spaceComm_w
- logical :: cprj_paral_band,mykpt
+ logical :: already_has_nabla,cprj_paral_band,mykpt
  real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,intg
  character(len=500) :: message
 !arrays
  integer :: tmp_shape(3)
  integer,allocatable :: kg_k(:,:)
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8),kpoint(3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: dphi(:),dtphi(:)
- real(dp),allocatable ::ff(:),int1(:,:),int2(:,:)
- real(dp),allocatable :: kpg_k(:,:),phidphj(:,:),psinablapsi(:,:,:,:)
- real(dp),allocatable :: rad(:),tnm(:,:,:,:),tphidtphj(:,:)
- type(coeff3_type), allocatable :: phipphj(:)
+ real(dp),allocatable :: kpg_k(:,:),psinablapsi(:,:,:,:),tnm(:,:,:,:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(wffile_type) :: wff1
 
@@ -139,98 +134,11 @@
  ABI_CHECK(mkmem/=0,"mkmem==0 not supported anymore!")
 
 !----------------------------------------------------------------------------------
-!1- Computation of phipphj=<phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j>
+!1- Computation of on-site contribution: <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j>
 !----------------------------------------------------------------------------------
 
-!1-A Integration of the angular part : all angular integrals have been
-!computed outside Abinit and tabulated for each (l,m) value
-!----------------------------------------------------------------------------------
-
- call int_ang(ang_phipphj,mpsang)
-
- ABI_DATATYPE_ALLOCATE(phipphj,(dtset%ntypat))
-
-!loop on atoms type
- do itypat=1,dtset%ntypat
-
-   mesh_size=pawtab(itypat)%mesh_size
-   lmn_size=pawtab(itypat)%lmn_size
-   basis_size=pawtab(itypat)%basis_size
-   ij_size=lmn_size*lmn_size
-
-   ABI_ALLOCATE(ff,(mesh_size))
-   ABI_ALLOCATE(rad,(mesh_size))
-   ABI_ALLOCATE(int2,(lmn_size,lmn_size))
-   ABI_ALLOCATE(int1,(lmn_size,lmn_size))
-   ABI_ALLOCATE(dphi,(mesh_size))
-   ABI_ALLOCATE(dtphi,(mesh_size))
-   ABI_ALLOCATE(phidphj,(mesh_size,ij_size))
-   ABI_ALLOCATE(tphidtphj,(mesh_size,ij_size))
-   ABI_ALLOCATE(phipphj(itypat)%value,(3,lmn_size,lmn_size))
-
-   indlmn => pawtab(itypat)%indlmn
-   rad(1:mesh_size)=pawrad(itypat)%rad(1:mesh_size)
-
-!  1-B  Computation of int1=\int phi phj /r dr - \int tphi tphj /r dr
-!  ----------------------------------------------------------------------------------
-   do jln=1,basis_size
-     do iln=1,basis_size
-       ff(2:mesh_size)=(pawtab(itypat)%phi(2:mesh_size,iln)*pawtab(itypat)%phi(2:mesh_size,jln)&
-&       -pawtab(itypat)%tphi(2:mesh_size,iln)*pawtab(itypat)%tphi(2:mesh_size,jln))/rad(2:mesh_size)
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(intg,ff,pawrad(itypat))
-       int1(iln,jln)=intg
-     end do
-   end do
-
-!  1-C Computation of int2=\int phi/r d/dr(phj/r) r^2dr - \int tphi/r d/dr(tphj/r)r^2 dr
-!  ----------------------------------------------------------------------------------
-   do jln=1,basis_size
-
-     ff(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)
-     call nderiv_gen(dphi,ff,pawrad(itypat))
-     ff(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)
-     call nderiv_gen(dtphi,ff,pawrad(itypat))
-
-     do iln=1,basis_size
-       ff(2:mesh_size)=pawtab(itypat)%phi(2:mesh_size,iln)*dphi(2:mesh_size) &
-&       -pawtab(itypat)%phi (2:mesh_size,iln)*pawtab(itypat)%phi(2:mesh_size,jln)/ &
-&       rad(2:mesh_size)-(pawtab(itypat)%tphi(2:mesh_size,iln)*dtphi(2:mesh_size) &
-&       -pawtab(itypat)%tphi (2:mesh_size,iln)*pawtab(itypat)%tphi(2:mesh_size,jln)/rad(2:mesh_size))
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(intg,ff,pawrad(itypat))
-       int2(iln,jln)=intg
-     end do
-   end do
-
-!  1-D Integration of the radial part
-!  ----------------------------------------------------------------------------------
-   do jlmn=1,lmn_size
-     jlm=indlmn(4,jlmn)
-     jl=indlmn(5,jlmn)
-     do ilmn=1,lmn_size
-       ilm=indlmn(4,ilmn)
-       il=indlmn(5,ilmn)
-       phipphj(itypat)%value(1,ilmn,jlmn)= int2(il,jl)*ang_phipphj(ilm,jlm,1)&
-&       + int1(il,jl)*(ang_phipphj(ilm,jlm,2)+ang_phipphj(ilm,jlm,3))
-       phipphj(itypat)%value(2,ilmn,jlmn)= int2(il,jl)*ang_phipphj(ilm,jlm,4)&
-&       + int1(il,jl)*(ang_phipphj(ilm,jlm,5)+ang_phipphj(ilm,jlm,6))
-       phipphj(itypat)%value(3,ilmn,jlmn)= int2(il,jl)*ang_phipphj(ilm,jlm,7)&
-&       + int1(il,jl)*ang_phipphj(ilm,jlm,8)
-     end do
-   end do
-
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(rad)
-   ABI_DEALLOCATE(int2)
-   ABI_DEALLOCATE(int1)
-   ABI_DEALLOCATE(dphi)
-   ABI_DEALLOCATE(dtphi)
-   ABI_DEALLOCATE(phidphj)
-   ABI_DEALLOCATE(tphidtphj)
-
-!  end loop on atoms type
- end do
+ already_has_nabla=all(pawtab(:)%has_nabla==2)
+ call pawnabla_init(mpsang,ntypat,pawrad,pawtab)
 
 !----------------------------------------------------------------------------------
 !2- Computation of <psi_n|-i.nabla|psi_m> for each k
@@ -435,7 +343,7 @@
                  do jlmn=1,lmn_size
                    do ilmn=1,lmn_size
                      cpnm1=cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn)
-                     tnm(2,:,ib,jb)=tnm(2,:,ib,jb)+cpnm1*phipphj(itypat)%value(:,ilmn,jlmn)
+                     tnm(2,:,ib,jb)=tnm(2,:,ib,jb)+cpnm1*pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
                    end do !ilmn
                  end do !jlmn
                end do !iatom
@@ -452,8 +360,8 @@
 &                     +cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn))
                      cpnm2=(cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn) &
 &                     -cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn))
-                     tnm(1,:,ib,jb)=tnm(1,:,ib,jb)+cpnm2*phipphj(itypat)%value(:,ilmn,jlmn)
-                     tnm(2,:,ib,jb)=tnm(2,:,ib,jb)-cpnm1*phipphj(itypat)%value(:,ilmn,jlmn)
+                     tnm(1,:,ib,jb)=tnm(1,:,ib,jb)+cpnm2*pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
+                     tnm(2,:,ib,jb)=tnm(2,:,ib,jb)-cpnm1*pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
                    end do !ilmn
                  end do !jlmn
                end do !iatom
@@ -523,11 +431,15 @@
  call WffClose(wff1,ierr)
 
 !Datastructures deallocations
- do itypat=1,dtset%ntypat
-   ABI_DEALLOCATE(phipphj(itypat)%value)
- end do
- ABI_DATATYPE_DEALLOCATE(phipphj)
  ABI_DEALLOCATE(psinablapsi)
+ if (.not.already_has_nabla) then
+   do itypat=1,dtset%ntypat
+     if (allocated(pawtab(itypat)%nabla_ij)) then
+       ABI_DEALLOCATE(pawtab(itypat)%nabla_ij)
+       pawtab(itypat)%has_nabla=0
+     end if
+   end do
+ end if
 
  DBG_EXIT("COLL")
 
