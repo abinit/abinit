@@ -10,7 +10,7 @@
 !! on the nuclear sites.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,14 +71,14 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_nspinor,ndat
- type(gs_hamiltonian_type),intent(in),target :: gs_ham
+ type(gs_hamiltonian_type),intent(in) :: gs_ham
 !arrays
  real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
  real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
 
 !Local variables-------------------------------
 !scalars
- integer :: cwavedim,igp
+ integer :: cwavedim
  character(len=500) :: message
  !arrays
  complex(dpc),allocatable :: inwave(:),hggc(:)
@@ -102,28 +102,29 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
    MSG_BUG(message)
  end if
 
- cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ABI_ALLOCATE(hggc,(cwavedim))
- ABI_ALLOCATE(inwave,(cwavedim))
+ if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
+   cwavedim = gs_ham%npw_k*my_nspinor*ndat
+   ABI_ALLOCATE(hggc,(cwavedim))
+   ABI_ALLOCATE(inwave,(cwavedim))
 
- do igp = 1, gs_ham%npw_k
-   inwave(igp) = cmplx(cwavef(1,igp),cwavef(2,igp),kind=dpc)
- end do
+   inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
 
-! apply hamiltonian hgg to input wavefunction inwave, result in hggc
- call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
+    ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+    ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
+    ! objects, with the matrix as Hermitian in packed storage
+   call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
+   
+   ghcnd(1,1:gs_ham%npw_k) = real(hggc)
+   ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
 
- do igp=1,gs_ham%npw_k
-   ghcnd(1,igp) = dreal(hggc(igp))
-   ghcnd(2,igp) = dimag(hggc(igp))
- end do
+   ABI_DEALLOCATE(hggc)
+   ABI_DEALLOCATE(inwave)
 
- ABI_DEALLOCATE(hggc)
- ABI_DEALLOCATE(inwave)
+ else
 
-! ghcnd=zero
+   ghcnd(:,:) = zero
 
- ! ABI_DEALLOCATE(hgg)
-
+ end if
+ 
 end subroutine getghcnd
 !!***

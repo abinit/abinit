@@ -9,7 +9,7 @@
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2018 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@ MODULE m_vkbr
 
  use defs_basis
  use defs_datatypes
- use m_blas
+ use m_hide_blas
  use m_errors
  use m_profiling_abi
 
@@ -35,6 +35,8 @@ MODULE m_vkbr
  use m_paw_sphharm,   only : ylmc, ylmcd
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_kg,            only : mkkin
+ use m_mkffnl,        only : mkffnl
 
  implicit none
 
@@ -457,8 +459,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vkb'
- use interfaces_56_recipspace
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

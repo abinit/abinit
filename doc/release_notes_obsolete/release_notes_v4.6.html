@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2005-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between March 2005 and September 2005:
+
+N. Bandeira, J.-M. Beuken, F. Bottin, P. Boulanger, M. Cote,
+J.-F. Danel, T. Deutsch, K. Dewhurst, P. Fons, M. Gatti, Ph. Ghosez,
+D. Hamann, F. Jollet, Lu Jianmin, C. Morari, Mikami-san, G. Onida,
+S. Pesant, Y. Pouillon, G.-M. Rignanese, A. Roy,
+R. Shaltaf, S. Sharma, K.V. Shavanas, W. Shelton,
+M. Torrent, D. Vanderbilt, B. Van Renterghem, M. Veithen,
+M. Verstraete, E. Walter, C. Wiegert, X. Wu, G. Zerah, J. Zwanziger.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.6, released on July 16, 2005.
+
+Changes with respect to version 4.5 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. The number of filenames to be specified in anaddb.files has increased to 6.
+    The help file has been accordingly modified, see ~abinit/doc/users/anaddb_help.html
+
+A2. The input variable zatnum has been definitely suppressed
+    (it was replaced by znucl since v3.4, more than two years ago, but still tolerated).
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The outstanding achievement of this version 4.6 is the creation of
+    more than a dozen of new tutorials, for the summer school at UCSB, end of August 2005.
+    Here is the list (ref. to the directory ~/Infos/Tutorial), with main contributors :
+    lesson_spin            Gilles Zerah
+    lesson_tddft           Xavier Gonze
+    lesson_anaysis_tools   Michel Cote
+    lesson_paw1            Marc Torrent + Francois Jollet
+    lesson_paw2            Marc Torrent + Francois Jollet + Francois Bottin
+    lesson_parallelism     Yann Pouillon
+    lesson_source_code     Yann Pouillon
+    lesson_rf2             Xavier Gonze
+    lesson_optic           Sangeeta Sharma + Xavier Gonze
+    lesson_elphon          Matthieu Verstraete
+    lesson_elastic         Don Hamann
+    lesson_nlo             Philippe Ghosez + Marek Veithen
+    lesson_ffield          Philippe Ghosez + Marek Veithen
+    All these tutorials correspond to automated tests. Hence,
+    the CPU time needed to execute the Tutorial automatic tests
+    has increased a lot.
+
+B2. GW part of ABINIT  (improvements by R. Shaltaf and G.M. Rignanese):
+    (1) Introduction of the Hybertsen-Louie Generalized Plasmon Pole model
+            for GW calculations. New input variable : ppmodel.
+    (2) Possibility to split the correlation part into different contributions :
+            see the new input variable spitsigc
+    (3) It is now possible to compute the dielectric matrix for a restricted
+            set of q-points. The "_SCR" files that are produced from different runs are
+            then merged with the new "mrgscr" program...
+            The list of q-points is specified through nqptdm and qptdm.
+
+B3. PAW part of ABINIT (Marc Torrent and Francois Jollet)
+    Lot of work, fine tuning, rationalization and cleaning, so that PAW can be considered
+    now to be in beta-testing. Should be in production in v5.0 .
+
+    Conjugate gradient routines have been rationalized and cleaned.
+    Now they are compatible with the generalized eigenproblem (PAW).
+    New options have been introduced (in particular an option to
+    perform a modified CG like in Kresse, Furthmuller, PRB 54, 11169 (1996)
+    The blocked algorithm has been cleaned and all communications have
+    been set in cgwf.F90, in order to allow the introduction of future
+    minimization algorithms in vtowfk.F90.
+    The conjugate gradient has been optimized in order to decrease the cpu
+    time when resolving a generalized eigenvalues problem.
+    Mixing of the spherical part in case of PAW (mixing of rhoij)
+            has been completely rewritten
+    New variables : iboxcut, pawoptmix
+    Modified variables (for PAW) : wfoptalg, ortalg, iscf
+    Suppressed variables : pawmixtyp, pawvlbox, toldet
+    See also change D1.
+
+B4. Concerning the responses to strain and electric field, many different
+    thermodynamic conditions have been coded by Xifan Wu (with the cooperation
+    of D. Hamann and D. Vanderbilt).
+    See the input variables elaflag (new values 4 and 5),
+    piezoflag (new values 4 to 7) and dieflag.
+
+    Relaxed ion elastic and compliance tensors when the stress correction are available.
+    Generally, when the cell is not fully relaxed, we must consider the stress correction
+    to the elastic tensors, which is not trivial.
+    We basically following the paper by Don Hamann Phys. Rev. B, 71, 035117 (2005).
+    Add several other new features:
+    1. Calculate piezoelectric d, g, h tensors (relaxed ion).
+    2. Calculate relaxed ion and free stress dielectric tensor.
+    3. Calculate fixed Displacement Field elastic and compliance
+        tensors (relaxed ion).
+    For the details, see the paper:
+    http://arxiv.org/abs/cond-mat/0501548
+
+B5. There are new SCF options, coded by MTorrent and FBottin (iscf=7,12,13,14,17), to
+    perform the SCF. In particular, the near-optimal Pulay algorithm
+    is now available for both norm-conserving and PAW SCF.
+    You are invited to test this algorithm for your preferred test case,
+    and report it to the forum (well, the developer forum for v4.6.2)
+    The possibility to have SCF with respect to the density (instead of the potential)
+    has also been coded. Mixing over the density is a better choice for PAW runs
+    (because it needs less operations).
+    See the input variable iscf and npulayit .
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C1. In the file RunTests.pl,
+    add the ncdump program in the list of program (CODE_NCDUMP) that can be called
+    during a test. The path is (in the abinit folder): Lib_netcdf/bin/ncdump
+    When called, ncdump generate an ASCII file of the netCDF file and then the function
+    fldiff is used to compare this file with the reference(ASCII file).
+    Add the Cut3d option "-nofld". When Cut3d is called during a test and the option
+    is "-nofld", Cut3d run but the fldiff function is not called after.
+    New Tests_v4#100 and 101, Test_v4/README..
+    From M. Coté .
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. On-going work on band parallelisation in lobpcgccwf (A. Roy and G. Zerah).
+    (See mail ARoy 050531).
+
+D2. J Zwanziger has developed an utility called abchk (~abinit/Utilities),
+    to check the input file, and identify the mispelling, with respect
+    to a pre-defined list of admitted keywords (input variables).
+    L Sindic has improved the treatment, leading to the script chkinabi,
+    to be found in the same directory.
+
+D3. There is an additional option 13 of cut3d (to analyze the wavefunctions),
+    from N Bandeira : XCrysden files with negative and positive isosurface data.
+
+D4. Shanavas K.V. has written a bash script "abi2sxf" to extract
+    from abinit output file XCrysDen xsf/axsf format.
+    See ~abinit/Utilities .
+
+D5. The new input variable "symmorphi" has been introduced, in order
+    to be able to prepare and run GW calculations, for which non-symmorphic
+    symmetry operations are not yet allowed.
+
+D6. In the framework of the energy- and orbital-dependent functional theory,
+    implementation of chi_0*kxc in real space, Giovanni Onida, Matteo Gatti,
+    Yann Pouillon, Xavier Gonze. New input variable : suskxcrs .
+
+D7. Improvements of abilint.py by TDeutsch
+
+D8. Improvements of the Wan-T interface by C. Morari.
+
+D9. Improvements of abirules from LSindic
+
+D10. Improvements of electron-phonon part of anaddb by M. Verstra
+    Also, introduction of the new input variable rifcsph and prtgkk .
+
+D11. Bug fixes by : E. Walter, C. Wiegert, K. Dewhurst, LuJianmin ....
+
+D12. New makefile_macros by M. Verstraete, B. Van Renterghem : g95, pathscale ...
+</pre>

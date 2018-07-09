@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +24,12 @@
 #include "abi_common.h"
 
 module m_band2eps_dataset
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
+
+ use m_parser,    only : intagm
 
  implicit none
 
@@ -62,13 +64,13 @@ module m_band2eps_dataset
   integer :: nlines
   integer :: ngrad
   integer :: prtout
-  real(dp) :: min 
+  real(dp) :: min
   real(dp) :: max
 
 
   integer,allocatable :: nqline(:)
 ! nqline(nlines)
-  
+
   real(dp),allocatable :: scale(:)
 ! scale(nlines)
 
@@ -88,7 +90,7 @@ module m_band2eps_dataset
  end type band2eps_dataset_type
 !!***
 
-contains 
+contains
 !!***
 
 !!****f* m_band2eps_dataset/band2eps_dtset_free
@@ -127,7 +129,7 @@ subroutine band2eps_dtset_free(band2eps_dtset)
  type(band2eps_dataset_type), intent(inout) :: band2eps_dtset
 
 ! *************************************************************************
- 
+
  if (allocated(band2eps_dtset%nqline))  then
    ABI_DEALLOCATE(band2eps_dtset%nqline)
  end if
@@ -186,7 +188,6 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars11'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -195,7 +196,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !scalars
  integer,intent(in) :: lenstr
  character(len=strlen),intent(in) :: string
- type(band2eps_dataset_type),intent(inout) :: band2eps_dtset 
+ type(band2eps_dataset_type),intent(inout) :: band2eps_dtset
 
 !Local variables -------------------------
 !Dummy arguments for subroutine 'intagm' to parse input file
@@ -203,7 +204,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !scalars
  integer :: ii,position,jdtset,marr,tread
  character(len=500) :: message
- character(len=fnlen) :: name_qpoint 
+ character(len=fnlen) :: name_qpoint
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -216,7 +217,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  jdtset=1
 
 ! Need to get the number of atom
- band2eps_dtset%natom = zero
+ band2eps_dtset%natom = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
  if(tread==1) band2eps_dtset%natom=intarr(1)
  if (band2eps_dtset%natom <= tol10) then
@@ -227,7 +228,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%nlines = zero
+ band2eps_dtset%nlines = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nlines',tread,'INT')
  if(tread==1) band2eps_dtset%nlines=intarr(1)
  if (band2eps_dtset%nlines <= tol10) then
@@ -238,7 +239,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%cunit = zero
+ band2eps_dtset%cunit = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cunit',tread,'INT')
  if(tread==1) band2eps_dtset%cunit=intarr(1)
  if (band2eps_dtset%cunit < 1 .or. band2eps_dtset%cunit > 2) then
@@ -249,7 +250,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%ngrad = zero
+ band2eps_dtset%ngrad = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ngrad',tread,'INT')
  if(tread==1) band2eps_dtset%ngrad=intarr(1)
  if (band2eps_dtset%ngrad < 0) then
@@ -268,16 +269,16 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  band2eps_dtset%max = zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max',tread,'DPR')
  if(tread==1) band2eps_dtset%max=dprarr(1)
- 
+
  ABI_ALLOCATE(band2eps_dtset%red,(band2eps_dtset%natom))
  ABI_ALLOCATE(band2eps_dtset%blue,(band2eps_dtset%natom))
  ABI_ALLOCATE(band2eps_dtset%green,(band2eps_dtset%natom))
- band2eps_dtset%red(:) = zero
- band2eps_dtset%blue(:) = zero
- band2eps_dtset%green(:) = zero
+ band2eps_dtset%red(:) = 0
+ band2eps_dtset%blue(:) = 0
+ band2eps_dtset%green(:) = 0
 
 ! Read prtout
- band2eps_dtset%prtout = zero
+ band2eps_dtset%prtout = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtout',tread,'INT')
  if(tread==1) band2eps_dtset%prtout=intarr(1)
  if (band2eps_dtset%prtout < 0 .or. band2eps_dtset%prtout > 1) then
@@ -307,7 +308,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !nlines dimenstion
  ABI_ALLOCATE(band2eps_dtset%nqline,(band2eps_dtset%nlines))
  ABI_ALLOCATE(band2eps_dtset%scale,(band2eps_dtset%nlines))
- band2eps_dtset%nqline(:) = zero
+ band2eps_dtset%nqline(:) = 0
  band2eps_dtset%scale(:) = zero
 
  if(band2eps_dtset%nlines > marr)then
@@ -325,10 +326,10 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 
  call intagm(dprarr,intarr,jdtset,marr,band2eps_dtset%nlines,string(1:lenstr),'scale',tread,'DPR')
  if(tread==1) band2eps_dtset%scale(1:band2eps_dtset%nlines) = dprarr(1:band2eps_dtset%nlines)
- 
+
 !nline+1 dimension
  ABI_ALLOCATE(band2eps_dtset%qpoint_name,(band2eps_dtset%nlines+1))
- band2eps_dtset%qpoint_name(:) = ""    
+ band2eps_dtset%qpoint_name(:) = ""
  position = index(string(1:lenstr),trim("QPOINT_NAME")) + 11
  name_qpoint = trim(string(position:(position + &
 &          len(band2eps_dtset%qpoint_name(1))*band2eps_dtset%nlines+1)))

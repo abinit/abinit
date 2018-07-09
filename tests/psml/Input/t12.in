@@ -4,11 +4,10 @@ natom   1
 ntypat  1
 typat   1
 znucl   13
-ndtset  4
-acell1  3.89    3.89    3.89 Angstrom
-acell2  3.95    3.95    3.95 Angstrom
+ndtset  3
+acell1  3.95    3.95    3.95 Angstrom
+acell2  3.98    3.98    3.98 Angstrom
 acell3  4.01    4.01    4.01 Angstrom
-acell4  4.07    4.07    4.07 Angstrom
 rprim   0.0     0.5     0.5 
         0.5     0.0     0.5
         0.5     0.5     0.0

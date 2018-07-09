@@ -8,7 +8,7 @@
 !!  Minimal Energy Path (MEP) search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT)
+!! Copyright (C) 2012-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +31,14 @@
 
 MODULE m_mep
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
  use m_errors
- use m_xmpi, only : xmpi_sum
- use m_bfgs, only : hessupdt
+ use m_xmpi
+
+ use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
+ use m_bfgs,        only : hessupdt
  use m_results_img, only : results_img_type,gather_array_img
 
  implicit none
@@ -64,8 +65,6 @@ MODULE m_mep
 !!
 !! FUNCTION
 !! Datatype with the variables required to perform MEP search
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -136,10 +135,6 @@ subroutine mep_init(dtset,mep_param)
 !scalars
  type(dataset_type),target,intent(in) :: dtset
  type(mep_type),intent(inout) :: mep_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -205,10 +200,6 @@ subroutine mep_destroy(mep_param)
 !Arguments ------------------------------------
 !scalars
  type(mep_type),intent(inout) :: mep_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -290,7 +281,6 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_steepest'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -399,7 +389,6 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_qmin'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -538,7 +527,6 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_lbfgs'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -733,7 +721,6 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_gbfgs'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1066,7 +1053,6 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_rk4'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1220,8 +1206,6 @@ end subroutine mep_rk4
 !! OUTPUT
 !!  mep_img_dotp=dot product
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1278,8 +1262,6 @@ end function mep_img_dotp
 !! OUTPUT
 !!  mep_img_norm=norm
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1303,9 +1285,6 @@ function mep_img_norm(vect)
  real(dp) :: mep_img_norm
 !arrays
  real(dp),intent(in) :: vect(:,:)
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -1333,12 +1312,9 @@ end function mep_img_norm
 !! OUTPUT
 !!  mep_img_dotp_red=dot product
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -1362,7 +1338,6 @@ function mep_img_dotp_red(rmet,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii,jj,size1,size2
-!arrays
 
 !************************************************************************
 
@@ -1401,8 +1376,6 @@ end function mep_img_dotp_red
 !! OUTPUT
 !!  mep_img_norm_red=norm
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1427,9 +1400,6 @@ function mep_img_norm_red(rmet,vect)
 !arrays
  real(dp),intent(in) :: rmet(3,3)
  real(dp),intent(in) :: vect(:,:)
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 

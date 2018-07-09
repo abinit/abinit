@@ -1,13 +1,14 @@
-# Copyright (C) 1998-2017 ABINIT group (XG)
+# Copyright (C) 1998-2018 ABINIT group (XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
 # For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 # 
-# The purpose of this script is to create a new routine
-# ${routine_name}.F90, from the embedded template, 
+# The purpose of this script is to create a new file
+# m_${routine_name}.F90, containing a routine of the same
+# name, from the embedded template, 
 # where "${routine_name}" is the argument of the script.
-# Suppose that one is in a source directory, and that
+# Supposes that one is in a source directory, and that
 # Utility/template.F90 is accessible as ../Utilities/template.F90
 
 if [ $# -lt 1 ]
@@ -19,10 +20,24 @@ fi
 routine_name=${1}
 this_year=`date '+%Y'`
 
-echo -n "mkroutine: creating ${routine_name}.F90..."
+echo -n "mkroutine: creating m_${routine_name}.F90..."
 
-cat > ${routine_name}.F90 <<EOF
+cat > m_${routine_name}.F90 <<EOF
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_${routine_name}
+!! NAME
+!!  m_${routine_name}
+!!
+!! FUNCTION
+!!  module to contain ${routine_name}
+!!
+!! COPYRIGHT
+!!  Copyright (C) ${this_year} ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+
 !!****f* ABINIT/${routine_name}
 !! NAME
 !!  ${routine_name}
@@ -99,6 +114,8 @@ subroutine ${routine_name}(argin,argout,option,sizein,sizeout)
  DBG_EXIT("COLL")
 
 end subroutine ${routine_name}
+!!***
+
 !!***
 EOF
 

@@ -12,7 +12,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2015 ABINIT group (YG)
+!! Copyright (C) 2001-2018 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,9 +37,11 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal, only :       crystal_t
+ use m_crystal,  only : crystal_t
+ use m_kpts,     only : listkk
 
  implicit none
+
  private
 !!***
 
@@ -396,7 +398,6 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'renorm_bst'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

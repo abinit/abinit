@@ -8,7 +8,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MT)
+!! Copyright (C) 2011-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -668,11 +668,11 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
  if (nsppol_in>nsppol_out) then
    if (allocated(results_gs_out%gaps))   then
-     ABI_DEALLOCATE(results_gs_out%gaps)  
+     ABI_DEALLOCATE(results_gs_out%gaps)
    end if
    if (allocated(results_gs_in%gaps))    then
      ABI_ALLOCATE(results_gs_out%gaps,(3,nsppol_in))
-   end if 
+   end if
  endif
 
 
@@ -781,9 +781,9 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 ! Write data.
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],& 
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],&
 &  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
-&  datamode=.True.) 
+&  datamode=.True.)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -793,12 +793,12 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
 
-#else 
+#else
  MSG_ERROR("netcdf support is not activated.")
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).

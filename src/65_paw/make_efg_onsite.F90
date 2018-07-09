@@ -7,7 +7,7 @@
 !! Compute the electric field gradient due to onsite densities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (JZ,MT)
+!! Copyright (C) 2005-2018 ABINIT group (JZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,8 +64,9 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
+ use m_xmpi
 
+ use m_symtk,  only : matpointsym
  use m_pawang, only : pawang_type
  use m_pawtab, only : pawtab_type
  use m_pawrad, only : pawrad_type, pawrad_deducer0, simp_gen
@@ -78,7 +79,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_onsite'
- use interfaces_45_geomoptim
  use interfaces_65_paw, except_this_one => make_efg_onsite
 !End of the abilint section
 

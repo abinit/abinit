@@ -10,7 +10,7 @@
 !!    sushat_{ij,R}(g)=Sum_{L}[Q^L_ijR(g)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,19 +84,18 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
  use m_profiling_abi
  use m_distribfft
  use m_errors
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
+ use m_xmpi
 
  use m_pawang,     only : pawang_type
  use m_pawtab,     only : pawtab_type
  use m_pawcprj,    only : pawcprj_type
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_mpinfo,     only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_mpinfo,     only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawsushat'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

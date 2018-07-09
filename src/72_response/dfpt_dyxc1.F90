@@ -5,11 +5,11 @@
 !!
 !! FUNCTION
 !! Compute 2nd-order non-linear xc core-correction (part1) to the dynamical matrix.
-!! In case of derivative with respect to k or electric field perturbation, 
+!! In case of derivative with respect to k or electric field perturbation,
 !! the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,19 +89,20 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
+ use m_xmpi
 
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab, only : pawtab_type
- use m_xmpi,   only : xmpi_sum
+ use defs_datatypes,  only : pseudopotential_type
+ use m_time,          only : timab
+ use m_cgtools,       only : dotprod_vn
+ use m_pawtab,        only : pawtab_type
+ use m_atm2fft,       only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyxc1'
- use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_dyxc1
 !End of the abilint section
 
@@ -187,7 +188,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      if (nspden==4.and.present(rhor).and.present(vxc)) then
        optnc=1
        call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
+&       nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)

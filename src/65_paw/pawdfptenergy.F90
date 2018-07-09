@@ -26,7 +26,7 @@
 !!      -Int{ VHxc[tild_n1^(j1)+hat_n1^(j1);tild_n_c^(j1)].(tild_n1+hat_n1)[r,EFermi] }
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  use m_errors
  use m_xmpi, only : xmpi_comm_self,xmpi_sum
 
+ use m_time,       only : timab
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -117,7 +118,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdfptenergy'
- use interfaces_18_timing
  use interfaces_65_paw, except_this_one => pawdfptenergy
 !End of the abilint section
 

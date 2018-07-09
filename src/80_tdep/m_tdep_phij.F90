@@ -147,7 +147,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
 
   integer :: iatcell,ishell,jshell,isym,iatom,jatom,eatom,fatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,jj,kk,ll,this_shell,kappa,iatshell,iatref,trans
-  double precision :: sum1,sum2,max_bound,min_bound,dist_shell,delta
+  double precision :: max_bound,min_bound,dist_shell,delta
   integer,allocatable :: tab_shell(:),counter(:,:,:)
   double precision,allocatable :: Phij_33(:,:),Phij_shell(:,:,:),correction(:,:,:),Phij_ref(:,:,:)
 
@@ -181,7 +181,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
         isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
         trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
         if (fatom.lt.eatom) cycle
-        call tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+        call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
 !       Symetrization of the Phij_NN matrix
         Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
         do ii=1,3
@@ -357,8 +357,8 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
 ! Write the Phij_unitcell.dat and Phij_NN.dat files
   if (InVar%debug) then
     write(InVar%stdout,'(a)') ' See the Phij*.dat file'
-    open(unit=52,file='Phij_unitcell.dat')
-    open(unit=55,file='Phij_NN.dat')
+    open(unit=52,file=trim(InVar%output_prefix)//'Phij_unitcell.dat')
+    open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN.dat')
     do jatom=1,3*InVar%natom
       if (jatom.le.3*InVar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phij_NN(jatom,:)
@@ -398,7 +398,8 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
   double complex :: ctemp,norm
   double precision, allocatable :: omega2(:)
   double precision, allocatable :: RWORK(:)
-  double complex, allocatable :: WORKC(:),mass_mat(:,:)
+  double complex, allocatable :: WORKC(:)
+! double complex, allocatable :: mass_mat(:,:)
 
 ! Calculation of the dynamical matrix (Dij)
   do iatcell=1,InVar%natom_unitcell
@@ -578,7 +579,7 @@ subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
 end subroutine tdep_write_dij
 
 !=====================================================================================================
-subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans) 
+subroutine tdep_build_phij33(isym,Phij_ref,Phij_33,Sym,trans) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -590,10 +591,10 @@ subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans)
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: InVar
+! type(Input_Variables_type),intent(in) :: InVar
   double precision, intent(in) :: Phij_ref(3,3)
   double precision, intent(out) :: Phij_33(3,3)
-  integer,intent(in) :: eatom,fatom,isym,trans
+  integer,intent(in) :: isym,trans
 
   double precision :: Phij_tmp(3,3),tmp1(3,3)
 
@@ -658,7 +659,7 @@ subroutine tdep_destroy_eigen2nd(Eigen2nd)
 end subroutine tdep_destroy_eigen2nd
 
 !=====================================================================================================
-subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
+subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -671,13 +672,14 @@ subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
 
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
-  type(Lattice_Variables_type),intent(in) :: Lattice
+  character(len=*) :: Prefix
+! type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: ii,iqpt,imode,nmode
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file='phonon-bands.yaml')
+  open(unit=52,file=trim(Prefix)//'phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'
@@ -693,7 +695,7 @@ subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
     write(52,'(a,f15.6)') '  distance:',distance
     do ii=1,Qpt%qpt_tot
       if (sum(abs(Qpt%qpt_red(:,iqpt)-Qpt%special_red(ii,:))).lt.tol8) then
-        write(52,'(3a)') "  label: '",Qpt%special_qpt(ii),"'"
+        write(52,'(3a)') "  label: '",trim(Qpt%special_qpt(ii)),"'"
         exit
       end if
     end do !ii

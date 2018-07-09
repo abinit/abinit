@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -212,7 +212,7 @@ end subroutine alloc_self
 !! 
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -284,7 +284,7 @@ end subroutine initialize_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -350,7 +350,7 @@ end subroutine destroy_self
 !!  self <type(self_type)>= variables related to self-energy
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -424,7 +424,7 @@ end subroutine print_self
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -550,7 +550,7 @@ end subroutine dc_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -1087,7 +1087,7 @@ end subroutine rw_self
 !!  self <type(self_type)>= variables related to mixed self-energy
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout

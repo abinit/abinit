@@ -9,7 +9,7 @@
 !!  especially those depending on the image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2017 ABINIT group (MT)
+!! Copyright (C) 2015-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,7 +165,7 @@ end subroutine args_gs_init
 !!  args_gs(:)=<type(args_gs_type)>=args_gs datastructure
 !!
 !! PARENTS
-!!      gstateimg,mover_effpot
+!!      gstateimg
 !!
 !! CHILDREN
 !!

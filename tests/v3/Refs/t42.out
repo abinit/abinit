@@ -2,7 +2,7 @@
 .Version 8.6.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -154,13 +154,13 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      5.8000000000E+00  5.8000000000E+00  9.4000000000E+00 Bohr
               amu      2.43050000E+01
-      chksymbreak1          1
-      chksymbreak2          1
-      chksymbreak3          1
-      chksymbreak4          1
-      chksymbreak5          1
-      chksymbreak6          0
-      chksymbreak7          1
+       chkdilatmx1          1
+       chkdilatmx2          1
+       chkdilatmx3          1
+       chkdilatmx4          1
+       chkdilatmx5          1
+       chkdilatmx6          0
+       chkdilatmx7          1
           dilatmx1     1.10000000E+00
           dilatmx2     1.10000000E+00
           dilatmx3     1.10000000E+00
@@ -3466,13 +3466,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.813      69.761
             acell6     5.9083830543E+00  5.9083830543E+00  9.7329379843E+00 Bohr
             acell7     5.9105914486E+00  5.9105914486E+00  9.7266983544E+00 Bohr
               amu      2.43050000E+01
-      chksymbreak1          1
-      chksymbreak2          1
-      chksymbreak3          1
-      chksymbreak4          1
-      chksymbreak5          1
-      chksymbreak6          0
-      chksymbreak7          1
+       chkdilatmx1          1
+       chkdilatmx2          1
+       chkdilatmx3          1
+       chkdilatmx4          1
+       chkdilatmx5          1
+       chkdilatmx6          0
+       chkdilatmx7          1
           dilatmx1     1.10000000E+00
           dilatmx2     1.10000000E+00
           dilatmx3     1.10000000E+00

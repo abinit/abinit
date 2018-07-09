@@ -9,7 +9,7 @@
 !!  should minimize the second order XC energy (without taking self-consistency into account).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,12 +21,12 @@
 !!  nfft  = dimension of the fft grid
 !!  nspden= number of density matrix components
 !!  nkxc  = number of kxc components
-!!  vxc0(nfft,nspden)  = GS XC potential 
-!!  kxc0(nfft,nspden)  = GS XC derivatives 
-!!  rhor0(nfft,nspden) = GS density matrix 
+!!  vxc0(nfft,nspden)  = GS XC potential
+!!  kxc0(nfft,nspden)  = GS XC derivatives
+!!  rhor0(nfft,nspden) = GS density matrix
 !!
 !! OUTPUT
-!!  rhor1(cplex*nfft) = first order density magnetization guess 
+!!  rhor1(cplex*nfft) = first order density magnetization guess
 !!
 !! SIDE EFFECTS
 !!
@@ -47,7 +47,7 @@
 
 
 subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
@@ -64,18 +64,19 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
  real(dp), intent(in)    :: kxc0(nfft,nkxc)
- real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)                        
+ real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
- integer  :: ipt                                     
- real(dp) :: bxc0,phixc0,m_dot_m1,bxc1                  
- real(dp) :: mdir(3),fdir(3)               
- real(dp) :: m1(3),m0(3),m1_norm,m0_norm
- real(dp) :: f_dot_m,f_perp(3)
- 
+ integer  :: ipt
+ real(dp) :: bxc0,bxc1
+ real(dp) :: m1_norm,m0_norm
+ real(dp) :: f_dot_m
+ real(dp) :: mdir(3),fdir(3)
+
 ! *************************************************************************
 
  if (nspden==2) then
+
    if(cplex==1) then
      do ipt=1,nfft
        bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2)) ! d/dm Bxc
@@ -89,11 +90,12 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(ipt,:)=zero
      end do
    end if
+
  else if(nspden==4) then
 
    fdir=zero
    fdir(idir)= 1.0d0
-   do ipt=1,nfft  
+   do ipt=1,nfft
      m0_norm=sqrt(rhor0(ipt,2)**2+rhor0(ipt,3)**2+rhor0(ipt,4)**2)
      mdir(1)=rhor0(ipt,2)/m0_norm
      mdir(2)=rhor0(ipt,3)/m0_norm
@@ -103,13 +105,13 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
      bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2))  ! d/dm Bxc
      m1_norm=(-half/bxc1)*f_dot_m                            ! get an estimate of the norm of m1
 
-     bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)       
-
+     bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
      if(cplex==1) then
        rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
        rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
-       rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
-       rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
+       rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
+       rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
+       rhor1(ipt,:)=zero
      else
        rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
        rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
@@ -120,13 +122,14 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(2*ipt  ,3)=zero
        rhor1(2*ipt  ,4)=zero
 
+       rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
+       rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero
+       rhor1(2*ipt-1,3)=zero; rhor1(2*ipt,3)=zero
+       rhor1(2*ipt-1,4)=zero; rhor1(2*ipt,4)=zero
 
-       rhor1(2*ipt-1,:)=zero
-       rhor1(2*ipt  ,:)=zero
      end if
    end do
  end if
-
 
 end subroutine dfpt_init_mag1
 !!***

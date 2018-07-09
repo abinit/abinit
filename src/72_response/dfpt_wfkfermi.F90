@@ -8,7 +8,7 @@
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, MT)
+!! Copyright (C) 1999-2018 ABINIT group (DRH, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,19 +96,19 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_xmpi
  use m_cgtools
 
+ use m_dtfil,       only : status
+ use m_time,        only : timab
  use m_pawrhoij,    only : pawrhoij_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free
- use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
+ use m_getgh1c,     only : getgh1c
+ use m_dfpt_mkrho, only : dfpt_accrho
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_wfkfermi'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_wfkfermi
 !End of the abilint section
 
  implicit none
@@ -266,9 +266,9 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
-     
+
 !    Accumulate contribution to density and PAW occupation matrix
-     
+
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
 &     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&

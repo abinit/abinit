@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2014-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -69,7 +69,7 @@ run_standard_tests = $(BOURNE_SHELL) \\
 all-local: help
 
 help:
-	@cat $(top_srcdir)/doc/help_make/help_make_abichecks
+	@cat $(top_srcdir)/doc/help_make/help_make_abichecks.txt
 """ % (name,stamp,name)
 
 

@@ -1,0 +1,283 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+September 2011 and January 2012. These release notes
+are relative to improvements of ABINITv6.12 with respect to v6.10.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin, J. Bouchet, E. Bousquet, 
+F. Bruneval, D. Caliste, F. Dahm, H. Dammak, M. Delaveau, T. Deutsch,
+C. Espejo, G.A. Franco, G. Geneste, L. Genovese, M. Giantomassi, Y. Gillet,
+X. Gonze, A. Jacques, F. Jollet, G. Jomard, M. Marques,
+S. Ponce, Y. Pouillon, A. Romero,
+M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, Bin Xu, J. Zwanziger .
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 6.12, released on January 30, 2012.
+
+Changes with respect to version 6.10 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 As mentioned in B.2, the standard version of LibXC is now 1.1.0 instead of 1.0.0 . 
+    There has been a few numerical changes, esp. in the PBE functional and the mGGAs ...
+    Also, functional number 104 is no more the Becke 86 Xalfa,beta,gamma (reoptimized)
+    but Herman Xalphabeta GGA.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+ 
+B.1 The Ground-state calculations can benefit from GPUs, with CUDA library.
+    See the input variable use_gpu_cuda, as well as the tests contained in the tests/gpu
+    subdirectory.
+    This functionnality is still in beta stage and has to be used carefully.
+    Note that to take benefit of the GPU efficiency the computation load has to be large enough.
+    Abinit has to be compiled with the NVidia Cuda package (v3.2+) as well as the Magma library (http://icl.cs.utk.edu/magma/).
+    Relevant configure options: --enable-gpu, --with-gpu-flavor, --with-gpu-prefix, NVCC, NVCC_FLAGS
+    and --with-linalg-flavor (for Magma activation).
+    When Abinit has been compiled with Cuda and an available Graphics card is detected, ground-states calculations
+     are automatically done on the GPU. This can de deactivated by setting "use_gpu_cuda 0" in the input file.
+    Note that, when doing a GS calculation one GPU, some defaults are automatically changed: LOBPCG algorithm use
+    is forced (wfoptalg=14), Ylm version of non-local operator is selected, FFT algorithm is forced to be 401.
+    All these changes do not modify the final result of ground-state calculations.
+    (F. Dahm and M. Torrent, with some testing by JM Beuken)
+
+B.2 The LibXC version 1.1.0 is now interfaced with ABINIT, instead of LibXC version 1.0.0 .
+    There are numerous new LDA/GGA functionals of which the portability has been tested.
+    New functionals that can be used with ABINIT (numbers refer to the index given in the description of the ixc input variable): 
+    - 3 LDA (number 22,23,24) 
+    - 9 X-GGA (number 139,140,141,142,144,145,149,183,184)
+    - 4 C-GGA (number 143, 147, 148, 186)
+    - 3 XC-GGA (number 146, 170, 171)
+    The documentation is up-to-date, and also include the documentation 
+    of different functionals that were previously already available (125,126, 172->181)
+    See the automatic tests libxc#17,18,19 .
+    See also the warning A.1
+    (work by XG + YPouillon and JMBeuken, and of course, the LibXC team, esp. M. Marques)
+
+B.3 Tutorials for parallelism (also Bethe-Salpether)
+    For the needs of the ABINIT hands-on tutorial for High-performance computing at the TGCC in Bruyeres-le-chatel,
+    November 2011, http://sites.google.com/site/abinit2011tutorial, a set of six new lessons for the ABINIT tutorial has been created :
+    ground state with plane waves, ground state with wavelets, molecular dynamics, parallelism on "images", 
+    response functions, Many-Body Perturbation Theory .
+    They are available on the Web, as well as in the package, entry point doc/tutorial/welcome.html.
+    A new directory for testing the has been created : tests/tutoparal.
+    The old lesson on parallelism, obsolete, has been cleaned and is now up-to-date, and coherent with the other lessons.
+    The tutorials all demonstrate, for different capabilities of ABINIT, that a speed-up of more than one hundred
+    is achievable. 
+    By the way, in the process of setting up the tutorials, tests and improvements of the scaling were made, for the
+    different functionalities.
+
+    There is also another new tutorial (sequential) on the use of the Bethe-Salpether equation to compute optical properties,
+    created for v6.12 : see doc/tutorial/lesson_bse.html
+    Also, the tutorial on GW has been considerably improved.
+
+    Work by M. Torrent, F. Jollet, B. Amadon, G. Geneste, J. Bouchet, G. Jomard, M. Stankovski, M. Giantomassi, F. Bruneval,
+    F. Bottin, D. Caliste, L. Genovese.
+   
+B.4 The latest version of the BigDFT library has been interfaced with ABINIT : switch from BigDFT 1.2 to BigDFT 1.6 .
+    This allowed to develop the tutorial on BigDFT in parallel.
+    Work by D. Caliste (and of course the whole BigDFT tesm, esp. L. Genovese and T. Deutsch).
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 All the "allocate/deallocate" instructions have been replaced by "ABI_ALLOCATE/ABI_DEALLOCATE"
+    (ABI_DATATYPE_(DE)ALLOCATE for pointers).
+    This project, lead by David Waroquiers, aims to allow memory control and monitoring.
+
+C.2 Previously a set of blanks might have been introduced by abiauty, changing
+    !$OMP
+    to something like
+    !   $OMP
+    depending on the alignment with other neighboring lines.
+    The abiauty script has been modified, so that the lines starting with 
+    !$OMP
+    will now be unchanged by abiauty. This is the expected behaviour of abiauty for future developments inside
+    ABINIT, in order not to have abiauty destroying the OMP directives.
+    (By the way, comments can also be leaved unaffected by abiauty, if they start with !!OMP )
+
+C.3 There have been many improvements for the test farm.
+    Among other developments :
+    - new "on_push" server to test quickly the public branch freshly committed
+      (already active but not for production 
+    - new nightly builders :
+        - tikal with pathscale 4.0
+        - max2 with Open64
+        - ktulu with native deb packages ( gcc44, fftw3, atlas, openmpi,...)
+    - new "on_demand only" builders :
+        - buda_gcc45_checks to check quickly buildsys
+        - buda_gcc45_cuda to test GPU/CUDA
+        - shiva_gcc45_abiauty 
+        - tikal_intel11_openmp to test OpenMP
+    - removed nightly builder : bigmac_gcc43
+    (JM Beuken)
+
+C.4 Improvement/modifications of the build system :
+    - Switched from plugins to connectors / fallbacks.
+    - Added connector for Levenberg-Marquardt nonlinear least squares
+      algorithms (levmar).
+    - Added build-system support for flexible MPI compiler wrappers.
+    - Automated the triggering of defines and conditionals.
+    - Added build-system support for multiple shared-object file extensions.
+    - Added build-system support for the Magma library.
+    - Fully modularized the build system into 5 blocks: core, doc, fallbacks,
+      gui, and tests, to allow for asynchronous improvements on each block
+      while preserving the overall robustness.
+    - Rewrote makemake as a configurable Python script. Obsoleted the
+      clean-source-tree script.
+    - Fixed various consistency issues.
+    - Enhanced and refactored build-system outputs.
+    (Y. Pouillon)
+
+C.5 The name of the routine is now defined automatically, thanks to the ABI_FUNC macro. The abilint script
+    automatically creates it.
+    (M. Giantomassi)
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+
+D.1 Switch to atompaw 3.1.0.3
+    Switch to ETSF-IO 1.0.4
+    (YPouillon, XG)
+
+D.2 Fox 4.1.0 has been replaced by Fox4.1.2 . It is now tested satisfactorily on more builders than previously : testf_gcc44,
+    testf_gcc44_serial, buda_gcc43-mpiio, green_g95, ibm_xlf12, inca_gcc44_sdebug, ktulu_gcc44,
+    littlebuda_gcc45_gpu, max2_gcc46, shiva_gcc45_distchk .
+    Seem NOT to work with Intel, Open64, Pathscale compilers, though.
+    (XG, YPouillon, JMBeuken).
+
+D.3 The input variable bs_loband has been introduced.
+    See the tests Tv6#91,94 and tutorials Bethe-Salpether, cases 2 to 5, as well as
+    tutorial Many-Body Theory, test case 5.
+    (M Giantomassi)
+
+D.4 More work on the Contour deformation approach to GW calculations (see section B.3 of the
+    release notes for version 6.10), with the introduction of the following input variables :
+    cd_use_pole_src, cd_reconstr_scr, cd_npoles (still to be documented and tests to be provided).
+    The new test Tv6#101 has been defined, to test the use of cd_customimfrqs, cd_imfrqs,
+    cd_full_grid, nfreqim, nfreqre, cd_halfway_freq, cd_max_freq, gw_use_freqre_tangrid
+    Enabling pole-fit in sigma calculations, using the Levenberg-Marquardt algorithm
+    (introduction of the levmar library).
+    (M. Stankovski)
+
+D.5 Work on the electron-phonon coupling part of ABINIT, especially the tools to analyse its effects. 
+    New input variables for ABINIT : fermie_nest. 
+    New input variable for ANADDB : ep_extrael.
+    New tests : Tv6#103 and 104.
+    (Bin Xu, M. Verstraete) 
+
+D.6 The preconditioners defined by non-zero iprcel values (extrapolar-type) can now be used used safely
+    with PAW. See the input variable pawsushat, and the test paral#W .
+    (M. Torrent)
+
+D.7 Computation of the chemical shielding, on-going development. Definition of the input variable
+    prtcs, not operational yet, though.
+    Orbital magnetization and Chern number can be computed, but at present, only in the nspinor=nsppol=1 case.
+    More possibilities (esp. related to spin/spinor) under development.
+    (J. Zwanziger).
+
+D.8 To avoid numerical problems with some XC functionals (see point B.2), a new input varaible, xc_denpos,
+    has been introduced, to allow avoiding the density to vanish, and avoid spurious divergences.
+    See test Libxc#13 .
+    (XG)
+
+D.9 Development of a new timing technique, based on the writing of _TIMER files.
+    (M. Giantomassi)
+
+D.10 Work on the geometry optimisation preconditioner.
+     By G.A. Franco
+
+D.11 Work on the GW part of ABINIT, to allow to use OpenMP to speed up the code and also reduce the memory needs.
+     (M. Giantomassi)
+
+D.12 Decomposition of the square of phonon frequencies at each q-point in short-range and long-range contributions, 
+     inside ANADDB. New input variable prtsrlr. Test Tv6#105.
+     (E. Bousquet)
+
+D.13 Some rudimentary automatic test of the ABINIT GUI is currently being developed.
+     By F. Abreu, Y. Pouillon, JM Beuken, X Gonze.
+
+D.14 Implementation inside of ANADDB of Gaal Nagy algorithm to refine the set of q points in the Brillouin Zone, in development.
+     Input variable : qrefine. See test v6#102. Not working yet ...
+     (M. Verstraete)
+
+D.15 Work on automation of the distribution of the work load for the parallelism 
+     (no need to explicitly specify the splitting of processors in npband / npfft / npspin / npkpt ...)
+     An automatic test should be available ...
+     By F. Jollet and M. Torrent.
+
+D.16 Work on Shirley interpolation, to speed up the BSE code.
+     (Should provide documentation and test cases ...)
+     (M. Giantomassi)
+
+D.17 On-going effort to provide vdW functionals for ABINIT.
+     (see D.7 of the 6.4 release notes)
+     Included Silvestrelli method to vdW (version 2), following Ambrosetti & Silvestrelli, http://arxiv.org/abs/1111.6737
+     Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.18 A genetic algorithm to find new structures is under development.
+     (see D.13 of the 6.4 release notes)
+     By AH. Romero and X. Gonze
+
+D.19 Phonon calculations using DFPT can be done reliably with the PAW methodology,
+     for the insulating case. 
+     The metal case is operational (under the same conditions), except for q=0 (not fully implemented).
+     The electric field response was already available previously.
+     Still, for the time being, mixing of electric field and atomic displacement is not allowed.
+     Not yet possible to do calculations with spinors.
+     Not yet all possibilities that are present in PAW (e.g. pawxcdev is not allowed).
+     Work done by M. Torrent.
+
+D.20 Electric field gradient computation with spin-orbit has been coded. See test v6#49, for the ICl molecule.
+     (J. Zwanziger)
+
+D.21 The use of LDA+Dynamical Mean Field Theory is in progress.
+     (see D.6 of the 6.4 release notes)
+     By B. Amadon
+
+D.22 Work on parallelisation/distribution on the atoms in the PAW case 
+     By M. Delaveau, M. Torrent and F. Bottin.
+
+D.23 Work on the computation of polarisation (Berry phase) and finite electric-field computations,
+     with spinorial wavefunctions.
+     (J. Zwanziger)
+
+D.24 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by
+     A. Berger, J.M. Beuken, F. Bottin, E. Bousquet, D. Caliste, H. Dammak, M. Delaveau, 
+     G. Franco, Y. Gillet, A. Jacques, F. Jollet, 
+     S. Poncé, A.H. Romero, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger, D. Waroquiers.
+</pre>

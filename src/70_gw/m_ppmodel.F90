@@ -8,7 +8,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,14 +35,14 @@ MODULE m_ppmodel
  use m_linalg_interfaces
 
  use m_fstrings,       only : sjoin, itoa
- use m_abilasi,        only : xhegv
+ use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t, cmod_qpg
  use m_fft_mesh,       only : g2ifft
- use m_mpinfo,         only : destroy_mpi_enreg
+ use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -1485,7 +1485,6 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm2par'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1712,7 +1711,6 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm3par'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1988,7 +1986,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm4par'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section
 

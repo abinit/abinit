@@ -4,11 +4,11 @@
 !!  m_distribfft
 !!
 !! FUNCTION
-!!  This module provides the definition of the different arrays 
+!!  This module provides the definition of the different arrays
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2018 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@ MODULE m_distribfft
 !! for plane sharing for FFT parallelization
 !!
 !! TODO
-!!   1) One should create two separated tables: one for the wavefunctions and the other one for 
+!!   1) One should create two separated tables: one for the wavefunctions and the other one for
 !!      fourdp on the dense/coarse mesh.
 !!
 !!   2) Use shorter names --> fftabs_type
@@ -76,7 +76,7 @@ MODULE m_distribfft
   integer, allocatable :: tab_fftwf2dg_distrib(:)
   ! rank of the processors which own fft planes in 2nd dimension for fourwf on fine grid
 
-  integer, allocatable :: tab_fftdp2dg_distrib(:) 
+  integer, allocatable :: tab_fftdp2dg_distrib(:)
   ! rank of the processors which own fft planes in 2nd dimension for fourdp on fine grid
 
   integer, allocatable :: tab_fftdp3dg_distrib(:)
@@ -97,7 +97,7 @@ MODULE m_distribfft
   integer, allocatable :: tab_fftdp2dg_local(:)
   ! local i2 indices in fourdp on fine grid
 
-  integer, allocatable :: tab_fftdp3dg_local(:) 
+  integer, allocatable :: tab_fftdp3dg_local(:)
   ! local i3 indices in fourdp on fine grid
 
 end type distribfft_type
@@ -121,7 +121,7 @@ CONTAINS !===========================================================
 !!  MPI-FFT routines should always be compatible with this distribution.
 !!
 !! INPUTS
-!! grid_type = 'c' or 'f' for informations about coarse or fine fft grid
+!! grid_type = 'c' or 'f' for information about coarse or fine fft grid
 !! nproc_fft = number of process used to distribute the fft
 !! n2,n3     = sizes of second and third fft grid
 !!
@@ -168,7 +168,7 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
 
  select case (grid_type)
  case ('c')
-    ! Updating informations about coarse fft grid
+    ! Updating information about coarse fft grid
     if(distribfft_arg%n2_coarse > 0) then
       if(n2 == distribfft_arg%n2_coarse) then
         MSG_WARNING("The distribfft passed was already allocated for coarse grid on the same size")
@@ -186,7 +186,7 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     ABI_ALLOCATE(distribfft_arg%tab_fftdp3_distrib,(n3))
     ABI_ALLOCATE(distribfft_arg%tab_fftdp3_local,(n3))
     do i2=1, n2
-      ! Cyclic distribution of ig2 planes over fft processors 
+      ! Cyclic distribution of ig2 planes over fft processors
       distribfft_arg%tab_fftwf2_distrib(i2) = modulo((i2-1),nproc_fft)
       distribfft_arg%tab_fftwf2_local(i2)    = (i2-1)/nproc_fft + 1
       ! Block distribution of i2 planes over fft processors for fourdp
@@ -209,7 +209,7 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
       end if
     endif
     distribfft_arg%n2_fine = n2
-    ! Updating informations about fine fft grid
+    ! Updating information about fine fft grid
     ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_distrib,(n2))
     ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_local,(n2))
     ABI_ALLOCATE(distribfft_arg%tab_fftdp2dg_distrib,(n2))
@@ -217,7 +217,7 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_distrib,(n3))
     ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_local,(n3))
     do i2=1, n2
-      ! Cyclic distribution of ig2 planes over fft processors 
+      ! Cyclic distribution of ig2 planes over fft processors
       distribfft_arg%tab_fftwf2dg_distrib(i2) = modulo((i2-1),nproc_fft)
       distribfft_arg%tab_fftwf2dg_local(i2)    = (i2-1)/nproc_fft + 1
       ! Block distribution of i2 planes over fft processors for fourdp on fine grid
@@ -253,7 +253,7 @@ end subroutine init_distribfft
 !!  Initializes a sequential FFT distribution
 !!
 !! INPUTS
-!! grid_type  = 'c' or 'f' for informations about coarse or fine fft grid
+!! grid_type  = 'c' or 'f' for information about coarse or fine fft grid
 !! n2,n3 = sizes of second and third fft grid
 !! type_four = 'fourdp' or 'fourwf' or 'all' to prepare a call to fourdp/fourwf
 !!
@@ -391,11 +391,11 @@ end subroutine init_distribfft_seq
 !!  destroy_distribfft
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for FFT distribution
+!!  Cleans-up the mpi information for FFT distribution
 !!  (mostly deallocate parts distribfft(:) ).
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      atm2fft,dfpt_atm2fft,m_cut3d,m_fft,m_mpinfo,m_qparticles,m_wfd
@@ -479,11 +479,11 @@ end subroutine destroy_distribfft
 !!  copy_distribfft
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for FFT distribution
+!!  Cleans-up the mpi information for FFT distribution
 !!  (mostly deallocate parts distribfft(:) ).
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      m_mpinfo

@@ -6,7 +6,7 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,6 @@
 !! m_array.F90
 !! m_blas.F90
 !! m_bspline.F90
-!! m_cgtools.F90
 !! m_cplxtools.F90
 !! m_elpa.F90
 !! m_gaussian_quadrature.F90

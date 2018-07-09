@@ -8,7 +8,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (FJ,MT)
+!! Copyright (C) 2011-2018 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,9 @@ MODULE m_bandfft_kpt
  use m_profiling_abi
  use m_errors
  use m_xmpi
+
+ use m_fftcore,   only : sphereboundary
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 
@@ -59,7 +62,7 @@ MODULE m_bandfft_kpt
 !! about the triple band-fft-kpt parallelisation :
 !! tabs which are distributed over all the three dimensions and stored during
 !! the calculation, dimensions of messages exchange during the calculations...
-!! i.e.: all the informations which were spread over the entire code before and
+!! i.e.: all the information which were spread over the entire code before and
 !! recomputed at each iline, istep or itime STEP with a large probability to
 !! make a mistake.
 !!
@@ -119,7 +122,7 @@ MODULE m_bandfft_kpt
 !!***
 
  type(bandfft_kpt_type),save,public,pointer :: bandfft_kpt(:) => null()
-    ! Contains all the informations related to the band/FFT parallelism
+    ! Contains all the information related to the band/FFT parallelism
     ! which depends on kpt exists only if mpi_enreg%paral_kgb==1
 
  integer,save,private :: bandfft_kpt_current_ikpt=-1
@@ -146,7 +149,7 @@ CONTAINS
 !!  kg(3,mpw*mkmem)    = dimensionless coords of G vecs in basis sphere at k point
 !!  mgfft              = maximum single fft dimension (IN)
 !!  mkmem              = number of k points which can fit in memory; set to 0 if use disk
-!!  mpi_enreg          = informations about MPI parallelization
+!!  mpi_enreg          = information about MPI parallelization
 !!  mpw                = maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol) = number of bands at each k point
 !!  nkpt               = number of k points
@@ -201,8 +204,6 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_init1'
- use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none
@@ -923,7 +924,6 @@ subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_destroy_array'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1000,7 +1000,6 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_copy'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2059,7 +2058,7 @@ end subroutine bandfft_kpt_restoretabs
 !!
 !! INPUT
 !!  ikpt=index of k-point (in the global array dtset%kpt)
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!
 !! OUTPUT
 !!  bandfft_kpt_current_ikpt value changed

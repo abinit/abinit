@@ -10,7 +10,7 @@
 !!  regions and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT, FJ, BA)
+!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

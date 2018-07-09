@@ -10,7 +10,7 @@
 !! Perform some preliminary checks and echo these dimensions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MKV)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MKV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,15 +82,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  use m_xmpi
  use m_atomdata
 
+ use m_fstrings, only : inupper
+ use m_geometry, only : mkrdim
+ use m_parser,   only : intagm, chkint_ge
+ use m_inkpts,   only : inkpts, inqpt
+ use m_ingeo,    only : ingeo, invacuum
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_42_parser
- use interfaces_57_iovars, except_this_one => invars1
 !End of the abilint section
 
  implicit none
@@ -330,11 +332,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&     ' invars1: ERROR -',ch10,&
-&     '  nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
-&     '  for the same dataset.',ch10,&
-&     '  Action : check the input file.'
+     write(message, '(5a)' )&
+&     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
+&     'for the same dataset.',ch10,&
+&     'Action: check the input file.'
      call wrtout(std_out,  message,'COLL')
      leave=1
    else
@@ -469,7 +470,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
 &   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
 &   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
-&   string,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,typat,vel,vel_cell,xred,znucl)
+&   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
+&   typat,vel,vel_cell,xred,znucl)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
@@ -668,7 +670,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
 &   'This is not allowed.',ch10,&
-&   'Action : check the input file.'
+&   'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -711,7 +713,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  After inkpts, nkpt must be > 0, but was ',nkpt,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,  message,'COLL')
    leave=1
  end if
@@ -722,7 +724,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  Input nsppol must be 1 or 2, but was ',nsppol,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if
@@ -733,7 +735,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  Input nspinor must be 1 or 2, but was ',nspinor,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if
@@ -744,7 +746,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  nspinor and nsappol cannot be 2 together !',ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if
@@ -913,25 +915,26 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
    MSG_WARNING(message)
  end if
- 
+
 !Some PAW+U keywords
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
+ if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 .and. dtset%usedmft > 0) then
+ if (dtset%usepawu > 0 ) then
    write(message, '(7a)' )&
 &   'usedmft and usepawu are both activated ',ch10,&
 &   'This is not an usual calculation:',ch10,&
-&   'usepawu will be put to 10:',ch10,&
+&   'usepawu will be put to a value >= 10:',ch10,&
 &   'LDA+U potential and energy will be put to zero'
    MSG_WARNING(message)
  end if
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
- if (dtset%usepawu>0) then
+ if (dtset%usepawu>0.or.dtset%usedmft>0) then
+
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 

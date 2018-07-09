@@ -1,0 +1,215 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+June 2011 and October 2011. These release notes
+are relative to improvements of ABINITv6.10 with respect to v6.8.
+
+The list of contributors includes :
+F. Abreu, B. Amadon, G. Antonius, A. Berger, J.-M. Beuken, F. Bottin, J. Bouchet, D. Caliste, M. Delaveau,
+C. Espejo, G.A. Franco, G. Geneste, M. Giantomassi, X. Gonze, A. Jacques, F. Jollet,
+A. Knyazev, M. Mancini, S. Ponce, Y. Pouillon, G.-M. Rignanese, A. Romero,
+M. Torrent, M. Stankovski, M. Verstraete, D. Waroquiers, Bin Xu, J. Zwanziger .
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 6.10, released on October 24, 2011.
+
+Changes with respect to version 6.8 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+(nothing relevant)
+__________________________________________________________________
+
+B.  Most noticeable achievements
+ 
+B.1 Spinor parallelization is available,
+    and can be combined with the k-point/planewave/band parallelisation.
+    Algorithm LOBPCG must be used (wfoptalg=4 or 14 / paral_kbg=1)
+    The wavefunctions are fully distributed, over spinor components + k-points + planewaves + bands.
+    It is OK in both norm-conserving and PAW cases.
+    New input variable : npspinor.
+    Work by M. Delaveau helped by M. Torrent
+
+B.2 Parallelism over images is available, and can be combined with the k-point/planewave/band/spins/spinor parallelisation.
+    This is relevant for the string method or path-integral molecular dynamics (see the input variable imgmov/=0).
+    Tests have shown linear speed-up for test cases (10 images) up to 5000 processors.
+    It is OK in both norm-conserving and PAW cases.
+    New input variable : npimage. Moreover, its value can also be deduced by ABINIT.
+    New test case : in tests/paral test #AC
+    Work by G. Geneste and M. Torrent.
+
+B.3 Contour deformation GW calculations have been vastly improved, e.g. through
+    the availability of input variables to control the frequency grid spacing
+    (gw_use_freqre_tangrid, cd_halfway_freq, cd_max_freq, cd_subset_freq). 
+    There have also been big improvements in the abilities of the utility
+    mrgscr : now it is not only possible to split up a screening calculation
+    by q-points and later merge them, but also to split up the calculation
+    for subsets of frequencies per q-point for later merge with mrgscr.
+    There are speed-related improvements, and specific information crucial for effective
+    calculation is now printed, particularly regarding how far along the real
+    frequency axis information from the screening is needed in the self-energy calculation.
+    (This as well as other useful info is turned on by setting prtvol=10.)
+    New input variables: gw_use_freqre_tangrid, cd_halfway_freq, cd_max_freq, cd_subset_freq
+                         cd_full_grid, cd_customimfrqs, cd_imfrqs
+    Work by M. Stankovski, G. Antonius, M. Giantomassi, D. Waroquiers.
+
+B.4 A whole set of tutorials on parallelism has been added (see doc/tutorial/lesson_paral*html, as well as on the Web):
+    - ground-state planewaves
+    - ground-state wavelets
+    - molecular dynamics
+    - transition states searching
+    - response-functions
+    - many-body perturbation theory
+    [They were announced in v6.10.2 , and will be further tuned during the School on parallelism with ABINIT,
+      http://sites.google.com/site/abinit2011tutorial ]
+    Also, the tutorial on GW has been considerably improved.
+    Work by F. Bottin, J. Bouchet, D. Caliste, G. Geneste, M. Giantomassi, X. Gonze, M. Stankovski, M. Torrent 
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 The memory leaks that are present in all automatic tests have been removed. The slave green_g95 
+    now tests the presence of any such memory leak.
+    By M. Verstraete, JM Beuken, X Gonze.
+
+C.2 No "write(6," are present in ABINIT. Indeed, this did not allow for efficient
+    output in case of massively parallel run.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Orbital magnetization can now be computed, but at present, only in the nspinor=nsppol=1 case.
+    Also Chern number computation.
+    More possibilities (esp. related to spin/spinor) under development.
+    Activated by berryopt=-5. See test v6#48.
+    By JZwanziger
+
+D.2 Imported the full GANDALF set of scripts (in psps/scripts/GANDALF), from F. Bottin. 
+    This is to test the pseudopotentials.
+
+D.3 Earlier, the computation of susceptibility matrix in view of preconditioning the SCF cycle (non-zero positive iprcel)
+    has been coded in PAW. Now, it can be done much faster than previously, in an approximate calculation.
+    The new input variable pawsushat has been introduced for this purpose.
+    By MTorrent
+
+D.4 The new input variable pimass has been introduced, to control the mass of particules 
+    for the path-integral molecular dynamics algorithm.
+    The numerical calculation have been stabilized. The implementation is modularized. 
+    Work has been done on the random number generator, see the new irandom input variables. 
+    See the new test v6#26.
+    By G. Geneste and M. Torrent
+
+D.5 Echo of all the input variables are using generalized prttagm.F90 and
+     their output is in NetCDF file  (prtvol -1  store all input variables inside OUT.nc file
+     Also work on MOLDYN.nc file (together with M. Torrent)
+     By G.A. Franco
+
+D.6 Work on fallback mechanism, to deal with plugins
+    By Y. Pouillon
+
+D.7 The management of the files LOG and STATUS has been revised in the parallel case :
+    beyond 100 processors, there is only one LOG file and no STATUS file. It is possible to govern the
+    creation of LOG/STATUS files by the presence of a _NOLOG (or _LOG) file in the execution directory of ABINIT.
+
+D.8 Modification of tutorial PAW2 to take into account new AtomPAW fallback
+    By M. Torrent
+
+D.9 Print nesting factor (input variable prtnest) is now OK.
+    By M. Verstraete
+
+D.10 Work on modularization of ANADDB
+     By M. Verstraete 
+
+D.11 Abinit can now translate polarized WF (nsspol=2) in spinors (nspinors=2) (and the contrary)
+     By M. Torrent
+
+D.12 Work on the geometry optimisation preconditioner.
+     By G.A. Franco
+
+D.13 Some rudimentary automatic test of the ABINIT gui is currently being developed.
+     By F. Abreu, Y. Pouillon, JM Beuken, X Gonze.
+
+D.14 A genetic algorithm to find new structures is under development.
+     (see D.13 of the 6.4 release notes)
+     By AH. Romero and X. Gonze
+
+D.15 Work on implementation of ABINIT on GPUs (not present in the trunk yet)
+     By F. Dahm and M. Torrent .
+
+D.16 Work on tight control of memory.
+     By D. Waroquiers
+
+D.17 Bether-Salpeter part of ABINIT.
+    Work in progress :  model dielectric function, Haydock approach,
+    the plotting of excitons, the Haydock method for pseudo Hermitian matrices,
+    approximated DOS with Haydock method, post-processing tools for BSE calculations,
+    BSE with collinear spin.
+    Test cases to be provided ...
+    By M. Giantomassi.
+
+D.18 Phonon calculations using DFPT can now be done reliably with the PAW methodology,
+   for the insulating case. 
+   The metal case is operational (under the same conditions), except for q=0 (not fully implemented).
+   The electric field response was already available previously.
+   Still, for the time being, mixing of electric field and atomic displacement is not allowed.
+   Not yet possible to do calculations with spinors.
+   Not yet all possibilities that are present in PAW (e.g. pawxcdev is not allowed).
+   Work done by M. Torrent.
+   See the test v6#62.
+
+D.19 The use of LDA+Dynamical Mean Field Theory is in progress.
+     (see D.6 of the 6.4 release notes)
+     By B. Amadon
+
+D.20 On-going effort to provide vdW functionals for ABINIT.
+     (see D.7 of the 6.4 release notes)
+     Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.21 On going work on new slave tikal, with pathscale 4.0.
+    Also, the time needed for execution of all operation on several slaves has been decreased, thanks to
+    miscellaneous changes.
+    By JM Beuken
+
+D.22 Upgraded version of AtomPAW (3.0.1.2) delivered as a plugin of ABINIT.
+
+D.23 Parallelisation/distribution on the atoms in the PAW case 
+     By M. Delaveau, M. Torrent and F. Bottin.
+
+D.24 Automation of the paralelism (no need to explicitly specify the splitting of processors in npband / npfft / npspin / npkpt ...)
+     By F. Jollet and M. Torrent.
+
+D.25 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by
+     A. Berger, J.M. Beuken, F. Bottin, D. Caliste, M. Delaveau, A. Knyazev, A. Jacques, F. Jollet, 
+     M. Mancini, G.-M. Rignanese, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger.
+</pre>

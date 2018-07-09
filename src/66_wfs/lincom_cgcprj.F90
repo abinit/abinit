@@ -5,24 +5,25 @@
 !! lincom_cgcprj
 !!
 !! FUNCTION
-!! For one k point and spinpol, compute a set (size nband_out) of linear combinations of nband_in wavefunctions,
+!! For one k point and spin, compute a set (size nband_out) of linear combinations of nband_in wavefunctions,
 !! that are known in the cg+cprj representation :
 !! cgout_n(:,:) <--- Sum_m [ cg_m(:,:) . alpha_mn ]
 !! cprjout_n(:,:) <--- Sum_m [ cprj_m(:,:) . alpha_mn ]
-!! If nband_out is smaller or equal to nband_in, the result might be in-place (output in cg instead of cgout, and in cprj instead of cprjout).
+!! If nband_out is smaller or equal to nband_in, the result might be in-place
+!! output in cg instead of cgout, and in cprj instead of cprjout).
 !! Otherwise, it is contained in the optional cgout+cprjout pair.
-
+!!
 !! In the present status, the cg and cgout relates to all the k points and spins, and rely on the icg index,
 !! while it is assumed that cprj and cprjout refer to the specific k point and spin.
 !! This is not coherent.
 !! THIS MIGHT BE CHANGED IN THE FUTURE !
-
+!!
 !! This implementation is NOT band-parallelized
 !! Also, it is far of being optimal at the level of linear algebra, and involves extra copying
 !! that are detrimental for performance...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +35,7 @@
 !!  icg=shift in cg array to locate current k-point and spinpol (for input, and possibly for in-place output)
 !!  inplace= if 0, output in cgout and cprjout ; if 1, output in cg and cprj
 !!  mcg=second dimension of cg array (mpw*nspinor*mband*mkmem*nsppol)
-!!  mcprj=second dimension of cprj array 
+!!  mcprj=second dimension of cprj array
 !!  natom=number of atoms
 !!  nband_in=number of bands, size of the input set of wavefunctions
 !!  nband_out=number of bands, size of the output set of wavefunctions (should be equal to nband_in if inplace==1)
@@ -43,7 +44,7 @@
 !!  usepaw=1 if PAW is activated
 !!  [icgout= shift in cgout array to locate current k-point and spinpol (for output)]
 !!  [mcgout=second dimension of cgout array (mpw*nspinor*mband*mkmem*nsppol)]
-!!  [mcprjout=second dimension of cprjout array] 
+!!  [mcprjout=second dimension of cprjout array]
 !!
 !! OUTPUT
 !!  [cgout(2,mcgout)= plane wave wavefunction coefficients for the set of output wavefunctions]
@@ -52,11 +53,13 @@
 !! SIDE EFFECTS
 !!  (this quantities are input, and possibly updated output when inplace==1)
 !!  cg(2,mcg)= plane wave wavefunction coefficients for the set of input wavefunctions (all k points and spinpol)
-!!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors 
+!!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_lincom,zgemm
 !!
 !! SOURCE
 
@@ -67,12 +70,13 @@
 #include "abi_common.h"
 
  subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
-& icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, & 
+& icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout) ! optional args
 
  use defs_basis
- use m_errors 
+ use m_errors
  use m_profiling_abi
+
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_lincom, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -108,31 +112,32 @@
 !DEBUG
 !write(std_out,*)' lincom_cgcprj : enter '
 !write(std_out,*)' lincom_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' lincom_cgcprj : icgout=',icgout
 !ENDDEBUG
 
  if(inplace==0)then
    if(.not.present(cgout))then
      MSG_ERROR(' inplace==0 while .not.present(cgout) is not permitted ')
-   endif
+   end if
    if(usepaw==1) then
-     if(.not.present(cprjout))then 
+     if(.not.present(cprjout))then
        MSG_ERROR(' inplace==0 and usepaw==1 while .not.present(cprjout) is not permitted ')
-     endif
-   endif
- endif
+     end if
+   end if
+ end if
 
 !Take care of the plane wave part
  ABI_ALLOCATE(cgout_,(2,npw*nspinor*nband_out))
 
  call zgemm('N','N',npw*nspinor,nband_out,nband_in,dcmplx(1._dp), &
-&  cg(:,icg+1:icg+npw*nspinor*nband_in),npw*nspinor, &
-&  alpha_mn,nband_in,dcmplx(0._dp),cgout_,npw*nspinor)
+& cg(:,icg+1:icg+npw*nspinor*nband_in),npw*nspinor, &
+& alpha_mn,nband_in,dcmplx(0._dp),cgout_,npw*nspinor)
 
  if(inplace==1)then
    cg(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  else
    cgout(:,icgout+1:icgout+npw*nspinor*nband_out)=cgout_
- endif
+ end if
  ABI_DEALLOCATE(cgout_)
 
 !Take care of the cprj part
@@ -146,20 +151,20 @@
      do iband_in=1,nband_in
        al(1,iband_in)=alpha_mn(1,iband_in,iband_out)
        al(2,iband_in)=alpha_mn(2,iband_in,iband_out)
-     enddo
+     end do
      call pawcprj_lincom(al,cprj,cprjout_(:,ii+1:ii+nspinor),nband_in)
-   enddo
+   end do
    ABI_DEALLOCATE(al)
 
    if(inplace==1)then
      cprj=cprjout_
    else
      cprjout=cprjout_
-   endif
+   end if
    call pawcprj_free(cprjout_)
    ABI_DATATYPE_DEALLOCATE(cprjout_)
 
- endif
+ end if
 
 end subroutine lincom_cgcprj
 !!***

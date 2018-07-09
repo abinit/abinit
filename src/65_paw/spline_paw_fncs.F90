@@ -7,7 +7,7 @@
 !! Compute radial PAW functions and their derivatives on a set of points in the PAW sphere.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (JJ,MT)
+!! Copyright (C) 2005-2018 ABINIT group (JJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

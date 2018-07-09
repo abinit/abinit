@@ -10,7 +10,7 @@
 !!  Manage a 2D vector to store couple of c+c
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,11 +52,17 @@ PRIVATE
 
 TYPE, PUBLIC :: ListCdagC
   INTEGER _PRIVATE :: size = 0
+!  max size of matrix list
+
   INTEGER          :: tail = 0 
+!  the size of matrix list that contains physical data (ie number of
+!  segment)
   !DOUBLE PRECISION :: inv_dt = 0.d0
 !  TYPE(CdagC), ALLOCATABLE, DIMENSION(:) :: list => NULL()
   !INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: ind
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)         :: list
+!  for all elements i below itail, list(i,1:2) are times for creation
+!  and destruction of particles.
 END TYPE ListcdagC
 !!***
 
@@ -100,7 +106,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +165,7 @@ END SUBROUTINE ListCdagC_init
 !!  Impose size of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,7 +225,7 @@ END SUBROUTINE ListCdagC_setSize
 !!  Enlarge memory space of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,7 +301,7 @@ END SUBROUTINE ListCdagC_enlarge
 !!  assign routine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -349,7 +355,7 @@ END SUBROUTINE ListCdagC_assign
 !!  Swap two lists
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -424,7 +430,7 @@ END SUBROUTINE ListCdagC_swap
 !!  push at the end of the list a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -488,7 +494,7 @@ END SUBROUTINE ListCdagC_pushBack
 !!  insert somewhere a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -558,7 +564,7 @@ END SUBROUTINE ListCdagC_insert
 !!  Remove the last element
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -608,7 +614,7 @@ END SUBROUTINE ListCdagC_popBack
 !!  Erase a couple at a given position
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -667,7 +673,7 @@ END SUBROUTINE ListCdagC_erase
 !!  assume the list is already sorted
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -726,7 +732,7 @@ END FUNCTION ListCdagC_firstHigherThanReal
 !!  sort the list by c+ increasing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -773,7 +779,7 @@ END SUBROUTINE ListCdagC_sort
 !!  sort the list by c+ increasing with the quick sort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -857,7 +863,7 @@ END SUBROUTINE ListCdagC_quickSort
 !!  print the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -913,7 +919,7 @@ END SUBROUTINE ListCdagC_print
 !!  Clear the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -958,7 +964,7 @@ END SUBROUTINE ListCdagC_clear
 !!  destroy the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

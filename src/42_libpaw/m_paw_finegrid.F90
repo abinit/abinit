@@ -8,7 +8,7 @@
 !!  on the fine grid around a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2018 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1307,7 +1307,7 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
  end if
 
 !Temporary allocate "large" arrays
- ncmax=1+int(1.2_dp*(n1*n2*n3)*four_pi/(three*ucvol)*rcut**3)
+ ncmax=1+int(1.5_dp*(n1*n2*n3)*four_pi/(three*ucvol)*rcut**3)
  LIBPAW_ALLOCATE(ifftsph_tmp,(ncmax))
  LIBPAW_ALLOCATE(rfgd_tmp,(3,ncmax))
 

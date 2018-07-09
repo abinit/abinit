@@ -8,7 +8,7 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2018 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,7 +406,7 @@ end subroutine energies_copy
    energies_array(16)=energies%e_hartree
    energies_array(17)=energies%e_hybcomp_E0
    energies_array(18)=energies%e_hybcomp_v0
-   energies_array(19)=energies%e_hybcomp_v 
+   energies_array(19)=energies%e_hybcomp_v
    energies_array(20)=energies%e_kinetic
    energies_array(21)=energies%e_localpsp
    energies_array(22)=energies%e_magfield
@@ -552,7 +552,7 @@ end subroutine energies_to_array
  if (optdc==0.or.optdc==2) then
    eint = energies%e_kinetic + energies%e_hartree + energies%e_xc + energies%e_fock+&
 &   energies%e_hybcomp_E0 -energies%e_hybcomp_v0 + energies%e_hybcomp_v+&
-&   energies%e_localpsp + energies%e_corepsp 
+&   energies%e_localpsp + energies%e_corepsp
    if (usepaw==0) eint = eint + energies%e_nonlocalpsp
    if (usepaw==1) eint = eint + energies%e_paw
    if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
@@ -638,13 +638,13 @@ subroutine energies_ncwrite(enes,ncid)
 &   enes%e_exactX, enes%e_fermie, enes%e_fock, enes%e_fockdc, enes%e_hartree, &
 &   enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
 &   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nonlocalpsp, &
-&   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,& 
+&   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
 &   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
 &   enes%h0])
 
  NCF_CHECK(ncerr)
 
-#else 
+#else
  MSG_ERROR("ETSF-IO support is not activated.")
 #endif
 

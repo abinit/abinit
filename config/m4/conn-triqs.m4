@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -33,7 +33,7 @@ AC_DEFUN([ABI_CONNECT_TRIQS], [
   fi
 
   dnl Inform Automake
-  AM_CONDITIONAL([DO_BUILD_01_TRIQS_EXT], [test "${enable_triqs}" = "yes"])
+  AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${enable_triqs}" = "yes"])
 
   dnl Substitute variables
   AC_SUBST(lib_triqs_incs)

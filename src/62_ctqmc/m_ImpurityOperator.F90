@@ -10,7 +10,7 @@
 !!  manage all related to Impurity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,13 +53,32 @@ PRIVATE
 TYPE, PUBLIC :: ImpurityOperator
   LOGICAL          _PRIVATE :: doCheck = .FALSE.
   INTEGER          _PRIVATE :: flavors
+   !  Number of flavors
   INTEGER                   :: activeFlavor
+   !  Flavor considered e.g when a segment is added
+
+
   DOUBLE PRECISION _PRIVATE          :: beta
+   !  Inverse of temperature.
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: mat_U 
+   !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
+   !  coulomb interaction between iflavor1 and iflavor2.
+
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: overlaps   ! total overlaps
+   !  for iflavor1 and iflavor2 overlaps(iflavor1,iflavor2) is the total
+   !  overlap between segments of iflavor1 and segments of iflavor2.
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) _PRIVATE :: updates    ! new_(anti)seg 
+   !  For a given flavor (activeflavor), gives for each other flavors, the
+   !  supplementary overlaps, called updates(otherflavor).
+
   TYPE(ListCdagC)                               _PRIVATE :: list_swap
   TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  )          :: particles 
+   !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
+   !  gives the beginning and end of each segment.
+
   DOUBLE PRECISION _PRIVATE :: checkNumber
   DOUBLE PRECISION _PRIVATE :: tolerance
   DOUBLE PRECISION _PRIVATE :: meanError
@@ -75,9 +94,10 @@ PUBLIC  :: ImpurityOperator_activateParticle
 PUBLIC  :: ImpurityOperator_getAvailableTime
 PUBLIC  :: ImpurityOperator_getAvailedTime
 PUBLIC  :: ImpurityOperator_add
-PRIVATE :: ImpurityOperator_getSegment
+PUBLIC :: ImpurityOperator_getSegment
+PUBLIC :: ImpurityOperator_getsign
 PUBLIC  :: ImpurityOperator_remove
-PRIVATE :: ImpurityOperator_getNewOverlap
+PUBLIC :: ImpurityOperator_getNewOverlap
 PUBLIC  :: ImpurityOperator_getTraceAdd
 PUBLIC  :: ImpurityOperator_getTraceRemove
 PRIVATE :: ImpurityOperator_overlapSegFlav
@@ -107,7 +127,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -199,7 +219,7 @@ END SUBROUTINE ImpurityOperator_init
 !!  reset operator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,7 +283,7 @@ END SUBROUTINE ImpurityOperator_reset
 !!  Compute an interaction this for t2g like interaction
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -344,7 +364,7 @@ END SUBROUTINE ImpurityOperator_computeU
 !!  Set directly the U interaction this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -399,10 +419,10 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  ImpurityOperator_setMu
 !!
 !! FUNCTION
-!!  Set directly the chimical potential
+!!  Set directly the chemical potential
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -456,7 +476,7 @@ END SUBROUTINE ImpurityOperator_setMu
 !!  active a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -512,7 +532,7 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !!  positive if outside a segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -600,7 +620,7 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !!  get the time available without the segment "position"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -669,7 +689,7 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!  add a segment to the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -682,7 +702,9 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
+!!  this=ImpurityOperatoroffdiag
+!!   this%particles(aF)%list is updated
+!!   this%overlaps  is updated
 !! NOTES
 !!
 !! PARENTS
@@ -727,14 +749,25 @@ SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
     IF ( (this%particles(aF)%tail .EQ. 0) .AND. (this%particles(aF)%list(0,C_) .EQ. 0d0)) THEN ! should be full orbital
       IF ( CdagC_1(Cdag_) .GT. this%beta ) THEN
 !        CALL CdagC_init(C2add,CdagC_1%Cdag-this%beta,CdagC_1%C)
+        ! From the IF condition and the creation of CdagC in TryAddRemove, we have
+        ! CdagC_1(Cdag_) > beta
+        ! CdagC_1(C_)    < beta
         C2add(Cdag_) = CdagC_1(Cdag_)-this%beta
         C2add(C_   ) = CdagC_1(C_)
+        ! Now C2add(Cdag_) < beta
+        ! still C2add(C_)  < beta
       ELSE
 !        CALL CdagC_init(C2add,CdagC_1%Cdag,CdagC_1%C+this%beta)
+        ! CdagC_1(Cdag_) < beta
+        ! CdagC_1(C_)    < beta
         C2add(Cdag_) = CdagC_1(Cdag_)
         C2add(C_   ) = CdagC_1(C_)+this%beta
+        ! C2add(Cdag_) < beta
+        ! C2ass(C_)    > beta
       END IF
       position = 0
+      ! See impurityoperator_init to understand this. This is due to the
+      ! convention for the full orbital case.
       this%particles(aF)%list(0,C_   ) = this%beta
       this%particles(aF)%list(0,Cdag_) = 0.d0
     ELSE IF ( this%particles(aF)%tail .GT. 0 ) THEN
@@ -781,7 +814,7 @@ END SUBROUTINE ImpurityOperator_add
 !!  Return the segment at position_val
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -859,7 +892,7 @@ END FUNCTION ImpurityOperator_getSegment
 !!  Remove a segment for the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -949,7 +982,7 @@ END SUBROUTINE ImpurityOperator_remove
 !!  Get the overlap induced by CdagC_1 in the current configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1021,6 +1054,134 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
 END FUNCTION ImpurityOperator_getNewOverlap
 !!***
 
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_getsign
+!! NAME
+!!  ImpurityOperator_getsign
+!!
+!! FUNCTION
+!!  Get the sign of the ratio of impurity traces
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2014 ABINIT group (B. Amadon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this     = ImpurityOperator
+!!  time2    = for segment/antisegment addition, end of segment
+!!  position = for segment/antisegment removal, position  of segment/antisegment removed
+!!  action = > 0.5 addition 
+!!           < 0.5 removal
+!!
+!! OUTPUT
+!!  ImpurityOperator_getsign = sign of ratio of impurity traces
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Ctqmc_tryAddRemove
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+DOUBLE PRECISION FUNCTION ImpurityOperator_getsign(this, time2, i, action, position)
+
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ImpurityOperator_getsign'
+!End of the abilint section
+
+  TYPE(ImpurityOperator), INTENT(IN) :: this
+  DOUBLE PRECISION, INTENT(IN) :: time2, action
+  INTEGER ,  INTENT(IN) :: i,position
+!Local variables ------------------------------
+  INTEGER                            :: tailint
+  DOUBLE PRECISION                   :: sign_imp
+! ************************************************************************
+  tailint=this%particles(this%activeflavor)%tail
+  if(action < 0.5d0) then
+    if(tailint>=1) then
+      if ( this%particles(this%activeFlavor)%list(tailint,2)>this%beta ) then ! segment winds around
+        if (i==1) then ! add segment do not change winding
+           sign_imp = 1
+        else if (i==2) then ! antisegment
+           if(time2>this%beta) then ! suppress winding around
+             sign_imp = -1
+           else   ! winding around still here
+             sign_imp = 1
+           endif
+        endif
+      else ! segment do not wind around
+        if (i==1) then ! segment
+          if(time2>this%beta) then ! create winding
+            sign_imp = -1
+          else   ! do not create winding
+            sign_imp = 1
+          endif
+        else if (i==2) then ! no winding in any case
+          sign_imp = 1
+        endif
+      endif
+    else if (tailint==0) then
+      if (i==1) then ! segment
+        if(time2>this%beta) then ! create winding
+           sign_imp = -1
+        else   ! do not create winding
+           sign_imp = 1
+        endif
+      else if (i==2) then ! antisegment
+        if(time2>this%beta) then ! do not create winding
+          sign_imp = 1
+        else   ! create winding
+          sign_imp = -1
+        endif
+      endif
+    endif
+  else
+    if ( this%particles(this%activeFlavor)%list(tailint,2)>this%beta ) then ! segment winds around
+      if (i==1) then ! remove segment
+        if(position==tailint) then ! suppress winding around
+          sign_imp = -1
+        else  ! winding around still here
+          sign_imp = 1
+        endif
+      else if (i==2) then ! remove antisegment
+        if(tailint==1) then ! if tailint=1, create full orbital
+          sign_imp = -1
+        else  ! if tailint >1 preserve winding
+          sign_imp = 1
+        endif
+      endif
+    else ! segments do not wind around
+      if (i==1) then ! suppress segment do not change winding
+        sign_imp = 1
+      else if (i==2) then ! antisegment 
+        if(abs(position)==tailint) then  ! create winding around only tailint >=1
+          if(tailint==1)  then 
+            sign_imp = 1
+          else 
+            sign_imp = -1
+          endif
+        else  !do not create winding around
+          sign_imp = 1
+        endif
+      endif
+    endif
+  endif
+
+  ImpurityOperator_getsign=sign_imp
+
+
+END FUNCTION ImpurityOperator_getsign
+!!***
+
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_getTraceAdd
 !! NAME
 !!  ImpurityOperator_getTraceAdd
@@ -1030,7 +1191,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  new (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1106,7 +1267,7 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !!  (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1183,7 +1344,7 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !!  Compute the overlap of a segment with a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1364,7 +1525,7 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !!  Returns the overlap of flavor with the others
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1426,7 +1587,7 @@ END FUNCTION ImpurityOperator_overlapflavor
 !!  compute the overlap of flavor1 with the configuration of flavor2
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1498,7 +1659,7 @@ END FUNCTION ImpurityOperator_overlapSwap
 !!  Swap to flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1569,7 +1730,7 @@ END SUBROUTINE ImpurityOperator_swap
 !!  Compute overlap between two flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1645,7 +1806,7 @@ END FUNCTION ImpurityOperator_overlapIJ
 !!  measure double occupancy and interaction energy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1714,7 +1875,7 @@ END SUBROUTINE ImpurityOperator_measDE
 !!  Compute from scratch all overlaps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1773,7 +1934,7 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !!  measure the number of electrons on flavor flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1845,7 +2006,7 @@ END FUNCTION ImpurityOperator_measN
 !!  destroy and deallocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1905,7 +2066,7 @@ END SUBROUTINE ImpurityOperator_destroy
 !!  compute error on the overlap (numerical accumulation)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1977,7 +2138,7 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !!  set the check mechanism
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2027,7 +2188,7 @@ END SUBROUTINE ImpurityOperator_doCheck
 !!  between Tmin and Tmax (c+ and c)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2157,7 +2318,7 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !!  get error on computing the overlap
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2214,7 +2375,7 @@ END FUNCTION ImpurityOperator_getError
 !!  print in a latex format all the configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

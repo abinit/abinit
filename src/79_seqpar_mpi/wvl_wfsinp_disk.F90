@@ -7,13 +7,13 @@
 !! This method allocates and initialises wavefunctions with values from disk.
 !! See wvl_wfsinp_scratch() or wvl_wfsinp_reformat() from other initialisation
 !! routines.
-!! 
+!!
 !! When initialised from scratch or from disk, wvl%wfs%[h]psi comes unallocated
 !! and will be allocated inside this routine.
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

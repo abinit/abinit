@@ -19,7 +19,7 @@ import utility.canvas as Canvas
 
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 
-from numpy import linspace,random
+from numpy import linspace,random,array
 try :
     from PyQt4 import Qt,QtGui,QtCore,Qwt5
 except :

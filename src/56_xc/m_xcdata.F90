@@ -8,7 +8,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (XG)
+!!  Copyright (C) 2017-2018 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,8 @@ module m_xcdata
  use m_errors
  use libxc_functionals
 
+ use defs_abitypes, only : dataset_type
+
  implicit none
 
  private
@@ -44,8 +46,8 @@ module m_xcdata
 !!  xcdata_type
 !!
 !! FUNCTION
-!!   This object stores the input variables (and derived parameters) needed to compute the exchange-correlation functional, 
-!!   not simply to define it. 
+!!   This object stores the input variables (and derived parameters) needed to compute the exchange-correlation functional,
+!!   not simply to define it.
 !!
 !! NOTES
 !!
@@ -147,7 +149,6 @@ contains
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
 
- use defs_abitypes, only : dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -209,7 +210,7 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
  if(present(xc_tb09_c))  xcdata%xc_tb09_c=xc_tb09_c
 
-!Compute xclevel 
+!Compute xclevel
  call get_xclevel(xcdata%ixc,xclevel,usefock=usefock)
  xcdata%xclevel=xclevel
  xcdata%usefock=usefock
@@ -284,7 +285,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
      jj=libxc_functionals_family_from_id(ii)
      if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) xclevel=2
      if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) then
-       xclevel=2 
+       xclevel=2
        if(present(usefock))then
          usefock=1
        endif
@@ -308,7 +309,7 @@ end subroutine get_xclevel
 !!  get_auxc_ixc
 !!
 !! FUNCTION
-!!  Returns the ixc of an auxiliary XC functional to be used instead of the input ixc 
+!!  Returns the ixc of an auxiliary XC functional to be used instead of the input ixc
 !!  For most of the functionals, there is no need of an auxiliary functional, in which case auxc_ixc=0
 !!  For hybrid functionals, on the contrary, some speedup can be achieved by using such an auxiliary functional
 !!  Note that this XC functional intend to replace the whole ixc functional. Generally speakin, it should be
@@ -349,7 +350,8 @@ subroutine get_auxc_ixc(auxc_ixc,ixc)
  integer, intent(out) :: auxc_ixc
 
 !Local variables-------------------------------
- integer :: gga_id(2),usefock,xclevel
+ integer :: usefock,xclevel
+!integer :: gga_id(2)
 
 ! *************************************************************************
 

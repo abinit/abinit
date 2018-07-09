@@ -1,0 +1,228 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between June 2010 and September 2010. These release notes
+are relative to improvements of ABINITv6.4 with respect to v6.2.
+
+The list of contributors includes :
+D. Adams, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin,
+P. Boulanger, F. Bruneval, C. Espejo, G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada,
+F. Jollet, A. Lherbier, S. Miller, T. Nishimatsu, M. Oliveira, Y. Pouillon, AH. Romero, 
+M. Torrent, M. Verstraete, D. Waroquiers, Z. Zanolli, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+(Please note the WARNINGS !)
+
+Xavier
+
+__________________________________________________________________
+
+Version 6.4, released on September 27, 2010.
+
+Changes with respect to version 6.2 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The format of the DOS file has changed : the index field column has been suppressed. It is easier to plot this file
+    with standard graphic packages.
+    By M. Verstraete
+
+A.2 Removed a bug in the computation of the temperature-dependence of the gap (and electronic structure).
+    The reference files for test v5#26, 27, 28 have been corrected.
+    By P. Boulanger and X. Gonze
+
+A.3 Many different options have been added to the prtden variable. It contains the features previously activated by pawprtden.
+    See v5#11 for prtden 2 (causes generation of a file _PAWDEN that contains the bulk
+    valence charge density together with the PAW on-site contributions, and has the same format as the other density files
+    (Test cases to be provided for prtden 3 to 6 !)
+    By D. Waroquiers
+
+A.4 A numerical bug present in v6.4.1 has been fixed in v6.4.2 . It concerned GW-PAW calculations only,
+    the computation of the head and wings of the susceptbility matrix at q=0.
+    Expect the changes in the QP energies to be around tens of meV. 
+    Results for systems sampled at Gamma only were correct though.
+
+A.5 The default value for ecutwfn and ecutsigx is now set to ecut.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The computation of the RPA energy in the GW part of ABINIT is now available.
+    Coded in the norm-conserving and PAW cases 
+    Several techniques have been implemented : use of logarithmic formula, use of numerical integration over the interaction.
+    It can be combined with the extrapolar trick and the range separated Coulomb interactions.
+    Test v6#99. Input variable gwrpacorr .
+    By F. Bruneval
+
+B.2 Implementation of the GW Effective Energy Technique, by J.A. Berger .
+    See J.A. Berger, L. Reining, and F. Sottile, Phys. Rev. B 82, 041103(R) (2010).
+    Presently only norm-conserving pseudos are supported.
+    Parallel implementation on k-points and occupied states (gwpara=1) but not yet on memory (gwpara=2).
+    Related input variables (not operational yet) gw_EET and gw_EET_nband.
+    Automatic test Tv6#90
+    Work by J.A. Berger, some help by M. Giantomassi.
+
+B.3 Several advanced features of the GW part of ABINIT can now be used safely.
+    In particular QPSCGW + PAW is OK, as well as self-consistent COHSEX + PAW.
+    Extrapolar works with SCGW, also with PAW.
+    SCGW has now been implemented with symmetries (HF, COHSEX, SEX), and use of
+    hermitianity (speed up of the calculations).
+    The memory is better controlled, thanks to the gwmem input variable.
+    Two different FFT meshes defined by ecuteps and ecusigx are used to calculate the
+    matrix elements the exchange and the correlation part of the self-energy, respectively.
+    A new optdriver level has been addded for performing self-consistent GW calculations.
+    Related input variables gw_nstep, gw_sctype, gw_sctype_name, gw_toldfeig.
+    Work by M. Giantomassi
+
+B.4 The capability to compute the U or J values, within the DFT+U (LDA or GGA) approach (with PAW, also spin-polarized), 
+    according to the method of Coccocioni and De Gironcoli (2005), is available in production. 
+    Input variable : macro_uj, pawujat, pawujv, and pawujrad. 
+    Automatic tests : Tv5#38, 39, Tv6#41 
+    Work by D. Adams and B. Amadon
+
+B.5 Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon codes for frozen phonon calculations.
+    Input variable prtposcar. See also the script extras/post_processing/phondisp2abi.py for easy use with PHON or
+    equivalents (generates dataset inputs for abinit runs).
+    Test v6#100.
+    By M. Verstraete.
+
+B.6 The distribution of processors in the FFT/Band/k point parallelism can be found automatically. 
+    Input variable : paral_kgb .
+    Work by F. Jollet
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 Shiva, a new slave for the test farm has been set up : it tests the
+    distcheck (creation of the distribution package, and test of this
+    distribution package). It tests also the creation of html files. It
+    makes sure as well that configure options which are rarely used do
+    not break the build.
+    By J.-M. Beuken, Y. Pouillon, X. Gonze
+
+C.2 The use of the FOX library is now tested automatically. A new directory tests/fox has been created
+    for this purpose, with two tests for pseudopotential files written in xml. Should be generalized for all slaves.
+    By M. Verstraete, J.-M. Beuken, X. Gonze
+
+C.3 There is an on-going big restructuration of the routines involved in the change
+    of the atomic coordinates and cell parameters (called by gstate.F90, linke brdmin.F90), also coupled with on-going
+    changes to accommodate the images (above gstate.F90).
+    New tests of previous implementations were created, v5#02, for ionmov 2,3,20 .
+    Some other tests were reorganised, e.g. v6#03, 04, 05 were combined.
+    By G.A. Franco .
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 Finite electric field calculations can now take advantage of symmetries.
+    (On top of PAW + parallel, that was announced in v6.2).
+    Tv6#42 and 43
+    By J. Zwanziger
+
+D.2 The use of Density Functional Perturbation Theory with PAW
+    (phonons and electric field) is in progress,
+    the test Tv6#56 has been created.
+    by M. Torrent, F. Jollet and J. Zwanziger.
+
+D.3 Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
+    <a href="http://www.chem.au.dk/~webuorg/new/groups/gm/BoltzTrap/BoltzTrap.html">BoltzTraP code</a> by Georg Madsen
+    (computation of transport properties) is now available.
+    Input variable prtbltztrp.
+    Test v6#11 .
+    By M. Verstraete.
+
+D.4 Self-consistent phonon calculations calculations have begun to be implemented, by M. Verstraete.
+    See Souvatzis et al, Phys. Rev. Lett. 100, 095901 (2008) ; Souvatzis et al, Computational Materials Science 18, 184304 (2008).
+    Documentation should be provided (input variable outscphon not described ?).
+    Test v5 #88
+    Input variables : scphon_temp and scphon_supercell
+
+D.5 Tests of the reading of pseudopotential files written in xml are now provided.
+     Done using the FOX library. See tests/fox#01 and 02.
+     By M. Verstraete.
+
+D.6 The use of LDA+Dynamical Mean Field Theory is in progress.
+    (see D.7 of the 6.2 release notes)
+    By B. Amadon
+
+D.7 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the 
+    ionic degrees of freedom, combined with DFT for the electronic degrees of freedom.
+    New input variable pitransform
+    Allowed by imgmov=9 (Langevin dynamics), imgmov=13 (chain of thermostats).
+    New test (fake at present) : Tv6#26
+    By G. Geneste and X. Gonze.
+
+D.8 On-going effort to provide vdW functionals for ABINIT.
+     Silvestrelli approach is now in production.
+     See input variables vdw_xc (=10 for Silvestrelli approach), vdw_nwan and vdw_supercell .
+     Also, the XC functional C09 (ixc 24), for use with the Silvestrelli approach, has been coded.
+     Available in v6#12, 13.
+     Also, a new directory to test vdwxc has been created. At present Tvdwxc#10 is working.
+     Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.9 The Tran-Blaha meta-GGA is available 
+    See the automatic test Tlibxc#09
+    By M. Oliveira, A. Lherbier and X. Gonze.
+
+D.10 A fine grid method has been introduced to treat electron-phonon coupling (not functional yet).
+     (see also point D.3 of 6.2  release_notes )
+     Input variable kptrlatt_fine (not yet documented).
+     Tv6#77 . Mentioned not to work yet (tests/v6/README) ?
+     By M. Verstraete
+
+D.11 Work in progress : addition of Zeeman field (non-collinear), using the zeemanfield
+     input variable. The documentation of the latter is still incomplete.
+     A fake test has been set up v6#17.
+     By X. Gonze, for K. Delaney and E. Bousquet.
+
+D.12 Input variable asr=5 has been added.
+     By M. Verstraete
+
+D.13 A genetic algorithm to find new structures is under development.
+     By AH. Romero and X. Gonze
+
+D.14 The configure script now displays environment variables at the
+     beginning of its output when they override the settings of the config
+     file. This is useful to address build-time platform-specific issues.
+     By Y. Pouillon
+
+D.15 A new detection mechanism for external libraries (DFT, FFT, GPU,
+     linear algebra, math, MPI, timer, transferable I/O), codename
+     "connector", is currently under test. See the output of
+     "configure --help" for details.
+     By Y. Pouillon
+
+D.16 The tutorial GW1 has been updated and cleaned, to contain up-to-date information.
+
+D.17 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by
+     J.-M. Beuken, F. Bottin, M. Giantomassi, I. Hamada, Steven Miller, T. Nishimatsu, Y. Pouillon, Tim Robinson, M. Torrent, 
+     M. Verstraete, Z. Zanolli, J. Zwanziger
+
+</pre>

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
+.Version 8.7.6 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h00 )
+.Starting date : Thu  8 Mar 2018.
+- ( at 06h29 )
   
 
 ================================================================================
@@ -74,6 +74,7 @@
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.011  and twall      0.011 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -135,9 +136,9 @@
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.342927E-03    4.599386E-15    3.718381E-13
-       2        9.000004E-03    5.582558E-15    3.878277E-13
-       3        9.000004E-03    5.582558E-15    3.878277E-13
+       1        8.098458E-03    5.650988E-15    4.848537E-13
+       2        9.400866E-03    7.617331E-15    4.850183E-13
+       3        9.400866E-03    7.617331E-15    4.850183E-13
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -180,9 +181,9 @@
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.342927E-03    6.301673E-18    1.911181E-15
-       2        9.000004E-03    6.962628E-18    1.814557E-15
-       3        9.000004E-03    6.962628E-18    1.814557E-15
+       1        8.098458E-03   -3.843226E-16   -1.237013E-13
+       2        9.400866E-03   -3.830006E-16   -9.148432E-14
+       3        9.400866E-03   -3.830006E-16   -9.148432E-14
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    2
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -223,7 +224,7 @@
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -237,30 +238,30 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  1.41083486E-06  1.73312259E-06 -3.05729804E-03
+-  1  7.56149540E-07 -3.92895872E-06 -3.05729624E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  2.89364545E-06  3.05729700E-03  1.73445731E-06
+-  1  4.14397481E-06  3.05729353E-03 -3.92793032E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.05729717E-03 -2.89444507E-06  1.40919365E-06
+-  1  3.05729596E-03 -4.14299978E-06  7.61473676E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
 - Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.183  and wall time      0.184 sec
++Total cpu time      0.182  and wall time      0.185 sec
 
  anaddb : the run completed succesfully.
