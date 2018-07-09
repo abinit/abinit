@@ -39,7 +39,7 @@
 !!      gstate
 !!
 !! CHILDREN
-!!      kpgsph,listkk,setsymrhoij,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
+!!      kpgsph,listkk,setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -69,7 +69,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_pawrad,           only : pawrad_type, simp_gen
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
- use m_paw_sphharm, only : initylmr
+ use m_paw_sphharm, only : initylmr,setsym_ylm
  use m_special_funcs, only : sbf8
  use m_mpinfo,  only : proc_distrb_cycle
 
@@ -229,7 +229,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
    call symatm(dtorbmag%atom_indsym,dtorbmag%natom,dtset%nsym,symrec,dtset%tnons,tol8,dtset%typat,xred)
    lmax = psps%mpsang - 1
    ABI_ALLOCATE(dtorbmag%zarot,(2*lmax+1,2*lmax+1,lmax+1,dtset%nsym))
-   call setsymrhoij(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
+   call setsym_ylm(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
    dtorbmag%nsym = dtset%nsym
    dtorbmag%lmax = lmax
    dtorbmag%lmnmax = psps%lmnmax

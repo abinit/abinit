@@ -25,6 +25,7 @@ sources = [
  "m_paw_slater.F90",
  "m_paw_pwaves_lmn.F90",
  "m_pawfgr.F90",
+ "m_paw_overlap.F90",
  "calc_ubare.F90",
  "chkpawovlp.F90",
  "convert_notation.F90",
@@ -70,7 +71,6 @@ sources = [
  "paw_symcprj.F90",
  "setnoccmmp.F90",
  "setrhoijpbe0.F90",
- "setsymrhoij.F90",
  "simple_j_dia.F90",
  "transgrid.F90",
  "wvl_nhatgrid.F90"]

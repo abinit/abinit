@@ -83,6 +83,7 @@ module m_bethe_salpeter
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_paw_sphharm,     only : setsym_ylm
  use m_paw_dmft,        only : paw_dmft_type
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
@@ -172,7 +173,7 @@ contains
 !!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
 !!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
 !!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
-!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      screen_free,screen_init,screen_nullify,setsym_ylm,setup_bse
 !!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
 !!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
 !!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
@@ -409,7 +410,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then

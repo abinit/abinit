@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, TRangel)
+!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,21 +32,30 @@ MODULE m_paw_sphharm
  private
 
 !public procedures.
- public :: ylmc         ! Complex Spherical harmonics for l<=3.
- public :: ylmcd        ! First derivative of complex Ylm wrt theta and phi up to l<=3
- public :: ylm_cmplx    ! All (complex) spherical harmonics for lx<=4
- public :: initylmr     ! Real Spherical Harmonics on a set of vectors
- public :: ys           ! Matrix element <Yl'm'|Slm>
- public :: lxyz         ! Matrix element <Yl'm'|L_idir|Ylm>
- public :: slxyzs       ! Matrix element <Sl'm'|L_idir|Slm>
- public :: plm_coeff    ! Coefficients depending on Plm used to compute the 2nd der of Ylm
- public :: ass_leg_pol  ! Associated Legendre Polynomial Plm(x)
- public :: plm_d2theta  ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= ass. legendre polynomial)
- public :: plm_dphi     ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= ass. legendre polynomial)
- public :: plm_dtheta   ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= ass. legendre polynomial)
- public :: pl_deriv     ! d2(Pl (x)))/d(x)2  where P_l is a legendre polynomial
- public :: mat_mlms2jmj ! Change a matrix from the Ylm basis to the J,M_J basis
- public :: mat_slm2ylm  ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
+ public :: ylmc            ! Complex Spherical harmonics for l<=3.
+ public :: ylmcd           ! First derivative of complex Ylm wrt theta and phi up to l<=3
+ public :: ylm_cmplx       ! All (complex) spherical harmonics for lx<=4
+ public :: initylmr        ! Real Spherical Harmonics on a set of vectors
+ public :: ys              ! Matrix element <Yl'm'|Slm>
+ public :: lxyz            ! Matrix element <Yl'm'|L_idir|Ylm>
+ public :: slxyzs          ! Matrix element <Sl'm'|L_idir|Slm>
+ public :: plm_coeff       ! Coefficients depending on Plm used to compute the 2nd der of Ylm
+ public :: ass_leg_pol     ! Associated Legendre Polynomial Plm(x)
+ public :: plm_d2theta     ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= ass. legendre polynomial)
+ public :: plm_dphi        ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= ass. legendre polynomial)
+ public :: plm_dtheta      ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= ass. legendre polynomial)
+ public :: pl_deriv        ! d2(Pl (x)))/d(x)2  where P_l is a legendre polynomial
+ public :: mkeuler         ! For a given symmetry operation, determines the corresponding Euler angles
+ public :: dble_factorial  ! Compute factorial of an integer; returns a double precision real
+ public :: dbeta           ! Calculate the rotation matrix d^l_{m{\prim}m}(beta)
+ public :: phim            ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+                           !                       Sqrt[2] sin[Abs(m) theta], if m<0
+                           !                       1                        , if m=0
+ public :: mat_mlms2jmj    ! Change a matrix from the Ylm basis to the J,M_J basis
+ public :: mat_slm2ylm     ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
+ public :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
+ public :: create_mlms2jmj ! For a given angular momentum lcor, give the rotation matrix msml2jmj
+ public :: setsym_ylm      ! Compute rotation matrices expressed in the basis of real spherical harmonics
 !!***
 
 CONTAINS
@@ -200,14 +209,14 @@ function ylmc(il,im,kcart)
 #if 0
 ! Remember the expression of complex spherical harmonics:
 ! $Y_{lm}(\theta,\phi)=sqrt{{(2l+1) over (4\pi)} {fact(l-m)/fact(l+m)} } P_l^m(cos(\theta)) e^{i m\phi}$
-  new_ylmc = SQRT((2*il+1)*factorial(il-ABS(im))/(factorial(il+ABS(im))*four_pi)) * &
+  new_ylmc = SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi)) * &
 &   ass_leg_pol(il,ABS(im),costh) * CMPLX(cosphi,sinphi)**ABS(im)
   if (im<0) new_ylmc=(-one)**(im)*CONJG(new_ylmc)
 
   if (ABS(new_ylmc-ylmc)>tol6) then
     !MSG_WARNING("Check new_ylmc")
     !write(std_out,*)"il,im,new_ylmc, ylmc",il,im,new_ylmc,ylmc
-    !write(std_out,*)"fact",SQRT((2*il+1)*factorial(il-ABS(im))/(factorial(il+ABS(im))*four_pi))
+    !write(std_out,*)"fact",SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi))
     !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh) 
     !write(std_out,*)"cosphi,sinphi,e^{imphi}",cosphi,sinphi,CMPLX(cosphi,sinphi)**ABS(im)
   end if
@@ -1523,6 +1532,326 @@ end subroutine pl_deriv
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_sphharm/mkeuler
+!! NAME
+!! mkeuler
+!!
+!! FUNCTION
+!! For a given symmetry operation, determines the corresponding Euler angles
+!!
+!! INPUTS
+!!  rot(3,3)= symmetry matrix
+!!
+!! OUTPUT
+!!  cosalp=  cos(alpha) with alpha=Euler angle 1
+!!  cosbeta= cos(beta)  with beta =Euler angle 2
+!!  cosgam=  cos(gamma) with gamma=Euler angle 3
+!!  isn= error code (0 if the routine exit normally)
+!!  sinalp= sin(alpha) with alpha=Euler angle 1
+!!  singam= sin(gamma) with gamma=Euler angle 3
+!!
+!! NOTES
+!!  This file comes from the file crystal_symmetry.f
+!!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! PARENTS
+!!      m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkeuler'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(out) :: isn
+ real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,singam
+!arrays
+ real(dp),intent(in) :: rot(3,3)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ier
+ real(dp) :: check,sinbeta
+ character(len=500) :: message
+
+! *********************************************************************
+
+ do isn= -1,1,2
+   cosbeta=real(isn)*rot(3,3)
+   if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+     sinbeta=zero
+   else
+     sinbeta=sqrt(1._dp-cosbeta*cosbeta)
+   end if
+   if (abs(sinbeta).gt.tol10)  then
+     cosalp=isn*rot(3,1)/sinbeta
+     sinalp=isn*rot(3,2)/sinbeta
+     cosgam=-isn*rot(1,3)/sinbeta
+     singam=isn*rot(2,3)/sinbeta
+   else
+     cosalp=isn*rot(1,1)/cosbeta
+     sinalp=isn*rot(1,2)/cosbeta
+     cosgam=one
+     singam=zero
+   end if
+
+!  Check matrix:
+   ier=0
+   check=cosalp*cosbeta*cosgam-sinalp*singam
+   if (abs(check-isn*rot(1,1))>tol8) ier=ier+1
+   check=sinalp*cosbeta*cosgam+cosalp*singam
+   if (abs(check-isn*rot(1,2))>tol8) ier=ier+1
+   check=-sinbeta*cosgam
+   if (abs(check-isn*rot(1,3))>tol8) ier=ier+1
+   check=-cosalp*cosbeta*singam-sinalp*cosgam
+   if (abs(check-isn*rot(2,1))>tol8) ier=ier+1
+   check=-sinalp*cosbeta*singam+cosalp*cosgam
+   if (abs(check-isn*rot(2,2))>tol8) ier=ier+1
+   check=sinbeta*singam
+   if (abs(check-isn*rot(2,3))>tol8) ier=ier+1
+   check=cosalp*sinbeta
+   if (abs(check-isn*rot(3,1))>tol8) ier=ier+1
+   check=sinalp*sinbeta
+   if (abs(check-isn*rot(3,2))>tol8) ier=ier+1
+   if (ier.eq.0) return
+ end do
+
+ isn=0
+ write(message, '(7a)' )&
+& 'Error during determination of symetries!',ch10,&
+& 'Action: check your input file:',ch10,&
+& 'unit cell vectors and/or atoms positions',ch10,&
+& 'have to be given with a better precision.'
+ MSG_ERROR(message)
+
+end subroutine mkeuler
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/dble_factorial
+!! NAME
+!! dble_factorial
+!!
+!! FUNCTION
+!! PRIVATE function
+!! Calculates N! as a double precision real.
+!!
+!! INPUTS
+!!   nn=input integer
+!!
+!! OUTPUT
+!!   factorial= N! (double precision)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental function dble_factorial(nn)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rfactorial'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp) :: dble_factorial
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ rfactorial=one
+ do ii=2,nn
+   dble_factorial=dble_factorial*ii
+ end do
+
+end function dble_factorial
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/dbeta
+!! NAME
+!! dbeta
+!!
+!! FUNCTION
+!!  Calculate the rotation matrix d^l_{m{\prim}m}(beta) using Eq. 4.14 of
+!!  M.E. Rose, Elementary Theory of Angular Momentum,
+!!             John Wiley & Sons, New-York, 1957
+!!
+!! INPUTS
+!!  cosbeta= cosinus of beta (=Euler angle)
+!!  ll= index l
+!!  mm= index m
+!!  mp= index m_prime
+!!
+!! OUTPUT
+!!  dbeta= rotation matrix
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  - Assume l relatively small so that factorials do not cause
+!!    roundoff error
+!!
+!! PARENTS
+!!     m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function dbeta(cosbeta,ll,mp,mm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dbeta'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ll,mm,mp
+ real(dp) :: dbeta
+ real(dp),intent(in) :: cosbeta
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: mxterms=200
+ integer :: ii,ina,inb,inc,ml,ms
+ real(dp) :: arg,cosbetab2,pref,sinbetab2,sum,tt
+
+!************************************************************************
+ dbeta=zero
+
+!Special cases
+ if (abs(cosbeta-1._dp).lt.tol10) then
+   if (mp.eq.mm) dbeta=1
+ else if (abs(cosbeta+1._dp).lt.tol10) then
+   if (mp.eq.-mm) dbeta=(-1)**(ll+mm)
+ else
+
+!  General case
+   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
+   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+   ml=max(mp,mm)
+   ms=min(mp,mm)
+   if (ml.ne.mp) sinbetab2=-sinbetab2
+   tt=-(sinbetab2/cosbetab2)**2
+   pref=sqrt((dble_factorial(ll-ms)*dble_factorial(ll+ml))&
+&   /(dble_factorial(ll+ms)*dble_factorial(ll-ml)))&
+&   /dble_factorial(ml-ms)*(cosbetab2**(2*ll+ms-ml))&
+&   *((-sinbetab2)**(ml-ms))
+   sum=1._dp
+   arg=1._dp
+   ina=ml-ll
+   inb=-ms-ll
+   inc=ml-ms+1
+   do ii=1,mxterms
+     if (ina.eq.0.or.inb.eq.0) exit
+     arg=(arg*ina*inb*tt)/(ii*inc)
+     sum=sum+arg
+     ina=ina+1
+     inb=inb+1
+     inc=inc+1
+   end do
+   dbeta=pref*sum
+ end if
+
+end function dbeta
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/phim
+!! NAME
+!! phim
+!!
+!! FUNCTION
+!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+!!                       Sqrt[2] sin[Abs(m) theta], if m<0
+!!                       1                        , if m=0
+!!
+!! INPUTS
+!!  costeta= cos(theta)  (theta= input angle)
+!!  mm = index m
+!!  sinteta= sin(theta)  (theta= input angle)
+!!
+!! OUTPUT
+!!  phim= Phi_m(theta) (see above)
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! PARENTS
+!!     m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function phim(costheta,sintheta,mm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phim'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mm
+ real(dp) :: phim
+ real(dp),intent(in) :: costheta,sintheta
+
+! *********************************************************************
+
+ if (mm==0)  phim=one
+ if (mm==1)  phim=sqrt2*costheta
+ if (mm==-1) phim=sqrt2*sintheta
+ if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
+ if (mm==-2) phim=sqrt2*two*sintheta*costheta
+ if (mm==3)  phim=sqrt2*&
+& (costheta*(costheta*costheta-sintheta*sintheta)&
+& -sintheta*two*sintheta*costheta)
+ if (mm==-3) phim=sqrt2*&
+& (sintheta*(costheta*costheta-sintheta*sintheta)&
+& +costheta*two*sintheta*costheta)
+
+ end function phim
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_paw_sphharm/mat_mlms2jmj
 !! NAME
 !! mat_mlms2jmj
@@ -1543,7 +1872,7 @@ end subroutine pl_deriv
 !!  wrt_mode=printing mode in parallel ('COLL' or 'PERS')
 !!
 !! SIDE EFFECTS
-!!  mat_mlms= Input/Ouput matrix in the Ylm basis, size of the matrix is (2*lcor+1,2*lcor+1,ndij)
+!!  mat_mlms= Input/Output matrix in the Ylm basis, size of the matrix is (2*lcor+1,2*lcor+1,ndij)
 !!  mat_jmj= Input/Output matrix in the J,M_J basis, size is 2*(2*lcor+1),2*(2*lcor+1)
 !!
 !! NOTES
@@ -1972,6 +2301,362 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
  LIBPAW_DEALLOCATE(slm2ylm)
 
 end subroutine mat_slm2ylm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/create_slm2ylm
+!! NAME
+!! create_slm2ylm
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, compute slm2ylm.
+!!
+!! INPUTS
+!!  lcor= angular momentum, size of the matrix is 2(2*lcor+1)
+!!
+!! OUTPUT
+!!  slm2ylm(2lcor+1,2lcor+1) = rotation matrix.
+!!
+!! NOTES
+!!  useful only in ndij==4
+!!
+!! PARENTS
+!!      m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine create_slm2ylm(lcor,slmtwoylm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'create_slm2ylm'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jm,ll,mm,im
+ real(dp),parameter :: invsqrt2=one/sqrt2
+ real(dp) :: onem
+!arrays
+
+! *********************************************************************
+
+ ll=lcor
+ slmtwoylm=czero
+ do im=1,2*ll+1
+   mm=im-ll-1;jm=-mm+ll+1
+   onem=dble((-1)**mm)
+   if (mm> 0) then
+     slmtwoylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+     slmtwoylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+   end if
+   if (mm==0) then
+     slmtwoylm(im,im)=cone
+   end if
+   if (mm< 0) then
+     slmtwoylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+     slmtwoylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+   end if
+ end do
+
+end subroutine create_slm2ylm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/create_mlms2jmj
+!! NAME
+!! create_mlms2jmj
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, give the rotation matrix msml2jmj
+!!
+!! INPUTS
+!!  lcor= angular momentum
+!!
+!! SIDE EFFECTS
+!!  mlms2jmj= rotation matrix
+!!
+!! PARENTS
+!!      m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine create_mlms2jmj(lcor,mlmstwojmj)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'create_mlms2jmj'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jc1,jj,jm,ll,ml1,ms1
+ real(dp) :: invsqrt2lp1,xj,xmj
+ character(len=500) :: message
+!arrays
+ integer, allocatable :: ind_msml(:,:)
+ complex(dpc),allocatable :: mat_mlms2(:,:)
+
+!*********************************************************************
+
+!--------------- Built indices + allocations
+ ll=lcor
+ mlmstwojmj=czero
+ ABI_ALLOCATE(ind_msml,(2,-ll:ll))
+ ABI_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
+ mlmstwojmj=czero
+ jc1=0
+ do ms1=1,2
+   do ml1=-ll,ll
+     jc1=jc1+1
+     ind_msml(ms1,ml1)=jc1
+   end do
+ end do
+
+!--------------- built mlmstwojmj
+!do jj=ll,ll+1    ! the physical value of j are ll-0.5,ll+0.5
+!xj(jj)=jj-0.5
+ if(ll==0)then
+   message=' ll should not be equal to zero !'
+   MSG_BUG(message)
+ end if
+ jc1=0
+ invsqrt2lp1=one/sqrt(float(2*lcor+1))
+ do jj=ll,ll+1
+   xj=float(jj)-half
+   do jm=-jj,jj-1
+     xmj=float(jm)+half
+     jc1=jc1+1
+     if(nint(xj+0.5)==ll+1) then
+       if(nint(xmj+0.5)==ll+1)  then
+         mlmstwojmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
+       else if(nint(xmj-0.5)==-ll-1) then
+         mlmstwojmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
+       else
+         mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+         mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+       end if
+     end if
+     if(nint(xj+0.5)==ll) then
+       mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+       mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+     end if
+   end do
+ end do
+
+ ABI_DEALLOCATE(ind_msml)
+ ABI_DEALLOCATE(mat_mlms2)
+
+end subroutine create_mlms2jmj
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/setsym_ylm
+!! NAME
+!! setsym_ylm
+!!
+!! FUNCTION
+!! Compute rotation matrices expressed in the basis of real spherical harmonics
+!! This coefficients are used later to symmetrize PAW on-site quantities (rhoij, dij, ...).
+!!
+!! INPUTS
+!!  gprimd(3,3)==dimensional primitive translations for reciprocal space (bohr^-1)
+!!  lmax=value of lmax mentioned at the second line of the psp file
+!!  nsym=number of symmetry elements in space group
+!!  pawprtvol=control print volume and debugging output
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  sym(3,3,nsym)=symmetries of group in terms of operations on primitive translations
+!!
+!! OUTPUT
+!!  zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)=coefficients of the
+!!      transformation of real spherical harmonics
+!!      under the symmetry operations
+!!
+!! NOTES
+!!  Typical use: sym(:,:,:) is symrec(:,:,:) (rotations in reciprocal space)
+!!               because we need symrel^-1 (=transpose[symrec])
+!!               to symmetrize quantities.
+!!
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  - Uses sign & phase convension of  M. E. Rose, Elementary Theory of Angular
+!!    Momentum, John Wiley & Sons,. inc. 1957)
+!!    zalpha = exp(-i*alpha)   zgamma = exp (-i*gamma)
+!!  - Assumes each transformation  can be expressed in terms of 3 Euler
+!!    angles with or without inversion
+!!
+!!  Reference for evaluation of rotation matrices in the basis of real SH:
+!!  Blanco M.A., Florez M. and Bermejo M.
+!!  Journal of Molecular Structure: THEOCHEM, Volume 419, Number 1, 8 December 1997 , pp. 19-27(9)
+!!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'setsym_ylm'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lmax,nsym,pawprtvol
+!arrays
+ integer,intent(in) :: sym(3,3,nsym)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(out) :: zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)
+
+!Local variables ------------------------------
+!scalars
+ integer :: i1,ii,il,irot,isn,j1,jj,k1,ll,mm,mp
+ real(dp) :: cosalp,cosbeta,cosgam,sinalp,singam
+ character(len=1000) :: message
+!arrays
+ real(dp) :: prod(3,3),rot(3,3)
+!************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if (abs(pawprtvol)>=3) then
+   write(message,'(8a,i4)') ch10,&
+&   ' PAW TEST:',ch10,&
+&   ' ==== setsym_ylm: rotation matrices in the basis ============',ch10,&
+&   ' ====              of real spherical harmonics    ============',ch10,&
+&   '  > Number of symmetries (nsym)=',nsym
+   call wrtout(std_out,message,'COLL')
+ end if
+
+ zarot=zero
+
+ do irot=1,nsym
+
+   if (abs(pawprtvol)>=3) then
+     write(message,'(a,i2,a,9i2,a)') '   >For symmetry ',irot,' (',sym(:,:,irot),')'
+     call wrtout(std_out,message,'COLL')
+   end if
+
+!  === l=0 case ===
+   zarot(1,1,1,irot)=one
+
+!  === l>0 case ===
+   if (lmax>0) then
+!    Calculate the rotations in the cartesian basis
+     rot=zero;prod=zero
+     do k1=1,3
+       do j1=1,3
+         do i1=1,3
+           prod(i1,j1)=prod(i1,j1)+sym(i1,k1,irot)*rprimd(j1,k1)
+         end do
+       end do
+     end do
+     do j1=1,3
+       do i1=1,3
+         do k1=1,3
+           rot(i1,j1)=rot(i1,j1)+gprimd(i1,k1)*prod(k1,j1)
+         end do
+         if(abs(rot(i1,j1))<tol10) rot(i1,j1)=zero
+       end do
+     end do
+     call mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+     do ll=1,lmax
+       il=(isn)**ll
+       do mp=-ll,ll
+         jj=mp+ll+1
+         do mm=-ll,ll
+           ii=mm+ll+1
+
+!          Formula (47) from the paper of Blanco et al
+           zarot(ii,jj,ll+1,irot)=il&
+&           *(phim(cosalp,sinalp,mm)*phim(cosgam,singam,mp)*sign(1,mp)&
+           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
+&           +(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half&
+&           -phim(cosalp,sinalp,-mm)*phim(cosgam,singam,-mp)*sign(1,mm)&
+           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
+&           -(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half)
+         end do
+       end do
+     end do
+   end if   ! lmax case
+
+   if (abs(pawprtvol)>=3) then
+     if(lmax>0) then
+       write(message,'(2a,3(3(2x,f7.3),a))') &
+&       '    Rotation matrice for l=1:',ch10,&
+&       (zarot(1,jj,2,irot),jj=1,3),ch10,&
+&       (zarot(2,jj,2,irot),jj=1,3),ch10,&
+&       (zarot(3,jj,2,irot),jj=1,3)
+       call wrtout(std_out,message,'COLL')
+     end if
+     if(lmax>1) then
+       write(message,'(2a,5(5(2x,f7.3),a))') &
+&       '    Rotation matrice for l=2:',ch10,&
+&       (zarot(1,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(2,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(3,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(4,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(5,jj,3,irot),jj=1,5)
+       call wrtout(std_out,message,'COLL')
+     end if
+     if(lmax>2) then
+       write(message,'(2a,7(7(2x,f7.3),a))') &
+&       '    Rotation matrice for l=3:',ch10,&
+&       (zarot(1,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(2,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(3,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(4,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(5,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(6,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(7,jj,4,irot),jj=1,7)
+       call wrtout(std_out,message,'COLL')
+     end if
+   end if
+
+ end do  ! isym loop
+
+ DBG_EXIT("COLL")
+
+end subroutine setsym_ylm
 !!***
 
 !----------------------------------------------------------------------

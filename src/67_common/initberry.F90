@@ -75,7 +75,7 @@
 !!
 !! CHILDREN
 !!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsymrhoij,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
+!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -108,6 +108,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc,pawcprj_getdim
+ use m_paw_sphharm, only : setsym_ylm
  use m_paw_overlap, only : qijb_kk,expibi
  use m_mpinfo,  only : proc_distrb_cycle
 
@@ -336,7 +337,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      call symatm(dtefield%atom_indsym,natom,nsym,symrec,dtset%tnons,tol8,typat,xred)
      lmax = psps%mpsang - 1
      ABI_ALLOCATE(dtefield%zarot,(2*lmax+1,2*lmax+1,lmax+1,nsym))
-     call setsymrhoij(gprimd,lmax,nsym,1,rprimd,symrec,dtefield%zarot)
+     call setsym_ylm(gprimd,lmax,nsym,1,rprimd,symrec,dtefield%zarot)
      dtefield%nsym = nsym
      dtefield%lmax = lmax
      dtefield%lmnmax = psps%lmnmax

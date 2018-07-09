@@ -71,6 +71,7 @@ module m_gstate
  use m_results_gs,       only : results_gs_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
  use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
+ use m_paw_sphharm,      only : setsym_ylm
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -975,7 +976,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
 !  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
    pawtab(:)%usepawu=0
