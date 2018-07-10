@@ -86,6 +86,7 @@ module m_screening_driver
  use m_paw_sphharm,   only : setsym_ylm
  use m_paw_onsite,    only : pawnabla_init
  use m_paw_nhatgrid,  only : nhatgrid
+ use m_paw_tools,     only : chkpawovlp,pawprt
  use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn

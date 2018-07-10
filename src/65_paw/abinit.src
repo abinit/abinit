@@ -28,7 +28,7 @@ sources = [
  "m_paw_optics.F90",
  "m_paw_overlap.F90",
  "m_paw_tools.F90",
- "m_nhatgrid.F90",
+ "m_paw_nhatgrid.F90",
  "calc_ubare.F90",
  "convert_notation.F90",
  "denfgr.F90",
