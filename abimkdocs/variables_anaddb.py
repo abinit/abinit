@@ -622,7 +622,7 @@ Bose distribution $n_B$ and the frequency $\omega_{qs}$ of the phonon mode. At a
 temperature T, **freeze_displ** will give the mean square displacement of
 atoms (along with the displacement vectors, which are in Bohr). In atomic
 units **freeze_displ** = $\sqrt{(0.5 + n_B(\omega_{qs}/kT) / \omega_{qs}}$.
-Typical values are 50-200 for a frequency of a few hundred cm$^{-1}$ and room temperature. 
+Typical values are 50-200 for a frequency of a few hundred cm$^{-1}$ and room temperature.
 If all you want is to break the symmetry in the right direction, any reasonable value
 (10-50) should be ok.
 
@@ -1468,7 +1468,7 @@ Variable(
     mnemonics="PRinT the NESTing function",
     text=r"""
 Only for electron-phonon calculations. This input variable is used to
-calculate the nesting function defined as: 
+calculate the nesting function defined as:
 $$
 \chi_{nm}(q) = \sum_k\delta(\epsilon_{k,n}-\epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F).
 $$
