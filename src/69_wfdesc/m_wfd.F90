@@ -60,6 +60,7 @@ MODULE m_wfd
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
+ use m_paw_nhatgrid,   only : nhatgrid
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg

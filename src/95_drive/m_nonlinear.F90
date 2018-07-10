@@ -62,6 +62,7 @@ module m_nonlinear
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
+ use m_paw_nhatgrid,only : nhatgrid
  use m_mkrho,       only : mkrho
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini

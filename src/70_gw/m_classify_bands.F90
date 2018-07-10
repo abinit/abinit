@@ -45,6 +45,7 @@ module m_classify_bands
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_paw_sphharm,    only : setsym_ylm
+ use m_paw_nhatgrid,   only : nhatgrid
  use m_wfd,            only : wfd_get_ur, wfd_t, wfd_ug2cprj, wfd_change_ngfft, wfd_paw_get_aeur
 
  implicit none

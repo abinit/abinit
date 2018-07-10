@@ -198,6 +198,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawcprj,          only : pawcprj_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
+ use m_paw_optics,       only : optics_paw,optics_paw_core
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite

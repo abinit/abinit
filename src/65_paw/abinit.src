@@ -28,6 +28,7 @@ sources = [
  "m_paw_optics.F90",
  "m_paw_overlap.F90",
  "m_paw_tools.F90",
+ "m_nhatgrid.F90",
  "calc_ubare.F90",
  "convert_notation.F90",
  "denfgr.F90",
@@ -36,7 +37,6 @@ sources = [
  "initrhoij.F90",
  "make_efg_onsite.F90",
  "make_fc_paw.F90",
- "nhatgrid.F90",
  "pawaccrhoij.F90",
  "pawdenpot.F90",
  "pawdensities.F90",
@@ -67,7 +67,6 @@ sources = [
  "setnoccmmp.F90",
  "setrhoijpbe0.F90",
  "simple_j_dia.F90",
- "transgrid.F90",
- "wvl_nhatgrid.F90"]
+ "transgrid.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

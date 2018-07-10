@@ -210,6 +210,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_pawfgr,           only : pawfgr_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhatgrid,     only : nhatgrid,wvl_nhatgrid
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
  use m_gwls_hamiltonian, only : build_vxc
