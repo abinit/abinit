@@ -15,11 +15,7 @@ This tutorial aims at showing how to get the following physical properties for a
 
 You will learn about the smearing of the Brillouin zone integration, and also a bit about preconditioning the SCF cycle.
 
-$ABI_HOME
-
 [TUTORIAL_README]
-
-$ABI_HOME
 
 This tutorial should take about 1 hour and 30 minutes.
 
@@ -32,16 +28,15 @@ The file *tbase4_x.files* lists the file names and root names.
 You can copy it in the *Work4* directory (and change it, as usual). 
 You can also copy the file *tbase4_1.in* in *Work4*. 
 
-
 ```sh
 cd $ABI_TUTORIAL/Input
 mkdir Work4
 cd Work4
-cp ../tbase4_x.files .
+cp ../tbase4_x.files .  # You will need to edit this file.
 cp ../tbase4_1.in .
 ```
 
-*tbase4_1.in* is our input file. You should edit it, read it carefully,
+*tbase4_1.in* is our input file. You should edit it and read it carefully,
 
 {% dialog tests/tutorial/Input/tbase4_x.files tests/tutorial/Input/tbase4_1.in %}
 
@@ -137,8 +132,8 @@ is already converged with [[nkpt]] = 10:
 
 Note that there is usually a **strong** cross-convergence effect between the number of 
 k-points and the value of the broadening, [[tsmear]]. 
-The right procedure is: for each value of *tsmear*, to get the convergence with respect to the number of k-points, 
-then to compare the k-point converged values for different values of *tsmear*.
+The right procedure is: for each value of *tsmear*, convergence with respect to the number of k-points, 
+then compare the k-point converged values for different values of *tsmear*.
 
 In what follows, we will restrict ourselves to the grids with [[nkpt]] = 2, 10 and 28.
 
@@ -189,7 +184,7 @@ For that particular value of *tsmear*, one can use the second k-point grid, givi
 !!! summary
 
     So to summarize: we can choose to work with a 10 k-point grid in the irreducible Brillouin
-    zone, and the associated [[tsmear]] = 0.04, with less than 0.1% error on the lattice parameter.  
+    zone, and the associated [[tsmear]] = 0.04, with less than 0.1% error on the lattice parameter.
     Note that this error due to the Brillouin zone sampling could add to the error
     due to the choice of [[ecut]] (that was mentioned previously to be on the order of 0.2%).
 
@@ -250,14 +245,14 @@ There is no primitive cell of bulk aluminum based on these vectors, but a double
 We will first compute the total energy associated with this doubled cell. 
 This is not strictly needed, but it is a valuable intermediate step towards the study of the surface.
 
-You might start from `tbase4_3.in`. You have to change [[rprim]]. Still, try to keep [[acell]] 
+You might start from *tbase4_3.in*. You have to change [[rprim]]. Still, try to keep [[acell]] 
 at the values of bulk aluminum that were determined previously. 
 But it is not all: the most difficult part in the passage to this doubled cell is the definition of the k-point grid. 
 Of course, one could just take a homogeneous simple cubic grid of k-points, but this will not 
-correspond exactly to the k-point grid used in the primitive cell in `tbase4_3.in`. 
+correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.in*.
 This would not be a big problem, but you would miss some error cancellation.
 
-The answer to this problem is given in the input file `~abinit/tests/tutorial/Input/tbase4_4.in`.  
+The answer to this problem is given in the input file *$ABI_TUTORIAL/Input/tbase4_4.in*.
 
 {% dialog tests/tutorial/Input/tbase4_1.in %}
 
@@ -267,13 +262,13 @@ as for the primitive cell case. There is a simple rule to estimate **roughly** w
 grids for different cells have the same resolution: simply multiply the linear dimensions of the k-point grids, 
 by the number of sublattices, by the number of atoms in the cell. 
 For example, the corresponding product for the usual 10 k-point grid is `4x4x4 x 4 x 1 = 256`. 
-In the file `tbase4_4.in`, one has `4x4x4 x 2 x 2 = 256`. 
+In the file *tbase4_4.in*, one has `4x4x4 x 2 x 2 = 256`. 
 The grids of k-points should not be too anisotropic for this rough estimation to be valid.
 
 Note also the input variables [[rprim]] and [[chkprim]] in this input file.
 
-So, you run tbase4_4.in (only a few seconds, the reference file is `~abinit/tests/tutorial/Refs/tbase4_4.out`), 
-and you find the following total energy:
+Now run *tbase4_4.in* (the reference file is *$ABI_TUTORIAL/Refs/tbase4_4.out*).
+You should find the following total energy:
 
     etotal     -4.1962972610E+00
 
@@ -298,19 +293,23 @@ It is convenient to take the vacuum region as having a multiple of the width of 
 The supercell to use is the double of the previous cell (that had two layers of Aluminum atoms along the `[0 0 1]` direction). 
 Of course, the relaxation of the surface might give an important contribution to the total energy.
 
-You should start from `tbase4_4.in`. 
+You should start from *tbase4_4.in*.
 You have to modify [[rprim]] (double the cell along `[0 0 1]`), the atomic positions, as well as the k-point mesh. 
 For the latter, it is supposed that the electrons cannot propagate from one slab to its image in the `[0 0 1]` direction, 
-so that the k_z component of the special k-points can be taken 0: only one layer of k-points is needed along the z-direction. 
+so that the $k_z$ component of the special k-points can be taken 0: only one layer of k-points is needed along the z-direction. 
 You should also allow the relaxation of atomic positions, but not the relaxation of lattice parameters 
 (the lattice parameters along x or y must be considered fixed to the bulk value, while, for the z direction, 
 there is no interest to allow the vacuum region to collapse!
 
-The input file `~abinit/tests/tutorial/Input/tbase4_5.in` is an example, 
-while `~abinit/tests/tutorial/Refs/tbase4_5.out` is a reference output file.
-The run might last one minute.
+The input file *tbase4_5.in* is an example, 
 
-{% dialog tests/tutorial/Input/tbase4_5.in tests/tutorial/Refs/tbase4_5.out %}
+{% dialog tests/tutorial/Input/tbase4_5.in %}
+
+while *tbase4_5.out* is the reference output file.
+
+{% dialog tests/tutorial/Refs/tbase4_5.out %}
+
+The run might last one minute.
 
 The total energy after the first SCF cycle, when the atomic positions are equal to their starting values, is:
 
@@ -335,11 +334,15 @@ It is preferable to define atomic positions in Cartesian coordinates.
 The same coordinates will work for both 2 and 3 vacuum layers, while this is not the case for reduced coordinates, 
 as the cell size increases.
 
-The input file `~abinit/tests/tutorial/Input/tbase4_6.in` is an example input file, 
-while `~abinit/tests/tutorial/Refs/tbase4_6.out` is a reference output file. 
-The run is on the order of thirty seconds on a PC 3 GHz.
+The input file *tbase4_6.in* is an example input file, 
 
-{% dialog tests/tutorial/Input/tbase4_6.in tests/tutorial/Refs/tbase4_6.out %}
+{% dialog tests/tutorial/Input/tbase4_6.in %}
+
+while *tbase4_6.out* is the reference output file. 
+
+{% dialog tests/tutorial/Refs/tbase4_6.out %}
+
+The run is on the order of thirty seconds on a PC 3 GHz.
 
 In the Broyden step 0 of the first dataset, you will notice the WARNING:
 
@@ -393,19 +396,16 @@ One could use an effective dielectric constant of about 3 or 5, with a rather sm
 However, there is also another possibility, using an estimation of the dielectric matrix governed by [[iprcel]]=45. 
 For comparison with the previous treatment of SCF, one can recompute the result with 3 aluminum layers.
 
-The input file `~abinit/tests/tutorial/Input/tbase4_7.in` is an example, while 
-`~abinit/tests/tutorial/Refs/tbase4_7.out` is a reference output file. 
+The input file *tbase4_7.in* is an example, while 
+
+{% dialog tests/tutorial/Input/tbase4_7.in %}
+
+*tbase4_7.out* is a reference output file. 
+
+{% dialog tests/tutorial/Refs/tbase4_7.out %}
+
 This run might take about one minute, and is the longest of the four basic tutorials. You should start it now.
 
-{% dialog tests/tutorial/Input/tbase4_7.in tests/tutorial/Refs/tbase4_7.out %}
-
-You can monitor its evolution by editing from time to time the `tbase4_7_STATUS` file that the code updates regularly. 
-The status file, that refer to the skeleton of the code, is described in the `~abinit/doc/developers/programmer_guide.txt`. 
-You might take advantage of the time of the run to explore the files contained in the `~abinit/doc/usersdirectory` 
-and the `~abinit/doc/developers` directory. 
-The README files provided interesting entry points in the documentation of the code.
-
-Coming back to the file tbase4_7.out. 
 You will notice that the SCF convergence is rather satisfactory, for all the cases (3, 4 or 5 metal layers).
 
 For the 3 aluminum layer case, one has the non-relaxed total energy:
@@ -417,7 +417,8 @@ and for the relaxed case:
 
 etotal1    -6.2547008127E+00
 
-(by contrast the difference with test 4.6 is less than 1 microHa) giving the relaxed surface energy 0.0196 Ha = 0.533 eV .
+(by contrast the difference with test 4.6 is less than 1 microHa) giving 
+the relaxed surface energy 0.0196 Ha = 0.533 eV.
 
 For the 4 aluminum layer case, one has the non-relaxed total energy:
 
@@ -446,7 +447,7 @@ of the concepts already explored.
 
 Just for your information, and as an additional warning, when the work accomplished 
 until now is completed with 6 and 7 layers without relaxation
-(see `~abinit/tests/tutorial/Input/tbase4_8.in` and `~abinit/tests/tutorial/Refs/tbase4_8.out` where 5, 6 and 7 layers are treated),
+(see *\$ABI_TUTORIAL/Input/tbase4_8.in* and *\$ABI_TUTORIAL/Refs/tbase4_8.out* where 5, 6 and 7 layers are treated),
 this non-relaxed energy surface energy behaves as follows:  
 
 number of aluminum layers | surface energy  
@@ -458,7 +459,7 @@ number of aluminum layers | surface energy
 7   | 0.463 eV  
 
 So, the surface energy convergence is rather difficult to reach. Our values, with a `4x4x1` grid, 
-a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the `13al.981214.fhi` pseudopotential, 
+a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *13al.981214.fhi* pseudopotential, 
 still oscillate between 0.45 eV and 0.51 eV. 
 Increasing the k-point sampling might decrease slightly the oscillations, but note that this effect 
 is intrinsic to the computation of properties of a metallic surface: the electrons are confined inside the slab potential, 

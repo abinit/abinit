@@ -268,7 +268,7 @@ The input file *$ABI_TUTORIAL/Input/tbase3_5.in* is an example,
 
 {% dialog tests/tutorial/Input/tbase3_5.in %}
 
-while `$ABI_TUTORIAL/Refs/tbase3_5.out` is a reference output file.
+while *$ABI_TUTORIAL/Refs/tbase3_5.out* is a reference output file.
 
 {% dialog tests/tutorial/Refs/tbase3_5.out %}
 
@@ -336,11 +336,12 @@ For experimental data and band structure representation, see the book by M.L. Co
 
 ## Using AbiPy to automate the most boring steps
 
-|AbiPy| provides several tools to facilitate the preparation of band structure calculations 
+The |AbiPy| package provides several tools to facilitate the preparation of band structure calculations 
 and the analysis of the output results. First of all, one can use the |abistruct| script with 
 the `kpath` command to determine a high-symmetry k-path from **any file** containing structural 
-information (abinit input file, netcdf output file, ...). 
+information (abinit input file, netcdf output files etc.). 
 The high-symmetry k-path follows the conventions described in [[cite:Setyawan2010]].
+Let's try with:
 
 ```sh
 abistruct.py kpath tbase3_5.in
@@ -388,7 +389,7 @@ It is also possible to compare multiple GSR files with the |abicomp| script and 
 
     abicomp.py gsr tbase3_5o_DS1_GSR.nc tbase3_5o_DS2_GSR.nc -e -sns=talk
 
-to produce:
+to produce the following figures:
 
 ![](base3_assets/abicomp_tbase3_5o_GSR_files.png)
 

@@ -1,5 +1,5 @@
 ---
-authors: VOlevano, FBruneval, XG
+authors: VOlevano, FBruneval, MG, XG
 ---
 
 # First tutorial on GW  
@@ -23,14 +23,16 @@ the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, 
 see the [[help:index|tutorial home page]]
-After this first tutorial on GW, you should read the [second WG tutorial](gw2).
+After this first tutorial on GW, you should read the [second GW tutorial](gw2).
+
+[TUTORIAL_README]
 
 This tutorial should take about 2 hours.
 
 ## 1 General example of an almost converged GW calculation
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other tutorials. Why not "Work_gw1"?*
+for the other tutorials. Why not Work_gw1?*
 
 At the end of [tutorial 3](base3), we computed the KS band
 structure of silicon. In this approximation, the band dispersion as well as
@@ -48,13 +50,17 @@ than the computation of the KS eigenvalues.
 So, let us run immediately this calculation, and while it is running, we will
 explain what has been done.
 
-*In the directory ~abinit/tests/tutorial/Input/Work_gw1, copy the files
-~abinit/tests/tutorial/Input/tgw1_x.files and tgw1_1.in, and modify the
-tgw1_x.files file as usual (see tutorial 1).*
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_gw1
+cd Work_gw1
+cp ../tgw1_x.files .  # modify this file as usual (see tutorial 1)
+cp ../tgw1_1.in .
+```
 
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_1.log &
+    abinit < tgw1_x.files > log 2> err &
 
 Please run this job in background because it takes about 1 minute. 
 In the meantime, you should read the following.
@@ -89,11 +95,11 @@ The first dataset performs the SCF calculation to get the density. The second
 dataset reads the previous density file and performs a NSCF run including
 several empty states. The third dataset reads the WFK file produced in the
 previous step and drives the computation of susceptibility and dielectric
-matrices, producing another specialized file, tgw1_xo_DS2_SCR (_SCR for
+matrices, producing another specialized file, *tgw1_xo_DS2_SCR* (*_SCR* for
 "Screening", actually the inverse dielectric matrix $\epsilon^{-1}$). Then, in the fourth
 dataset, the code calculates the quasiparticle energies for the 4th and 5th bands at the $\Gamma$ point.
 
-So, you can edit this tgw1_1.in file.
+So, you can edit this *tgw1_1.in* file.
 
 {% dialog tests/tutorial/Input/tgw1_x.files tests/tutorial/Input/tgw1_1.in %}
 
@@ -224,7 +230,7 @@ calculation due to integrable poles along the integration path.
 #### 1.e Examination of the output file.
 
 Let us hope that your calculation has been completed, and that we can examine
-the output file. Open tgw1_1.out in your preferred editor and find the section
+the output file. Open *tgw1_1.out* in your preferred editor and find the section
 corresponding to DATASET 3.
 
 {% dialog tests/tutorial/Refs/tgw1_1.out %}
@@ -324,6 +330,7 @@ At the end of the screening calculation, the macroscopic dielectric constant is 
 
 
 !!! note
+
     Note that the convergence in the dielectric constant **does not guarantee** the
     convergence in the GW corrections. In fact, the dielectric constant is
     representative of only one element i.e. the head of the full dielectric
@@ -458,16 +465,16 @@ cumbersome (at least in the framework of a tutorial) if more **k**-points were
 used. Testing the convergence with a $\Gamma$ point only grid of **k**-point represents a
 convenient approach although some caution should always be used.
 
-In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
-../tgw1_2.in, and modify the tgw1_x.files file as usual. Edit the tgw1_2.in
-file, and take the time to examine it.
+In directory *Work_gw1*, copy the file
+*../tgw1_2.in*, and modify the *tgw1_x.files* file as usual.
+Edit the *tgw1_2.in* file, and take the time to examine it.
 
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_2.log &
+    abinit < tgw1_x.files > tgw1_2.log 2> err &
 
 After this step you will need the WFK and SCR files produced in this run for
-the next runs. Move tgw1o_DS2_WFK to tgw1o_DS1_WFK and tgw1o_DS3_SCR to tgw1o_DS1_SCR.
+the next runs. Move *tgw1o_DS2_WFK* to *tgw1o_DS1_WFK* and *tgw1o_DS3_SCR* to *tgw1o_DS1_SCR*.
 
 The next sections are intended to show you how to find the converged
 parameters for a GW calculation. In principle, the following parameters might
@@ -502,12 +509,12 @@ done by defining five datasets, with increasing [[nband]]:
     nband:  50
     nband+  50
 
-In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
-../tgw1_3.in, and modify the tgw1_x.files file as usual. Edit the tgw1_3.in
-file, and take the time to examine it.  
+In directory *Work_gw1*, copy the file
+*../tgw1_3.in*, and modify the *tgw1_x.files* file as usual.
+Edit the *tgw1_3.in* file, and take the time to examine it.
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_3.log &
+    abinit < tgw1_x.files > tgw1_3.log 2> err &
 
 {% dialog tests/tutorial/Input/tgw1_3.in %}
 
@@ -544,7 +551,7 @@ Gathering the GW energies for each number of bands, one gets:
         5   8.445  -9.700  -3.222  -6.535   0.797  -0.255  -9.745  -0.045   8.400
 
     
-So that nband=100 can be considered converged within 0.01 eV.
+So that [[nband]] = 100 can be considered converged within 0.01 eV.
 
 With |AbiPy|, one can use the |abicomp| script provides to compare multiple SIGRES.nc files
 Use the `--expose` option to visualize of the QP gaps extracted from the different netcdf files:
@@ -608,8 +615,7 @@ The datasets 11,21,31,41 and 51, drive the corresponding computation of the scre
     # Calculation of the screening (epsilon^-1 matrix)
     optdriver?1  3
     
-In this latter series, we will have to vary the two different parameters
- [[ecuteps]] and [[nband]].
+In this latter series, we will have to vary the two different parameters [[ecuteps]] and [[nband]].
 
 Let us begin with [[nband]]. 
 This convergence study is rather important. It can be done at the same time as
@@ -628,13 +634,12 @@ the screening. This will be done by defining five datasets, with increasing [[nb
     nband51  200
     
 
-In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
-../tgw1_4.in, and modify the tgw1_x.files file as usual. Edit the tgw1_4.in
-file, and take the time to examine it.
+In directory *Work_gw1*, copy the file *../tgw1_4.in*, and modify the
+*tgw1_x.files* file as usual. Edit the *tgw1_4.in* file, and take the time to examine it.
 
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_4.log &
+    abinit < tgw1_x.files > tgw1_4.log 2> err &
 
 {% dialog tests/tutorial/Input/tgw1_4.in %}
 
@@ -695,13 +700,12 @@ increasing [[ecuteps]]:
     ecuteps:?     3.0
     ecuteps+?     1.0
 
-In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
-../tgw1_5.in, and modify the tgw1_x.files file as usual. Edit the tgw1_5.in
-file, and take the time to examine it.
+In directory *Work_gw1*, copy the file *../tgw1_5.in*, and modify the
+*tgw1_x.files* file as usual. Edit the *tgw1_5.in* file, and take the time to examine it.
 
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_5.log &
+    abinit < tgw1_x.files > tgw1_5.log 2> err &
 
 {% dialog tests/tutorial/Input/tgw1_5.in %}
 
@@ -754,7 +758,7 @@ of bands, one gets:
 So that ecuteps = 6.0 ([[npweps]] = 169) can be considered converged within 0.01 eV.
 
 At this stage, we know that for the screening computation, we need
-[[ecuteps]]=6.0 Ha and [[nband]]=100.
+[[ecuteps]] = 6.0 Ha and [[nband]] = 100.
 
 Of course, until now, we have skipped the most difficult part of the
 convergence tests: the convergence in the number of **k**-points. It is as
@@ -776,9 +780,9 @@ fix these values and look at the convergence with respect to the BZ mesh.
 Now we try to perform a GW calculation for a real problem: the calculation of
 the GW corrections for the direct band gap of bulk Silicon at the $\Gamma$ point.
 
-In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
-../tgw1_6.in, and modify the tgw1_x.files file as usual. Then, edit the
-tgw1_6.in file, and, without examining it, comment the line
+In directory *Work_gw1*, copy the file
+*../tgw1_6.in*, and modify the *tgw1_x.files* file as usual. Then, edit the
+*tgw1_6.in file*, and, without examining it, comment the line
     
      ngkpt    2 2 2    # Density of k points used for the automatic tests of the tutorial
     
@@ -788,7 +792,7 @@ and uncomment the line
 
 Then, issue:
     
-    abinit < tgw1_x.files >& tgw1_6.log &
+    abinit < tgw1_x.files > tgw1_6.log 2> err &
 
 This job lasts about 3-4 minutes so it is worth to run it before the examination of the input file.
 Now, you can examine it.  
@@ -1010,9 +1014,9 @@ The columns are
 
   * **Band**: index of the band   
   * **E_lda**: LDA eigenvalue   
-  * **<Vxclda>**: diagonal expectation value of the xc potential in between LDA bra and ket   
+  * **Vxclda**: diagonal expectation value of the xc potential in between LDA bra and ket   
   * **E(N-1)**: quasiparticle energy of the previous iteration (equal to LDA for the first iteration)   
-  * **<Hhartree>**: diagonal expectation value of the Hartree Hamiltonian (equal to E_lda - <Vxclda> for the first iteration only)   
+  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_lda - Vxclda for the first iteration only)   
   * **SigX**: diagonal expectation value of the exchange self-energy   
   * **SigC[E(N-1)]**: diagonal expectation value of the correlation self-energy 
     (evaluated for the energy of the preceeding iteration)   

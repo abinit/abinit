@@ -230,7 +230,10 @@ The matrix elements of $v$ and $W$ are defined as:
 {\bar v}_{(n_1 n_2) (n_3 n_4)} = \delta_{\sigma_1 \sigma_2}\,
 \delta_{\sigma_3 \sigma_4} \iint \psi_{n_1}(\rr) \psi^*_{n_2}(\rr) {\bar
 v(\rr-\rr')} \psi_{n_3}^*(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
-\end{equation} \begin{equation} W_{(n_1 n_2) (n_3 n_4)} = \delta_{\sigma_1
+\end{equation} 
+
+\begin{equation} 
+W_{(n_1 n_2) (n_3 n_4)} = \delta_{\sigma_1
 \sigma_3}\, \delta_{\sigma_2 \sigma_4} \iint \psi_{n_1}(\rr) \psi^*_{n_3}(\rr)
 {W(\rr,\rr',\ww=0)} \psi^*_{n_2}(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
 \end{equation} 

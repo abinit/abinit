@@ -22,8 +22,8 @@ This tutorial should take about 1 hour.
 
 ## Computing the momentum matrix elements
 
-*Before beginning, you might consider working in a different subdirectory from
-for the other tutorials. Why not create Work_optic?*
+*Before beginning, you might consider working in a different subdirectory.
+Why not create Work_optic?*
 
 We also need to copy *toptic_1.files* and *toptic_1.in* from 
 *$ABI_TUTORIAL/Input* to *Work_optic*.

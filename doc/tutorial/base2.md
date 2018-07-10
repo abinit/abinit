@@ -49,8 +49,7 @@ Why not Work2?*
 
 Because we will compute many times the bond length and atomisation energy, it
 is worth to make a single input file that will do all the associated operations. 
-You should try to use 2 datasets (try to combine *$ABI_TUTORIAL/Input/tbase1_3.in* with *tbase1_5.in*).
-
+You should try to use 2 datasets (try to combine *\$ABI_TUTORIAL/Input/tbase1_3.in* with *tbase1_5.in*).
 Do not try to have the same position of the H atom as one of the H$_2$ atoms in the optimized geometry.
 
 ```sh
@@ -77,7 +76,7 @@ although it does not differ from *tbase1_x.files*.
 
 Execute the code with:
 
-    abinit < tbase2_x.files > log 2> err
+    abinit < tbase2_x.files > log 2> err &
 
 The run should take less than one minute.
 
@@ -96,12 +95,11 @@ although they have been obtained in one run.
 You can also check that the residual forces are lower than `5.0d-4`. 
 Convergence issues are discussed in [[help:abinit#7|section 7]] of the abinit help file.  
 You should read it. 
-By the way, you have read many parts of the abinit_help file! 
-You are missing the sections
-[[help:abinit#2|2]], [[help:abinit#5|5]],  [[help:abinit#7|7]].
+By the way, you have read many parts of the abinit help file! 
+You are missing the sections [[help:abinit#2|2]], [[help:abinit#5|5]],  [[help:abinit#7|7]].
 
 You are also missing the description of many input variables. 
-We suggest that you finish reading entirely the abinit_help file now, while 
+We suggest that you finish reading entirely the abinit help file now, while 
 the knowledge of the input variables will come in the long run.
 
 **2.1.b** Many convergence parameters have already been identified. We will
@@ -250,14 +248,13 @@ This allows to have reasonable CPU time still.
 ## 5 The final calculation in Local (Spin) Density Approximation
   
 We now use the correct values of both [[ecut]] and [[acell]]. 
-Well, you should modify the tbase2_3.in file to make a calculation with `acell 12 12 12` and `ecut 30`. 
+Well, you should modify the *tbase2_3.in* file to make a calculation with `acell 12 12 12` and `ecut 30`. 
 You can still use the double loop feature with `udtset 1 2`
 (which reduces to a single loop), to minimize the modifications to the file.
 
 The file *$ABI_TUTORIAL/Input/tbase2_4.in* can be taken as an example of input file:
 
 {% dialog tests/tutorial/Input/tbase2_4.in %}
-
 
 while *$ABI_TUTORIAL/Refs/tbase2_4.out* is as an example of output file:
 
@@ -281,7 +278,7 @@ The output data are:
 * The interatomic distance is 1.452 Bohr. 
 * These are our final data for the local (spin) density approximation. 
 
-We have used [[ixc]] = 1. 
+We have used [[ixc]] = 1.
 Other expressions for the local (spin) density approximation [2, 3 ... 7] are possible. 
 The values 1, 2, 3 and 7 should give about the same results, since they all start 
 from the XC energy of the homogeneous electron gas, as determined by Quantum Monte Carlo calculations.  
@@ -330,4 +327,4 @@ In LDA, we were within 4% of the experimental bond length, and within 2% of the 
 
 !!! important
 
-    Do not forget that the typical accuracy of LDA and GGA varies with the class of materials studied
+    Do not forget that the typical accuracy of LDA and GGA varies with the class of materials studied.

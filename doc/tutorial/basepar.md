@@ -163,7 +163,7 @@ Of course, it is also quite powerful, and allows to use several hundreds of proc
 Actually, the two levels based on
 
   * the treatment of k-points in reciprocal space;
-  * the treatment of spins, for spin-polarized collinear situations [[nsppol]]=2);
+  * the treatment of spins, for spin-polarized collinear situations [[nsppol]] = 2);
 
 are, on the contrary, quite easy to use. An example of such parallelism will
 be given in the next section.
@@ -177,6 +177,9 @@ be given in the next section.
 *Before starting, you might consider working in a different subdirectory as
 for the other tutorials. Why not Work_paral?*
 
+Copy the `files` file and the input file from the *\$ABI_TUTORIAL*
+directory to your work directory. They are named *tbasepar_1.files* and *tbasepar_1.in*.
+
 ```sh
 cd $ABI_TUTORIAL/Input
 mkdir Work_paral
@@ -185,15 +188,11 @@ cp ../tbasepar_1.files .   # You will need to edit this file.
 cp ../tbasepar_1.in .
 ```
 
-Copy the `files` file and the input file from the `~abinit/tests/tutorial`
-directory to your work directory. They are named `tbasepar_1.files` and
-`tbasepar_1.in`. 
-
 You can start immediately a sequential run with
 
     abinit < tbasepar_1.files > log 2> err 
 
-to have a reference CPU time. 
+to have a reference CPU time.
 On a 2.8GHz PC, it runs in about one minute.
 
 Contrary to the sequential case, it is worth to have a look at the `files`
@@ -245,7 +244,7 @@ implementation, and mention the number of processors you want to use, as well
 as the abinit command:
     
 ```bash
-mpirun -n 2 ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+mpirun -n 2 abinit < tbasepar_1.files >& tbasepar_1.log &
 ```
 
 Depending on your particular machine, *mpirun* might have to be replaced by
@@ -331,13 +330,12 @@ once in a while that all processors are alive.
 
 The parallelization over the spins (up, down) is done along with the one over
 the k-points, so it works exactly the same way. The files
-`~abinit/tests/tutorial/tbasepar_2.in` and
-`~abinit/tests/tutorial/tbasepar_2.files` treat a spin-polarized system
+*tbasepar_2.in* and *tbasepar_2.files* in *\$ABI_TUTORIAL* treat a spin-polarized system
 (distorted FCC Iron) with only one k-point in the Irreducible Brillouin Zone.
 This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
 precedence over the spin parallelism, so that with 2 processors, one needs
-only one k-point to see the spin parallelism.  
+only one k-point to see the spin parallelism.
 If needed, modify the _files_ file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
 
@@ -378,6 +376,7 @@ resulting from the increasing amount of communication between the processors.
 The loss of efficiency is highly dependent on the implementation and linked to
 the decreasing charge on each processor too.
 
+<!--
 ## Details of the implementation
   
 ### The MPI toolbox in ABINIT
@@ -448,3 +447,4 @@ subroutine dosomethin(arg,comm)
   call wrtout(std_out,"Only master will write",'COLL')
   call wrtout(std_out,"Each proc will write in its own std_out",'PERS')
 ```
+-->

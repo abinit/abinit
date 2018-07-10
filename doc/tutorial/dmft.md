@@ -18,6 +18,8 @@ ABINIT, [PAW1](paw1) and [PAW2](paw2).
 Also the [DFT+U tutorial](dftu) in ABINIT might be useful to know some basic
 variables common to DFT+_U_ and DFT+DMFT.
 
+[TUTORIAL_README]
+
 This tutorial should take one hour to complete 
 (especially if you have access to several processors).
 
@@ -46,15 +48,15 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
   * The definition of the Coulomb and exchange interaction U and J are done as in DFT+_U_ through the variables [[upawu]] and [[jpawu]].     They could be computed with the cRPA method, also available in ABINIT. The value of U and J should in principle depend 
     on the definition of correlated orbitals. In this tutorial, U and J will be seen as parameters, as in the DFT+_U_ approach. 
     As in DFT+_U_, two double counting methods are available (see the [[dmft_dc]] input variable). 
-    Note that in version 7.10.5 (but not in later versions) [[jpawu]]=0 is required if the density matrix 
+    Note that in version 7.10.5 (but not in later versions) [[jpawu]] = 0 is required if the density matrix 
     in the correlated subspace is not diagonal. 
 
-  * The choice of the double counting correction. The current default choice in ABINIT is ([[dmft_dc]]=1) 
+  * The choice of the double counting correction. The current default choice in ABINIT is ([[dmft_dc]] = 1) 
     which corresponds to the full localized limit. 
 
-  * The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method ([[dmft_solv]]=2) 
+  * The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method ([[dmft_solv]] = 2) 
     the Continuous time Quantum Monte Carlo (CTQMC) method ([[dmft_solv]]=5) or the static mean field method 
-    ([[dmft_solv]]=1) equivalent to usual DFT+_U_. 
+    ([[dmft_solv]] = 1) equivalent to usual DFT+_U_. 
 
   * The solution of the Anderson Hamiltonian and the DMFT solution are strongly dependent over temperature. 
      So the temperature [[tsmear]] is a very important physical parameter of the calculation. 
@@ -62,24 +64,32 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
   * The practical solution of the DFT+DMFT scheme is usually presented as a double loop over first the 
     local Green's function, and second the electronic local density. (cf Fig. 1 in [[cite:Amadon2012]]). 
     The number of iterations of both loops are respectively given in ABINIT by keywords [[dmft_iter]] and [[nstep]]. 
-    Other useful variables are [[dmft_rslf]]=1 and [[prtden]]=-1 (to be able to restart the calculation from the density file). 
+    Other useful variables are [[dmft_rslf]] = 1 and [[prtden]] = -1 (to be able to restart the calculation from the density file). 
     Lastly, one linear and one logarithmic grid are used for Matsubara Frequencies indicated by [[dmft_nwli]] and [[dmft_nwlo]] 
     (Typical values are 100000 and 100, but convergence should be studied). 
-    A large number of information are given in the log file using [[pawprtvol]]=3. 
+    A large number of information are given in the log file using [[pawprtvol]] = 3.
 
 ## 2 Electronic Structure of SrVO3 in LDA
   
-You might create a subdirectory of the ~abinit/tests/tutoparal directory, and use it for the tutorial. 
-In what follows, the names of files will be mentioned as if you were in this subdirectory
+*You might create a subdirectory of the *\$ABI_TUTOPARAL* directory, and use it for the tutorial. 
+In what follows, the names of files will be mentioned as if you were in this subdirectory*
 
-Copy the files ../Input/tdmft_1.in and ../Input/tdmft_x.files in your Work
-directory, edit the tdmft_x.files and run ABINIT 
+Copy the files *tdmft_1.in* and *dmft_x.files* from *\$ABI_TUTOPARAL* in your Work
+directory,
+
+```sh
+cd $ABI_TUTOPARAL/Input
+mkdir Work_dfmt
+cd Work_dmft
+cp ../tdmft_x.files . 
+cp ../tdmft_1.in .
+```
 
 {% dialog tests/tutoparal/Input/tdmft_x.files tests/tutoparal/Input/tdmft_1.in %}
 
-As usual, the actual "abinit" command is something like ../../../../src/98_main/abinit):
+Then edit the *tdmft_x.files* and run ABINIT with:
     
-    abinit < tdmft_x.files > log_1
+    mpirun -n 32 abinit < tdmft_x.files > log_1 &
 
 This run should take some time. It is recommended that you use at least 10
 processors (and 32 should be fast). It calculates the LDA ground state of
@@ -89,8 +99,9 @@ The variable [[pawfatbnd]] allows to create files with "fatbands" (see descripti
 variable in the list of variables): the width of the line along each k-point
 path and for each band is proportional to the contribution of a given atomic
 orbital on this particular Kohn Sham Wavefunction. A low cutoff and a small
-number of k-points are used in order to speed up the calculation. During this
-time you can take a look at the input file. There are two datasets. The first
+number of k-points are used in order to speed up the calculation. 
+
+During this time you can take a look at the input file. There are two datasets. The first
 one is a ground state calculations with [[nnsclo]]=3 and [[nline]]=3 in order
 to have well diagonalized eigenfunctions even for empty states. In practice,
 you have however to check that the residue of wavefunctions is small at the
@@ -120,12 +131,12 @@ _p_. However, we clearly see an important hybridization. The Fermi level (at 0
 eV) is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t 2g_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use pawfatbnd=2 in tdmft_1.in and relaunch the calculations. 
-Then the file tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-2,
-tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-1 and
-tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m1 give you respectively the _xy_, _yz_ and
-xz fatbands (ie _d-t 2g_) and tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+0 and
-tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+2 give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands (i.e. _e<sub>g</sub>_).
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tdmft_1.in* and relaunch the calculations. 
+Then the file *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
+*tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
+*tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
+xz fatbands (ie _d-t 2g_) and *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+0* and
+*tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+2* give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands (i.e. _e<sub>g</sub>_).
 
 So in conclusion of this study, the Kohn Sham bands which are mainly _t<sub>2g</sub>_
 are the bands 21,22 and 23.
@@ -159,18 +170,18 @@ function contains a important weight of _t<sub>2g</sub>_ atomic orbitals mainly 
 So, we can use only the _t<sub>2g</sub>_-like bands to define Wannier functions or also
 both the _t<sub>2g</sub>_-like and _O-p_ -like bands.
 
-The first case corresponds to the input file tdmft_2.in. In this case
-[[dmftbandi]]=21 and [[dmftbandf]]=23. As we only put the electron interaction
-on _t<sub>2g</sub>_ orbitals, we have to use first lpawu=2, but also the keyword
-[[dmft_t2g]]=1 in order to restrict the application of interaction on _t<sub>2g</sub>_ orbitals.
+The first case corresponds to the input file *tdmft_2.in*. In this case
+[[dmftbandi]] = 21 and [[dmftbandf]] = 23. As we only put the electron interaction
+on _t<sub>2g</sub>_ orbitals, we have to use first [[lpawu]] = 2, but also the keyword
+[[dmft_t2g]] = 1 in order to restrict the application of interaction on _t<sub>2g</sub>_ orbitals.
 
 Notice also that before launching a DMFT calculation, the LDA should be
 perfectly converged, including the empty states (check nline and nnsclo in the
-input file). The input file tdmft_2.in thus contains two datasets: the first
+input file). The input file *tdmft_2.in* thus contains two datasets: the first
 one is a well converged LDA calculation, and the second is the DFT+DMFT calculation.
 
 Notice the other dmft variables used in the input file and check their meaning
-in the input variable glossary. In particular, we are using [[dmft_solv]]=5 for
+in the input variable glossary. In particular, we are using [[dmft_solv]] = 5 for
 the dmft dataset in order to use the density-density continuous time quantum
 monte carlo (CTQMC) solver. (See [[cite:Gull2011]], as well as the ABINIT 2016
 paper [[cite:Gonze2016]] for details about the CTQMC implementation in ABINIT.)  
@@ -188,16 +199,16 @@ convention as in DFT+_U_ calculations in ABINIT (cf [[cite:Amadon2008a]]). Howev
 calculations in Ref. [[cite:Amadon2008]] use for U and J the usual convention for
 _t 2g _ systems as found in [[cite:Lechermann2006]], Eq. 26 (see also the appendix
 in [[cite:Fresard1997]]). It corresponds to the Slater integral F4=0 and we can
-show that U_abinit=U-4/3 J and J_abinit=7/6 J . So in order to use U=4 eV and
+show that U_abinit=U-4/3 J and J_abinit=7/6 J. So in order to use U = 4 eV and
 J=0.65 eV with these latter conventions (as in [[cite:Amadon2008]]), we have to use
-in ABINIT: [[upawu]]=3.13333 eV; [[jpawu]]=0.75833 eV and [[f4of2_sla]]=0.
+in ABINIT: [[upawu]] = 3.13333 eV; [[jpawu]] = 0.75833 eV and [[f4of2_sla]] = 0.
 
 Now, you can launch the calculation:
 
-Copy the files ../Input/tdmft_2.in and modify tdmft_x.files in your Work
+Copy the files *../Input/tdmft_2.in* and modify *tdmft_x.files* in your Work
 directory and run ABINIT:
     
-    mpirun -n 32 ../../../tmp/src/98_main/abinit < tdmft_x.files > log_2
+    mpirun -n 32 abinit < tdmft_x.files > log_2
 
 {% dialog tests/tutoparal/Input/tdmft_2.in %}
     
@@ -318,8 +329,8 @@ of the calculation, the occupation matrix is written and is:
 
 We can see that the total number of electron is very close to one and it does
 not change much as a function of iterations. As an output of the calculation,
-you can find the self energy in file tdmft_2o_DS2Self-omega_iatom0001_isppol1
-and the Green's function is file Gtau.dat.
+you can find the self energy in file *tdmft_2o_DS2Self-omega_iatom0001_isppol1*
+and the Green's function is file *Gtau.dat*.
 
 ### 3.3. The self energy
 
@@ -332,7 +343,7 @@ Then we plot the imaginary part of the self-energy (in imaginary frequency):
     
     xmgrace -block self.dat -bxy 1:3
 
-Then using xmgrace, you click on _Data_ , then on _Transformations_ and then
+Then using |xmgrace|, you click on _Data_ , then on _Transformations_ and then
 on _Regression_ and you can do a 4th order fit as:  
 
 ![self](dmft_assets/self.jpg)
@@ -383,7 +394,7 @@ stochastic noise can induces that the variation of physical quantities (number
 of electrons, electronic density, energy) as a function of the number of
 iteration is noisy. Once you have finished this comparison, copy the saved
 Green's function into Gtau.dat in order to continue the tutorial with a
-precise Green's function in Gtau.dat:
+precise Green's function in *Gtau.dat*:
     
     cp Gtau.dat_save Gtau.dat
 
@@ -404,11 +415,11 @@ this DFT+DMFT tutorial to introduce to the Maximum Entropy Method (see
 obtain a spectral function. First, you have to install this code and the
 armadillo library by following the [guidelines](https://www.physique.usherbrooke.ca/MaxEnt/index.php/Download),
 and then launch it on the current directory in order to generate the default
-input file OmegaMaxEnt_input_params.dat.
+input file *OmegaMaxEnt_input_params.dat*.
     
     OmegaMaxEnt
 
-Then edit the file OmegaMaxEnt_input_params.dat, and modify the first seven lines with:
+Then edit the file *OmegaMaxEnt_input_params.dat*, and modify the first seven lines with:
     
     data file: Gtau.dat
     
@@ -447,7 +458,7 @@ functions. Create a new input file:
     
     cp tdmft_2.in tdmft_3.in
 
-and use [[dmftbandi]]= 12 in tdmft_3.in. Now the code will built Wannier
+and use [[dmftbandi]] = 12 in *tdmft_3.in*. Now the code will built Wannier
 functions with a larger window, including _O-p_ -like bands, and thus much
 more localized. Launch the calculation after having updated tdmft_x.files (if
 the calculation is too long, you can decide to restart the second dataset
@@ -567,14 +578,14 @@ energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
 
 ## 6 Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
   
-We focus now on the total energy. Create a new input file, tdmft_4.in:
+We focus now on the total energy. Create a new input file, *tdmft_4.in*:
     
     cp tdmft_3.in tdmft_4.in
 
-And use [[acell]]=7.1605 instead of 7.2605. Relaunch the calculation and note the
+And use [[acell]] = 7.1605 instead of 7.2605. Relaunch the calculation and note the
 Internal energy (grep Internal tdmft_4.out).
 
-Redo another calculation with [[acell]]=7.00. Then extract the LDA Internal energy
+Redo another calculation with [[acell]] = 7.00. Then extract the LDA Internal energy
 and the DMFT Internal energy (grep Internal tdmft_5.out).
     
 <center>

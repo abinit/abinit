@@ -862,12 +862,14 @@ The bibtex file is available [here](../abiref.bib).
 
     ```bash
     export ABI_HOME=Replace_with_the_absolute_path_to_the_abinit_top_level_dir
+
     export ABI_TESTS=$ABI_HOME/tests/
-    export ABI_TUTORIAL=$ABI_TESTS/tutorial/
-    export ABI_TUTORESPFN=$ABI_TESTS/tutorespfn/
-    export ABI_TUTOPARAL=$ABI_TESTS/tutoparal/
-    export ABI_TUTOPLUGS=$ABI_TESTS/tutoplugs/
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/
+
+    export ABI_TUTORIAL=$ABI_TESTS/tutorial/           # Files for base1-2-3-4, GW ...
+    export ABI_TUTORESPFN=$ABI_TESTS/tutorespfn/       # Files specific to DFPT tutorials.
+    export ABI_TUTOPARAL=$ABI_TESTS/tutoparal/         # Tutorials about parallel version
+    export ABI_TUTOPLUGS=$ABI_TESTS/tutoplugs/         # Examples using external libraries.
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/       # Pseudos used in examples.
 
     export PATH=$ABI_HOME/src/98_main/:$PATH
     ```
@@ -882,8 +884,8 @@ The bibtex file is available [here](../abiref.bib).
 
         mpirun -n 2 abinit < files_file > log 2> err
 
-    The standard output of the application is redirect to `log` while `err` collects the standard error
-    (runtime error messages will be written here).
+    The standard output of the application is redirected to `log` while `err` collects the standard error
+    (runtime error messages, if any, are written here).
 
 """
 

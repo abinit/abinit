@@ -25,13 +25,13 @@ This tutorial should take about 2 hours.
 ## 1 The ground-state geometry of AlAs
   
 *Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
-Why not create Work_rf1 in $ABI_TUTORESPFN/Input?*
+Why not create Work_rf1 in \$ABI_TUTORESPFN/Input?*
 
 ```sh
 cd $ABI_TUTORESPFN/Input
 mkdir Work_rf1
 cd Work_rf1
-cp ../trf1_x_x.files .   # You will need to edit this file.
+cp ../trf1_x.files .   # You will need to edit this file.
 cp ../trf1_1.in .
 ```
 
@@ -46,7 +46,7 @@ The file *trf1_x.files* lists the file names and root names.
 
 {% dialog tests/tutorespfn/Input/trf1_x.files %}
 
-You can copy it in the *Work_rf1* directory and, as usual, change its name to trf1_1.files 
+You can copy it in the *Work_rf1* directory and, as usual, change its name to *trf1_1.files*
 and replace the occurrences of `trf1_x` by `trf1_1`. 
 
 Note that two pseudopotentials are mentioned in this *files* file: one
@@ -54,12 +54,9 @@ for the Aluminum atom, and one for the Arsenic atom.
 The first listed in *trf1_x.files* (for Al) will define the first type of atom of the input file 
 (see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
 It might be the first time that you encounter this situation (more than one type of atoms) in the
-tutorials, at variance with the first four "basic" tutorials.
+tutorials, at variance with the first four basic tutorials.
 
-You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in *Work_rf1*. 
-
-    cp ../trf1_1.in .
-
+You can also copy the file *\$ABI_TUTORESPFN/Input/trf1_1.in* in *Work_rf1*. 
 This is your input file. You should read it carefully.
 
 {% dialog tests/tutorespfn/Input/trf1_1.in %}
@@ -99,7 +96,6 @@ The resulting main output file, *trf1_1.out*, should be similar to the one below
 {% dialog tests/tutorespfn/Refs/trf1_1.out %}
 
 This output file is not very long, so you can quickly read it entirely.
-
 Note that one obtains the following value for the energy, in the final echo section:
     
      etotal   -9.7626837450E+00
@@ -118,7 +114,7 @@ that you can already rename as *trf1_1i_WFK* to use it as input wave function fo
 
 !!! warning
 
-    So, in the corresponding "files" file for all the following runs, at third line, 
+    So, in the corresponding *files* file for all the following runs, at third line, 
     pay attention **to keep** "trf1_1i". By contrast, for the second run, you 
     should change the first line from "trf1_1" to "trf1_2", and do similarly for the second, 
     fourth and fifth lines of this file.
@@ -128,15 +124,15 @@ that you can already rename as *trf1_1i_WFK* to use it as input wave function fo
 We will now compute the second derivative of the total energy with
 respect to an atomic displacement by different means. 
 For that purpose, you must first read [[help:respfn#intro|sections 0 and the first paragraph of section 1]]
-of the *respfn_help* file (the auxiliary help file, that deals specifically with the DFPT features).
+of the *respfn help* file (the auxiliary help file, that deals specifically with the DFPT features).
 We will explain later, in more detail, the signification of the different
-input parameters introduced in section 1 of the *respfn_help* file.
+input parameters introduced in section 1 of the *respfn help* file.
 
 For the time being, in order to be able to perform a direct comparison with the result of
 a DFPT calculation, we choose as a perturbation the displacement of the Al
 atom along the first axis of the reduced coordinates.
 
-You can copy the file *$ABI_TUTORESPFN/Input/trf1_2.in* in *Work_rf1*.
+You can copy the file *\$ABI_TUTORESPFN/Input/trf1_2.in* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.in*:
 the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
@@ -237,10 +233,9 @@ case, taking a finer XC grid will allow one to reduce this effect.
 We now compute the second derivative of the total energy with respect to the
 same atomic displacement through the DFPT capabilities of ABINIT.
 
-You can copy the file ~abinit/tests/tutorespfn/Input/trf1_3.in in *Work_rf1*.
+You can copy the file *\$ABI_TUTORESPFN/Input/trf1_3.in* in *Work_rf1*.
 This is your input file. You should examine it. The changes with respect to
-the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered in the
-first part of this file, before
+*trf1_1.in* are all gathered in the first part of this file, before
     
 ```
 #######################################################################
@@ -257,20 +252,20 @@ When you have understood the purpose of the input variable values specified
 before the "Common input variables" section, you can make the code run, as usual.
 
 Then, we need to analyze the different output files. For that purpose, you should read 
-the content of the [[help:respfn#output|section 6]] of the respfn_help file.
+the content of the [[help:respfn#output|section 6]] of the respfn help file.
 Read it quickly, as we will come back to the most important points hereafter.
 
 ABINIT has created several different files:
 
-  * trf1_3.log (the log file) 
-  * trf1_3.out (the output file), possibly also trf1_3o_OUT.nc, an abridged netCDF version 
-  * trf1_3o_1WF1 (the 1st-order wavefunction file) 
-  * trf1_3o_DEN1 (the 1st-order density file) 
-  * trf1_3o_POT1 (the 1st-order potential file) 
-  * trf1_3o_DDB (the derivative database), possibly also trf1_3o_DDB.nc, its netCDF version 
+  * *trf1_3.log* (the log file) 
+  * *trf1_3.out* (the output file), possibly also trf1_3o_OUT.nc, an abridged netCDF version 
+  * *trf1_3o_1WF1* (the 1st-order wavefunction file) 
+  * *trf1_3o_DEN1* (the 1st-order density file) 
+  * *trf1_3o_POT1* (the 1st-order potential file) 
+  * *trf1_3o_DDB* (the derivative database), possibly also *trf1_3o_DDB.nc*, its netCDF version 
 
 Let us have a look at the output file. You can follow the description provided
-in the [[help:respfn#output|section 6.2]] of the respfn_help file. 
+in the [[help:respfn#output|section 6.2]] of the respfn help file. 
 
 {% dialog tests/tutorespfn/Refs/trf1_3.out %}
 
@@ -291,13 +286,13 @@ in excellent agreement with the higher-order finite-difference values for the
 2DTE, determined in the previous section: 5.007855 Hartree from the energy
 differences, and 5.007852 Hartree from the force differences.
 
-Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn_help file. 
-Then, you should also open the trf1_3o_DDB file, and read the
-corresponding [[help:respfn#ddb|section 6.5]] of the respfn_help file.
+Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file. 
+Then, you should also open the *trf1_3o_DDB* file, and read the
+corresponding [[help:respfn#ddb|section 6.5]] of the respfn help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
 DFPT approach calls for some accuracy considerations. These can be found in 
-[[help:respfn#numerical-quality|section 7]] of the respfn_help file.
+[[help:respfn#numerical-quality|section 7]] of the respfn help file.
 
 !!! tip
 
@@ -311,12 +306,12 @@ DFPT approach calls for some accuracy considerations. These can be found in
 ## 4 DFPT calculation of the dynamical matrix at Gamma
   
 We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0). 
-You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in *Work_rf1*. 
-This is your input file.  
+You can copy the file *\$ABI_TUTORESPFN/Input/trf1_4.in* in *Work_rf1*. 
+This is your input file.
 
-As for test rf1_3, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
+As for test rf1_3, the changes with respect to *trf1_1.in* are
 all gathered in the first part of this file. Moreover, the changes with
-respect to trf1_3.in concern only the input variables [[rfatpol]], and [[rfdir]]. 
+respect to *trf1_3.in* concern only the input variables [[rfatpol]], and [[rfdir]]. 
 Namely, all the atoms will be displaced, in all the directions.
 
 {% dialog tests/tutorespfn/Input/trf1_4.in%}
@@ -324,9 +319,9 @@ Namely, all the atoms will be displaced, in all the directions.
 There are six perturbations to consider. 
 So, one might think that the CPU time will raise accordingly. 
 This is not true, as ABINIT is able to determine which perturbations are the symmetric of another perturbation, 
-see [[help:respfn#symmetries|section 3]] of the respfn_help file.
+see [[help:respfn#symmetries|section 3]] of the respfn help file.
 
-Now, you can make the run. You open the file trf1_4.out, and notice that the
+Now, you can make the run. You open the file *trf1_4.out*, and notice that the
 response to two perturbations were computed explicitly, while the response to
 the other four could be deduced from the two first by using the symmetries.
     
@@ -359,12 +354,11 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
 
 There are a good and a bad news about this result. The good news is that
 there are indeed three acoustic modes, with frequency rather close to zero
-(less than 1 cm$^{-1}$, which is rather good !). The bad news comes when the three
+(less than 1 cm$^{-1}$, which is rather good!). The bad news comes when the three
 other frequencies are compared with experimental results, or other theoretical
 results. Indeed, in the present run, one obtains three degenerate modes, while
-there should be a (2+1) splitting. This can be seen in the paper  Ab initio
-calculation of phonon dispersions in semiconductors [[cite:Giannozzi1991]]
-, especially Fig. 2.
+there should be a (2+1) splitting. This can be seen in the paper Ab initio
+calculation of phonon dispersions in semiconductors [[cite:Giannozzi1991]], especially Fig. 2.
 
 Actually, we have forgotten to take into account the coupling between atomic
 displacements and the homogeneous electric field, that exists in the case of
@@ -392,10 +386,10 @@ There is also an extensive discussion of the Born
 effective charges by [[cite:Ghosez1998]].
 
 In order to compute the response of solids to an homogeneous electric field in ABINIT, 
-the remaining sections of the respfn_help file
+the remaining sections of the respfn help file
 should be read. These sections also present the information needed to compute
 phonons with non-zero q wavevector, which will be the subject of the next
-section of the present tutorial. The sections to be read are :
+section of the present tutorial. The sections to be read are:
 
   * the part of [[help:respfn#1|section 1]] that had not yet been read 
   * [[help:respfn#2|section 2]] 
@@ -404,13 +398,13 @@ section of the present tutorial. The sections to be read are :
 
 You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
 including the coupling with an homogeneous electric field. 
-You can copy the file ~abinit/tests/tutorespfn/Input/trf1_5.in in *Work_rf1*. 
+You can copy *\$ABI_TUTORESPFN/Input/trf1_5.in* in *Work_rf1*.
 This is your input file. 
 
 {% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
 
-As for the other DFPT tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered
-in the first part of this file. 
+As for the other DFPT tests, the changes with respect to the *trf1_1.in* are all gathered
+in the first part of this file.
 Unlike the other tests, however, the multi-dataset mode was used, computing from scratch 
 the ground-state properties, then computing the effect of the ddk perturbation, then the effect of all
 other perturbations (electric field as well as atomic displacements).
@@ -473,7 +467,7 @@ It is diagonal and isotropic, and corresponds to a dielectric constant of 9.7606
 Then, the Born effective charges are given, either computed from the
 derivative of the wavefunctions with respect to the electric field, or
 computed from the derivative of the wavefunctions with respect to an atomic
-displacement, as explained in section II of [[cite:Gonze1997a]]: 
+displacement, as explained in section II of [[cite:Gonze1997a]]:
     
       Effective charges, in cartesian coordinates,
       (from electric field response)
@@ -534,32 +528,31 @@ while the next sections consider it along the three cartesian coordinates.
 
 In the present material, the directionality of the electric field has no
 influence. We note that there are still three acoustic mode, below 1 cm$^{-1}$,
-while the optic modes have the correct degeneracies: two TO modes at 344.3 
+while the optic modes have the correct degeneracies: two TO modes at 344.3
 cm$^{-1}$, and one LO mode at 379.6 cm$^{-1}$.
 
 These values can be compared to experimental (361 cm$^{-1}$, 402 cm$^{-1}$) as well
 as theoretical (363 cm$^{-1}$, 400 cm$^{-1}$) values (again [[cite:Giannozzi1991]]). 
 Most of the discrepancy comes from the too low value of
-[[ecut]]. Using ABINIT with [[ecut]]=6 Hartree gives (358.8 cm$^{-1}$, 389.8 cm$^{-1}$). 
+[[ecut]]. Using ABINIT with [[ecut]]=6 Hartree gives (358.8 cm$^{-1}$, 389.8 cm$^{-1}$).
 The remaining of the discrepancy may come partly from the
 pseudopotentials, that are particularly soft.
 
 The comparison of Born effective charges is also interesting. After imposition
 of the neutrality sum rule, the Al Born effective charge is 2.116. The value
-from Gianozzi et al is 2.17, the experimental value is 2.18. 
+from Gianozzi et al is 2.17, the experimental value is 2.18.
 Increasing [[ecut]] to 6 Hartree in ABINIT gives 2.168.
 
 For the dielectric tensor, it is more delicate. The value from Gianozzi et al
 is 9.2, while the experimental value is 8.2 . The agreement is not very good,
 a fact that can be attributed to the LDA lack of polarization-dependence [[cite:Gonze1995a]].
 Still, the agreement of our calculation with the theoretical result is not very good. With
-[[ecut]]=3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
-better k point sampling (8x8x8), with [[ecut]]=6 Hartree, reduces the value to
-9.89 . Changing pseudopotentials finally improves the agreement : with the
-much harder 13al.pspgth and 33as.psphgh pseudopotentials with adequate
-[[ecut]]=16 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of
-9.37 . This illustrates that the dielectric tensor is a much more sensitive
-quantity than the others.
+[[ecut]] = 3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
+better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
+Changing pseudopotentials finally improves the agreement: with the
+much harder *13al.pspgth* and *33as.psphgh* pseudopotentials with adequate
+[[ecut]] = 16 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.37.
+This illustrates that the dielectric tensor is a much more sensitive quantity than the others.
 
 ## 6 DFPT calculation of phonon frequencies at non-zero q
   
@@ -570,17 +563,17 @@ In any case, the computation within the reciprocal space DFPT formalism is more
 efficient than the real space frozen-phonon technique since the use of supercells is
 completely avoided with DFPT. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
-You can copy the file ~abinit/tests/tutorespfn/Input/trf1_6.in in *Work_rf1*.
+You can copy the file *\$ABI_TUTORESPFN/Input/trf1_6.in* in *Work_rf1*.
 This is your input file.
 
 {% dialog tests/tutorespfn/Input/trf1_6.in tests/tutorespfn/Refs/trf1_6.out %}
 
-As for the other RF tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
-all gathered in the first part of this file. 
+As for the other RF tests, the changes with respect to *trf1_1.in* are
+all gathered in the first part of this file.
 The multi-dataset mode is used, computing from scratch the ground-state wave functions, then computing different
-dynamical matrices with DFPT. 
-The run is about 2 minutes on a 2.8 GHz machine. 
-So, you would better leave your computer running, and either read more of the ABINIT documentation 
+dynamical matrices with DFPT.
+The run is about 2 minutes on a 2.8 GHz machine.
+So, you would better leave your computer running, and either read more of the ABINIT documentation
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]), or make a walk).
 
 The results of this simulation can be compared to those provided in the Gianozzi *et al* paper. 
@@ -601,7 +594,7 @@ close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 * * *
 
 !!! note 
-    This ABINIT tutorial is now finished. 
-    You are advised to go through the [second tutorial on DFPT](rf2) to 
-    make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*) 
+    This ABINIT tutorial is now finished.
+    You are advised to go through the [second tutorial on DFPT](rf2) to
+    make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*)
 

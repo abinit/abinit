@@ -84,9 +84,10 @@ cd Work_paw1
 cp ../tpaw1_1.files . 
 cp ../tpaw1_1.in .
 ```
+
 and execute:
     
-    abinit < tpaw1_1.files > log
+    abinit < tpaw1_1.files > log 2> err &
 
 The code should run very quickly.
 In the meantime, you can read the input file and see that there is no PAW input variable.  
@@ -96,7 +97,7 @@ In the meantime, you can read the input file and see that there is no PAW input 
 Now, open the *tpaw1_1.files* file and change the last line; replace the *6c.pspnc* file with *6c.lda.atompaw*.
 Run the code again:
     
-    abinit < tpaw1_1.files > log
+    abinit < tpaw1_1.files > log 2> err &
 
 Your run should stop almost immediately!  
 The input file, indeed, is missing the mandatory argument [[pawecutdg]]!!
@@ -121,10 +122,9 @@ to *tpaw1_1.in* and run it again. Now the code completes successfully.
     the cut-off needed for the Norm-Conserving PseudoPotential (see next section),
     **a PAW calculation will actually require less CPU time**.
 
-Let's open the output file (*tpaw1_1.out*) and have a look inside.  
+Let's open the output file (*tpaw1_1.out*) and have a look inside.
 Compared to an output file for a Norm-Conserving PseudoPotential run, an
 output file for PAW contains the following specific topics:
-
 
 - At the beginning of the file,
 some specific default PAW input variables ([[ngfftdg]], [[pawecutdg]], and
@@ -256,7 +256,7 @@ from 8 Ha to 24 Ha.
 You might use the *tpaw1_2.files* file (with a standard Norm-Conserving
 PseudoPotential), and run:
     
-    abinit < tpaw1_2.files > log
+    abinit < tpaw1_2.files > log 2> err &
 
 You should obtain the following _total energy_ values (see *tpaw1_2.out*):
 
@@ -417,7 +417,7 @@ Also note that more k-points are used in order to increase the accuracy of the D
 
 Launch the code with these files; you should obtain the *tpaw1_4.out* and the DOS file (*tpaw1_4o_DOS*):
     
-    abinit < tpaw1_4.files > log
+    abinit < tpaw1_4.files > log 2> err &
 
 You can plot the DOS file if you want; for this purpose, use a graphical tool
 and plot column 3 with respect to column 2. If you use the |xmgrace| tool, launch:
@@ -435,7 +435,7 @@ Now, edit the *tpaw1_4.in* file, comment the "prtdos 1" line, and uncomment (or 
 the center of projection, and sets the radius of the projection area to 1.5
 atomic units (this is exactly the radius of the PAW augmentation regions:
 generally the best choice).
-The [[pawprtdos]] 1 is specific to PAW. 
+The [[pawprtdos]] 1 is specific to PAW.
 With this option, ABINIT should compute all the contributions to the projected DOS.
 
 Let us remember that:
@@ -491,22 +491,22 @@ Let's have a look at the *$ABI_PSPDIR/6c.lda.atompaw* file.
 The 6th line indicates the number of partial waves and their $l$ angular momentum.
 In the present file, `0 0 1 1` means `two l = 0 partial waves, two l = 1 partial waves`.
 
-Now, let's open the `~abinit/tests/Psps_for_tests/6c.lda.test-2proj.atompaw`
-and `~abinit/tests/Psps_for_tests/6c.lda.test-6proj.atompaw` files. 
+Now, let's open the *\$ABI_PSPDIR/6c.lda.test-2proj.atompaw*
+and *\$ABI_PSPDIR/6c.lda.test-6proj.atompaw* files. 
 In the first file, only one _partial wave_ per $l$ is present; in the second one, 3 _partial
 waves_ per $l$ are present.  
-The completeness of the partial wave basis increases when you use `6c.lda.test-2proj.atompaw`,
-`6c.lda.atompaw` and `6c.lda.test-6proj.atompaw`.
+The completeness of the partial wave basis increases when you use *6c.lda.test-2proj.atompaw*,
+*6c.lda.atompaw* and *6c.lda.test-6proj.atompaw*.
   
 Now, let us plot the DOS for the two new PAW datasets.  
 
-1. Save the existing `tpaw1_4o_DOS_AT0001` file, naming it f.i. `tpaw1_4o_4proj_DOS_AT0001`.
-2. Open the `tpaw1_4.files` file and modify it in order to use the `6c.lda.test-2proj.atompaw` PAW dataset.
+1. Save the existing *tpaw1_4o_DOS_AT0001* file, naming it f.i. *tpaw1_4o_4proj_DOS_AT0001*.
+2. Open the *tpaw1_4.files* file and modify it in order to use the *6c.lda.test-2proj.atompaw* PAW dataset.
 3. Launch ABINIT.
-4. Save the new `tpaw1_4o_DOS_AT0001` file, naming it f.i. `tpaw1_4o_2proj_DOS_AT0001`.
-5. Open the `tpaw1_4.files` file and modify it in order to use the `6c.lda.test-6proj.atompaw` PAW dataset.
+4. Save the new *tpaw1_4o_DOS_AT0001* file, naming it f.i. *tpaw1_4o_2proj_DOS_AT0001*.
+5. Open the *tpaw1_4.files* file and modify it in order to use the *6c.lda.test-6proj.atompaw* PAW dataset.
 6. Launch ABINIT again.
-7. Save the new `tpaw1_4o_DOS_AT0001` file, naming it f.i. `tpaw1_4o_6proj_DOS_AT0001`.
+7. Save the new *tpaw1_4o_DOS_AT0001* file, naming it f.i. *tpaw1_4o_6proj_DOS_AT0001*.
   
 Then, plot the contributions to the projected DOS for the two new DOS files.
 You should get:
@@ -569,7 +569,7 @@ around 3.54 angstrom, using the standard PAW dataset.
 
 {% dialog tests/tutorial/Input/tpaw1_5.in %}
     
-    abinit < tpaw1_5.files > log
+    abinit < tpaw1_5.files > log 2> err &
 
 From the *tpaw1_5.out* file, you can extract the 7 values of _acell_ and 7 values
 of _etotal_, then put them into a file and plot it with a graphical tool. 
@@ -651,7 +651,7 @@ on-site contributions are closely related, only the AE on-site contribution is
 computed; it is indeed a very good approximation.
 
 Converging a _Self-Consistent Cycle_, or ensuring the global minimum is reached,
-with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help...
+with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help.
 
 ### 8.d. Printing volume for PAW###
 

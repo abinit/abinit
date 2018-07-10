@@ -28,13 +28,13 @@ It is supposed that you have some good knowledge of UNIX/Linux.
 This tutorial should take about 2 hours.
 
 ## Computing the (pseudo) total energy and some associated quantities
-  
+
+<!--
 Note that the present tutorial will use four different windows: one to
 visualize the text of the tutorial (the present window), a second to run the
 code, a third to visualize sections of the [[help:abinit]] (that will open
 automatically), and a fourth one for the description of input variables (that
 will also open automatically). Try to manage adequately these four windows.
-
 In addition to the present window, open the second window. 
 Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`). 
 
@@ -48,49 +48,46 @@ Take a few seconds to read the names of the files already present in `~abinit/te
 Compare with the tutorials mentioned in the index of the [Tutorial home page](index.md).
 You will find other input files, specific for the Density Functional
 Perturbation Theory ("Response functions") capabilities in the directory `~abinit/tests/tutorespfn/Input`. 
+-->
 
-You also need a working directory. 
-So, you should create a subdirectory of this directory, whose name might be *Work* so `~abinit/tests/tutorial/Input/Work`. 
-Change the working directory of windows 2 to *Work*: 
+For this tutorial, we need a working directory. 
+So, you should create a *Work* subdirectory inside $ABI_TUTORIAL with the commands:
 
 ```sh
 cd $ABI_TUTORIAL/Input
-mkdir Work
+mkdir Work   # ~abinit/tests/tutorial/Input/Work
 cd Work
 ```
 
-You will do most of the actions of this tutorial in this working directory.
-Copy *tbase1_x.files* in *Work* with:
+We will do most of the actions of this tutorial in this working directory.
+Now copy the *tbase1_x.files* files file inside *Work* with:
 
     cp ../tbase1_x.files .
 
 Edit the *tbase1_x.files*. It is not very long (only 6 lines). 
 It gives the information needed for the code to build other file names.
+The original version of the files file is:
+
+{% dialog tests/tutorial/Input/tbase1_x.files %}
+
+Modify the first and second lines of *tbase1_x.files* file, so that it reads:
+
+    tbase1_1.in  
+    tbase1_1.out  
 
 !!! tip
 
     You will discover more about this file in [[help:abinit#intro|section 1.1]]
     of the help file. Please, read it now.
 
-The original version of the files file is:
-
-{% dialog tests/tutorial/Input/tbase1_x.files %}
-
-Modify the first and second lines of *tbase1_x.files* file, so that they read:  
-
-    tbase1_1.in  
-    tbase1_1.out  
-
-Later, you will again modify these lines, to treat more cases. 
+Later, you will **modify again** these lines, to treat more cases.
 Make sure that the last line, gives the correct location of the pseudopotential file.
-Close *tbase1_x.files* then copy [[tests/tutorial/Input/tbase1_1.in]] in *Work*:  
+Close *tbase1_x.files* then copy *$ABI_TUTORIAL/Input/tbase1_1.in* in *Work*:
 
     cp ../tbase1_1.in .
 
 Also later, we will look at this file, and learn about its content. 
 For now, you will try to run the code.
-The place where it can be found varies, according to the installation procedure. 
-
 So, in the *Work* directory, type:  
 
     abinit < tbase1_x.files > log 2> err &
@@ -109,7 +106,7 @@ tbase1_1.out         tbase1_1o_EBANDS.agr tbase1_1o_GSR.nc     tbase1_x.files
 Different output files have been created, including a *log* file, the standard error file *err* 
 and the output file *tbase1_1.out*. 
 To check that everything is correct, you can make a diff of
-*tbase1_1.out* with the reference file [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
+*tbase1_1.out* with the reference file *$ABI_TUTORIAL/Refs/tbase1_1.out*
 
 ```sh
 diff tbase1_1.out ../../Refs/tbase1_1.out | less
@@ -181,7 +178,7 @@ later, what is in the *tbase1_1.out* and *log* output files.
     Running the code is described in [[help:abinit#exec|section 1.2]] of the abinit help file. 
     Please, read it now.
 
-It is now time to edit the *tbase1_1.in* file. 
+It is now time to edit the *tbase1_1.in* input file. 
 
 {% dialog tests/tutorial/Input/tbase1_1.in %}
 
@@ -237,7 +234,8 @@ You can find more information about messages in the log file in
 
 !!! tip
 
-    To extract the messages from the Abinit log file, use the |abiopen| script with the syntax:
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
+    to extract the messages from the Abinit log file with the syntax:
 
         abiopen.py log -p
 
@@ -277,7 +275,7 @@ You can find more information about messages in the log file in
 
         num_errors: 0, num_warnings: 3, num_comments: 4, completed: True
 
-Then, open the *tbase1_1.out* file. 
+Now open the *tbase1_1.out* file. 
 
 {% dialog tests/tutorial/Refs/tbase1_1.out %}
 
@@ -318,8 +316,8 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
 :  
     The maximal number of plane waves ([[mpw]]) is mentioned in the memory evaluation section: it is **752**.
     Well, this is not completely right, as the code took advantage of the time-reversal symmetry, 
-    valid for the k-point (0, 0, 0), to decrease the number of planewave by about a factor of two.  
-    The full set of plane waves is **1503** (see later in the *tbase1_1.out* file).  
+    valid for the k-point (0, 0, 0), to decrease the number of planewave by about a factor of two.
+    The full set of plane waves is **1503** (see later in the *tbase1_1.out* file).
     The code indicates the time-reversal symmetry by a value of [[istwfk]] = 2,
     instead of the default istwfk = 1.
   
@@ -453,34 +451,43 @@ Suppose you decide to examine the interatomic distances from 1.0 Bohr to 2.0 Boh
 That is, 21 calculations.  
 If you are a UNIX guru, it will be easy for you to write a script that will
 drive these 21 calculations, changing automatically the variable [[xcart]] in
-the input file, and then gather all the data, in a convenient form to be plotted.  
-Well, are you a UNIX guru? If not, there is an easier path, all within abinit!
+the input file, and then gather all the data, in a convenient form to be plotted.
 
+Well, are you a UNIX guru? If not, there is an easier path, all within abinit!
 This is the multi-dataset mode. Detailed explanations about it can be found in sections 
 [[help:abinit#multidataset|3.3]],
 [[help:abinit#series|3.4]],
 [[help:abinit#loop|3.5]] and
 [[help:abinit#filenames-multidataset|3.6]] of the abinit help file.
 
-Now, can you write an input file that will do the computation described above 
-(interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from *tbase1_1.in*. 
+Now, can you write an input file that will do the computation described above
+(interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from *tbase1_1.in*.
 Try to define a series, and to use the [[getwfk]] input variable (the latter will make the computation much faster). 
 
 You should likely have a look at the section that describes the [[irdwfk]] and
 [[getwfk]] input variables: in particular, look at the meaning of *getwfk -1*
-
 Also, define explicitly the number of states (or supercell "bands") to be one, using the input variable [[nband]]. 
 
-The input file [[tests/tutorial/Input/tbase1_2.in]] is an example of file that will do the
-job, while [[tests/tutorial/Refs/tbase1_2.out]] is an example of output file.
+The input file *\$ABI_TUTORIAL/Input/tbase1_2.in* is an example of file that will do the job,
 
-{% dialog tests/tutorial/Input/tbase1_2.in tests/tutorial/Refs/tbase1_2.out %}
+{% dialog tests/tutorial/Input/tbase1_2.in %}
 
-If you decide to use the *tbase1_2.in file*, do not
-forget to change the file names in the *tbase1_x.files* file...
+while *\$ABI_TUTORIAL/Refs/tbase1_2.out* is the reference output file.
 
-So, you run the code with your input file (this might take fifteen seconds or
-so on a PC at 3 GHz), examine the output file quickly (there are many
+{% dialog tests/tutorial/Refs/tbase1_2.out %}
+
+Run the code with *tbase1_2.in* (this might take fifteen seconds or so on a PC at 3 GHz),
+
+```sh
+cp ../tbase1_2.in .
+abinit < tbase1_x.file > log 2> err 
+```
+
+!!! important
+
+    Do not forget to change the file names in the *tbase1_x.files* file.
+
+Now examine the output file quickly (there are many
 repetition of sections, for the different datasets), and get the output
 energies gathered in the final echo of variables:
     
@@ -530,12 +537,12 @@ Note that *the number of SCF cycles drops from 6 to 5 when the wavefunctions are
 
 ## Computation of the interatomic distance (method 2)
   
-The other methodology is based on an automatic computation of the minimum.   
-There are different algorithms to do that. See the input variable [[ionmov]], with values 2 and 7. 
+The other methodology is based on an automatic computation of the minimum.
+There are different algorithms to do that. See the input variable [[ionmov]], with values 2 and 7.
 In the present case, with only one degree of freedom to be optimized, the best choice is *ionmov* 2.
 
 You have also to define the maximal number of time steps for this optimization.
-Set the input variable [[ntime]] to 10, it will be largely enough. 
+Set the input variable [[ntime]] to 10, it will be largely enough.
 For the stopping criterion [[tolmxf]], use the reasonable value of 5.0d-4 Ha/Bohr.
 This defines the force threshold to consider that the geometry is converged.
 The code will stop if the residual forces are below that value before reaching *ntime*.
@@ -613,25 +620,25 @@ It is the appropriate time to read also the description of the potential files a
 wavefunctions files, as these files contain the same header as the density
 file, see sections [[help:abinit#localpotfile|6.6]] and [[help:abinit#wfkfile|6.7]].
 
-Such a density file can be read by abinit, to restart a calculation 
-(see the input variable [[iscf]], when its value is -2), but more usually, by an utility called *cut3d*. 
-This utility is available in the ABINIT package. 
-You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.   
+Such a density file can be read by abinit, to restart a calculation
+(see the input variable [[iscf]], when its value is -2), but more usually, by an utility called *cut3d*.
+This utility is available in the ABINIT package.
+You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.
 Read the corresponding [[help:cut3d|Cut3D help file]]
 
-Then, try to run cut3d to analyse *tbase1_xo_DEN*. 
+Then, try to run cut3d to analyse *tbase1_xo_DEN*.
 You should first try to translate the unformatted
-density data to indexed formatted data, by using option 6 in the adequate menu. 
-Save the indexed formatted data to file *tbase1_xo_DEN_indexed*. 
-Then, edit this file, to have an idea of the content of the *_DEN* files.  
-For further treatment, you might choose to select another option than 6. In
-particular, if you have access to MATLAB, choose option 5. With minor
+density data to indexed formatted data, by using option 6 in the adequate menu.
+Save the indexed formatted data to file *tbase1_xo_DEN_indexed*.
+Then, edit this file, to have an idea of the content of the *_DEN* files.
+For further treatment, you might choose to select another option than 6.
+In particular, if you have access to MATLAB, choose option 5. With minor
 modifications (set ngx=ngy=ngz to 30) you will be able to use the file [dim.m](base1_assets/dim.m)
-to visualize the 3-Dimensional isosurfaces. 
+to visualize the 3-Dimensional isosurfaces.
 Another option might be to use the |xcrysden| software, for which you need to use option 9.
 
 If you have a density file in netcdf format, it is possible to use |AbiPy| to
-export the data in different formats and invoke an external graphical tool. 
+export the data in different formats and invoke an external graphical tool.
 This is, for example, the density isosurfaces produced with |vesta|
 as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/base1/lesson_base1.ipynb#Analysis-of-the-charge-density)
 
@@ -639,46 +646,46 @@ as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abin
 
 ## Computation of the atomisation energy
   
-The atomisation energy is the energy needed to separate a molecule in its constituent atoms, each being neutral.   
-In the present case, one must compute first the total energy of an isolated hydrogen atom. 
+The atomisation energy is the energy needed to separate a molecule in its constituent atoms, each being neutral.
+In the present case, one must compute first the total energy of an isolated hydrogen atom.
 The atomisation energy will be the difference between the total
-energy of H$_2 and twice the total energy of H.  
+energy of H$_2 and twice the total energy of H.
 There are some subtleties in the calculation of an isolated atom.
 
-* In many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]]; 
+* In many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]];
 
-* The highest occupied level might be degenerate with the lowest unoccupied level of the same spin, 
-  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](base4)) 
+* The highest occupied level might be degenerate with the lowest unoccupied level of the same spin,
+  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](base4))
 
-* also often, the symmetry of the ground-state charge density **will not be spherical**, so that the automatic 
-  determination of symmetries by the code, based on the atomic coordinates, should be disabled, 
-  see the input variable [[nsym]], to be set to 1 in this case. 
+* also often, the symmetry of the ground-state charge density **will not be spherical**, so that the automatic
+  determination of symmetries by the code, based on the atomic coordinates, should be disabled,
+  see the input variable [[nsym]], to be set to 1 in this case.
   
 For Hydrogen, we are lucky that the ground state is spherical (1s orbital),
 and that the highest occupied level and lowest unoccupied level, although
 degenerate, have a different spin. We will define by hand the occupation of
-each spin, see the input variables [[occopt]] (to be set to 2), and [[occ]] .  
+each spin, see the input variables [[occopt]] (to be set to 2), and [[occ]].  
 Finally, in order to make numerical errors cancel, it is important to compute
 the above-mentioned difference in the same box, for the same energy cut-off, and even
 for a location in the box that is similar to the molecule case (although the
 latter might not be so important).
 
-The input file *tbase1_5.in* is an example of file that will do the job, 
+The input file *tbase1_5.in* is an example of file that will do the job,
 
 {% dialog tests/tutorial/Input/tbase1_5.in %}
 
-while *tbase1_5.out* is an example of output file. 
+while *tbase1_5.out* is an example of output file.
 
 {% dialog tests/tutorial/Refs/tbase1_5.out %}
 
 If you decide to use the *tbase1_5.in file*, do not forget to
-change the file names in the *tbase1_x.files* file. 
+change the file names in the *tbase1_x.files* file.
 The run lasts a few seconds.
 
 You should read the output file, and note the tiny differences related with
 the spin-polarisation:
 
-The electronic eigenvalues are now given for both spin up and spin down cases: 
+The electronic eigenvalues are now given for both spin up and spin down cases:
     
 ```
 Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -689,8 +696,8 @@ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -0.11112
 ```
 
-If you run again, while having set [[prtvol]] to 2 in the input file, because [[occopt]], 
-the charge density and spin polarisation at each point of the FFT grid is also analyzed: 
+If you run again, while having set [[prtvol]] to 2 in the input file, because [[occopt]],
+the charge density and spin polarisation at each point of the FFT grid is also analyzed:
     
 ```
     Total charge density [el/Bohr^3]
@@ -722,11 +729,11 @@ Next minimum=    1.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
     
 The **zeta** variable is the ratio between the spin-density difference and the
 charge density. It varies between +1 and -1. In the present case of Hydrogen,
-there is no spin down density, so the zeta variable is +1.  
+there is no spin down density, so the zeta variable is +1.
 (Comment: in this part of the output file, note the comma "," that is inserted
-in the first column. This is not important for the user: it is used to post-
-process the output file using some automatic tool. As a rule, you should
-ignore symbols placed in the first column of the ABINIT output file.)
+in the first column. This is not important for the user: it is used to post-process
+the output file using some automatic tool.
+As a rule, you should ignore symbols placed in the first column of the ABINIT output file.)
 
 The total energy is
     
@@ -756,18 +763,18 @@ bond length [Bohr]      | 1.522       | 1.401
 atomisation energy [eV] | 4.506       | 4.747 
 
 The bond length is awful (nearly 10% off), and the atomisation energy is a bit too low, 5% off.
-What is wrong??  
+What is wrong??
 
-Well, are you sure that the input parameters that we did not discuss are correct? 
+Well, are you sure that the input parameters that we did not discuss are correct?
 These are:
 
-* [[ecut]] (the plane-wave kinetic energy cut-off) 
-* [[acell]] (the supercell size) 
-* [[ixc]] (not even mentioned until now, this input variable specifies what kind of 
-  exchange-correlation functional is to be used) 
-* the pseudopotential 
+* [[ecut]] (the plane-wave kinetic energy cut-off)
+* [[acell]] (the supercell size)
+* [[ixc]] (not even mentioned until now, this input variable specifies what kind of
+  exchange-correlation functional is to be used)
+* the pseudopotential
   
-We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation
 (as well as the local-spin-density approximation) in the
 Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table [[cite:Goedecker1996]].
 
