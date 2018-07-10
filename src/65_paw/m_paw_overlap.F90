@@ -9,7 +9,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (JWZ,TRangel,BA,FJ,PHermet,)
+!! Copyright (C) 2018-2018 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-MODULE m_pawpwij
+MODULE m_paw_overlap
 
  use defs_basis
  use defs_abitypes

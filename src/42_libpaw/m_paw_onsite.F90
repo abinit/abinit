@@ -124,7 +124,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
  end if
 
 !Integration of the angular part: all angular integrals have been computed 
-!outside Abinit and tabulated for each (l,m) value up to l=2
+!outside Abinit and tabulated for each (l,m) value up to l=3
  call setnabla_ylm(ang_phipphj,mpsang)
 
  do itypat=1,ntypat
@@ -237,7 +237,7 @@ end subroutine pawnabla_init
 !!    %mesh_size=Dimension of radial mesh
 !!    %lmn_size=Number of (l,m,n) elements for the PAW basis
 !!  phi_cor(mesh_size,nphicor)=core wave-functions for the current type of atoms.
-!!  indlmn_cor(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn, for the core wave functions.
+!!  indlmn_cor(6,nlmn_core)= array giving l,m,n,lm,ln,s for i=lmn, for the core wave functions.
 !!
 !! OUTPUT
 !!  See side effects
@@ -315,7 +315,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  end if
 
 !Integration of the angular part: all angular integrals have been computed
-!outside Abinit and tabulated for each (l,m) value up to l=2
+!outside Abinit and tabulated for each (l,m) value up to l=3
  call setnabla_ylm(ang_phipphj,mpsang)
 
  do itypat=1,ntypat
