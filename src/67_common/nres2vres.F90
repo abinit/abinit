@@ -87,6 +87,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_paw_nhat, only : pawmknhat
  use m_spacepar, only : hartre
  use m_rhotoxc,  only : rhotoxc
  use m_dfpt_mkvxc, only : dfpt_mkvxc

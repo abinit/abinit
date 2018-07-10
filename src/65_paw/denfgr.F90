@@ -91,7 +91,7 @@
  use m_pawfgr,      only : pawfgr_type
  use m_paw_sphharm, only : initylmr
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
- use m_paw_nhatgrid,only : nhatgrid
+ use m_paw_nhat,    only : nhatgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

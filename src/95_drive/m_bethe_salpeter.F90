@@ -86,7 +86,7 @@ module m_bethe_salpeter
  use m_paw_sphharm,     only : setsym_ylm
  use m_paw_onsite,      only : pawnabla_init
  use m_paw_dmft,        only : paw_dmft_type
- use m_paw_nhatgrid,    only : nhatgrid
+ use m_paw_nhat,        only : nhatgrid,pawmknhat
  use m_paw_tools,       only : chkpawovlp,pawprt
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr

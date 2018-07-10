@@ -106,6 +106,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free_unpacked, &
 &                       pawrhoij_nullify, pawrhoij_free, symrhoij
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_nhat, only : pawmknhat
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

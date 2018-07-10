@@ -134,6 +134,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_alloc
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_nhat, only : pawmknhat
  use m_fock,     only : fock_type
  use m_kg,       only : getcut
  use defs_wvltypes, only : wvl_data

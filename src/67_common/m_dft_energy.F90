@@ -54,6 +54,7 @@ module m_dft_energy
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhat,         only : pawmknhat
  use m_cgtools,          only : dotprod_vn
  use m_fft,              only : fftpac
  use m_spacepar,         only : meanvalue_g, hartre

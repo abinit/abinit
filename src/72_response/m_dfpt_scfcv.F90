@@ -61,6 +61,7 @@ module m_dfpt_scfcv
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_nhat, only : pawmknhat,pawnhatfr
  use m_rf2,      only : rf2_getidirs
  use m_dens,     only : calcdensph
  use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec

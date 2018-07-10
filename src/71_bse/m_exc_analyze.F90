@@ -47,7 +47,7 @@ module m_exc_analyze
  use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_pwaves_lmn,    only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_paw_nhatgrid,      only : nhatgrid
+ use m_paw_nhat,          only : nhatgrid
 
  implicit none
 

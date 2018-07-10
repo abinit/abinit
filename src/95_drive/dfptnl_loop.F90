@@ -148,6 +148,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
+ use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_pawtab,      only : pawtab_type
  use m_rf2,         only : rf2_getidir
  use m_initylmg,    only : initylmg

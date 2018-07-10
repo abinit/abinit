@@ -190,6 +190,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_nhat, only : pawnhatfr
  use m_kg,       only : mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac
  use m_spacepar, only : hartrestr, symrhg

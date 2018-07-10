@@ -92,7 +92,7 @@ module m_sigma_driver
  use m_paw_slater,    only : paw_mkdijexc_core, paw_dijhf
  use m_paw_dmft,      only : paw_dmft_type
  use m_paw_sphharm,   only : setsym_ylm
- use m_paw_nhatgrid,  only : nhatgrid
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
  use m_paw_tools,     only : chkpawovlp,pawprt
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
