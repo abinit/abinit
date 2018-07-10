@@ -1706,7 +1706,7 @@ end subroutine add_matlu
 !           end do
 !           call dgemm('n','n',tndim,tndim,tndim,cone,valuer2,tndim,&
 !&            valuer4,tndim,czero,valuer                ,tndim)
-           write(6,*) "INFO",info
+           !write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
 !           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
 !           call wrtout(std_out,message,'COLL')

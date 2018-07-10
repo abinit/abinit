@@ -541,6 +541,10 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
              nnn=nnn+1
              paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)=buffer1(nnn)
 !            enddo
+             ! if(ibandc==1) then
+             !   write(6,*) "m1",m1
+             !   write(6,*) "psichi datafordmft",paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)
+             ! endif
            end do
          end do
        end do
@@ -712,7 +716,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  ABI_DATATYPE_DEALLOCATE(xnorm_check)
 
  if(present(nbandkss)) then
-   if(me.eq.0.and.nbandkss/=0) then
+   if((me.eq.0.and.nbandkss/=0).or.(iscf<0)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm=3
      if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2

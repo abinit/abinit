@@ -310,6 +310,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
  type(self_type) :: selfr
+ type(self_type) :: self
  type(green_type) :: greenr
 
 ! *************************************************************************
@@ -1089,7 +1090,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      write(message,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out,message,'COLL')
-     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
@@ -1105,11 +1106,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
       write(6,*) "datafordmft done"
        call initialize_self(selfr,paw_dmft,wtype='real')
       write(6,*) "init self done"
+       call initialize_self(self,paw_dmft)
+      write(6,*) "init self done"
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
       write(6,*) "init green done with allocation of green%oper"
-       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1)
+      ! call rw_self(self,paw_dmft,prtopt=5,opt_rw=1)
+     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
+     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
+     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
+      write(6,*) "init green done with allocation of green%oper"
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=1,&                
+     &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
       write(6,*) "read self done"
-       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=1,opt_nonxsum=0)
+       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=0,opt_nonxsum=0)
       write(6,*) "compute green done"
        if(me==master) then
          call print_green("forspectralfunction",greenr,5,paw_dmft,pawprtvol=3,opt_wt=1)
@@ -1118,6 +1127,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        call destroy_green(greenr)
        call destroy_self(selfr)
+       call destroy_self(self)
      endif
      call destroy_dmft(paw_dmft)
      call destroy_oper(lda_occup)

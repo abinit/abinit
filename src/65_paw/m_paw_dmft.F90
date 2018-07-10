@@ -244,6 +244,8 @@ MODULE m_paw_dmft
 
   character(len=fnlen) :: filapp
 
+  character(len=fnlen) :: filnamei
+
   real(dp) :: temp
 
   integer, allocatable :: lpawu(:)
@@ -539,7 +541,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
  use defs_abitypes
  use m_splines
@@ -564,6 +566,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  type(pawtab_type),intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type),intent(inout) :: paw_dmft
  character(len=fnlen), intent(in) :: fnametmp_app
+ character(len=fnlen), intent(in) :: fnamei
 !arrays
  integer,intent(in) :: typat(dtset%natom)
  real(dp),intent(in),target :: dmatpawu(:,:,:,:)
@@ -622,6 +625,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
  endif
  paw_dmft%filapp= fnametmp_app
+ paw_dmft%filnamei= fnamei
  paw_dmft%natpawu=dtset%natpawu
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
@@ -784,15 +788,14 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
        write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', grid_unt
        call wrtout(std_out,message,'COLL')
        read(grid_unt,*) ngrid
-       paw_dmft%dmft_nwr=ngrid/2
-       ABI_ALLOCATE(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
+       ABI_ALLOCATE(paw_dmft%omega_r,(ngrid))
        if(ioerr<0) then
          message = "Error reading grid file"
          MSG_ERROR(message)
        endif
-       do ifreq=1,2*paw_dmft%dmft_nwr
+       do ifreq=1,ngrid
          read(grid_unt,*) paw_dmft%omega_r(ifreq)
-         paw_dmft%omega_r(ifreq)=paw_dmft%omega_r(ifreq)/Ha_eV
+         paw_dmft%omega_r(ifreq)=paw_dmft%omega_r(ifreq)
        enddo
        if(ioerr<0) then
          message = "Error reading grid file"
@@ -809,12 +812,12 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
   !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
    enddo
 
+ endif
 !=======================
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
-   if(dtset%ucrpa==0) call construct_nwlo_dmft(paw_dmft)
- endif
+ if(dtset%ucrpa==0) call construct_nwlo_dmft(paw_dmft)
 
 !=========================================================
 !== if we use ctqmc impurity solver

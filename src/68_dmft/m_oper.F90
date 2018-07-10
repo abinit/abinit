@@ -740,7 +740,7 @@ end subroutine loc_oper
 !!
 !! SOURCE
 
-subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
+subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
@@ -761,6 +761,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc
  integer, optional, intent(in) :: procb(oper%nkpt)
+ integer, optional, intent(in) :: prt
 !oper variables-------------------------------
  integer :: iatom,ib,ib1,ikpt,ispinor,ispinor1,isppol,im1,im
  integer :: natom,mbandc,ndim,nkpt,nspinor,nsppol,paral
@@ -816,13 +817,13 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
 &                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)        &
 &                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)    &
 &                     * conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
-!               if(ib==1.and.ib1==3) then
-!                 write(std_out,*) "im,im1",im,im1
-!                 write(std_out,*) "ispinor,ispinor1",ispinor,ispinor1
-!                 write(std_out,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-!                 write(std_out,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
-!                 write(std_out,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-!               endif
+              ! if(present(prt).and.(ib==1.and.ib1==1)) then
+              !   write(6,*) "im,im1",im,im1
+              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
+              !   write(6,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+              !   write(6,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
+              !   write(6,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+              ! endif
 
                    enddo ! ispinor1
                  enddo ! ispinor

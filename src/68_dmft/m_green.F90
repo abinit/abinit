@@ -1224,13 +1224,18 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.001/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
+! do iatom = 1 , natom
+!   write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+!   write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+!   write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+! enddo ! natom
      if(paw_dmft%dmft_solv==4)  then 
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
@@ -1240,7 +1245,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      end if
 
      procb_ifreq=green%procb(ifreq,:)
-     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc)
+     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc,prt=1)
      do ib1 = 1 , paw_dmft%mbandc
        do ib = 1 , paw_dmft%mbandc
          do ikpt = 1 , paw_dmft%nkpt
@@ -1252,6 +1257,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 &               + fermilevel                               &
 &               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+!write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
 
 
 
@@ -3143,6 +3149,7 @@ end subroutine occup_green_tau
  procb(:,:)=-1
 
  if(nproc.ge.2*nw) then
+ !write(6,*) "AA"
    ratio=nproc/nw
    ABI_ALLOCATE(proca,(nw,nproc/nw))
    do ir=1,ratio
@@ -3174,6 +3181,7 @@ end subroutine occup_green_tau
    ABI_DEALLOCATE(proca)
 
  else if (nproc.ge.nw) then
+ !write(6,*) "BB"
    do iw=1,nw
      procb(iw,:)= iw
      proct(iw,iw)=1
@@ -3185,7 +3193,9 @@ end subroutine occup_green_tau
    nw_perproc=1
 
  else if (nproc.le.nw) then
+ !write(6,*) "CC"
    ratio=nw/nproc
+ !write(6,*) "ratio", ratio
    do iproc=0,nproc-1
      do iw=1,nw
        if (mod(iw-1,nproc)==iproc) then
@@ -3194,6 +3204,9 @@ end subroutine occup_green_tau
        endif
      enddo
    enddo
+    ! do iw=1,nw
+    !   write(6,*) "iw, iproc", iw, procb(iw,1)
+    ! enddo
    nw_perproc=ratio+1
 !  some procs will compute a number of frequency which is ratio and some
 !  other will compute a number of frequency which is ratio+1.
