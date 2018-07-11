@@ -72,6 +72,7 @@ module m_nonlinear
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 

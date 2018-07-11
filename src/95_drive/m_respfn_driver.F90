@@ -87,6 +87,7 @@ module m_respfn_driver
  use m_drivexc,     only : check_kxc
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1, prteigrs
+ use m_fourier_interpol, only : transgrid
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu

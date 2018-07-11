@@ -47,6 +47,7 @@ MODULE m_qparticles
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 

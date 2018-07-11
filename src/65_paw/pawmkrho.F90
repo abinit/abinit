@@ -107,6 +107,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &                       pawrhoij_nullify, pawrhoij_free, symrhoij
  use m_pawfgr,   only : pawfgr_type
  use m_paw_nhat, only : pawmknhat
+ use m_fourier_interpol, only : transgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

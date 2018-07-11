@@ -87,6 +87,7 @@ module m_dfpt_loopert
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 

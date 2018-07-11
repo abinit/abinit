@@ -65,6 +65,7 @@ module m_dft_energy
  use m_rhotoxc,          only : rhotoxc
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 

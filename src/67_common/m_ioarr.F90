@@ -56,6 +56,7 @@ MODULE m_ioarr
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : init_distribfft_seq
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 

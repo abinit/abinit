@@ -74,7 +74,9 @@ module m_vtorho
  use m_mpinfo,             only : proc_distrb_cycle
  use m_common,             only : prteigrs
  use m_dmft,               only : dmft_solve
- use m_datafordmft,         only : datafordmft
+ use m_datafordmft,        only : datafordmft
+ use m_fourier_interpol,   only : transgrid
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif

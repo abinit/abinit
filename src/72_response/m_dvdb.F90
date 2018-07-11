@@ -55,6 +55,7 @@ MODULE m_dvdb
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 

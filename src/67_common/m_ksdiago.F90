@@ -50,6 +50,7 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc
+ use m_fourier_interpol,  only : transgrid
 
  implicit none
 

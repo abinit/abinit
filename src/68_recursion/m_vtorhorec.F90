@@ -35,10 +35,11 @@ module m_vtorhorec
  use m_profiling_abi
  use m_per_cond
 
- use m_time,           only : timein, timab
- use m_rec,            only : Calcnrec, init_nlpsprec, cpu_distribution
- use m_rec_tools,      only : reshape_pot, trottersum, get_pt0_pt1
- use m_spacepar,       only : symrhg
+ use m_time,             only : timein, timab
+ use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
+ use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
+ use m_spacepar,         only : symrhg
+ use m_fourier_interpol, only : transgrid
 
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,       only : cudap
