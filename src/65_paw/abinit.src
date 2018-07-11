@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_orbmag.F90",
+ "m_paw_init.F90",
  "m_pawhr.F90",
  "m_paw_dmft.F90",
  "m_pawpwij.F90",
@@ -42,7 +43,6 @@ sources = [
  "pawaccrhoij.F90",
  "pawdfptenergy.F90",
  "pawgrnl.F90",
- "pawinit.F90",
  "m_pawmkaewf.F90",
  "pawmkrho.F90",
  "pawmkrhoij.F90",

@@ -1,11 +1,59 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/pawinit
+!!****m* ABINIT/m_paw_init
+!! NAME
+!!  m_paw_init
+!!
+!! FUNCTION
+!!  This module contains routines related tp PAW calculations initialization.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2018-2018 ABINIT group (FJ, MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+MODULE m_paw_init
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_splines
+
+ use defs_abitypes,  only : dataset_type
+
+ use m_time,    only : timab
+ use m_pawpsp,  only : pawpsp_nl
+ use m_paw_atom,only : atompaw_shpfun
+ use m_pawang,  only : pawang_type, pawang_init, pawang_free
+ use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson
+ use m_pawtab,  only : pawtab_type
+ use m_paw_numeric, only : paw_derfc
+
+ implicit none
+
+ private
+
+!public procedures.
+ public :: pawinit     ! Initialize some tabulated data for PAW calculations
+ public :: paw_gencond ! Test whether we have to call pawinit to regenerate tabulated data.
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_init/pawinit
 !! NAME
 !! pawinit
 !!
 !! FUNCTION
-!! Initialize some starting values of several arrays used in
-!! PAW calculations
+!! Initialize some starting values of several arrays used in PAW calculations.
 !!
 !! 1-Initialize data related to angular mesh
 !! 2-Tabulate normalized shape function g(r)
@@ -124,19 +172,6 @@
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
 
- use defs_basis
- use m_errors
- use m_profiling_abi
- use m_splines
-
- use m_time,    only : timab
- use m_pawpsp,  only : pawpsp_nl
- use m_paw_atom,only : atompaw_shpfun
- use m_pawang,  only : pawang_type, pawang_init, pawang_free
- use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson
- use m_pawtab,  only : pawtab_type
- use m_paw_numeric, only : paw_derfc
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -166,7 +201,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  character(len=500) :: message
 !arrays
  integer,allocatable :: indl(:,:),klm_diag(:),kmix_tmp(:)
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ integer, ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
  real(dp),allocatable :: rad(:),rgl(:,:),vhatijl(:,:),vhatl(:),work(:)
@@ -601,15 +636,14 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 end subroutine pawinit
 !!***
 
-
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/paw_gencond
+!!****f* m_paw_init/paw_gencond
 !! NAME
 !!   paw_gencond
 !!
 !! FUNCTION
-!!   This routine tests whether we have to call pawinit in one of the optdriver 
+!!   This routine tests whether we have to call pawinit in one of the optdriver
 !!   routines since important values have changed wrt to the previous dataset.
 !!   The function uses an internal array to store of the previous values
 !!
@@ -647,11 +681,6 @@ end subroutine pawinit
 !! SOURCE
 
 subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit) 
-
- use defs_basis
- use m_errors
-
- use defs_abitypes,  only : dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -699,4 +728,9 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
  end select
 
 end subroutine paw_gencond
+!!***
+
+!----------------------------------------------------------------------
+
+END MODULE m_paw_init
 !!***

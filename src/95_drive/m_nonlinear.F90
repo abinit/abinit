@@ -64,6 +64,7 @@ module m_nonlinear
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
  use m_paw_denpot,  only : pawdenpot
+ use m_paw_init,    only : pawinit,paw_gencond
  use m_paw_tools,   only : chkpawovlp
  use m_mkrho,       only : mkrho
  use m_getshell,    only : getshell
