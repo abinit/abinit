@@ -44,7 +44,8 @@ module m_odamix
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type
- use m_paw_nhat,    only : pawmknhat
+ use m_paw_nhat,   only : pawmknhat
+ use m_paw_denpot, only : pawdenpot
  use m_energies,   only : energies_type
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc

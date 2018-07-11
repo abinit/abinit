@@ -84,6 +84,7 @@ module m_bethe_salpeter
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_denpot,      only : pawdenpot
  use m_paw_onsite,      only : pawnabla_init
  use m_paw_dmft,        only : paw_dmft_type
  use m_paw_nhat,        only : nhatgrid,pawmknhat

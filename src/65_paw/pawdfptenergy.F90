@@ -112,6 +112,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  use m_pawrhoij,   only : pawrhoij_type
  use m_pawdij,     only : pawdijhartree
  use m_pawxc,      only : pawxc_dfpt, pawxcm_dfpt
+ use m_paw_denpot, only : pawdensities
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).

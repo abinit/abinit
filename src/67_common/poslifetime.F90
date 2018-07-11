@@ -77,12 +77,13 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  use m_xmpi
  use m_electronpositron
 
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_type, simp_gen, nderiv_gen
- use m_pawtab, only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_pawxc, only: pawxcsum
- use m_drivexc,     only : mkdenpos
+ use m_pawang,        only : pawang_type
+ use m_pawrad,        only : pawrad_type, simp_gen, nderiv_gen
+ use m_pawtab,        only : pawtab_type
+ use m_pawrhoij,      only : pawrhoij_type
+ use m_pawxc,         only: pawxcsum
+ use m_paw_denpot,    only : pawdensities
+ use m_drivexc,       only : mkdenpos
  use m_gammapositron, only : gammapositron, gammapositron_fft
 
 !This section has been created automatically by the script Abilint (TD).

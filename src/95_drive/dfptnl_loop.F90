@@ -131,11 +131,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_wffile
  use m_wfk
 
- use m_dtfil,    only : status
- use m_time,     only : timab
+ use m_dtfil,       only : status
+ use m_time,        only : timab
  use m_io_tools,    only : file_exists
- use m_kg,       only : getph
- use m_inwffil,  only : inwffil
+ use m_kg,          only : getph
+ use m_inwffil,     only : inwffil
 
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
@@ -149,12 +149,13 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_pawrad,      only : pawrad_type
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
+ use m_paw_denpot,  only : pawdenpot
  use m_pawtab,      only : pawtab_type
  use m_rf2,         only : rf2_getidir
  use m_initylmg,    only : initylmg
  use m_atm2fft,     only : dfpt_atm2fft
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
- use m_dfpt_rhotov,   only : dfpt_rhotov
+ use m_dfpt_mkvxc,  only : dfpt_mkvxc
+ use m_dfpt_rhotov  only : dfpt_rhotov
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

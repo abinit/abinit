@@ -735,9 +735,9 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
    end if
  end if
 
-!*********************************************************************
+! -----------------------------------------------------------------
 !Small functions related to analytical expression of shape function
- contains
+ CONTAINS
 ! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc1
 !  shapefunc1 is g(x) (gaussian)

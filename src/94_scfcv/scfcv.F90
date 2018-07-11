@@ -212,6 +212,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid,pawmknhat
  use m_paw_tools,        only : chkpawovlp
+ use m_paw_denpot,       only : pawdenpot
  use m_paw_uj,           only : pawuj_red
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc

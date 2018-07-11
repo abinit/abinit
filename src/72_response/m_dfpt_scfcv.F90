@@ -61,13 +61,14 @@ module m_dfpt_scfcv
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
- use m_paw_nhat, only : pawmknhat,pawnhatfr
- use m_rf2,      only : rf2_getidirs
- use m_dens,     only : calcdensph
- use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_nhat,    only : pawmknhat,pawnhatfr
+ use m_rf2,         only : rf2_getidirs
+ use m_dens,        only : calcdensph
+ use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_common,     only : scprqt
+ use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
+ use m_common,      only : scprqt
  use m_dfpt_rhotov, only : dfpt_rhotov
 
  implicit none

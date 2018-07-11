@@ -72,6 +72,7 @@ module m_respfn_driver
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
  use m_paw_tools,   only : chkpawovlp
+ use m_paw_denpot,  only : pawdenpot
  use m_kg,          only : getcut, getph, kpgio
  use m_eig2d,       only : eig2tot, elph2_fanddw
  use m_inwffil,     only : inwffil

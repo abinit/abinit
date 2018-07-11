@@ -94,6 +94,7 @@ module m_sigma_driver
  use m_paw_sphharm,   only : setsym_ylm
  use m_paw_nhat,      only : nhatgrid,pawmknhat
  use m_paw_tools,     only : chkpawovlp,pawprt
+ use m_paw_denpot,    only : pawdenpot
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss

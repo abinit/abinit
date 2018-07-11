@@ -66,13 +66,14 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
  use m_profiling_abi
  use m_xmpi
 
- use m_symtk,  only : matpointsym
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_pawrad, only : pawrad_type, pawrad_deducer0, simp_gen
- use m_pawtab, only : pawtab_type
- use m_paw_an, only : paw_an_type
- use m_pawrhoij, only : pawrhoij_type
+ use m_symtk,      only : matpointsym
+ use m_pawang,     only : pawang_type
+ use m_pawtab,     only : pawtab_type
+ use m_pawrad,     only : pawrad_type, pawrad_deducer0, simp_gen
+ use m_pawtab,     only : pawtab_type
+ use m_paw_an,     only : paw_an_type
+ use m_pawrhoij,   only : pawrhoij_type
+ use m_paw_denpot, only : pawdensities
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).

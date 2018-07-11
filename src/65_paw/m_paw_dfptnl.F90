@@ -35,6 +35,7 @@ MODULE m_paw_dfptnl
  use m_paw_an,     only : paw_an_type
  use m_pawrhoij,   only : pawrhoij_type
  use m_pawcprj,    only : pawcprj_type
+ use m_paw_denpot, only : pawdensities
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
 
  implicit none
