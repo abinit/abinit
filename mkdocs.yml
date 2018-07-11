@@ -221,6 +221,7 @@ pages:
 - About:
     - Release Notes: about/release-notes.md
     - Contributing: about/contributing.md
+    - History: about/history.md
     - License: about/license.md
 
 markdown_extensions:
