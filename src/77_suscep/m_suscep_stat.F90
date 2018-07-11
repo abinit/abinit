@@ -42,6 +42,7 @@ MODULE m_suscep_stat
  use m_fftcore, only : sphereboundary
  use m_fft,     only : fftpac
  use m_spacepar,     only : symrhg
+ use m_paw_finegrid, only : pawgylmg
 
  implicit none
 
