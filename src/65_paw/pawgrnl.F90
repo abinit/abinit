@@ -78,7 +78,7 @@
 !!      d2frnl,etotfor,forstr
 !!
 !! CHILDREN
-!!      convert_notation,destroy_distribfft,dfpt_atm2fft,free_my_atmtab
+!!      pawgrnl_convert,destroy_distribfft,dfpt_atm2fft,free_my_atmtab
 !!      get_my_atmtab,init_distribfft_seq,metric,pawexpiqr,pawfgrtab_free
 !!      pawfgrtab_gather,pawfgrtab_nullify,pawgylm,pawrfgd_fft,pawrhoij_free
 !!      pawrhoij_gather,pawrhoij_nullify,stresssym,xmpi_sum
@@ -655,7 +655,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                do mub=1,6
                  eps_gamma=eps1(mub);eps_delta=eps2(mub);
                  mu4 = zero
-                 call convert_notation(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
+                 call pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 !                v_loc*d2glylm
                  prod(ishift_str2+mu,ilm)=prod(ishift_str2+mu,ilm) + half*half*vloc(ic)*( &
 &                 pawfgrtab_iatom%rfgd(eps_beta,ic)*pawfgrtab_iatom%rfgd(eps_gamma,ic)*&
@@ -744,7 +744,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                do idir=1,3
 !                v_loc*d2glylm/dR contribution:
                  eps_alpha=alpha(mu);eps_beta=beta(mu);
-                 call convert_notation(mu4,eps_alpha,eps_beta,idir,idir)
+                 call pawgrnl_convert(mu4,eps_alpha,eps_beta,idir,idir)
                  prod(ishift_str2is+(mu-1)*3+idir,ilm)=prod(ishift_str2is+(mu-1)*3+idir,ilm)&
 &                 -half*vloc(ic)&
 &                 *(pawfgrtab_iatom%gylmgr2(mu4(3),ic,ilm)*pawfgrtab_iatom%rfgd(eps_alpha,ic)&
@@ -1539,6 +1539,88 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
  DBG_ENTER("COLL")
 
+ CONTAINS
+
+! ------------------------------------------------
+!!****f* pawgrnl/pawgrnl_convert
+!! NAME
+!!  pawgrnl_convert
+!!
+!! FUNCTION
+!!  notation: Convert index of the elastic tensor:
+!!    - voigt notation       => 32
+!!    - normal notation      => 3 3 2 2
+!!    - notation for gylmgr2 => 32 32 32 32 => 4 4 4
+!!
+!! INPUTS
+!!  eps_alpha, eps_beta, eps_delta, eps_gamma
+!!
+!! OUTPUT
+!!  mu4(4) = array with index for the second derivative of gylm
+!!
+!! SIDE EFFECTS
+!!  mu4(4) = input : array with index for the second derivative of gylm
+!!           output: the 4 indexes for the calculation of the second derivative of gylm
+!!
+!! SOURCE
+
+subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawgrnl_convert'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalar
+ integer,intent(in)  :: eps_alpha,eps_beta
+ integer,optional,intent(in)  :: eps_gamma,eps_delta
+ !array
+ integer,intent(inout) :: mu4(4)
+
+!Local variables-------------------------------
+ integer :: eps1,eps2,i,j,k
+ integer,allocatable :: mu_temp(:)
+
+! *************************************************************************
+
+ ABI_ALLOCATE(mu_temp,(4))
+ if (present(eps_gamma).and.present(eps_delta)) then
+   mu_temp(1)=eps_alpha
+   mu_temp(2)=eps_beta
+   mu_temp(3)=eps_gamma
+   mu_temp(4)=eps_delta
+ else
+   mu_temp(1)=eps_alpha
+   mu_temp(2)=eps_beta
+   mu_temp(3)= 0
+   mu_temp(4)= 0
+ end if
+ k=1
+ do i=1,2
+   eps1=mu_temp(i)
+   do j=1,2
+     eps2=mu_temp(2+j)
+     if(eps1==eps2) then
+       if(eps1==1) mu4(k)=1;
+       if(eps1==2) mu4(k)=2;
+       if(eps1==3) mu4(k)=3;
+     else
+       if((eps1==3.and.eps2==2).or.(eps1==2.and.eps2==3)) mu4(k)=4;
+       if((eps1==3.and.eps2==1).or.(eps1==1.and.eps2==3)) mu4(k)=5;
+       if((eps1==1.and.eps2==2).or.(eps1==2.and.eps2==1)) mu4(k)=6;
+     end if
+     k=k+1
+   end do
+ end do
+ ABI_DEALLOCATE(mu_temp)
+
+end subroutine pawgrnl_convert
+!!***
+! ------------------------------------------------
 
 end subroutine pawgrnl
 !!***
