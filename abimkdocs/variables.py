@@ -183,7 +183,7 @@ ABI_TOPICS = [
     "Dev",
     "DFPT",
     "DMFT",
-    "EffectiveMass"
+    "EffectiveMass",
     "DynamicsMultibinit",
     "EFG",
     "Elastic",

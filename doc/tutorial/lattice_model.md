@@ -8,7 +8,7 @@ authors: AM
 
 This lesson aims at showing how to build a harmonic model by using a second-principles approach for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations.
 
-**Before beginning, it is very important to read the [[cite:Wojdel2013| paper on second-principles]].**
+**Before beginning, it is very important to read the reference [[cite:Wojdel2013]].**
 
 With this lesson, you will learn how to :
 
@@ -29,7 +29,7 @@ The AGATE software is also required for this tutorial, you can install it on deb
 
 ## 1 The Harmonic part of the lattice model
 
-As mentionned in this [[cite:Wojdel2013| paper]], define the reference of your model is the starting point in the construction of the model:
+As mentionned in [[cite:Wojdel2013]], define the reference of your model is the starting point in the construction of the model:
 
 ![Schema 1](lattice_model_assets/reference.png)
 

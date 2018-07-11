@@ -4,7 +4,7 @@ authors: AM,ACGC
 
 # The multibinit software
 
-The MULTIBINIT software is using a second-principles approach for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations [[cite:Wojdel2013| (1) ]]. The second-principles model includes harmonic (short-range and long-range dipole-dipole interactions) and anharmonic parts as well as explicit treatment of homogeneous strains and their couplings to the lattice. Most parameters (harmonic IFC, elastic constants, strain-phonon coupling, ...) are provided directly from density functional perturbation theory (DFPT) calculations as implemented in ABINIT and keep therefore the first-principles accuracy. The anharmonic lattice part is treated in a more effective way and fitted [[cite:Escorihuela-Sayalero2017| (2) ]] to reproduce stresses and forces of representative snapshots of short ab-initio molecular dynamics runs with a limited number of terms.
+The MULTIBINIT software is using a second-principles approach for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations [[cite:Wojdel2013]]. The second-principles model includes harmonic (short-range and long-range dipole-dipole interactions) and anharmonic parts as well as explicit treatment of homogeneous strains and their couplings to the lattice. Most parameters (harmonic IFC, elastic constants, strain-phonon coupling, ...) are provided directly from density functional perturbation theory (DFPT) calculations as implemented in ABINIT and keep therefore the first-principles accuracy. The anharmonic lattice part is treated in a more effective way and fitted [[cite:Escorihuela-Sayalero2017]] to reproduce stresses and forces of representative snapshots of short ab-initio molecular dynamics runs with a limited number of terms.
 
 
 ## 0 Installation  
@@ -74,7 +74,7 @@ This Software is able to perform many different tasks. It is possible to generat
 
 ## 3 How to generate a model
 
-Before to learn how to generate the model, we encourage you to read the papers [[cite:Wojdel2013|1]] and [[cite:Escorihuela-Sayalero2017|2]].
+Before to learn how to generate the model, we encourage you to read the papers [[cite:Wojdel2013]] and [[cite:Escorihuela-Sayalero2017]].
 
 ### 3.1 How to compute the harmonic part from [[help:abinit|ABINIT]]
 
@@ -86,7 +86,7 @@ To learn the procedure to compute the  harmonic part of the potential, you can f
 
 ### 3.2 How to compute the anharmonic part from a training set
 
-To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. Such training set will contain an ensemble of atomic configurations into the potential energy surface. This file will be used to fit a polynomial following the method developed in this [[cite:Escorihuela-Sayalero2017|paper]]. To generate the training set, the user requieres to get some experience in molecular dynamics simulation within abinit. 
+To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. Such training set will contain an ensemble of atomic configurations into the potential energy surface. This file will be used to fit a polynomial following the method developed in [[cite:Escorihuela-Sayalero2017]]. To generate the training set, the user requieres to get some experience in molecular dynamics simulation within abinit. 
 
 ### 3.3 How to bound a model
 
