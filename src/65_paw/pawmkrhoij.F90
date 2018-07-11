@@ -80,8 +80,8 @@
 
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_free
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, &
-&                       pawcprj_gather_spin, pawcprj_free, pawcprj_mpi_send,&
-&                       pawcprj_mpi_recv, pawcprj_copy
+&                       pawcprj_gather_spin, pawcprj_free, pawcprj_pack,&
+&                       pawcprj_unpack
  use m_paw_io,   only : pawio_print_ij
  use m_paw_dmft, only : paw_dmft_type
  use m_mpinfo,   only : proc_distrb_cycle
@@ -119,15 +119,18 @@
  integer :: option,spaceComm,use_nondiag_occup_dmft
  logical :: locc_test,paral_atom,usetimerev
  integer :: ib1_this_proc, ib_loop, proc_sender, proc_recver
+ integer :: n2buff
  real(dp) :: wtk_k
  character(len=4) :: wrt_mode
  character(len=500) :: msg
 
 !arrays
  integer :: idum(0)
+ integer,allocatable :: req_correl(:)
  real(dp) :: occup(2)
+ real(dp), allocatable :: buffer_cprj_correl(:,:,:)
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
- type(pawcprj_type),allocatable :: cprj_tmp(:,:),cwaveprj(:,:),cwaveprjb(:,:),cprj_correl(:,:,:)
+ type(pawcprj_type),allocatable :: cprj_tmp(:,:),cwaveprj(:,:),cwaveprjb(:,:)
  type(pawcprj_type),pointer :: cprj_ptr(:,:)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
 
@@ -174,7 +177,7 @@
 
 !Initialise and check dmft variables
  if(paw_dmft%use_sc_dmft/=0) then
-   nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
+   nbandc1=paw_dmft%mbandc
  else
    nbandc1=1
  end if
@@ -197,11 +200,10 @@
    call pawcprj_alloc(cwaveprjb,0,dimcprj)
  end if
 
- if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
-   ABI_DATATYPE_ALLOCATE(cprj_correl,(natom,my_nspinor,nbandc1))
-   do ibc1=1,nbandc1
-     call pawcprj_alloc(cprj_correl(:,:,ibc1),0,dimcprj)
-   end do
+ if (paw_dmft%use_sc_dmft /= 0 .and. paral_kgb == 1) then
+   n2buff = nspinor*sum(dimcprj)
+   ABI_ALLOCATE(buffer_cprj_correl,(2,n2buff,nbandc1))
+   ABI_ALLOCATE(req_correl,(nbandc1))
  end if
 
 !Initialize temporary file (if used)
@@ -250,8 +252,9 @@
 
 !    In case of band parallelism combined with self consistent DMFT, need to
 !    exchange bands cprj
-     if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
+     if (paw_dmft%use_sc_dmft /= 0 .and. paral_kgb /= 0) then
        if (paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
+         req_correl = 0
          do ibc1=1,nbandc1
            proc_sender = paw_dmft%bandc_proc(ibc1)
            if(proc_sender == mpi_enreg%me_band) then
@@ -267,23 +270,22 @@
              ib1_this_proc = ib1_this_proc+1
 
 !            extract the band
-             call pawcprj_get(atindx1,cprj_correl(:,:,ibc1),cprj_ptr,natom,ib1_this_proc,ibg,ikpt,&
+             call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1_this_proc,ibg,ikpt,&
 &                             iorder_cprj,isppol,mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,&
 &                             unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
 
+             call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
                  ! send to proc_recver
                  ierr = 0
-                 call pawcprj_mpi_send(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),&
-&                                  proc_recver,mpi_enreg%comm_band,ierr)
+                 call xmpi_isend(buffer_cprj_correl(:,:,ibc1),proc_recver,0,mpi_enreg%comm_band,req_correl(ibc1),ierr)
                end if
              end do
            else
              ! recv from proc_sender
              ierr = 0
-             call pawcprj_mpi_recv(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),proc_sender,&
-&                                  mpi_enreg%comm_band,ierr)
+             call xmpi_irecv(buffer_cprj_correl(:,:,ibc1),proc_sender,0,mpi_enreg%comm_band,req_correl(ibc1),ierr)
            end if
          end do
        end if
@@ -325,6 +327,7 @@
 !        check if dmft and occupations
 !        write(std_out,*) 'ib,ibc1          ',ib,ibc1
 
+!        if ib is not part a band correlated in dmft do not repeat the following
          if(ibc1 /= 1) then
            if (paw_dmft%use_sc_dmft == 0) then
              cycle
@@ -343,18 +346,22 @@
 
              use_nondiag_occup_dmft = 1
              locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
+
              occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
-
              occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
-
 !            write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
-!
+!  
              if (locc_test .or. mkmem == 0) then
-
+ 
 !              Get ib1_this_proc from ib1
                if (paral_kgb==1) then
 !                cprj have already been extracted
-                 call pawcprj_copy(cprj_correl(:,:,ibc1),cwaveprjb)
+                 if (paw_dmft%bandc_proc(ibc1) /= mpi_enreg%me_band) then
+!                  if the band is not on this proc, wait for the recv to complete
+                   ierr = 0
+                   call xmpi_wait(req_correl(ibc1), ierr)
+                 end if
+                 call pawcprj_unpack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
                else ! paral_kgb /= 0
                  call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
 &                                 mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
@@ -366,7 +373,7 @@
              locc_test = (abs(occ(iband))>tol8)
              occup(1) = occ(iband)
            end if
-         else  ! nbandc1=1
+         else
            use_nondiag_occup_dmft=0
            locc_test = (abs(occ(iband))>tol8)
            occup(1) = occ(iband)
@@ -424,11 +431,9 @@
    ABI_DATATYPE_DEALLOCATE(cwaveprjb)
  end if
 
- if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
-   do ibc1=1,nbandc1
-     call pawcprj_free(cprj_correl(:,:,ibc1))
-   end do
-   ABI_DATATYPE_DEALLOCATE(cprj_correl)
+ if (paw_dmft%use_sc_dmft /= 0 .and. paral_kgb == 1) then
+   ABI_DEALLOCATE(buffer_cprj_correl)
+   ABI_DEALLOCATE(req_correl)
  end if
 
 !MPI: need to exchange rhoij_ between procs
