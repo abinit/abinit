@@ -154,7 +154,13 @@
 
  weight=wtk_k*occ_k
  weight_2=zero
- if(present(occ_k_2).and.nspinor==2) weight_2=wtk_k*occ_k_2
+ if(present(occ_k_2)) then
+   if (cplex /= 2) then
+     ! DMFT need complex cprj
+     MSG_ERROR('DMFT computation must be done with complex cprj. Check that istwfk = 1.')
+   end if
+   weight_2=wtk_k*occ_k_2
+ end if
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
  if (option==1) then
@@ -181,6 +187,10 @@
                ro11_re=ro11_re+cpi0(iplex,1)*cpj0(iplex,1)
              end do
              pawrhoij(iatom)%rhoij_(klmn,isppol)=pawrhoij(iatom)%rhoij_(klmn,isppol)+weight*ro11_re
+             if (present(occ_k_2)) then
+               ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+               pawrhoij(iatom)%rhoij_(klmn,isppol)=pawrhoij(iatom)%rhoij_(klmn,isppol)-weight_2*ro11_im
+             end if
            end do
          end do
        end do
@@ -200,10 +210,17 @@
                ro11_re=ro11_re+cpi0(iplex,1)*cpj0(iplex,1)
              end do
              pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
+             if (present(occ_k_2)) then
+               ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+               pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)-weight_2*ro11_im
+             end if
              if (compute_impart_cplex) then
                klmn_im=klmn_re+1
                ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
                pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+               if (present(occ_k_2)) then
+                 pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight_2*ro11_re
+               end if
              end if
            end do
          end do
@@ -245,6 +262,14 @@
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
+           if (present(occ_k_2)) then
+             ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+             ro22_im=cpi0(1,2)*cpj0(2,2)-cpi0(2,2)*cpj0(1,2)
+             pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight_2*(-ro11_im-ro22_im)
+             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight_2*(-ro21_im-ro12_im)
+             pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight_2*(-ro12_re+ro21_re)
+             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight_2*(-ro11_im+ro22_im)
+           end if
            if (compute_impart) then
              klmn_im=klmn_re+1
              if (nspden_rhoij>1) pawrhoij(iatom)%rhoij_(klmn_im,3)=pawrhoij(iatom)%rhoij_(klmn_im,3)+weight*(ro12_re-ro21_re)
@@ -256,14 +281,10 @@
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight*(ro11_im-ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_im,2)+weight*(ro12_im+ro21_im)
                end if
-               if (present(occ_k_2).and.nspinor==2) then
-                 pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight_2*(-ro11_im-ro22_im)
+               if (present(occ_k_2)) then
                  pawrhoij(iatom)%rhoij_(klmn_im,1)=pawrhoij(iatom)%rhoij_(klmn_im,1)+weight_2*( ro11_re+ro22_re)
-                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight_2*(-ro21_im-ro12_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_im,2)+weight_2*( ro21_re+ro12_re)
-                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight_2*(-ro12_re+ro21_re)
                  pawrhoij(iatom)%rhoij_(klmn_im,3)=pawrhoij(iatom)%rhoij_(klmn_im,3)+weight_2*(-ro12_im+ro21_im)
-                 pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight_2*(-ro11_im+ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight_2*( ro11_re-ro22_re)
                end if
              end if

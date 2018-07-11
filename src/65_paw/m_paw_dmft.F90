@@ -54,6 +54,8 @@ MODULE m_paw_dmft
  public :: print_sc_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
+
+ private :: init_sc_dmft_paralkgb, destroy_sc_dmft_paralkgb
 !!***
 
 !!****t* m_paw_dmft/paw_dmft_type
@@ -263,6 +265,13 @@ MODULE m_paw_dmft
   logical, allocatable :: band_in(:)
   ! true for each band included in the calculation.
 
+  integer, allocatable :: bandc_proc(:)
+  ! proc index (on comm_band) for each correlated band in DMFT
+
+  logical, allocatable :: use_bandc(:)
+  ! true for each proc wich has at least one band involved in DMFT non diagonal
+  ! occupations on band parallelism
+
   integer :: use_dmft
   ! 1 if non diagonal occupations are used, else 0
 
@@ -461,6 +470,11 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  else
   paw_dmft%mbandc = 0
  endif
+  
+ if(mpi_enreg%paral_kgb/=0) then
+   call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
+ end if
+
  if(paw_dmft%use_dmft > 0 .and. paw_dmft%mbandc /= dmftbandf-dmftbandi+1) then
   write(message, '(3a)' )&
 &  ' WARNING init_sc_dmft',ch10,&
@@ -1322,6 +1336,7 @@ subroutine destroy_sc_dmft(paw_dmft)
    ABI_DEALLOCATE(paw_dmft%exclude_bands)
  end if
 
+ call destroy_sc_dmft_paralkgb(paw_dmft)
 
 end subroutine destroy_sc_dmft
 !!***
@@ -1558,13 +1573,8 @@ subroutine saveocc_dmft(paw_dmft)
    do ikpt = 1, paw_dmft%nkpt
      do ib = 1, paw_dmft%mbandc
        do ib1 = 1, paw_dmft%mbandc
-         if (paw_dmft%nspinor==1) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
-         if (paw_dmft%nspinor==2) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
+         write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&         paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
        enddo
      enddo
    enddo
@@ -1649,15 +1659,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
      do ikpt = 1, paw_dmft%nkpt
        do ib = 1, paw_dmft%mbandc
          do ib1 = 1, paw_dmft%mbandc
-           if (paw_dmft%nspinor==1) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
-           if (paw_dmft%nspinor==2) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&             paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
+           read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
+&           paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
          enddo
        enddo
      enddo
@@ -1674,6 +1678,111 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
  endif
 
 end subroutine readocc_dmft
+!!***
+
+!!****f* m_paw_dmft/init_sc_dmft_paralkgb
+!! NAME
+!! init_sc_dmft_paralkgb
+!!
+!! FUNCTION
+!!  Init some values used with KGB parallelism in self consistent DMFT
+!!  calculation.
+!!
+!! INPUTS
+!!  paw_dmft   = data structure
+!!  
+!! OUTPUT
+!!  paw_dmft: bandc_proc, use_bandc
+!!
+!! PARENTS
+!!      init_sc_dmft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'init_sc_dmft_paralkgb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(paw_dmft_type),intent(inout) :: paw_dmft
+ type(MPI_type), intent(in) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: nproc, ib, ibc, proc
+
+! *********************************************************************
+ nproc = mpi_enreg%nproc_band
+
+ ABI_ALLOCATE(paw_dmft%bandc_proc,(paw_dmft%mbandc))
+ ABI_ALLOCATE(paw_dmft%use_bandc,(nproc))
+ paw_dmft%bandc_proc = 0
+ paw_dmft%use_bandc = .false.
+ 
+ do ibc=1,paw_dmft%mbandc
+   ib = paw_dmft%include_bands(ibc)
+   proc = mod((ib-1)/mpi_enreg%bandpp,nproc)
+
+   paw_dmft%bandc_proc(ibc) = proc
+
+   paw_dmft%use_bandc(proc+1) = .true.
+ end do
+end subroutine init_sc_dmft_paralkgb
+
+!!***
+
+!!****f* m_paw_dmft/destroy_sc_dmft_paralkgb
+!! NAME
+!! destroy_sc_dmft_paralkgb
+!!
+!! FUNCTION
+!!   deallocate bandc_proc and use_bandc
+!!
+!! INPUTS
+!!  paw_dmft   = data structure
+!!  
+!! OUTPUT
+!!
+!! PARENTS
+!!      destroy_sc_dmft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine destroy_sc_dmft_paralkgb(paw_dmft)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'destroy_sc_dmft_paralkgb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(paw_dmft_type),intent(inout) :: paw_dmft
+! *********************************************************************
+
+ if ( allocated(paw_dmft%exclude_bands) )  then
+   ABI_DEALLOCATE(paw_dmft%bandc_proc)
+ end if
+
+ if ( allocated(paw_dmft%exclude_bands) )  then
+   ABI_DEALLOCATE(paw_dmft%use_bandc)
+ end if
+
+end subroutine destroy_sc_dmft_paralkgb
 !!***
 
 END MODULE m_paw_dmft
