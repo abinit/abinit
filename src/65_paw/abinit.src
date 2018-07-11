@@ -29,11 +29,12 @@ sources = [
  "m_paw_overlap.F90",
  "m_paw_tools.F90",
  "m_paw_nhat.F90",
+ "m_paw_dfpnl.F90",
+ "m_fourier_interpol.F90",
  "calc_ubare.F90",
  "convert_notation.F90",
  "denfgr.F90",
  "dsdr_k_paw.F90",
- "fourier_interpol.F90",
  "initrhoij.F90",
  "make_efg_onsite.F90",
  "make_fc_paw.F90",
@@ -41,9 +42,6 @@ sources = [
  "pawdenpot.F90",
  "pawdensities.F90",
  "pawdfptenergy.F90",
- "paw_dfptnl_accrhoij.F90",
- "paw_dfptnl_energy.F90",
- "paw_dfptnl_xc.F90",
  "pawgrnl.F90",
  "pawgylmg.F90",
  "pawinit.F90",
@@ -63,7 +61,6 @@ sources = [
  "paw_symcprj.F90",
  "setnoccmmp.F90",
  "setrhoijpbe0.F90",
- "simple_j_dia.F90",
- "transgrid.F90"]
+ "simple_j_dia.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
