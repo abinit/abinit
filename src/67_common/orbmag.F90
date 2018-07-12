@@ -87,15 +87,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_errors
  use m_profiling_abi
 
- use m_orbmag
- use m_paw_overlap,only : overlap_k1k2_paw
+ use m_paw_orbmag,       only : orbmag_type
+ use m_paw_overlap,      only : overlap_k1k2_paw
 
- use m_geometry,     only : metric
- use m_berrytk,      only : smatrix
- use m_kg,           only : mkkin 
- use m_hamiltonian,  only : init_hamiltonian,destroy_hamiltonian,&
-&                           load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
- use m_getghc,        only : getghc
+ use m_geometry,         only : metric
+ use m_berrytk,          only : smatrix
+ use m_kg,               only : mkkin 
+ use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
+&                               load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
+ use m_getghc,           only : getghc
  use m_fftcore,          only : kpgsph
  use m_fft,              only : fftpac
  use m_mkffnl,           only : mkffnl
@@ -104,8 +104,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_pawfgr,           only : pawfgr_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
- use m_pawcprj,  only :  pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-                         pawcprj_get, pawcprj_getdim, pawcprj_set_zero, pawcprj_symkn
+ use m_pawcprj,          only :  pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
+                                 pawcprj_get, pawcprj_getdim, pawcprj_set_zero, pawcprj_symkn
  use m_fourier_interpol, only : transgrid
 
 !This section has been created automatically by the script Abilint (TD).

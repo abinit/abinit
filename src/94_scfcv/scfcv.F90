@@ -179,7 +179,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_ab7_mixing
  use m_errors
  use m_efield
- use m_orbmag
  use mod_prc_memory
  use m_nctk
  use m_hdr
@@ -215,6 +214,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_denpot,       only : pawdenpot
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
+ use m_paw_orbmag,       only : orbmag_type
  use m_paw_uj,           only : pawuj_red
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc

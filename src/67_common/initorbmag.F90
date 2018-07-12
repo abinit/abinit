@@ -56,22 +56,22 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_orbmag
  use m_profiling_abi
  use m_errors
  use m_xmpi
 
- use m_time,    only : timab
- use m_symtk,   only : symatm
- use m_fftcore, only : kpgsph
- use m_kpts,    only : listkk, smpbz
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type, simp_gen
- use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
- use m_paw_sphharm, only : initylmr,setsym_ylm
+ use m_time,          only : timab
+ use m_symtk,         only : symatm
+ use m_fftcore,       only : kpgsph
+ use m_kpts,          only : listkk, smpbz
+ use m_pawang,        only : pawang_type
+ use m_pawrad,        only : pawrad_type, simp_gen
+ use m_pawtab,        only : pawtab_type
+ use m_pawcprj,       only : pawcprj_alloc, pawcprj_getdim
+ use m_paw_sphharm,   only : initylmr,setsym_ylm
+ use m_paw_orbmag,    only : orbmag_type
  use m_special_funcs, only : sbf8
- use m_mpinfo,  only : proc_distrb_cycle
+ use m_mpinfo,        only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -34,7 +34,6 @@ module m_afterscfloop
  use m_errors
  use m_profiling_abi
  use m_efield
- use m_orbmag
  use m_ab7_mixing
  use m_hdr
 
@@ -58,6 +57,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
+ use m_paw_orbmag,       only : orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current

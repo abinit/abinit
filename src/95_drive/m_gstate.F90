@@ -41,7 +41,6 @@ module m_gstate
  use m_wffile
  use m_rec
  use m_efield
- use m_orbmag
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
@@ -75,6 +74,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
+ use m_paw_orbmag,       only : orbmag_type,destroy_orbmag
  use m_paw_uj,           only : pawuj_ini,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &

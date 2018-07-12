@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_orbmag
+!!****m* ABINIT/m_paw_orbmag
 !! NAME
-!!  m_orbmag
+!!  m_paw_orbmag
 !!
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module m_orbmag
+module m_paw_orbmag
 
  use defs_basis
  use m_profiling_abi
@@ -46,7 +46,7 @@ module m_orbmag
 !!***
 
 
-!!****t* defs_datatypes/orbmag_type
+!!****t* m_paw_orbmag/orbmag_type
 !! NAME
 !! orbmag_type
 !!
@@ -163,7 +163,7 @@ module m_orbmag
 
 contains
 
-!!****f* m_orbmag/destroy_orbmag
+!!****f* m_paw_orbmag/destroy_orbmag
 !! NAME
 !!
 !! FUNCTION
@@ -268,7 +268,7 @@ end subroutine destroy_orbmag
 
 !----------------------------------------------------------------------
 
-!!****f* m_orbmag/pawtwdij_2b
+!!****f* m_paw_orbmag/pawtwdij_2b
 !! NAME
 !! pawtwdij_2b
 !!
@@ -498,5 +498,5 @@ end subroutine destroy_orbmag
 !!***
  
 
-end module m_orbmag
+end module m_paw_orbmag
 !!***
