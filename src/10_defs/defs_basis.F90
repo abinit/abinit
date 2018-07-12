@@ -563,13 +563,8 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_CLASSIFY
  case ("paw_aepsi")
    wfk_task = WFK_TASK_PAW_AEPSI
-<<<<<<< HEAD
- case ("shirley")
-   wfk_task = WFK_TASK_SHIRLEY
  case ("wfk_ddk")
    wfk_task = WFK_TASK_DDK
-=======
->>>>>>> trunk/develop
  case default
    wfk_task = WFK_TASK_NONE
  end select
