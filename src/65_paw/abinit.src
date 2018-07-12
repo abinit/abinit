@@ -32,9 +32,9 @@ sources = [
  "m_paw_nhat.F90",
  "m_paw_dfpnl.F90",
  "m_pawdenpot.F90",
+ "m_paw_correlations.F90",
  "m_fourier_interpol.F90",
  "m_paw_uj",
- "calc_ubare.F90",
  "denfgr.F90",
  "dsdr_k_paw.F90",
  "initrhoij.F90",
@@ -47,13 +47,8 @@ sources = [
  "pawmkrho.F90",
  "pawmkrhoij.F90",
  "pawpolev.F90",
- "pawpuxinit.F90",
- "pawuenergy.F90",
- "pawxenergy.F90",
  "paw_mknewh0.F90",
  "paw_symcprj.F90",
- "setnoccmmp.F90",
- "setrhoijpbe0.F90",
  "simple_j_dia.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

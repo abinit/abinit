@@ -39,6 +39,7 @@ module m_entropyDMFT
   use m_pawang, only : pawang_type
   use m_pawrad, only : pawrad_type, simp_gen, poisson
   use m_pawtab, only : pawtab_type
+  use m_paw_correlations,only : pawpuxinit
   use m_io_tools, only : get_unit
   use m_data4entropyDMFT
 

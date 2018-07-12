@@ -139,6 +139,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_paw_init,        only : pawinit,paw_gencond
  use m_paw_nhat,        only : nhatgrid
  use m_paw_tools,       only : chkpawovlp
+ use m_paw_correlations,only : pawpuxinit
  !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
  !use m_paw_dmft,       only : paw_dmft_type
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free

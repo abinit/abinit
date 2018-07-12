@@ -91,6 +91,8 @@ module m_respfn_driver
  use m_common,      only : setup1, prteigrs
  use m_fourier_interpol, only : transgrid
 
+ use m_paw_correlations,only : pawpuxinit
+
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif

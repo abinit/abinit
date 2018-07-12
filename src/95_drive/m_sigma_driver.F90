@@ -109,6 +109,8 @@ module m_sigma_driver
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
 
+ use m_paw_correlations,only : pawpuxinit
+
  implicit none
 
  private

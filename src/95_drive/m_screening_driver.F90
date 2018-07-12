@@ -94,6 +94,8 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
 
+ use m_paw_correlations, only : pawpuxinit
+
  implicit none
 
  private
