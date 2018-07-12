@@ -88,6 +88,7 @@ module m_bethe_salpeter
  use m_paw_init,        only : pawinit,paw_gencond
  use m_paw_onsite,      only : pawnabla_init
  use m_paw_dmft,        only : paw_dmft_type
+ use m_paw_mkrho,       only : denfgr
  use m_paw_nhat,        only : nhatgrid,pawmknhat
  use m_paw_tools,       only : chkpawovlp,pawprt
  use m_paw_correlations,only : pawpuxinit

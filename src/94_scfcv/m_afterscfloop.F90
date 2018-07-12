@@ -54,6 +54,7 @@ module m_afterscfloop
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
+ use m_paw_mkrho,        only : pawmkrho
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp

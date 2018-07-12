@@ -59,6 +59,7 @@ module m_vtorho
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,   only : pawmkrhoij
+ use m_paw_mkrho,          only : pawmkrho
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit

@@ -154,6 +154,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
 &                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
  use m_paw_an,     only : paw_an_type
+ use m_paw_mkrho,  only : pawmkrho
  use m_paw_nhat,   only : pawnhatfr
  use m_paw_dfpt,   only : dfptenergy
  use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy

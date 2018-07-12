@@ -48,6 +48,7 @@ module m_dfpt_vtorho
 &                       pawrhoij_mpisum_unpacked
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
  use m_fft,      only : fftpac
  use m_spacepar, only : symrhg
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup

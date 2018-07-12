@@ -193,6 +193,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawtab,           only : pawtab_type
  use m_paw_an,           only : paw_an_type
  use m_paw_ij,           only : paw_ij_type
+ use m_paw_mkrho,        only : denfgr
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy
  use m_pawcprj,          only : pawcprj_type
