@@ -606,7 +606,7 @@ in order of number of occurrence in the input files provided with the package.
         for topic in self.all_topics:
             all_mdfiles.remove("_" + topic + ".md")
         if all_mdfiles:
-            raise RuntimeError("Found md files in topics not listed in python module `variable.py.\n%s" % (
+            raise RuntimeError("Found md files in topics not listed in python module `variables.py.\n%s" % (
                 str(all_mdfiles)))
 
         # datastructures needed for topics index.md
