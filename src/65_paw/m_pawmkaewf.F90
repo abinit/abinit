@@ -32,7 +32,7 @@ module m_pawmkaewf
  use defs_wvltypes
  use m_profiling_abi
  use m_xmpi
- use m_blas
+ use m_hide_blas
  use m_splines
  use m_errors
  use m_nctk

@@ -400,10 +400,10 @@ implicit none
    if(dtset%ionmov == 27)then
      call effective_potential_file_getType(filnam(3),filetype)
      if(filetype /= 1)then
-          write(message, '(5a)' )&
-&           ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
-&           ' It is not compatible with ionmov 27'
-          MSG_ERROR(message)
+       write(message, '(5a)' )&
+&       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
+&       ' It is not compatible with ionmov 27'
+       MSG_ERROR(message)
      end if
 
    end if
@@ -571,9 +571,9 @@ implicit none
 
 !        Get the additional coeff
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&                inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
-&                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&                anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
+&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -662,9 +662,9 @@ implicit none
 !TEST_AM!
          sc_size_TS = (/2,2,2/)
          call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
-&       comm,anharmstr=inp%bound_anhaStrain==1,&
-&       spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
+&         ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
+&         comm,anharmstr=inp%bound_anhaStrain==1,&
+&         spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
 &         only_even_power=.true.,only_odd_power=.false.)
 
          if(iam_master)then
@@ -716,7 +716,7 @@ implicit none
          model_bound = 0
          model_ncoeffbound = 0
 
-       do ii=2,inp%bound_maxCoeff
+         do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
            nmodels = 1
            ABI_ALLOCATE(list_bound,(nmodels,ii))

@@ -43,4 +43,5 @@ optcell = 2
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml and generate effective potential and run NPT simulation
+#%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

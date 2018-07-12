@@ -1939,7 +1939,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          fildata=trim(dtfil%fnametmp_app_den)//'_'//trim(tag)
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          call fftdatar_write_from_hdr("density",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-&          dtset%nspden,rhor,mpi_enreg,eigen=eigen)
+&         dtset%nspden,rhor,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -1953,7 +1953,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          ! output the Laplacian of density
          call fftdatar_write_from_hdr("kinedr",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-&          dtset%nspden,taur,mpi_enreg,eigen=eigen)
+&         dtset%nspden,taur,mpi_enreg,eigen=eigen)
        end if
      end if
 

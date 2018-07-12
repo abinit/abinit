@@ -57,7 +57,7 @@
 
  use m_geometry,     only : metric
  use m_io_tools,   only : open_file, get_unit
- use m_abilasi,    only : matrginv
+ use m_hide_lapack,    only : matrginv
  use m_mpinfo,     only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
  use m_numeric_tools,  only : kramerskronig
 

@@ -41,7 +41,7 @@ MODULE m_exc_itdiago
  use m_io_tools,      only : open_file
  use m_time,          only : cwtime
  use m_numeric_tools, only : stats_t, stats_eval
- use m_abilasi,       only : xhpev !xheev,
+ use m_hide_lapack,   only : xhpev !xheev,
  use m_bse_io,        only : exc_read_rcblock
 
  implicit none

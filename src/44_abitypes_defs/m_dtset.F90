@@ -858,6 +858,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%slabwsrad          = dtin%slabwsrad
  dtout%slabzbeg           = dtin%slabzbeg
  dtout%slabzend           = dtin%slabzend
+ dtout%slk_rankpp         = dtin%slk_rankpp
  dtout%smdelta            = dtin%smdelta
  dtout%spgaxor            = dtin%spgaxor
  dtout%spgorig            = dtin%spgorig
@@ -1614,7 +1615,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none

@@ -176,7 +176,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
      do ilmn=1,jlmn
        klmn=j0lmn+ilmn
        if ((ilmn==jlmn).and.test_pawu.and.test_exexch.and.test_lnspinat) &
-&        zz=zz+pawtab(itypat)%rhoij0(klmn)
+&       zz=zz+pawtab(itypat)%rhoij0(klmn)
      end do
    end do
 

@@ -29,7 +29,7 @@ MODULE m_double_grid
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_blas
+ use m_hide_blas
  use m_bz_mesh
  use m_kptrank
 

@@ -42,7 +42,7 @@ MODULE m_exc_spectra
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx
- use m_blas,            only : xdotu,xdotc
+ use m_hide_blas,       only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
  use m_crystal,         only : crystal_t
  use m_crystal_io,      only : crystal_ncwrite

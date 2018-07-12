@@ -49,8 +49,8 @@ MODULE m_exc_diago
  use m_pawhr,           only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
- use m_abilasi,         only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv
- use m_blas,            only : xdotc, xgemm
+ use m_hide_lapack,     only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv
+ use m_hide_blas,       only : xdotc, xgemm
  use m_bse_io,          only : exc_fullh_from_blocks, offset_in_file, rrs_of_glob, ccs_of_glob, &
 &                              exc_read_bshdr, exc_skip_bshdr_mpio, exc_read_rblock_fio
  use m_exc_spectra,     only : build_spectra

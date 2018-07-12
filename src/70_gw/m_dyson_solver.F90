@@ -37,7 +37,7 @@ MODULE m_dyson_solver
  use m_numeric_tools, only : linfit, pade, dpade, newrap_step
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char10
- use m_abilasi,       only : xheev
+ use m_hide_lapack,   only : xheev
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_sigma,         only : sigma_t
 
