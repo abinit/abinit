@@ -157,7 +157,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'classify_bands'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

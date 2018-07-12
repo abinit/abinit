@@ -91,7 +91,6 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 #undef ABI_FUNC
 #define ABI_FUNC 'poslifetime'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

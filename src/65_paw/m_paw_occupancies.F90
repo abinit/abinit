@@ -46,6 +46,8 @@ MODULE m_paw_occupancies
  public :: pawmkrhoij  ! Compute the PAW occupancies rhoij
  public :: pawaccrhoij ! Accumulate the contribution of one band to the PAW occupancies rhoij
  public :: initrhoij   ! Initialize the PAW occupancies rhoij from atomic data
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -114,6 +116,7 @@ MODULE m_paw_occupancies
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrhoij'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -491,6 +494,7 @@ end subroutine pawmkrhoij
  subroutine pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj1,ipert,isppol,my_natom,natom,&
 &                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1057,6 +1061,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 &                    nspden,nspinor,nsppol,ntypat,pawrhoij,pawspnorb,pawtab,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

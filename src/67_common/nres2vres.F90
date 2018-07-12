@@ -99,7 +99,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_62_poisson
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

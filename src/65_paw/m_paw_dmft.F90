@@ -54,7 +54,6 @@ MODULE m_paw_dmft
  public :: print_sc_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
-!!***
 
 !!****t* m_paw_dmft/paw_dmft_type
 !! NAME

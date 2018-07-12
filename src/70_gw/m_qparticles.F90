@@ -290,7 +290,6 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdqps'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

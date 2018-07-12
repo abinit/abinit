@@ -114,7 +114,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 #define ABI_FUNC 'orbmag'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

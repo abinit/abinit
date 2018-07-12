@@ -254,7 +254,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
@@ -2441,7 +2440,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 

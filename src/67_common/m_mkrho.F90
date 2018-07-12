@@ -1947,6 +1947,12 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 &                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
 
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_atomden'
+!End of the abilint section
+
  implicit none
 
 !Arguments ------------------------------------

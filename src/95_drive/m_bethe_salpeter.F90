@@ -196,7 +196,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #define ABI_FUNC 'bethe_salpeter'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

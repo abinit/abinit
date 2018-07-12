@@ -60,12 +60,10 @@ module m_paw_mkaewf
  implicit none
 
  private
-!!***
 
  public :: pawmkaewf
-!!***
 
-contains
+CONTAINS  !========================================================================================
 !!***
 
 !!****f* m_paw_mkaewf/pawmkaewf
@@ -150,7 +148,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 #define ABI_FUNC 'pawmkaewf'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

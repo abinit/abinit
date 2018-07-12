@@ -50,6 +50,8 @@ MODULE m_paw_overlap
  public :: smatrix_k_paw
  public :: qijb_kk
  public :: expibi
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -107,11 +109,11 @@ MODULE m_paw_overlap
  subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
 &                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'overlap_k1k2_paw'
- use interfaces_65_paw, except_this_one => overlap_k1k2_paw
 !End of the abilint section
 
  implicit none
@@ -243,6 +245,7 @@ MODULE m_paw_overlap
 & g1,gprimd,kpt,mband,mbandw,mkmem,mpi_enreg,&
 & natom,nband,nkpt,nspinor,nsppol,ntypat,pawang,pawrad,pawtab,rprimd,&
 & seed_name,typat,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -667,6 +670,7 @@ MODULE m_paw_overlap
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -778,6 +782,13 @@ MODULE m_paw_overlap
 
  subroutine qijb_kk(calc_qijb,dkvecs,expibi,gprimd,lmn2max,natom,ntypat,&
 &                   pawang,pawrad,pawtab,typat)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'qijb_kk'
+!End of the abilint section
 
  implicit none
 
@@ -926,6 +937,7 @@ MODULE m_paw_overlap
 #include "abi_common.h"
 
  subroutine expibi(calc_expibi,dkvecs,natom,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

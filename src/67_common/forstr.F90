@@ -213,7 +213,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => forstr
 !End of the abilint section

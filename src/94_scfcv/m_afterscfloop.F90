@@ -297,7 +297,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 

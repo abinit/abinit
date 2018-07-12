@@ -46,6 +46,8 @@ MODULE m_paw_nmr
 !public procedures.
  public :: make_efg_onsite ! Compute the electric field gradient due to PAW on-site densities
  public :: make_fc_paw     ! Compute the PAW on-site contribution to the Fermi-contact
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -99,6 +101,7 @@ MODULE m_paw_nmr
 subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij,pawrad,pawtab, &
 &                          rprimd,symrel,tnons,xred,&
 &                          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

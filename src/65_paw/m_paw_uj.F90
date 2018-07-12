@@ -55,6 +55,8 @@ MODULE m_paw_uj
 !  lprtmat:    prints out the real matrix mmat
 !  lcalcu:     prints out real the real matrice mmat
 !  blow_pawuj: reads a real nxn matrice and appends lines n+1 and clumn n+1
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -82,6 +84,7 @@ MODULE m_paw_uj
 !! SOURCE
 
 subroutine pawuj_ini(dtpawuj,ndtset)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -161,6 +164,7 @@ end subroutine pawuj_ini
 
 subroutine pawuj_free(dtpawuj)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -227,10 +231,12 @@ end subroutine pawuj_free
 
 subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_det'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -769,10 +775,12 @@ end subroutine pawuj_det
 subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_red'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1019,10 +1027,12 @@ end subroutine pawuj_red
 subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,&
 & disv_sc,nat_sc,smult_sc,nsh_sc,opt,prtvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chiscwrt'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1127,10 +1137,12 @@ end subroutine chiscwrt
 
 subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linvmat'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1244,10 +1256,12 @@ end subroutine linvmat
 
 subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lprtmat'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1326,6 +1340,7 @@ end subroutine lprtmat
 !! SOURCE
 
 subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1428,6 +1443,7 @@ end subroutine lcalcu
 !! SOURCE
 
 subroutine blow_pawuj(mat,nj,matt)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

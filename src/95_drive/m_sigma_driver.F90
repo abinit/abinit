@@ -206,7 +206,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -3846,7 +3845,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

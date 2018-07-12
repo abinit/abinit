@@ -60,6 +60,8 @@ MODULE m_paw_dfpt
  public :: pawdfptenergy ! Compute Hartree+XC PAW on-site contrib. to a 1st or 2nd-order energy
  public :: pawgrnl       ! Compute derivatives of total energy due to NL terms (PAW Dij derivatives)
  public :: dsdr_k_paw    ! Compute PAW on-site terms for forces/stresses for finite electric fields
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -148,6 +150,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &                    paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
 &                    pawtab,pawxcdev,xclevel, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -511,6 +514,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &          nattyp,nfft,ngfft,nhat,nlstr,nspden,nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,ucvol,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_grid,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1964,6 +1968,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2061,6 +2066,7 @@ end subroutine pawgrnl
 !! SOURCE
 
  subroutine dsdr_k_paw(cprj_k,cprj_kb,dsdr,dtefield,kdir,kfor,mband,natom,ncpgr,typat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

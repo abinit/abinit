@@ -53,6 +53,8 @@ MODULE m_paw_correlations
  public :: setnoccmmp   ! Compute LDA+U density matrix nocc_{m,m_prime} or impose it
  public :: setrhoijpbe0 ! Impose value of rhoij for using an auxiliairy file (PBE0 only)
  public :: calc_ubare   ! Calculate the bare interaction on atomic orbitals
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -117,10 +119,12 @@ MODULE m_paw_correlations
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,jpawu,llexexch,llpawu,&
 &           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,ucrpa)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpuxinit'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -743,10 +747,12 @@ MODULE m_paw_correlations
  subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,pawprtvol,pawtab,paw_ij,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuenergy'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1090,10 +1096,12 @@ MODULE m_paw_correlations
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxenergy'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1260,6 +1268,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setnoccmmp'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2138,10 +2147,12 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &                       mpi_comm_read,my_natom,natom,ntypat,pawrhoij,pawtab,typat,&
 &                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setrhoijpbe0'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2478,10 +2489,12 @@ end subroutine setrhoijpbe0
 
  subroutine calc_ubare(itypatcor,lpawu,pawang,pawrad,pawtab,rmax)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_ubare'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

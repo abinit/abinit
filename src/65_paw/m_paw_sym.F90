@@ -39,6 +39,8 @@ MODULE m_paw_sym
 !public procedures.
  public :: paw_symcprj    ! Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - in-place version
  public :: paw_symcprj_op ! Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - out-of-place version
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------

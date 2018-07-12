@@ -694,7 +694,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_nextLambda'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
     type(entropyDMFT_t) , intent(inout) :: e_t

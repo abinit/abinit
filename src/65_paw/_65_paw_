@@ -21,7 +21,7 @@
 !! m_paw_dfpt.F90
 !! m_paw_dfptnl.F90
 !! m_paw_dmft.F90
-!! m_paw_efield"
+!! m_paw_efield.F90
 !! m_paw_hr.F90
 !! m_paw_init.F90
 !! m_paw_lmn.F90

@@ -219,7 +219,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 

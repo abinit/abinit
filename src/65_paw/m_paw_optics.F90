@@ -52,6 +52,8 @@ MODULE m_paw
  public :: optics_paw
  public :: optics_paw_core
  public :: linear_optics_paw
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -108,6 +110,7 @@ MODULE m_paw
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
 &               pawrad,pawtab)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -523,6 +526,7 @@ MODULE m_paw
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -850,6 +854,7 @@ MODULE m_paw
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out,mpi_enreg_seq)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

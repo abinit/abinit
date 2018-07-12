@@ -133,7 +133,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => posdoppler
 !End of the abilint section

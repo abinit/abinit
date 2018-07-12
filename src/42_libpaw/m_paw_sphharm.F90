@@ -1667,7 +1667,7 @@ elemental function dble_factorial(nn)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'rfactorial'
+#define ABI_FUNC 'dble_factorial'
 !End of the abilint section
 
  implicit none
@@ -2526,10 +2526,12 @@ end subroutine create_mlms2jmj
 
 subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setsym_ylm'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

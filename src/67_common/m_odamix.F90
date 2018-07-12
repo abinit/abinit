@@ -195,7 +195,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

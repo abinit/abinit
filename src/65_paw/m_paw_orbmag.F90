@@ -159,9 +159,11 @@ module m_paw_orbmag
  ! Bound methods:
  public :: destroy_orbmag
  public :: pawtwdij_2b
+
+CONTAINS  !========================================================================================
 !!***
 
-contains
+!----------------------------------------------------------------------
 
 !!****f* m_paw_orbmag/destroy_orbmag
 !! NAME
@@ -332,7 +334,6 @@ end subroutine destroy_orbmag
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawtwdij_2b'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

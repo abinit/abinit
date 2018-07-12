@@ -89,7 +89,6 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_grad_berry'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

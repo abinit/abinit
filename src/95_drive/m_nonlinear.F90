@@ -162,7 +162,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_65_paw
  use interfaces_95_drive
 !End of the abilint section
 

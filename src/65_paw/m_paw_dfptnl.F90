@@ -46,9 +46,12 @@ MODULE m_paw_dfptnl
  public :: paw_dfptnl_energy    ! Compute the XC PAW on-site contributions to a 3rd-order energy
  public :: paw_dfptnl_xc        ! Compute a contribution of the 3rd-derivative of XC energy of ONE PAW sphere
  public :: paw_dfptnl_acccrhoij ! Accumulate the 2nd order PAW quantities rhoij^(2)
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
+
 !!****f* m_paw_dfptnl/paw_dfptnl_energy
 !! NAME
 !! paw_dfptnl_energy
@@ -99,6 +102,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 &                    pawrhoij_1,pawrhoij_2,pawrhoij_3,&
 &                    pawtab,pawxcdev,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -302,6 +306,7 @@ end subroutine paw_dfptnl_energy
 
 subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmselect1,lmselect2,lmselect3,&
 &                 nhat1,nhat2,nhat3,nkxc,nrad,nspden,pawang,pawrad,rhor1,rhor2,rhor3,usexcnhat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -532,6 +537,7 @@ end subroutine paw_dfptnl_xc
 &                       cwaveprj1_pert12,cwaveprj1_pert21,ipert1,ipert2,isppol,my_natom,natom,&
 &                       nspinor,occ_k,pawrhoij,wtk_k,&
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

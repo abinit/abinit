@@ -172,7 +172,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suscep_stat'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -918,7 +917,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 #undef ABI_FUNC
 #define ABI_FUNC 'susk'
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1521,7 +1519,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 #undef ABI_FUNC
 #define ABI_FUNC 'suskmm'
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

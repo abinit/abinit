@@ -235,7 +235,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_53_ffts
  use interfaces_56_io_mpi
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 
@@ -2529,7 +2528,6 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_drive'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

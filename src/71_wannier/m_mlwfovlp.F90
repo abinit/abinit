@@ -134,7 +134,6 @@ contains
 #define ABI_FUNC 'mlwfovlp'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

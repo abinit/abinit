@@ -45,6 +45,8 @@ MODULE m_paw_tools
 !public procedures.
  public :: chkpawovlp
  public :: pawprt
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -81,10 +83,12 @@ MODULE m_paw_tools
 
 subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkpawovlp'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -320,6 +324,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawprt'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

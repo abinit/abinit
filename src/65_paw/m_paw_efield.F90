@@ -37,6 +37,8 @@ MODULE m_paw_efield
 
 !public procedures.
  public :: pawpolev ! Compute the PAW on-site term for polarization
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -76,6 +78,7 @@ MODULE m_paw_efield
 
 subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 &                   comm_atom) ! optional argument (parallelism)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

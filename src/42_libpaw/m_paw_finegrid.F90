@@ -742,11 +742,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/shapefunc1
 !  shapefunc1 is g(x) (gaussian)
    function shapefunc1(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shapefunc1'
 !End of the abilint section
+
      real(dp) :: shapefunc1
      real(dp),intent(in) :: arg
      shapefunc1=exp(-(arg/sigma)**lambda)
@@ -756,11 +759,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/shapefunc1_0
 !  shapefunc1_0 is g(x) (gaussian) for small x
    function shapefunc1_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shapefunc1_0'
 !End of the abilint section
+
      real(dp) :: shapefunc1_0
      real(dp),intent(in) :: arg
      shapefunc1_0=one-(arg/sigma)**lambda+half*(arg/sigma)**(2*lambda)-(arg/sigma)**(3*lambda)/6._dp
@@ -770,11 +776,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/shapefunc2
 !  shapefunc2 is g(x) (sinc2)
    function shapefunc2(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shapefunc2'
 !End of the abilint section
+
      real(dp) :: shapefunc2
      real(dp),intent(in) :: arg
      shapefunc2=(sin(pi_over_rshp*arg)/(pi_over_rshp*arg))**2
@@ -784,11 +793,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/shapefunc2_0
 !  shapefunc2_0 is g(x) (sinc2) for small x
    function shapefunc2_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shapefunc2_0'
 !End of the abilint section
+
      real(dp) :: shapefunc2_0
      real(dp),intent(in) :: arg
      shapefunc2_0=one-(pi_over_rshp*arg)**2/three+two*(pi_over_rshp*arg)**4/45._dp
@@ -798,11 +810,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/shapefunc3
 !  shapefunc3 is g(x) (Bessel)
    function shapefunc3(jbes1,jbes2,argl)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shapefunc3'
 !End of the abilint section
+
      integer,intent(in) :: argl
      real(dp) :: shapefunc3
      real(dp),intent(in) :: jbes1,jbes2
@@ -813,11 +828,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc1
 !  dshpfunc1(x) is g_prime(x) (gaussian)
    function dshpfunc1(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc1'
 !End of the abilint section
+
      real(dp) :: dshpfunc1
      real(dp),intent(in) :: arg
      dshpfunc1=-lambda/sigma*(arg/sigma)**(lambda-1)*exp(-(arg/sigma)**lambda)
@@ -827,11 +845,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc1_ovr_0
 !  dshpfunc1_ovr_0(x) is g_prime(x)/x (gaussian) for small x and lambda>2
    function dshpfunc1_ovr_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc1_ovr_0'
 !End of the abilint section
+
      real(dp) :: dshpfunc1_ovr_0
      real(dp),intent(in) :: arg
      dshpfunc1_ovr_0=-lambda/sigma**2*((arg/sigma)**(lambda-2)-(arg/sigma)**(2*lambda-2))
@@ -841,11 +862,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc1_ovr_0_2
 !  dshpfunc1_ovr_0_2(x) is g_prime(x)/x (gaussian) for small x and lambda=2
    function dshpfunc1_ovr_0_2(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc1_ovr_0_2'
 !End of the abilint section
+
      real(dp) :: dshpfunc1_ovr_0_2
      real(dp),intent(in) :: arg
      dshpfunc1_ovr_0_2=-two/sigma**2*(one-(arg/sigma)**2+half*(arg/sigma)**4)
@@ -855,11 +879,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc2
 !  dshpfunc2(x) is g_prime(x) (sinc2)
    function dshpfunc2(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc2'
 !End of the abilint section
+
      real(dp) :: dshpfunc2
      real(dp),intent(in) :: arg
      dshpfunc2=two*pi_over_rshp*sin(pi_over_rshp*arg)/(pi_over_rshp*arg)**3&
@@ -870,11 +897,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc2_ovr_0
 !  dshpfunc2_ovr_0(x) is g_prime(x)/x (sinc2) for small x
    function dshpfunc2_ovr_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc2_ovr_0'
 !End of the abilint section
+
      real(dp) :: dshpfunc2_ovr_0
      real(dp),intent(in) :: arg
      dshpfunc2_ovr_0=-two*pi_over_rshp**2/3._dp+8._dp*pi_over_rshp**4*arg**2/45._dp
@@ -884,11 +914,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/dshpfunc3
 !  dshpfunc3(x) is g_prime(x) (Bessel)
    function dshpfunc3(jbesp1,jbesp2,argl)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dshpfunc3'
 !End of the abilint section
+
      integer :: argl
      real(dp) :: dshpfunc3
      real(dp),intent(in) :: jbesp1,jbesp2
@@ -900,11 +933,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc1
 !  d2shpfunc1(x) is g_prime_prime(x) (gaussian)
    function d2shpfunc1(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc1'
 !End of the abilint section
+
      real(dp) :: d2shpfunc1
      real(dp),intent(in) :: arg
      d2shpfunc1=lambda/(sigma**2)*(lambda*(arg/sigma)**(2*lambda-2) &
@@ -915,11 +951,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0
 !  d2shpfunc1_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda>4
    function d2shpfunc1_ovr2_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc1_ovr2_0'
 !End of the abilint section
+
      real(dp) :: d2shpfunc1_ovr2_0
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0=-lambda/(sigma**4)*((lambda-2)*(arg/sigma)**(lambda-4) &
@@ -930,11 +969,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_2
 !  d2shpfunc1_ovr2_0_2(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==2
    function d2shpfunc1_ovr2_0_2(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc1_ovr2_0_2'
 !End of the abilint section
+
      real(dp) :: d2shpfunc1_ovr2_0_2
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_2=four/(sigma**4)*(one-(arg/sigma)**2)
@@ -944,11 +986,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_3
 !  d2shpfunc1_ovr2_0_3(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==3
    function d2shpfunc1_ovr2_0_3(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc1_ovr2_0_3'
 !End of the abilint section
+
      real(dp) :: d2shpfunc1_ovr2_0_3
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_3=-three/arg/sigma**3+12._dp*arg**2/sigma**6-half*21._dp*arg**5/sigma**9
@@ -958,11 +1003,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_4
 !  d2shpfunc1_ovr2_0_4(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==4
    function d2shpfunc1_ovr2_0_4(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc1_ovr2_0_4'
 !End of the abilint section
+
      real(dp) :: d2shpfunc1_ovr2_0_4
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_4=-8._dp/(sigma**4)*(one-three*(arg/sigma)**4)
@@ -972,11 +1020,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc2
 !  d2shpfunc2(x) is g_prime_prime(x) (sinc2)
    function d2shpfunc2(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc2'
 !End of the abilint section
+
      real(dp) :: d2shpfunc2
      real(dp),intent(in) :: arg
      d2shpfunc2=two/(pi_over_rshp**2*arg**4)* &
@@ -989,11 +1040,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc2_ovr2_0
 !  d2shpfunc2_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (sinc2) for small x
    function d2shpfunc2_ovr2_0(arg)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc2_ovr2_0'
 !End of the abilint section
+
      real(dp) :: d2shpfunc2_ovr2_0
      real(dp),intent(in) :: arg
      d2shpfunc2_ovr2_0=16._dp/45._dp*pi_over_rshp**4-8._dp/105._dp*pi_over_rshp**6*arg**2 &
@@ -1004,11 +1058,14 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !!****f* m_paw_finegrid/d2shpfunc3
 !  d2shpfunc3(x) is g_prime_prime(x) (Bessel)
    function d2shpfunc3(jbespp1,jbespp2,argl)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2shpfunc3'
 !End of the abilint section
+
      integer,intent(in) :: argl
      real(dp) :: d2shpfunc3
      real(dp),intent(in) :: jbespp1,jbespp2
@@ -1053,6 +1110,7 @@ end subroutine pawgylm
 !! SOURCE
 
 subroutine pawgylmg(gprimd,gylmg,kg,kpg,kpt,lmax,nkpg,npw,ntypat,pawtab,ylm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1458,11 +1516,14 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 ! ------------------------------------------------
 !!****f* m_paw_finegrid/my_ind_positions
  subroutine my_ind_positions(periodic,i,n,j,go)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'my_ind_positions'
 !End of the abilint section
+
    implicit none
    integer,intent(in) :: i,n
    logical,intent(in) :: periodic
@@ -1478,11 +1539,14 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 ! ------------------------------------------------
 !!****f* m_paw_finegrid/my_ext_buffers
    subroutine my_ext_buffers(periodic,nl,nr)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'my_ext_buffers'
 !End of the abilint section
+
   implicit none
   logical, intent(in) :: periodic
   integer, intent(out) :: nl,nr

@@ -6430,7 +6430,6 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_plot_ur'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -7220,7 +7219,6 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_pawrhoij'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

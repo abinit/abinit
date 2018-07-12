@@ -38,6 +38,8 @@ MODULE m_fourier_interpol
 !public procedures.
  public :: transgrid        ! Convert a density/potential from the coarse to the fine grid and vice versa
  public :: fourier_interpol ! Perform a Fourier interpolation. Just a wrapper for transgrid.
+
+CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -100,10 +102,12 @@ MODULE m_fourier_interpol
 
 subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfgr,rhog,rhogf,rhor,rhorf)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'transgrid'
+ use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -434,6 +438,7 @@ end subroutine transgrid
 
 subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,ngfft_out,&
 & paral_kgb,MPI_enreg,rhor_in,rhor_out,rhog_in,rhog_out)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

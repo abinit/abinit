@@ -72,7 +72,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_getghc'
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

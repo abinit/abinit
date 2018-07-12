@@ -140,7 +140,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 #define ABI_FUNC 'd2frnl'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

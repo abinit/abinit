@@ -216,7 +216,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_65_paw
  use interfaces_72_response
 !End of the abilint section
 
