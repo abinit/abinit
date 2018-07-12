@@ -2,11 +2,11 @@
 authors: XG, RC
 ---
 
-# Third (basic) lesson  
+# Third (basic) tutorial
 
 ## Crystalline silicon.  
 
-This lesson aims at showing you how to get the following physical properties, for an insulator:
+This tutorial aims at showing you how to get the following physical properties, for an insulator:
 
 * the total energy 
 * the lattice parameter 
@@ -14,12 +14,12 @@ This lesson aims at showing you how to get the following physical properties, fo
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## Computing the total energy of silicon at fixed number of k points
 
 *Before beginning, you might consider to work in a different subdirectory as
-for lesson_base1 or lesson_base2 . Why not "Work3"?*
+for tutorial 1 or 2 . Why not "Work3"?*
 
 The file ~abinit/tests/tutorial/Input/tbase3_x.files lists the file names and root names. 
 You can copy it in the Work3 directory and change it as you did for the tbase1_x.files and tbase2_x.files files. 
@@ -291,7 +291,7 @@ The minimum of the conduction band is even slightly displaced with respect to X,
 This underestimation of the band gap is well-known (the famous DFT band-gap problem). 
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
 Theory: use the GW approximation. 
-This is described in [[lesson:gw1|the first lesson on the GW approximation]].
+This is described in [the first tutorial on GW](gw1).
 
 For experimental data and band structure representation, see  
 M.L. Cohen and J.R. Chelikowski  
@@ -314,3 +314,65 @@ Springer-Verlag New-York (1988).
     [[tolwfr]], while the two upper bands are less converged (still sufficiently
     for graphical representation of the band structure). 
     In order to achieve the same convergence for all 8 bands, it is advised to use [[nband]]=10  (that is, 8 + 2).
+
+## Using AbiPy scripts to automate the most boring steps 
+
+|AbiPy| provides several tools to facilitate the preparation of band structure 
+calculations and the analysis of the output results.
+First of all, one can use the |abistruct| script with the `kpath` command to determine a high-symmmetry
+k-path from **any file** containing stuctural information (abinit input file, netcdf output file, ...)
+The high-symmetry k-path follows the conventions described in [[cite:Setyawan2010]].
+
+```sh
+abistruct.py kpath tbase3_5.in
+
+# Abinit Structure
+ natom 2
+ ntypat 1
+ typat 1 1
+ znucl 14
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.2500000000    0.2500000000    0.2500000000
+ acell    1.0    1.0    1.0
+ rprim
+    0.0000000000    5.1080000000    5.1080000000
+    5.1080000000    0.0000000000    5.1080000000
+    5.1080000000    5.1080000000    0.0000000000
+
+# K-path in reduced coordinates:
+# tolwfr 1e-20 iscf -2 getden ??
+ ndivsm 10
+ kptopt -11
+ kptbounds
+    +0.00000  +0.00000  +0.00000 # $\Gamma$
+    +0.50000  +0.00000  +0.50000 # X
+    +0.50000  +0.25000  +0.75000 # W
+    +0.37500  +0.37500  +0.75000 # K
+    +0.00000  +0.00000  +0.00000 # $\Gamma$
+    +0.50000  +0.50000  +0.50000 # L
+    +0.62500  +0.25000  +0.62500 # U
+    +0.50000  +0.25000  +0.75000 # W
+    +0.50000  +0.50000  +0.50000 # L
+    +0.37500  +0.37500  +0.75000 # K
+    +0.62500  +0.25000  +0.62500 # U
+    +0.50000  +0.00000  +0.50000 # X
+```
+
+To visualize the band structure stored in the GSR.nc file, 
+use the |abiopen| script and the command line:
+
+    abiopen.py tbase3_5o_DS2_GSR.nc --expose -sns=talk
+
+![](base3_assets/abiopen_tbase3_5o_DS2_GSR.png)
+
+It is also possible to compare multiple GSR files with the |abicomp| script 
+and the syntax
+
+    abicomp.py gsr tbase3_5o_DS1_GSR.nc tbase3_5o_DS2_GSR.nc -e -sns=talk
+
+to produce:
+
+![](base3_assets/abicomp_tbase3_5o_GSR_files.png)
+
+For further details about the AbiPy API and the GSR file, please consult the |GsrFileNb| .

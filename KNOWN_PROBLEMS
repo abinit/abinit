@@ -359,7 +359,7 @@ Still, should investigate what is the correct answer ...
 P54.7 (XG070601 - actually, much earlier than that, but not documented)
 CRASH : finite electric field with atomic displacements
 Test ffield_7 does not work on my PC, and has been disabled .
-The corresponding section of the ffield lesson of the tutorial has been commented ... 
+The corresponding section of the ffield tutorial has been commented ... 
 
 
 P54.18 (XG070825)
@@ -816,3 +816,9 @@ is very small.
 
 P890.1 (XG180504)
 Test v8#34 (Hybrid Monte-Carlo) from Serguei Prokhorenko gives randomly different results on nag@abiref.
+
+P890.2 (XG180609)
+Test v6_t52 (for electron-phonon).
+The tolerance is extremely large. Why is this test lacking so much portability ? Why is this not important ?
+At least this portability problem should be commented upon ?!
+

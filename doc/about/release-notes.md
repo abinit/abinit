@@ -87,8 +87,8 @@ B.6 The Chern number can be computed, in the norm-conserving case as well as in 
     Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call. 
-    Lesson [[lesson:nuc|nuc]] is nightly tested.
-    By J. Zwanziger ([[lesson:nuc|nuc]] testing by X. Gonze).
+    Tutorial [[tutorial:nuc|nuc]] is nightly tested.
+    By J. Zwanziger ([[tutorial:nuc|nuc]] testing by X. Gonze).
 
 * * *
 
@@ -154,7 +154,7 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[lesson:tdepes|lesson on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
     See all tests in `tutorespfn/tdepes*`.
     By X. Gonze and M. Giantomassi
 
@@ -168,7 +168,7 @@ D.5 Ongoing work on the multibinit project.
     add the plot of the comparison between model and DFT.
     By A. Martin, M. Verstraete and Ph. Ghosez.
 
-D.6 Adjustment of lesson tutoparal ucrpa, see test tutoparal#tucrpa_4.
+D.6 Adjustment of tutorial tutoparal ucrpa, see test tutoparal#tucrpa_4.
     By B. Amadon
 
 D.7 The ddk file is now available in netCDF format (lightweight version without first-order wavefunctions), 
@@ -269,7 +269,7 @@ A.2 Some changes of names :
 * input variable gwls_dielectric_model has become [[gwls_diel_model]];
 * input variable prt_effpot has become prt_model (multibinit input variable);
 * input variable effmass has become [[effmass_free]];
-* lesson tlda has become tdftu;
+* tutorial tlda has become tdftu;
 
     Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
 
@@ -286,7 +286,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
     Those topic web pages usually have :
     - a brief introduction;
-    - the list of related tutorial lessons -if any-;
+    - the list of related tutorials -if any-;
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
@@ -295,7 +295,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
 
 B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the
     above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
-    the lessons of the tutorial, the theory documents, the acknowledgments ...).
+    the tutorials, the theory documents, the acknowledgments ...).
     More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
     central bibliographic database, though.
     By X. Gonze and F. Jollet.
@@ -306,7 +306,7 @@ B.3 The list of input variables has been restructured, and is now searchable.
 
 B.4 The frequency of usage of each input variable (in the set of automatic tests) is now automatically
     computed, and mentioned in the documentation for this input variable. Examples input files are also now mentioned in the documentation.
-    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
+    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the tutorials.
     By. X. Gonze and F. Jollet.
 
 B.5 Several important developments related to electron-phonon matrix element computation have been made.
@@ -333,7 +333,7 @@ B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in 
     have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
     By M. Torrent.
 
-B.8 A new lesson of the tutorial, called [[lesson:positron|Electron-positron annihilation]] has been created.
+B.8 A new tutorial, called [[tutorial:positron|Electron-positron annihilation]] has been created.
     By J. Wiktor and M. Torrent.
 
 B.9 The new input variable [[chkdilatmx]] has been introduced, to allow expert users to make
@@ -704,10 +704,10 @@ B.1 Implementation of the Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS
     available on netlib.org.  They have been reshaped and translated into modern fortran, 
     then interfaced to ABINIT by F. Bruneval (sources in 45_geomoptim/m_lbfgs.F90).
 
-B.2 A new tutorial is available : a lesson on the calculation of the effective interactions U and J 
+B.2 A new tutorial is available, on the calculation of the effective interactions U and J 
     using constrained Random Phase Approximation (cRPA) for DFT+DMFT (or DFT+U) calculations.
-    See doc/tutorial/lesson_ucalc_crpa.html as well as the automatic tests tutorial/tucrpa#1-5 .
-    This lesson was prepared by B. Amadon.
+    See doc/tutorial/_ucalc_crpa.md as well as the automatic tests tutorial/tucrpa#1-5 .
+    This tutorial was prepared by B. Amadon.
 
 B.3 Implementation of temperature-dependent spectral functions 
     (electronic spectral function, with electron-phonon interactions),

@@ -920,7 +920,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   const_tot=0
   nsyminv=Sym%nsym*facorder
   ABI_MALLOC(alphaij,(nsyminv,norder,norder)); alphaij(:,:,:)=czero
-  ABI_MALLOC(iconst,(nsyminv))               ; iconst(:)=zero
+  ABI_MALLOC(iconst,(nsyminv))               ; iconst(:)=0
   ABI_MALLOC(unchanged,(nsyminv))            ; unchanged(:)=.false.
 
 ! ================================================================================================
