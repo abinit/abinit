@@ -27,6 +27,7 @@ pages:
     - Fold2Bloch: guide/fold2bloch.md
     - Mrgddb: guide/mrgddb.md
     - Mrgscr: guide/mrgscr.md
+    - Multibinit: guide/multibinit.md
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
@@ -49,6 +50,7 @@ pages:
     - topics/Berry.md
     - topics/BandOcc.md
     - topics/BSE.md
+    - topics/BoundProcess.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
@@ -61,6 +63,7 @@ pages:
     - topics/DFPT.md
     - topics/DMFT.md
     - topics/EffectiveMass.md
+    - topics/DynamicsMultibinit.md
     - topics/EFG.md
     - topics/Elastic.md
     - topics/ElPhonInt.md
@@ -68,6 +71,7 @@ pages:
     - topics/ElecDOS.md
     - topics/ElecBandStructure.md
     - topics/FileFormats.md
+    - topics/FitProcess.md
     - topics/ForcesStresses.md
     - topics/FrequencyMeshMBPT.md
     - topics/GeoConstraints.md
@@ -78,6 +82,7 @@ pages:
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md
+    - topics/LatticeModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/MagField.md
@@ -143,6 +148,7 @@ pages:
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
+    - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
@@ -185,6 +191,9 @@ pages:
         - Images: tutorial/paral_images.md
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
+    - Multibinit:
+        - Lattice Model: tutorial/lattice_model.md
+        - Fit Process: tutorial/fit_process.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md
