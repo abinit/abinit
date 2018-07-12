@@ -28,6 +28,7 @@ sources = [
  "m_paw_optics.F90",
  "m_paw_overlap.F90",
  "m_paw_tools.F90",
+ "m_paw_sym.F90",
  "m_paw_nhat.F90",
  "m_paw_dfpnl.F90",
  "m_pawdenpot.F90",
@@ -40,8 +41,6 @@ sources = [
  "m_paw_orbmag.F90",
  "m_pawmkaewf.F90",
  "m_paw_uj.F90",
- "pawpolev.F90",
- "paw_symcprj.F90",
- "simple_j_dia.F90"]
+ "pawpolev.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

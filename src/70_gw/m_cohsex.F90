@@ -53,6 +53,7 @@ module m_cohsex
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_sym,       only : paw_symcprj
 
  implicit none
 

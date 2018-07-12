@@ -1,9 +1,54 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/paw_symcprj
+!!****m* ABINIT/m_paw_sym
+!! NAME
+!!  m_paw_sym
+!!
+!! FUNCTION
+!!  This module contains several routines related to the use of symmetries in the PAW approach.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2018-2018 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+MODULE m_paw_sym
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_crystal,   only : crystal_t
+ use m_pawang,    only : pawang_type
+ use m_pawtab,    only : pawtab_type
+ use m_pawcprj,   only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_copy
+ use m_bz_mesh,   only : kmesh_t,get_ibz_item,get_bz_item
+
+ implicit none
+
+ private
+
+!public procedures.
+ public :: paw_symcprj    ! Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - in-place version
+ public :: paw_symcprj_op ! Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - out-of-place version
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sym/paw_symcprj
 !! NAME
 !!  paw_symcprj
 !!
 !! FUNCTION
+!!  Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - in-place version
 !!
 !! INPUTS
 !!  ik_ibz=The index of the k-point in the full BZ where the matrix elements have to be symmetrized.
@@ -45,24 +90,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
 
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_crystal,   only : crystal_t
- use m_pawang,    only : pawang_type
- use m_pawtab,    only : pawtab_type
- use m_pawcprj,   only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_bz_mesh,   only : kmesh_t, get_ibz_item, get_bz_item
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -99,7 +128,7 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
 ! *********************************************************************
 
  ncpgr = Cprj_bz(1,1)%ncpgr
- ABI_CHECK(ncpgr==0,"Derivatived of cprj are not coded")
+ ABI_CHECK(ncpgr==0,"Derivatives of cprj are not coded")
 
 !Get the index of the IBZ image associated to the BZ k-point ik_bz and related simmetry.
  call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
@@ -160,13 +189,13 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
            tmp(2,ispinor)=tmp(2,ispinor)+DS_mmpl(mm,jlpm,jl+1)*Cprjnk_kibz(iat_sym,ibsp_ibz)%cp(2,indexj+mm)
          end do
        end do !ispinor
-!      
+!
 !      * Apply the phase to account if the symmetric atom belongs to a different unit cell.
        do ispinor=1,nspinor
          dum(1,ispinor)=tmp(1,ispinor)*phase(1)-tmp(2,ispinor)*phase(2)
          dum(2,ispinor)=tmp(1,ispinor)*phase(2)+tmp(2,ispinor)*phase(1)
        end do
-!      
+!
 !      * If required, apply time-reversal symmetry to retrieve the correct point in the BZ.
        if (itim==2) then
          if (nspinor==1) then
@@ -179,7 +208,7 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
            dum(2,2)= swp(2)
          end if
        end if
-!      
+!
 !      ==== Save values ====
        do ispinor=1,nspinor
          ibsp_bz=ibsp_bz+1
@@ -200,11 +229,12 @@ end subroutine paw_symcprj
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/paw_symcprj_op
+!!****f* m_paw_sym/paw_symcprj_op
 !! NAME
 !!  paw_symcprj_op
 !!
 !! FUNCTION
+!!  Symetrize the projections cprj=<n,k|p_i> (p_i=NL PAW projector) - in-place version
 !!
 !! INPUTS
 !!  ik_ibz=The index of the k-point in the full BZ where the matrix elements have to be symmetrized.
@@ -236,7 +266,7 @@ end subroutine paw_symcprj
 !! OUTPUT
 !!   out_Cprj(Cryst%natom,nspinor*nband_k)<pawcprj_type>=Symmetrized cprj matrix elements.
 !!
-!! NOTES  
+!! NOTES
 !!  Derivatives are not symmetrized.
 !! 
 !! PARENTS
@@ -249,15 +279,6 @@ end subroutine paw_symcprj
 
 subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cprj,out_Cprj)
 
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_crystal,   only : crystal_t
- use m_bz_mesh,   only : kmesh_t, get_ibz_item, get_bz_item
- use m_pawang,    only : pawang_type
- use m_pawtab,    only : pawtab_type
- use m_pawcprj,   only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -294,7 +315,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
 ! *********************************************************************
 
  ncpgr = in_Cprj(1,1)%ncpgr
- ABI_CHECK(ncpgr==0,"Derivatived of cprj are not coded")
+ ABI_CHECK(ncpgr==0,"Derivatives of cprj are not coded")
 
 !Get the index of the IBZ image associated to the BZ k-point ik_bz and related simmetry.
  call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
@@ -330,7 +351,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
    arg=two_pi*dot_product(kirr,r0)
    phase(1)=COS(arg)
    phase(2)=SIN(arg)
-!  
+!
 !  Loop over the (jl,jm,jn) components to be symmetrized.
    jl0=-1; jln0=-1; indexj=1
    do jlmn=1,Pawtab(itypat)%lmn_size
@@ -340,7 +361,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
      jln =indlmn(5,jlmn)
      jlpm=1+jl+jm
      if (jln/=jln0) indexj=indexj+2*jl0+1
-!    
+!
 !    === For each band, calculate contribution due to rotated real spherical harmonics ===
 !    FIXME check this expression; according to Blanco I should have D(S^-1} but it seems D(S) is correct
 !    Recheck spinorial case, presently is wrong
@@ -356,13 +377,13 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
            tmp(2,ispinor)=tmp(2,ispinor)+DS_mmpl(mm,jlpm,jl+1)*in_Cprj(iat_sym,ibsp_ibz)%cp(2,indexj+mm)
          end do
        end do !ispinor
-!      
+!
 !      * Apply the phase to account if the symmetric atom belongs to a different unit cell.
        do ispinor=1,nspinor
          dum(1,ispinor)=tmp(1,ispinor)*phase(1)-tmp(2,ispinor)*phase(2)
          dum(2,ispinor)=tmp(1,ispinor)*phase(2)+tmp(2,ispinor)*phase(1)
        end do
-!      
+!
 !      * If required, apply time-reversal symmetry to retrieve the correct point in the BZ.
        if (itim==2) then
          if (nspinor==1) then
@@ -375,7 +396,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
            dum(2,2)= swp(2)
          end if
        end if
-!      
+!
 !      ==== Save values ====
        do ispinor=1,nspinor
          ibsp_bz=ibsp_bz+1
@@ -391,4 +412,9 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
  ABI_DEALLOCATE(DS_mmpl)
 
 end subroutine paw_symcprj_op
+!!***
+
+!----------------------------------------------------------------------
+
+END MODULE m_paw_sym
 !!***

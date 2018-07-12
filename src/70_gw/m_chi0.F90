@@ -59,6 +59,7 @@ module m_chi0
  use m_pawfgrtab,       only : pawfgrtab_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawpwij,         only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_sym,         only : paw_symcprj
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
  use m_read_plowannier, only : read_plowannier

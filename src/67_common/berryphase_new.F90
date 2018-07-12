@@ -120,22 +120,24 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  use defs_wvltypes
  use m_xmpi
  use m_errors
- use m_efield
  use m_profiling_abi
+ use m_mpinfo, only : proc_distrb_cycle
 
- use m_numeric_tools, only : rhophi
- use m_io_tools, only : open_file
- use m_geometry, only : xred2xcart
- use m_iowf,     only : outwf
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
-                        pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
-                        pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
- use m_paw_dfpt, only : dsdr_k_paw
- use m_mpinfo,      only : proc_distrb_cycle
- use m_berrytk,     only : smatrix, polcart
- use m_paw_overlap, only : smatrix_k_paw
+ use m_numeric_tools,only : rhophi
+ use m_io_tools,     only : open_file
+ use m_geometry,     only : xred2xcart
+ use m_iowf,         only : outwf
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only : pawrhoij_type
+ use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
+                            pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
+                            pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
+ use m_paw_dfpt,     only : dsdr_k_paw
+ use m_paw_overlap,  only : smatrix_k_paw
+
+ use m_efield
+ use m_berrytk,      only : smatrix, polcart
+ use m_paw_efield,   only : pawpolev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

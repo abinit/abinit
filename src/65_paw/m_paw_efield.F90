@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_paw_efield
+!! NAME
+!!  m_paw_efield
+!!
+!! FUNCTION
+!!  This module contains routines related to the treatment of electric field in the PAW approach.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2018-2018 ABINIT group (FJ, PH)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+MODULE m_paw_efield
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_time, only : timab
+ use m_xmpi, only : xmpi_sum
+
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type
+
+ implicit none
+
+ private
+
+!public procedures.
+ public :: pawpolev ! Compute the PAW on-site term for polarization
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/pawpolev
 !! NAME
 !! pawpolev
@@ -32,23 +74,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 &                   comm_atom) ! optional argument (parallelism)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_xmpi, only : xmpi_sum
- use m_time,     only : timab
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -76,7 +103,6 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 !arrays
  integer,dimension(3) :: idirindx = (/4,2,3/)
  real(dp) :: tsec(2)
-
 
 ! *************************************************************************
 
@@ -123,4 +149,9 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
  DBG_EXIT("COLL")
 
 end subroutine pawpolev
+!!***
+
+!----------------------------------------------------------------------
+
+END MODULE m_paw_efield
 !!***
