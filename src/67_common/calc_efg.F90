@@ -78,12 +78,13 @@
 
  use m_linalg_interfaces
 
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_type
- use m_pawtab, only : pawtab_type
- use m_paw_an, only : paw_an_type
- use m_pawrhoij, only : pawrhoij_type
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
+ use m_pawang,      only : pawang_type
+ use m_pawrad,      only : pawrad_type
+ use m_pawtab,      only : pawtab_type
+ use m_paw_an,      only : paw_an_type
+ use m_pawrhoij,    only : pawrhoij_type
+ use m_paw_nmr,     only : make_efg_onsite
+ use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
