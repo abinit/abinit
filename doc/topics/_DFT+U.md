@@ -51,5 +51,5 @@ keywords [[usedmatpu]] and [[dmatpawu]]).
 
 ## Tutorials
 
-* [[lesson:dftu|The lesson on DFT+U]] shows how to perform a DFT+U calculation using ABINIT, and will lead to compute the projected DOS of NiO. Prerequisite: PAW1.
+* [[tutorial:dftu|The tutorial on DFT+U]] shows how to perform a DFT+U calculation using ABINIT, and will lead to compute the projected DOS of NiO. Prerequisite: PAW1.
 

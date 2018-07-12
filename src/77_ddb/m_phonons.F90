@@ -155,7 +155,7 @@ module m_phonons
   real(dp),allocatable :: msqd_dos_atom(:,:,:,:)
    ! msqd_dos_atom(nomega,3,3,natom)
    ! mean square displacement matrix, frequency dependent like a DOS, tensor in cartesian coords.
-   ! allows to calculate Debye Waller factors by integration with 1/omega
+   ! allows one to calculate Debye Waller factors by integration with 1/omega
    ! and the Bose Einstein factor
 
  end type phonon_dos_type
@@ -783,7 +783,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    phdos%omega_min = ifc%omega_minmax(1)
    phdos%omega_max = ifc%omega_minmax(2)
  end if
- ! Must be consistent with mesh computed in tethra routines!
+ ! Must be consistent with mesh computed in tetra routines!
  phdos%nomega = nint((phdos%omega_max - phdos%omega_min) / phdos%omega_step) + 1
  ! Ensure Simpson integration will be ok
  phdos%nomega = max(6, phdos%nomega)

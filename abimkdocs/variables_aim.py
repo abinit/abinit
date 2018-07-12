@@ -157,7 +157,7 @@ Variable(
     vartype="real",
     topics=['Bader_expert'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval="3*0.0",
     mnemonics="FOLlow DEParture",
     text="""
 Needed in the case [[aim:follow]]=1 only. Defines the starting point.
@@ -377,7 +377,7 @@ Variable(
     vartype="integer",
     topics=['Bader_expert'],
     dimensions=[2],
-    defaultval=MultipleValue({'number': 2, 'value': 30}),
+    defaultval="2*30",
     mnemonics="Number of GRID points",
     text="""
 Defines the grid in real space, for the density and laplacian outputs,
@@ -397,9 +397,9 @@ Variable(
 With [[aim:ntheta]], this variable defines the angular grid for the
 integration within the Bader volume, in particular, the number of phi angles,
 to be used between [[aim:phimin]] and [[aim:phimax]]. When the difference
-between these two variables is 2 pi, the recommended value of **nphi** is 48.
-When it is pi (for symmetry reasons), the recommended value is 32. When it is
-pi/2 (for symmetry reasons), the recommended value is 20.
+between these two variables is 2 $\pi$, the recommended value of **nphi** is 48.
+When it is $\pi$ (for symmetry reasons), the recommended value is 32. When it is
+$\pi$/2 (for symmetry reasons), the recommended value is 20.
 """,
 ),
 
@@ -493,8 +493,8 @@ Variable(
 With [[aim:nphi]], this variable defines the angular grid for the integration
 within the Bader volume, in particular, the number of theta angles, to be used
 between [[aim:thetamin]] and [[aim:thetamax]]. When the difference between
-these two variables is pi, the recommended value of **ntheta** is 32. When it
-is pi/2 (for symmetry reasons), the recommended value is 20.
+these two variables is $\pi$, the recommended value of **ntheta** is 32. When it
+is $\pi$/2 (for symmetry reasons), the recommended value is 20.
 """,
 ),
 
@@ -568,7 +568,7 @@ Variable(
     vartype="real",
     topics=['Bader_expert'],
     dimensions=[2],
-    defaultval=MultipleValue({'number': 2, 'value': 0.0}),
+    defaultval="2*0.0",
     mnemonics="Radius SURface DIRection",
     text="""
 In the case [[aim:rsurf]]=1, gives the direction (angular coordinates
@@ -628,7 +628,7 @@ Variable(
     vartype="real",
     topics=['Bader_basic'],
     dimensions="scalar",
-    defaultval="pi",
+    defaultval="$\pi$",
     mnemonics="THETA MAXimal angle",
     text="""
 Angular limits of integration of the Bader volume for the theta variables. The
@@ -658,7 +658,7 @@ Variable(
     vartype="real",
     topics=['Bader_useful'],
     dimensions=[6],
-    defaultval=MultipleValue({'number': 6, 'value': 0.0}),
+    defaultval="6*0.0",
     mnemonics="Vectors defining the PoinTS of the surface",
     commentdims="6 for 1D, 9 for 2D",
     text="""

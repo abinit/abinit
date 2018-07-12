@@ -36,7 +36,7 @@ module m_cohsex
 
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
- use m_blas,          only : xdotc, xgemv
+ use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize, imin_loc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t

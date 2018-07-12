@@ -36,7 +36,7 @@ module m_ksdiago
 
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
  use m_fft,               only : fftpac

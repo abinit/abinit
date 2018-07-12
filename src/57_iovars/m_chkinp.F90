@@ -175,12 +175,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    rprimd(:,:)=dtsets(idtset)%rprimd_orig(:,:,intimage)    ! For the purpose of checking symmetries
    response=0
    if(dt%rfelfd/=0.or.dt%rfphon/=0.or.dt%rfstrs/=0.or.dt%rfddk/=0.or.dt%rfuser/=0 &
-&   .or.dt%rf2_dkdk/=0.or.dt%rf2_dkde/=0.or.dt%rfmagn/=0) response=1
+&   .or.dt%rf2_dkdk/=0.or.dt%rf2_dkde/=0.or.dt%rfmagn/=0.or.dt%d3e_pert1_elfd/=0 &
+&   .or.dt%d3e_pert2_elfd/=0.or.dt%d3e_pert3_elfd/=0.or.dt%d3e_pert1_phon/=0 &
+&   .or.dt%d3e_pert2_phon/=0.or.dt%d3e_pert3_phon/=0) response=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    nproc=mpi_enregs(idtset)%nproc
    mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
-
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -521,7 +522,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,7,(/-1,0,1,2,5,6,7/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,8,(/-1,0,1,2,5,6,7,8/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -604,9 +605,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 #if !defined HAVE_TRIQS
-   if(dt%dmft_solv>=6) then
+   if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(message, '(a,a,a)' )&
-&     ' dmft_solv>=6 is only relevant if the TRIQS library is linked',ch10,&
+&     ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
 &     ' Action: check compilation options'
      MSG_ERROR(message)
    end if
@@ -803,7 +804,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,6,[0,1,2,3,4,5],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,7,[0,1,2,3,4,5,6],iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -811,6 +812,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
+
+     cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
 
    end if
 
@@ -1708,14 +1712,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  Must be greater or equal to -1
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npwkss',dt%npwkss,-1,iout)
 
-!  np_slk
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_slk',dt%np_slk,0,iout)
-   if (dt%np_slk>0) then
-     if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
-       MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
-     end if
-   end if
-
 !  nqpt
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nqpt',dt%nqpt,2,(/0,1/),iout)
 
@@ -1970,14 +1966,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  optdriver
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,9,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH],iout)
-   if (response==1.and.dt%optdriver/=1) then
-     write(message,'(a,i3,3a,7(a,i3),4a)' )&
+   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR])) then
+     write(message,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
-&     'rfphon=',dt%rfphon,'  rfddk=',dt%rfddk,'  rf2_dkdk=',dt%rf2_dkdk,'  rf2_dkde=',dt%rf2_dkde,&
-&     '  rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfelfd,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
-&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs',ch10,&
-&     'and rfuser in your input file.'
+&     'rfphon=',dt%rfphon,' rfddk=',dt%rfddk,' rf2_dkdk=',dt%rf2_dkdk,' rf2_dkde=',dt%rf2_dkde,&
+&     ' rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,' rfstrs=',dt%rfstrs,' rfuser=',dt%rfuser,&
+&     ' d3e_pert1_elfd=',dt%d3e_pert1_elfd,' d3e_pert2_elfd=',dt%d3e_pert2_elfd,' d3e_pert3_elfd=',dt%d3e_pert3_elfd,&
+&     ' d3e_pert1_phon=',dt%d3e_pert1_phon,' d3e_pert2_phon=',dt%d3e_pert2_phon,' d3e_pert3_phon=',dt%d3e_pert3_phon,ch10,&
+&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs, rfuser,',ch10,&
+&     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
    if(usepaw==1)then
@@ -2139,15 +2137,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      MSG_ERROR_NOSTOP(message,ierr)
    end if
 
+
 !  paral_rf
    if ((response==0).and.(dt%paral_rf/=0)) then
-     write(message,'(a,i3,3a,7(i3,a),4a)' )&
-&     'The input variable paral_rf=',dt%paral_rf,ch10,&
+     write(message,'(a,i3,3a,14(a,i2),4a)' )&
+&     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
-&     'rfphon=',dt%rfphon,'  rfddk=',dt%rfddk,'  rf2_dkdk=',dt%rf2_dkdk,'  rf2_dkde=',dt%rf2_dkde,&
-&     '  rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
-&     'Action: check the values of paral_rf, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs',ch10,&
-&     '        and rfuser in your input file.'
+&     'rfphon=',dt%rfphon,' rfddk=',dt%rfddk,' rf2_dkdk=',dt%rf2_dkdk,' rf2_dkde=',dt%rf2_dkde,&
+&     ' rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,' rfstrs=',dt%rfstrs,' rfuser=',dt%rfuser,&
+&     ' d3e_pert1_elfd=',dt%d3e_pert1_elfd,' d3e_pert2_elfd=',dt%d3e_pert2_elfd,' d3e_pert3_elfd=',dt%d3e_pert3_elfd,&
+&     ' d3e_pert1_phon=',dt%d3e_pert1_phon,' d3e_pert2_phon=',dt%d3e_pert2_phon,' d3e_pert3_phon=',dt%d3e_pert3_phon,ch10,&
+&     'Action: check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs, rfuser,',ch10,&
+&     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 
@@ -2496,6 +2497,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%prtdosm==2.and.dt%pawprtdos/=2)then
      message = ' pawprtdos/=2  and prtdosm=2 are not compatible '
      MSG_ERROR(message)
+   end if
+
+!  prtefmas 
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
+   if(optdriver/=RUNL_RESPFN)then
+     cond_string(1)='optdriver' ; cond_values(1)=optdriver
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
    end if
 
 !  prtelf
@@ -3252,6 +3260,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
      !! TODO check bandpp instead of overwriting it
    end if
+
+!  np_slk
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_slk',dt%np_slk,0,iout)
+   if (dt%np_slk>0 .and. dt%wfoptalg /= 114 ) then
+     if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
+       MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
+     end if
+   end if
+!  slk_rankpp
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'slk_rankpp',dt%slk_rankpp,0,iout)
+
 
 !  wtk
 !  Check that no k point weight is < 0:

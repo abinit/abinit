@@ -17,8 +17,7 @@ interpolation, the DOS can be produced (see [[cite:Lee1995]]), the phonon
 eigenenergies plotted along lines, the slope of the energy versus cristalline
 momentum evaluated (to give sound velocity).
 
-The two-phonon sum and difference spectra can also be obtained, see
-[[anaddb:dossum]].
+The two-phonon sum and difference spectra can also be obtained, see [[anaddb:dossum]].
 
 For the related computation of temperature-dependent properties, see [[topic:Temperature]].
 
@@ -33,5 +32,5 @@ For the related computation of temperature-dependent properties, see [[topic:Tem
 
 ## Tutorials
 
-* [[lesson:rf2|The lesson Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the [[lesson:rf1]]. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this lesson.
+* [[tutorial:rf2|The tutorial Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the [[tutorial:rf1]]. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this tutorial.
 

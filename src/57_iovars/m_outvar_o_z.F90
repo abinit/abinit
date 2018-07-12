@@ -531,6 +531,9 @@ contains
  intarr(1,:)=dtsets(:)%prtefg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtefmas
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefmas','INT',0)
+
  intarr(1,:)=dtsets(:)%prteig
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prteig','INT',0)
 
@@ -879,8 +882,11 @@ contains
  dprarr(1,:)=dtsets(:)%slabzend
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slabzend','DPR',0)
 
- dprarr(1,:)=dtsets(:)%smdelta
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
+ intarr(1,:)=dtsets(:)%slk_rankpp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'slk_rankpp','INT',0)
+
+ intarr(1,:)=dtsets(:)%smdelta
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'smdelta','INT',0)
 
  do idtset=0,ndtset_alloc
    intarr(1:npsp,idtset)=dtsets(idtset)%so_psp(1:npsp)

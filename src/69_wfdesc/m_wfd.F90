@@ -40,7 +40,7 @@ MODULE m_wfd
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks
- use m_blas,           only : xcopy, xdotc
+ use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary

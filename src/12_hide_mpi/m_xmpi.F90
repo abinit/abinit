@@ -1824,7 +1824,7 @@ end subroutine xmpi_comm_translate_ranks
 !!
 !! PARENTS
 !!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi
-!!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
+!!      m_datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
 !!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff
 !!      m_green,m_haydock,m_hdr,m_io_redirect,m_ioarr,m_iowf,m_plowannier

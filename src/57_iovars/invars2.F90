@@ -785,11 +785,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symchi',tread,'INT')
  if(tread==1) dtset%symchi=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getefmas',tread,'INT')
+ if(tread==1) dtset%getefmas=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdefmas',tread,'INT')
+ if(tread==1) dtset%irdefmas=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdsuscep',tread,'INT')
  if(tread==1) dtset%irdsuscep=intarr(1)
@@ -1094,6 +1100,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_frohlichm',tread,'INT')
+ if(tread==1) dtset%eph_frohlichm=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsmear',tread,'ENE')
  if(tread==1) dtset%eph_fsmear=dprarr(1)
 
@@ -1137,7 +1146,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
    ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
    call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),&
-&              'ph_freez_disp_ampl',tread,'DPR')
+&   'ph_freez_disp_ampl',tread,'DPR')
    if (tread==0) then
      MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
    end if
@@ -1637,9 +1646,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- endif
+   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1795,7 +1804,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'impose dmft_dc = 5'
      MSG_WARNING(message)
      dtset%dmft_dc=5
-   endif
+   end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -1869,7 +1878,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &       'Action: add dmftqmc_therm keyword in input file.'
        MSG_ERROR(message)
      end if
-     if(dtset%dmft_solv==5) then
+     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8) then
+    ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')
@@ -2128,6 +2138,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
  if(tread==1) dtset%prtefg=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefmas',tread,'INT')
+ if(tread==1) dtset%prtefmas=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteig',tread,'INT')
  if(tread==1) dtset%prteig=intarr(1)

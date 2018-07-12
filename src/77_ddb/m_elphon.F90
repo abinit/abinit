@@ -159,7 +159,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -1151,7 +1151,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !  bxu, no need for complete sets of ie1 and ie2
 !  Only save those within the range of omega_max from Ef
    ABI_ALLOCATE(pair2red,(tmp_nenergy,tmp_nenergy))
-   pair2red = zero
+   pair2red = 0
 
    elph_ds%n_pair = 0
    do ie1=1,tmp_nenergy
@@ -1203,7 +1203,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call wrtout(std_out,message,'COLL')
 
    ABI_ALLOCATE(red2pair,(2,elph_ds%n_pair))
-   red2pair = zero
+   red2pair = 0
    elph_ds%n_pair = 0
    do ie1 = 1, tmp_nenergy
      do ie2 = 1, tmp_nenergy
@@ -2959,7 +2959,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_setupqpt'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none

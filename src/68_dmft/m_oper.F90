@@ -35,7 +35,7 @@ MODULE m_oper
  use m_errors
 
  use m_matlu,    only : matlu_type
- use m_abilasi,  only : xginv
+ use m_hide_lapack,  only : xginv
 
  implicit none
 
@@ -947,7 +947,7 @@ end subroutine identity_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,psichi_renormalization
+!!      m_dmft,psichi_renormalization
 !!
 !! CHILDREN
 !!      prod_matlu

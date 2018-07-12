@@ -249,9 +249,9 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
    !This test should be update if in the future we allow non-diagonal supercell
    if (any(dtsets(idtset)%supercell_latt(:,:) < zero).or.&
-&         (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
-&          dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
-&          dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
+&   (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
+&   dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
+&   dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
      write(message, '(5a)' )&
 &     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
