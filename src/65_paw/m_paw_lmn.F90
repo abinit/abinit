@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_lmn_indices
+!!****m* ABINIT/m_paw_lmn
 !! NAME
-!!  m_lmn_indices
+!!  m_paw_lmn
 !!
 !! FUNCTION
 !!  This module provides tools to calculate tables commonly used to iterate
@@ -21,7 +21,7 @@
 
 #include "abi_common.h"
 
-MODULE m_lmn_indices
+MODULE m_paw_lmn
 
  use defs_basis
  use m_profiling_abi
@@ -47,7 +47,7 @@ MODULE m_lmn_indices
 CONTAINS  !========================================================================================
 !!***
 
-!!****f* m_lmn_indices/ilm2lm
+!!****f* m_paw_lmn/ilm2lm
 !! NAME
 !!  ilm2lm
 !!
@@ -110,7 +110,7 @@ end subroutine ilm2lm
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/make_indlmn
+!!****f* m_paw_lmn/make_indlmn
 !! NAME
 !!  make_indlmn
 !!
@@ -183,7 +183,7 @@ end subroutine make_indlmn
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/make_indklmn
+!!****f* m_paw_lmn/make_indklmn
 !! NAME
 !!  make_indklmn
 !!
@@ -279,7 +279,7 @@ end subroutine make_indklmn
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/make_kln2ln
+!!****f* m_paw_lmn/make_kln2ln
 !! NAME
 !!  make_kln2ln
 !!
@@ -365,7 +365,7 @@ end subroutine make_kln2ln
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/make_klm2lm
+!!****f* m_paw_lmn/make_klm2lm
 !! NAME
 !!  make_klm2lm
 !!
@@ -471,7 +471,7 @@ end subroutine make_klm2lm
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/klmn2ijlmn
+!!****f* m_paw_lmn/klmn2ijlmn
 !! NAME
 !!  klmn2ijlmn
 !!
@@ -486,7 +486,7 @@ end subroutine make_klm2lm
 !!  jlmn, ilmn=The two symmetrix indices corresponding to klmn. NB: jlmn >= ilmn
 !!
 !! PARENTS
-!!      m_lmn_indices,m_paw_slater
+!!      m_paw_lmn,m_paw_slater
 !!
 !! CHILDREN
 !!
@@ -532,7 +532,7 @@ end subroutine klmn2ijlmn
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/make_indln
+!!****f* m_paw_lmn/make_indln
 !! NAME
 !!  make_indln
 !!
@@ -598,7 +598,7 @@ end subroutine make_indln
 
 !----------------------------------------------------------------------
 
-!!****f* m_lmn_indices/uppert_index
+!!****f* m_paw_lmn/uppert_index
 !! NAME
 !!   uppert_index
 !!
@@ -642,5 +642,5 @@ function uppert_index(ii,jj)
 end function uppert_index
 !!***
 
-END MODULE m_lmn_indices
+END MODULE m_paw_lmn
 !!***

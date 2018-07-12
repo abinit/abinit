@@ -1,10 +1,10 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_atom
+!!****m* ABINIT/m_paw_atomorb
 !! NAME
-!!  m_atom
+!!  m_paw_atomorb
 !!
 !! FUNCTION
-!!  This module provides the definition of the atom_type used
+!!  This module provides the definition of the atomorb_type used
 !!  to store atomic orbitals on a radial mesh as well
 !!  as methods to operate on it.
 !!
@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-MODULE m_atom
+MODULE m_paw_atomorb
 
  use defs_basis
  use m_profiling_abi
@@ -31,7 +31,7 @@ MODULE m_atom
 
  use m_io_tools,      only : open_file
  use m_fstrings,      only : tolower
- use m_lmn_indices,   only : make_indlmn, make_indklmn, make_kln2ln
+ use m_paw_lmn,       only : make_indlmn, make_indklmn, make_kln2ln
  use m_pawrad,        only : pawrad_type, pawrad_init, &
 &                            pawrad_free, pawrad_print, pawrad_isame, pawrad_ifromr, simp_gen
 
@@ -40,11 +40,11 @@ MODULE m_atom
  private
 !!***
 
-!!****t* m_atom/atom_type
+!!****t* m_paw_atomorb/atomorb_type
 !! NAME
 !!
 !! FUNCTION
-!!  Defines the atom_type datastructure type.
+!!  Defines the atomorb_type datastructure type.
 !!  It contains the atomic orbitals on a radial mesh for a given type of atom.
 !!
 !! NOTES
@@ -54,7 +54,7 @@ MODULE m_atom
 !!
 !! SOURCE
 
- type, public :: atom_type
+ type, public :: atomorb_type
 
 !scalars
   integer :: ixc
@@ -187,13 +187,12 @@ MODULE m_atom
    ! Gives the core density of the atom for each spin channel
    ! Total charge in first dimension,up component in second one (if present)
 
- end type atom_type
+ end type atomorb_type
 
 ! public procedures.
- public :: init_atom
- public :: destroy_atom
- public :: print_atom
- !public :: get_atomcharge
+ public :: init_atomorb
+ public :: destroy_atomorb
+ public :: print_atomorb
  public :: get_overlap
 !!***
 
@@ -209,15 +208,15 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/destroy_atom
+!!****f* m_paw_atomorb/destroy_atomorb
 !! NAME
-!!  destroy_atom
+!!  destroy_atomorb
 !!
 !! FUNCTION
-!!  Free the dynamic memory allocated in a structure of type atom_type.
+!!  Free the dynamic memory allocated in a structure of type atomorb_type.
 !!
 !! SIDE EFFECTS
-!!  Atm <type(atom_type)>=datastructure containing atomic orbitals for a given type of atom.
+!!  Atm <type(atomorb_type)>=datastructure containing atomic orbitals for a given type of atom.
 !!
 !! PARENTS
 !!      m_paw_slater
@@ -227,24 +226,24 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine destroy_atom(Atm)
+subroutine destroy_atomorb(Atm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_atom'
+#define ABI_FUNC 'destroy_atomorb'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(atom_type),intent(inout) :: Atm
+ type(atomorb_type),intent(inout) :: Atm
 
 !************************************************************************
 
- !@atom_type
+ !@atomorb_type
 
  ! integers
  if (allocated(Atm%indlmn)) then
@@ -280,24 +279,24 @@ subroutine destroy_atom(Atm)
    ABI_FREE(Atm%phi)
  end if
 
-end subroutine destroy_atom
+end subroutine destroy_atomorb
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/init_atom
+!!****f* m_paw_atomorb/init_atomorb
 !! NAME
-!!  init_atom
+!!  init_atomorb
 !!
 !! FUNCTION
-!!  Initialize a structure of type atom_type from file.
+!!  Initialize a structure of type atomorb_type from file.
 !!
 !! INPUTS
 !!  filename=Name of the file containing core electrons
 !!
 !! OUTPUT
 !!  Atmrad<pawrad_type>=Info oh the Radial mesh used for core electrons.
-!!  Atm<atom_type>=Structure defining the set of core orbitals.
+!!  Atm<atomorb_type>=Structure defining the set of core orbitals.
 !!  ierr=Status error.
 !!   * 1 if error during the opening of the file.
 !!   * 2 for generic error during the reading.
@@ -310,13 +309,13 @@ end subroutine destroy_atom
 !!
 !! SOURCE
 
-subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
+subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'init_atom'
+#define ABI_FUNC 'init_atomorb'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -328,7 +327,7 @@ subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
  integer,intent(out) :: ierr
  real(dp),intent(in) :: rcut
  character(len=*),intent(in) :: filename
- type(atom_type),intent(out) :: Atm
+ type(atomorb_type),intent(out) :: Atm
  type(pawrad_type),intent(out) :: Atmrad
 
 !Local variables-------------------------------
@@ -391,7 +390,7 @@ subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
  !    mesh_type=4 (logari. grid): rad(i)=-AA*ln[1-BB*(i-1)] with BB=1/n
  ! --------------------------------------------------------------------------------
 
- !@atom_type
+ !@atomorb_type
  ierr=0
  if (open_file(filename,msg,newunit=unt,form="formatted",status="old",action="read") /=0) then
    MSG_WARNING(msg)
@@ -589,7 +588,7 @@ subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
  call pawrad_print(Atmrad,header="Final mesh",prtvol=prtvol)
 
  ABI_MALLOC(radens,(Atm%mesh_size,Atm%nspden))
- call get_atomcharge(Atm,Atmrad,charge,radens=radens)
+ call get_atomorb_charge(Atm,Atmrad,charge,radens=radens)
 
  write(std_out,*)"core charge  = ",charge
  !do ii=1,Atmrad%mesh_size
@@ -642,7 +641,7 @@ subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
  ABI_MALLOC(Atm%mode,(Atm%ln_size,Atm%nsppol))
  Atm%mode = ORB_FROZEN
 
- !call print_atom(Atm,prtvol=prtvol)
+ !call print_atomorb(Atm,prtvol=prtvol)
 
  return
  !
@@ -652,21 +651,21 @@ subroutine init_atom(Atm,Atmrad,rcut,filename,prtvol,ierr)
  MSG_WARNING("Wrong file format")
  return
 
-end subroutine init_atom
+end subroutine init_atomorb
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/get_atomcharge
+!!****f* m_paw_atomorb/get_atomorb_charge
 !! NAME
-!!  get_atomcharge
+!!  get_atomorb_charge
 !!
 !! FUNCTION
-!!  Get core charge from a structure of type atom_type
+!!  Get core charge from a structure of type atomorb_type
 !!  and optionally core density.
 !!
 !! INPUTS
-!!  Atm<atom_type>=Structure defining the set of core orbitals.
+!!  Atm<atomorb_type>=Structure defining the set of core orbitals.
 !!  Radmesh<pawrad_type>=Info oh the Radial mesh used for core electrons.
 !!
 !! OUTPUT
@@ -674,20 +673,20 @@ end subroutine init_atom
 !!  raddens(mesh_size)=core density (optional)
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!      wrtout
 !!
 !! SOURCE
 
-subroutine get_atomcharge(Atm,Radmesh,nele,radens)
+subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'get_atomcharge'
+#define ABI_FUNC 'get_atomorb_charge'
 !End of the abilint section
 
  implicit none
@@ -695,7 +694,7 @@ subroutine get_atomcharge(Atm,Radmesh,nele,radens)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: nele
- type(atom_type),intent(in) :: Atm
+ type(atomorb_type),intent(in) :: Atm
  type(pawrad_type),intent(in) :: Radmesh
 !arrays
  real(dp),optional,intent(out) :: radens(Atm%mesh_size,Atm%nspden)
@@ -734,12 +733,12 @@ subroutine get_atomcharge(Atm,Radmesh,nele,radens)
 
  ABI_FREE(phi2nl)
 
-end subroutine get_atomcharge
+end subroutine get_atomorb_charge
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/get_overlap
+!!****f* m_paw_atomorb/get_overlap
 !! NAME
 !!  get_overlap
 !!
@@ -747,7 +746,7 @@ end subroutine get_atomcharge
 !!  Get overlap between core and valence states
 !!
 !! INPUTS
-!!  Atm<atom_type>=Structure defining the set of core states
+!!  Atm<atomorb_type>=Structure defining the set of core states
 !!  Atmesh<pawrad_type>=Info oh the Radial mesh used for core states
 !!  isppol=index for spin component
 !!  nphi=number of core states
@@ -780,7 +779,7 @@ subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nphi,isppol
- type(atom_type),intent(in) :: Atm
+ type(atomorb_type),intent(in) :: Atm
  type(pawrad_type),target,intent(in) :: Atmesh,Radmesh2
 !arrays
  integer,intent(in) :: phi_indln(2,nphi)
@@ -861,15 +860,15 @@ end subroutine get_overlap
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/print_atom
+!!****f* m_paw_atomorb/print_atomorb
 !! NAME
-!!  print_atom
+!!  print_atomorb
 !!
 !! FUNCTION
-!!  Reports info on a structure of type atom_type.
+!!  Reports info on a structure of type atomorb_type.
 !!
 !! INPUTS
-!!  Atm <type(atom_type)>=datastructure containing atomic orbitals for a given type of atom.
+!!  Atm <type(atomorb_type)>=datastructure containing atomic orbitals for a given type of atom.
 !!
 !! OUTPUT
 !!
@@ -881,13 +880,13 @@ end subroutine get_overlap
 !!
 !! SOURCE
 
-subroutine print_atom(Atm,header,unit,prtvol,mode_paral)
+subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'print_atom'
+#define ABI_FUNC 'print_atomorb'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -895,7 +894,7 @@ subroutine print_atom(Atm,header,unit,prtvol,mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- type(atom_type),intent(in) :: Atm
+ type(atomorb_type),intent(in) :: Atm
  integer,optional,intent(in) :: prtvol,unit
  character(len=*),optional,intent(in) :: header
  character(len=4),optional,intent(in) :: mode_paral
@@ -906,12 +905,12 @@ subroutine print_atom(Atm,header,unit,prtvol,mode_paral)
  character(len=500) :: msg
 ! ************************************************************************
 
- !@atom_type
+ !@atomorb_type
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
- msg=' ==== Info on the atom_type ==== '
+ msg=' ==== Info on the atomorb_type ==== '
  if (PRESENT(header)) msg=header
  call wrtout(my_unt,msg,my_mode)
 
@@ -952,12 +951,12 @@ subroutine print_atom(Atm,header,unit,prtvol,mode_paral)
    end do
  end do
 
-end subroutine print_atom
+end subroutine print_atomorb
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_atom/my_mode2str
+!!****f* m_paw_atomorb/my_mode2str
 !! NAME
 !!  my_mode2str
 !!
@@ -1012,5 +1011,5 @@ function my_mode2str(mode) result(str)
 end function my_mode2str
 !!***
 
-END MODULE m_atom
+END MODULE m_paw_atomorb
 !!***

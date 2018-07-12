@@ -42,7 +42,7 @@ MODULE m_paw_nhat
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
  use m_fft,          only : zerosym
- use m_lmn_indices,  only : klmn2ijlmn
+ use m_paw_lmn,      only : klmn2ijlmn
 
  implicit none
 
