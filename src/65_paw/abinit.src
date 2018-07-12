@@ -42,7 +42,6 @@ sources = [
  "make_efg_onsite.F90",
  "make_fc_paw.F90",
  "pawpolev.F90",
- "paw_mknewh0.F90",
  "paw_symcprj.F90",
  "simple_j_dia.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
