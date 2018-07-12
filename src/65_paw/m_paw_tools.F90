@@ -36,6 +36,7 @@ MODULE m_paw_tools
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
  use m_paw_io,           only : pawio_print_ij
  use m_paw_sphharm,      only : mat_mlms2jmj, mat_slm2ylm
+ use m_paw_correlations, only : setnoccmmp
 
  implicit none
 

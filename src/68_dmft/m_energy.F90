@@ -35,6 +35,17 @@ MODULE m_energy
  use m_profiling_abi
 
  use m_pawtab, only : pawtab_type
+ use m_paw_correlations, only : pawuenergy
+ use m_paw_ij, only : paw_ij_type,paw_ij_init,paw_ij_free,paw_ij_nullify
+
+ use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
+ use m_paw_dmft, only : paw_dmft_type
+
+ use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
+& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
+ use m_oper, only : trace_oper
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -121,9 +132,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -184,9 +192,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -243,9 +248,6 @@ end subroutine destroy_energy
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
- use defs_basis
- use m_crystal, only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -339,14 +341,6 @@ end subroutine print_energy
 !! SOURCE
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
-
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -528,12 +522,6 @@ end subroutine compute_energy
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -689,12 +677,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 !DEC$ NOOPTIMIZE
 #endif
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -845,12 +827,6 @@ end subroutine compute_migdal_energy
 !! SOURCE
 
 subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
-
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_paw_dmft, only : paw_dmft_type
- use m_paw_ij, only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1027,15 +1003,6 @@ end subroutine compute_ldau_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
- use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
- use m_oper, only : trace_oper
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1147,8 +1114,6 @@ end subroutine compute_noninterentropy
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

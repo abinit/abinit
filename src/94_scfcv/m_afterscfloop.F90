@@ -56,6 +56,7 @@ module m_afterscfloop
  use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
+ use m_paw_correlations, only : setnoccmmp
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current

@@ -36,6 +36,7 @@ MODULE m_paw_denpot
  use m_pawrhoij,only: pawrhoij_type
  use m_pawdij,  only: pawdijhartree,pawdijnd,pawdijso,pawxpot,pawdijfock
  use m_pawxc,   only: pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron, awxcmpositron
+ use m_paw_correlations, only : pawuenergy,pawxenergy,setnoccmmp
  use m_paral_atom, only : get_my_atmtab,free_my_atmtab
  use m_electronpositron, only: electronpositron_type,electronpositron_calctype
 
