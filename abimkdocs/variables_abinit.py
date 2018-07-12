@@ -6557,7 +6557,7 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:**
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2016]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:** The initial time step [[dtion]]
