@@ -132,6 +132,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
  use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

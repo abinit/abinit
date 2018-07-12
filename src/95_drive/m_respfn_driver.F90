@@ -91,6 +91,7 @@ module m_respfn_driver
  use m_common,      only : setup1, prteigrs
  use m_fourier_interpol, only : transgrid
 
+ use m_paw_occupancies, only : initrhoij
  use m_paw_correlations,only : pawpuxinit
 
 #if defined HAVE_GPU_CUDA

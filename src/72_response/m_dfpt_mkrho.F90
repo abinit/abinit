@@ -33,17 +33,18 @@ module m_dfpt_mkrho
  use m_cgtools
  use m_xmpi
 
- use m_time,      only : timab
- use m_io_tools,  only : get_unit, iomode_from_fname
- use m_fftcore,   only : sphereboundary
- use m_fft,       only : fftpac
- use m_spacepar,  only : symrhg
- use m_dtfil,         only : status
- use m_hamiltonian,   only : gs_hamiltonian_type
- use m_pawrhoij,      only : pawrhoij_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paral_atom,    only : get_my_atmtab
-use m_mpinfo,         only : proc_distrb_cycle
+ use m_time,            only : timab
+ use m_io_tools,        only : get_unit, iomode_from_fname
+ use m_fftcore,         only : sphereboundary
+ use m_fft,             only : fftpac
+ use m_spacepar,        only : symrhg
+ use m_dtfil,           only : status
+ use m_hamiltonian,     only : gs_hamiltonian_type
+ use m_pawrhoij,        only : pawrhoij_type
+ use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_occupancies, only : pawaccrhoij
+ use m_paral_atom,      only : get_my_atmtab
+ use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 

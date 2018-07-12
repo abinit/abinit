@@ -137,9 +137,10 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_paw_nhat, only : pawmknhat
  use m_fock,     only : fock_type
  use m_kg,       only : getcut
- use defs_wvltypes, only : wvl_data
- use m_spacepar,    only : hartre
- use m_mkrho,       only : initro
+ use defs_wvltypes,     only : wvl_data
+ use m_spacepar,        only : hartre
+ use m_mkrho,           only : initro
+ use m_paw_occupancies, only : initrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

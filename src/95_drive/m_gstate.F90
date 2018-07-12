@@ -73,6 +73,7 @@ module m_gstate
  use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
  use m_paw_sphharm,      only : setsym_ylm
  use m_paw_init,         only : pawinit,paw_gencond
+ use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
  use m_paw_uj,           only : pawuj_ini,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy

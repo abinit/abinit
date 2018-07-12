@@ -75,6 +75,7 @@ module m_nonlinear
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
  use m_fourier_interpol, only : transgrid
+ use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
 
  implicit none

@@ -124,7 +124,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
  use m_drivexc, only : mkdenpos
- use m_gammapositron, only : gammapositron_fft
+ use m_gammapositron,   only : gammapositron_fft
+ use m_paw_occupancies, only : pawaccrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

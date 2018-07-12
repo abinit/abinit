@@ -61,6 +61,7 @@ MODULE m_wfd
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
  use m_paw_nhat,       only : nhatgrid
+ use m_paw_occupancies,only : pawaccrhoij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg
