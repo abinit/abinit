@@ -62,6 +62,7 @@ module m_dfpt_scfcv
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
  use m_paw_denpot,  only : pawdenpot
+ use m_paw_dfpt,    only : pawdfptenergy
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_rf2,         only : rf2_getidirs
  use m_dens,        only : calcdensph

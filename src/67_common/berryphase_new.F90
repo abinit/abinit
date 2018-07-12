@@ -132,8 +132,9 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
                         pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
                         pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
- use m_mpinfo,    only : proc_distrb_cycle
- use m_berrytk,   only : smatrix, polcart
+ use m_paw_dfpt, only : dsdr_k_paw
+ use m_mpinfo,      only : proc_distrb_cycle
+ use m_berrytk,     only : smatrix, polcart
  use m_paw_overlap, only : smatrix_k_paw
 
 !This section has been created automatically by the script Abilint (TD).
