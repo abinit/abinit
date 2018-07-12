@@ -19,7 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_paw_init.F90",
- "m_pawhr.F90",
+ "m_paw_hr.F90",
  "m_paw_dmft.F90",
  "m_pawpwij.F90",
  "m_paw_slater.F90",
@@ -41,6 +41,6 @@ sources = [
  "m_paw_orbmag.F90",
  "m_pawmkaewf.F90",
  "m_paw_uj.F90",
- "pawpolev.F90"]
+ "m_paw_efield"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

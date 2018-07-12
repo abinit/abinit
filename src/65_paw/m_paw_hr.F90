@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_pawhr
+!!****m* ABINIT/m_paw_hr
 !! NAME
-!!  m_pawhr
+!!  m_paw_hr
 !!
 !! FUNCTION
 !!  This module provides objects and methods to calculate the matrix elements 
@@ -26,7 +26,7 @@
 
 #include "abi_common.h"
 
-MODULE m_pawhr
+MODULE m_paw_hr
 
  use defs_basis
  use m_profiling_abi
@@ -49,7 +49,7 @@ MODULE m_pawhr
 
 !----------------------------------------------------------------------
 
-!!****t* m_pawhr/pawhur_t
+!!****t* m_paw_hr/pawhur_t
 !! NAME
 !!  pawhur_t
 !!
@@ -92,7 +92,7 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawhr/pawhur_free
+!!****f* m_paw_hr/pawhur_free
 !! NAME
 !! pawhur_free
 !!
@@ -139,7 +139,7 @@ end subroutine pawhur_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawhr/paw_ihr
+!!****f* m_paw_hr/paw_ihr
 !! NAME
 !! paw_ihr
 !!
@@ -303,7 +303,7 @@ end function paw_ihr
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawhr/paw_cross_ihr_comm
+!!****f* m_paw_hr/paw_cross_ihr_comm
 !! NAME
 !! paw_cross_ihr_comm
 !!
@@ -428,7 +428,7 @@ end subroutine paw_cross_ihr_comm
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawhr/pawhur_init
+!!****f* m_paw_hr/pawhur_init
 !! NAME
 !! pawhur_init
 !!
@@ -602,7 +602,7 @@ end subroutine pawhur_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawhr/pawr
+!!****f* m_paw_hr/pawr
 !! NAME
 !! pawr
 !!
@@ -631,7 +631,7 @@ end subroutine pawhur_init
 !!  rcart_onsite(3,lmn2_size_max,natom)
 !!
 !! PARENTS
-!!      m_pawhr
+!!      m_paw_hr
 !!
 !! CHILDREN
 !!      simp_gen
@@ -776,5 +776,5 @@ end subroutine pawr
 
 !----------------------------------------------------------------------
 
-END MODULE m_pawhr
+END MODULE m_paw_hr
 !!***

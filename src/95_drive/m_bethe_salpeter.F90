@@ -81,7 +81,7 @@ module m_bethe_salpeter
 &                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
+ use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_sphharm,     only : setsym_ylm
  use m_paw_denpot,      only : pawdenpot

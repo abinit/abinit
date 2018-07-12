@@ -61,7 +61,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  use m_wfd,               only : wfd_t, wfd_get_cprj, wfd_distribute_bbp
  use m_pawtab,            only : pawtab_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_pawhr,             only : pawhur_t, paw_ihr
+ use m_paw_hr,            only : pawhur_t, paw_ihr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

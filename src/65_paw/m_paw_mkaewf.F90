@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_pawmkaewf
+!!****m* ABINIT/m_paw_mkaewf
 !! NAME
-!!  m_pawmkaewf
+!!  m_paw_mkaewf
 !!
 !! FUNCTION
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_pawmkaewf
+module m_paw_mkaewf
 
  use defs_basis
  use defs_datatypes
@@ -68,7 +68,7 @@ module m_pawmkaewf
 contains
 !!***
 
-!!****f* m_pawmkaewf/pawmkaewf
+!!****f* m_paw_mkaewf/pawmkaewf
 !! NAME
 !! pawmkaewf
 !!
@@ -745,5 +745,5 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 end subroutine pawmkaewf
 !!***
 
-end module m_pawmkaewf
+end module m_paw_mkaewf
 !!***

@@ -208,7 +208,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
- use m_pawmkaewf,        only : pawmkaewf
+ use m_paw_mkaewf,       only : pawmkaewf
  use m_dens,             only : mag_constr_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
