@@ -256,7 +256,7 @@ contains
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'_output')
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
 
 
 #if defined HAVE_NETCDF
