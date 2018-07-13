@@ -978,6 +978,19 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        write(message,*) ch10
        call wrtout(spfkresolved_unt,message,'COLL')
      enddo
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         do ib=1,mbandc
+           sf=czero
+           write(71,*)  
+           write(71,*)  "#", ikpt, ib
+           do ifreq=1,green%nw
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+           enddo
+         enddo
+       enddo
+     enddo
    endif
    if (option==4) then
      do isppol = 1 , nsppol
@@ -1224,18 +1237,18 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
-! do iatom = 1 , natom
-!   write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
-!   write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
-!   write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
-! enddo ! natom
+ do iatom = 1 , natom
+   write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+   write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+   write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+ enddo ! natom
      if(paw_dmft%dmft_solv==4)  then 
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
@@ -1257,11 +1270,9 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 &               + fermilevel                               &
 &               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-!write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-
-
-
-
+          if(ikpt==2.and.ib==ib1) then
+            write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          endif
 !&               - (self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
 !               if(prtopt>5) then
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then

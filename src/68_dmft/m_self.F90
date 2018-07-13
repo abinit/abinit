@@ -557,7 +557,7 @@ end subroutine dc_self
 !!
 !! SOURCE
 
-subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,opt_selflimit,opt_hdc)
+subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,opt_selflimit,opt_hdc,opt_stop)
 
  use defs_basis
  use defs_abitypes
@@ -584,6 +584,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer,intent(in) :: prtopt
  integer,intent(in),optional :: opt_rw,istep_iter,opt_imagonly
  character(len=4), optional :: opt_char
+ integer, intent(in), optional :: opt_stop
  type(matlu_type), optional, intent(in) :: opt_selflimit(paw_dmft%natom)
  type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
 
@@ -610,10 +611,15 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  else
    optrw=0
  endif
+ readimagonly=0
  if(present(opt_imagonly)) then
-   if(opt_imagonly==1.and.paw_dmft%dmft_solv==5) then
+   if(opt_imagonly==1.and.paw_dmft%dmft_solv>=5) then
      readimagonly=opt_imagonly
      write(message,'(4x,2a)') "About to read imaginary part of Self energy"
+     call wrtout(std_out,message,'COLL')
+   else
+     readimagonly=0
+     write(message,'(4x,2a)') "About to read both real and imaginary part of Self energy"
      call wrtout(std_out,message,'COLL')
    endif
  else
@@ -757,7 +763,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                 ch10,"     Fermi level",paw_dmft%fermie 
                  call wrtout(std_out,message,'COLL')
                  message = "Dimensions in self are not correct"
-                 if(readimagonly==1) then
+                 if(readimagonly==1.or.present(opt_stop)) then
                    MSG_ERROR(message)
                  else
                    MSG_WARNING(message)
@@ -838,11 +844,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  do ispinor=1,nspinor
                    do ifreq=1,self%nw
                      read(unitselffunc_arr(iall),*,iostat=ioerr) xtemp,s_i(im,im,ispinor,ispinor)
+!*************************************************************************************
+                     !s_i(im,im,ispinor,ispinor)=zero
+!*************************************************************************************
                       ! minus sign because - Im Sigma is the output of OmegaMaxent
                      self%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)&
 &                       =cmplx(s_r(im,im,ispinor,ispinor),-s_i(im,im,ispinor,ispinor),kind=dp)
-                         write(6,*)'read self', s_r(im,im,ispinor,ispinor),s_i(im,im,ispinor,ispinor)
+                         
+                       !  write(6,*)'read self', s_r(im,im,ispinor,ispinor),s_i(im,im,ispinor,ispinor)
+                         write(68,*)self%omega(ifreq), s_r(im,im,ispinor,ispinor),s_i(im,im,ispinor,ispinor)
                    enddo ! ifreq
+                         write(68,*)
                  enddo
                enddo
              endif
@@ -852,7 +864,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              if(readimagonly==1) then
                write(message,'(4x,2a)') "Read only diagonal self energy from Maxent"
                call wrtout(std_out,message,'COLL')
-              ! call kramerskronig_self(self,opt_selflimit,opt_hdc)
+               write(6,*) "opt_hdc",opt_hdc(1)%mat(1,1,1,1,1)
+               call kramerskronig_self(self,opt_selflimit,opt_hdc)
              endif
            endif
 !          ===========================
@@ -879,12 +892,15 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                 =cmplx(s_r(im,1,ispinor,1),s_i(im,1,ispinor,1),kind=dp)
                enddo
              enddo
-           else
+             write(6,*) "read selfhdc",self%hdc%matlu(1)%mat(1,1,1,1,1)
+           else if(readimagonly==1.and..not.present(opt_hdc)) then
              do ispinor=1,nspinor
                do im=1,ndim
                  self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=czero
                enddo
              enddo
+           else 
+            write(std_out,*) "self%hdc fixed in kramerskronig_self"
            endif
            close(unitselffunc_arr(iall))
 !         enddo ! ispinor
@@ -909,7 +925,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call xmpi_bcast(ioerr,master,spacecomm ,ier)
    if(iexist2==0.or.ioerr<0.or.ioerr>0) then
      message = "Self file does not exist or is incomplete"
-     if(readimagonly==1) then
+     if(readimagonly==1.or.present(opt_stop)) then
+      if(readimagonly==1) then
+        message = "Self file does not exist or is incomplete: check the number of self data in file"
+      endif
        MSG_ERROR(message)
      else
        MSG_WARNING(message)
@@ -1399,15 +1418,21 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 
 !Local variables-------------------------------
  integer :: ifreq,jfreq,iidim,isppol,ispinor,ispinor1,im,im1,iatom
+ real(dp), allocatable :: selftemp_re(:)
+ real(dp), allocatable :: selftemp_imag(:)
  integer :: natom,ndim,nsppol,nspinor
  real(dp) :: delta,real_part,imag_part
 ! *********************************************************************
- delta=0.001
+ delta=0.0000000
+ ABI_ALLOCATE(selftemp_re,(self%nw))
+ ABI_ALLOCATE(selftemp_imag,(self%nw))
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
 !  Compute limit of Real Part and put in double counting energy.
- call copy_matlu(selfhdc,self%hdc%matlu,natom)
+! call copy_matlu(selfhdc,self%hdc%matlu,natom)
+     write(6,*) "selfhdc   kramerskronig",selfhdc(1)%mat(1,1,1,1,1)
+     write(6,*) "selfr%hdc kramerskronig",self%hdc%matlu(1)%mat(1,1,1,1,1)
  do iatom=1,natom
    if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
      ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
@@ -1418,21 +1443,50 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
              do im1=1,ndim
                write(6,*) "realpart",real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                do ifreq=1,self%nw
-                 real_part=real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+                 selftemp_re(ifreq)=zero
+                 selftemp_imag(ifreq)=aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  do jfreq=1,self%nw-1
-                    imag_part=aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-                    real_part=real_part - imag_part   &
-                     *(self%omega(ifreq)-self%omega(jfreq)) &
-                    /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
-                   *(self%omega(jfreq+1)-self%omega(jfreq))
+                   if(jfreq==ifreq) cycle
+!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+! &                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
+! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
+! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
+                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+ &                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+ &                   /(self%omega(ifreq)-self%omega(jfreq)) * (self%omega(jfreq+1)-self%omega(jfreq))
                  enddo
-                 real_part=real_part/pi
-                 imag_part=aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-                 write(67,*) ifreq, self%omega(ifreq),real_part,imag_part
-                 self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
-&                =cmplx(real_part,imag_part,kind=dp)
+                 selftemp_re(ifreq)=selftemp_re(ifreq)/pi
+                 write(671,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
                enddo
-                 write(67,*) 
+!                 TEST*************************
+!               do ifreq=1,self%nw
+!                 selftemp_imag(ifreq)=zero
+!                 do jfreq=1,self%nw-1
+!                   if(jfreq==ifreq) cycle
+!!                   selftemp_re(ifreq)=selftemp_re(ifreq) -   &
+!! &                   aimag(self%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+!! &                   *(self%omega(ifreq)-self%omega(jfreq)) &
+!! &                   /((self%omega(ifreq)-self%omega(jfreq))**2+delta**2)&
+!! &                   *(self%omega(jfreq+1)-self%omega(jfreq))
+!                   selftemp_imag(ifreq)=selftemp_imag(ifreq) +    &
+! &                   selftemp_re(jfreq)  &
+! &                   /(self%omega(ifreq)-self%omega(jfreq)) * (self%omega(jfreq+1)-self%omega(jfreq))
+!                 enddo
+!                 selftemp_imag(ifreq)=selftemp_imag(ifreq)/pi
+!                 write(672,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+!               enddo
+!                 TEST*************************
+               do ifreq=1,self%nw
+                 selftemp_re(ifreq)=selftemp_re(ifreq)+ &
+ &                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
+ &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+                 self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
+  &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)
+!  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
+                 write(67,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+               enddo
+               write(67,*) 
              enddo
            enddo
          enddo
@@ -1441,6 +1495,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
    endif ! lpawu=/-1
  enddo ! iatom
                
+ ABI_DEALLOCATE(selftemp_re)
+ ABI_DEALLOCATE(selftemp_imag)
 
 
 end subroutine kramerskronig_self

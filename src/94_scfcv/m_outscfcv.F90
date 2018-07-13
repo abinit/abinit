@@ -276,6 +276,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: pawprtden
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
  integer :: my_comm_atom
+ integer :: opt_imagonly
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
@@ -1101,6 +1102,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
+     opt_imagonly=0
+     if(paw_dmft%dmft_solv>=5) opt_imagonly=1
+
 
      if(dtset%iscf<0) then
       write(6,*) "datafordmft done"
@@ -1110,15 +1114,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
       write(6,*) "init self done"
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
       write(6,*) "init green done with allocation of green%oper"
-      ! call rw_self(self,paw_dmft,prtopt=5,opt_rw=1)
+       call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
+     write(6,*) "self%hdc outscfcv",self%hdc%matlu(1)%mat(1,1,1,1,1)
      write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
      write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
      write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
       write(6,*) "init green done with allocation of green%oper"
-       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=1,&                
+      write(6,*) "opt_imagonly",opt_imagonly
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly,  &                
      &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
+     write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
       write(6,*) "read self done"
-       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=0,opt_nonxsum=0)
+       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=1,opt_nonxsum=0)
       write(6,*) "compute green done"
        if(me==master) then
          call print_green("forspectralfunction",greenr,5,paw_dmft,pawprtvol=3,opt_wt=1)
