@@ -508,7 +508,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' Note also that it will be of great value to readers of publications presenting these results,',ch10,&
 & ' to read papers enabling them to understand the theoretical formalism and details',ch10,&
 & ' of the ABINIT implementation.',ch10,&
-& ' For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.'
+& ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
 
  ncited=0
  print_optional=1
