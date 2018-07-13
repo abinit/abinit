@@ -31,9 +31,6 @@ MODULE m_paw_finegrid
  use m_paw_sphharm, only : initylmr
  use m_paw_numeric, only : paw_jbessel,paw_splint,paw_uniform_splfit,paw_sort_dp
 
- use m_splines
-
-
  implicit none
 
  private
