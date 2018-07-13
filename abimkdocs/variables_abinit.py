@@ -14984,9 +14984,11 @@ cell parameters with the lowest energy. Forget all the history and start the
 calculation using those values. The original atomic coordinates and cell
 parameters are irrelevant in that case.
 
+**restartxf=-3 (New)**:Read **ONLY** the last require the atomic positions and cell parameters in the HIST file to restart the Molecular dynamics or structural optimization. 
+
 NOTES:
-* You can use **restartxf=-1 or -2** for all predictiors that make no use of random numbers.
-* You can use **restartxf=-1 or -2** to restart a calculation that was not completed. The HIST file is written on each iteration. So you always have something to recover from.
+* You can use **restartxf=-1, -2 or -3** for all predictiors that make no use of random numbers.
+* You can use **restartxf=-1, -2 or -3** to restart a calculation that was not completed. The HIST file is written on each iteration. So you always have something to recover from.
 * You can take advantage of the appropriate values of [[irdwfk]] or [[getwfk]] to get a good wave function to continue your job.
 """,
 ),
