@@ -75,7 +75,7 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
   character(len=500) :: message
 
 !arrays
-  complex(kind=dpc) :: rwork(3*nband-1)
+  real(kind=dp) :: rwork(3*nband-1)
   complex(kind=dpc), allocatable :: work(:)
 
 ! *************************************************************************
