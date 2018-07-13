@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file  tmp.file2
- sed -e 's!https://www.abinit.org/about/?text=acknowledgments!https://docs.abinit.org/theory/acknowledgments!' $file > tmp.file
+ sed -e 's!~abinit/doc/users/acknowledgments.html!https://docs.abinit.org/theory/acknowledgments!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
