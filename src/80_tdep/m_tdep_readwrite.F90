@@ -139,7 +139,7 @@ contains
   write(stdout,'(a)') ' Note also that it will be of great value to readers of publications presenting these results,'
   write(stdout,'(a)') ' to read papers enabling them to understand the theoretical formalism and details'
   write(stdout,'(a)') ' of the ABINIT implementation.'
-  write(stdout,'(a)') ' For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.'
+  write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\alpha$-U' 
   write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).'
@@ -311,7 +311,7 @@ contains
   write(InVar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
   write(InVar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
   write(InVar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
-  write(InVar%stdout,'(a)') ' Please read ~abinit/doc/users/acknowledgments.html for suggested'
+  write(InVar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
   write(InVar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
   write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
