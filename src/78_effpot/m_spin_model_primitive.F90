@@ -137,7 +137,7 @@ contains
 !End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
-    !TODO
+   !TODO should something  be done here?
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
