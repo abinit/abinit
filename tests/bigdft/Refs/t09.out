@@ -315,7 +315,7 @@
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Daubechies wavelets as a basis set for density functional pseudopotential calculations.
 - L. Genovese, A. Neelov, S. Goedecker, T. Deutsch, S.A. Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A. Bergman et R. Schneider,
