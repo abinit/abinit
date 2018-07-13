@@ -54,6 +54,9 @@ MODULE m_paw_dmft
  public :: print_sc_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
+!!***
+
+!----------------------------------------------------------------------
 
 !!****t* m_paw_dmft/paw_dmft_type
 !! NAME
@@ -217,8 +220,6 @@ MODULE m_paw_dmft
   real(dp) :: dmft_chpr
   ! Precision on charge required for determination of fermi level (fermi_green) with newton method
 
-
-
   real(dp) :: dmft_fepr
   ! Required precision on Fermi level (fermi_green) during the DMFT SCF cycle, (=> ifermie_cv)
   ! used also for self (new_self)  (=> iself_cv).
@@ -270,7 +271,6 @@ MODULE m_paw_dmft
   ! electronic density.
 
   complex(dpc), allocatable :: psichi(:,:,:,:,:,:)
-
 
   real(dp), allocatable :: eigen_lda(:,:,:)
 
@@ -397,8 +397,6 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 !   MSG_ERROR(message)
 ! endif
 !#endif
-
-
 
  paw_dmft%mband       = mband
  paw_dmft%dmftbandf   = dmftbandf

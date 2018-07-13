@@ -1941,6 +1941,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  DBG_ENTER("COLL")
 
  CONTAINS
+!!***
 
 ! ------------------------------------------------
 !!****f* pawgrnl/pawgrnl_convert
@@ -2021,7 +2022,6 @@ subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
  ABI_DEALLOCATE(mu_temp)
 
 end subroutine pawgrnl_convert
-!!***
 ! ------------------------------------------------
 
 end subroutine pawgrnl

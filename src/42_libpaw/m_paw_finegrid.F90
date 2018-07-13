@@ -738,6 +738,7 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 ! -----------------------------------------------------------------
 !Small functions related to analytical expression of shape function
  CONTAINS
+!!***
 ! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc1
 !  shapefunc1 is g(x) (gaussian)
@@ -1072,7 +1073,6 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
      d2shpfunc3= alpha(1,1+argl)*(qq(1,1+argl)**2)*jbespp1 &
 &                                 +alpha(2,1+argl)*(qq(2,1+argl)**2)*jbespp2
    end function d2shpfunc3
-!!***
 ! ------------------------------------------------
 
 end subroutine pawgylm
@@ -1513,6 +1513,7 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 !*********************************************************************
 !Small functions related to boundary conditions
  contains
+!!***
 ! ------------------------------------------------
 !!****f* m_paw_finegrid/my_ind_positions
  subroutine my_ind_positions(periodic,i,n,j,go)
@@ -1556,7 +1557,6 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
     nl=14 ; nr=15
   end if
   end subroutine my_ext_buffers
-!!***
 ! ------------------------------------------------
 
 end subroutine pawrfgd_wvl
