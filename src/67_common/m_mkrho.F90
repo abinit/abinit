@@ -56,7 +56,6 @@ module m_mkrho
  public :: mkrho
  public :: initro
  public :: prtrhomxmn
- public :: prtrhomxmn
  public :: read_atomden
 !!***
 

@@ -21,7 +21,7 @@
 
 #include "abi_common.h"
 
-MODULE m_paw
+MODULE m_paw_optics
 
  use defs_basis
  use defs_abitypes
@@ -37,8 +37,8 @@ MODULE m_paw
  use m_pawrad,       only : pawrad_type, pawrad_deducer0, simp_gen
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, &
-&                        pawcprj_free,pawcprj_mpi_allgather
- use m_paw_onsite,   only : pawnabla_init
+&                           pawcprj_free,pawcprj_mpi_allgather
+ use m_paw_onsite,   only : pawnabla_init,pawnabla_core_init
  use m_mpinfo,       only : destroy_mpi_enreg,nullify_mpi_enreg,initmpi_seq,proc_distrb_cycle
  use m_numeric_tools,only : kramerskronig
  use m_geometry,     only : metric
@@ -135,7 +135,7 @@ CONTAINS  !=====================================================================
  real(dp),intent(inout) :: cg(2,mcg)
  type(pawcprj_type),target,intent(inout) :: cprj(natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
- type(pawtab_type),target,intent(in) :: pawtab(dtset%ntypat)
+ type(pawtab_type),target,intent(inout) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -151,7 +151,7 @@ CONTAINS  !=====================================================================
 !arrays
  integer :: tmp_shape(3)
  integer,allocatable :: kg_k(:,:)
- real(dp) :: tsec(2)
+ real(dp) :: kpoint(3),tsec(2)
  real(dp),allocatable :: kpg_k(:,:),psinablapsi(:,:,:,:),tnm(:,:,:,:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(wffile_type) :: wff1
@@ -168,7 +168,7 @@ CONTAINS  !=====================================================================
 !----------------------------------------------------------------------------------
 
  already_has_nabla=all(pawtab(:)%has_nabla==2)
- call pawnabla_init(mpsang,ntypat,pawrad,pawtab)
+ call pawnabla_init(mpsang,dtset%ntypat,pawrad,pawtab)
 
 !----------------------------------------------------------------------------------
 !2- Computation of <psi_n|-i.nabla|psi_m> for each k
@@ -548,12 +548,12 @@ CONTAINS  !=====================================================================
  real(dp),intent(in) :: eigen0(mband*nkpt*nsppol)
  type(pawcprj_type),target,intent(inout) :: cprj(natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
- type(pawtab_type),target,intent(in) :: pawtab(dtset%ntypat)
+ type(pawtab_type),target,intent(inout) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: basis_size,bdtot_index,cplex,etiq,iatom,ib,ibg
- integer :: ierr,ikpt,il,ilmn,ount
+ integer :: ierr,ikpt,il,ilmn,iln,ount
  integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat
  integer :: jb,jbsp,jl,jlmn,lmn_size,lmncmax,mband_cprj
  integer :: me,me_kpt,mesh_size,my_nspinor,nband_cprj_k,nband_k,nphicor
@@ -565,7 +565,7 @@ CONTAINS  !=====================================================================
 !arrays
  integer,allocatable :: indlmn_core(:,:),lcor(:),ncor(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: energy_cor(:),tnm(:,:,:,:,:)
+ real(dp),allocatable :: energy_cor(:),phi_cor(:,:),psinablapsi(:,:,:,:,:),tnm(:,:,:,:,:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(wffile_type) :: wff1
 
@@ -597,7 +597,7 @@ CONTAINS  !=====================================================================
 !----------------------------------------------------------------------------------
 
  already_has_nabla=all(pawtab(:)%has_nabla==3)
- call pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_core)
+ call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_core)
 
 !----------------------------------------------------------------------------------
 !2- Computation of <psi_n|p_i>(<phi_i|-i.nabla|phi_core>)
@@ -708,7 +708,7 @@ CONTAINS  !=====================================================================
                  do ilmn=1,lmncmax
                    ib=indlmn_core(5,ilmn)
                    cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
-                   tnm(2,:,jb,ib,iatom)=tnm(2,:,jb,ib,iatom)+cpnm1*phipphj(itypat)%value(:,jlmn,ilmn)
+                   tnm(2,:,jb,ib,iatom)=tnm(2,:,jb,ib,iatom)+cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                  end do !ilmn
                end do !jlmn
              end do !iatom
@@ -724,8 +724,8 @@ CONTAINS  !=====================================================================
                    ib=indlmn_core(5,ilmn)
                    cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                    cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
-                   tnm(1,:,jb,ib,iatom)=tnm(1,:,jb,ib,iatom)+cpnm1*phipphj(itypat)%value(:,jlmn,ilmn)
-                   tnm(2,:,jb,ib,iatom)=tnm(2,:,jb,ib,iatom)+cpnm2*phipphj(itypat)%value(:,jlmn,ilmn)
+                   tnm(1,:,jb,ib,iatom)=tnm(1,:,jb,ib,iatom)+cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
+                   tnm(2,:,jb,ib,iatom)=tnm(2,:,jb,ib,iatom)+cpnm2*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                  end do !ilmn
                end do !jlmn
              end do !iatom

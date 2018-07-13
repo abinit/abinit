@@ -43,7 +43,7 @@ MODULE m_suscep_stat
  use m_fft,     only : fftpac
  use m_spacepar,     only : symrhg
  use m_paw_finegrid, only : pawgylmg
- use m_paw_naht,     only : pawsushat
+ use m_paw_nhat,     only : pawsushat
 
  implicit none
 

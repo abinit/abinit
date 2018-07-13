@@ -128,6 +128,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
  use m_kg,       only : mkkin, mkkpg
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle

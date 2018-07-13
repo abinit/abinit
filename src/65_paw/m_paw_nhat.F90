@@ -49,12 +49,12 @@ MODULE m_paw_nhat
  private
 
 !public procedures.
- public :: pawmkhat        ! Compute compensation charge density on the real space (fine) grid
- public :: pawmkhat_psipsi ! Compute compensation charge density associated to the product of two WF
- public :: pawnhatfr       ! Compute frozen part of 1st-order compensation charge density nhat^(1) (DFPT)
- public :: pawsushat       ! Compute contrib. to the product of two WF from compensation charge density
- public :: nhatgrid        ! Determine points of the (fine) grid that are located around atoms - PW version
- public :: wvl_nhatgrid    ! Determine points of the (fine) grid that are located around atoms - WVL version
+ public :: pawmknhat        ! Compute compensation charge density on the real space (fine) grid
+ public :: pawmknhat_psipsi ! Compute compensation charge density associated to the product of two WF
+ public :: pawnhatfr        ! Compute frozen part of 1st-order compensation charge density nhat^(1) (DFPT)
+ public :: pawsushat        ! Compute contrib. to the product of two WF from compensation charge density
+ public :: nhatgrid         ! Determine points of the (fine) grid that are located around atoms - PW version
+ public :: wvl_nhatgrid     ! Determine points of the (fine) grid that are located around atoms - WVL version
 
 CONTAINS  !========================================================================================
 !!***

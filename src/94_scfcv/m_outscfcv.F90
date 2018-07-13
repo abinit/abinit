@@ -212,7 +212,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_dens,             only : mag_constr_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
- use m_atomden,          only : read_atomden
+ use m_mkrho,            only : read_atomden
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -260,7 +260,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars

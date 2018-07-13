@@ -43,7 +43,6 @@ MODULE m_paw_dfpt
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_pawxc,        only : pawxc_dfpt, pawxcm_dfpt
  use m_paw_denpot,   only : pawdensities
- use m_paw_dfpt,     only : pawdfptenergy
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
 
  use m_atm2fft,      only : dfpt_atm2fft

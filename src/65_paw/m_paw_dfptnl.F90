@@ -43,9 +43,9 @@ MODULE m_paw_dfptnl
  private
 
 !public procedures.
- public :: paw_dfptnl_energy    ! Compute the XC PAW on-site contributions to a 3rd-order energy
- public :: paw_dfptnl_xc        ! Compute a contribution of the 3rd-derivative of XC energy of ONE PAW sphere
- public :: paw_dfptnl_acccrhoij ! Accumulate the 2nd order PAW quantities rhoij^(2)
+ public :: paw_dfptnl_energy   ! Compute the XC PAW on-site contributions to a 3rd-order energy
+ public :: paw_dfptnl_xc       ! Compute a contribution of the 3rd-derivative of XC energy of ONE PAW sphere
+ public :: paw_dfptnl_accrhoij ! Accumulate the 2nd order PAW quantities rhoij^(2)
 
 CONTAINS  !========================================================================================
 !!***

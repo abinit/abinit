@@ -33,10 +33,10 @@ MODULE m_paw_denpot
  use m_pawtab,           only : pawtab_type
  use m_paw_an,           only : paw_an_type
  use m_paw_ij,           only : paw_ij_type
- use m_pawfgrtab         only : pawfgrtab_type
+ use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawdij,           only : pawdijhartree,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
- use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron, awxcmpositron
+ use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron
  use m_paw_finegrid,     only : pawgylm
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
  use m_paw_correlations, only : pawuenergy,pawxenergy,setnoccmmp

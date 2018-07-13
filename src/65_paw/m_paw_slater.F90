@@ -931,7 +931,7 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
  integer,allocatable :: phi_indln(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: phi(:,:)
  real(dp),allocatable :: overlap(:,:)
- type(Atom_type),allocatable :: Atm(:)
+ type(atomorb_type),allocatable :: Atm(:)
  type(Pawrad_type),allocatable :: Radatm(:)
 
 ! *************************************************************************

@@ -156,7 +156,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_paw_an,     only : paw_an_type
  use m_paw_mkrho,  only : pawmkrho
  use m_paw_nhat,   only : pawnhatfr
- use m_paw_dfpt,   only : dfptenergy
+ use m_paw_dfpt,   only : pawdfptenergy
  use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
  use m_initylmg,   only : initylmg
  use m_mkffnl,     only : mkffnl

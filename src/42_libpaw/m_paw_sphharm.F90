@@ -1683,7 +1683,7 @@ elemental function dble_factorial(nn)
 
 ! *********************************************************************
 
- rfactorial=one
+ dble_factorial=one
  do ii=2,nn
    dble_factorial=dble_factorial*ii
  end do
@@ -2429,8 +2429,8 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 !--------------- Built indices + allocations
  ll=lcor
  mlmstwojmj=czero
- ABI_ALLOCATE(ind_msml,(2,-ll:ll))
- ABI_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
+ LIBPAW_ALLOCATE(ind_msml,(2,-ll:ll))
+ LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
  mlmstwojmj=czero
  jc1=0
  do ms1=1,2
@@ -2471,8 +2471,8 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
    end do
  end do
 
- ABI_DEALLOCATE(ind_msml)
- ABI_DEALLOCATE(mat_mlms2)
+ LIBPAW_DEALLOCATE(ind_msml)
+ LIBPAW_DEALLOCATE(mat_mlms2)
 
 end subroutine create_mlms2jmj
 !!***

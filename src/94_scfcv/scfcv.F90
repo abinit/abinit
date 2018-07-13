@@ -215,6 +215,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
  use m_paw_orbmag,       only : orbmag_type
+ use m_paw_mkrho,        only : pawmkrho
  use m_paw_uj,           only : pawuj_red
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
@@ -309,7 +310,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtpawuj)
  type(pawrhoij_type), intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type), intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type), intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
 
 !Local variables -------------------------
@@ -2433,6 +2434,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_energies,         only : energies_type
+ use m_paw_dfpt,         only : pawgrnl
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_forces,           only : forces
 

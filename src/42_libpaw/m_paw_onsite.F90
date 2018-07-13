@@ -111,7 +111,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
  real(dp) :: intg
  character(len=500) :: msg      
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8)
  real(dp),allocatable :: dphi(:),dtphi(:),ff(:),int1(:,:),int2(:,:),rad(:)
  
@@ -288,7 +288,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  real(dp) :: intg
  character(len=500) :: msg
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8)
  real(dp),allocatable :: dphi(:),ff(:),int1(:,:),int2(:,:),rad(:)
 
@@ -310,7 +310,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    MSG_BUG(msg)
  end if
 
- if (any(mesh_size_cor/=pawtab(:)%mesh_size))
+ if (any(mesh_size_cor/=pawtab(:)%mesh_size)) then
    write(msg,'(3a)') 'Wrong mesh_size_cor value (2)!',ch10,&
 &                    'Should have only one type of atom.'
    MSG_ERROR(msg)

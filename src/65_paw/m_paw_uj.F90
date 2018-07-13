@@ -28,6 +28,8 @@ MODULE m_paw_uj
  use m_profiling_abi
  use m_errors
  use m_linalg_interfaces
+ use m_xmpi
+
  use m_pptools,       only : prmat
  use m_special_funcs, only : iradfnh
  use m_geometry,      only : shellstruct,ioniondist
@@ -47,7 +49,6 @@ MODULE m_paw_uj
  public :: pawuj_free ! Deallocate dtpawuj datastructure
  public :: pawuj_det  ! Determine U (or J) parameter
  public :: pawuj_red  ! Store atomic occupancies, potential shift, positions
- public :: 
 
 !private procedures.
 !  chiscwrt:   distributes values of chi_org on chi_sc according to ion-ion distances
