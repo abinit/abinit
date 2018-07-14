@@ -6537,7 +6537,7 @@ end function uniformrandom
 !! Also deduce different quantities at this predicted point, and at the two other points
 !! It uses a quartic interpolation, with the supplementary
 !! condition that the second derivative vanishes at one and
-!! only one point (See Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! only one point. See Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !! For this option, lambda_1 must be 1 (new point),
 !! and lambda_2 must be 0 (old point).
 !! Also, if the derivative at the new point is more negative

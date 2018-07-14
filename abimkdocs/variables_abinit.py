@@ -18118,7 +18118,7 @@ order to take into account of the dispersion:
 The last term has been predicted to have an important effect for large
 molecules [[cite:Grimme2010]]. It is however quite costly in computational
 time for periodic systems and seems to lead to an overestimation of lattice
-parameters for weakly bound systems [[cite:Grimme2010a]]. Still, its
+parameters for weakly bound systems [[cite:Grimme2011]]. Still, its
 contribution to energy, to forces and to stress is available (not planned for
 elastic constants, dynamical matrix and internal strains).
 """,

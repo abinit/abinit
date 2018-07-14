@@ -1398,7 +1398,7 @@ end subroutine psp3nl
 !! FUNCTION
 !! Initialize pspcod=10 pseudopotentials (formalism is the same as in HGH psps
 !! PRB58,3641(1998) [[cite:Hartwigsen1998]], but the full h and k matrices are read, allowing for using
-!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005)):
+!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005) [[cite:Dolg2005]]:
 !! continue to read the file, then compute the corresponding
 !! local and non-local potentials.
 !!

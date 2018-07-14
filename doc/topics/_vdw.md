@@ -27,7 +27,7 @@ systems requiring van-der-Waals interactions.
 
 The DFT-D methods have been implemented inside ABINIT, namely DFT-D2
 [[cite:Grimme2006]], DFT-D3 [[cite:Grimme2010]] and DFT-D3(BJ)
-[[cite:Grimme2010a]]. In these cases, pair-wise terms (and 3-body corrections
+[[cite:Grimme2011]]. In these cases, pair-wise terms (and 3-body corrections
 for DFT-D3 and DFT-D3(BJ)) are added to the DFT energy, which are independent
 of the electronic density, in order to mimic the vdW interactions. The
 implementation includes the contributions of these methods to forces and

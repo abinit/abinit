@@ -467,7 +467,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Compute the displacmeent of each configuration.
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
-!Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
@@ -1251,7 +1251,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Compute the displacmeent of each configuration.
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
-!Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
@@ -1615,7 +1615,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!                                      of  the coefficients for each direction,time
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! OUTPUT
 !! coefficients(ncoeff_fit) = Values of the coefficients
@@ -1825,7 +1825,7 @@ end subroutine fit_polynomial_coeff_solve
 !!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! OUTPUT
 !! gf_value(4) = Goal function
@@ -2236,7 +2236,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! hist<type(abihist)> = The history of the MD
 !! natom = number of atom
 !! ntime = number of time in the hist
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! compute_anharmonic = TRUE if the anharmonic part of the effective potential
 !!                           has to be taking into acount
 !! print_file = if True, a ASCII file with the difference in energy will be print
