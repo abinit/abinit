@@ -252,11 +252,11 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#anglade2008'
  priority(16)=10
 
- ref(17)=' Sharing electronic structure and crystallographic data with ETSF_IO'//ch10//&
-& ' D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze,'//ch10//&
-& ' Comput. Physics Communications 179, 748 (2008).'
+ ref(17)=' Specification of an extensible and portable file format for electronic structure and crystallographic data'//ch10//&
+& ' X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete,'//ch10//&
+& ' Comput. Material Science 43, 1056 (2008).'
  comment(17)=' Comment : to be cited in case the ETSF_IO file format is used, i.e. iomode=3.'//ch10//&
-& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#caliste2008'
+& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2008'
  priority(17)=20
 
  ref(18)=' Daubechies wavelets as a basis set for density functional pseudopotential calculations.'//ch10//&
@@ -467,7 +467,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If iprcel/=0, cite Anglade2008
    if(dtsets(idtset)%iprcel/=0)cite(16)=1
 
-!  If iomode==IO_MODE_ETSF, cite Caliste2008
+!  If iomode==IO_MODE_ETSF, cite Gonze2008
    if(dtsets(idtset)%iomode==IO_MODE_ETSF)cite(17)=1
 
 !  If usewvl/=0, cite Genovese2008

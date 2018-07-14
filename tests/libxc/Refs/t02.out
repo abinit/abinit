@@ -1745,7 +1745,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4139.000    4139.000
  Exchange-correlation functional for the present dataset will be:
   GGA: HCTH120 functional - ixc=17
  Citation for XC functional:
-  A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (1998)
+  A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (2000)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 14.0000000  0.0000000  0.0000000  G(1)=  0.0714286  0.0000000  0.0000000
@@ -2002,7 +2002,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4139.000    4139.000
  Exchange-correlation functional for the present dataset will be:
   GGA: HCTH147 functional - ixc=26
  Citation for XC functional:
-  A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (1998)
+  A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (2000)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 14.0000000  0.0000000  0.0000000  G(1)=  0.0714286  0.0000000  0.0000000

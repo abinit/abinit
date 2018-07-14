@@ -6433,7 +6433,7 @@ files). The possible values are:
 
   * 0 --> Use standard Fortran IO (ok for sequential runs, not suitable for large parallel runs)
   * 1 --> Use MPI/IO routines (ok both for sequential and large parallel runs)
-  * 3 --> Use NetCDF library to produce files according to the ETSF specification
+  * 3 --> Use NetCDF library to produce files according to the ETSF specification [[cite:Gonze2008]]
     (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
 
 By default, Abinit produces Fortran files and uses parallel MPI-IO under the
@@ -6458,13 +6458,8 @@ Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
 compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
 
-References:
-
-  * "Specification of an extensible and portable file format for electronic structure and crystallographic data",
-  X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete, [[cite: Gonze2008 | Comput. Mat. Science 43, 1056 (2008) ]]
-  * "Sharing electronic structure and crystallographic data with ETSF_IO", D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze, Comput.
-  [[cite: Caliste2008 | Physics Communications 179, 748 (2008) ]]
-  * see also [ http://www.etsf.eu/fileformats ](http://www.etsf.eu/fileformats).
+Additional note : The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
+The ETSF_IO library was indeed not maintained anymore.
 """,
 ),
 
@@ -13758,7 +13753,7 @@ Variable(
     mnemonics="PRint NABLA",
     requires="[[usepaw]] == 1",
     text="""
-  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti.
+  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]). 
 """,
 ),
 
