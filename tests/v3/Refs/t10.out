@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -1005,7 +1005,7 @@ P          mk1mem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).

@@ -539,8 +539,6 @@ symmetries, the time-reversal symmetry, or even the permutation of first and
 second perturbations to deduce the value of non-computed matrix elements. This
 behaviour might be improved, as it is sometimes confusing ...
 
-_If you follow the tutorial, you should go back to the tutorial window now._
-
 <a id="numerical-quality"></a>
 ## 7 Numerical quality of the calculations
   
