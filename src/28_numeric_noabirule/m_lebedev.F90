@@ -406,32 +406,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
 !cvw
 !cvw    Given a point on a sphere (specified by a and b), generate all
@@ -1006,32 +1006,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1666666666666667D+0
@@ -1077,32 +1077,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.6666666666666667D-1
@@ -1150,32 +1150,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.4761904761904762D-1
@@ -1225,32 +1225,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.9523809523809524D-2
@@ -1301,32 +1301,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1269841269841270D-1
@@ -1379,32 +1379,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.5130671797338464D-3
@@ -1460,32 +1460,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1154401154401154D-1
@@ -1542,32 +1542,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.3828270494937162D-2
@@ -1627,32 +1627,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.5996313688621381D-3
@@ -1715,32 +1715,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.5544842902037365D-2
@@ -1806,32 +1806,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1782340447244611D-2
@@ -1900,32 +1900,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=-0.5522639919727325D-1
@@ -1998,32 +1998,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=-0.1313769127326952D-2
@@ -2099,32 +2099,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.8545911725128148D-3
@@ -2204,32 +2204,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.3006796749453936D-2
@@ -2313,32 +2313,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.5265897968224436D-3
@@ -2431,32 +2431,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.3095121295306187D-3
@@ -2564,32 +2564,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.2192942088181184D-3
@@ -2714,32 +2714,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1438294190527431D-3
@@ -2883,32 +2883,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1105189233267572D-3
@@ -3073,32 +3073,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.7777160743261247D-4
@@ -3286,32 +3286,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.6309049437420976D-4
@@ -3524,32 +3524,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.4656031899197431D-4
@@ -3789,32 +3789,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.3922616270665292D-4
@@ -4083,32 +4083,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.2998675149888161D-4
@@ -4408,32 +4408,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.2599095953754734D-4
@@ -4766,32 +4766,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.2040382730826330D-4
@@ -5159,32 +5159,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1807395252196920D-4
@@ -5589,32 +5589,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.1449063022537883D-4
@@ -6058,32 +6058,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.9687521879420705D-4
@@ -6568,32 +6568,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.9080510764308163D-4
@@ -7121,32 +7121,32 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !chvd   [1] V.I. Lebedev, and D.N. Laikov
 !chvd       "A quadrature formula for the sphere of the 131st
 !chvd        algebraic order of accuracy"
-!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+!chvd       Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481. [[cite:Lebedev1999]]
 !chvd
 !chvd   [2] V.I. Lebedev
 !chvd       "A quadrature formula for the sphere of 59th algebraic
 !chvd        order of accuracy"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 50, 1995, pp. 283-286. [[cite:Lebedev1995]]
 !chvd
 !chvd   [3] V.I. Lebedev, and A.L. Skorokhodov
 !chvd       "Quadrature formulas of orders 41, 47, and 53 for the sphere"
-!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592.
+!chvd       Russian Acad. Sci. Dokl. Math., Vol. 45, 1992, pp. 587-592. [[cite:Lebedev1992]]
 !chvd
 !chvd   [4] V.I. Lebedev
 !chvd       "Spherical quadrature formulas exact to orders 25-29"
-!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107.
+!chvd       Siberian Mathematical Journal, Vol. 18, 1977, pp. 99-107. [[cite:Lebedev1977]]
 !chvd
 !chvd   [5] V.I. Lebedev
 !chvd       "Quadratures on a sphere"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 16,
-!chvd       1976, pp. 10-24.
+!chvd       1976, pp. 10-24. [[cite:Lebedev1976]]
 !chvd
 !chvd   [6] V.I. Lebedev
 !chvd       "Values of the nodes and weights of ninth to seventeenth
 !chvd        order Gauss-Markov quadrature formulae invariant under the
 !chvd        octahedron group with inversion"
 !chvd       Computational Mathematics and Mathematical Physics, Vol. 15,
-!chvd       1975, pp. 44-51.
+!chvd       1975, pp. 44-51. [[cite:Lebedev1975]]
 !chvd
        N=1
        V=0.9735347946175486D-5
