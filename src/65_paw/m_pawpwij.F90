@@ -139,7 +139,7 @@ MODULE m_pawpwij
 
 !----------------------------------------------------------------------
 
- integer,parameter :: PWIJ_ARNAUD   = 1   ! Arnaud-Alouani exact expression. PRB 62. 4464
+ integer,parameter :: PWIJ_ARNAUD   = 1   ! Arnaud-Alouani exact expression. PRB 62. 4464 [[cite:Arnaud2000]]
  integer,parameter :: PWIJ_SHISHKIN = 2   ! Shishkin-Kresse approximated expression. PRB 74. 035101 [[cite:Shishkin2006]]
 
 CONTAINS  !========================================================================================
@@ -568,7 +568,7 @@ end subroutine pawpwij_free_d2
 !!   = MAXVAL(Pawtab(:)%lmn2_size) if method=2
 !!  method=integer flag defining the approach used:
 !!   1 --> Expression based on the expansion on a plane wave in terms of Bessel functions
-!!        and spherical harmonics (Arnaud-Alouani's methos, see PRB 62, 4464
+!!        and spherical harmonics (Arnaud-Alouani's methos, see PRB 62, 4464 [[cite:Arnaud2000]]
 !!   2 --> Approximate expression with correct description of the multipoles. Eq. 9 in PRB 74, 035101 [[cite:Shishkin2006]]
 !!  nq_spl=number of grid points in the q-mesh
 !!  qgrid_spl(nq_spl)=values where form factors are returned
@@ -643,7 +643,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
  SELECT CASE (method)
 
  CASE (PWIJ_ARNAUD)
-   ! === Arnaud-Alouani exact expression PRB 62. 4464 ===
+   ! === Arnaud-Alouani exact expression PRB 62. 4464 [[cite:Arnaud2000]] ===
    ! * $ff_^{aL}_{ij}(q) =
    !    \int_0^{r_a} j_L(2\pi qr) [phi_{n_i,l_i}.phi_{n_j l_j}(r)-tphi_{n_i l_i}.tph_{n_j l_j}(r)]dr$
    ! * It does not descrive correctly the multipoles of the AE charge density if low cutoff on G

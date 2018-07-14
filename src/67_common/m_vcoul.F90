@@ -546,7 +546,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
  CASE ('SPHERE')
    ! TODO check that L-d > R_c > d
-   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008).
+   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut<tol12) then
      Vcp%rcut = (ucvol*Kmesh%nbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&

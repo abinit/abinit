@@ -1190,7 +1190,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016)
+!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!

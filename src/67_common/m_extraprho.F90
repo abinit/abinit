@@ -502,7 +502,7 @@ end subroutine extraprho
 !! FUNCTION
 !! Extrapolate wavefunctions for new ionic positions
 !! from values of wavefunctions of previous SCF cycle.
-!! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992)
+!! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992) [[cite:Arias1992]]
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms

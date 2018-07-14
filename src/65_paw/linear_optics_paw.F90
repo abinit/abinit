@@ -218,7 +218,7 @@
 
 !    occupation numbers for k-point
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-!    accumulate e2 for this k point, Eq. 17 from PRB 73, 045112 (2006)
+!    accumulate e2 for this k point, Eq. 17 from PRB 73, 045112 (2006 [[cite:Gajdo2006]])
      do iband = 1, nband_k
        do jband = 1, nband_k
          fij = occ_k(iband) - occ_k(jband) !occ number difference

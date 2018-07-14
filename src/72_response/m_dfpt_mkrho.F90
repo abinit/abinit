@@ -826,7 +826,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      valuer=zero
      diag=zero
      offdiag=zero
-   ! EB FR 2nd term in Eq. 91 PRB52,1096 for non-collinear magnetism
+   ! EB FR 2nd term in Eq. 91 PRB52,1096 [[cite:Gonze1995]] for non-collinear magnetism
      do i3=1,n3
        do i2=1,n2
          do i1=1,n1

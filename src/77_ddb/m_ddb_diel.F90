@@ -461,7 +461,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
          if(frdiel(idir1,idir1,ifreq)<=zero)then
            refl(idir1)=one
          else
-!          See Gervais and Piriou PRB11,3944(1975).
+!          See Gervais and Piriou PRB11,3944(1975) [[cite:Gervais1975]].
            refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one) /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
          end if
        end do

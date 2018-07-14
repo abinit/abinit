@@ -1138,7 +1138,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    *delta(istm,istn,lz)
 !                  NOTE:: lx to ly m to n in pmat matrices respectively
 !                  Changes are made so that this (b3) term is according to paper
-!                  PRB48(Ref. 4) rather than PRB53(Ref 2) in which this term is incorrect
+!                  [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
                  end do
                end do
              end do

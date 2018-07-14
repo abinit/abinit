@@ -550,7 +550,7 @@ with **all-electrons** computations or with other existing PAW results;
 it should not be done by comparison with experimental results.
 As the PAW method has the same accuracy than all-electron methods, results should be very close.
   
-In the case of diamond, all-electron results can be found f.i. in [[cite:Holzwarth2005]].
+In the case of diamond, all-electron results can be found f.i. in [[cite:Holzwarth1997]].
 All-electron equilibrium parameters for diamond (within _Local Density Approximation_) obtained
 with the FP-LAPW WIEN2K code are:
 

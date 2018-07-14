@@ -281,7 +281,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  end do
 
  ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", &
+ call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", & ! [[cite:Pickett1988]]
              do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))

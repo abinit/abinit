@@ -23,7 +23,7 @@
 !!       $B_ijkl   =\sum_{L,m} {vhatijL*Gaunt(k,l,Lm)*q_ijL}$
 !!       $C_ijkl   =\sum_{L,m} {intvhatL*q_ijL*q_klL}$
 !!     and:
-!!       vh1 according to eq. (A17) in Holzwarth et al., PRB 55, 2005 (1997)
+!!       vh1 according to eq. (A17) in Holzwarth et al., PRB 55, 2005 (1997) [[cite:Holzwarth1997]]
 !! 7-Compute Ex-correlation energy for the core density
 !!
 !! COPYRIGHT
@@ -468,7 +468,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
      if (iloop==2) eijkl => pawtab(itypat)%eijkl_sr
 
 !    Compute:
-!    vhatL(r) according to eq. (A14) in Holzwarth et al., PRB 55, 2005 (1997)
+!    vhatL(r) according to eq. (A14) in Holzwarth et al., PRB 55, 2005 (1997) [[cite:Holzwarth1997]]
 !    intvhatL=$\int_{0}^{r_c}{vhatL(r) shapefunc_L(r) r^2\,dr}$
 !    vhatijL =$\int_{0}^{r_c}{vhatL(r) \tilde{\phi}_i \tilde{\phi}_j \,dr}$
 !    -----------------------------------------------------------------
@@ -500,7 +500,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 !          $B_ijkl   =\sum_{L,m} {vhatijL*Gaunt(k,l,Lm)*q_ijL}$
 !          $C_ijkl   =\sum_{L,m} {intvhatL*q_ijL*q_klL}$
 !    and:
-!      vh1 according to eq. (A17) in Holzwarth et al., PRB 55, 2005 (1997)
+!      vh1 according to eq. (A17) in Holzwarth et al., PRB 55, 2005 (1997) [[cite:Holzwarth1997]]
 !    Warning: compute only eijkl for (i,j)<=(k,l)
 !    -----------------------------------------------------------------
      eijkl(:,:)=zero

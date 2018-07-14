@@ -242,7 +242,7 @@
    end do ! m1
  end if
 
-!Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008)
+!Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008) [[cite:Amadon2008a]]
  eldautemp=half*eldautemp
 
 !if (paw_ij%ndij==1) then
