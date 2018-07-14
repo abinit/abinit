@@ -58,7 +58,7 @@ contains
 !! Get the frequency-dependent dielectric matrix, as well as the
 !! oscillator strengths and mode effective charges,
 !! and reflectivities (without damping)
-!! See the definitions Eq.(53-54) in PRB55, 10355 (1997).
+!! See the definitions Eq.(53-54) in PRB55, 10355 (1997) [[cite:Gonze1997a]].
 !!
 !! INPUTS
 !! amu(ntypat)=mass of the atoms (atomic mass unit)
@@ -167,14 +167,14 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
 !modez(2,3,3*natom)=mode effective charges for the different eigenmodes,
 !for different directions of the electric field, following
-!the definition Eq.(53) in PRB55, 10355 (1997)
+!the definition Eq.(53) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !fact_oscstr(2,3,3*natom)=factors of the oscillator strengths
 !for the different eigenmodes,
 !for different direction of the electric field
  ABI_ALLOCATE(frdiel,(3,3,nfreq))
  ABI_ALLOCATE(modez,(2,3,3*natom))
 !oscstr(2,3,3,3*natom)=oscillator strengths, following
-!the definition Eq.(54) in PRB55, 10355 (1997)
+!the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
  ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
 
 ! write(std_out,'(a)')' Enter ddb_diel : displ ='

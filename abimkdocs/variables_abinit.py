@@ -6506,7 +6506,7 @@ unstable - use with caution!
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987]] p 81]. The only related parameter is the time step ([[dtion]]).
+  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81]. The only related parameter is the time step ([[dtion]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]

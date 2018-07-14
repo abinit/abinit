@@ -331,7 +331,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
 !              In case of electric field perturbation, evaluate the ddk
 !              using the finite difference expression of
-!              Marzari and Vanderbilt PRB 56, 12847 (1997).
+!              Marzari and Vanderbilt PRB 56, 12847 (1997) [[cite:Marzari1997]].
 
                d3_berry(:,:) = 0._dp
 
@@ -469,9 +469,9 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !                  \frac{d}{d \lambda}
 !                  \frac{\delta^2 E_{Hxc}}{\delta n(r) \delta n(r\prim)}
 !$
-!                  (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995)).
+!                  (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995) [[cite:Gonze1995]]).
 
-!                  the following are essentially the 4th and the 3rd terms of PRB 71,125107, but the
+!                  the following are essentially the 4th and the 3rd terms of PRB 71,125107 [[cite:Veithen2005]], but the
 !                  multiplication for rho1 will be done by dotprod_vn later
 
 !                  in the non spin polarized case xc_tmp has only 1 component

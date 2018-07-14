@@ -3866,7 +3866,7 @@ end subroutine pawdijfr
 !!
 !! OUTPUT
 !!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=lda+u potential
-!!                                 (see eg PRB 52, 5467 (1995))
+!!                                 (see eg PRB 52, 5467 (1995) [[cite:Liechenstein1995]])
 !!
 !! PARENTS
 !!      ldau_self,m_pawdij,m_pawhr
@@ -3942,7 +3942,7 @@ end subroutine pawdijfr
 
 !=====================================================
 !Compute LDA+U Potential on the basis of projectors
-!cf PRB 52 5467 (1995)
+!cf PRB 52 5467 (1995) [[cite:Liechenstein1995]]
 !-----------------------------------------------------
 
  vpawu=zero ; nspden_eff=ndij
@@ -4065,10 +4065,10 @@ end subroutine pawdijfr
 
    end if ! ispden<=2
 
-!  Non-collinear magnetism: add non-diagonal term; see (Eq 6) in PRB 72, 024458 (2005)
+!  Non-collinear magnetism: add non-diagonal term; see (Eq 6) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
 !  BA Here, we compute the transpose --- with respect to spin indices --- of
 !  BA equation (6) of this reference, because of differences in notations,
-!  BA namely Eband=\sum rhoij^{alpha,beta}*Dij(beta,alpha) contrary to PRB 72, 024458 (2005)
+!  BA namely Eband=\sum rhoij^{alpha,beta}*Dij(beta,alpha) contrary to PRB 72, 024458 (2005) [[cite:Shurikov2005]]
    if (ispden>=3) then
      mx=nocctot(2)
      my=nocctot(3)

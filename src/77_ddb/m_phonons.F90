@@ -536,7 +536,7 @@ implicit none
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
-     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
      energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
      spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2

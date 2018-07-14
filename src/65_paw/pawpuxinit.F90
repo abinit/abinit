@@ -9,7 +9,7 @@
 !!
 !! A-define useful indices for LDA+U/local exact-exchange
 !! B-Compute overlap between atomic wavefunction
-!! C-Compute matrix elements of coulomb interaction (see PRB vol.52 5467)
+!! C-Compute matrix elements of coulomb interaction (see PRB vol.52 5467 [[cite:Liechenstein1995]])
 !!    (angular part computed from Gaunt coefficients)
 !!
 !! COPYRIGHT

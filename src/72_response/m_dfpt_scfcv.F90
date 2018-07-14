@@ -220,7 +220,7 @@ contains
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  eovl1=1st-order change of wave-functions overlap, part of 2nd-order energy
-!!        PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008)
+!!        PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !!  epaw1=1st-order PAW on-site part of 2nd-order total energy.
 !!  etotal=total energy (sum of 7 contributions) (hartree)
 !!  exc1=1st-order exchange-correlation part of 2nd-order total energy.

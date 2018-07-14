@@ -269,7 +269,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 &             paral_kgb,tim_fourwf7,weight,weight)
 
 !          Compute the weight, note that the factor 2 is
-!          not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!          not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
              weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 
 !          Accumulate density
@@ -411,7 +411,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !        cwave1_up => cwavef1(:,1:npw_k)
 !        cwave1_down => cwavef1(:,1+npw_k:2*npw_k)
 
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997)??)
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) ?? [[cite:Gonze1997]])
          weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 !density components
 !GS wfk Fourrier Tranform
@@ -759,7 +759,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwavef_sp)
 
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
        weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
 !    Accumulate 1st-order density
        if (cplex==2) then
@@ -898,7 +898,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
      re1_down=zero;im1_down=zero
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
 !    SPr: the following treatment with factor=2 is ok for perturbations not breaking the
 !         time reversal symmetry of the Hamiltonian (due to Kramer's degeneracy) hence
 !         not applicable for magnetic field perturbation (for phonons with SOC, H^(0) has

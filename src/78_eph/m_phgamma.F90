@@ -2692,7 +2692,7 @@ end subroutine a2fw_init
 !!
 !! FUNCTION
 !!  Compute \int dw [a2F(w)/w] w^n
-!!  From Allen PRL 59 1460 (See also Grimvall, Eq 6.72 page 175)
+!!  From Allen PRL 59 1460 [[cite:Allen1987]] (See also [[cite:Grimvall1981]], Eq 6.72 page 175)
 !!
 !! INPUTS
 !!  a2f<a2fw_t>=Structure storing the Eliashberg function.
@@ -2770,7 +2770,7 @@ end function a2fw_moment
 !!
 !! FUNCTION
 !!  Compute \int dw [a2F_tr(w)/w] w^n
-!!  From Allen PRL 59 1460 and later PRB papers (See also Grimvall book)
+!!  From Allen PRL 59 1460 [[cite:Allen1987]] and later PRB papers (See also [[cite:Grimvall1981]] book)
 !!
 !! INPUTS
 !!  a2f_tr<a2fw_tr_t>=Structure storing the Eliashberg function.

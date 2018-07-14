@@ -457,7 +457,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  end if
 
 !Get the decomposition for each coefficients of the forces and stresses for
-!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017)
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(need_verbose)then
    write(message, '(a)' ) ' Initialisation of the fit process...'
    call wrtout(std_out,message,'COLL')
@@ -471,7 +471,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
+!each atoms and each step  (see equations 11 & 12 of  
+!PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]]+ allocation
 !If the user does not turn off this initialization, we store all the informations for the fit,
 !it will reduce the computation time but increase a lot the memory...
  if(need_initialize_data)then
@@ -673,7 +674,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
 
 !      call the fit process routine
-!      This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!      This routine solves the linear system proposed 
+!      by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
        call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
@@ -905,7 +907,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !TEST_AM
 
 !      call the fit process routine
-!      This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!      This routine solves the linear system proposed by 
+!      C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
        call fit_polynomial_coeff_solve(coeff_values(1:icycle_tmp),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,ncycle_max,&
@@ -996,7 +999,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end do
  end select
 
-!This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!This routine solves the linear system proposed by 
+! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(ncycle_tot > 0)then
 
    call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -1237,7 +1241,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  end do
 
 !Get the decomposition for each coefficients of the forces and stresses for
-!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017)
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(need_verbose)then
    write(message, '(a)' ) ' Initialisation of the fit process...'
    call wrtout(std_out,message,'COLL')
@@ -1251,7 +1255,8 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
+!each atoms and each step  (see equations 11 & 12 of  
+! PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]] + allocation
  ABI_ALLOCATE(energy_coeffs,(ncoeff_tot,ntime))
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,ncoeff_tot,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,ncoeff_tot))
@@ -1589,7 +1594,8 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!
 !! FUNCTION
 !! Build and the solve the system to get the values of the coefficients
-!! This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!! This routine solves the linear system proposed by 
+!! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
 !!
 !! INPUTS
 !! fcart_coeffs(3,natom_sc,ncoeff_max,ntime) = List of the values of the contribution to the
@@ -1700,7 +1706,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !1-Get forces and stresses from the model and fill A
 !  Fill alsor B with the forces and stresses from
 !  the DFT snapshot and the model
-!  See equation 17 of PRB95 094115 (2017)
+!  See equation 17 of PRB95 094115 (2017) [[cite:Escorihuela-Sayalero2017]]
  do icoeff=1,ncoeff_fit
    icoeff_tmp = list_coeffs(icoeff)
    fcart_coeffs_tmp(:,:,:) = fcart_coeffs(:,:,icoeff_tmp,:)
@@ -1868,7 +1874,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
 ! *************************************************************************
 
 !1-Compute the value of the goal function
-! see equation 9 of PRB 95 094115(2017)
+! see equation 9 of PRB 95 094115(2017) [[cite:Escorihuela-Sayalero2017]]
  gf_value = zero
  etmp     = zero
  ftmp     = zero
@@ -1926,7 +1932,7 @@ end subroutine fit_polynomial_coeff_computeGF
 !! fit_polynomial_coeff_getFS
 !!
 !! FUNCTION
-!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017)
+!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017) [[cite:Escorihuela-Sayalero2017]]
 !!
 !! INPUTS
 !! coefficients(ncoeff)          = type(polynomial_coeff_type)

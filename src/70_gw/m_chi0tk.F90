@@ -1331,13 +1331,14 @@ end subroutine assemblychi0sf
 !!
 !! FUNCTION
 !!  Approximate the Dirac function using two methods:
-!!  method 1) a triangular funtion centered at the value egwdiff_re (Eq 17 of PRB 74, 035101 (2006)
+!!  method 1) a triangular funtion centered at the value egwdiff_re, Eq 17 of PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!  method 2) a gaussian of witdth ep%spsmear expandended in Taylor series
 !!  (at the moment only the 0-th moments)
 !!
 !!  Subroutine needed to implement the calculation
 !!  of the polarizability using the spectral representation as proposed in:
-!!  PRB 74, 035101 (2006) and PRB 61, 7172 (1999)
+!!  PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!!  and PRB 61, 7172 (2000) [[cite:Miyake2000]]
 !!
 !! INPUTS
 !!  nomegasf=number of frequencies in the grid for Im \chi_0
@@ -1434,7 +1435,8 @@ end subroutine approxdelta
 !!
 !!  Subroutine needed to implement the calculation
 !!  of the polarizability using the spectral representation as proposed in:
-!!  PRB 74, 035101 (2006) and PRB 61, 7172 (1999)
+!!  PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!!  and PRB 61, 7172 (2000) [[cite:Miyake2000]]
 !!
 !! INPUTS
 !! nsp=number of frequencies where the imaginary part of the polarizability is evaluated
@@ -1444,7 +1446,7 @@ end subroutine approxdelta
 !! delta=small imaginary part used to avoid poles, input variables
 !!
 !! OUTPUT
-!! kkweight(nsp,ne)=frequency dependent weights (Eq A1 PRB 74, 035101 (2006)
+!! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!
 !! PARENTS
 !!      m_chi0
@@ -1532,7 +1534,8 @@ end subroutine calc_kkweight
 !!  setup_spectral
 !!
 !! FUNCTION
-!! Calculation of \chi_o based on the spectral method as proposed in PRB 74, 035101 (2006) and PRB 61, 7172 (1999).
+!! Calculation of \chi_o based on the spectral method as proposed in PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!! and PRB 61, 7172 (2000) [[cite:Miyake2000]].
 !! Setup of the real frequency mesh for $\Im\chi_o$ and of the frequency-dependent weights for
 !! Hilbert transform. Note that CPU time does not depend dramatically on nomegasf unlike memory.
 !! spmeth defines the approximant for the delta function:
