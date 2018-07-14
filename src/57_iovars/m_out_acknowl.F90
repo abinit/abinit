@@ -288,7 +288,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ref(21)=' First-principles calculation of electric field gradients in metals, semiconductors, and insulators.'//ch10//&
 & ' J.W. Zwanziger, M. Torrent,'// &
 & ' Applied Magnetic Resonance 33, 447-456 (2008).'
- comment(21)=' Comment : to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'//ch10//&
+ comment(21)=&
+& ' Comment : to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'//ch10//&
 & ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#zwanziger2008'
  priority(21)=20
 
