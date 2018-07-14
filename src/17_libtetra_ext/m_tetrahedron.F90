@@ -792,7 +792,7 @@ end subroutine tetra_blochl_weights
 !!
 !! FUNCTION
 !! calculate integration weights and their derivatives
-!! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983)
+!! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983) [[cite:Allen1983b]]
 !! the k-points and tetrahedra must be the same for both grids, of course,
 !! but the range of energies is arbitrary
 !!

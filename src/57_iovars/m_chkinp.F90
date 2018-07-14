@@ -1536,7 +1536,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     '  But we strongly recommend users to use reduced ebar calculation (berryopt=14)',ch10,&
 &     '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
 &     '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
-&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10
+&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10 ! [[cite:Stengel2009]]
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -1548,7 +1548,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     '  But we strongly recommend users to use reduced d calculation (berryopt=16)',ch10,&
 &     '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
 &     '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
-&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10
+&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10 [[cite:Stengel2009]]
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
