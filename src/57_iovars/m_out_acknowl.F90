@@ -94,8 +94,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  integer :: idtset,iprior,iref,ncited,nrefs,ipsp,print_optional
  integer, allocatable :: cite(:),priority(:)
  character(len=750), allocatable :: ref(:)
- character(len=500), allocatable :: comment(:)
- character(len=500+750) :: string
+ character(len=600), allocatable :: comment(:)
+ character(len=600+750) :: string
 
 ! *************************************************************************
 
@@ -364,7 +364,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' B. Van Troeye, M. Torrent, and X. Gonze. Phys. Rev. B93, 144304 (2016)'
  comment(30)=' Comment : in case one of the Van der Waals DFT-D functionals are used with DFPT (dynamical matrices).'//ch10//&
 & ' Strong suggestion to cite this paper in your publications.'//ch10//&
-& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#vantroeye2016
+& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#vantroeye2016'
  priority(30)=20
 
  ref(31)= ' Efficient on-the-fly interpolation technique for Bethe-Salpeter calculations of optical spectra'//ch10//&
