@@ -94,8 +94,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  integer :: idtset,iprior,iref,ncited,nrefs,ipsp,print_optional
  integer, allocatable :: cite(:),priority(:)
  character(len=750), allocatable :: ref(:)
- character(len=500), allocatable :: comment(:)
- character(len=500+750) :: string
+ character(len=600), allocatable :: comment(:)
+ character(len=600+750) :: string
 
 ! *************************************************************************
 
@@ -288,7 +288,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ref(21)=' First-principles calculation of electric field gradients in metals, semiconductors, and insulators.'//ch10//&
 & ' J.W. Zwanziger, M. Torrent,'// &
 & ' Applied Magnetic Resonance 33, 447-456 (2008).'
- comment(21)=' Comment : to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'//ch10//&
+ comment(21)=&
+& ' Comment : to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'//ch10//&
 & ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#zwanziger2008'
  priority(21)=20
 
@@ -364,7 +365,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' B. Van Troeye, M. Torrent, and X. Gonze. Phys. Rev. B93, 144304 (2016)'
  comment(30)=' Comment : in case one of the Van der Waals DFT-D functionals are used with DFPT (dynamical matrices).'//ch10//&
 & ' Strong suggestion to cite this paper in your publications.'//ch10//&
-& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#vantroeye2016
+& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#vantroeye2016'
  priority(30)=20
 
  ref(31)= ' Efficient on-the-fly interpolation technique for Bethe-Salpeter calculations of optical spectra'//ch10//&

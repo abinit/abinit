@@ -537,9 +537,9 @@ Note that *the number of SCF cycles drops from 6 to 5 when the wavefunctions are
 
 ## Computation of the interatomic distance (method 2)
   
-The other methodology is based on an automatic computation of the minimum.
-There are different algorithms to do that. See the input variable [[ionmov]], with values 2 and 7.
-In the present case, with only one degree of freedom to be optimized, the best choice is *ionmov* 2.
+The other methodology is based on an automatic computation of the minimum.   
+There are different algorithms to do that. See the input variable [[ionmov]], with values 2, 7, 15, and 22. 
+In the present case, with only one degree of freedom to be optimized, the best choice is *ionmov* 22.
 
 You have also to define the maximal number of time steps for this optimization.
 Set the input variable [[ntime]] to 10, it will be largely enough.
