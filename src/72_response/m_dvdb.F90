@@ -4104,7 +4104,7 @@ end subroutine dvdb_test_ftinterp
 !!
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
-!!  due to the Born effective charges [PRL 115, 176401 (2015)].
+!!  due to the Born effective charges, PRL 115, 176401 (2015) [[cite:Verdi2015]].
 !!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))

@@ -2487,7 +2487,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
      omega=omega + domega
    end do
 !
-!  From Allen PRL 59 1460
+!  From Allen PRL 59 1460 [[cite:Allen1987]]
 !  \lambda <\omega^n> = 2 \int_0^{\infty} d\omega [\alpha^2F / \omega] \omega^n
 !
    lambda_iso(isppol) = simpson(domega,a2f_1mom)

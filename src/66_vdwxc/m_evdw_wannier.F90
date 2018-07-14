@@ -52,7 +52,7 @@ contains
 !! FUNCTION
 !!  FIXME: Evaluates the van der Waals correlation energy using maximally
 !!         localized Wannier functions (MLWF) as proposed by:
-!!         P. L. Silvestrelli in PRL 100:053002 (2008) vdw_xc=10 and
+!!         P. L. Silvestrelli in PRL 100:053002 (2008) [[cite:Sivestrelli2008]] vdw_xc=10 and
 !!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) [[cite:Ambrosetti2012]] vdw_xc=11.
 !!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) [[cite:Silvestrelli2013]] vdw_xc=14.
 !!

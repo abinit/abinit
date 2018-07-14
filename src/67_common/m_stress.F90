@@ -366,7 +366,8 @@ contains
  call timab(38,2,tsec)
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
-!HONG  (PRL 89, 117602 (2002)   Nature Physics: M. Stengel et.al. (2009))
+!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]  
+!HONG  Nature Physics: M. Stengel et.al. (2009))
 !=======================================================================
 !=================== Berry phase contribution ==========================
 !=======================================================================

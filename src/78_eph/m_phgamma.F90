@@ -2630,7 +2630,7 @@ end if
  end do
 
 #ifdef DEV_MJV
- ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013))
+ ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]]) 
  if (my_rank == master) then
    ntemp = 100
    min_temp = zero
