@@ -1000,7 +1000,7 @@ Variable(
     text="""
 *bs_interp_method* selects the interpolation method::
 
-  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2015]]).
+  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2016]]).
   * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and [[cite:Rohlfing2000]])
 """,
 ),
@@ -5541,7 +5541,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the DFT eigenstate $|e\\rangle$ in which the self-energy will be evaluated, as
-shown in Eq. (7) of [[cite:Janssen2015]]. That is, it is the state
+shown in Eq. (7) of [[cite:Laflamme2015]]. That is, it is the state
 to be corrected in the G0W0 scheme.
 """,
 ),
@@ -5557,7 +5557,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the use of a dielectric model (as explained in Sec. V of
-[[cite:Janssen2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
+[[cite:Laflamme2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
 (35) of the same reference at all external [[gw_freqsp]] and integration (as
 generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices
 are:
@@ -5616,7 +5616,7 @@ Variable(
     text="""
 This variable sets the band index to be used to generate the first seed vector
 to be used in the construction of the Lanczos basis for the (static)
-dielectric matrix in a GWLS calculation. See Sec. IV of [[cite:Janssen2015]].
+dielectric matrix in a GWLS calculation. See Sec. IV of [[cite:Laflamme2015]].
 Together with [[gwls_nseeds]], this defines the seeds for the
 Lanczos procedure. That is, the states associated to band index
 [[gwls_first_seed]] to [[gwls_first_seed]]+[[gwls_nseeds]]-1 are used to
@@ -5639,7 +5639,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-Eq. (35) of [[cite:Janssen2015]] to solve it at all external
+Eq. (35) of [[cite:Laflamme2015]] to solve it at all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
 converged to a few 10s of meV for all molecules studied so far.
 """,
@@ -5656,7 +5656,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 The G0W0 formalism involves the calculation of a summation conceptually linked
-to the trace of the dielectric matrix [see Eq. (38) of [[cite:Janssen2015]]\].
+to the trace of the dielectric matrix [see Eq. (38) of [[cite:Laflamme2015]]\].
 Since the eigenvalues spectrum of the dielectric matrix of formed by a
 few large discrete eigenvalues and an integrable divergence in the density of
 eigenvalues around 0, it is expensive to sample accurately this divergence
@@ -5668,7 +5668,7 @@ In the context where the model dielectric matrix is used in the calculations,
 [[gwls_kmax_complement]] determines the size of the 'large' basis.
 
 For more information on the exact role of these bases and on the model
-dielectric operator used, see Sec. V of [[cite:Janssen2015]].
+dielectric operator used, see Sec. V of [[cite:Laflamme2015]].
 """,
 ),
 
@@ -5683,7 +5683,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-Eq. (30) of [[cite:Janssen2015]] to solve it simultaneously at all
+Eq. (30) of [[cite:Laflamme2015]] to solve it simultaneously at all
 integration frequencies (generated automatically by the number of points
 [[gwls_npt_gauss_quad]] to use in the gaussian quadrature) and all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
@@ -5705,7 +5705,7 @@ The contour deformation technique, in the G0W0 context, will involve the
 calculation of pole residues associated to states lying between the one
 corrected ([[gwls_band_index]]) and the Fermi level. These residues take the
 form of a matrix element of the inverse dielectric matrix at a real frequency
-[see Eq. (11) of [[cite:Janssen2015]]\]. Therefore, the dielectric
+[see Eq. (11) of [[cite:Laflamme2015]]\]. Therefore, the dielectric
 matrix must be constructed in some basis at these frequencies and inverted to
 calculate the matrix element. The present input variable sets the size of the
 Lanczos basis to be constructed for this purpose. The default value has proven
@@ -5713,7 +5713,7 @@ to be very robust for many molecular systems and should therefore be left to
 the default value by the user.
 
 For more information on the Lanczos basis constructed for the calculation of
-the residues, see Sec. IV of [[cite:Janssen2015]].
+the residues, see Sec. IV of [[cite:Laflamme2015]].
 """,
 ),
 
@@ -5730,7 +5730,7 @@ Variable(
 This variable sets the frequencies to be used to construct the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved by the construction of the dielectric matrix at finite
-frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
+frequencies. See Sec. VI of [[cite:Laflamme2015]]. For most cases,
 since the frequencies $\infty$ and 0.0 (if [[gwls_recycle]] > 0) are used at no
 computational cost, [[gwls_n_proj_freq]] == 0 (which means no ADDITIONAL
 frequency is to be used) is fine and no frequencies need to be picked up.
@@ -5750,7 +5750,7 @@ Variable(
     text=r"""
 This is the width of the lorentzian, in Ha, used to model the frequency
 dependence of the dielectric matrix in the GWLS calculation [see Eqs. (12-16)
-and (34) of [[cite:Janssen2015]]\]. More
+and (34) of [[cite:Laflamme2015]]\]. More
 precisely, this parameter is the value of $\alpha$ used in Eq. (34). This model
 is then used to separate the integration over frequencies into a 'model' part
 [second term of Eq. (12)] and an 'exact - model' part [first term of Eq. (12)].
@@ -5780,7 +5780,7 @@ This variable sets the number of frequencies, on top of $\infty$ and 0.0 (if
 [[gwls_recycle]] > 0), to be used for the construction of the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved in the construction of the dielectric matrix at finite
-frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
+frequencies. See Sec. VI of [[cite:Laflamme2015]]. For most cases,
 the default ([[gwls_n_proj_freq]] == 0) is fine.
 """,
 ),
@@ -5797,7 +5797,7 @@ Variable(
     text="""
 This variable defines the number of points used for the numerical integration
 of the self-energy over frequencies in GWLS computations [see Eq. (12) of
-[[cite:Janssen2015]]\]. The default is fine for most cases.
+[[cite:Laflamme2015]]\]. The default is fine for most cases.
 """,
 ),
 
@@ -5813,7 +5813,7 @@ Variable(
     text="""
 This variable sets the number of seed vectors to be used in the construction
 of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
-See Sec. IV of [[cite:Janssen2015]]. Only [[gwls_nseeds]] == 1 has
+See Sec. IV of [[cite:Laflamme2015]]. Only [[gwls_nseeds]] == 1 has
 been tested for now and users should keep this value.
 """,
 ),
@@ -5855,7 +5855,7 @@ basis in which the Hamiltonian is projected for the solution of the
 Sternheimer equations involved by the calculation of the dielectric matrix at
 finite frequencies. The other solutions used will be those at $\omega \to \infty$
 (always used) and those at $\omega=$[[gwls_list_proj_freq]]. For more
-information of the basis constructed, see Sec. IV of [[cite:Janssen2015]].
+information of the basis constructed, see Sec. IV of [[cite:Laflamme2015]].
 
 It is important to note that the solutions rapidly take much space to store.
 Therefore, it is often not possible to store them in RAM in production
@@ -5878,7 +5878,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 This variable sets the dimension of the dielectric matrix used in a GWLS
-calculation [see Sec. IV of [[cite:Janssen2015]]\]. Typically
+calculation [see Sec. IV of [[cite:Laflamme2015]]\]. Typically
 converged at a value of a few hundreds to a few thousands for a convergence
 criterion of 50 meV on the eigenenergies.
 """,
