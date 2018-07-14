@@ -6630,7 +6630,7 @@ The possible values of [[iprcel]] correspond to:
   * 141 to 169 --> same as Between 41 and 69 (but, the dielectric matrix is also recomputed every iprcel modulo 10 step).
 
 The computation of the dielectric matrix (for 0 [100]< [[iprcel]] < 70 [100])
-is based on the **extrapolar** approximation. This approximation can be tuned
+is based on the **extrapolar** approximation, see [[cite:Anglade2008]]. This approximation can be tuned
 with [[diecut]], [[dielam]], and [[diegap]]. Yet its accuracy mainly depends
 on the number of conduction bands included in the system. Having 2 to 10 empty
 bands in the calculation is usually enough (use [[nband]]).
