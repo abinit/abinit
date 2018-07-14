@@ -403,7 +403,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,
-!    See X. Gonze, Phys. Rev. B 55, 10337 (1997) Eq. (79)
+!    See X. Gonze, Phys. Rev. B 55, 10337 (1997) [[cite:Gonze1997]] Eq. (79)
 !    the operator used to compute the first-order derivative
 !    of the wavefunctions with respect to an electric field
 !    is $+i \frac{d}{dk}$

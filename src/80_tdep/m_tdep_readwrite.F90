@@ -142,16 +142,16 @@ contains
   write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\alpha$-U' 
-  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).'
+  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [2] Lattice dynamics of anharmonic solids from first principles'
-  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).'
+  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).' ! [[cite:Hellman2011]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [3] Temperature dependent effective potential method for accurate free energy calculations of solids'
-  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).'
+  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
 
  end subroutine tdep_print_Aknowledgments 

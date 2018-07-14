@@ -359,7 +359,7 @@ module m_phgamma
 
   real(dp),allocatable :: vals_tr_gen(:,:,:,:,:,:,:)
   ! vals(nene,nene,nomega,3,3,nsppol)
-  ! generalized transport spectral function from PB Allen Phys. Rev. Lett. 59, 1460 (1987)
+  ! generalized transport spectral function from PB Allen Phys. Rev. Lett. 59, 1460 (1987) [[cite:Allen1987]]
 
   real(dp),allocatable :: lambdaw_tr(:,:,:,:,:)
   ! lambda(nomega,3,3,0:natom3,nsppol)

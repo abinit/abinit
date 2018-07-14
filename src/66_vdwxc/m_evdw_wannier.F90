@@ -53,8 +53,8 @@ contains
 !!  FIXME: Evaluates the van der Waals correlation energy using maximally
 !!         localized Wannier functions (MLWF) as proposed by:
 !!         P. L. Silvestrelli in PRL 100:053002 (2008) vdw_xc=10 and
-!!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) vdw_xc=11.
-!!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) vdw_xc=14.
+!!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) [[cite:Ambrosetti2012]] vdw_xc=11.
+!!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) [[cite:Silvestrelli2013]] vdw_xc=14.
 !!
 !! INPUTS
 !!   nsppol          = Spin polarization.
@@ -517,7 +517,7 @@ contains
 
  end if
 
-!vdW-WF VERSION 2: Phys. Rev. B. 85:073101 (2012)
+!vdW-WF VERSION 2: Phys. Rev. B. 85:073101 (2012) [[cite:Ambrosetti2012]]
 
  if (vdw_xc==11) then
 
@@ -1282,7 +1282,7 @@ end subroutine getFu
  end do
 !END DEBUG
 !Determining both free and effective volumes.
-!Eqs (6) and (7) in PRB 85:073101.
+!Eqs (6) and (7) in PRB 85:073101 [[cite:Ambrosetti2012]].
 !Creation of grids around each WF centre.
 !Calculation of intersection volumes.
  do ii = 1,nsppol
@@ -1359,7 +1359,7 @@ end subroutine getFu
 !! FUNCTION
 !!  Performs double integral needed to evaluate C6
 !!  coefficients from the long range limit of VV10
-!!  functional (Phys. Rev. A. 81:062708 (2010))
+!!  functional (Phys. Rev. A. 81:062708 (2010)) [[cite:Vydrov2010]]
 !!  as expressed in terms of MLWFs.
 !!
 !! INPUTS

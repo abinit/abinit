@@ -902,7 +902,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        phdos%phdos(:) = phdos%phdos(:) + gvals_wtq
 
        ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
-       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108
+       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
        ! In principle there's a phase due to nonsymmorphic translations
        ! but we here need |e(Sq)_iatom|**2
        syme2_xyza = zero

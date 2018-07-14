@@ -17,10 +17,10 @@
 !!
 !!  Right now the routine sums over the k-points. In future linear tetrahedron method might be useful.
 !!  Reference articles:
-!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
-!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
-!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
-!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
+!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003 [[cite:Sharma2003]]
+!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996 [[cite:Hughes1996]]
+!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004 [[cite:Sharma2004]]
+!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993 [[cite:Sipe1993]]
 !!
 !! SOURCE
 

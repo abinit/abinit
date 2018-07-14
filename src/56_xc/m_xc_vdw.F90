@@ -13,8 +13,8 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
-!!  RS09 = doi:10.1103/PhysRevLett.103.096102
+!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401 [[cite:Dion2004]]
+!!  RS09 = doi:10.1103/PhysRevLett.103.096102 [[cite:Romanperez2009]]
 !!
 !! SOURCE
 
