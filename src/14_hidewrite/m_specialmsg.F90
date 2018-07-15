@@ -296,7 +296,7 @@ subroutine herald(code_name,code_version,iout)
 &   ' S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B 67, 165332 (2003), and',&
 &   ' S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 (2004).',&
 &   '- URLs and DOI at https://docs.abinit.org/theory/bibliography/#sharma2003',&
-&   '- and https://docs.abinit.org/theory/bibliography/#sharma2004',&
+&   '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
  end if
 
  write(iout, '(a,/,a,/,a,/,a,/,a)' ) &
