@@ -80,7 +80,7 @@
 
     !    note the definition used for the k-dependence of the PAW basis functions:
     !$|\phi_{i,k}\rangle = exp(-i k\cdot r)|\phi_i\rangle
-    !    see Umari, Gonze, and Pasquarello, PRB 69,235102 Eq. 23. 
+    !    see Umari, Gonze, and Pasquarello, PRB 69,235102 [[cite:Umari2004]] Eq. 23. 
    bdotr = DOT_PRODUCT(xred(1:3,iatom),-dkvecs(1:3))
     !    here is exp(i b.R) for the given site
    calc_expibi(1,iatom) = cos(two_pi*bdotr)

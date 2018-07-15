@@ -1240,7 +1240,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     ' pspatm : COMMENT -',ch10,&
 &     '  the projectors are not normalized,',ch10,&
 &     '  so that the KB energies are not consistent with ',ch10,&
-&     '  definition in PRB44, 8503 (1991). ',ch10,&
+&     '  definition in PRB44, 8503 (1991). ',ch10,& ! [[cite:Gonze1991]]
 &     '  However, this does not influence the results obtained hereafter.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')

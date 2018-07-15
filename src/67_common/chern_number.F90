@@ -46,8 +46,9 @@
 !! TODO
 !!
 !! NOTES
-!! See Ceresoli et al, PRB 74, 024408 (2006), and Gonze and Zwanziger, PRB 84
-!! 064446 (2011). This routine computes the Chern number as
+!! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]], 
+!! and Gonze and Zwanziger, PRB 84 064445 (2011) [[cite:Gonze2011a]]. 
+!! This routine computes the Chern number as
 !! $C_\alpha = \frac{i}{2\pi}\int_{\mathrm{BZ}} dk \epsilon_{\alpha\beta\gamma}
 !! \mathrm{Tr}[\rho_k \partial_\beta \rho_k (1 - \rho_k) \partial_gamma\rho_k] $
 !! The derivative of the density operator is obtained from a discretized formula

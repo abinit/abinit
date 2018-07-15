@@ -424,7 +424,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  else
    energies%e_entropy = zero
  end if
-!Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009), the missing volumce is added here
+!Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
+! the missing volume is added here
  energies%e_elecfield = zero
  if (dtset%berryopt == 4 .or. dtset%berryopt == 14 ) then             !!HONG
 
@@ -448,7 +449,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !energies%e_magfield = emag
 !end if
 
-!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009), but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
+!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]], 
+!but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
  if (dtset%berryopt == 6 .or. dtset%berryopt == 16 )  then
    energies%e_elecfield=zero
    call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)

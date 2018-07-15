@@ -351,7 +351,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            MVeithen 021212 :
 !            1) Case ipert1 = natom + 2 and ipert = natom + 2:
 !            the second derivative of the energy with respect to an electric
-!            field is computed from Eq. (38) of X. Gonze, PRB 55 ,10355 (1997).
+!            field is computed from Eq. (38) of X. Gonze, PRB 55 ,10355 (1997) [[cite:Gonze1997a]].
 !            The evaluation of this formula needs the operator $i \frac{d}{dk}.
 !            2) Case ipert1 = natom + 2 and ipert < natom:
 !            the computation of the Born effective charge tensor uses

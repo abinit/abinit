@@ -1163,7 +1163,7 @@ end subroutine dfptff_gradberry
 !!
 !! FUNCTION
 !! calculate the gradient of the second order \Omega E \cdot P
-!! term, Eq.(23) in PRB 75, 115116(2007).
+!! term, Eq.(23) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -1615,7 +1615,7 @@ end subroutine dfptff_gbefd
 !!
 !! FUNCTION
 !! calculate the second order energy from the contribution of \Omega E \cdot P
-!! term, Eq.(6) in PRB 75, 115116(2007).
+!! term, Eq.(6) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -2244,7 +2244,7 @@ end subroutine dfptff_ebp
 !! dfptff_die
 !!
 !! FUNCTION
-!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007).
+!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -2426,7 +2426,7 @@ end subroutine dfptff_die
 !! dfptff_bec
 !!
 !! FUNCTION
-!! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007).
+!! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions

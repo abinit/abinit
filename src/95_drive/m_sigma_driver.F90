@@ -3206,6 +3206,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
 
+ Sigp%ecuteps = Gsph_c%ecut
+ Dtset%ecuteps = Sigp%ecuteps
+
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)

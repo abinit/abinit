@@ -138,7 +138,7 @@ CONTAINS  !=====================================================================
 !!  cryst<crystal_t>=Crystalline structure.
 !!  params(:)
 !!     params(1): Ratio between star functions and ab-initio k-points.
-!!     params(2:3): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
+!!     params(2:3): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639 [[cite:Uehara2000]]) if params(2) > tol6
 !!       params(2)=rcut, params(3) = rsigma
 !!  cplex=1 if time reversal can be used, 2 otherwise.
 !!  nband=Total Number of bands in the eig array.
@@ -281,7 +281,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  end do
 
  ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", &
+ call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", & ! [[cite:Pickett1988]]
              do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))
@@ -327,7 +327,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  if (params(2) > tol6) then
    rcut = params(2) * sqrt(r2vals(new%nr))
    rsigma = params(3); if (rsigma <= zero) rsigma = five
-   call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)")
+   call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)") ! [[cite:Uehara2000]]
    !call wrtout(std_out," cut sigma
    do ir=2,nr
      new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)

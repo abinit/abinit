@@ -1767,7 +1767,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !    Get average number of planewaves per k point:
 !    both arithmetic and GEOMETRIC averages are desired--
 !    need geometric average to use method of Francis and Payne,
-!    J. Phys.: Condens. Matter 2, 4395-4404 (1990).
+!    J. Phys.: Condens. Matter 2, 4395-4404 (1990) [[cite:Francis1990]].
 !    Also note: force k point wts to sum to 1 for this averaging.
 !    (wtk is not forced to add to 1 in a case with occopt=2)
        arith=zero

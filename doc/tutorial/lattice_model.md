@@ -27,6 +27,9 @@ The AGATE software is also required for this tutorial, you can install it on deb
     sudo add-apt-repository ppa:piti-diablotin/abiout
     sudo apt-get update && sudo apt-get install abiout
 
+
+[TUTORIAL_README]
+
 ## 1 The Harmonic part of the lattice model
 
 As mentionned in [[cite:Wojdel2013]], define the reference of your model is the starting point in the construction of the model:
@@ -98,7 +101,7 @@ You should read carefully the input file:
 
 You now should make the run (less than a seconds):
 
-  ./multibinit < tmulti1.files > tmulti1_1_stdout
+    multibinit < tmulti1.files > tmulti1_1_stdout
 
 The resulting main output file, trf1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
@@ -122,7 +125,7 @@ You XML file is now generated you can now use it as input for multibinit. To do 
 
 Here the DDB file is remplace by the XML file, do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory and run:
 
-   ./multibinit < tmulti2.files > tmulti1_2_stdout
+    multibinit < tmulti2.files > tmulti1_2_stdout
   
 In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit will generate again a new XML which is not useful. You can set this input variable to 0 but in this case, multibinit will just read the XML.
 

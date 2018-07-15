@@ -27,9 +27,9 @@ one could do one of two things.
 One could change the sum over k-points to integration, and then use the
 linear tetrahedron method (see [[cite:Hughes1996]] for details).
 Another way to get around the problem, as we will do in the present case,
-is to avoid the singularities by adding a small imaginary contribution to the 
-denominator. This addition prevents the denominator from ever going to 0, 
-and acts as a broadening to the spectrum. The broadening should not be too 
+is to avoid the singularities by adding a small imaginary contribution to the
+denominator. This addition prevents the denominator from ever going to 0,
+and acts as a broadening to the spectrum. The broadening should not be too
 large, as this would wash out the features in the spectrum.
 """,
 ),
@@ -46,8 +46,8 @@ Variable(
 This parameter specifies the name of the file containing the matrix elements of the
 $d/dk$ operator in direction X, as the string ddkfile_X. This file should have been
 produced by a preparatory Abinit run.
-This file must not contain the first-order wavefunctions, and may be generated 
-using [[prtwf]] 3. Make sure that the number of bands, spin channels, and 
+This file must not contain the first-order wavefunctions, and may be generated
+using [[prtwf]] 3. Make sure that the number of bands, spin channels, and
 k-points are the same in all the files.
 """,
 ),
@@ -79,9 +79,9 @@ Variable(
     defaultval=0,
     mnemonics="LINear COMPonents",
     text="""
-This parameter specifies the directions of the [[optic:num_lin_comp]] requested components 
-of the dielectric tensor. The components are specified in 
-cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For 
+This parameter specifies the directions of the [[optic:num_lin_comp]] requested components
+of the dielectric tensor. The components are specified in
+cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
 example, 11 represents the xx component, and 32 represents zy. There should be
 [[optic:num_lin_comp]] entries. Note that these directions are denoted by
 $a$ and $b$ in [[cite:Sharma2004]].
@@ -115,9 +115,9 @@ Variable(
     defaultval=0,
     mnemonics="NON-LINear COMPonents",
     text="""
-This parameter specifies the directions of the [[optic:num_nonlin_comp]] requested components 
-of the second-order nonlinear dielectric tensor. The components are specified in 
-cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For 
+This parameter specifies the directions of the [[optic:num_nonlin_comp]] requested components
+of the second-order nonlinear dielectric tensor. The components are specified in
+cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
 example, 111 represents the xxx component, and 321 represents zyx. There should be
 [[optic:num_nonlin_comp]] entries. Note that these directions are denoted by
 $a$ and $b$ in [[cite:Sharma2004]].
@@ -133,7 +133,7 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
     text="""
-This parameter species how many components (out of 9 possible) 
+This parameter species how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
 symmetry of the material (for detail see [[cite:Draxl2006]]).
@@ -151,7 +151,7 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
     text="""
-This parameter species how many components (out of 27 possible) 
+This parameter species how many components (out of 27 possible)
 of the second-order nonlinear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
 symmetry of the material (for detail see [[cite:Draxl2006]]).
@@ -172,8 +172,8 @@ Variable(
     text="""
 This parameter provides a fixed shift to all the conduction bands. As
 LDA/GGA are known to underestimate the band-gap by a significant amount in
-some cases, in order to obtain a reasonable optical spectrum and make a realistic 
-comparison with experiments one needs to correct for this. 
+some cases, in order to obtain a reasonable optical spectrum and make a realistic
+comparison with experiments one needs to correct for this.
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap, and simply shifts the conduction bands. Alternatively, one may
 determine the self energy using the [[tutorial:gw1|GW approach]], in which case

@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Exchange-correlation at finite temperature of an electron gas
-!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
+!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2018 ABINIT group (JFD,LK)
@@ -47,7 +47,7 @@ contains
 !!
 !! FUNCTION
 !! Exchange-correlation at finite temperature of an electron gas
-!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
+!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! INPUTS
 !!  temp= (electronic) temperature
@@ -120,7 +120,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !  Compute Gamma
    Gamma=one/(tt*ef)/rs
 
-!  Exchange-correlation of Ichimaru functionnal
+!  Exchange-correlation of Ichimaru functional
    fxc(ipt)= fexsGamma(Gamma,tt)*rsm1
    exc(ipt)=fxc(ipt) - tdexcsdtiit(rs,tt);
    vxc(ipt)=(8.0_dp*(Fxc_iit(rs,tt,deltavxc)-Fxc_iit(rs,tt,-deltavxc)) &

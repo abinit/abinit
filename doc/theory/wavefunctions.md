@@ -119,7 +119,7 @@ One must distinguish two classes of Hamiltonians:
 2. the Hamiltonian mixes the spin components
 
 In the first class, one finds usual non-spin-polarized, non-spin-orbit
-Hamiltonians, in which case the spin up-spin up and spin down-spin down parts of the Hamiltonian 
+Hamiltonians, in which case the spin up-spin up and spin down-spin down parts of the Hamiltonian
 are equal, as well as spin-polarized
 Hamiltonian when the magnetic field varies in strength but *not* in direction.
 In the second class, one finds Hamiltonians that include the
@@ -140,7 +140,7 @@ These two classes are mutually exclusive. The possibilities are thus:
    1         |     2       |   spinor wavefunctions
 
 
-The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2
+The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2.
 
 ## Plane wave basis set sphere
 
@@ -174,11 +174,11 @@ $$
 
 For these points, the number of $\GG$ vectors to be taken into account, is decreased by about a factor of 2.
 For the $\GG$'s that are not treated, the coefficients
-$u_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to 
+$u_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to
 
 $$ u_{n{\bf k}}({\bf G}) = u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_0) $$
 
-The value of [[istwfk]] is automatically computed by the code 
+The value of [[istwfk]] is automatically computed by the code
 on the basis of the k-point coordinates and the treatment of time-reversal symmetry as specified by [[kptopt]].
 One can disable the time-reversal trick in the input file by setting explicitly the value of [[istwfk]]
 with the syntax:

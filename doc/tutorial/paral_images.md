@@ -13,11 +13,13 @@ You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
 efficiency of the parallelism on "images".  
 
-This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
-cores parallel computer.
-
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
 [A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
+
+[TUTORIAL_README]
+
+This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
+cores parallel computer.
 
 ## 1 Summary of the String Method
   
@@ -34,13 +36,13 @@ The algorithm presently implemented in ABINIT is the so-called "simplified strin
 It has been designed for the sampling of smooth energy landscapes.   
 
 *Before continuing you might work in a different subdirectory as for the other
-tutorials. Why not "work_paral_string"?* 
+tutorials. Why not work_paral_string?* 
 
 !!! important
 
     In what follows, the names of files are mentioned as if you were in this subdirectory.
-    All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
-    You can compare your results with reference output files located in ~abinit/tests/tutoparal/Refs.  
+    All the input files can be found in the *\$ABI_TUTOPARAL/Input* directory.
+    You can compare your results with reference output files located in *\$ABI_TUTOPARAL/Refs*.  
   
     In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of
@@ -71,14 +73,14 @@ are in white, the O atom is in red and the N atom in grey).
 ![final state](paral_images_assets/Initial2.png)  
   
 Before using the string method, it is necessary to optimize the initial and
-final points. The input files `tstring_01.in` and `tstring_02.in` contain
+final points. The input files *tstring_01.in* and *tstring_02.in* contain
 respectively two geometries close to the initial and final states of the
 system. You have first to optimize properly these initial and final
 configurations, using for instance the Broyden algorithm implemented in ABINIT.  
 
 {% dialog tests/tutoparal/Input/tstring_01.in tests/tutoparal/Input/tstring_02.in %}
   
-Open the `tstring_01.in` file and look at it carefully. The unit cell is defined
+Open the *tstring_01.in* file and look at it carefully. The unit cell is defined
 at the end. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
@@ -88,13 +90,13 @@ remove an electron of the system and thus obtain a protonated molecule
   
 The exchange-correlation functional uses the external library _libxc_. You have
 to compile ABINIT using the _libxc_ plugin (if not, simply replace
-[[ixc]]=-001009 by [[ixc]] 7). This input file has to be run in parallel using
-20 CPU cores. You might use the `tstring.files` file. Edit it and adapt it with
+[[ixc]] = -001009 by [[ixc]] 7). This input file has to be run in parallel using
+20 CPU cores. You might use the *tstring.files* file. Edit it and adapt it with
 the appropriate file names.  
   
 Then run the calculation in parallel over 20 CPU cores, first for the initial
-configuration (`tstring_01.in`), and then for the final one (`tstring_02.in`). You
-should obtain the following positions:  
+configuration (*tstring_01.in*), and then for the final one (*tstring_02.in*). You
+should obtain the following positions:
   
 1) for the initial configuration:
 
@@ -165,7 +167,7 @@ thus only perform one step of string method.
 
 {% dialog tests/tutoparal/Input/tstring_03.in %}
 
-Open the `tstring_03.in` file and look at it. The initial and final
+Open the *tstring_03.in* file and look at it. The initial and final
 configurations are specified at the end through the keywords [[xangst] and
 [[nimage|xangst_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
@@ -174,7 +176,7 @@ correspond to the initial and final states, 10 are evolving). [[nimage]] is
 thus set to 12. The keyword [[npimage]] is set to 1 (no parallelism over
 images) and [[ntimimage]] is set to 1 (only one time step).
 
-You might use the `tstring.files` file. Edit it and adapt it with the
+You might use the *tstring.files* file. Edit it and adapt it with the
 appropriate file names. Since the parallelism over the images is not used,
 this calculation has to be run over 20 CPU cores.
 
@@ -184,7 +186,7 @@ Now you can perform the complete computation of the MEP using the parallelism ov
 
 {% dialog tests/tutoparal/Input/tstring_04.in %}
   
-Open the `tstring_04.in` file. The keyword [[npimage]] has been set to 10, and
+Open the *tstring_04.in* file. The keyword [[npimage]] has been set to 10, and
 [[ntimimage]] has been increased to 50.
 This calculation has thus to be run over 200 CPU cores. Note that the output
 file is very big, so that no reference file is provided in the ABINIT package.
@@ -192,7 +194,7 @@ file is very big, so that no reference file is provided in the ABINIT package.
 The convergence of the string method algorithm is controlled by [[tolimg]],
 which has been set to 0.0001 Ha. In order to obtain a more lisible output
 file, you can decrease the printing volume and set [[prtvolimg]] to 2.
-Here again, you might use the `tstring.files`. Edit it and adapt it with the
+Here again, you might use the *tstring.files*. Edit it and adapt it with the
 appropriate file names. Then run ABINIT over 200 CPU cores.  
   
 When the calculation is completed, ABINIT provides you with 12 configurations
@@ -273,7 +275,7 @@ recompute the MEP. This will be much faster than in the previous case.
   
 Then you should decrease [[tolimg]] to 0.00001 and recompute the MEP. To gain
 CPU time, you can start your calculation by using the 12 images obtained at
-the end of the calculation that used [[tolimg]]=0.0001. In your input file,
+the end of the calculation that used [[tolimg]] = 0.0001. In your input file,
 these starting images will be specified by the keywords [[xangst]],
 [[nimage|xangst_2img]], [[nimage|xangst_3img]] ... [[nimage|xangst_12img]].
 You can copy them directly from the output file obtained at the previous

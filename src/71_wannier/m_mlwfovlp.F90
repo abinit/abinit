@@ -202,7 +202,7 @@ contains
  complex(dpc) :: caux,caux2,caux3
 #endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
- character(len=20) :: wfnname
+ character(len=fnlen) :: wfnname
  character(len=500) :: message
  character(len=fnlen) :: seed_name(nsppol)
  character(len=fnlen) :: fname,filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
