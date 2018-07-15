@@ -1033,6 +1033,7 @@ end function isdiagmat_rdp
 
 pure function l2int_1D(larr) result(int_arr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1072,10 +1073,11 @@ end function l2int_1D
 
 pure function l2int_2D(larr) result(int_arr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'l2int_3D'
+#define ABI_FUNC 'l2int_2D'
 !End of the abilint section
 
  implicit none
@@ -1110,6 +1112,7 @@ end function l2int_2D
 !! SOURCE
 
 pure function l2int_3D(larr) result(int_arr)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

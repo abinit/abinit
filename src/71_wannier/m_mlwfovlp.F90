@@ -229,7 +229,7 @@ contains
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable::just_augmentation(:,:)
 #if defined HAVE_WANNIER90
- real(dp) :: spreadw(3)
+ real(dp) :: spreadw(3,nsppol)
  real(dp),allocatable :: csix(:,:,:,:)
  real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
  real(dp),allocatable :: tdocc_wan(:,:)
@@ -1162,7 +1162,7 @@ contains
 &    U_matrix_opt(1:num_bands(isppol),1:nwan(isppol),:,isppol),& !output
 &    lwindow_loc=lwindow(1:num_bands(isppol),:,isppol),& !output
 &    wann_centres_loc=wann_centres(:,1:nwan(isppol),isppol),&     !output
-&    wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw)                            !output
+&    wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw(:,isppol))                            !output
 
 !    ----------------------------------------------------------------------------------------------
 
@@ -1227,7 +1227,7 @@ contains
        nctkarr_t("lwindow_int", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
        !nctkarr_t("exclude_bands", "int", "max_number_of_states, number_of_spins"), &
        !nctkarr_t("eigenvalues_w", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
-       !nctkarr_t("spread_loc", "dp", "three, number_of_spins"), &
+       nctkarr_t("spread", "dp", "three, number_of_spins"), &
        !nctkarr_t("A_matrix", "dp", "two, max_num_bands, mwan, number_of_kpoints, number_of_spins"), &
        nctkarr_t("irvec", "int", "three, nrpts"), &
        nctkarr_t("ndegen", "int", "nrpts"), &
@@ -1248,7 +1248,7 @@ contains
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "lwindow_int"), l2int(lwindow)))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "exclude_bands"), exclude_bands))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eigenvalues_w"), eigenvalues_w))
-     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "spread_loc"), spread_loc))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "spread"), spreadw))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "A_matrix"), c2r(A_matrix)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "irvec"), irvec))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ndegen"), ndegen))
