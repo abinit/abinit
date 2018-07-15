@@ -79,7 +79,7 @@ module m_spin_model
   !! spin_mover = include information for how to run spin dynamics
   !! params = parameters from input file
   !! spin_ncfile = wrapper for spin hist netcdf file.
-  !! nmatoms= number of magnetic atoms
+  !! nspins= number of magnetic atoms
   !! SOURCE
 
   type spin_model_t
@@ -199,7 +199,9 @@ contains
 
 
     !TODO hexu: mxhist, has_latt, natoms should be input with their true values when lattice part also added
-    call spin_hist_t_init(hist=self%spin_hist, nmatom=self%nspins, mxhist=3, has_latt=.False.)
+    call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
+         & nspins_prim=self%spin_primitive%nspins,  mxhist=3, has_latt=.False.)
+
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=self%params%spin_temperature)
     !TODO

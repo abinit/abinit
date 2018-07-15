@@ -95,7 +95,7 @@ module m_spin_hist
      ! Maximun size of the historical records
      integer :: mxhist = 0
 
-     integer :: nspins
+     integer :: nspins, nspins_prim
      ! whether lattice dynamics is also present
      integer, allocatable :: ihist_latt(:)
      logical :: has_latt
@@ -137,6 +137,14 @@ module m_spin_hist
      ! spin_nctime: interval of step for writing to netcdf hist file.
      integer :: spin_nctime
      real(dp) :: spin_temperature
+
+
+     ! observables
+     real(dp), allocatable :: ms_prim(:,:)
+     real(dp), allocatable :: Cv(:)
+     real(dp), allocatable :: rcorr(:,:)
+     real(dp), allocatable :: sp_corr_func(:,:,:)
+
   end type spin_hist_t
   !!***
 
@@ -177,7 +185,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine spin_hist_t_init(hist, nspins, mxhist, has_latt)
+  subroutine spin_hist_t_init(hist, nspins, nspins_prim, mxhist, has_latt, rcorr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -188,15 +196,25 @@ contains
 
     implicit none
     class(spin_hist_t), intent(inout) :: hist
-    integer, intent(in) :: nspins, mxhist
+    integer, intent(in) :: nspins, mxhist, nspins_prim
     logical, intent(in) :: has_latt
+    real(dp), optional, intent(in) :: rcorr(:, :)
+    integer :: nrcorr
+
     hist%nspins=nspins
+    hist%nspins_prim=nspins_prim
     hist%ntypat=0
     hist%ihist=1
     hist%ihist_prev=0
     hist%mxhist=mxhist
     hist%natoms=0
     hist%has_latt=has_latt
+
+    if(present(rcorr)) then
+       nrcorr=size(rcorr, dim=2)
+    else
+       nrcorr=0
+    endif
 
     !print *, "initialize HIST spin"
     ABI_ALLOCATE(hist%heff, (3, nspins, mxhist))
@@ -212,6 +230,11 @@ contains
 
     ABI_ALLOCATE(hist%ihist_latt, (mxhist))
 
+    ABI_ALLOCATE(hist%ms_prim, (nspins_prim, mxhist))
+    ABI_ALLOCATE(hist%Cv, (mxhist))
+    ABI_ALLOCATE(hist%rcorr, (3, nrcorr))
+    ABI_ALLOCATE(hist%sp_corr_func, (3, nrcorr, mxhist))
+
     hist%etot(1) =zero
     hist%entropy(1) =zero
     hist%time(1) =zero
@@ -224,6 +247,10 @@ contains
     hist%dSdt(:,:,1)=zero
     hist%snorm(:,1)=zero
     !print *, "Initialization spin hist finished"
+
+    hist%Cv( 1)=zero
+    hist%sp_corr_func(:, :, 1)=zero
+
   end subroutine spin_hist_t_init
 !!***
 
@@ -283,7 +310,6 @@ contains
   !!***
 
 
-  
   !!****f* m_spin_hist/spin_hist_t_set_params
   !!
   !! NAME
@@ -602,5 +628,34 @@ contains
     endif
   end subroutine spin_hist_t_set_vars
   !!***
+
+  !!***f* m_spin_hist/spin_hist_t_update_Cv
+  !!
+  !! NAME
+  !! spin_hist_tupdate_Cv_
+  !!
+  !! FUNCTION
+  !! update volumetric heat capacity
+  !! INPUTS
+  !!   hist 
+  !! OUTPUT
+  !!   
+  !! PARENTS
+  !!      m_spin_hist
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine spin_hist_t_update_Cv(hist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_update_Cv'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: hist
+  end subroutine spin_hist_t_update_Cv
 
 end module m_spin_hist
