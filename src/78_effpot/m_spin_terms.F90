@@ -631,6 +631,8 @@ contains
     if ( temperature .gt. 1d-7) then
        !call rand_normal_ziggurat(x)
        call rand_normal_array(self%rng, x, 3*self%nspins)
+       !print*, self%gilbert_damping(1), boltzmann, temperature, self%gyro_ratio(1), dt, self%ms(1)
+
        do i = 1, self%nspins
           C=sqrt(2.0*self%gilbert_damping(i)*boltzmann* temperature &
                &  /(self%gyro_ratio(i)* dt *self%ms(i)))

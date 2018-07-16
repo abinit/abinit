@@ -148,7 +148,7 @@ contains
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
-         & Heff(3, self%nspins), Heff2(3, self%nspins), &
+         !& Heff(3, self%nspins), Heff2(3, self%nspins), &
          & H_lang(3, self%nspins)
     ! predict
 
@@ -162,6 +162,9 @@ contains
        S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
     end do
     !$OMP END PARALLEL DO
+    !do i=1, self%nspins
+    !   S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
+    !end do
 
     ! correction
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)

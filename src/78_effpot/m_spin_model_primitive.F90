@@ -153,7 +153,7 @@ contains
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in):: natoms, nspins, index_spin(:)
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
-         spinat(3,nspins), gyroratios(nspins), damping_factors(nspins)
+         spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
 
     !print *, "natoms",natoms
     !print *, "nspins", nspins
@@ -163,7 +163,7 @@ contains
     !print *, "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
-    ABI_ALLOCATE(self%spinat, (3, nspins))
+    ABI_ALLOCATE(self%spinat, (3, natoms))
     ABI_ALLOCATE(self%gyroratios, (nspins))
     ABI_ALLOCATE(self%damping_factors, (nspins))
 
@@ -337,7 +337,7 @@ contains
     call c_f_pointer(p_gyroratios, gyroratios, [nspins])
     call c_f_pointer(p_damping_factors, damping_factors, [nspins])
     call c_f_pointer(p_positions, positions, [natoms*3])
-    call c_f_pointer(p_spinat, spinat, [nspins*3])
+    call c_f_pointer(p_spinat, spinat, [natoms*3])
     call c_f_pointer(p_exc_ilist, exc_ilist, [exc_nnz])
     call c_f_pointer(p_exc_jlist, exc_jlist, [exc_nnz])
     call c_f_pointer(p_exc_Rlist, exc_Rlist, [exc_nnz*3])
@@ -365,7 +365,7 @@ contains
             & reshape(positions, [3, natoms]), &
             & nspins, &
             & index_spin, &
-            & reshape(spinat, [3, nspins]), &
+            & reshape(spinat, [3, natoms]), &
             & gyroratios,damping_factors)
 
     print *, "Spin model: setting exchange terms."
@@ -801,7 +801,10 @@ contains
           counter=counter+1
           sc_index_spin(i)=counter
           sc_spinpos(:, counter)=scell%xcart(:,counter)
-          sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
+          !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
+          ! in primitive cell, everyone has spinat
+          sc_spinat(:, counter)=self%spinat(:,iatom) 
+          print *, self%spinat(:, iatom)
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
@@ -840,6 +843,9 @@ contains
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
+                if(isnan(tmp(icol, irow)))then
+                    print *, 'nan found'
+                endif
              end do
           end do
           !print *, "i0", self%total_ilist%data(i)
