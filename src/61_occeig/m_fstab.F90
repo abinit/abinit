@@ -485,7 +485,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
-       ! Calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+       ! Calculate general integration weights at each irred kpoint 
+       ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
 

@@ -14,7 +14,7 @@
 !!    In that case, n1_a^(1)[r]=n1^(j1)[r] and n1_b[r]=delta_n1^(j2)[r]
 !!    where j1 and j2 are two given perturbations,
 !!    and delta_n1^(j)[r] is the 1s-order density only due to change of WF overlap.
-!!    See PRB 78, 035105 (2008), Eq.(80)
+!!    See PRB 78, 035105 (2008) [[cite:Audouze2008]] , Eq.(80)
 !!    E_onsite=
 !!       Int{ VHxc[n1^(j1);nc^(j1)].delta_n1^(j2) }
 !!      -Int{ VHxc[tild_n1^(j1)+hat_n1^(j1);tild_n_c^(j1)].delta_(tild_n1+hat_n1)^(j2) }

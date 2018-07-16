@@ -2534,7 +2534,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
  if (iqibz == Qmesh%nibz ) then
 
    ! Multiply by the prefactors
-   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10309 (1998).
+   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10307 (1998) [[cite:Campillo1998]].
    ! A factor one half is missing in the paper.
    rspower(:) = - zp**2 / ( Cryst%ucvol * Qmesh%nbz * pvel_norm(:) ) * rspower(:)
 

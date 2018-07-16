@@ -34,6 +34,7 @@ sources = [
  "m_pred_bfgs.F90",
  "m_pred_delocint.F90",
  "m_pred_diisrelax.F90",
+ "m_pred_fire.F90",
  "pred_hmc.F90",
  "m_pred_isokinetic.F90",
  "m_pred_isothermal.F90",

@@ -27,7 +27,7 @@ excitonic effects, see [[topic:BSE]].
 
 In the Abinit package, there are two different utilities to compute optical
 responses in the independent-particle approximation: [[help:optic]] and
-conducti. They have been developed independently of each other, and thus
+conducti [[cite:Mazevet2010]]. They have been developed independently of each other, and thus
 overlap significantly. The first one computes the linear and non-
 linear optical properties as a function of the frequency. It provides the
 optical dielectric tensor, the second-harmonic generation (SHG) as well as the

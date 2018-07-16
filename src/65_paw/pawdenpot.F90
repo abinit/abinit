@@ -735,7 +735,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Compute 1st moment of total Hartree potential VH(n_Z+n_core+n1)
 !  equation 10 (density) and up to 43 (Hartree potential of density)
-!    of Kresse and Joubert PRB 59 1758 (1999)
+!    of Kresse and Joubert PRB 59 1758 (1999) [[cite:Kresse1999]]
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
    if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
      ! in the first clause case, would it not be simpler just to turn on has_vhartree?

@@ -210,7 +210,7 @@
  ABI_DEALLOCATE(n34_msig)
  ABI_DEALLOCATE(n34_sig)
 
-!Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005)
+!Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
  if (paw_ij%ndij==4) then
    do m1=-lpawu,lpawu
      m11=m1+lpawu+1
@@ -242,7 +242,7 @@
    end do ! m1
  end if
 
-!Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008)
+!Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008) [[cite:Amadon2008a]]
  eldautemp=half*eldautemp
 
 !if (paw_ij%ndij==1) then

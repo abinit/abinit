@@ -429,7 +429,7 @@ end subroutine destroy_orbmag
 
                 !    note the definition used for the k-dependence of the PAW basis functions:
                 !$|\phi_{i,k}\rangle = exp(-i k\cdot r)|\phi_i\rangle
-                !    see Umari, Gonze, and Pasquarello, PRB 69,235102 Eq. 23. Thus the k-vector on the
+                !    see Umari, Gonze, and Pasquarello, PRB 69,235102 [[cite:Umari2004]] Eq. 23. Thus the k-vector on the
                 !    bra side enters as k, while on the ket side it enters as -k.
                 bb(:) = -dkvecs(:)
 

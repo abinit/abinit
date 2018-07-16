@@ -660,7 +660,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end if
 
          ! Electric field: compute the gradient of the Berry phase part of the energy functional.
-         ! See PRL 89, 117602 (2002), grad_berry(:,:) is the second term of Eq. (4)
+         ! See PRL 89, 117602 (2002) [[cite:Souza2002]], grad_berry(:,:) is the second term of Eq. (4)
          if (finite_field) then
 
            call make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
