@@ -559,7 +559,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        MVeithen 021212 : in case ipert = 2, these lines compute the local part
 !        of the Born effective charges from phonon and electric
 !        field type perturbations, see eq. 43 of
-!        X. Gonze and C. Lee, PRB 55, 10355 (1997)
+!        X. Gonze and C. Lee, PRB 55, 10355 (1997) [[cite:Gonze1997a]]
 !        The minus sign is due to the fact that the effective charges
 !        are minus the second derivatives of the energy
          if (ipert == dtset%natom+2) then

@@ -446,7 +446,7 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
 
    if (any(inp%qrefine(:) > 1)) then
-     ! Gaal-Nagy's algorithm in PRB 73 014117.
+     ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
 
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3

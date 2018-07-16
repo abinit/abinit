@@ -119,12 +119,12 @@
 !!  d2nl(2,3,mpert,3,mpert)=non-local contributions to the 2DTEs
 !!  d2ovl(2,3,mpert,3,mpert*usepaw)=overlap contributions to the 2DTEs (PAW only)
 !!  eovl1=1st-order change of wave-functions overlap, part of 2nd-order energy
-!!        PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008)
+!!        PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !!
 !! NOTES
 !   We perform here the computation of
 !!     delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
-!      see PRB 78, 035105 (2008), Eq. (42)
+!      see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
 !!
 !! PARENTS
 !!      dfpt_scfcv
@@ -538,7 +538,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &   (ipert ==dtset%natom+2)) elfd_fact=-one
 
 !  We want to compute delta_u^(j1))=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
-!  see PRB 78, 035105 (2008), Eq. (42)
+!  see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
    has_dcwf=.false.;has_dcwf2=.false.;has_drho=.false.
    if (usepaw==1) then
      has_dcwf =(ipert1/=dtset%natom+2)
@@ -689,7 +689,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          dotr=dot1r+dot2r+dot3r;doti=dot1i+dot2i+dot3i
 !        In case ipert = natom+2, these lines compute the local part
 !        of the Born effective charges from phonon and electric
-!        field type perturbations, see eq. 43 of X. Gonze and C. Lee, PRB 55, 10355 (1997)
+!        field type perturbations, see eq. 43 of X. Gonze and C. Lee, PRB 55, 10355 (1997) [[cite:Gonze1997a]]
 !        The minus sign is due to the fact that the effective charges
 !        are minus the second derivatives of the energy
          if (ipert/=dtset%natom+1) then
@@ -1180,7 +1180,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !          If needed, compute here <delta_u^(j1)_k_i|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>
 !          with delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
-!          (see PRB 78, 035105 (2008), Eq. (42))
+!          (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
 !          This can be rewritten as:
 !          -1/2.<u0_k_i|S^(j1)| Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
 !          The sum over j can be computed with a single call to projbd routine
@@ -1273,7 +1273,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,gh1,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !              Case ipert1=natom+2 (electric field):
 !              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
-!              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997).
+!              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
 !              * if ipert==natom+2, we apply directly Eq. (38)
 !              * if ipert/=natom+2, Born effective charges are minus D2E
                d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
@@ -1312,7 +1312,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            if (has_drho) then
              if (abs(occ_k(iband))>tol8) then
 !              Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
-!              (see PRB 78, 035105 (2008), Eq. (42))
+!              (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
                ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
                ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
@@ -1484,7 +1484,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        ABI_DEALLOCATE(drho1wfg)
 
 !      Compute plane-wave contribution to overlap contribution
-!      This is subtle as it is a mix of Eq(79) and Eq(80) of PRB 78, 035105 (2008)
+!      This is subtle as it is a mix of Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !      Details:
 !      The VH(tild_nZc)^(1) term of Eq(79) is:
 !      <VH(tild_nZc)^(j2)|delta_tild_rho^(j1)>            = <vpsp1|drhor1-dnhat1>
@@ -1507,7 +1507,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        dotr=dot1r-dot2r;doti=dot1i-dot2i
 
 !      Compute on-site contributions to overlap contribution
-!      (two last terms of Eq(80) of PRB 78, 035105 (2008))
+!      (two last terms of Eq(80) of PRB 78, 035105 (2008)) [[cite:Audouze2008]]
 !      (note: Dij^(j2) and Vxc^(j2) are computed for ipert at first call)
        call pawdfptenergy(epawnst,ipert,ipert1,dtset%ixc,my_natom,dtset%natom,dtset%ntypat,&
 &       nzlmopt_ipert,nzlmopt_ipert1,paw_an,paw_an1,paw_ij1,pawang,dtset%pawprtvol,&

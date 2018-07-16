@@ -82,7 +82,7 @@ contains
 !! NOTES
 !!  Ref.: S. Grimme, Semiempirical GGA-type density functional
 !!        constructed with a long-range dispersion correction,
-!!        J. Comp. Chem. 27, 1787 (2006)
+!!        J. Comp. Chem. 27, 1787 (2006) [[cite:Grimme2006]]
 !!
 !! PARENTS
 !!      respfn,setvtr,stress

@@ -66,7 +66,7 @@ Before following the tutorials, you should have read the
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
-[[cite:Martin2008|this book]] by R. M. Martin.
+[[cite:Martin2004|this book]] by R. M. Martin.
 The latter reference is a must if you have not yet used another electronic structure code or a Quantum Chemistry package.
 
 After the tutorial, you might find it useful to learn about the test cases

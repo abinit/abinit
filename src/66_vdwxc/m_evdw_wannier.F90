@@ -52,9 +52,9 @@ contains
 !! FUNCTION
 !!  FIXME: Evaluates the van der Waals correlation energy using maximally
 !!         localized Wannier functions (MLWF) as proposed by:
-!!         P. L. Silvestrelli in PRL 100:053002 (2008) vdw_xc=10 and
-!!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) vdw_xc=11.
-!!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) vdw_xc=14.
+!!         P. L. Silvestrelli in PRL 100:053002 (2008) [[cite:Sivestrelli2008]] vdw_xc=10 and
+!!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) [[cite:Ambrosetti2012]] vdw_xc=11.
+!!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) [[cite:Silvestrelli2013]] vdw_xc=14.
 !!
 !! INPUTS
 !!   nsppol          = Spin polarization.
@@ -124,7 +124,7 @@ contains
  character(len=500) :: message                   ! to be uncommented, if needed
 ! *************************************************************************
 
-!Determining presence p-like MLWFs see J.Chem.Phys.135:154105 (2011)
+!Determining presence p-like MLWFs see J.Chem.Phys.135:154105 (2011) [[cite:Andrinopoulos2011]]
  ABI_ALLOCATE(npwf,(nsppol))
  ABI_ALLOCATE(inwan,(origmwan,nsppol))
  ABI_ALLOCATE(nwan,(nsppol))
@@ -220,7 +220,7 @@ contains
  end if !vdw_nfrag>0
 
 !Spliting of p-like into 2 s-like MLWFs
-!Eqs. (22) and (23) of J.Chem.Phys.135:154105 (2011)
+!Eqs. (22) and (23) of J.Chem.Phys.135:154105 (2011) [[cite:Andrinopoulos2011]]
 
  if ( any (npwf(:)/=0) ) then
 
@@ -288,7 +288,7 @@ contains
    end do
  end do
 
-!Amalgamation of close MLWFs, see J.Chem.Phys.135:154105 (2011)
+!Amalgamation of close MLWFs, see J.Chem.Phys.135:154105 (2011) [[cite:Andrinopoulos2011]]
 
  if (all(npwf(:)==0).and.vdw_xc/=14) then !amalgamation is done only if no p-like
 
@@ -425,7 +425,8 @@ contains
      do iwan=1, nwan(jj)
        rc(iwan,jj)= three*(0.769d0+half*dlog(wannspr(iwan,jj)))
 !      rv(iwan,jj)= (1.475d0-half_sqrt3*dlog(wannspr(iwan,jj)))*wannspr(iwan,jj)
-       rv(iwan,jj)= (rc(iwan,jj)*wannspr(iwan,jj))/sqrt3 !r_v suggested in JPhysChemA 113:5224
+!      r_v suggested in JPhysChemA 113:5224 [[cite:Silvestrelli2009]]
+       rv(iwan,jj)= (rc(iwan,jj)*wannspr(iwan,jj))/sqrt3 
      end do
    end do
    corrvdw=0.0d0  !Initializing the vdW correction energy.
@@ -487,7 +488,7 @@ contains
                  fij=one/(one+exp(-a*(rij/(rv(iwan,ii)+rv(jwan,jj))-one))) !Damping function.
 
                  corrvdw = corrvdw - csix(iwan,jwan,ii,jj)*fij/(two*(rij**6)) !making the sum of eq(4) of
-!                JPhysChemA 113:5224-5234. Each term is divided by two because
+!                JPhysChemA 113:5224-5234 [[cite:Silvestrelli2009]]. Each term is divided by two because
 !                we are counting twice within the unit cell, also the
 !                interactions with neighbor cells are properly acounted for in
 !                this way.
@@ -517,7 +518,7 @@ contains
 
  end if
 
-!vdW-WF VERSION 2: Phys. Rev. B. 85:073101 (2012)
+!vdW-WF VERSION 2: Phys. Rev. B. 85:073101 (2012) [[cite:Ambrosetti2012]]
 
  if (vdw_xc==11) then
 
@@ -600,7 +601,7 @@ contains
 !                write(std_out,*) 'f_i,j=',fij,ch10
 !                END DEBUG
                  corrvdw = corrvdw - csix(iwan,jwan,ii,jj)*fij/(two*(rij**6)) !making the sum of eq(4) of
-!                JPhysChemA 113:5224-5234.
+!                JPhysChemA 113:5224-5234 [[cite:Silvestrelli2009]]
                end do
              end do
            end do
@@ -635,7 +636,7 @@ contains
        rc(iwan,jj)=three*wannspr(iwan,jj) !integral cutoff
 !      rv(iwan,jj)= (1.475d0-half_sqrt3*dlog(wannspr(iwan,jj)))*wannspr(iwan,jj)
        rv(iwan,jj)= wannspr(iwan,jj)*sqrt3*(0.769d0+half*dlog(wannspr(iwan,jj)))
-!      r_v suggested in JPhysChemA 113:5224
+!      r_v suggested in JPhysChemA 113:5224 [[cite:Silvestrelli2009]]
      end do
    end do
    corrvdw=0.0d0  !Initializing the vdW correction energy.
@@ -697,7 +698,7 @@ contains
                  fij=one/(one+exp(-a*(rij/(rv(iwan,ii)+rv(jwan,jj))-one))) !Damping function.
 
                  corrvdw = corrvdw - csix(iwan,jwan,ii,jj)*fij/(two*(rij**6)) !making the sum of eq(4) of
-!                JPhysChemA 113:5224-5234. Each term is divided by two because
+!                JPhysChemA 113:5224-5234 [[cite:Silvestrelli2009]]. Each term is divided by two because
 !                we are counting twice within the unit cell, also the
 !                interactions with neighbor cells are properly acounted for in
 !                this way.
@@ -1056,7 +1057,7 @@ end subroutine evdw_wannier
 !!
 !! FUNCTION
 !!  Performs double integral needed to evaluate C6
-!!  coefficients. Eq. (9) in J.Phys.Chem. 113:5224
+!!  coefficients. Eq. (9) in J.Phys.Chem. 113:5224 [[cite:Silvestrelli2009]]
 !!
 !! INPUTS
 !!
@@ -1282,7 +1283,7 @@ end subroutine getFu
  end do
 !END DEBUG
 !Determining both free and effective volumes.
-!Eqs (6) and (7) in PRB 85:073101.
+!Eqs (6) and (7) in PRB 85:073101 [[cite:Ambrosetti2012]].
 !Creation of grids around each WF centre.
 !Calculation of intersection volumes.
  do ii = 1,nsppol
@@ -1359,7 +1360,7 @@ end subroutine getFu
 !! FUNCTION
 !!  Performs double integral needed to evaluate C6
 !!  coefficients from the long range limit of VV10
-!!  functional (Phys. Rev. A. 81:062708 (2010))
+!!  functional (Phys. Rev. A. 81:062708 (2010)) [[cite:Vydrov2010]]
 !!  as expressed in terms of MLWFs.
 !!
 !! INPUTS
@@ -1454,7 +1455,7 @@ end subroutine vv10limit
 !!
 !! FUNCTION
 !!  Amalgamates MLWFs, which are close enough,
-!!  into one MLWF as suggested in J.Chem.Phys.135:154105 (2011)
+!!  into one MLWF as suggested in J.Chem.Phys.135:154105 (2011) [[cite:Andrinopoulos2011]]
 !!
 !! INPUTS
 !!

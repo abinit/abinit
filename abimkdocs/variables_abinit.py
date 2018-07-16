@@ -1000,7 +1000,7 @@ Variable(
     text="""
 *bs_interp_method* selects the interpolation method::
 
-  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2015]]).
+  * 0 --> Interpolate using Y. Gillet technique with 8 neighbours (see [[cite:Gillet2016]]).
   * 1 --> Interpolation using Rohlfing & Louie technique (see above-mentioned article and [[cite:Rohlfing2000]])
 """,
 ),
@@ -2980,12 +2980,12 @@ Variable(
     abivarname="dtion",
     varset="rlx",
     vartype="real",
-    topics=['PIMD_compulsory', 'MolecularDynamics_compulsory'],
+    topics=['PIMD_compulsory', 'MolecularDynamics_compulsory', "GeoOpt_compulsory"],
     dimensions="scalar",
     defaultval=100,
     mnemonics="Delta Time for IONs",
     text="""
-Used for controlling ion time steps. If [[ionmov]] is set to 1, 6 or 7, then
+Used for controlling ion time steps. If [[ionmov]] is set to 1, 6, 7 and 15, then
 molecular dynamics is  used to update atomic positions in response to forces.
 The parameter [[dtion]] is a time step in atomic units of time. (One atomic
 time unit is 2.418884e-17 seconds, which is the value of Planck's constant in
@@ -3002,6 +3002,8 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
+It is also used in geometric relaxation calculation with the FIRE alogorithm 
+([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
 
@@ -5541,7 +5543,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the DFT eigenstate $|e\\rangle$ in which the self-energy will be evaluated, as
-shown in Eq. (7) of [[cite:Janssen2015]]. That is, it is the state
+shown in Eq. (7) of [[cite:Laflamme2015]]. That is, it is the state
 to be corrected in the G0W0 scheme.
 """,
 ),
@@ -5557,7 +5559,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the use of a dielectric model (as explained in Sec. V of
-[[cite:Janssen2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
+[[cite:Laflamme2015]] and the use of the Lanczos scheme to solve Eqs. (30) and
 (35) of the same reference at all external [[gw_freqsp]] and integration (as
 generated from [[gwls_npt_gauss_quad]]) frequencies. The different choices
 are:
@@ -5616,7 +5618,7 @@ Variable(
     text="""
 This variable sets the band index to be used to generate the first seed vector
 to be used in the construction of the Lanczos basis for the (static)
-dielectric matrix in a GWLS calculation. See Sec. IV of [[cite:Janssen2015]].
+dielectric matrix in a GWLS calculation. See Sec. IV of [[cite:Laflamme2015]].
 Together with [[gwls_nseeds]], this defines the seeds for the
 Lanczos procedure. That is, the states associated to band index
 [[gwls_first_seed]] to [[gwls_first_seed]]+[[gwls_nseeds]]-1 are used to
@@ -5639,7 +5641,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-Eq. (35) of [[cite:Janssen2015]] to solve it at all external
+Eq. (35) of [[cite:Laflamme2015]] to solve it at all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
 converged to a few 10s of meV for all molecules studied so far.
 """,
@@ -5656,7 +5658,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 The G0W0 formalism involves the calculation of a summation conceptually linked
-to the trace of the dielectric matrix [see Eq. (38) of [[cite:Janssen2015]]\].
+to the trace of the dielectric matrix [see Eq. (38) of [[cite:Laflamme2015]]\].
 Since the eigenvalues spectrum of the dielectric matrix of formed by a
 few large discrete eigenvalues and an integrable divergence in the density of
 eigenvalues around 0, it is expensive to sample accurately this divergence
@@ -5668,7 +5670,7 @@ In the context where the model dielectric matrix is used in the calculations,
 [[gwls_kmax_complement]] determines the size of the 'large' basis.
 
 For more information on the exact role of these bases and on the model
-dielectric operator used, see Sec. V of [[cite:Janssen2015]].
+dielectric operator used, see Sec. V of [[cite:Laflamme2015]].
 """,
 ),
 
@@ -5683,7 +5685,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 Governs the number of iterations to be done in the shift Lanczos solution of
-Eq. (30) of [[cite:Janssen2015]] to solve it simultaneously at all
+Eq. (30) of [[cite:Laflamme2015]] to solve it simultaneously at all
 integration frequencies (generated automatically by the number of points
 [[gwls_npt_gauss_quad]] to use in the gaussian quadrature) and all external
 frequencies requested by the user ([[gw_freqsp]]). The default value is
@@ -5705,7 +5707,7 @@ The contour deformation technique, in the G0W0 context, will involve the
 calculation of pole residues associated to states lying between the one
 corrected ([[gwls_band_index]]) and the Fermi level. These residues take the
 form of a matrix element of the inverse dielectric matrix at a real frequency
-[see Eq. (11) of [[cite:Janssen2015]]\]. Therefore, the dielectric
+[see Eq. (11) of [[cite:Laflamme2015]]\]. Therefore, the dielectric
 matrix must be constructed in some basis at these frequencies and inverted to
 calculate the matrix element. The present input variable sets the size of the
 Lanczos basis to be constructed for this purpose. The default value has proven
@@ -5713,7 +5715,7 @@ to be very robust for many molecular systems and should therefore be left to
 the default value by the user.
 
 For more information on the Lanczos basis constructed for the calculation of
-the residues, see Sec. IV of [[cite:Janssen2015]].
+the residues, see Sec. IV of [[cite:Laflamme2015]].
 """,
 ),
 
@@ -5730,7 +5732,7 @@ Variable(
 This variable sets the frequencies to be used to construct the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved by the construction of the dielectric matrix at finite
-frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
+frequencies. See Sec. VI of [[cite:Laflamme2015]]. For most cases,
 since the frequencies $\infty$ and 0.0 (if [[gwls_recycle]] > 0) are used at no
 computational cost, [[gwls_n_proj_freq]] == 0 (which means no ADDITIONAL
 frequency is to be used) is fine and no frequencies need to be picked up.
@@ -5750,7 +5752,7 @@ Variable(
     text=r"""
 This is the width of the lorentzian, in Ha, used to model the frequency
 dependence of the dielectric matrix in the GWLS calculation [see Eqs. (12-16)
-and (34) of [[cite:Janssen2015]]\]. More
+and (34) of [[cite:Laflamme2015]]\]. More
 precisely, this parameter is the value of $\alpha$ used in Eq. (34). This model
 is then used to separate the integration over frequencies into a 'model' part
 [second term of Eq. (12)] and an 'exact - model' part [first term of Eq. (12)].
@@ -5780,7 +5782,7 @@ This variable sets the number of frequencies, on top of $\infty$ and 0.0 (if
 [[gwls_recycle]] > 0), to be used for the construction of the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved in the construction of the dielectric matrix at finite
-frequencies. See Sec. VI of [[cite:Janssen2015]]. For most cases,
+frequencies. See Sec. VI of [[cite:Laflamme2015]]. For most cases,
 the default ([[gwls_n_proj_freq]] == 0) is fine.
 """,
 ),
@@ -5797,7 +5799,7 @@ Variable(
     text="""
 This variable defines the number of points used for the numerical integration
 of the self-energy over frequencies in GWLS computations [see Eq. (12) of
-[[cite:Janssen2015]]\]. The default is fine for most cases.
+[[cite:Laflamme2015]]\]. The default is fine for most cases.
 """,
 ),
 
@@ -5813,7 +5815,7 @@ Variable(
     text="""
 This variable sets the number of seed vectors to be used in the construction
 of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
-See Sec. IV of [[cite:Janssen2015]]. Only [[gwls_nseeds]] == 1 has
+See Sec. IV of [[cite:Laflamme2015]]. Only [[gwls_nseeds]] == 1 has
 been tested for now and users should keep this value.
 """,
 ),
@@ -5855,7 +5857,7 @@ basis in which the Hamiltonian is projected for the solution of the
 Sternheimer equations involved by the calculation of the dielectric matrix at
 finite frequencies. The other solutions used will be those at $\omega \to \infty$
 (always used) and those at $\omega=$[[gwls_list_proj_freq]]. For more
-information of the basis constructed, see Sec. IV of [[cite:Janssen2015]].
+information of the basis constructed, see Sec. IV of [[cite:Laflamme2015]].
 
 It is important to note that the solutions rapidly take much space to store.
 Therefore, it is often not possible to store them in RAM in production
@@ -5878,7 +5880,7 @@ Variable(
     requires="[[optdriver]] == 66",
     text="""
 This variable sets the dimension of the dielectric matrix used in a GWLS
-calculation [see Sec. IV of [[cite:Janssen2015]]\]. Typically
+calculation [see Sec. IV of [[cite:Laflamme2015]]\]. Typically
 converged at a value of a few hundreds to a few thousands for a convergence
 criterion of 50 meV on the eigenenergies.
 """,
@@ -6433,7 +6435,7 @@ files). The possible values are:
 
   * 0 --> Use standard Fortran IO (ok for sequential runs, not suitable for large parallel runs)
   * 1 --> Use MPI/IO routines (ok both for sequential and large parallel runs)
-  * 3 --> Use NetCDF library to produce files according to the ETSF specification
+  * 3 --> Use NetCDF library to produce files according to the ETSF specification [[cite:Gonze2008]]
     (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
 
 By default, Abinit produces Fortran files and uses parallel MPI-IO under the
@@ -6458,13 +6460,8 @@ Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
 compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
 
-References:
-
-  * "Specification of an extensible and portable file format for electronic structure and crystallographic data",
-  X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete, [[cite: Gonze2008 | Comput. Mat. Science 43, 1056 (2008) ]]
-  * "Sharing electronic structure and crystallographic data with ETSF_IO", D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze, Comput.
-  [[cite: Caliste2008 | Physics Communications 179, 748 (2008) ]]
-  * see also [ http://www.etsf.eu/fileformats ](http://www.etsf.eu/fileformats).
+Additional note : The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
+The ETSF_IO library was indeed not maintained anymore.
 """,
 ),
 
@@ -6511,7 +6508,7 @@ unstable - use with caution!
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987]] p 81]. The only related parameter is the time step ([[dtion]]).
+  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81]. The only related parameter is the time step ([[dtion]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
@@ -6563,6 +6560,11 @@ thermostats ([[qmass]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
+
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
+**Purpose:** Relaxation
+**Cell optimization:** Yes (if [[optcell]]/=0)
+**Related variables:** The initial time step [[dtion]]
 
   * 20 --> Direct inversion of the iterative subspace. Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates), and unit cell parameters ([[rprimd]]) this routine uses the DIIS (direct inversion of the iterative subspace) to minimize the gradient (forces) on atoms. The preconditioning used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm. This method is known to converge to the nearest point where gradients vanish. This is efficient to refine positions around a saddle point for instance.
 **Purpose:** Structural optimization
@@ -6630,7 +6632,7 @@ The possible values of [[iprcel]] correspond to:
   * 141 to 169 --> same as Between 41 and 69 (but, the dielectric matrix is also recomputed every iprcel modulo 10 step).
 
 The computation of the dielectric matrix (for 0 [100]< [[iprcel]] < 70 [100])
-is based on the **extrapolar** approximation. This approximation can be tuned
+is based on the **extrapolar** approximation, see [[cite:Anglade2008]]. This approximation can be tuned
 with [[diecut]], [[dielam]], and [[diegap]]. Yet its accuracy mainly depends
 on the number of conduction bands included in the system. Having 2 to 10 empty
 bands in the calculation is usually enough (use [[nband]]).
@@ -13758,7 +13760,7 @@ Variable(
     mnemonics="PRint NABLA",
     requires="[[usepaw]] == 1",
     text="""
-  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti.
+  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]). 
 """,
 ),
 
@@ -18116,7 +18118,7 @@ order to take into account of the dispersion:
 The last term has been predicted to have an important effect for large
 molecules [[cite:Grimme2010]]. It is however quite costly in computational
 time for periodic systems and seems to lead to an overestimation of lattice
-parameters for weakly bound systems [[cite:Grimme2010a]]. Still, its
+parameters for weakly bound systems [[cite:Grimme2011]]. Still, its
 contribution to energy, to forces and to stress is available (not planned for
 elastic constants, dynamical matrix and internal strains).
 """,

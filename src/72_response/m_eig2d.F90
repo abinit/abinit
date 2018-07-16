@@ -2290,7 +2290,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 
              if(option==1)then
 !              Compute the mean displacement correlation at T=0.
-!              Consistent with Eqs.(7) and (8) of PRB51, 8610 (1995), specialized for the contribution of one q point.
+!              Consistent with Eqs.(7) and (8) of PRB51, 8610 (1995) [[cite:Lee1995]], specialized for the contribution of one q point.
 !              but generalized to two different atoms. Note that the complex conjugate is taken on the second direction.
                displ2cart(1,idir1,idir2)=(d_at1_dir1_re*d_at2_dir2_re+ &
 &               d_at1_dir1_im*d_at2_dir2_im )/(two*phfrq(imode))
@@ -2298,7 +2298,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 &               d_at1_dir1_re*d_at2_dir2_im )/(two*phfrq(imode))
              else if(option==2)then
 !              Compute the mean square displacement correlation of each atom at T=0, and take mean over iatom1 and iatom2.
-!              See Eqs.(7) and (8) of PRB51, 8610 (1995), specialized for the contribution of one q point.
+!              See Eqs.(7) and (8) of PRB51, 8610 (1995) [[cite:Lee1995]], specialized for the contribution of one q point.
 !              Note that the complex conjugate is taken on the second direction.
 !              Also, note the overall negative sign, to make it opposite to the Fan term.
                d_at1_dir2_re=displ(1 + 2*(idir2-1 +3*(iatom1-1 +natom*(imode-1))))

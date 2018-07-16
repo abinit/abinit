@@ -289,18 +289,20 @@ subroutine herald(code_name,code_version,iout)
 & ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
 
  if(trim(code_name)=='OPTIC')then
-   write(iout, '(a,a,a,/,a,/,a,/,a,/,a,/)' ) &
+   write(iout, '(a,a,a,/,a,/,a,/,a,/,a,/,a,/,a,/)' ) &
 &   ' ',trim(code_name),' has originally been developed by',&
 &   ' Sangeeta Sharma and incorporated in ABINIT with the help of M. Verstraete.',&
 &   ' Please refer to : ',&
 &   ' S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B 67, 165332 (2003), and',&
-&   ' S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 (2004).'
+&   ' S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 (2004).',&
+&   '- URLs and DOI at https://docs.abinit.org/theory/bibliography/#sharma2003',&
+&   '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
  end if
 
  write(iout, '(a,/,a,/,a,/,a,/,a)' ) &
 & ' ABINIT is a project of the Universite Catholique de Louvain,',&
 & ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
-& ' Please read ~abinit/doc/users/acknowledgments.html for suggested',&
+& ' Please read https://docs.abinit.org/theory/acknowledgments for suggested',&
 & ' acknowledgments of the ABINIT effort.',&
 & ' For more information, see https://www.abinit.org .'
 

@@ -1480,7 +1480,8 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+!      calculate general integration weights at each irred kpoint 
+!      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
 &       tweight,dtweightde,xmpi_comm_self)
@@ -1737,8 +1738,8 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
-
+!      calculate general integration weights at each irred kpoint 
+!      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
 &       tweight,dtweightde,xmpi_comm_self)

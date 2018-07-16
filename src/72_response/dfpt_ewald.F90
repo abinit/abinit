@@ -8,7 +8,7 @@
 !! Compute ewald contribution to the dynamical matrix, at a given q wavevector.
 !! Note: the q=0 part should be subtracted, by another call to
 !! the present routine, with q=0. The present routine correspond
-!! to the quantity C_bar defined in Eq.(24) or (27) in Phys. Rev. B 55, 10355 (1997).
+!! to the quantity C_bar defined in Eq.(24) or (27) in Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]].
 !! The two calls correspond to Eq.(23) of the same paper.
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
