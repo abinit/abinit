@@ -510,7 +510,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
- 
+
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
  dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
@@ -602,8 +602,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
  dtout%hyb_range_fock  = dtin%hyb_range_fock
- dtout%hmcsst             = dtin%hmcsst  
- dtout%hmctt              = dtin%hmctt  
+ dtout%hmcsst             = dtin%hmcsst
+ dtout%hmctt              = dtin%hmctt
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -796,7 +796,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtdosm            = dtin%prtdosm
  dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
  dtout%prtefg             = dtin%prtefg
- dtout%prtefmas           = dtin%prtefmas 
+ dtout%prtefmas           = dtin%prtefmas
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prtfc              = dtin%prtfc
@@ -824,6 +824,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtvdw             = dtin%prtvdw
  dtout%prtvha             = dtin%prtvha
  dtout%prtvhxc            = dtin%prtvhxc
+ dtout%prtkbff            = dtin%prtkbff
  dtout%prtvol             = dtin%prtvol
  dtout%prtvolimg          = dtin%prtvolimg
  dtout%prtvpsp            = dtin%prtvpsp

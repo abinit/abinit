@@ -89,6 +89,7 @@ MODULE m_vkbr
  public :: vkbr_init       ! vkbr_t Constructor
  public :: vkbr_free       ! Free memory
  public :: nc_ihr_comm     ! Compute matrix elements of the commutator i[H,r] for NC pseudos
+ public :: calc_vkb        ! Kleynman-Bylander form factors and derivatives.
 !!***
 
  interface vkbr_free
