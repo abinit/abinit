@@ -1542,13 +1542,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
    if (dt%optcell /=0 .and. (dt%berryopt == 6 ))  then
-     write(message,'(14a)') ch10,&
+     write(message,'(12a)') ch10,&
 &     ' chkinp : WARNING -',ch10,&
 &     '  Constant unreduced D calculation with relaxation of cell parameters is allowed.',ch10,&
 &     '  But we strongly recommend users to use reduced d calculation (berryopt=16)',ch10,&
 &     '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
 &     '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
-&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10, '[[cite:Stengel2009]]'
+&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.' ! [[cite:Stengel2009]]
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
