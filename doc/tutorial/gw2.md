@@ -32,13 +32,15 @@ by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 The user should be familiarized with the four basic tutorials of ABINIT, see the
 [tutorial index](.) as well as the [first GW tutorial](gw1).
 
+[TUTORIAL_README]
+
 This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
-## 1 The preliminary Kohn-Sham band structure calculation
+## The preliminary Kohn-Sham band structure calculation
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other tutorials. Why not "Work_gw2"?*
+for the other tutorials. Why not Work_gw2?*
 
 In [tutorial 4](base4), we have computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is
@@ -46,20 +48,29 @@ no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
 significantly if one relies on the GW approximation.
 
-In the directory ~abinit/tests/tutorial/Input/Work_gw2, copy the files
-~abinit/tests/tutorial/Input/tgw2_x.files and tgw2_1.in, and modify the
-tgw2_x.files file as usual (see [the tutorial 1](base1).  
-Then (supposing abinit is the proper alias), issue:
+In the directory *Work_gw2*, copy the files *tgw2_x.files* and *tgw2_1.in* located
+in *\$ABI_TUTORIAL/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_gw2
+cd Work_gw2
+cp ../tgw2_x.files .  # modify this file as usual (see tutorial 1)
+cp ../tgw2_1.in .
+```
+
+Then issue:
     
-    abinit < tgw2_x.files >& tgw2_1.log &
+    abinit < tgw2_x.files > tgw2_1.log 2> err &
 
 {% dialog tests/tutorial/Input/tgw2_x.files tests/tutorial/Input/tgw2_1.in %}
     
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
-functional is used ([[occopt]]=3), with a large smearing ([[tsmear]]=0.05 Ha).
-The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid (64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
-wedge, [[ngkpt]]=4 4 4). Converged results would need a 4x4x4 grid with 4
+functional is used ([[occopt]] = 3), with a large smearing ([[tsmear]] = 0.05 Ha).
+The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid 
+(64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
+wedge, [[ngkpt]] = 4 4 4). Converged results would need a 4x4x4 grid with 4
 shifts (256 **k**-points in the full Brillouin zone). This grid contains the $\Gamma$
 point, at which the valence band structure reaches its minimum.
 
@@ -76,12 +87,12 @@ as well as the lowest energy, at the $\Gamma$ point
 So, the occupied band width is 10.90 eV. More converged calculations would give 11.06 eV (see [[cite:Bruneval2006]]).  
 This is to be compared to the experimental value of 10.6 eV (see references in [[cite:Bruneval2006]]).
 
-## 2 Calculation of the screening file
+## Calculation of the screening file
   
 In order not to lose time, let us start the calculation of the screening file
 before the examination of the corresponding input file. So, copy the file
-tgw2_2.in, and modify the tgw2_x.files file as usual (replace occurrences of
-twg2_x by tgw2_2). Also, copy the WFK file (tgw2_1o_WFK) to tgw2_2i_WFK. Then
+*tgw2_2.in*, and modify the *tgw2_x.files* file as usual (replace occurrences of
+twg2_x by tgw2_2). Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
 run the calculation (it should take about 30 seconds).
 
 {% dialog tests/tutorial/Input/tgw2_2.in %}
@@ -104,8 +115,12 @@ integration path can be deformed: one transforms an integral along the real
 axis into an integral along the imaginary axis plus residues enclosed in the
 new contour of integration. The method is extensively described in [[cite:Lebegue2003]].
 
-Examine the input file tgw2_2.in. The ten first lines contain the important
-information. There, you find some input variables that you are already
+Examine the input file *tgw2_2.in*. 
+
+{% dialog tests/tutorial/Input/tgw2_2.in %}
+
+The ten first lines contain the important information.
+There, you find some input variables that you are already
 familiarized with, like [[optdriver]], [[ecuteps]], but also new
 input variables: [[gwcalctyp]], [[nfreqim]], [[nfreqre]], and [[freqremax]].
 The purpose of this run is simply to generate the screening matrices. Unlike
@@ -117,13 +132,14 @@ governed by [[nfreqim]] can be chosen quite small, since all functions are
 smooth in this direction. In contrast, the number of frequencies needed along
 the real axis set with the variable [[nfreqre]] is usually larger.
 
-## 3 Finding the Fermi energy and the bottom of the valence band
+## Finding the Fermi energy and the bottom of the valence band
   
 In order not to lose time, let us start the calculation of the band width
-before the study of the input file. So, copy the file tgw2_3.in, and modify
-the tgw3_x.files file as usual (replace occurrences of twg2_x by tgw2_3).
-Also, copy the WFK file (tgw2_1o_WFK) to tgw2_3i_WFK, and the screening file
-(tgw2_2o_SCR) to tgw2_3i_SCR. Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
+before the study of the input file. So, copy the file *tgw2_3.in*, and modify
+the *tgw3_x.files* file as usual (replace occurrences of twg2_x by tgw2_3).
+Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_3i_WFK*, and the screening file
+(*tgw2_2o_SCR*) to *tgw2_3i_SCR*.
+Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
 The computation of the GW quasiparticle energy at the $\Gamma$ point of Aluminum
 does not differ from the one of quasiparticle in Silicon. However, the
@@ -131,14 +147,14 @@ determination of the Fermi energy raises a completely new problem: one should
 sample the Brillouin Zone, to get new energies (quasiparticle energies) and
 then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
-Examine the input file tgw2_3.in:
+Examine the input file *tgw2_3.in*:
 
 {% dialog tests/tutorial/Input/tgw2_3.in %}
 
 The first thirty lines contain the important information. 
 There, you find some input variables with values that you are
 already familiarized with, like [[optdriver]], [[ecutsigx]], [[ecutwfn]].
-Then, comes the input variable [[gwcalctyp]]=12. The value _x2_ corresponds to
+Then, comes the input variable [[gwcalctyp]] = 12. The value _x2_ corresponds to
 a contour integration. The value _1x_ corresponds to a self-consistent
 calculation with update of the energies only. Then, one finds the list of k
 points and bands for which a quasiparticle correction will be computed:
@@ -166,9 +182,9 @@ The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
 Combining the quasiparticle energy at $\Gamma$ and the Fermi energy, gives the
 band width, 10.404 eV. Using converged parameters, the band width will be
-10.54 eV (see Bruneval[2006]). This is in excellent agreement with the experimental value of 10.6 eV.
+10.54 eV (see [[cite:Bruneval2006]]). This is in excellent agreement with the experimental value of 10.6 eV.
 
-## 4 Computing a GW spectral function, and the plasmon satellite of Aluminum
+## Computing a GW spectral function, and the plasmon satellite of Aluminum
   
 The access to the non-plasmon-pole-model self-energy (real and imaginary part)
 has additional benefit, e.g. an accurate spectral function can be computed,
@@ -190,30 +206,41 @@ which corresponds to the quasiparticle excitation and some additional peaks
 which correspond to quasiparticle and plasmon excitations together.
 
 In order not to lose time, this calculation can be started before the
-examination of the input file. So, copy the file tgw2_4.in, and modify the
-tgw4_x.files file as usual (replace occurrences of twg2_x by tgw2_4). Also,
-copy the WFK file (tgw2_1o_WFK) to tgw2_4i_WFK, and the screening file
-(tgw2_2o_SCR) to tgw2_4i_SCR. 
+examination of the input file. So, copy the file *tgw2_4.in*, and modify the
+*tgw4_x.files* file as usual (replace occurrences of twg2_x by tgw2_4). Also,
+copy the WFK file (*tgw2_1o_WFK*) to *tgw2_4i_WFK*, and the screening file
+(*tgw2_2o_SCR*) to *tgw2_4i_SCR*.
 Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
 {% dialog tests/tutorial/Input/tgw2_4.in %}
 
-Compared to the previous file (tgw2_3.in), the input file contains two
+Compared to the previous file (*tgw2_3.in*), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
 the GW self-energy is done only at the $\Gamma$ point.
 
-The spectral function is written in the file tgw2_4o_SIG. It is a simple text
+The spectral function is written in the file *tgw2_4o_SIG*. It is a simple text
 file. It contains, as a function of the frequency (eV), the real part of the
 self-energy, the imaginary part of the self-energy, and the spectral function.
-You can visualize it using your preferred software. For instance, issue
+You can visualize it using your preferred software. 
+For instance, start |gnuplot| and issue
     
-    $ gnuplot
-    gnuplot>  p'tgw2_4o_SIG' u 1:4 w l
+```gnuplot
+p 'tgw2_4o_SIG' u 1:4 w l
+```
 
 You should be able to distinguish the main quasiparticle peak located at the
 GW energy (-3.7 eV) and some additional features in the vicinity of the GW
 eigenvalue minus a plasmon energy (-3.7 eV - 15.8 eV = -19.5 eV).
 
-Another file, tgw2_4o_GW, is worth to mention: it contains information to be
+!!! tip
+
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
+    with the `--expose` option to visualize the results:
+
+        abiopen.py tgw2_4o_SIGRES.nc -e -sns
+
+    ![](gw2_assets/al_spectra_b0_gamma.png)
+
+Another file, *tgw2_4o_GW*, is worth to mention: it contains information to be
 used for the subsequent calculation of excitonic effects within the Bethe-Salpeter Equation with ABINIT or with other codes from
 the [ETSF software page](http://www.etsf.eu/resources/software/codes).

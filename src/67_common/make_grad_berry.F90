@@ -141,7 +141,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 !allocations
 
 !Electric field: compute the gradient of the Berry phase part of the energy functional.
-!See PRL 89, 117602 (2002), grad_berry(:,:) is the second term of Eq. (4)
+!See PRL 89, 117602 (2002) [[cite:Souza2002]], grad_berry(:,:) is the second term of Eq. (4)
  grad_berry(:,:) = zero
  job = 11 ; shiftbd = 1
  mcg_q = mpw*mband*nspinor

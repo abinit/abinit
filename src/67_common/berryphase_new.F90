@@ -6,7 +6,7 @@
 !! FUNCTION
 !! This routine computes the Berry Phase polarization
 !!  and the finite difference expression of the ddk.
-!!  [see for example Na Sai et al., PRB 66, 104108 (2002)]
+!!  See for example Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]]
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2018 ABINIT  group (MVeithen)

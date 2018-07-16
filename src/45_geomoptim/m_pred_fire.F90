@@ -1,10 +1,53 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/pred_verlet
+!!****m* ABINIT/m_pred_fire
 !! NAME
-!! pred_verlet
+!!  m_pred_fire
 !!
 !! FUNCTION
 !! Ionmov predictors (15) FIRE algorithm
+!! The fast inertial relaxation engine (FIRE) method for relaxation.
+!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler, 
+!! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (hexu)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_fire
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+ use m_xfpack
+ use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
+
+ implicit none
+ private
+ public :: pred_fire
+
+contains
+
+!!***
+
+!!****f* m_pred_fire/pred_fire
+!! NAME
+!! pred_fire
+!!
+!! FUNCTION
 !!
 !! IONMOV 15:
 !! Given a starting point xred that is a vector of length 3*natom
@@ -27,14 +70,6 @@
 !! Returned quantities are xred, and eventually acell and rprimd
 !! (new ones!).
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XHe)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
@@ -54,34 +89,22 @@
 !!      mover
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      fcart2fred,hist2var,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
+
+
+!Arguments ------------------------------------
+!scalars
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_fire'
- use interfaces_41_geometry
- use interfaces_45_geomoptim, except_this_one => pred_fire
 !End of the abilint section
 
- implicit none
-
-!Arguments ------------------------------------
-!scalars
  type(abimover),intent(in) :: ab_mover
  type(ab_xfh_type),intent(inout)    :: ab_xfh
  type(abiforstr),intent(in) :: forstr
@@ -109,9 +132,10 @@ real(dp),save :: dtratio, alpha
 ! alphadec: decrement of alpha
 ! alpha0: initial value of alpha
 ! mixold: if energy goes up, linear mix old and new coordinates. mixold
-real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0, alphadec=0.99, alpha0=0.2, mixold=0.1
+real(dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0
+real(dp), parameter :: alphadec=0.99, alpha0=0.2, mixold=0.3
 ! v.dot.f
-real (dp) :: vf
+real(dp) :: vf
 ! number of v.dot.f >0
 integer, save :: ndownhill
 ! reset_lattice: whether to reset lattice if energy goes up.
@@ -157,7 +181,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    return
  end if
 
- write(std_out,*) 'FIRE 01'
+ !write(std_out,*) 'FIRE 01'
 !##########################################################
 !### 01. Compute the dimension of vectors (ndim)
 
@@ -172,8 +196,8 @@ real(dp),allocatable,save :: vel_ioncell(:)
 & ab_mover%optcell==8 .or.&
 & ab_mover%optcell==9) ndim=ndim+3
 
-write(std_out,*) 'FIRE: ndim=', ndim
- write(std_out,*) 'FIRE 02'
+!write(std_out,*) 'FIRE: ndim=', ndim
+! write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
 
@@ -200,7 +224,7 @@ write(std_out,*) 'FIRE: ndim=', ndim
    vel_ioncell(:)=0.0
  end if
 
- write(std_out,*) 'FIRE 03'
+ !write(std_out,*) 'FIRE 03'
 !##########################################################
 !### 03. Obtain the present values from the history
 
@@ -264,13 +288,13 @@ write(std_out,*) 'FIRE: ndim=', ndim
  if(ab_mover%nconeq==0)then
    do kk=1,3
      if (kk/=3.or.ab_mover%jellslab==0) then
-       favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
-       residual_corrected(ii,:)=residual_corrected(ii,:)-favg
+       favg=sum(residual_corrected(kk,:))/dble(ab_mover%natom)
+       residual_corrected(kk,:)=residual_corrected(kk,:)-favg
      end if
    end do
  end if
 
- write(std_out,*) 'FIRE 04'
+ !write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
@@ -291,7 +315,7 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 ! Now vout -> -dE/dx
 vout(:) = -1.0*vout(:)
 
- write(std_out,*) 'FIRE 05'
+ !write(std_out,*) 'FIRE 05'
 !##########################################################
 !### 05. iniialize FIRE
 if ( itime==1 ) then
@@ -302,7 +326,7 @@ if ( itime==1 ) then
    end if
 end if
 
- write(std_out,*) 'FIRE 06'
+ !write(std_out,*) 'FIRE 06'
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
@@ -325,28 +349,28 @@ else
     dtratio = dtratio*dtdec
 endif
 
- write(std_out,*) 'FIRE 07'
+ !write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
 ! Here mass is not used: all masses=1
-write(std_out,*) 'FIRE vin: ', vin
+!write(std_out,*) 'FIRE vin: ', vin
 ! update v
 vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
-write(std_out,*) 'FIRE vel: ', vel_ioncell
-write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
+!write(std_out,*) 'FIRE vel: ', vel_ioncell
+!write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
 ! update x
 vin = vin + dtratio*ab_mover%dtion* vel_ioncell
-write(std_out,*) 'FIRE vin: ', vin
+!write(std_out,*) 'FIRE vin: ', vin
    
-   write(std_out,*) 'FIRE vout: ', vout
-   write(std_out,*) 'FIRE vf: ', vf
-   write(std_out,*) 'FIRE etotal: ', etotal
-   write(std_out,*) 'FIRE etotal_prev: ', etotal_prev
-   write(std_out,*) 'FIRE deltaE: ',etotal-etotal_prev
+!   write(std_out,*) 'FIRE vout: ', vout
+!   write(std_out,*) 'FIRE vf: ', vf
+!   write(std_out,*) 'FIRE etotal: ', etotal
+!   write(std_out,*) 'FIRE etotal_prev: ', etotal_prev
+!   write(std_out,*) 'FIRE deltaE: ',etotal-etotal_prev
    write(std_out,*) 'FIRE ndownhill: ', ndownhill
-   write(std_out,*) 'FIRE dtratio: ', dtratio
-   write(std_out,*) 'FIRE dtion: ', ab_mover%dtion
+!   write(std_out,*) 'FIRE dtratio: ', dtratio
+!   write(std_out,*) 'FIRE dtion: ', ab_mover%dtion
 
 
 !Implement fixing of atoms : put back old values for fixed
@@ -362,7 +386,7 @@ write(std_out,*) 'FIRE vin: ', vin
 
 ! reset_lattice to last step by a ratio if energy is increased.
 ! disabled for debugging
-if ( etotal - etotal_prev >0.0 .and. .false. ) then
+if ( etotal - etotal_prev >0.0 ) then
     vin= vin*(1-mixold)+vin_prev*mixold
 end if
 
@@ -411,3 +435,6 @@ end if
 
 end subroutine pred_fire
 !!***
+
+end module m_pred_fire
+

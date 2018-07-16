@@ -151,7 +151,7 @@ MODULE m_paw_dmft
 
   integer :: dmftctqmc_triqs_nleg
   ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
-  ! Green's function (Phys. Rev. B 84, 075145). Default is 30.
+  ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]]. Default is 30.
   
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 

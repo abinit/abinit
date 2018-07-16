@@ -35,11 +35,11 @@
 !! at each atomic site in the unit cell.
 !! Key references:
 !! Profeta, Mauri, and Pickard, ``Accurate first principles prediction of $^{17}$O NMR parameters in
-!! SiO$_2$: Assignment of the zeolite ferrierite spectrum'', J. Am. Chem. Soc. 125, 541--548 (2003);
+!! SiO$_2$: Assignment of the zeolite ferrierite spectrum'', J. Am. Chem. Soc. 125, 541--548 (2003) [[cite:Profeta2003]];
 !! A. Honma, ``Dipolar lattice-sums with applications to the exciton bands of anthracene crystal and
-!! the crystal field due to point charges'', J. Phys. Soc. Jpn. 42, 1129--1135 (1977);
+!! the crystal field due to point charges'', J. Phys. Soc. Jpn. 42, 1129--1135 (1977) [[cite:Honma1977]];
 !! and Kresse and Joubert, ``From ultrasoft pseudopotentials to the projector augmented wave method'',
-!! Phys. Rev. B. 59, 1758--1775 (1999). In Kresse and Joubert's notation, the ionic cores are $n_{Zc}$;
+!! Phys. Rev. B. 59, 1758--1775 (1999) [[cite:Kresse1999]]. In Kresse and Joubert's notation, the ionic cores are $n_{Zc}$;
 !! these charges are given by the net core charges on the pseudoatoms. Due to otherwise slow convergence,
 !! the sum over atoms is carried out by an Ewald method as detailed in the Honma reference, specifically
 !! his Eq. 4.8.

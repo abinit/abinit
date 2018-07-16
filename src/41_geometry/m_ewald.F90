@@ -354,7 +354,7 @@ end subroutine ewald
 !! FUNCTION
 !! Compute the part of the stress tensor coming from the Ewald energy
 !! which is calculated by derivating the Ewald energy with respect to strain.
-!! See Nielsen and Martin, Phys. Rev. B 32, 3792 (1985).
+!! See Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985]].
 !! Definition of stress tensor is $(1/ucvol)*d(Etot)/d(strain(a,b))$.
 !!
 !! INPUTS
@@ -587,7 +587,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 
 !Finally assemble stress tensor coming from Ewald energy, stress
 !(note division by unit cell volume in accordance with definition
-!found in Nielsen and Martin, Phys. Rev. B 32, 3792 (1985).)
+!found in Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985]]
 
  fac = pi/(2._dp*ucvol*eta)
  stress(1)=(0.5_dp*reta*strr(1)+fac*(strg(1)+(ch**2)))/ucvol
@@ -608,7 +608,7 @@ end subroutine ewald2
 !! FUNCTION
 !! Compute ewald contribution to the dynamical matrix, at a given
 !! q wavevector, including anisotropic dielectric tensor and effective charges
-!! See Phys. Rev. B 55, 10355 (1997), equations (71) to (75).
+!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
 !!
 !! INPUTS
 !! acell = lengths by which lattice vectors are multiplied

@@ -9,7 +9,7 @@
 !!
 !! A-define useful indices for LDA+U/local exact-exchange
 !! B-Compute overlap between atomic wavefunction
-!! C-Compute matrix elements of coulomb interaction (see PRB vol.52 5467)
+!! C-Compute matrix elements of coulomb interaction (see PRB vol.52 5467 [[cite:Liechenstein1995]])
 !!    (angular part computed from Gaunt coefficients)
 !!
 !! COPYRIGHT
@@ -380,7 +380,7 @@
 !    end if
 
 !    ======================================================================
-!    C-PAW+U: Matrix elements of coulomb interaction (see PRB vol.52 5467)
+!    C-PAW+U: Matrix elements of coulomb interaction (see PRB 52 5467 (1995) [[cite:Liechenstein1995]])
 !    1. angular part computed from Gaunt coefficients
 !    --------------------------------------------------------------------
      if (usepawu>0) then
@@ -390,7 +390,7 @@
 !      ---------------------------------------------
        ABI_ALLOCATE(fk,(lpawu+1))
        fk(1)=pawtab(itypat)%upawu
-!      cf Slater Physical Review 165, p 665 (1968)
+!      cf Slater Physical Review 165, p 658 (1968) [[cite:Slater1958]]
 !      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
        if(lpawu==0) then
          fk(1)=fk(1)

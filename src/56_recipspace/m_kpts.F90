@@ -1699,10 +1699,10 @@ end subroutine get_kpt_fullbz
 !!  this routine should be rewritten, to use the Wigner-Seitz cell,
 !!  and thus unify the different treatments.
 !!  References :
-!!  H.J. Monkhorst and J.D. Pack, Phys. Rev. B 13, 5188 (1976)
-!!  J.D. Pack and H.J. Monkhorst, Phys. Rev. B 16, 1748 (1977)
-!!  A.H. MacDonald, Phys. Rev. B 18, 5897 (1978)
-!!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983)
+!!  H.J. Monkhorst and J.D. Pack, Phys. Rev. B 13, 5188 (1976) [[cite:Monkhorst1976]]
+!!  J.D. Pack and H.J. Monkhorst, Phys. Rev. B 16, 1748 (1977) [[cite:Pack1977]]
+!!  A.H. MacDonald, Phys. Rev. B 18, 5897 (1978) [[cite:MacDonald1978]]
+!!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983) [[cite:Evarestov1983]]
 !!
 !! PARENTS
 !!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc

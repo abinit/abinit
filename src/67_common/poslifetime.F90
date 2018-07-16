@@ -855,23 +855,23 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
      end if
      if (abs(electronpositron%ixcpositron)==1) then
        write(msg,'(4a)') ch10,' # Zero-positron density limit of Arponen and Pajanne provided by Boronski & Nieminen',&
-&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)'
+&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)' ! [[cite:Boronski1986]]
      else if (electronpositron%ixcpositron==11) then
        write(msg,'(4a)') ch10,' # Zero-positron density limit of Arponen and Pajanne fitted by Sterne & Kaiser',&
-&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)'
+&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)' ! [[cite:Sterne1991]]
      else if (electronpositron%ixcpositron==2) then
        write(msg,'(4a)') ch10,' # Electron-positron correlation provided by Puska, Seitsonen, and Nieminen',&
-&       ch10,'   Ref: M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994)'
+&       ch10,'   Ref: M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994)' !  [[cite:Puska1994]]  
      else if (electronpositron%ixcpositron==3) then
        write(msg,'(8a)') ch10,' # Zero-positron density limit of Arponen and Pajanne provided by Boronski & Nieminen',&
 &       ch10,'   + GGA corrections',&
-&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)',&
-&       ch10,'         B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)'
+&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)',& ! [[cite:Boronski1986]]
+&       ch10,'         B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995)' ! [[cite:Barbiellini1995]]
      else if (electronpositron%ixcpositron==31) then
        write(msg,'(8a)') ch10,' # Zero-positron density limit of Arponen and Pajanne fitted by Sterne & Kaiser',&
 &       ch10,'   + GGA corrections',&
-&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)',&
-&       ch10,'         B. Barbiellini, M.J. Puska, T. Torsti and R.M. Nieminen, Phys. Rev. B 51, 7341 (1994)'
+&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)',& ! [[cite:Sterne1991]]
+&       ch10,'         B. Barbiellini, M.J. Puska, T. Torsti and R.M. Nieminen, Phys. Rev. B 51, 7341 (1995)' ! [[cite:Barbiellini1995]]
      end if
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,  msg,'COLL')
@@ -879,16 +879,16 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        write(msg,'(a)')       ' # Enhancement factor set to one (test)'
      else if (igamma(igam)==1) then
        write(msg,'(3a)')      ' # Enhancement factor of Boronski & Nieminen',&
-&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)'
+&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)' ! [[cite:Boronski1986]]
      else if (igamma(igam)==2) then
        write(msg,'(3a)')      ' # Enhancement factor of Boronski & Nieminen IN THE RPA LIMIT',&
-&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)'
+&       ch10,'   Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)' ! [[cite:Boronski1986]]
      else if (igamma(igam)==3) then
        write(msg,'(3a)')      ' # Enhancement factor of Sterne & Kaiser',&
-&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)'
+&       ch10,'   Ref.: P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991)' ! [[cite:Sterne1991]]
      else if (igamma(igam)==4) then
        write(msg,'(3a)')      ' # Enhancement factor of Puska, Seitsonen, and Nieminen',&
-&       ch10,'   Ref.: M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994)'
+&       ch10,'   Ref.: M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994)' !  [[cite:Puska1994]]
      end if
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')

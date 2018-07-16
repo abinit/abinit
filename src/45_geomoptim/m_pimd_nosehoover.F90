@@ -277,8 +277,8 @@ end subroutine pimd_nosehoover_npt
 !!
 !! NOTES
 !!  Thermization by Nose-Hoover chains according to
-!!  Martyna, Klein, Tuckerman, J. Chem. Phys. 97, 2635 (1992)
-!!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996)
+!!  Martyna, Klein, Tuckerman, J. Chem. Phys. 97, 2635 (1992) [[cite:Martyna1992]]
+!!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996) [[cite:Tuckerman1996]]
 !!
 !! PARENTS
 !!      predict_pimd
@@ -391,7 +391,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !Recommended value of Nose mass
  write(msg,'(2a,f9.2,3a)') ch10,&
 & ' Recommended value of Nose mass is',one/(dble(trotter)*kt),' (atomic units)',ch10,&
-& '(see Tuckerman et al, J. Chem. Phys. 104, 5579 (1996))'
+& '(see Tuckerman et al, J. Chem. Phys. 104, 5579 (1996))' ! [[cite:Tuckerman1996]]
  call wrtout(std_out,msg,'COLL')
 
 !Compute cartesian coordinates

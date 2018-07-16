@@ -69,8 +69,8 @@ contains
 !!  prtvol=printing volume (if >0, print computation parameters)
 !!  typat(natom)=type integer for each atom in cell
 !!  vdw_xc= select van-der-Waals correction
-!!             if =6: DFT-D3 as in Grimme, J. Chem. Phys. 132, 154104 (2010)
-!!             if =7: DFT-D3(BJ) as in Grimme, Comput. Chem. 32, 1456 (2011)
+!!             if =6: DFT-D3 as in Grimme, J. Chem. Phys. 132, 154104 (2010) [[cite:Grimme2010]]
+!!             if =7: DFT-D3(BJ) as in Grimme, Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
 !!                    Only the use of R0 = a1 C8/C6 + a2 is available here
 !!
 !!  vdw_tol=tolerance use to converge the pair-wise potential
@@ -102,10 +102,10 @@ contains
 !!  DFT-D3: S. Grimme, J. Antony, S. Ehrlich, and H. Krieg
 !!  A consistent and accurate ab initio parametrization of density functional
 !!  dispersion correction (DFT-D) for the 94 elements H-Pu
-!!  J. Chem. Phys. 132, 154104 (2010)
+!!  J. Chem. Phys. 132, 154104 (2010) [[cite:Grimme2010]]
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
-!!  Comput. Chem. 32, 1456 (2011)
+!!  Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
 !!
 !! PARENTS
 !!      respfn,setvtr,stress
@@ -545,7 +545,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                         Introduction of a damping function for the coordination
 !                         number because of the divergence with increasing
 !                         number of cells of this quantity in periodic systems
-!                         See Reckien et al., J. Chem. Phys. 132, 154104 (2010)
+!                         See Reckien et al., J. Comp. Chem. 33, 2023 (2012) [[cite:Reckien2012]]
                  dr = rr-k2*rcovij
                  cn_dmp = half*abi_derfc(dr)
                  cn(ia) = cn(ia)+frac_cn*cn_dmp
@@ -1461,13 +1461,13 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    if (vdw_xc==6) then
      write(msg,'(3a)') &
 &     '   Van der Waals DFT-D3 semi-empirical dispersion potential as',ch10,&
-&     '   proposed by Grimme et al., J. Chem. Phys. 132, 154104 (2010)'
+&     '   proposed by Grimme et al., J. Chem. Phys. 132, 154104 (2010)' ! [[cite:Grimme2010]]
      call wrtout(std_out,msg,'COLL')
    elseif (vdw_xc==7) then
      write(msg,'(5a)') &
 &     '    Van der Waals DFT-D3 semi-empirical dispersion potential  ' ,ch10,&
 &     '    with Becke-Jonhson (BJ) refined by Grimme et al. J.    ',ch10,&
-&     '    Comput. Chem. 32, 1456 (2011) '
+&     '    Comput. Chem. 32, 1456 (2011) ' ! [[cite:Grimme2011]]
      call wrtout(std_out,msg,'COLL')
    end if
    if (natom<5) then

@@ -3139,7 +3139,7 @@ end subroutine sqnormm_v
 !! Compute the approximative derivatives of the energy at different
 !! points along the line search, thanks to a finite-difference formula.
 !! This formula is the projection along the line search of the
-!! Eq.(11) in PRB54, 4383 (1996).
+!! Eq.(11) in PRB54, 4383 (1996) [[cite:Gonze1996]].
 !!
 !! INPUTS
 !! cplex: if 1, real space functions on FFT grid are REAL, if 2, COMPLEX

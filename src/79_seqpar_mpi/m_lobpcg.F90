@@ -78,7 +78,7 @@ CONTAINS
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.
 !!  optekin= 1 if the kinetic energy used in preconditionning is modified
-!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
