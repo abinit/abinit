@@ -39,7 +39,7 @@
 !! first 5 points of the $u$ functions to a line through the origin, using the least squares
 !! procedure resulting from $\chi = sum_i (y_i - m*x_i)^2$ . This is more stable than
 !! computing the derivative of the whole function and extrapolating it to zero.
-!! See Zwanziger, J. Phys. Conden. Matt. 21, 15024-15036 (2009).
+!! See Zwanziger, J. Phys. Conden. Matt. 21, 195501 (2009) [[cite:Zwanziger2009]].
 !!
 !! PARENTS
 !!      calc_fc

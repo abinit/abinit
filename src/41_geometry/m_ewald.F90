@@ -354,7 +354,7 @@ end subroutine ewald
 !! FUNCTION
 !! Compute the part of the stress tensor coming from the Ewald energy
 !! which is calculated by derivating the Ewald energy with respect to strain.
-!! See Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985]].
+!! See Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985a]].
 !! Definition of stress tensor is $(1/ucvol)*d(Etot)/d(strain(a,b))$.
 !!
 !! INPUTS
@@ -587,7 +587,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 
 !Finally assemble stress tensor coming from Ewald energy, stress
 !(note division by unit cell volume in accordance with definition
-!found in Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985]]
+!found in Nielsen and Martin, Phys. Rev. B 32, 3792 (1985) [[cite:Nielsen1985a]]
 
  fac = pi/(2._dp*ucvol*eta)
  stress(1)=(0.5_dp*reta*strr(1)+fac*(strg(1)+(ch**2)))/ucvol

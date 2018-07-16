@@ -144,7 +144,7 @@ contains
 !!
 !! NOTES
 !! * Concerning the stress tensor:
-!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985) [[cite:Nielsen1985]].
+!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985) [[cite:Nielsen1985a]].
 !!   Note that first term in equation (2) should have minus sign
 !!   (for kinetic energy contribution to stress tensor).
 !!   Normalizations in this code differ somewhat from those employed
@@ -367,7 +367,7 @@ contains
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
 !HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]  
-!HONG  Nature Physics: M. Stengel et.al. (2009))
+!HONG  Nature Physics: M. Stengel et.al. (2009)) [[cite:Stengel1999]]
 !=======================================================================
 !=================== Berry phase contribution ==========================
 !=======================================================================
