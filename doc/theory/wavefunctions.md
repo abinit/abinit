@@ -23,32 +23,32 @@ $$
 \newcommand{\mcA}{{\mathcal{A}}}
 $$
 
-Representation and conversion of one wavefunction
-ABINIT data structures and their theoretical justifications
+Representation and convension of one wavefunction
+ABINIT data structures and their theoretical justifications.
 
 ## Notations and theoretical considerations
 
 A Bloch wavefunction characterized by a wavevector $\kk$ is such that
 
-$$ \psi_{\bf k}({\bf r}) = e^{i{\bf k}\cdot{\bf r}} u_{\bf k}({\bf r}) $$
+$$ \psi_{\bf k}({\bf r}) = e^{i{\bf k}\cdot{\bf r}} u_{\bf k}({\bf r}) $$, 
 
 where $u_{\bf k}({\bf r})$ is periodic, that is
 
-$$ u_{\bf k}({\bf r}+{\bf R})=u_{\bf k}({\bf r}) $$
+$$ u_{\bf k}({\bf r}+{\bf R})=u_{\bf k}({\bf r}) $$, 
 
 where ${\bf R}$ is a vector of the real space lattice.
 
-Representation by plane waves
+Its representation by plane waves reads:
 
 \begin{eqnarray*}
 u_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})e^{i{\bf G}\cdot{\bf r}} \\
 \psi_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})
 e^{i ({\bf k}+{\bf G})\cdot{\bf r}}
-\end{eqnarray*}
+\end{eqnarray*} 
 
-Normalisation
+Normalization of ${u_k}$ is:
 
-$$ \sum_{\bf G}|u_{\bf k}({\bf G})|^2 = 1 $$
+$$ \sum_{\bf G}|u_{\bf k}({\bf G})|^2 = 1 \,.$$
 
 For a **spinor** wavefunction, there is an additional variable, 
 the spin $\sigma$ that can take two values, that is $\sigma=\uparrow$ (spin up) 
@@ -56,28 +56,28 @@ or $\sigma=\downarrow$ (spin down).
 The following relations hold:
 
 $$
-u_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i{\bf G} \cdot {\bf r}}
+u_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i{\bf G} \cdot {\bf r}} \,,
 $$
 
 $$
-\psi_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i({\bf k}+{\bf G})\cdot{\bf r}}
+\psi_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i({\bf k}+{\bf G})\cdot{\bf r}} \,,
 $$
 
 $$
-\sum_{\sigma}\sum_{\bf G}|u_{\bf k}({\bf G},\sigma)|^2 = 1
+\sum_{\sigma}\sum_{\bf G}|u_{\bf k}({\bf G},\sigma)|^2 = 1 \,.
 $$
 
 ## Properties of the wavefunctions (scalar case)
 
 For ground-state wavefunctions, we have to solve the Schrödinger equation
 
-$$ H |\psi_{n{\bf k}}\ra = \varepsilon_{n{\bf k}}|\psi_{n{\bf k}}\ra $$
+$$ H |\psi_{n{\bf k}}\ra = \varepsilon_{n{\bf k}}|\psi_{n{\bf k}}\ra \,, $$
 
 where $H$ is the Hamiltonian operator, $n$ labels the state (or the band), $\varepsilon_{n{\bf k}}$ is the eigenvalue.
 
 As the wavevector labelling of an eigenstate comes from the property
 
-$$ \psi_{\bf k}({\bf r}+{\bf R}) = e^{i{\bf k}{\bf R}} \psi_{\bf k}({\bf r}) $$
+$$ \psi_{\bf k}({\bf r}+{\bf R}) = e^{i{\bf k}{\bf R}} \psi_{\bf k}({\bf r}) \,, $$
 
 in which $\kk$ can be replaced by $\kk + \GG$ where $\GG$ is any reciprocal space lattice vector, we can
 *choose* the wavefunctions at $\kk$ and $\kk + \GG$
@@ -89,10 +89,10 @@ $$ \psi_{\kk + \GG}(\rr) = \psi_\kk(\rr) $$
 
 to keep the notation as simple as possible,
 
-The time-reversal symmetry (non-magnetic case) of the Hamiltonian gives the following relation
+The time-reversal symmetry (non-magnetic case) of the Hamiltonian gives the following relation:
 
 $$
-\psi_{n{\bf k}}({\bf r}) = \psi^{*}_{n-\bf k}({\bf r})
+\psi_{n{\bf k}}({\bf r}) = \psi^{*}_{n-\bf k}({\bf r}) \,.
 $$
 
 For the ${\bf k}$ wavevectors that are half a reciprocal lattice vector
@@ -103,7 +103,7 @@ $$
 u_{n{\bf k}}({\bf G}) =
 u_{n{\bf k}-{\bf G}_{0}}({\bf G}+{\bf G}_{0}) = 
 u_{n-{\bf k}}({\bf G}+{\bf G}_{0}) =
-u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{0})
+u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{0}) \,.
 $$
 
 That is, coefficients at $\GG$ and $-{\bf G}-{\bf G}_{0}$ are related.
@@ -146,14 +146,14 @@ The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2
 
 In order to avoid dealing with an infinite number of plane waves to represent Bloch wavefunctions,
 one selects those with a kinetic energy lower than some cutoff energy $E_{\rm cut}$.
-The set of allowed ${\bf G}$ vectors will be noted by $\mcS_{\kk}(E_{\rm cut})$
+The set of allowed ${\bf G}$ vectors will be denoted by $\mcS_{\kk}(E_{\rm cut})$ such that
 
 $$
-\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{\lvert{\bf k + G}\rvert^{2}}{2} \leq E_{\rm cut}
+\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{\lvert{\bf k + G}\rvert^{2}}{2} \leq E_{\rm cut} \,.
 $$
 
 The kinetic energy cutoff is computed from the input variables [[ecut]] and [[dilatmx]]
-to give the *effective* value:
+to give the *effective* value
 
 $$ {\text{ecut_eff}} = {\text ecut} * ({\text dilatmx}) ** 2 $$
 
@@ -220,8 +220,12 @@ for a 3D-mesh of $\rr$-points, extremely fast, from the values $u_{n\kk}(\GG)$.
 The FFT algorithm starts from values of a function
 
 $$
-z (j_{1},j_{2},j_{3}) \, \mbox{for} \,
-j_{1}=0\cdots(N_{1}-1),j_{2}=0\cdots(N_{2}-1),j_{3}=0\cdots(N_{3}-1)
+\begin{aligned}
+  z (j_{1},j_{2},j_{3}) & \, \\
+ \mbox{for} \, &j_{1}=0\cdots(N_{1}-1) \,, \\
+               &j_{2}=0\cdots(N_{2}-1) \,,
+               &j_{3}=0\cdots(N_{3}-1)
+\end{aligned}
 $$
 
 and compute fast the transformed
