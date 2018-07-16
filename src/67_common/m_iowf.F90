@@ -321,9 +321,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
       NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
       mpw_disk = maxval(hdr%npwarr)
 
+      ! Dimensions needed by client code to allocate memory when reading.
       ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("mproj", psps%mproj), &
+       nctkdim_t("mpsang", psps%mpsang), &
        nctkdim_t("lnmax", psps%lnmax), &
-       nctkdim_t("lmnmax", psps%lnmax) &
+       nctkdim_t("lmnmax", psps%lmnmax) &
       ])
       NCF_CHECK(ncerr)
 
