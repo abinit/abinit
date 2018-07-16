@@ -1056,6 +1056,7 @@ pure function l2int_1D(larr) result(int_arr)
  end where
 
 end function l2int_1D
+!!***
 
 !----------------------------------------------------------------------
 
@@ -1096,6 +1097,7 @@ pure function l2int_2D(larr) result(int_arr)
  end where
 
 end function l2int_2D
+!!***
 
 !----------------------------------------------------------------------
 
@@ -1136,6 +1138,7 @@ pure function l2int_3D(larr) result(int_arr)
  end where
 
 end function l2int_3D
+!!***
 
 !----------------------------------------------------------------------
 
