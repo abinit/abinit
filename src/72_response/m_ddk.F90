@@ -281,11 +281,8 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'eph_gkk'
+#define ABI_FUNC 'eph_ddk'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_56_recipspace
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
