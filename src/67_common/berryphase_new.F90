@@ -1475,7 +1475,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      berrysav == 0,  for non fixed D/d calculation, polarizaion is in [-1,1],done above
 !      for fixed D/d calculation, choose polarization to minimize internal
 !      energy, or minimize |red_efiled|. (red_dfield=red_efiled+red_ptot)
-!      (d=e+p, as (26) of Stengel, Suppl.)
+!      (d=e+p, as (26) of Stengel, Suppl.) [[cite:Stengel2009]]
 !      This is default value.
 !
 !      berrysav == 1,  keep the polarization on the same branch, which saved in file POLSAVE

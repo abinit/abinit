@@ -7,7 +7,7 @@
 !! Ionmov predictors (15) FIRE algorithm
 !! The fast inertial relaxation engine (FIRE) method for relaxation.
 !! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler, 
-!! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201
+!! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (hexu)

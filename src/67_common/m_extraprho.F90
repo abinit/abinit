@@ -66,7 +66,7 @@ contains
 !! FUNCTION
 !! Extrapolate electronic density for new ionic positions
 !! from values of density of previous SCF cycle.
-!! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33
+!! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33 [[cite:Alfe1999]]
 !!
 !! INPUTS
 !!  atindx
@@ -209,7 +209,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
 !---------------------------------------------------------------
 !----------- Compute Alpha and Beta
-!----------- see (4) in Comp. Phys. Comm. 118 (1999), 31-33
+!----------- see (4) in Comp. Phys. Comm. 118 (1999), 31-33 [[cite:Alfe1999]]
 !---------------------------------------------------------------
 
 !Compute a_ij matrix
