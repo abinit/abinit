@@ -1057,8 +1057,6 @@ The bibtex file is available [here](../abiref.bib).
                     html_classes.append("codevar-wikilink")
                     if a.text is None:
                         a.text = var.name if not var.is_internal else "%%%s" % var.name
-                        # comment hexu: use the following to remove th3 % in internal links.
-                        #a.text = var.name if not var.is_internal else "%s" % var.name
 
                 elif name.startswith("tests/") or name.startswith("~abinit/tests/"):
                     assert fragment is None
