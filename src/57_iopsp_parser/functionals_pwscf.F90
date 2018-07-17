@@ -134,22 +134,22 @@ module funct_pwscf
   !              "olyp" = "nox+lyp+optx+blyp" !!! UNTESTED !!!
   !
   ! References:
-  !              pz      J.P.Perdew and A.Zunger, PRB 23, 5048 (1981) 
-  !              vwn     S.H.Vosko, L.Wilk, M.Nusair, Can.J.Phys. 58,1200(1980)
-  !              wig     E.P.Wigner, Trans. Faraday Soc. 34, 67 (1938) 
-  !              hl      L.Hedin and B.I.Lundqvist, J. Phys. C4, 2064 (1971)
-  !              gl      O.Gunnarsson and B.I.Lundqvist, PRB 13, 4274 (1976)
-  !              pw      J.P.Perdew and Y.Wang, PRB 45, 13244 (1992) 
-  !              obpz    G.Ortiz and P.Ballone, PRB 50, 1391 (1994) 
+  !              pz      J.P.Perdew and A.Zunger, PRB 23, 5048 (1981) [[cite:Perdew1981]]
+  !              vwn     S.H.Vosko, L.Wilk, M.Nusair, Can.J.Phys. 58,1200(1980) [[cite:Vosko1980]]
+  !              wig     E.P.Wigner, Trans. Faraday Soc. 34, 67 (1938) [[cite:Wigner1938]]
+  !              hl      L.Hedin and B.I.Lundqvist, J. Phys. C4, 2064 (1971) [[cite:Hedin1971]]
+  !              gl      O.Gunnarsson and B.I.Lundqvist, PRB 13, 4274 (1976) [[cite:Gunnarsson1976]]
+  !              pw      J.P.Perdew and Y.Wang, PRB 45, 13244 (1992) [[cite:Perdew1992a]]
+  !              obpz    G.Ortiz and P.Ballone, PRB 50, 1391 (1994) [[cite:Ortiz1994]]
   !              obpw    as above
-  !              b88     A.D.Becke, PRA 38, 3098 (1988)
-  !              p86     J.P.Perdew, PRB 33, 8822 (1986)
-  !              pbe     J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-  !              pw91    J.P.Perdew and Y. Wang, PRB 46, 6671 (1992)
-  !              blyp    C.Lee, W.Yang, R.G.Parr, PRB 37, 785 (1988)
-  !              hcth    Handy et al, JCP 109, 6264 (1998)
-  !              olyp    Handy et al, JCP 116, 5411 (2002)
-  !              revPBE  Zhang and Yang, PRL 80, 890 (1998)
+  !              b88     A.D.Becke, PRA 38, 3098 (1988) [[cite:Becke1988]]
+  !              p86     J.P.Perdew, PRB 33, 8822 (1986) [[cite:Perdew1986]] 
+  !              pbe     J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996) [[cite:Perdew1996]]
+  !              pw91    J.P.Perdew and Y. Wang, PRB 46, 6671 (1992) [[cite:Perdew1992]]
+  !              blyp    C.Lee, W.Yang, R.G.Parr, PRB 37, 785 (1988) [[cite:Lee1988]]
+  !              hcth    Hamprecht et al, JCP 109, 6264 (1998) [[cite:Hamprecht1998]]
+  !              olyp    Handy and Cohen, JCP 116, 5411 (2002) [[cite:Handy2002]]
+  !              revPBE  Zhang and Yang, PRL 80, 890 (1998) [[cite:Zhang1998]]
   !              oep
 
   integer, parameter:: notset = -1

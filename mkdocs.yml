@@ -27,6 +27,7 @@ pages:
     - Fold2Bloch: guide/fold2bloch.md
     - Mrgddb: guide/mrgddb.md
     - Mrgscr: guide/mrgscr.md
+    - Multibinit: guide/multibinit.md
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
@@ -49,6 +50,7 @@ pages:
     - topics/Berry.md
     - topics/BandOcc.md
     - topics/BSE.md
+    - topics/BoundProcess.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
@@ -61,6 +63,7 @@ pages:
     - topics/DFPT.md
     - topics/DMFT.md
     - topics/EffectiveMass.md
+    - topics/DynamicsMultibinit.md
     - topics/EFG.md
     - topics/Elastic.md
     - topics/ElPhonInt.md
@@ -68,6 +71,7 @@ pages:
     - topics/ElecDOS.md
     - topics/ElecBandStructure.md
     - topics/FileFormats.md
+    - topics/FitProcess.md
     - topics/ForcesStresses.md
     - topics/FrequencyMeshMBPT.md
     - topics/GeoConstraints.md
@@ -78,8 +82,10 @@ pages:
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md
+    - topics/LatticeModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
+    - topics/Macroave.md
     - topics/MagField.md
     - topics/MagMom.md
     - topics/MolecularDynamics.md
@@ -143,6 +149,7 @@ pages:
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
+    - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
@@ -185,6 +192,9 @@ pages:
         - Images: tutorial/paral_images.md
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
+    - Multibinit:
+        - Lattice Model: tutorial/lattice_model.md
+        - Fit Process: tutorial/fit_process.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md
@@ -221,6 +231,7 @@ pages:
 - About:
     - Release Notes: about/release-notes.md
     - Contributing: about/contributing.md
+    - History: about/history.md
     - License: about/license.md
 
 markdown_extensions:
@@ -236,12 +247,11 @@ markdown_extensions:
   - markdown.extensions.tables
   - markdown.extensions.def_list
   - markdown.extensions.sane_lists
-  - mdx_math:
-        enable_dollar_delimiter: True
-  #- pymdownx.arithmatex:
+  #- mdx_math:
+  #      enable_dollar_delimiter: True
+  - pymdownx.arithmatex:
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
-        #insert_as_script: True
   - pymdownx.betterem:
       smart_enable: all
   - pymdownx.caret
@@ -308,8 +318,10 @@ extra:
     # |token| will be replaced by value by the Markdown preprocessor
     # NB: white spaces in token are not allowed, `token` is ignored
     abimkdocs_aliases:
-        AbiPy: "[AbiPy](https://github.com/abinit/abipy)"
+        # Special macros:
+        today:  'Expands to datetime.date.today().strftime("%B %d, %Y")'
         # Links to doc pages (AbiPy script)
+        AbiPy: "[AbiPy](https://github.com/abinit/abipy)"
         abistruct: "[abistruct](http://abinit.github.io/abipy/scripts/abistruct.html)"
         abiopen: "[abiopen](http://abinit.github.io/abipy/scripts/abiopen.html)"
         abicomp: "[abicomp](http://abinit.github.io/abipy/scripts/abicomp.html)"
@@ -326,6 +338,8 @@ extra:
         DdbFileNb: "[DdbFile notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/ddb.ipynb)"
         SigresFileNb: "[Sigres notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigres.ipynb)"
         MdfFileNb: "[MdfFile notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/mdf.ipynb)"
+        # Links to abiturial lessosn
+        G0W0LessonNb: "[notebook with the GW lesson](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/g0w0/lesson_g0w0.ipynb)"
         # Links to websites
         abiconfig: "[abiconfig](https://github.com/abinit/abiconfig)"
         abiflows: "[abiflows](https://github.com/abinit/abiflows)"

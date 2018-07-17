@@ -56,6 +56,7 @@ module m_mover
  use m_xfpack,             only : xfh_update
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
+ use m_pred_fire,          only : pred_fire
  use m_pred_isokinetic,    only : pred_isokinetic
  use m_pred_diisrelax,     only : pred_diisrelax
  use m_pred_nose,          only : pred_nose
@@ -318,6 +319,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !12. Isokinetic ensemble molecular dynamics
 !13. Isothermal/isenthalpic ensemble molecular dynamics
 !14. Symplectic algorithm Runge-Kutta-Nystrom SRKNa14
+!15. Fast inertial relaxation engine method for relaxation.
 !20. Ionic positions relaxation using DIIS
 !21. Steepest descent algorithm
 !23. LOTF method
@@ -891,6 +893,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          call pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,DEBUG,iexit)
        case (14)
          call pred_srkna14(ab_mover,hist,icycle,DEBUG,iexit,skipcycle)
+       case (15)
+         call pred_fire(ab_mover, ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
        case (20)
          call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (21)

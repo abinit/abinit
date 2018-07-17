@@ -7,7 +7,7 @@
 !! This program computes the elements of the optical frequency dependent
 !! linear susceptiblity using matrix elements <-i Nabla> obtained from a
 !! PAW ground state calculation. It uses formula 17 from Gadoc et al,
-!! Phys. Rev. B 73, 045112 (2006) together with a scissors correction. It uses
+!! Phys. Rev. B 73, 045112 (2006) [[cite:Gajdo2006]] together with a scissors correction. It uses
 !! a Kramers-Kronig transform to compute the real part from the imaginary part, and
 !! it will work on all types of unit cells. It outputs all tensor elements of
 !! both the real and imaginary parts.
@@ -218,7 +218,7 @@
 
 !    occupation numbers for k-point
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-!    accumulate e2 for this k point, Eq. 17 from PRB 73, 045112 (2006)
+!    accumulate e2 for this k point, Eq. 17 from PRB 73, 045112 (2006 [[cite:Gajdo2006]])
      do iband = 1, nband_k
        do jband = 1, nband_k
          fij = occ_k(iband) - occ_k(jband) !occ number difference

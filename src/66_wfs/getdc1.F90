@@ -9,7 +9,7 @@
 !! Compute <G|delta_C^(1)> and eventually <P_i| delta_C^(1)> (P_i= non-local projector)
 !! delta_C^(1) is the variation of wavefunction only due to variation of overlap operator S.
 !! delta_C^(1)=-1/2.Sum_j [ <C_j|S^(1)|C>.C_j
-!!         see PRB 78, 035105 (2008), Eq. (42)
+!!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2018 ABINIT group (MT)

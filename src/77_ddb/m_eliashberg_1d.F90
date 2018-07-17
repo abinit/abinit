@@ -491,7 +491,7 @@ end subroutine eli_diag_m_1d
 !! FUNCTION
 !!  In the solving of the 1D (energy only) Eliashberg equations, calculate
 !!  the lambda, which is the e-p coupling strength. See Allen and Mitrovic
-!!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull, p.45
+!!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull, p.45 [[cite:Allen1983c]]
 !!
 !! INPUTS
 !!   a2f_1d = 1D alpha2F function
@@ -720,7 +720,7 @@ end subroutine eli_m_iter_1d
 !! FUNCTION
 !!  In the solving of the 1D (energy only) Eliashberg equations, calculate
 !!  the Z function, which is the renormalization factor. See Allen and Mitrovic
-!!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull
+!!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull [[cite:Allen1983c]]
 !!
 !! INPUTS
 !!   lambda_1d = coupling constant as a function of frequency

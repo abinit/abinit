@@ -237,7 +237,8 @@ CONTAINS !===========================================================
     !--call the LOTF initialization
     call init_lotf(itime,ab_mover%natom,acell,rprimd,xcart)
 
-    !--Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102)
+    !--Application of Gauss' principle of least constraint according to 
+    ! Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102 [[cite:Zhang1997]])
     !--v2gauss is twice the kinetic energy
     call vel_to_gauss(vel,ab_mover%amass,v2gauss)
 

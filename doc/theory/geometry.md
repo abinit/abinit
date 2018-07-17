@@ -10,7 +10,9 @@ The three primitive translation vectors are $\RR_1$, $\RR_2$, $\RR_3$.
 Their representation in Cartesian coordinates (atomic units) is:
 
 $$ \RR_1 \rightarrow {rprimd(:, 1)} $$
+
 $$ \RR_2 \rightarrow {rprimd(:, 2)} $$
+
 $$ \RR_3 \rightarrow {rprimd(:, 3)} $$
 
 Related input variables: [[acell]], [[rprim]], [[angdeg]].

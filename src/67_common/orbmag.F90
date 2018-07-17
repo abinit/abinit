@@ -53,8 +53,8 @@
 !! TODO
 !!
 !! NOTES
-!! See Ceresoli et al, PRB 74, 024408 (2006), and Gonze and Zwanziger, PRB 84
-!! 064446 (2011). 
+!! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]], 
+!! and Gonze and Zwanziger, PRB 84, 064445 (2011) [[cite:Gonze2011a]]. 
 !! The derivative of the density operator is obtained from a discretized formula
 !! $\partial_\beta \rho_k = \frac{1}{2\Delta}(\rho_{k+b} - \rho_{k-b})$ with
 !! $\Delta = |b|$. When reduced to wavefunction overlaps the computation amounts to

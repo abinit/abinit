@@ -27,5 +27,6 @@ spline            # Type of interpolation
 #%%   Si/Ge heterojunction, see test 42
 #%%   Analyze the Hartree and XC potential : one filter function,
 #%%   using the average width of a layer, and spline interpolation.
+#%% topics = Macroave
 #%%<END TEST_INFO>
 

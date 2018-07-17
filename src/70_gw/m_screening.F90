@@ -1698,7 +1698,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   !@WC bootstrap vertex correction [Sharma et al. PRL 107, 196401 (2011)]
+   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]] 
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
@@ -1848,7 +1848,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
 CASE(6)
-   !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) and Berger (PRL 115, 137402)
+   !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
+   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]] 
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
