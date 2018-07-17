@@ -9,7 +9,7 @@ ndtset 6
   ngkpt1    8 8 8
   nshiftk1  1
   shiftk1   0. 0. 0.
-  tolvrs1   1.0d-18   
+  tolvrs1   1.2d-18   
   
   #Restore the default parameters for the ground state part,
   #i.e. override the common parameters defined for the effective mass datasets.
