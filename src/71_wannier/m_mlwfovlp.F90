@@ -1186,7 +1186,8 @@ contains
    ! Output ABIWAN.nc file
 #ifdef HAVE_NETCDF
    if (dtset%kptopt == 0) then
-     MSG_WARNING("Output of ABIWAN.nc requires kptopt /= 0. File won't be produced!")
+     MSG_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
+     ! Need kptrlatt in wigner_seitz and client code need to know the k-grid.
    end if
    if (rank == master .and. dtset%kptopt /= 0) then
      abiwan_fname = strcat(dtfil%filnam_ds(4), "_ABIWAN.nc")
@@ -1194,9 +1195,7 @@ contains
      call wigner_seitz([zero, zero, zero], [2, 2, 2], dtset%kptrlatt, crystal%rmet, nrpts, irvec, ndegen)
      ! We know if disentanglement has been done by looking at the output values of lwindow
      ! Not elegant but it is the only way to avoid the parsing of the wannier input.
-     ! anyway this approach it is not bulletproof, it might fail if disentanglement and
-     ! all bands are inside the window!
-     ! TODO
+     ! In wannier_run lwindow is set to True if not disentanglement
      have_disentangled_spin = 0
      do isppol=1,nsppol
        !if nwan(isppol) < num_bands(isppol)
