@@ -195,10 +195,11 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   2. [[topic:ElecDOS|Electronic DOS and related topics]]
   3. [[topic:EffectiveMass|Effective mass calculations]]
   4. [[topic:Unfolding|Unfolding supercell band structures]]
-  5. [[topic:DensityPotential|Manipulating the density and potentials]]
-  6. [[topic:STM|Scanning Tunneling Microscopy map]]
-  7. [[topic:Wannier|Wannier functions]]
-  8. [[topic:Bader|Bader Atom-In-Molecule analysis]]
+  5. [[topic:DensityPotential|Manipulating the density and potential]]
+  6. [[topic:Macroave|Macroscopic average of density and potential]]
+  7. [[topic:STM|Scanning Tunneling Microscopy map]]
+  8. [[topic:Wannier|Wannier functions]]
+  9. [[topic:Bader|Bader Atom-In-Molecule analysis]]
 
 ## 10 Other physical properties (e.g. positron)
   

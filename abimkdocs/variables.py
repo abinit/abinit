@@ -209,6 +209,7 @@ ABI_TOPICS = [
     "MagField",
     "MagMom",
     "MolecularDynamics",
+    "Macroave",
     "multidtset",
     "nonlinear",
     "Optic",

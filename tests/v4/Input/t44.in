@@ -28,4 +28,5 @@ spline            # Type of interpolation
 #%%   Analyze the Hartree and XC potential : two filter functions,
 #%%   using two distinct values (on the order of the average
 #%%   layer width, but otherwise arbitrary), and spline interpolation.
+#%% topics = Macroave
 #%%<END TEST_INFO>
