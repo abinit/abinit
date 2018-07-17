@@ -29,7 +29,7 @@ MODULE m_paw_finegrid
 
  use m_pawtab,      only : pawtab_type
  use m_paw_sphharm, only : initylmr
- use m_paw_numeric, only : paw_jbessel, paw_splint, paw_sort_dp
+ use m_paw_numeric, only : paw_jbessel,paw_splint,paw_uniform_splfit,paw_sort_dp
 
  implicit none
 
@@ -37,9 +37,10 @@ MODULE m_paw_finegrid
 
 !public procedures.
  public :: pawgylm      ! g_l(r-R)*Y_lm(r-R) (and derivatives)
+ public :: pawgylmg     ! Fourier transform of g_l(r-R)*Y_lm(r-R), plane-waves case
+ public :: pawrfgd_fft  ! r-R, plane-waves case
+ public :: pawrfgd_wvl  ! r-R, wavelets case
  public :: pawexpiqr    ! exp(i.q.(r-R))
- public :: pawrfgd_fft  ! r-R
- public :: pawrfgd_wvl  ! r-R
 
 !declarations for the whole module (were needed to replace the statement functions)
 !MG: Why this? Global variables are powerful but extremely DANGEROUS
@@ -731,16 +732,15 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
    end if
  end if
 
-end subroutine pawgylm
+! -----------------------------------------------------------------
+!Small functions related to analytical expression of shape function
+ CONTAINS
 !!***
-
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc1
-
+!  shapefunc1 is g(x) (gaussian)
    function shapefunc1(arg)
-!   shapefunc1 is g(x) (gaussian)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -752,15 +752,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      shapefunc1=exp(-(arg/sigma)**lambda)
    end function shapefunc1
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc1_0
-
+!  shapefunc1_0 is g(x) (gaussian) for small x
    function shapefunc1_0(arg)
-!    shapefunc1_0 is g(x) (gaussian) for small x
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -773,13 +770,11 @@ end subroutine pawgylm
      shapefunc1_0=one-(arg/sigma)**lambda+half*(arg/sigma)**(2*lambda)-(arg/sigma)**(3*lambda)/6._dp
    end function shapefunc1_0
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc2
-
+!  shapefunc2 is g(x) (sinc2)
    function shapefunc2(arg)
-!    shapefunc2 is g(x) (sinc2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -791,15 +786,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      shapefunc2=(sin(pi_over_rshp*arg)/(pi_over_rshp*arg))**2
    end function shapefunc2
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc2_0
-
+!  shapefunc2_0 is g(x) (sinc2) for small x
    function shapefunc2_0(arg)
-!    shapefunc2_0 is g(x) (sinc2) for small x
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -811,15 +803,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      shapefunc2_0=one-(pi_over_rshp*arg)**2/three+two*(pi_over_rshp*arg)**4/45._dp
    end function shapefunc2_0
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/shapefunc3
-
+!  shapefunc3 is g(x) (Bessel)
    function shapefunc3(jbes1,jbes2,argl)
-!    shapefunc3 is g(x) (Bessel)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -832,15 +821,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: jbes1,jbes2
      shapefunc3= alpha(1,1+argl)*jbes1+alpha(2,1+argl)*jbes2
    end function shapefunc3
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc1
-
+!  dshpfunc1(x) is g_prime(x) (gaussian)
    function dshpfunc1(arg)
-!    dshpfunc1(x) is g_prime(x) (gaussian)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -852,15 +838,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      dshpfunc1=-lambda/sigma*(arg/sigma)**(lambda-1)*exp(-(arg/sigma)**lambda)
    end function dshpfunc1
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc1_ovr_0
-
+!  dshpfunc1_ovr_0(x) is g_prime(x)/x (gaussian) for small x and lambda>2
    function dshpfunc1_ovr_0(arg)
-!    dshpfunc1_ovr_0(x) is g_prime(x)/x (gaussian) for small x and lambda>2
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -872,15 +855,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      dshpfunc1_ovr_0=-lambda/sigma**2*((arg/sigma)**(lambda-2)-(arg/sigma)**(2*lambda-2))
    end function dshpfunc1_ovr_0
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc1_ovr_0_2
-
+!  dshpfunc1_ovr_0_2(x) is g_prime(x)/x (gaussian) for small x and lambda=2
    function dshpfunc1_ovr_0_2(arg)
-!    dshpfunc1_ovr_0_2(x) is g_prime(x)/x (gaussian) for small x and lambda=2
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -892,15 +872,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      dshpfunc1_ovr_0_2=-two/sigma**2*(one-(arg/sigma)**2+half*(arg/sigma)**4)
    end function dshpfunc1_ovr_0_2
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc2
-
+!  dshpfunc2(x) is g_prime(x) (sinc2)
    function dshpfunc2(arg)
-!    dshpfunc2(x) is g_prime(x) (sinc2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -913,15 +890,12 @@ end subroutine pawgylm
      dshpfunc2=two*pi_over_rshp*sin(pi_over_rshp*arg)/(pi_over_rshp*arg)**3&
 &              *(pi_over_rshp*arg*cos(pi_over_rshp*arg)-sin(pi_over_rshp*arg))
    end function dshpfunc2
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc2_ovr_0
-
+!  dshpfunc2_ovr_0(x) is g_prime(x)/x (sinc2) for small x
    function dshpfunc2_ovr_0(arg)
-!    dshpfunc2_ovr_0(x) is g_prime(x)/x (sinc2) for small x
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -933,15 +907,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      dshpfunc2_ovr_0=-two*pi_over_rshp**2/3._dp+8._dp*pi_over_rshp**4*arg**2/45._dp
    end function dshpfunc2_ovr_0
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/dshpfunc3
-
+!  dshpfunc3(x) is g_prime(x) (Bessel)
    function dshpfunc3(jbesp1,jbesp2,argl)
-!    dshpfunc3(x) is g_prime(x) (Bessel)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -955,15 +926,12 @@ end subroutine pawgylm
      dshpfunc3= alpha(1,1+argl)*qq(1,1+argl)*jbesp1 &
 &                              +alpha(2,1+argl)*qq(2,1+argl)*jbesp2
    end function dshpfunc3
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc1
-
+!  d2shpfunc1(x) is g_prime_prime(x) (gaussian)
    function d2shpfunc1(arg)
-!    d2shpfunc1(x) is g_prime_prime(x) (gaussian)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -976,15 +944,12 @@ end subroutine pawgylm
      d2shpfunc1=lambda/(sigma**2)*(lambda*(arg/sigma)**(2*lambda-2) &
 &               -(lambda-1)*(arg/sigma)**(lambda-2))*exp(-(arg/sigma)**lambda)
    end function d2shpfunc1
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0
-
+!  d2shpfunc1_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda>4
    function d2shpfunc1_ovr2_0(arg)
-!    d2shpfunc1_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda>4
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -997,15 +962,12 @@ end subroutine pawgylm
      d2shpfunc1_ovr2_0=-lambda/(sigma**4)*((lambda-2)*(arg/sigma)**(lambda-4) &
 &                                          -(lambda-1)*two*(arg/sigma)**(2*lambda-4))
    end function d2shpfunc1_ovr2_0
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_2
-
+!  d2shpfunc1_ovr2_0_2(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==2
    function d2shpfunc1_ovr2_0_2(arg)
-!    d2shpfunc1_ovr2_0_2(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==2
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1017,15 +979,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_2=four/(sigma**4)*(one-(arg/sigma)**2)
    end function d2shpfunc1_ovr2_0_2
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_3
-
+!  d2shpfunc1_ovr2_0_3(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==3
    function d2shpfunc1_ovr2_0_3(arg)
-!    d2shpfunc1_ovr2_0_3(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==3
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1037,15 +996,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_3=-three/arg/sigma**3+12._dp*arg**2/sigma**6-half*21._dp*arg**5/sigma**9
    end function d2shpfunc1_ovr2_0_3
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc1_ovr2_0_4
-
+!  d2shpfunc1_ovr2_0_4(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==4
    function d2shpfunc1_ovr2_0_4(arg)
-!    d2shpfunc1_ovr2_0_4(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (gaussian) for small x and lambda==4
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1057,15 +1013,12 @@ end subroutine pawgylm
      real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_4=-8._dp/(sigma**4)*(one-three*(arg/sigma)**4)
    end function d2shpfunc1_ovr2_0_4
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc2
-
+!  d2shpfunc2(x) is g_prime_prime(x) (sinc2)
    function d2shpfunc2(arg)
-!    d2shpfunc2(x) is g_prime_prime(x) (sinc2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1080,15 +1033,12 @@ end subroutine pawgylm
 &               +(three-pi_over_rshp**2*arg**2)*(sin(pi_over_rshp*arg))**2 &
 &               -four*pi_over_rshp*arg*cos(pi_over_rshp*arg)*sin(pi_over_rshp*arg))
    end function d2shpfunc2
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc2_ovr2_0
-
+!  d2shpfunc2_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (sinc2) for small x
    function d2shpfunc2_ovr2_0(arg)
-!    d2shpfunc2_ovr2_0(x) is (g_prime_prime(x)-g_prime(x)/x)/x**2 (sinc2) for small x
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1101,15 +1051,12 @@ end subroutine pawgylm
      d2shpfunc2_ovr2_0=16._dp/45._dp*pi_over_rshp**4-8._dp/105._dp*pi_over_rshp**6*arg**2 &
 &                      +41._dp/6300._dp*pi_over_rshp**8*arg**4
    end function d2shpfunc2_ovr2_0
-
 !!***
-
-!----------------------------------------------------------------------
-
+! ------------------------------------------------
 !!****f* m_paw_finegrid/d2shpfunc3
-
+!  d2shpfunc3(x) is g_prime_prime(x) (Bessel)
    function d2shpfunc3(jbespp1,jbespp2,argl)
-!    d2shpfunc3(x) is g_prime_prime(x) (Bessel)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1118,97 +1065,134 @@ end subroutine pawgylm
 !End of the abilint section
 
      integer,intent(in) :: argl
-     real(dp) :: d2shpfunc3 
+     real(dp) :: d2shpfunc3
      real(dp),intent(in) :: jbespp1,jbespp2
      d2shpfunc3= alpha(1,1+argl)*(qq(1,1+argl)**2)*jbespp1 &
 &                                 +alpha(2,1+argl)*(qq(2,1+argl)**2)*jbespp2
    end function d2shpfunc3
+! ------------------------------------------------
 
+end subroutine pawgylm
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_finegrid/pawexpiqr
+!!****f* m_paw_finegrid/pawgylmg
 !! NAME
-!! pawexpiqr
+!! pawgylmg
 !!
 !! FUNCTION
-!! Compute exp(i.q.r) for each point of the (fine) rectangular grid
-!! around a given atomic site. R is the position of the atom.
-!! Used for the determination of phonons at non-zero q wavevector.
+!! PAW: Compute Fourier transform of each g_l(r).Y_lm(r) function
 !!
 !! INPUTS
-!!  gprimd(3,3)= dimensional primitive translations for reciprocal space
-!!  nfgd= number of (fine grid) FFT points in the paw sphere around current atom
-!!  qphon(3)= wavevector of the phonon
-!!  rfgd(3,nfgd)= coordinates of r-R on the fine grid around current atom
-!!  xred(3)= reduced atomic coordinates
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  kg(3,npw)=integer coordinates of planewaves in basis sphere for this k point.
+!!  kpg(npw,nkpg)= (k+G) components (only if useylm=1)
+!!  kpt(3)=reduced coordinates of k point
+!!  lmax=1+max. value of l angular momentum
+!!  nkpg=second dimension of kpg_k (0 if useylm=0)
+!!  npw=number of planewaves in basis sphere
+!!  ntypat=number of types of atoms
+!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  ylm(npw,lmax**2)=real spherical harmonics for each G and k point
 !!
 !! OUTPUT
-!!  expiqr(2,nfgd)= exp(i.q.r) around the current atom
-!!                                 Not allocated if q=0 !
+!!  gylmg(npw,lmax**2,ntypat)=Fourier transform of each g_l(r).Y_lm(r) function
 !!
 !! PARENTS
-!!      m_pawdij,pawgrnl,pawmknhat,pawmknhat_psipsi,respfn
 !!
 !! CHILDREN
+!!      paw_uniform_splfit
 !!
 !! SOURCE
 
-subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
+subroutine pawgylmg(gprimd,gylmg,kg,kpg,kpt,lmax,nkpg,npw,ntypat,pawtab,ylm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawexpiqr'
+#define ABI_FUNC 'pawgylmg'
 !End of the abilint section
 
  implicit none
 
-!Arguments ---------------------------------------------
+!Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfgd
+ integer,intent(in) :: lmax,nkpg,npw,ntypat
 !arrays
- real(dp),intent(in) :: gprimd(3,3),qphon(3),xred(3)
- real(dp),intent(in) :: rfgd(:,:)
- real(dp),intent(out) :: expiqr(2,nfgd)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3),kpg(npw,nkpg),kpt(3)
+ real(dp),intent(in) :: ylm(npw,lmax**2)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
 
-!Local variables ------------------------------
+ real(dp),intent(out) :: gylmg(npw,lmax**2,ntypat)
+
+!Local variables-------------------------------
 !scalars
- integer :: ic
- logical :: qne0
- real(dp) :: phase,phase_xred,qx,qy,qz
- character(len=500) :: msg
+ integer :: ig,ilm,itypat,ll,l0,mm,mqgrid
+ real(dp) :: kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3
 !arrays
+ real(dp),allocatable :: glg(:),qgrid(:),kpgnorm(:),shpf(:,:),work(:)
 
 ! *************************************************************************
 
- if (size(rfgd)/=3*nfgd) then
-   msg='rfgd array must be allocated!'
-   MSG_BUG(msg)
- end if
-
- qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)
-
-!Compute q in cartesian coordinates
- if (qne0) then
-   qx=gprimd(1,1)*qphon(1)+gprimd(1,2)*qphon(2)+gprimd(1,3)*qphon(3)
-   qy=gprimd(2,1)*qphon(1)+gprimd(2,2)*qphon(2)+gprimd(2,3)*qphon(3)
-   qz=gprimd(3,1)*qphon(1)+gprimd(3,2)*qphon(2)+gprimd(3,3)*qphon(3)
-   phase_xred=two_pi*(qphon(1)*xred(1)+qphon(2)*xred(2)+qphon(3)*xred(3))
- end if
-
-!Compute exp(i.q.r)
- if (qne0) then
-   do ic=1,nfgd
-     phase=two_pi*(qx*rfgd(1,ic)+qy*rfgd(2,ic)+qz*rfgd(3,ic)) + phase_xred
-     expiqr(1,ic)=cos(phase)
-     expiqr(2,ic)=sin(phase)
+!Get |k+G|:
+ LIBPAW_ALLOCATE(kpgnorm,(npw))
+ if (nkpg<3) then
+   do ig=1,npw
+     kpg1=kpt(1)+dble(kg(1,ig));kpg2=kpt(2)+dble(kg(2,ig));kpg3=kpt(3)+dble(kg(3,ig))
+     kpgc1=kpg1*gprimd(1,1)+kpg2*gprimd(1,2)+kpg3*gprimd(1,3)
+     kpgc2=kpg1*gprimd(2,1)+kpg2*gprimd(2,2)+kpg3*gprimd(2,3)
+     kpgc3=kpg1*gprimd(3,1)+kpg2*gprimd(3,2)+kpg3*gprimd(3,3)
+     kpgnorm(ig)=sqrt(kpgc1*kpgc1+kpgc2*kpgc2+kpgc3*kpgc3)
+   end do
+ else
+   do ig=1,npw
+     kpgc1=kpg(ig,1)*gprimd(1,1)+kpg(ig,2)*gprimd(1,2)+kpg(ig,3)*gprimd(1,3)
+     kpgc2=kpg(ig,1)*gprimd(2,1)+kpg(ig,2)*gprimd(2,2)+kpg(ig,3)*gprimd(2,3)
+     kpgc3=kpg(ig,1)*gprimd(3,1)+kpg(ig,2)*gprimd(3,2)+kpg(ig,3)*gprimd(3,3)
+     kpgnorm(ig)=sqrt(kpgc1*kpgc1+kpgc2*kpgc2+kpgc3*kpgc3)
    end do
  end if
 
-end subroutine pawexpiqr
+ LIBPAW_ALLOCATE(glg,(npw))
+ LIBPAW_ALLOCATE(work,(npw))
+
+!Loop over types of atoms
+ do itypat=1,ntypat
+
+   mqgrid=pawtab(itypat)%mqgrid_shp
+   LIBPAW_ALLOCATE(qgrid,(mqgrid))
+   LIBPAW_ALLOCATE(shpf,(mqgrid,2))
+   qgrid(1:mqgrid)=pawtab(itypat)%qgrid_shp(1:mqgrid)
+
+!  Loops over (l,m) values
+   do ll=0,pawtab(itypat)%lcut_size-1
+     l0=ll**2+ll+1
+
+     shpf(1:mqgrid,1:2)=pawtab(itypat)%shapefncg(1:mqgrid,1:2,1+ll)
+     call paw_uniform_splfit(qgrid,work,shpf,0,kpgnorm,glg,mqgrid,npw)
+
+     do mm=-ll,ll
+       ilm=l0+mm
+
+       gylmg(1:npw,ilm,itypat)=ylm(1:npw,ilm)*glg(1:npw)
+
+!      End loops over (l,m) values
+     end do
+   end do
+
+!  End loop over atom types
+   LIBPAW_DEALLOCATE(qgrid)
+   LIBPAW_DEALLOCATE(shpf)
+ end do
+
+ LIBPAW_DEALLOCATE(kpgnorm)
+ LIBPAW_DEALLOCATE(glg)
+ LIBPAW_DEALLOCATE(work)
+
+end subroutine pawgylmg
 !!***
 
 !----------------------------------------------------------------------
@@ -1526,7 +1510,10 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 !*********************************************************************
 !Small functions related to boundary conditions
  contains
-   subroutine my_ind_positions(periodic,i,n,j,go)
+!!***
+! ------------------------------------------------
+!!****f* m_paw_finegrid/my_ind_positions
+ subroutine my_ind_positions(periodic,i,n,j,go)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1546,7 +1533,9 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
      j=i ; go=(i>=-14.and.i<=2*n+16)
    end if
    end subroutine my_ind_positions
-
+!!***
+! ------------------------------------------------
+!!****f* m_paw_finegrid/my_ext_buffers
    subroutine my_ext_buffers(periodic,nl,nr)
 
 
@@ -1565,8 +1554,97 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
     nl=14 ; nr=15
   end if
   end subroutine my_ext_buffers
+! ------------------------------------------------
 
 end subroutine pawrfgd_wvl
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_finegrid/pawexpiqr
+!! NAME
+!! pawexpiqr
+!!
+!! FUNCTION
+!! Compute exp(i.q.r) for each point of the (fine) rectangular grid
+!! around a given atomic site. R is the position of the atom.
+!! Used for the determination of phonons at non-zero q wavevector.
+!!
+!! INPUTS
+!!  gprimd(3,3)= dimensional primitive translations for reciprocal space
+!!  nfgd= number of (fine grid) FFT points in the paw sphere around current atom
+!!  qphon(3)= wavevector of the phonon
+!!  rfgd(3,nfgd)= coordinates of r-R on the fine grid around current atom
+!!  xred(3)= reduced atomic coordinates
+!!
+!! OUTPUT
+!!  expiqr(2,nfgd)= exp(i.q.r) around the current atom
+!!                                 Not allocated if q=0 !
+!!
+!! PARENTS
+!!      m_pawdij,pawgrnl,pawmknhat,pawmknhat_psipsi,respfn
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawexpiqr'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nfgd
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),qphon(3),xred(3)
+ real(dp),intent(in) :: rfgd(:,:)
+ real(dp),intent(out) :: expiqr(2,nfgd)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ic
+ logical :: qne0
+ real(dp) :: phase,phase_xred,qx,qy,qz
+ character(len=500) :: msg
+!arrays
+
+! *************************************************************************
+
+ if (size(rfgd)/=3*nfgd) then
+   msg='rfgd array must be allocated!'
+   MSG_BUG(msg)
+ end if
+
+ qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)
+
+!Compute q in cartesian coordinates
+ if (qne0) then
+   qx=gprimd(1,1)*qphon(1)+gprimd(1,2)*qphon(2)+gprimd(1,3)*qphon(3)
+   qy=gprimd(2,1)*qphon(1)+gprimd(2,2)*qphon(2)+gprimd(2,3)*qphon(3)
+   qz=gprimd(3,1)*qphon(1)+gprimd(3,2)*qphon(2)+gprimd(3,3)*qphon(3)
+   phase_xred=two_pi*(qphon(1)*xred(1)+qphon(2)*xred(2)+qphon(3)*xred(3))
+ end if
+
+!Compute exp(i.q.r)
+ if (qne0) then
+   do ic=1,nfgd
+     phase=two_pi*(qx*rfgd(1,ic)+qy*rfgd(2,ic)+qz*rfgd(3,ic)) + phase_xred
+     expiqr(1,ic)=cos(phase)
+     expiqr(2,ic)=sin(phase)
+   end do
+ end if
+
+end subroutine pawexpiqr
+!!***
+
+!----------------------------------------------------------------------
 
 END MODULE m_paw_finegrid
 !!***

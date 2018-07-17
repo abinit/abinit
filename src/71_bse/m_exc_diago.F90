@@ -46,7 +46,7 @@ MODULE m_exc_diago
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfd_t
- use m_pawhr,           only : pawhur_t
+ use m_paw_hr,          only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
  use m_hide_lapack,     only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv

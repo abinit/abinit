@@ -65,6 +65,7 @@ module m_sigmaph
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
+ use m_fourier_interpol, only : transgrid
 ! use m_paw_an,	       only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,	       only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init

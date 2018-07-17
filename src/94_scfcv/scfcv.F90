@@ -179,7 +179,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_ab7_mixing
  use m_errors
  use m_efield
- use m_orbmag
  use mod_prc_memory
  use m_nctk
  use m_hdr
@@ -210,6 +209,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_pawfgr,           only : pawfgr_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid,pawmknhat
+ use m_paw_tools,        only : chkpawovlp
+ use m_paw_denpot,       only : pawdenpot
+ use m_paw_occupancies,  only : pawmkrhoij
+ use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
+ use m_paw_orbmag,       only : orbmag_type
+ use m_paw_mkrho,        only : pawmkrho
+ use m_paw_uj,           only : pawuj_red
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
  use m_gwls_hamiltonian, only : build_vxc
@@ -238,6 +245,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_drivexc,          only : check_kxc
  use m_odamix,           only : odamix
  use m_common,           only : scprqt, prtene
+ use m_fourier_interpol, only : transgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -247,7 +255,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
@@ -303,7 +310,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtpawuj)
  type(pawrhoij_type), intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type), intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type), intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
 
 !Local variables -------------------------
@@ -2428,6 +2435,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_energies,         only : energies_type
+ use m_paw_dfpt,         only : pawgrnl
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_forces,           only : forces
 
@@ -2435,7 +2443,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 
