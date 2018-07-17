@@ -844,7 +844,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            MSG_BUG("Wrong spmeth")
          END SELECT
 
-         ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition.
+         ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition. [[cite:Mahan2000]]
          factor=spin_fact*qp_occ(band2,ik_ibz,spin)
 
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1b2,&
@@ -1757,7 +1757,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            MSG_BUG("Wrong spmeth")
          END SELECT
 
-         ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition.
+         ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition. [[cite:Mahan2000]]
          ! TODO Does not work with spinor
          factor=spin_fact*qp_occ(band2,ik_ibz,spin)
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1kmq_b2k,&

@@ -5630,7 +5630,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
            vvelocwtkpq(:,:)=elph_tr_ds%tmp_vvelocwtk2(ib2,ikpt_phonq,:,:,isppol)
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]],
 !          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
@@ -5803,7 +5803,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]]
 !          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
