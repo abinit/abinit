@@ -94,7 +94,8 @@ class MyEntry(Entry):
     def authors(self):
         """String with authors. Empty if authors are not provided."""
         try:
-            return ", ".join(my_unicode(p) for p in self.persons["author"])
+            #return ", ".join(my_unicode(p) for p in self.persons["author"])
+            return ", ".join( my_unicode(p).partition(',')[2]+" "+my_unicode(p).partition(',')[0] for p in self.persons["author"])
         except KeyError:
             return ""
 
