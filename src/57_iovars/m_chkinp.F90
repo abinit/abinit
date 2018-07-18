@@ -1542,7 +1542,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
    if (dt%optcell /=0 .and. (dt%berryopt == 6 ))  then
-     write(message,'(a,a,a,a,a,a,a,a,a,a,a,a,a)') ch10,&
+     write(message,'(12a)') ch10,&
 &     ' chkinp : WARNING -',ch10,&
 &     '  Constant unreduced D calculation with relaxation of cell parameters is allowed.',ch10,&
 &     '  But we strongly recommend users to use reduced d calculation (berryopt=16)',ch10,&
@@ -2499,7 +2499,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      MSG_ERROR(message)
    end if
 
-!  prtefmas 
+!  prtefmas
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
    if(optdriver/=RUNL_RESPFN)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
