@@ -34,7 +34,6 @@ module m_afterscfloop
  use m_errors
  use m_profiling_abi
  use m_efield
- use m_orbmag
  use m_ab7_mixing
  use m_hdr
 
@@ -55,6 +54,11 @@ module m_afterscfloop
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
+ use m_paw_mkrho,        only : pawmkrho
+ use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
+ use m_paw_occupancies,  only : pawmkrhoij
+ use m_paw_correlations, only : setnoccmmp
+ use m_paw_orbmag,       only : orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -293,7 +297,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 

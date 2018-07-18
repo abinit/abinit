@@ -91,6 +91,12 @@ module m_sigma_driver
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_slater,    only : paw_mkdijexc_core, paw_dijhf
  use m_paw_dmft,      only : paw_dmft_type
+ use m_paw_sphharm,   only : setsym_ylm
+ use m_paw_mkrho,     only : denfgr
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_tools,     only : chkpawovlp,pawprt
+ use m_paw_denpot,    only : pawdenpot
+ use m_paw_init,      only : pawinit,paw_gencond
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
@@ -103,6 +109,8 @@ module m_sigma_driver
  use m_pspini,        only : pspini
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
+
+ use m_paw_correlations,only : pawpuxinit
 
  implicit none
 
@@ -179,7 +187,7 @@ contains
 !!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
 !!      pawrhoij_free,pawtab_get_lsize,pawtab_print,ppm_free,ppm_init
 !!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
-!!      setsymrhoij,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
+!!      setsym_ylm,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
 !!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
 !!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
@@ -198,7 +206,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -497,7 +504,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    Paw_dmft%use_dmft=Dtset%usedmft
@@ -3841,7 +3848,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

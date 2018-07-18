@@ -63,6 +63,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian
  use m_pawdij,       only : pawdijhat
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
+ use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
 
@@ -71,7 +72,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_getghc'
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

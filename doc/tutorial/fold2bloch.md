@@ -223,7 +223,7 @@ band structure plot, though. Now we have one additional dimension -- the Bloch s
 There are several alternative visualization strategies. Here
 we use the scatter plot with the point size proportional to the spectral weight. 
 The following MatLab script will help you build a graph for any
-*fold2Bloch* output: [ubs_dots.m](*fold2Bloch*_assets/ubs_dots.m)
+*fold2Bloch* output: [ubs_dots.m](fold2bloch_assets/ubs_dots.m)
 
 Make sure the following parameters in *ubs_dots.m* are set as follows:
     

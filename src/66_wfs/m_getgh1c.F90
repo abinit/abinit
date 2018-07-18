@@ -41,7 +41,8 @@ module m_getgh1c
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian, load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian
- use m_nonlop,       only : nonlop
+ use m_nonlop,           only : nonlop
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -860,7 +861,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf_transgrid_and_pack'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

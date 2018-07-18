@@ -190,6 +190,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
+ use m_paw_nhat, only : pawnhatfr
+ use m_paw_dfpt, only : pawdfptenergy
  use m_kg,       only : mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac
  use m_spacepar, only : hartrestr, symrhg
@@ -207,7 +210,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_56_xc
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_72_response, except_this_one => dfpt_nstpaw

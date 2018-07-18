@@ -2169,7 +2169,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 !************************************************************************
 
  ! Accumulating the sum rule on chi0.
- ! Eq.(5.284) in G. D. Mahan Many-Particle Physics 3rd edition
+ ! Eq.(5.284) in G. D. Mahan Many-Particle Physics 3rd edition [[cite:Mahan2000]]
 
  SELECT CASE (symchi)
  CASE (0)

@@ -63,6 +63,7 @@ module m_phpi
  use m_pawfgr,          only : pawfgr_type
  use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
  use m_getgh1c,         only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_fourier_interpol, only : transgrid
 ! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init

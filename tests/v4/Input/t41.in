@@ -25,4 +25,5 @@ spline            # Type of interpolation
 #%% keywords = NC
 #%% description = 
 #%%  Test of macroave, on the basis of the density of the previous run.
+#%% topics = Macroave
 #%%<END TEST_INFO>

@@ -134,11 +134,13 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_alloc
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_nhat, only : pawmknhat
  use m_fock,     only : fock_type
  use m_kg,       only : getcut
- use defs_wvltypes, only : wvl_data
- use m_spacepar,    only : hartre
- use m_mkrho,       only : initro
+ use defs_wvltypes,     only : wvl_data
+ use m_spacepar,        only : hartre
+ use m_mkrho,           only : initro
+ use m_paw_occupancies, only : initrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -146,7 +148,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron
 !End of the abilint section
 

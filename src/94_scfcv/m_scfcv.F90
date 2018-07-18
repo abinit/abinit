@@ -38,7 +38,6 @@ module m_scfcv
  use m_wffile
  use m_rec
  use m_efield
- use m_orbmag
 
  use m_scf_history,      only: scf_history_type
  use m_results_gs ,      only: results_gs_type
@@ -49,6 +48,7 @@ module m_scfcv
  use m_pawrhoij,         only: pawrhoij_type
  use m_pawfgr,           only: pawfgr_type
  use m_paw_dmft,         only: paw_dmft_type
+ use m_paw_orbmag,       only : orbmag_type
  use m_entropyDMFT
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
 
