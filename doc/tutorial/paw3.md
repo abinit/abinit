@@ -17,7 +17,9 @@ It is assumed you already know how to use ABINIT in the PAW case. The tutorial
 assumes no previous experience with the `Elk` code, but it is strongly advised
 that the users familiarise themselves a bit with this code before attempting
 to do similar comparisons with their own datasets.  
-  
+
+[TUTORIAL_README]
+
 This tutorial should take about 3h-4h.
 
 
@@ -85,14 +87,13 @@ need:
     We will use the `Elk` code itself, as well as its `eos` (equation-of-state) utility,
     for calculating equilibrium lattice parameters.
 
-  * Auxiliary `bash` and `python` _scripts_ for the comparison of band structures, available in the folder
-    `ABINIT/doc/tutorial/paw3_assets/scripts/`.
-    Here ABINIT stands for the abinit source directory. 
-    There are also various `gnuplot` _scripts_ there.
+  * Auxiliary `bash` and `python` _scripts_ for the comparison of band structures, available in the directory
+    *\$ABI_HOME/doc/tutorial/paw3_assets/scripts/*.
+    There are also various *gnuplot* scripts there.
 
 You will of course also need a working copy of ABINIT. Please make sure that
 the above components are downloaded and working on your system before
-continuing this tutorial. The tutorial also makes extensive use of `gnuplot`, so
+continuing this tutorial. The tutorial also makes extensive use of |gnuplot|, so
 please also ensure that a recent and working version is installed on your system.
 
 !!! Note
@@ -201,7 +202,7 @@ called `outputs/`. Make sure to create it before you start the abinit run by wri
 
 You can now run the abinit tests (maybe even in a separate new `xterm` window), by executing:
     
-     abinit < input_C_test.files >& log_C_test &
+    abinit < input_C_test.files >& log_C_test &
 
 There are 18 double-index datasets in total, with the first index running from
 1 to 9 and the second from 1 to 2. You can check on the progress of the
@@ -1270,4 +1271,4 @@ calculations, here is a list of a few:
   * As a rule of thumb, a PAW dataset for GW should have at least three projectors per state, if not more.
 
   * A particularly sensitive thing is the quality of the expansion of the pseudised plane-wave part in terms of the on-site basis. 
-     This can be checked by using the density of states (DOS), as described in the [first PAW tutorial](PAW1).
+     This can be checked by using the density of states (DOS), as described in the [first PAW tutorial](paw1).

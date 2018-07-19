@@ -52,11 +52,17 @@ PRIVATE
 
 TYPE, PUBLIC :: ListCdagC
   INTEGER _PRIVATE :: size = 0
+!  max size of matrix list
+
   INTEGER          :: tail = 0 
+!  the size of matrix list that contains physical data (ie number of
+!  segment)
   !DOUBLE PRECISION :: inv_dt = 0.d0
 !  TYPE(CdagC), ALLOCATABLE, DIMENSION(:) :: list => NULL()
   !INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: ind
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)         :: list
+!  for all elements i below itail, list(i,1:2) are times for creation
+!  and destruction of particles.
 END TYPE ListcdagC
 !!***
 

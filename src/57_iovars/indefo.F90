@@ -701,6 +701,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%shiftk_orig(:,:)=one
    dtsets(idtset)%signperm=1
    dtsets(idtset)%slabwsrad=zero
+   dtsets(idtset)%slk_rankpp=1000
    dtsets(idtset)%smdelta=0
    dtsets(idtset)%spbroad=0.1
    dtsets(idtset)%spgaxor = -1

@@ -43,7 +43,7 @@ MODULE m_vcoul
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
- use m_abilasi,         only : matrginv
+ use m_hide_lapack,     only : matrginv
  use m_geometry,        only : normv, metric
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item
@@ -546,7 +546,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
  CASE ('SPHERE')
    ! TODO check that L-d > R_c > d
-   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008).
+   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut<tol12) then
      Vcp%rcut = (ucvol*Kmesh%nbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&
@@ -759,7 +759,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  CASE ('AUXILIARY_FUNCTION')
    !
    ! Numerical integration of the exact-exchange divergence through the
-   ! auxiliary function of Carrier et al. PRB 75, 205126 (2007).
+   ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
    !
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz,iq_ibz,Vcp%qibz,ng,Gsph%gvec,gprimd,vcoul(:,iq_ibz))
@@ -779,7 +779,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
 
    ! It might be useful to perform the integration using the routine quadrature
@@ -819,7 +819,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function of a Gygi-Baldereschi variant
+   ! * We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    ! * the choice of alfa (the width of gaussian) is somehow empirical
    alfa = 150.0/ecut
@@ -870,7 +870,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
@@ -905,7 +905,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
    !
    ! === Treat 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    do iq_bz=1,Qmesh%nbz
      qbz_cart(:)=Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)

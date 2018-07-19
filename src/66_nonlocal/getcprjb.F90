@@ -57,12 +57,11 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
  use m_profiling_abi
  use m_errors
 
- use m_orbmag
-
- use m_pawang,           only : pawang_type
- use m_pawcprj,  only : pawcprj_type
- use m_pawrad,           only : pawrad_type, simp_gen
- use m_pawtab, only : pawtab_type
+ use m_pawang,     only : pawang_type
+ use m_pawcprj,    only : pawcprj_type
+ use m_pawrad,     only : pawrad_type, simp_gen
+ use m_pawtab,     only : pawtab_type
+ use m_paw_orbmag, only : orbmag_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -110,88 +109,88 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
 
  
  do iatom = 1, natom
-    
-    itypat = typat(iatom)
-    mesh_size = pawtab(itypat)%mesh_size
+   
+   itypat = typat(iatom)
+   mesh_size = pawtab(itypat)%mesh_size
 
-    ABI_ALLOCATE(ff,(mesh_size))
+   ABI_ALLOCATE(ff,(mesh_size))
 
     !    here is exp(-i b.R) for current atom
-    etb = dtorbmag%expibi(idx,iatom)
+   etb = dtorbmag%expibi(idx,iatom)
 
-    do ilmn=1,pawtab(itypat)%lmn_size
-       il=pawtab(itypat)%indlmn(1,ilmn)
-       im=pawtab(itypat)%indlmn(2,ilmn)
-       ilm=pawtab(itypat)%indlmn(4,ilmn)
-       iln=pawtab(itypat)%indlmn(5,ilmn)
+   do ilmn=1,pawtab(itypat)%lmn_size
+     il=pawtab(itypat)%indlmn(1,ilmn)
+     im=pawtab(itypat)%indlmn(2,ilmn)
+     ilm=pawtab(itypat)%indlmn(4,ilmn)
+     iln=pawtab(itypat)%indlmn(5,ilmn)
 
-       cpc = czero
+     cpc = czero
 
-       do ll=0,pawtab(itypat)%l_size-1
-          do lt=0,pawtab(itypat)%l_size-1
+     do ll=0,pawtab(itypat)%l_size-1
+       do lt=0,pawtab(itypat)%l_size-1
              ! require |ll-lt| <= il <= ll+lt
-             if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
-             if ( mod((il+ll+lt),2) .NE. 0 ) cycle
+         if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
+         if ( mod((il+ll+lt),2) .NE. 0 ) cycle
 
-             do ipw = 1, npwb
+         do ipw = 1, npwb
 
                 ! ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
                 !      &pawtab(itypat)%tproj(1:mesh_size,iln)*&
                 !      &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
                 !      &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikptb,ipw,lt+1)
                 ! call simp_gen(intg,ff,pawrad(itypat))
-                
-                etk = dtorbmag%phkgi(ikptb,ipw,iatom)
+           
+           etk = dtorbmag%phkgi(ikptb,ipw,iatom)
 
-                if (dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb)) then
-                   intg = dtorbmag%pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb,ipw)
-                else
-                   intg = zero
-                   write(std_out,'(a)')'JWZ Debug: no pjj'
-                end if
+           if (dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb)) then
+             intg = dtorbmag%pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb,ipw)
+           else
+             intg = zero
+             write(std_out,'(a)')'JWZ Debug: no pjj'
+           end if
 
-                c1 = sxpi2*etb*etk*iexpl(mod(il,4))*iexpl(mod(lt,4))*intg
+           c1 = sxpi2*etb*etk*iexpl(mod(il,4))*iexpl(mod(lt,4))*intg
 
-                do mm = -ll, ll
-                   llmm = ll*ll+ll+mm+1
+           do mm = -ll, ll
+             llmm = ll*ll+ll+mm+1
 
-                   do mt = -lt, lt
+             do mt = -lt, lt
 
-                      if ( (mm+mt+im) .NE. 0) cycle
-                      
-                      ltmt = lt*lt+lt+mt+1
+               if ( (mm+mt+im) .NE. 0) cycle
+               
+               ltmt = lt*lt+lt+mt+1
 
-                      if (llmm .LE. ltmt) then
-                         kllt = ltmt*(ltmt-1)/2 + llmm
-                      else
-                         kllt = llmm*(llmm-1)/2 + ltmt
-                      end if
+               if (llmm .LE. ltmt) then
+                 kllt = ltmt*(ltmt-1)/2 + llmm
+               else
+                 kllt = llmm*(llmm-1)/2 + ltmt
+               end if
 
                       ! select on non-zero Gaunt integral G^{il,im}_{ll,mm,lt,mt}
-                      isel = pawang%gntselect(ilm,kllt)
-                      if (isel > 0) then
+               isel = pawang%gntselect(ilm,kllt)
+               if (isel > 0) then
 
-                         c2 = pawang%realgnt(isel)*dtorbmag%ylmb(idx,llmm)*ylm_kb(ipw,ltmt)
-                         cpc = cpc + c1*c2*cmplx(cwavef(1,ipw),cwavef(2,ipw))
+                 c2 = pawang%realgnt(isel)*dtorbmag%ylmb(idx,llmm)*ylm_kb(ipw,ltmt)
+                 cpc = cpc + c1*c2*cmplx(cwavef(1,ipw),cwavef(2,ipw))
 
-                      end if ! selection on non-zero Gaunt integrals
+               end if ! selection on non-zero Gaunt integrals
 
-                   end do ! end loop on mt
+             end do ! end loop on mt
 
-                end do ! end loop on mm
+           end do ! end loop on mm
 
-             end do ! end loop on npwb
+         end do ! end loop on npwb
 
-          end do ! end loop on lt
+       end do ! end loop on lt
 
-       end do ! end loop on ll
-       
-       cwaveprj(iatom,ispinor)%cp(1,ilmn) = real(cpc)            
-       cwaveprj(iatom,ispinor)%cp(2,ilmn) = aimag(cpc)
+     end do ! end loop on ll
+     
+     cwaveprj(iatom,ispinor)%cp(1,ilmn) = real(cpc)            
+     cwaveprj(iatom,ispinor)%cp(2,ilmn) = aimag(cpc)
 
-    end do ! end loop on ilmn
-    
-    ABI_DEALLOCATE(ff)
+   end do ! end loop on ilmn
+   
+   ABI_DEALLOCATE(ff)
 
  end do ! end loop over atoms
 

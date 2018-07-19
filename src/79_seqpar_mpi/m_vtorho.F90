@@ -57,6 +57,9 @@ module m_vtorho
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
+ use m_paw_correlations,   only : setnoccmmp
+ use m_paw_occupancies,   only : pawmkrhoij
+ use m_paw_mkrho,          only : pawmkrho
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
@@ -73,6 +76,10 @@ module m_vtorho
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
  use m_common,             only : prteigrs
+ use m_dmft,               only : dmft_solve
+ use m_datafordmft,        only : datafordmft
+ use m_fourier_interpol,   only : transgrid
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -281,11 +288,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_dmft
 !End of the abilint section
 
  implicit none

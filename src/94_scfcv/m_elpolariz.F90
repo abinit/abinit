@@ -38,7 +38,7 @@ module m_elpolariz
 
  use m_geometry, only : metric
  use m_symtk,    only : matr3inv
- use m_abilasi,  only : dzgedi, dzgefa
+ use m_hide_lapack,  only : dzgedi, dzgefa
  use m_rwwf,     only : rwwf
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type

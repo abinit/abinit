@@ -44,8 +44,8 @@ MODULE m_haydock
  use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
- use m_blas,              only : xdotc, xgemv
- use m_abilasi,           only : matrginv
+ use m_hide_blas,         only : xdotc, xgemv
+ use m_hide_lapack,       only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
  use m_kpts,              only : listkk
@@ -53,7 +53,7 @@ MODULE m_haydock
  use m_crystal_io,        only : crystal_ncwrite
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_pawhr,             only : pawhur_t
+ use m_paw_hr,            only : pawhur_t
  use m_wfd,               only : wfd_t, wfd_sym_ur, wfd_get_ur, wfd_change_ngfft, wfd_wave_free
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme
  use m_pawtab,            only : pawtab_type

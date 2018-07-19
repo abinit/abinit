@@ -407,7 +407,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -3520,7 +3520,8 @@ end subroutine ifc_test_phinterp
 !! OUTPUT
 !!  (Optional)
 !!  phfrq2l(3*crystal%natom,nph2l)=List of phonon frequencies
-!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities (see Eq.(41) of Veithen et al, PRB71, 125107 (2005))
+!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities 
+!!     (see Eq.(41) of Veithen et al, PRB71, 125107 (2005) [[cite:Veithen2005]])
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.

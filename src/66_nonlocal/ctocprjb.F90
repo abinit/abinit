@@ -45,12 +45,11 @@ subroutine ctocprjb(atindx1,cg,cprj,dtorbmag,icgb,idir,ifor,ikgb,&
  use m_profiling_abi
  use m_errors
 
- use m_orbmag
- 
- use m_pawang,           only : pawang_type
- use m_pawcprj, only : pawcprj_type, pawcprj_put, pawcprj_alloc, pawcprj_free, pawcprj_getdim
- use m_pawrad,           only : pawrad_type
- use m_pawtab,  only : pawtab_type
+ use m_pawang,     only : pawang_type
+ use m_pawcprj,    only : pawcprj_type, pawcprj_put, pawcprj_alloc, pawcprj_free, pawcprj_getdim
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_paw_orbmag, only : orbmag_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -96,19 +95,19 @@ subroutine ctocprjb(atindx1,cg,cprj,dtorbmag,icgb,idir,ifor,ikgb,&
 
  ABI_ALLOCATE(ylm_kb,(npwb,mpsang*mpsang))
  do ilm=1,mpsang*mpsang
-    ylm_kb(1:npwb,ilm)=ylm(1+ikgb:npwb+ikgb,ilm)
+   ylm_kb(1:npwb,ilm)=ylm(1+ikgb:npwb+ikgb,ilm)
  end do
  
  do iband = 1, nband_k
 
-    cwavef(1:2,1:npwb) = cg(1:2,icgb+(iband-1)*npwb+1:icgb+iband*npwb)
-    
-    call getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
-     &mpsang,natom,npwb,nspinor,ntypat,pawang,pawrad,pawtab,typat,ylm_kb)
+   cwavef(1:2,1:npwb) = cg(1:2,icgb+(iband-1)*npwb+1:icgb+iband*npwb)
+   
+   call getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
+&   mpsang,natom,npwb,nspinor,ntypat,pawang,pawrad,pawtab,typat,ylm_kb)
 
     ! hard-coded for nspinor 1, nsppol 1
-    call pawcprj_put(atindx1,cwaveprj,cprj,natom,iband,0,0,0,1,&
-&           nband_k,mkmem,natom,1,nband_k,dimlmn,1,1,0)
+   call pawcprj_put(atindx1,cwaveprj,cprj,natom,iband,0,0,0,1,&
+&   nband_k,mkmem,natom,1,nband_k,dimlmn,1,1,0)
 
  end do
 

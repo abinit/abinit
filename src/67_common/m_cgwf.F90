@@ -42,6 +42,7 @@ module m_cgwf
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
  use m_getghc,        only : getghc
  use m_berrytk,       only : smatrix
+ use m_paw_overlap, only : smatrix_k_paw
 
  implicit none
 
@@ -160,7 +161,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
 !End of the abilint section
@@ -660,7 +660,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end if
 
          ! Electric field: compute the gradient of the Berry phase part of the energy functional.
-         ! See PRL 89, 117602 (2002), grad_berry(:,:) is the second term of Eq. (4)
+         ! See PRL 89, 117602 (2002) [[cite:Souza2002]], grad_berry(:,:) is the second term of Eq. (4)
          if (finite_field) then
 
            call make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&

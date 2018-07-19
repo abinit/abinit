@@ -18,13 +18,22 @@ For the description of the implementation of TCDFT in ABINIT see [[cite:Wiktor20
 
 The user should be familiar with the four basic tutorials of ABINIT and the [first PAW tutorial](paw1).
 
+[TUTORIAL_README]
+
 This tutorial should take about 2 hours.
 
-
-## 1. Computing the positron lifetime in Si lattice
+## Computing the positron lifetime in Si lattice
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other tutorials. Why not `Work_positron`?*
+for the other tutorials. Why not Work_positron?*
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_positron
+cd Work_positron
+cp ../tpositron_x.files .   # You will need to edit this file.
+cp ../tpositron_1.in .
+```
 
 The tutorial begins with a calculation of the positron lifetime in a silicon lattice.
 In a perfect material the positron is delocalized. We can assume that its
@@ -66,12 +75,12 @@ We can now run the calculation. In the directory
 
 Then, issue:
 
-    abinit < tpositron_x.files >& tpositron_1.log
+    abinit < tpositron_x.files > log 2> err &
 
 This calculation should only take a few seconds.
 
-You can look at the `tpositron_1.out` file. We find the positron lifetime
-calculated in the RPA limit:
+You can look at the *tpositron_1.out* file. 
+We find the positron lifetime calculated in the RPA limit:
 
     ########## Lifetime computation 2
 
@@ -98,7 +107,7 @@ with the experimental value of about 219 ps [[cite:Panda1997]].
     setting [[posocc]] to a small value (0.0001 ...). This value must obviously be tested...
 
 
-## 2. Computing the positron lifetime in a Si monovacancy
+## Computing the positron lifetime in a Si monovacancy
 
 We will now perform a positron lifetime calculation for a monovacancy in
 silicon in the conventional scheme (which we applied to the perfect lattice
@@ -112,12 +121,12 @@ calculation is relatively fast.
 
 {% dialog tests/tutorial/Input/tpositron_2.in %}
 
-You can now, issue (after having replaced `tpositron_1` by `tpositron_2` in the
-`tpositron_x.files` file):
+You can now, issue (after having replaced *tpositron_1* by *tpositron_2* in the
+*tpositron_x.files* file):
 
-    abinit < tpositron_x.files >& tpositron_2.log
+    abinit < tpositron_x.files > log 2> err &
 
-Once the calculation is finished, look at the `tpositron_2.out` file.
+Once the calculation is finished, look at the *tpositron_2.out* file.
 Again, we look at the reported lifetime:
 
     ########## Lifetime computation 2
@@ -134,7 +143,7 @@ increases from 223 to 247 ps. This is because now the majority of the positron
 density is localized in the vacancy region, where the electron density is
 small. The overlap of the electron and positron densities is reduced, and the lifetime increased.
 
-In the `Work` directory, you will also find a `tpositron_2o_DS2_DEN_POSITRON`
+In the *Work_positron* directory, you will also find a *tpositron_2o_DS2_DEN_POSITRON*
 file, containing the positron density. Visualizing this file (using e.g.
 _cut3d_ and _XcrysDen_ or _VMD_ ) you can see that the positron is localized
 inside the vacancy. You can see below how the positron (in red, isodensity at
@@ -143,28 +152,28 @@ inside the vacancy. You can see below how the positron (in red, isodensity at
 ![](positron_assets/posdensity.png)
 
 
-## 3. Performing a self-consistent electron-positron calculation for a Si vacancy
+## Performing a self-consistent electron-positron calculation for a Si vacancy
 
 We will now perform a self-consistent calculation of the positron and electron
 densities. As this calculation will take a few minutes, you can already issue
-(putting `tpositron_3.in` in `tpositron_x.files`):
+(putting *tpositron_3.in* in *tpositron_x.files*):
 
-    abinit < tpositron_x.files >& tpositron_3.log
+    abinit < tpositron_x.files > log 2> err &
 
 {% dialog tests/tutorial/Input/tpositron_3.in %}
 
 This calculation is significantly longer than the previous one, because the
 electron and positron steps will be repeated until the convergence criterion is reached. 
 
-In `tpositron_3.in` we only have one dataset and we set
-[[positron]]=-10 to perform an automatic calculation of electrons and positron
-densities. The convergence is controlled by [[postoldfe]]=1d-5. This means
+In *tpositron_3.in* we only have one dataset and we set
+[[positron]] = -10 to perform an automatic calculation of electrons and positron
+densities. The convergence is controlled by [[postoldfe]] = 1d-5. This means
 that we will repeat the electron and positron steps until the energy
 difference between them is lower than 1d-5 Ha. This value should always be
-larger than [[toldfe]]. In this calculation we still use [[ixcpositron]]=1,
+larger than [[toldfe]]. In this calculation we still use [[ixcpositron]] = 1,
 which means that we are using the GGGC scheme (see [[cite:Gilgien1994]] and [[cite:Wiktor2015]]
 
-Once the calculation is finished, look at the positron lifetime in `tpositron_3.out`.
+Once the calculation is finished, look at the positron lifetime in *tpositron_3.out*.
 
     ########## Lifetime computation 2
 
@@ -179,24 +188,23 @@ Including the self-consistency increases the positron lifetime, because its
 localization inside the vacancy becomes stronger when the positron and the
 electron densities are allowed to relax.
 
-
-## 4. Relaxing the vacancy according to forces due to electrons and the positron
+## Relaxing the vacancy according to forces due to electrons and the positron
 
 In addition to the self-consistency, the lifetime of a positron inside a
 vacancy can be strongly affected by the relaxation of the atoms due to the
 forces coming from both the electrons and the positron. You can already start
 the relaxation of the vacancy by issuing:  
 
-    abinit < tpositron_4.files >& tpositron_4.log
+    abinit < tpositron_4.files > log 2> err &
 
 !!! important 
 
-    Don't forget to put `tpositron_4.in` in `tpositron_x.files`.
+    Don't forget to put *tpositron_4.in* in *tpositron_x.files*.
 
 In this calculation we switched on the atomic relaxation by setting
-[[ionmov]]=2. We need to calculate forces to be able to move the atoms, so we
-set [[optforces]]=1. In the provided `tpositron_4.in` file, we only perform 4
-relaxation steps ([[ntime]]=4) to save time, but more steps would be needed to
+[[ionmov]] = 2. We need to calculate forces to be able to move the atoms, so we
+set [[optforces]] = 1. In the provided *tpositron_4.in* file, we only perform 4
+relaxation steps ([[ntime]] = 4) to save time, but more steps would be needed to
 converge the positron lifetime.
 
 {% dialog tests/tutorial/Input/tpositron_3.in %}
@@ -230,7 +238,7 @@ Also, remember that the 16-atom supercell is not large enough to get converged
 results. In Table IV of [[cite:Wiktor2015]] you can see converged
 results of the positron lifetime of Si monovacancy within various methods.
 
-## 5. Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice
+## Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice
 
 In the last part of the tutorial we will calculate the electron-positron
 momentum distribution (_Doppler spectrum_) of a silicon lattice in the conventional
@@ -238,37 +246,37 @@ scheme. This type of calculation is much more time and memory consuming than
 the _lifetime_ calculation, as it is using the electron and positron
 _wavefunctions_ (not only _densities_).
 
-You can already issue (putting `tpositron_5.in` in `tpositron_x.files`)_:
+You can already issue (putting *tpositron_5.in* in *tpositron_x.files*):
 
-    abinit < tpositron_5.files >& tpositron_5.log
+    abinit < tpositron_5.files > log 2> err &
 
-Now take a look at the input file `tpositron_5.in`. 
+Now take a look at the input file *tpositron_5.in*. 
 
 {% dialog tests/tutorial/Input/tpositron_5.in %}
 
-The momentum distribution calculation is activated by [[posdoppler]]=1. You can also notice that instead
+The momentum distribution calculation is activated by [[posdoppler]] = 1. You can also notice that instead
 of having two datasets as in the first part of this tutorial, we now use the
-automatic electron-positron loop and set [[posnstep]]=2. This is done because
+automatic electron-positron loop and set [[posnstep]] = 2. This is done because
 we need to have the full electron and positron wavefunctions in memory, which
-is only the case when [[positron]]<=-10. Additionally, the momentum
+is only the case when [[positron]] <= -10. Additionally, the momentum
 distribution calculations require using a full k-point grid. In the input file we set:
 
-        kptopt 0
-        istwfk *1
-        nkpt 8   # This corresponds to a 2x2x2 grid, denser grids may be needed to get converged spectra
-        kpt
-        0 0 0
-        0 0 0.5
-        0 0.5 0
-        0.5 0 0
-        0 0.5 0.5
-        0.5 0 0.5
-        0.5 0.5 0
-        0.5 0.5 0.5
+    kptopt 0
+    istwfk *1
+    nkpt 8   # This corresponds to a 2x2x2 grid, denser grids may be needed to get converged spectra
+    kpt
+    0 0 0
+    0 0 0.5
+    0 0.5 0
+    0.5 0 0
+    0 0.5 0.5
+    0.5 0 0.5
+    0.5 0.5 0
+    0.5 0.5 0.5
 
 This grid is used in both electron and positron calculations, but only the
 positron _wavefunction_ at the first point is taken in the momentum distribution
-calculation, so the &Gamma; point should always be given first.
+calculation, so the $\Gamma$ point should always be given first.
 
 In the calculation of the momentum distribution, we need to include both _core_
 and _valence_ electrons. The _wavefunctions_ of the core electrons are read from a
@@ -276,19 +284,18 @@ file (one per atom type), which needs to be provided. This _core WF file_ should
 be named `<psp_file_name>.corewf` (where `<psp_file_name>` is the name of the
 pseudo-potential (or PAW) file) or `corewf.abinit<ityp>` (where `<ityp>` is the
 index of the atom type). _Core WF files_ can be obtained with the `atompaw` tool
-(see [the tutorial on generating PAW datasets (PAW2)](PAW2) ) by the use of the
+(see [the tutorial on generating PAW datasets (PAW2)](paw2) ) by the use of the
 `prtcorewf` keyword. You will find the core wavefunction file used in this calculation in
+*$ABI_PSPDIR/Si.LDA-PW-paw.abinit.corewf*.
 
-    ~abinit/tests/Psps_for_tests/Si.LDA-PW-paw.abinit.corewf
-
-Once the calculation is complete, you can find a `tpositron_5o_DOPPLER` file
+Once the calculation is complete, you can find a *tpositron_5o_DOPPLER* file
 containing the _momentum distribution_ on the FFT grid. You can use the
-**~abinit/scripts/post_processing/posdopspectra.F90** tool to generate 1D
+*~abinit/scripts/post_processing/posdopspectra.F90* tool to generate 1D
 projections (_Doppler spectra_) in (001), (011) and (111) directions and to
 calculate the low- and high-momentum contributions to the
 momentum distribution (so called `S` and `W` parameters, see [[cite:Wiktor2015]]).
 
-## 6. Studying the effect of the PAW dataset completeness
+## Studying the effect of the PAW dataset completeness
 
 The positron lifetime and momentum distribution calculations within the PAW
 method are very sensitive to the number of valence electrons in the **PAW
@@ -304,11 +311,11 @@ used only for the positron wave function description, while keeping the
 initial number of valence electrons (as done in [[cite:Wiktor2015]]). However, this second method is less straightforward.
 
 The previous calculations were done with only **4 valence electrons** (`3s` and `3p`).
-We will now see what happens if we include the `2s` and `2p` states in the **PAW
-dataset**. In `tpositron_12el_x.files` we have replaced the `Si.LDA-PW-paw.abinit`
-dataset with `Si.12el.LDA-PW-paw.abinit`. We can now rerun the lifetime calculation:
+We will now see what happens if we include the `2s` and `2p` states in the **PAW dataset**. 
+In *tpositron_12el_x.files* we have replaced the *Si.LDA-PW-paw.abinit*
+dataset with *Si.12el.LDA-PW-paw.abinit*. We can now rerun the lifetime calculation:
 
-    abinit < tpositron_12el_x.files >& tpositron_6.log
+    abinit < tpositron_12el_x.files > log 2> err
 
 We now find the positron lifetime calculated in the RPA limit:
 
@@ -327,11 +334,11 @@ the PAW dataset completeness for positron calculations**.
 
 The PAW dataset completeness is even more important in the _Doppler spectra_
 calculations. We will now recalculate the momentum distribution including 12
-_valence electrons_ (using `tpositron_7.in` in `tpositron_12el_x.files`):
+_valence electrons_ (using *tpositron_7.in* in *tpositron_12el_x.files*):
 
-    abinit < tpositron_12el_x.files >& tpositron_7.log
+    abinit < tpositron_12el_x.files > log 2> err
 
-Before processing the new `tpositron_7o_DOPPLER file`, you should copy files
+Before processing the new *tpositron_7o_DOPPLER file*, you should copy files
 `rho_001`, `rho_011`, `rho_111` from the fifth step to for instance `si4el_001`, `si4el_011` and `si4el_111`.
 By plotting the _Doppler spectra_ in the (001) direction calculated with 4 and
 12 valence electrons, you should obtain a figure like this:
@@ -344,4 +351,4 @@ unphysically high probability at high momenta in the spectrum.
 
 Further explanation of the influence of the PAW dataset on the _Doppler spectra_
 can be found in [[cite:Wiktor2015]]. In case you need to generate
-your own dataset for momentum distribution calculations, you can follow the [tutorial on generating PAW datasets (PAW2)](PAW2) .
+your own dataset for momentum distribution calculations, you can follow the [tutorial on generating PAW datasets (PAW2)](paw2).

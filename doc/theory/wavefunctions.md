@@ -23,32 +23,32 @@ $$
 \newcommand{\mcA}{{\mathcal{A}}}
 $$
 
-Representation and conversion of one wavefunction
-ABINIT data structures and their theoretical justifications
+Representation and convension of one wavefunction
+ABINIT data structures and their theoretical justifications.
 
 ## Notations and theoretical considerations
 
 A Bloch wavefunction characterized by a wavevector $\kk$ is such that
 
-$$ \psi_{\bf k}({\bf r}) = e^{i{\bf k}\cdot{\bf r}} u_{\bf k}({\bf r}) $$
+$$ \psi_{\bf k}({\bf r}) = e^{i{\bf k}\cdot{\bf r}} u_{\bf k}({\bf r}) \,, $$ 
 
 where $u_{\bf k}({\bf r})$ is periodic, that is
 
-$$ u_{\bf k}({\bf r}+{\bf R})=u_{\bf k}({\bf r}) $$
+$$ u_{\bf k}({\bf r}+{\bf R})=u_{\bf k}({\bf r}) \,, $$ 
 
 where ${\bf R}$ is a vector of the real space lattice.
 
-Representation by plane waves
+Its representation by plane waves reads:
 
 \begin{eqnarray*}
-u_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})e^{i{\bf G}\cdot{\bf r}} \\
+u_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})e^{i{\bf G}\cdot{\bf r}}  \,, \\
 \psi_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})
-e^{i ({\bf k}+{\bf G})\cdot{\bf r}}
-\end{eqnarray*}
+e^{i ({\bf k}+{\bf G})\cdot{\bf r}} \,.
+\end{eqnarray*} 
 
-Normalisation
+Normalization of ${u_k}$ reads:
 
-$$ \sum_{\bf G}|u_{\bf k}({\bf G})|^2 = 1 $$
+$$ \sum_{\bf G}|u_{\bf k}({\bf G})|^2 = 1 \,.$$
 
 For a **spinor** wavefunction, there is an additional variable, 
 the spin $\sigma$ that can take two values, that is $\sigma=\uparrow$ (spin up) 
@@ -56,28 +56,28 @@ or $\sigma=\downarrow$ (spin down).
 The following relations hold:
 
 $$
-u_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i{\bf G} \cdot {\bf r}}
+u_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i{\bf G} \cdot {\bf r}} \,,
 $$
 
 $$
-\psi_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i({\bf k}+{\bf G})\cdot{\bf r}}
+\psi_{\bf k}({\bf r},\sigma) = \sum_{\bf G}u_{\bf k}({\bf G},\sigma) e^{i({\bf k}+{\bf G})\cdot{\bf r}} \,,
 $$
 
 $$
-\sum_{\sigma}\sum_{\bf G}|u_{\bf k}({\bf G},\sigma)|^2 = 1
+\sum_{\sigma}\sum_{\bf G}|u_{\bf k}({\bf G},\sigma)|^2 = 1 \,.
 $$
 
 ## Properties of the wavefunctions (scalar case)
 
 For ground-state wavefunctions, we have to solve the Schrödinger equation
 
-$$ H |\psi_{n{\bf k}}\ra = \varepsilon_{n{\bf k}}|\psi_{n{\bf k}}\ra $$
+$$ H |\psi_{n{\bf k}}\ra = \varepsilon_{n{\bf k}}|\psi_{n{\bf k}}\ra \,, $$
 
 where $H$ is the Hamiltonian operator, $n$ labels the state (or the band), $\varepsilon_{n{\bf k}}$ is the eigenvalue.
 
 As the wavevector labelling of an eigenstate comes from the property
 
-$$ \psi_{\bf k}({\bf r}+{\bf R}) = e^{i{\bf k}{\bf R}} \psi_{\bf k}({\bf r}) $$
+$$ \psi_{\bf k}({\bf r}+{\bf R}) = e^{i{\bf k}{\bf R}} \psi_{\bf k}({\bf r}) \,, $$
 
 in which $\kk$ can be replaced by $\kk + \GG$ where $\GG$ is any reciprocal space lattice vector, we can
 *choose* the wavefunctions at $\kk$ and $\kk + \GG$
@@ -89,10 +89,10 @@ $$ \psi_{\kk + \GG}(\rr) = \psi_\kk(\rr) $$
 
 to keep the notation as simple as possible,
 
-The time-reversal symmetry (non-magnetic case) of the Hamiltonian gives the following relation
+The time-reversal symmetry (non-magnetic case) of the Hamiltonian gives the following relation:
 
 $$
-\psi_{n{\bf k}}({\bf r}) = \psi^{*}_{n-\bf k}({\bf r})
+\psi_{n{\bf k}}({\bf r}) = \psi^{*}_{n-\bf k}({\bf r}) \,.
 $$
 
 For the ${\bf k}$ wavevectors that are half a reciprocal lattice vector
@@ -103,7 +103,7 @@ $$
 u_{n{\bf k}}({\bf G}) =
 u_{n{\bf k}-{\bf G}_{0}}({\bf G}+{\bf G}_{0}) = 
 u_{n-{\bf k}}({\bf G}+{\bf G}_{0}) =
-u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{0})
+u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{0}) \,.
 $$
 
 That is, coefficients at $\GG$ and $-{\bf G}-{\bf G}_{0}$ are related.
@@ -115,11 +115,11 @@ application of the non-local part and the Fourier transform.
 
 One must distinguish two classes of Hamiltonians:
 
-1. the Hamiltonian is spin-diagonal
-2. the Hamiltonian mixes the spin components
+1. the Hamiltonian is spin-diagonal,
+2. the Hamiltonian mixes the spin components.
 
 In the first class, one finds usual non-spin-polarized, non-spin-orbit
-Hamiltonians, in which case the spin up-spin up and spin down-spin down parts of the Hamiltonian 
+Hamiltonians, in which case the spin up-spin up and spin down-spin down parts of the Hamiltonian
 are equal, as well as spin-polarized
 Hamiltonian when the magnetic field varies in strength but *not* in direction.
 In the second class, one finds Hamiltonians that include the
@@ -140,22 +140,22 @@ These two classes are mutually exclusive. The possibilities are thus:
    1         |     2       |   spinor wavefunctions
 
 
-The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2
+The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2.
 
 ## Plane wave basis set sphere
 
 In order to avoid dealing with an infinite number of plane waves to represent Bloch wavefunctions,
 one selects those with a kinetic energy lower than some cutoff energy $E_{\rm cut}$.
-The set of allowed ${\bf G}$ vectors will be noted by $\mcS_{\kk}(E_{\rm cut})$
+The set of allowed ${\bf G}$ vectors will be denoted by $\mcS_{\kk}(E_{\rm cut})$ such that
 
 $$
-\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{\lvert{\bf k + G}\rvert^{2}}{2} \leq E_{\rm cut}
+\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{\lvert{\bf k + G}\rvert^{2}}{2} \leq E_{\rm cut} \,.
 $$
 
 The kinetic energy cutoff is computed from the input variables [[ecut]] and [[dilatmx]]
-to give the *effective* value:
+to give the *effective* value
 
-$$ {\text{ecut_eff}} = {\text ecut} * ({\text dilatmx}) ** 2 $$
+$$ {\text{ecut_eff}} = {\text ecut} * ({\text dilatmx})^2 $$
 
 For special $\kk$-points satisfying the condition $2 \kk = \GG_0$, not all coefficients must be stored. 
 A specific storage mode, governed by the input variable [[istwfk]] has been
@@ -174,11 +174,11 @@ $$
 
 For these points, the number of $\GG$ vectors to be taken into account, is decreased by about a factor of 2.
 For the $\GG$'s that are not treated, the coefficients
-$u_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to 
+$u_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to
 
 $$ u_{n{\bf k}}({\bf G}) = u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_0) $$
 
-The value of [[istwfk]] is automatically computed by the code 
+The value of [[istwfk]] is automatically computed by the code
 on the basis of the k-point coordinates and the treatment of time-reversal symmetry as specified by [[kptopt]].
 One can disable the time-reversal trick in the input file by setting explicitly the value of [[istwfk]]
 with the syntax:
@@ -220,33 +220,40 @@ for a 3D-mesh of $\rr$-points, extremely fast, from the values $u_{n\kk}(\GG)$.
 The FFT algorithm starts from values of a function
 
 $$
-z (j_{1},j_{2},j_{3}) \, \mbox{for} \,
-j_{1}=0\cdots(N_{1}-1),j_{2}=0\cdots(N_{2}-1),j_{3}=0\cdots(N_{3}-1)
+\begin{aligned}
+  z (j_{1},j_{2},j_{3})  \, \mbox{for} \, &j_{1}=0\cdots(N_{1}-1) \,, \\
+               &j_{2}=0\cdots(N_{2}-1) \,,
+               &j_{3}=0\cdots(N_{3}-1)
+\end{aligned}
 $$
 
 and compute fast the transformed
 
 $$
-\tilde{z}(l_{1},l_{2},l_{3}) \, \mbox{for} \,
-l_{1}=0\cdots(N_{1}-1),l_{2}=0\cdots(N_{2}-1),l_{3}=0\cdots(N_{3}-1)
+\begin{aligned}
+\tilde{z}(l_{1},l_{2},l_{3}) \, \mbox{for} \, 
+                                &l_{1}=0\cdots(N_{1}-1)\,, \\
+				&l_{2}=0\cdots(N_{2}-1)\,, \\
+				&l_{3}=0\cdots(N_{3}-1)  \\
+\end{aligned}
 $$
 
 with
 
 $$
 \tilde{z}(l_{1},l_{2},l_{3})=\sum_{j_{1},j_{2},j_{3}} z(j_{1},j_{2},j_{3})
-e^{i2\pi\left(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}}\right)}
+e^{i2\pi\left(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}}\right)} \,.
 $$
 
 We want the values of $u_{\bf k}({\bf r})$ on a FFT grid with: 
 
 \begin{eqnarray*}
 r^{red}_{1}&=&\frac{0}{N_{1}},\frac{1}{N_{1}},\cdots
-\frac{N_{1}-1}{N_{1}}\left(=\frac{l_{1}}{N_{1}}\right) \\
+\frac{N_{1}-1}{N_{1}}\left(=\frac{l_{1}}{N_{1}}\right) \,, \\
 r^{red}_{2}&=&\frac{0}{N_{2}},\frac{1}{N_{1}},\cdots
-\frac{N_{2}-1}{N_{2}}\left(=\frac{l_{2}}{N_{2}}\right) \\
+\frac{N_{2}-1}{N_{2}}\left(=\frac{l_{2}}{N_{2}}\right) \,, \\
 r^{red}_{3}&=&\frac{0}{N_{3}},\frac{1}{N_{3}},\cdots
-\frac{N_{3}-1}{N_{3}}\left(=\frac{l_{3}}{N_{3}}\right)
+\frac{N_{3}-1}{N_{3}}\left(=\frac{l_{3}}{N_{3}}\right) \,. 
 \end{eqnarray*}
 
 The FFT algorithm has a computational cost that scales as $N\log(N)$ where $N$ is the 
@@ -424,8 +431,8 @@ of the three spatial coordinates is conventionally defined by:
 \end{equation}
 
 Since $\omcR_\tt$ commutes with the Hamiltonian $\HH$ of the crystal, it readily
-follows that, given $\Psi_{n\kk}(\rr)$ eigenstate of $\HH$,
-also $\omcR_\tt\, \Psi_{n\kk}(\rr)$ is eigenstate of the Schrödinger problem with the same eigenvalue:
+follows that, given $\Psi_{n\kk}(\rr)$ being eigenstate of $\HH$,
+ $\omcR_\tt\, \Psi_{n\kk}(\rr)$ is also eigenstate of the Schrödinger problem with the same eigenvalue:
 
 \begin{equation}
  \begin{cases}
@@ -446,13 +453,13 @@ This important property can be seen as follows:
 
 \begin{equation}
 \label{eq:Rotation_of_psi}
- \begin{split}
- \Bigl[ \omcR_\tt\Psi_\nk \Bigr] (\rr+\RR) = & \quad 
- \Psi_\nk \bigl( \Ri (\rr+\RR-\tt) \bigr) =
-  e^{i \kk\cdot\Ri (\rr+\RR-\tt)}\, u_\nk \bigl( \Ri(\rr-\tt) \bigr) = \\
-  = & \quad e^{i\Rit \kk\cdot\rr}\, \Psi_\nk \bigl( \Ri (\rr-\tt)\bigr ) =
-  e^{i\,\mcR \kk \cdot \rr}\, \omcR_\tt \Psi_\nk(\rr),
- \end{split}
+ \begin{aligned}
+ \Bigl[ \omcR_\tt\Psi_\nk \Bigr] (\rr+\RR) =  \quad 
+   & \Psi_\nk \bigl( \Ri (\rr+\RR-\tt) \bigr) \\ 
+ = & e^{i \kk\cdot\Ri (\rr+\RR-\tt)}\, u_\nk \bigl( \Ri(\rr-\tt) \bigr) \\
+ = & \quad e^{i\Rit \kk\cdot\rr}\, \Psi_\nk \bigl( \Ri (\rr-\tt)\bigr ) \\
+ = & e^{i\,\mcR \kk \cdot \rr}\, \omcR_\tt \Psi_\nk(\rr),
+ \end{aligned}
 \end{equation}
 
 where $\RR$ is an arbitrary vector of the direct Bravais lattice and the invariance of the periodic part of 

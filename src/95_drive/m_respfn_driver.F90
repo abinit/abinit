@@ -69,6 +69,11 @@ module m_respfn_driver
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
+ use m_paw_sphharm, only : setsym_ylm
+ use m_paw_nhat,    only : nhatgrid,pawmknhat
+ use m_paw_tools,   only : chkpawovlp
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_init,    only : pawinit,paw_gencond
  use m_kg,          only : getcut, getph, kpgio
  use m_eig2d,       only : eig2tot, elph2_fanddw
  use m_inwffil,     only : inwffil
@@ -84,6 +89,10 @@ module m_respfn_driver
  use m_drivexc,     only : check_kxc
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1, prteigrs
+ use m_fourier_interpol, only : transgrid
+
+ use m_paw_occupancies, only : initrhoij
+ use m_paw_correlations,only : pawpuxinit
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -190,7 +199,7 @@ contains
 !!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsymrhoij,setup1,status,symdij
+!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsym_ylm,setup1,status,symdij
 !!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
 !!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
 !!
@@ -207,7 +216,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_65_paw
  use interfaces_72_response
 !End of the abilint section
 
@@ -645,7 +653,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
-     call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
+     call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
      ! Update internal values
@@ -657,7 +665,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if (pawtab(1)%has_nabla==1) pawtab(1:psps%ntypat)%has_nabla=2
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    pawtab(:)%usepawu=0
    pawtab(:)%useexexch=0
    pawtab(:)%exchmix=zero

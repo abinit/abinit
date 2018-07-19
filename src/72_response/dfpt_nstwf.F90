@@ -351,7 +351,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            MVeithen 021212 :
 !            1) Case ipert1 = natom + 2 and ipert = natom + 2:
 !            the second derivative of the energy with respect to an electric
-!            field is computed from Eq. (38) of X. Gonze, PRB 55 ,10355 (1997).
+!            field is computed from Eq. (38) of X. Gonze, PRB 55 ,10355 (1997) [[cite:Gonze1997a]].
 !            The evaluation of this formula needs the operator $i \frac{d}{dk}.
 !            2) Case ipert1 = natom + 2 and ipert < natom:
 !            the computation of the Born effective charge tensor uses
@@ -486,7 +486,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
  DBG_EXIT("COLL")
 
-contains
+  contains
 !!***
 
 !!****f* ABINIT/gaugetransfo
@@ -559,27 +559,27 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 !write(100,*) 'gaugetransfo: ',iband
 !ENDDEBUG
 
- cwavef_d(:,:) = cwavef(:,:)
+   cwavef_d(:,:) = cwavef(:,:)
 
- do jband = 1,nband_k !loop over bands
+   do jband = 1,nband_k !loop over bands
 
-   if ((abs(eig_k(iband)-eig_k(jband)) > etol).and.(abs(occ_k(jband)) > tol8 )) then
+     if ((abs(eig_k(iband)-eig_k(jband)) > etol).and.(abs(occ_k(jband)) > tol8 )) then
 
-     cwave0(:,:) = cg_k(:,1+(jband-1)*npw_k*nspinor:jband*npw_k*nspinor)
+       cwave0(:,:) = cg_k(:,1+(jband-1)*npw_k*nspinor:jband*npw_k*nspinor)
 
-     eig1(1) = eig1_k(2*jband-1+(iband-1)*2*nband_k)
-     eig1(2) = eig1_k(2*jband +(iband-1)*2*nband_k)
+       eig1(1) = eig1_k(2*jband-1+(iband-1)*2*nband_k)
+       eig1(2) = eig1_k(2*jband +(iband-1)*2*nband_k)
 
-     cwavef_d(1,:)=cwavef_d(1,:) &
-&     - (eig1(1)*cwave0(1,:)-eig1(2)*cwave0(2,:))/(eig_k(jband)-eig_k(iband))
-     cwavef_d(2,:)=cwavef_d(2,:) &
-&     - (eig1(1)*cwave0(2,:)+eig1(2)*cwave0(1,:))/(eig_k(jband)-eig_k(iband))
+       cwavef_d(1,:)=cwavef_d(1,:) &
+&       - (eig1(1)*cwave0(1,:)-eig1(2)*cwave0(2,:))/(eig_k(jband)-eig_k(iband))
+       cwavef_d(2,:)=cwavef_d(2,:) &
+&       - (eig1(1)*cwave0(2,:)+eig1(2)*cwave0(1,:))/(eig_k(jband)-eig_k(iband))
 
-   end if
+     end if
 
- end do    !loop over bands
+   end do    !loop over bands
 
-end subroutine gaugetransfo
+  end subroutine gaugetransfo
 !!***
 
 end subroutine dfpt_nstwf

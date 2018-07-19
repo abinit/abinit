@@ -50,7 +50,7 @@ MODULE m_io_kss
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
- use m_abilasi,          only : xheevx, xhegvx
+ use m_hide_lapack,      only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
@@ -63,6 +63,7 @@ MODULE m_io_kss
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -1029,7 +1030,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #undef ABI_FUNC
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

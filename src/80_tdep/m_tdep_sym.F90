@@ -73,7 +73,7 @@ contains
   ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%ptsymrel(:,:,1:Sym%nsym))
   ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
   ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
-  open(unit=75,file='sym.dat')
+  open(unit=75,file=trim(InVar%output_prefix)//'sym.dat')
   do isym=1,Sym%nsym
     write(75,*) ' '
     write(75,*) 'For isym=',isym
@@ -269,7 +269,7 @@ contains
   end do
 ! Write the Indsym of the atoms included in the (reference) unitcell (i.e.: the motif)
   if (InVar%debug) then
-    open(unit=40,file='Indsym-unitcell.dat')
+    open(unit=40,file=trim(InVar%output_prefix)//'Indsym-unitcell.dat')
     do iatom=1,InVar%natom_unitcell
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
@@ -286,7 +286,7 @@ contains
   ABI_MALLOC(indsym2,(8,Sym%nptsym,InVar%natom,InVar%natom)); indsym2(:,:,:,:)=0
   tmpi(:,:)=0.d0
   tmpj(:,:)=0.d0
-  if (InVar%debug) open(unit=40,file='Indsym-supercell.dat')
+  if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-supercell.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
     if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
@@ -313,7 +313,7 @@ contains
   if (InVar%debug) close(40)
 
 ! For a couple of (iatom,jatom). The (iatom,jatom) vector depends on the position of iatom (due to PBC)
-  if (InVar%debug) open(unit=40,file='Indsym-2atoms.dat')
+  if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-2atoms.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
     if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)

@@ -116,11 +116,11 @@ CONTAINS !===========================================================
 !!
 !! NOTES
 !!   References for electron-positron correlation functionals:
-!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-!!         [2] Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979) [[cite:Arponen1979a]].
+!!         [2] E. Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986) [[cite:Boronski1986]].
+!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991) [[cite:Sterne1991]].
+!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
+!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
 !!      m_pawxc

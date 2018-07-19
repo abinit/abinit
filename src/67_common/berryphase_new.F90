@@ -6,7 +6,7 @@
 !! FUNCTION
 !! This routine computes the Berry Phase polarization
 !!  and the finite difference expression of the ddk.
-!!  [see for example Na Sai et al., PRB 66, 104108 (2002)]
+!!  See for example Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]]
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2018 ABINIT  group (MVeithen)
@@ -120,20 +120,24 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  use defs_wvltypes
  use m_xmpi
  use m_errors
- use m_efield
  use m_profiling_abi
+ use m_mpinfo, only : proc_distrb_cycle
 
- use m_numeric_tools, only : rhophi
- use m_io_tools, only : open_file
- use m_geometry, only : xred2xcart
- use m_iowf,     only : outwf
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
-                        pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
-                        pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
- use m_mpinfo,    only : proc_distrb_cycle
- use m_berrytk,   only : smatrix, polcart
+ use m_numeric_tools,only : rhophi
+ use m_io_tools,     only : open_file
+ use m_geometry,     only : xred2xcart
+ use m_iowf,         only : outwf
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only : pawrhoij_type
+ use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
+                            pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
+                            pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
+ use m_paw_dfpt,     only : dsdr_k_paw
+ use m_paw_overlap,  only : smatrix_k_paw
+
+ use m_efield
+ use m_berrytk,      only : smatrix, polcart
+ use m_paw_efield,   only : pawpolev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -141,7 +145,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 #define ABI_FUNC 'berryphase_new'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1475,7 +1478,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      berrysav == 0,  for non fixed D/d calculation, polarizaion is in [-1,1],done above
 !      for fixed D/d calculation, choose polarization to minimize internal
 !      energy, or minimize |red_efiled|. (red_dfield=red_efiled+red_ptot)
-!      (d=e+p, as (26) of Stengel, Suppl.)
+!      (d=e+p, as (26) of Stengel, Suppl.) [[cite:Stengel2009]]
 !      This is default value.
 !
 !      berrysav == 1,  keep the polarization on the same branch, which saved in file POLSAVE

@@ -18,28 +18,18 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "compute_levels.F90",
- "datafordmft.F90",
- "dmft_solve.F90",
- "dyson.F90",
- "fermi_green.F90",
- "hubbard_one.F90",
- "impurity_solve.F90",
- "hybridization_asymptotic_coefficient.F90",
- "ldau_self.F90",
- "local_ks_green.F90",
+ "m_datafordmft.F90",
+ "m_dmft.F90",
  "m_energy.F90",
  "m_entropyDMFT.F90",
+ "m_forctqmc.F90",
  "m_green.F90",
  "m_hu.F90",
+ "m_hubbard_one.F90",
+ "m_ldau_self.F90",
  "m_matlu.F90",
  "m_oper.F90",
  "m_self.F90",
- "newton.F90",
- "qmc_prep_ctqmc.F90",
- "spectral_function.F90",
- "psichi_renormalization.F90",
- "testcode_ctqmc.F90"
  ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

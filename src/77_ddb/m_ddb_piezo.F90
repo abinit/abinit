@@ -30,7 +30,7 @@ module m_ddb_piezo
  use m_errors
 
  use m_fstrings,       only : sjoin, itoa
- use m_abilasi,        only : matrginv
+ use m_hide_lapack,    only : matrginv
  use m_anaddb_dataset, only : anaddb_dataset_type
 
  implicit none

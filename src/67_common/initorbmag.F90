@@ -39,7 +39,7 @@
 !!      gstate
 !!
 !! CHILDREN
-!!      kpgsph,listkk,setsymrhoij,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
+!!      kpgsph,listkk,setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -56,29 +56,28 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_orbmag
  use m_profiling_abi
  use m_errors
  use m_xmpi
 
- use m_time,    only : timab
- use m_symtk,   only : symatm
- use m_fftcore, only : kpgsph
- use m_kpts,    only : listkk, smpbz
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type, simp_gen
- use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
- use m_paw_sphharm, only : initylmr
+ use m_time,          only : timab
+ use m_symtk,         only : symatm
+ use m_fftcore,       only : kpgsph
+ use m_kpts,          only : listkk, smpbz
+ use m_pawang,        only : pawang_type
+ use m_pawrad,        only : pawrad_type, simp_gen
+ use m_pawtab,        only : pawtab_type
+ use m_pawcprj,       only : pawcprj_alloc, pawcprj_getdim
+ use m_paw_sphharm,   only : initylmr,setsym_ylm
+ use m_paw_orbmag,    only : orbmag_type
  use m_special_funcs, only : sbf8
- use m_mpinfo,  only : proc_distrb_cycle
+ use m_mpinfo,        only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initorbmag'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -229,7 +228,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
    call symatm(dtorbmag%atom_indsym,dtorbmag%natom,dtset%nsym,symrec,dtset%tnons,tol8,dtset%typat,xred)
    lmax = psps%mpsang - 1
    ABI_ALLOCATE(dtorbmag%zarot,(2*lmax+1,2*lmax+1,lmax+1,dtset%nsym))
-   call setsymrhoij(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
+   call setsym_ylm(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
    dtorbmag%nsym = dtset%nsym
    dtorbmag%lmax = lmax
    dtorbmag%lmnmax = psps%lmnmax
@@ -663,7 +662,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !       idx = ifor + 2*(idir-1)
  !       dk(:) = dtorbmag%dkvecs(:,idir)
  !       if (ifor .EQ. 2) dk(:) = -dk(:)
-       
+ 
  !       !    compute Y_LM(\hat{-b}) here
  !       bb(:) = -dk(:)
  !       !    reference bb to cartesian axes
@@ -686,7 +685,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !          !depends on |b| so only do this for the +b, not -b
  !          bnorm = two_pi*bnorm
  !          do itypat = 1, dtset%ntypat
-             
+ 
  !             mesh_size = pawtab(itypat)%mesh_size
  !             do ir=1,mesh_size
  !                arg=bnorm*pawrad(itypat)%rad(ir)
@@ -694,10 +693,10 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !                call sbf8(pawang%l_size_max,arg,sb_out) 
  !                dtorbmag%jb_bessel(idir,itypat,ir,:) = sb_out
  !             end do ! end loop over mesh
-          
+ 
  !          end do ! end loop over ntypat
  !       end if ! end check on ifor
-    
+ 
  !    end do ! end loop over ifor
  ! end do ! end loop over idir
 
@@ -730,7 +729,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !             dtorbmag%jkg_bessel(itypat,ir,ikpt,ipw,:)=sb_out(:)
  !          end do ! end loop over mesh_size
  !       end do ! end loop over ntypat
-       
+ 
  !    end do ! end loop over npw_k
 
  ! end do ! end loop over fnkpt
@@ -780,7 +779,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  !    end do ! end loop over ilmn
 
  !    ABI_DEALLOCATE(ff)
-    
+ 
  ! end do ! end loop over itypat
  
 
