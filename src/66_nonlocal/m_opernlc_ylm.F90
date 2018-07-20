@@ -1,4 +1,47 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_opernlc_ylm
+!! NAME
+!!  m_opernlc_ylm
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_opernlc_ylm
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ implicit none
+
+ private
+!!***
+
+ public :: opernlc_ylm
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/opernlc_ylm
 !! NAME
 !! opernlc_ylm
@@ -8,13 +51,6 @@
 !!   in order to reduce projected scalars
 !! * Operate with the non-local projectors and the overlap matrix,
 !!   in order to reduce projected scalars
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms (gives the absolute index of
@@ -86,22 +122,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &                      d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,enl,gx,gxfac,gxfac_sij,iatm,indlmn,itypat,&
 &                      lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nlmn,&
 &                      nspinor,nspinortot,optder,paw_opt,sij,hermdij)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -142,7 +166,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  logical :: hermdij_
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
- real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:) 
+ real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:)
 
 ! *************************************************************************
 
@@ -174,7 +198,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
    end do
 !$OMP END DO
-!$OMP END PARALLEL 
+!$OMP END PARALLEL
  end if
 
 !Accumulate gxfac related to nonlocal operator (PAW)
@@ -225,7 +249,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          end do
        end do
      end do
-!$OMP END DO 
+!$OMP END DO
 !$OMP END PARALLEL
 
 !    2-Enl is complex
@@ -363,7 +387,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
      end if !nspinortot
    end if !complex_enl
-   
+
 !  === Off-diagonal term(s) (up-down, down-up)
 !  --- No parallelization over spinors ---
    if (nspinortot==2.and.nspinor==nspinortot) then
@@ -793,11 +817,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
-               cplex_ = 2 ; 
+               cplex_ = 2 ;
                gxfi(1)    = zero ; gxfi(2)    = dgxdt(1,mu,jlmn,ia,ispinor)
                gxfj(1,mu) = zero ; gxfj(2,mu) = dgxdt(1,mu,jlmn,ia,jspinor)
              else
-               cplex_ = cplex ; 
+               cplex_ = cplex ;
                gxfi(1:cplex)   =dgxdt(1:cplex,mu,jlmn,ia,ispinor)
                gxfj(1:cplex,mu)=dgxdt(1:cplex,mu,jlmn,ia,jspinor)
              end if
@@ -1240,11 +1264,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
            do mu=1,nd2gxdtfac
              if(cplex_d2gxdt(mu)==2)then
-               cplex_ = 2 ; 
+               cplex_ = 2 ;
                gxfi(1)    = zero ; gxfi(2)    = d2gxdt(1,mu,jlmn,ia,ispinor)
                gxfj(1,mu) = zero ; gxfj(2,mu) = d2gxdt(1,mu,jlmn,ia,jspinor)
              else
-               cplex_ = cplex ; 
+               cplex_ = cplex ;
                gxfi(1:cplex)   =d2gxdt(1:cplex,mu,jlmn,ia,ispinor)
                gxfj(1:cplex,mu)=d2gxdt(1:cplex,mu,jlmn,ia,jspinor)
              end if
@@ -1426,4 +1450,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  end if
 
 end subroutine opernlc_ylm
+!!***
+
+end module m_opernlc_ylm
 !!***

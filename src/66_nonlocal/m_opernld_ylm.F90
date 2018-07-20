@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_opernld_ylm
+!! NAME
+!!  m_opernld_ylm
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_opernld_ylm
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: opernld_ylm
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/opernld_ylm
 !! NAME
 !! opernld_ylm
@@ -10,13 +52,6 @@
 !! * Operate with the non-local projectors and the overlap matrix Sij
 !!   in order to get contributions to <c|S|c>
 !!   from projected scalars
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  choice=chooses possible output
@@ -91,21 +126,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
 
-
- use defs_basis
- use m_profiling_abi
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -953,4 +977,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
  end if
 
 end subroutine opernld_ylm
+!!***
+
+end module m_opernld_ylm
 !!***

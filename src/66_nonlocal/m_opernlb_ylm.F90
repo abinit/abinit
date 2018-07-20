@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_opernlb_ylm
+!! NAME
+!!  m_opernlb_ylm
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_opernlb_ylm
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+#if defined HAVE_OPENMP
+ use OMP_LIB
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: opernlb_ylm
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/opernlb_ylm
 !! NAME
 !! opernlb_ylm
@@ -8,13 +52,6 @@
 !!   from projected scalars to reciprocal space.
 !! * Operate with the non-local projectors and the overlap matrix,
 !!   from projected scalars to reciprocal space.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  choice=chooses possible output (see below)
@@ -110,23 +147,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                      d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnl,ffnl,gxfac,gxfac_sij,&
 &                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
 &                      nspinor,paw_opt,ph3d,svect,ucvol,vect)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-#if defined HAVE_OPENMP
- use OMP_LIB
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1250,5 +1274,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #endif
 
 end subroutine opernlb_ylm
+!!***
 
+end module m_opernlb_ylm
 !!***

@@ -1,4 +1,52 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_opernla_ylm
+!! NAME
+!!  m_opernla_ylm
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_opernla_ylm
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+#if defined HAVE_OPENMP
+ use OMP_LIB
+#endif
+
+ use m_time,        only : timab
+
+ implicit none
+
+ private
+!!***
+
+ public :: opernla_ylm
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/opernla_ylm
 !! NAME
 !! opernla_ylm
@@ -8,13 +56,6 @@
 !! <p_lmn|c> where |p_lmn> are non-local projectors
 !!   With:
 !!   <p_lmn|c>=4pi/sqrt(vol) (i)^l Sum_g[c(g).f_nl(g).Y_lm(g).exp(2pi.i.g.R)]
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  choice=chooses possible output:
@@ -102,26 +143,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
-#if defined HAVE_OPENMP
- use OMP_LIB
-#endif
-
- use m_time,        only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2734,4 +2758,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  end if
 
 end subroutine opernla_ylm
+!!***
+
+end module m_opernla_ylm
 !!***
