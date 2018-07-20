@@ -47,6 +47,7 @@ module m_mkrho
  use m_io_tools,     only : open_file
  use m_splines,      only : spline,splint
  use m_sort,         only : sort_dp
+ use m_prep_kgb,     only : prep_fourwf
 
  implicit none
 

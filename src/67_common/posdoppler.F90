@@ -126,6 +126,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_drivexc, only : mkdenpos
  use m_gammapositron,   only : gammapositron_fft
  use m_paw_occupancies, only : pawaccrhoij
+ use m_prep_kgb,        only : prep_fourwf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

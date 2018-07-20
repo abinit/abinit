@@ -41,6 +41,7 @@ module m_chebfi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
+ use m_prep_kgb,      only : prep_getghc, prep_index_wavef_bandpp
 
  implicit none
 
