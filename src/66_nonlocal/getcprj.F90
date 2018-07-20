@@ -98,7 +98,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcprj'
- use interfaces_66_nonlocal, except_this_one => getcprj
 !End of the abilint section
 
  implicit none
