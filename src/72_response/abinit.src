@@ -45,7 +45,6 @@ sources = [
  "m_dfpt_vtowfk.F90",
  "dfpt_v1zeeman.F90",
  "d2frnl.F90",
- "eigen_meandege.F90",
  "eltxccore.F90",
  "elt_ewald.F90",
  "m_ddb.F90",

@@ -84,7 +84,7 @@ module m_respfn_driver
  use m_initylmg,    only : initylmg
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
- use m_dfpt_loopert,only : dfpt_looppert
+ use m_dfpt_loopert,only : dfpt_looppert, eigen_meandege
  use m_rhotoxc,     only : rhotoxc
  use m_drivexc,     only : check_kxc
  use m_mklocl,      only : mklocl
