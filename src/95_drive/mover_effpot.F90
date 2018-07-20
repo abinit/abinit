@@ -357,13 +357,13 @@ implicit none
      !   freq_b = 0.02
      ! end if
 
-!TEST_AM_old way 
+!TEST_AM_old way
 !     freq_q = 0.1
 !     freq_b = 0.01
 !     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
 !     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
 !TEST_AM
-     
+
 
 !TEST_AM
      freq_q = 800  / Ha_cmm1
@@ -371,8 +371,8 @@ implicit none
      qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
      bmass = 10000*qmass
 !TEST_AM
-     
-     
+
+
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
