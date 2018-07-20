@@ -282,7 +282,9 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Number of frequencies along the real axis: 201 , Step: 5.000000E-02 [eV]
+Method for q-space integration: 0
+Both Real and Imag part of Sigma will be computed.
+Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -410,7 +412,9 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Number of frequencies along the real axis: 201 , Step: 5.000000E-02 [eV]
+Method for q-space integration: 0
+Both Real and Imag part of Sigma will be computed.
+Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -620,7 +624,7 @@ P           mkmem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
+- B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
