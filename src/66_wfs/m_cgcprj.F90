@@ -116,6 +116,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 & ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,mkmem,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -461,6 +462,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 & mpi_enreg,mset,natom,nattyp,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat,&
 & shift_set1,shift_set2,pawtab,smn,usepaw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -703,6 +705,7 @@ end subroutine dotprodm_sumdiag_cgcprj
 & icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout) ! optional args
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -839,11 +842,11 @@ end subroutine lincom_cgcprj
  subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
 &  mpi_enreg,natom,nattyp,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgcprj_cholesky'
- use interfaces_66_wfs, except_this_one => cgcprj_cholesky
 !End of the abilint section
 
  implicit none

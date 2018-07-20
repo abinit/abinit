@@ -2774,7 +2774,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wf_mixing'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
