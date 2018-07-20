@@ -1,4 +1,189 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_scfcv_core
+!! NAME
+!!  m_scfcv_core
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_scfcv_core
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use defs_rectypes
+ use m_xmpi
+ use m_profiling_abi
+ use m_wffile
+ use m_rec
+ use m_ab7_mixing
+ use m_errors
+ use m_efield
+ use mod_prc_memory
+ use m_nctk
+ use m_hdr
+ use m_xcdata
+ use m_cgtools
+
+ use m_dtfil,            only : status
+ use m_time,             only : timab
+ use m_fstrings,         only : int2char4, sjoin
+ use m_symtk,            only : symmetrize_xred
+ use m_geometry,         only : metric
+ use m_fftcore,          only : getng, sphereboundary
+ use m_time,             only : abi_wtime, sec2str
+ use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
+ use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar, initmpi_seq, proc_distrb_cycle
+ use m_ioarr,            only : fftdatar_write_from_hdr
+ use m_results_gs ,      only : results_gs_type
+ use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
+ use m_energies,         only : energies_type, energies_init, energies_copy
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type,pawtab_get_lsize
+ use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
+ use m_pawfgrtab,        only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_pawrhoij,         only : pawrhoij_type
+ use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
+&                               pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim, pawcprj_reorder
+ use m_pawdij,           only : pawdij, symdij,pawdijhat
+ use m_pawfgr,           only : pawfgr_type
+ use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid,pawmknhat
+ use m_paw_tools,        only : chkpawovlp
+ use m_paw_denpot,       only : pawdenpot
+ use m_paw_occupancies,  only : pawmkrhoij
+ use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
+ use m_paw_orbmag,       only : orbmag_type
+ use m_paw_mkrho,        only : pawmkrho
+ use m_paw_uj,           only : pawuj_red
+ use m_paw_dfpt,         only : pawgrnl
+ use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
+                                fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
+ use m_gwls_hamiltonian, only : build_vxc
+#if defined HAVE_BIGDFT
+ use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
+#endif
+ use m_io_kss,           only : gshgg_mkncwrite
+ use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
+ use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_vtorhorec,        only : first_rec, vtorhorec
+ use m_vtorhotf,         only : vtorhotf
+ use m_outscfcv,         only : outscfcv
+ use m_afterscfloop,     only : afterscfloop
+ use m_extraprho,        only : extraprho
+ use m_spacepar,         only : setsym
+ use m_newrho,           only : newrho
+ use m_newvtr,           only : newvtr
+ use m_vtorho,           only : vtorho
+ use m_setvtr,           only : setvtr
+ use m_mkrho,            only : mkrho
+ use m_rhotov,           only : rhotov
+ use m_forces,           only : fresid, forces
+ use m_dft_energy,       only : energy
+ use m_initylmg,         only : initylmg
+ use m_rhotoxc,          only : rhotoxc
+ use m_drivexc,          only : check_kxc
+ use m_odamix,           only : odamix
+ use m_common,           only : scprqt, prtene
+ use m_fourier_interpol, only : transgrid
+ use m_fock_getghc,      only : fock2ACE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: scfcv
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/scfcv
 !! NAME
 !! scfcv
@@ -10,14 +195,6 @@
 !! ground state and optionally to compute forces and energy.
 !! This routine is called to compute forces for given atomic
 !! positions or else to do non-SCF band structures.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -153,100 +330,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
 &  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
-
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use defs_rectypes
- use m_xmpi
- use m_profiling_abi
- use m_wffile
- use m_rec
- use m_ab7_mixing
- use m_errors
- use m_efield
- use mod_prc_memory
- use m_nctk
- use m_hdr
- use m_xcdata
-
- use m_dtfil,            only : status
- use m_time,             only : timab
- use m_fstrings,         only : int2char4, sjoin
- use m_symtk,            only : symmetrize_xred
- use m_geometry,         only : metric
- use m_fftcore,          only : getng, sphereboundary
- use m_time,             only : abi_wtime, sec2str
- use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar, initmpi_seq, proc_distrb_cycle
- use m_ioarr,            only : fftdatar_write_from_hdr
- use m_results_gs ,      only : results_gs_type
- use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
- use m_energies,         only : energies_type, energies_init, energies_copy
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type,pawtab_get_lsize
- use m_paw_an,           only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
- use m_pawfgrtab,        only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_pawrhoij,         only : pawrhoij_type
- use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder, pawcprj_getdim
- use m_pawdij,           only : pawdij, symdij,pawdijhat
- use m_pawfgr,           only : pawfgr_type
- use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_paw_dmft,         only : paw_dmft_type
- use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid,pawmknhat
- use m_paw_tools,        only : chkpawovlp
- use m_paw_denpot,       only : pawdenpot
- use m_paw_occupancies,  only : pawmkrhoij
- use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
- use m_paw_orbmag,       only : orbmag_type
- use m_paw_mkrho,        only : pawmkrho
- use m_paw_uj,           only : pawuj_red
- use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
-                                fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
- use m_gwls_hamiltonian, only : build_vxc
-#if defined HAVE_BIGDFT
- use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
-#endif
- use m_io_kss,           only : gshgg_mkncwrite
- use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
- use m_kg,               only : getcut, getmpw, kpgio, getph
- use m_vtorhorec,        only : first_rec, vtorhorec
- use m_vtorhotf,         only : vtorhotf
- use m_outscfcv,         only : outscfcv
- use m_afterscfloop,     only : afterscfloop
- use m_extraprho,        only : extraprho
- use m_spacepar,         only : setsym
- use m_newrho,           only : newrho
- use m_newvtr,           only : newvtr
- use m_vtorho,           only : vtorho
- use m_setvtr,           only : setvtr
- use m_mkrho,            only : mkrho
- use m_rhotov,           only : rhotov
- use m_forces,           only : fresid
- use m_dft_energy,       only : energy
- use m_initylmg,         only : initylmg
- use m_rhotoxc,          only : rhotoxc
- use m_drivexc,          only : check_kxc
- use m_odamix,           only : odamix
- use m_common,           only : scprqt, prtene
- use m_fourier_interpol, only : transgrid
- use m_fock_getghc,      only : fock2ACE
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2420,25 +2509,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_efield
- use m_profiling_abi
-
- use m_time,             only : timab
- use m_fock,             only : fock_type
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
- use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawrhoij,         only : pawrhoij_type
- use m_energies,         only : energies_type
- use m_paw_dfpt,         only : pawgrnl
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_forces,           only : forces
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2755,19 +2825,7 @@ end subroutine etotfor
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 & nattyp,npwarr,pawtab,scf_history_wf)
 
- use defs_basis
- use defs_abitypes
- use m_scf_history
- use m_xmpi
- use m_profiling_abi
- use m_errors
- use m_cgtools
-
- use m_time,    only : timab
- use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
-&                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
- use m_mpinfo,  only : proc_distrb_cycle
+ !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3281,4 +3339,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  end if
 
 end subroutine wf_mixing
+!!***
+
+end module m_scfcv_core
 !!***
