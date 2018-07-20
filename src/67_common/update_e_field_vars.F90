@@ -393,7 +393,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
      if (scfcv_step > 1) then
 !      ! update efield taking damping into account reduced red_dfield
-!      red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009)
+!      red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 
        red_efield2(:)=dtset%ddamp*(dtset%red_dfield(:)-red_ptot(:))+ (1.0d0-dtset%ddamp)*red_efield2_old(:)
 
@@ -460,7 +460,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
      if (scfcv_step > 1) then
 !      ! update efield taking damping into account reduced red_dfield
-!      red_efield1 and red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009)
+!      red_efield1 and red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel1999]]
 !      red_efield1 for fixed ebar, red_efield2 for fixed d calculation
 
 !      save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar

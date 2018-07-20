@@ -35,7 +35,7 @@ MODULE m_ppmodel
  use m_linalg_interfaces
 
  use m_fstrings,       only : sjoin, itoa
- use m_abilasi,        only : xhegv
+ use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
@@ -1448,7 +1448,7 @@ end subroutine cppm1par
 !! cppm2par
 !!
 !! FUNCTION
-!!  Calculate plasmon-pole parameters of the Hybertsen and Louie model (PRB 34, 5390 (1986))
+!!  Calculate plasmon-pole parameters of the Hybertsen and Louie model (PRB 34, 5390 (1986) [[cite:Hybertsen1986]])
 !!
 !! INPUTS
 !!  qpt(3)=The coordinates of the q-point in the IBZ.
@@ -1677,8 +1677,8 @@ end subroutine cppm2par
 !! cppm3par
 !!
 !! FUNCTION
-!! Calculate the plasmon-pole parameters using the von Linden-Horsh model (PRB 37, 8351, 1988)
-!! (see also Pag 22 of Quasiparticle Calculations in Solids. Aulbur et. al)
+!! Calculate the plasmon-pole parameters using the von Linden-Horsh model (PRB 37, 8351, 1988) [[cite:vonderLinden1988]]
+!! (see also Pag 22 of Quasiparticle Calculations in Solids [[cite:Aulbur2001]].
 !!
 !! INPUTS
 !! epsm1(npwc,npwc))= symmetrized inverse dielectric
@@ -1955,8 +1955,8 @@ end subroutine cppm3par
 !! cppm4par
 !!
 !! FUNCTION
-!! Calculate the plasmon-pole parameters using Engel and Farid model (PRB47,15931,1993)
-!! See also Quasiparticle Calculations in Solids, Aulbur et al. (pag. 23)
+!! Calculate the plasmon-pole parameters using Engel and Farid model (PRB47,15931,1993) [[cite:Engel1993]].
+!! See also Quasiparticle Calculations in Solids [[cite:Aulbur2001]] p. 23
 !!
 !! INPUTS
 !!  qpt(3)=Reduced coordinates of the q-point.

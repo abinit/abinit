@@ -59,7 +59,7 @@ contains
 !! From the symmetries of the Bravais lattice (ptsymrel),
 !! select those that leave invariant the system, and generate
 !! the corresponding tnons vectors.
-!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972)
+!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
 !!
 !! INPUTS
 !! berryopt    =  4/14, 6/16, 7/17: electric or displacement field

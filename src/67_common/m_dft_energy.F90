@@ -54,6 +54,8 @@ module m_dft_energy
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhat,         only : pawmknhat
+ use m_paw_occupancies,  only : pawaccrhoij
  use m_cgtools,          only : dotprod_vn
  use m_fft,              only : fftpac
  use m_spacepar,         only : meanvalue_g, hartre
@@ -64,6 +66,7 @@ module m_dft_energy
  use m_rhotoxc,          only : rhotoxc
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -228,7 +231,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #define ABI_FUNC 'energy'
  use interfaces_53_ffts
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_66_wfs
 !End of the abilint section
 

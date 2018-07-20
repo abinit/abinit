@@ -148,7 +148,7 @@ CONTAINS  !=====================================================================
 !! ntime = Number of time (number of snapshot, number of md step...)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! ucvol(ntime) = Volume of the system for each time
 !! ts<training_set_type> = datatype with the information about the training set
 !!
@@ -288,7 +288,7 @@ end subroutine fit_data_free
 !! Compute the displacmeent of each configuration.
 !! Compute the variation of the displacement due to strain of each configuration.
 !! Compute fixed forces and stresse and get the standard deviation.
-!! Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!! Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
@@ -461,7 +461,7 @@ end subroutine fit_data_compute
 !! natom = number of atoms
 !! ntime = number of time step
 !! strain(6,ntime) = Strain
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
 !!
 !! OUTPUT

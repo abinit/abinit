@@ -144,14 +144,14 @@ contains
 !!
 !! NOTES
 !! * Concerning the stress tensor:
-!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985).
+!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985) [[cite:Nielsen1985a]].
 !!   Note that first term in equation (2) should have minus sign
 !!   (for kinetic energy contribution to stress tensor).
 !!   Normalizations in this code differ somewhat from those employed
 !!   by Nielsen and Martin.
 !!   For the stress tensor contribution from the nonlocal Kleinman-Bylander
 !!   separable pseudopotential, see D. M. Bylander, L. Kleinman, and
-!!   S. Lee, PRB 42, 1394 (1990).
+!!   S. Lee, PRB 42, 1394 (1990) [[cite:Bylander1990]].
 !!   Again normalization conventions differ somewhat.
 !!   See Doug Allan s notes starting page 795 (13 Jan 1992).
 !! * This subroutine calls different subroutines to compute the stress
@@ -366,7 +366,8 @@ contains
  call timab(38,2,tsec)
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
-!HONG  (PRL 89, 117602 (2002)   Nature Physics: M. Stengel et.al. (2009))
+!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]  
+!HONG  Nature Physics: M. Stengel et.al. (2009)) [[cite:Stengel1999]]
 !=======================================================================
 !=================== Berry phase contribution ==========================
 !=======================================================================

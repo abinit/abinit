@@ -37,5 +37,6 @@ fit_fixcoeff  = 48 50
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit the anharmonic part and generate effective potential 
+#%%   read ddb and HIST, fit the anharmonic part and generate effective potential
+#%% topics = FitProcess,LatticeModel
 #%%<END TEST_INFO>

@@ -179,7 +179,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_ab7_mixing
  use m_errors
  use m_efield
- use m_orbmag
  use mod_prc_memory
  use m_nctk
  use m_hdr
@@ -210,6 +209,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_pawfgr,           only : pawfgr_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid,pawmknhat
+ use m_paw_tools,        only : chkpawovlp
+ use m_paw_denpot,       only : pawdenpot
+ use m_paw_occupancies,  only : pawmkrhoij
+ use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
+ use m_paw_orbmag,       only : orbmag_type
+ use m_paw_mkrho,        only : pawmkrho
+ use m_paw_uj,           only : pawuj_red
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
  use m_gwls_hamiltonian, only : build_vxc
@@ -238,6 +245,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_drivexc,          only : check_kxc
  use m_odamix,           only : odamix
  use m_common,           only : scprqt, prtene
+ use m_fourier_interpol, only : transgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -247,7 +255,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
@@ -303,7 +310,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtpawuj)
  type(pawrhoij_type), intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type), intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type), intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
 
 !Local variables -------------------------
@@ -364,10 +371,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  real(dp) :: efield_old_cart(3), ptot_cart(3)
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
-! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009)
+! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 ! red_efield1(3) for fixed ebar calculation, red_efield2(3) for fixed reduced d calculation, in mixed BC
-! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009)
-! pbar(3) and dbar(3) are reduced polarization and displacement field, defined by Eq.(27) and (29) Nat. Phys. suppl. (2009)
+! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
+! pbar(3) and dbar(3) are reduced polarization and displacement field, 
+!    defined by Eq.(27) and (29) Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
  real(dp),allocatable :: fcart(:,:),forold(:,:),fred(:,:),gresid(:,:)
@@ -1939,7 +1947,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          fildata=trim(dtfil%fnametmp_app_den)//'_'//trim(tag)
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          call fftdatar_write_from_hdr("density",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-&          dtset%nspden,rhor,mpi_enreg,eigen=eigen)
+&         dtset%nspden,rhor,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -1953,7 +1961,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          ! output the Laplacian of density
          call fftdatar_write_from_hdr("kinedr",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-&          dtset%nspden,taur,mpi_enreg,eigen=eigen)
+&         dtset%nspden,taur,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -2427,6 +2435,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_energies,         only : energies_type
+ use m_paw_dfpt,         only : pawgrnl
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_forces,           only : forces
 
@@ -2434,7 +2443,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 
@@ -2513,7 +2521,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_entropy = zero
    end if
 
-!  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009),
+!  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !    the missing volume is added here
    energies%e_elecfield=zero
    if ((dtset%berryopt==4.or.dtset%berryopt==14).and.ipositron/=1) then
@@ -2527,7 +2535,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_elecfield=energies%e_elecfield-eenth*ucvol/(8._dp*pi)
    end if
 
-!  Turn it into an internal energy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009),
+!  Turn it into an internal energy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !    but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
    if ((dtset%berryopt==6.or.dtset%berryopt==16).and.ipositron/=1) then
      energies%e_elecfield=zero

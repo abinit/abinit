@@ -201,6 +201,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_getdim,pawcprj_alloc
+ use m_paw_dfpt,         only : pawgrnl
  use m_fock,             only : fock_type
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_stress,           only : stress
@@ -213,7 +214,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => forstr
 !End of the abilint section

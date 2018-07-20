@@ -31,10 +31,10 @@ MODULE m_geometry
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
  use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
- use m_abilasi,        only : matr3eigval
+ use m_hide_lapack,    only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf
- use m_abilasi,        only : matrginv
+ use m_hide_lapack,    only : matrginv
 
  implicit none
 
@@ -520,7 +520,7 @@ end subroutine acrossb
 !!  ndegen(npts)=Weigths associated to each point.
 !!
 !! SIDE EFFECTS
-!!  In input irvec and ndegen are NULL pointers. They are allocated with the correct
+!!  irvec and ndegen are are allocated with the correct
 !!  size inside the routine and returned to the caller.
 !!
 !! NOTES
@@ -539,7 +539,7 @@ end subroutine acrossb
 !!
 !! SOURCE
 
-subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
+subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -557,7 +557,7 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
  integer,intent(out) :: npts
 !arrays
  integer,intent(in) :: kptrlatt(3,3),lmax(3)
- integer,pointer :: irvec(:,:),ndegen(:)
+ integer,allocatable,intent(out) :: irvec(:,:),ndegen(:)
  real(dp),intent(in) :: center(3),rmet(3,3)
 
 !Local variables-------------------------------
@@ -565,16 +565,15 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
  integer :: in1,in2,in3,l1,l2,l3,ii,icount,n1,n2,n3
  integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3
  real(dp) :: tot,dist_min
- real(dp),parameter :: TOL_DIST=tol6
+ real(dp),parameter :: TOL_DIST=tol7
  character(len=500) :: msg
 !arrays
  real(dp) :: diff(3)
- real(dp),allocatable :: dist(:)
- real(dp),allocatable :: swap2(:,:),swap1(:)
+ real(dp),allocatable :: dist(:),swap2(:,:),swap1(:)
 
 ! *************************************************************************
 
- verbose=0; if (PRESENT(prtvol)) verbose=prtvol
+ verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
 
  if (kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
 &    kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
@@ -582,56 +581,56 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
    MSG_ERROR('Off-diagonal elements of kptrlatt must be zero')
  end if
 
- n1=kptrlatt(1,1)
- n2=kptrlatt(2,2)
- n3=kptrlatt(3,3)
+ n1 = kptrlatt(1,1)
+ n2 = kptrlatt(2,2)
+ n3 = kptrlatt(3,3)
 
- l1_max=lmax(1)
- l2_max=lmax(2)
- l3_max=lmax(3)
+ l1_max = lmax(1)
+ l2_max = lmax(2)
+ l3_max = lmax(3)
 
  nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
  l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
  ABI_MALLOC(dist,(nl))
 
  ! Allocate with maximum size
- mm1=2*n1+1
- mm2=2*n2+1
- mm3=2*n3+1
- ABI_MALLOC(irvec,(3,mm1*mm2*mm3))
- ABI_MALLOC(ndegen,(mm1*mm2*mm3))
+ mm1 = 2 * n1 + 1
+ mm2 = 2 * n2 + 1
+ mm3 = 2 * n3 + 1
+ ABI_MALLOC(irvec, (3, mm1*mm2*mm3))
+ ABI_MALLOC(ndegen, (mm1*mm2*mm3))
 
- npts=0
+ npts = 0
  do in1=-n1,n1
    do in2=-n2,n2
      do in3=-n3,n3
-      !
+
       ! Loop over the nl points R. R=0 corresponds to l1=l2=l3=1, or icount=l0
-      icount=0
+      icount = 0
       do l1=-l1_max,l1_max
         do l2=-l2_max,l2_max
           do l3=-l3_max,l3_max
-            ! * Calculate |r-R-r_0|^2.
-            diff(1)= in1 -l1*n1 -center(1)
-            diff(2)= in2 -l2*n2 -center(2)
-            diff(3)= in3 -l3*n3 -center(3)
-            icount=icount+1
-            dist(icount)=DOT_PRODUCT(diff,MATMUL(rmet,diff))
+            ! Calculate |r - R -r0|^2.
+            diff(1) = in1 - l1 * n1 - center(1)
+            diff(2) = in2 - l2 * n2 - center(2)
+            diff(3) = in3 - l3 * n3 - center(3)
+            icount = icount+1
+            dist(icount) = DOT_PRODUCT(diff, MATMUL(rmet, diff))
           end do
         end do
       end do
 
-      dist_min=MINVAL(dist)
+      dist_min = MINVAL(dist)
 
-      if (ABS(dist(l0)-dist_min)<TOL_DIST) then
-        npts=npts+1
-        ndegen(npts)=0
+      if (ABS(dist(l0) - dist_min) < TOL_DIST) then
+        npts = npts + 1
+        ndegen (npts) = 0
         do ii=1,nl
-          if (ABS(dist(ii)-dist_min)<TOL_DIST) ndegen(npts)=ndegen(npts)+1
+          if (ABS(dist(ii) - dist_min) < TOL_DIST) ndegen(npts) = ndegen(npts) + 1
         end do
-        irvec(1,npts)=in1
-        irvec(2,npts)=in2
-        irvec(3,npts)=in3
+        irvec(1, npts) = in1
+        irvec(2, npts) = in2
+        irvec(3, npts) = in3
       end if
      end do !in3
    end do !in2
@@ -646,19 +645,19 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
    end do
  end if
 
- ! === Check the "sum rule" ===
- tot=zero
+ ! Check the "sum rule"
+ tot = zero
  do ii=1,npts
-   tot=tot+one/ndegen(ii)
+   tot = tot + one/ndegen(ii)
  end do
  if (ABS(tot-(n1*n2*n3))>tol8) then
-   write(msg,'(a,es16.8,a,i5)')'Something wrong in the generation of the mesh ',tot,' /= ',n1*n2*n3
+   write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
    MSG_ERROR(msg)
  end if
 
  ABI_FREE(dist)
 
- ! === Reallocate the output with correct size ===
+ ! Reallocate the output with correct size.
  ABI_MALLOC(swap1,(npts))
  swap1(:)=ndegen(1:npts)
  ABI_FREE(ndegen)

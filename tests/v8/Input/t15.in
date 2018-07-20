@@ -10,7 +10,7 @@ dipdip_prt = 1
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
-fit_generateTerm = 0
+fit_generateCoeff = 0
 fit_coeff = 1
 fit_ncoeff = 0
 fit_nfixcoeff  = -1
@@ -18,7 +18,7 @@ fit_nfixcoeff  = -1
 #---------------------------------------------------------------
 #Inputs for the bound process:
 #---------------------------------------------------------------                                                                                                                                                  
-bound_coeff = 2
+bound_model = 2
 bound_maxCoeff = 5 
 bound_rangePower = 6 8
 bound_cutoff = 7.5
@@ -49,4 +49,5 @@ bound_step = 100
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and HIST, fit and try to bound the anharmonic part
+#%% topics = FitProcess,BoundProcess,LatticeModel
 #%%<END TEST_INFO>

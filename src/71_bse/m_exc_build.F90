@@ -44,7 +44,7 @@ module m_exc_build
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
- use m_blas,         only : xdotc, xgemv
+ use m_hide_blas,    only : xdotc, xgemv
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t, gsph_fft_tabs
@@ -54,6 +54,7 @@ module m_exc_build
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_sym,      only : paw_symcprj_op
  use m_wfd,          only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_ihave_cprj
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
@@ -168,7 +169,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_block'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

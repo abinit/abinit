@@ -45,9 +45,9 @@ program lapackprof
  use m_xmpi
  use m_xomp
  use m_errors
- use m_blas
+ use m_hide_blas
  use m_cgtools
- use m_abilasi
+ use m_hide_lapack
 
  use m_fstrings,      only : lower, itoa, strcat
  use m_specialmsg,    only : specialmsg_getcount, herald

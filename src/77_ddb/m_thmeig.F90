@@ -819,7 +819,8 @@ subroutine thmeig(inp, ddb, crystal, &
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
 
-!    calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+!    calculate general integration weights at each irred kpoint 
+!    as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
      call get_tetra_weight(eigen_in,enemin,enemax,&
 &     one,nene,nqpt,tetrahedra,bcorr0,&
 &     tweight,dtweightde,xmpi_comm_self)

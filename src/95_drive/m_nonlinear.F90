@@ -62,6 +62,11 @@ module m_nonlinear
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
+ use m_paw_sphharm, only : setsym_ylm
+ use m_paw_nhat,    only : nhatgrid,pawmknhat
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_init,    only : pawinit,paw_gencond
+ use m_paw_tools,   only : chkpawovlp
  use m_mkrho,       only : mkrho
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini
@@ -70,6 +75,9 @@ module m_nonlinear
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
+ use m_fourier_interpol, only : transgrid
+ use m_paw_occupancies,  only : initrhoij
+ use m_paw_correlations, only : pawpuxinit
 
  implicit none
 
@@ -155,7 +163,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_65_paw
  use interfaces_95_drive
 !End of the abilint section
 
@@ -693,7 +700,7 @@ end if
      call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
-     call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
+     call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
      ! Update internal values
@@ -705,7 +712,7 @@ end if
      if (pawtab(1)%has_nabla==1) pawtab(1:psps%ntypat)%has_nabla=2
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    pawtab(:)%usepawu=0
    pawtab(:)%useexexch=0
    pawtab(:)%exchmix=zero
@@ -987,7 +994,7 @@ end if
  if (psps%usepaw==1) then
 !  Allocate/initialize only zarot in pawang1 datastructure
    call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
-   call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+   call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  end if
 
  if (pead/=0) then

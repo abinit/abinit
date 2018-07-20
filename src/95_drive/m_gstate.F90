@@ -41,7 +41,6 @@ module m_gstate
  use m_wffile
  use m_rec
  use m_efield
- use m_orbmag
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
@@ -71,6 +70,12 @@ module m_gstate
  use m_results_gs,       only : results_gs_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
  use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
+ use m_paw_sphharm,      only : setsym_ylm
+ use m_paw_init,         only : pawinit,paw_gencond
+ use m_paw_occupancies,  only : initrhoij
+ use m_paw_correlations, only : pawpuxinit
+ use m_paw_orbmag,       only : orbmag_type,destroy_orbmag
+ use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -88,6 +93,7 @@ module m_gstate
  use m_mover,            only : mover
  use m_mpinfo,           only : proc_distrb_cycle
  use m_common,           only : setup1, prteigrs, prtene
+ use m_fourier_interpol, only : transgrid
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -229,7 +235,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_53_ffts
  use interfaces_56_io_mpi
  use interfaces_62_poisson
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 
@@ -975,7 +980,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
 !  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
    pawtab(:)%usepawu=0
@@ -1767,7 +1772,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !    Get average number of planewaves per k point:
 !    both arithmetic and GEOMETRIC averages are desired--
 !    need geometric average to use method of Francis and Payne,
-!    J. Phys.: Condens. Matter 2, 4395-4404 (1990).
+!    J. Phys.: Condens. Matter 2, 4395-4404 (1990) [[cite:Francis1990]].
 !    Also note: force k point wts to sum to 1 for this averaging.
 !    (wtk is not forced to add to 1 in a case with occopt=2)
        arith=zero
@@ -2523,7 +2528,6 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_drive'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

@@ -42,14 +42,14 @@ MODULE m_exc_spectra
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx
- use m_blas,            only : xdotu,xdotc
+ use m_hide_blas,       only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
  use m_crystal,         only : crystal_t
  use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
- use m_pawhr,           only : pawhur_t
+ use m_paw_hr,          only : pawhur_t
  use m_wfd,             only : wfd_t
  !use m_bse_io,          only : exc_amplitude
 

@@ -25,7 +25,11 @@ module m_efmas
  use defs_basis
  use defs_abitypes
  use m_errors
+#ifdef HAVE_NETCDF
+ use netcdf, only : nf90_noerr, nf90_put_var, nf90_get_var
+#endif
  use m_efmas_defs
+ use m_nctk
 
  implicit none
 
@@ -36,7 +40,9 @@ module m_efmas
  public :: efmasval_free_array
  public :: efmasdeg_free
  public :: efmasdeg_free_array
+ public :: efmas_ncread
  public :: check_degeneracies
+ public :: print_tr_efmas
  public :: print_efmas
  public :: efmas_main
  public :: efmas_analysis 
@@ -136,6 +142,9 @@ CONTAINS
 
    ! *********************************************************************
 
+   !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+   write(std_out,*)' efmasval_free_array : enter '
+
    if(allocated(efmasval)) then
      n=shape(efmasval)
      do i=1,n(1)
@@ -184,26 +193,12 @@ CONTAINS
    type(efmasdeg_type),intent(inout) :: efmasdeg
 
    ! *********************************************************************
-
    if(allocated(efmasdeg%degs_bounds)) then
      ABI_FREE(efmasdeg%degs_bounds)
-   end if
-   if(allocated(efmasdeg%deg_dim)) then
-     ABI_FREE(efmasdeg%deg_dim)
-   end if
-   if(allocated(efmasdeg%degl)) then
-     ABI_FREE(efmasdeg%degl)
    end if
    if(allocated(efmasdeg%ideg)) then
      ABI_FREE(efmasdeg%ideg)
    end if
-   if(allocated(efmasdeg%degenerate)) then
-     ABI_FREE(efmasdeg%degenerate)
-   end if
-   if(allocated(efmasdeg%treated)) then
-     ABI_FREE(efmasdeg%treated)
-   end if
-
  end subroutine efmasdeg_free
 !!***
 
@@ -245,7 +240,6 @@ CONTAINS
    integer :: i,n
 
    ! *********************************************************************
-
    if(allocated(efmasdeg)) then
      n=size(efmasdeg)
      do i=1,n
@@ -253,7 +247,6 @@ CONTAINS
      end do
      ABI_DATATYPE_DEALLOCATE(efmasdeg)
    end if
-
  end subroutine efmasdeg_free_array
 !!***
 
@@ -277,9 +270,8 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine check_degeneracies(efmas,bands,nband,eigen,deg_tol)
+ subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
 
-!  use m_efmas, only : efmasdeg_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -290,83 +282,73 @@ CONTAINS
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasdeg_type),intent(out) :: efmas
+   type(efmasdeg_type),intent(out) :: efmasdeg
    integer,intent(in) :: bands(2),nband
    real(dp),intent(in) :: eigen(nband)
    real(dp),intent(in),optional :: deg_tol
 
    !!!Local variables-------------------------------
-   integer :: iband, ideg
+   integer :: deg_dim,iband, ideg
    integer, allocatable :: degs_bounds(:,:)
    real(dp) :: tol
    real(dp) :: eigen_tmp(nband)
+   logical :: treated
 
    ! *********************************************************************
 
    tol=tol5; if(present(deg_tol)) tol=deg_tol
 
    !!! Determine sets of degenerate states in eigen0, i.e., at 0th order.
-   efmas%ndegs=1
+   efmasdeg%ndegs=1
+   efmasdeg%nband=nband
    ABI_MALLOC(degs_bounds,(2,nband))
-   ABI_MALLOC(efmas%ideg, (nband))
+   ABI_MALLOC(efmasdeg%ideg, (nband))
    degs_bounds=0; degs_bounds(1,1)=1
-   efmas%ideg=0; efmas%ideg(1)=1
+   efmasdeg%ideg=0; efmasdeg%ideg(1)=1
 
    eigen_tmp(:) = eigen(:)
 
    do iband=2,nband
      if (ABS(eigen_tmp(iband)-eigen_tmp(iband-1))>tol) then
-       degs_bounds(2,efmas%ndegs) = iband-1
-       efmas%ndegs=efmas%ndegs+1
-       degs_bounds(1,efmas%ndegs) = iband
+       degs_bounds(2,efmasdeg%ndegs) = iband-1
+       efmasdeg%ndegs=efmasdeg%ndegs+1
+       degs_bounds(1,efmasdeg%ndegs) = iband
      end if
-     efmas%ideg(iband) = efmas%ndegs
+     efmasdeg%ideg(iband) = efmasdeg%ndegs
    end do
-   degs_bounds(2,efmas%ndegs)=nband
-   ABI_MALLOC(efmas%degs_bounds,(2,efmas%ndegs))
-   efmas%degs_bounds(1:2,1:efmas%ndegs) = degs_bounds(1:2,1:efmas%ndegs)
+   degs_bounds(2,efmasdeg%ndegs)=nband
+   ABI_MALLOC(efmasdeg%degs_bounds,(2,efmasdeg%ndegs))
+   efmasdeg%degs_bounds(1:2,1:efmasdeg%ndegs) = degs_bounds(1:2,1:efmasdeg%ndegs)
    ABI_FREE(degs_bounds)
 
    !!! Determine if treated bands are part of a degeneracy at 0th order.
-   ABI_MALLOC(efmas%degenerate,(efmas%ndegs))
-   ABI_MALLOC(efmas%treated   ,(efmas%ndegs))
-   ABI_MALLOC(efmas%deg_dim,   (efmas%ndegs))
-   ABI_MALLOC(efmas%degl,      (efmas%ndegs))
-   efmas%degenerate = .false.; efmas%treated=.false.
-   efmas%band_range=0; efmas%deg_range=0; efmas%deg_dim=0
-   write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmas%ndegs
+   efmasdeg%deg_range=0
+   deg_dim=0
+   treated=.false.
+   write(std_out,'(a,i6)') 'Number of sets of bands for this k-point:',efmasdeg%ndegs
    write(std_out,'(a)') 'Set index; range of bands included in the set; is the set degenerate?(T/F); &
 &                        is the set treated by EFMAS?(T/F):'
-   do ideg=1,efmas%ndegs
-     efmas%deg_dim(ideg) = efmas%degs_bounds(2,ideg) - efmas%degs_bounds(1,ideg) + 1
-     efmas%degl(ideg) = efmas%degs_bounds(1,ideg)-1
-     if(efmas%deg_dim(ideg)>1) then
-       efmas%degenerate(ideg) = .true.
-     end if
-     if(efmas%degs_bounds(1,ideg)<=bands(2) .and. efmas%degs_bounds(2,ideg)>=bands(1)) then
-       efmas%treated(ideg) = .true.
-       if(efmas%degs_bounds(1,ideg)<=bands(1)) then
-         efmas%band_range(1) = efmas%degs_bounds(1,ideg)
-         efmas%deg_range(1) = ideg
+   do ideg=1,efmasdeg%ndegs
+     deg_dim = efmasdeg%degs_bounds(2,ideg) - efmasdeg%degs_bounds(1,ideg) + 1
+     !If there is some level in the set that is inside the interval defined by bands(1:2), treat such set
+     !The band range might be larger than the nband interval: it includes it, and also include degenerate states
+     if(efmasdeg%degs_bounds(1,ideg)<=bands(2) .and. efmasdeg%degs_bounds(2,ideg)>=bands(1)) then
+       treated = .true.
+       if(efmasdeg%degs_bounds(1,ideg)<=bands(1)) then
+         efmasdeg%deg_range(1) = ideg
        end if
-       if(efmas%degs_bounds(2,ideg)>=bands(2)) then
-         efmas%band_range(2) = efmas%degs_bounds(2,ideg)
-         efmas%deg_range(2) = ideg
+       if(efmasdeg%degs_bounds(2,ideg)>=bands(2)) then
+         efmasdeg%deg_range(2) = ideg
        end if
      end if
-     write(std_out,'(2i6,a,i6,2l4)') ideg, efmas%degs_bounds(1,ideg), ' -', efmas%degs_bounds(2,ideg), &
-&                                    efmas%degenerate(ideg), efmas%treated(ideg)
+     write(std_out,'(2i6,a,i6,2l4)') ideg, efmasdeg%degs_bounds(1,ideg), ' -', efmasdeg%degs_bounds(2,ideg), &
+&                                    (deg_dim>1), treated
    end do
 
-!   write(std_out,*)'ndegs=',          efmas%ndegs
-!   write(std_out,*)'degs_bounds=',    efmas%degs_bounds
-!   write(std_out,*)'ideg=',           efmas%ideg
-!   write(std_out,*)'band_range=',     efmas%band_range
-!   write(std_out,*)'deg_range=',      efmas%deg_range
-!   write(std_out,*)'degenerate=',     efmas%degenerate
-!   write(std_out,*)'treated=',        efmas%treated
-!   write(std_out,*)'degl=',           efmas%degl
-!   write(std_out,*)'deg_dim=',        efmas%deg_dim
+!   write(std_out,*)'ndegs=',          efmasdeg%ndegs
+!   write(std_out,*)'degs_bounds=',    efmasdeg%degs_bounds
+!   write(std_out,*)'ideg=',           efmasdeg%ideg
+!   write(std_out,*)'deg_range=',      efmasdeg%deg_range
 
   !!This first attempt WORKS, but only if the symmetries are enabled, see line 1578 of dfpt_looppert.F90.
   !use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
@@ -404,6 +386,313 @@ CONTAINS
 !! print_efmas
 !!
 !! FUNCTION
+!! This routine prints the information needed to compute rapidly the band effective masses, 
+!! namely, the generalized second-order k-derivatives of the eigenenergies,
+!! see Eq.(66) of Laflamme2016. 
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine print_efmas(efmasdeg,efmasval,kpt,ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'print_efmas'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,            intent(in) :: ncid
+!arrays
+ real(dp),            intent(in) :: kpt(:,:)
+ type(efmasdeg_type), intent(in) :: efmasdeg(:)
+ type(efmasval_type), intent(in) :: efmasval(:,:)
+
+!Local variables-------------------------------
+ integer :: deg_dim,eig2_diag_arr_dim
+ integer :: iband,ideg,ideg_tot,ieig,ikpt 
+ integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ integer, allocatable :: nband_arr(:)
+integer, allocatable :: ndegs_arr(:)
+ integer, allocatable :: degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:)
+ integer, allocatable :: degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:)
+ real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
+ character(len=500) :: msg
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
+!----------------------------------------------------------------------
+
+!XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
+!To be reexamined/corrected at the time of parallelization.
+
+#ifdef HAVE_NETCDF
+ nkptdeg=size(efmasdeg,1)
+ nkptval=size(efmasval,2)
+ if(nkptdeg/=nkptval) then
+   write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkptval =',nkptdeg,' and ',nkptval,' differ, which is inconsistent.'
+   MSG_ERROR(msg)
+ end if
+ nkpt=nkptdeg
+ if(nkpt/=size(kpt,2)) then
+   write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkpt =',nkptdeg,' and ',nkpt,' differ, which is inconsistent.'
+   MSG_ERROR(msg)
+ end if
+
+ mband=size(efmasval,1)
+
+!Total number of (degenerate) sets over all k points
+ ndegs_tot=sum(efmasdeg%ndegs)
+!Total number of generalized second-order k-derivatives
+ eig2_diag_arr_dim=zero
+ do ikpt=1,nkpt
+   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
+     deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 
+   enddo
+ enddo
+
+!Allocate the arrays to be nc-written
+ ABI_MALLOC(nband_arr, (nkpt) )
+ ABI_MALLOC(ndegs_arr, (nkpt) )
+ ABI_MALLOC(degs_range_arr, (2,nkpt) )
+ ABI_MALLOC(ideg_arr, (mband,nkpt) )
+ ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
+ ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
+
+!Prepare the arrays to be nc-written
+ ideg_tot=1
+ ieig=1
+ do ikpt=1,nkpt
+   nband_arr(ikpt)=efmasdeg(ikpt)%nband
+   ndegs_arr(ikpt)=efmasdeg(ikpt)%ndegs
+   degs_range_arr(:,ikpt)=efmasdeg(ikpt)%deg_range(:)
+   ideg_arr(:,ikpt)=0
+   ideg_arr(1:efmasdeg(ikpt)%nband,ikpt)=efmasdeg(ikpt)%ideg(:)
+   do ideg=1,efmasdeg(ikpt)%ndegs
+     degs_bounds_arr(:,ideg_tot)=efmasdeg(ikpt)%degs_bounds(:,ideg)
+     ideg_tot=ideg_tot+1
+   enddo
+   do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
+     deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     do jband=1,deg_dim
+       do iband=1,deg_dim
+         ch2c_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
+         ch2c_arr(2,:,:,ieig+iband-1)=aimag(efmasval(ideg,ikpt)%ch2c(:,:,iband,jband))
+         eig2_diag_arr(1,:,:,ieig+iband-1)=real(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
+         eig2_diag_arr(2,:,:,ieig+iband-1)=aimag(efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband))
+       enddo
+       ieig=ieig+deg_dim
+     enddo
+   enddo
+ enddo
+
+!Define dimensions
+ ncerr=nctk_def_dims(ncid, [ &
+&  nctkdim_t("number_of_reduced_dimensions", 3), &
+&  nctkdim_t("real_or_complex", 2), &
+&  nctkdim_t("number_of_kpoints", nkpt), &
+&  nctkdim_t("max_number_of_states", mband), &
+&  nctkdim_t("total_number_of_degenerate_sets", ndegs_tot), &
+&  nctkdim_t("eig2_diag_arr_dim", eig2_diag_arr_dim)&
+&  ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+& nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), &
+& nctkarr_t("number_of_states", "int", "number_of_kpoints"), &
+& nctkarr_t("number_of_degenerate_sets", "int", "number_of_kpoints"), &
+& nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
+& nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
+& nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
+& nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim"),  &
+& nctkarr_t("eig2_diag_arr","dp","real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")&
+  ]) 
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_states"), nband_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+
+!Deallocate the arrays 
+ ABI_FREE(nband_arr)
+ ABI_FREE(ndegs_arr)
+ ABI_FREE(degs_range_arr)
+ ABI_FREE(ideg_arr)
+ ABI_FREE(degs_bounds_arr)
+ ABI_FREE(ch2c_arr)
+ ABI_FREE(eig2_diag_arr)
+#endif
+
+end subroutine print_efmas
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_efmas/efmas_ncread
+!! NAME
+!! efmas_ncread
+!!
+!! FUNCTION
+!! This routine reads from an EFMAS NetCDF file the information needed 
+!! to compute rapidly the band effective masses,
+!! namely, the generalized second-order k-derivatives of the eigenenergies,
+!! see Eq.(66) of Laflamme2016.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'efmas_ncread'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,            intent(in) :: ncid
+!arrays
+ real(dp), allocatable,            intent(out) :: kpt(:,:)
+ type(efmasdeg_type), allocatable, intent(out) :: efmasdeg(:)
+ type(efmasval_type), allocatable, intent(out) :: efmasval(:,:)
+
+!Local variables-------------------------------
+ integer :: deg_dim,eig2_diag_arr_dim
+ integer :: iband,ideg,ideg_tot,ieig,ikpt
+ integer :: jband,mband,nband,ndegs,ndegs_tot,nkpt
+ integer, allocatable :: nband_arr(:)
+ integer, allocatable :: ndegs_arr(:)
+ integer, allocatable :: degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:)
+ integer, allocatable :: degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:)
+ real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
+!----------------------------------------------------------------------
+
+#ifdef HAVE_NETCDF
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt))
+ NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
+ NCF_CHECK(nctk_get_dim(ncid, "total_number_of_degenerate_sets", ndegs_tot))
+ NCF_CHECK(nctk_get_dim(ncid, "eig2_diag_arr_dim", eig2_diag_arr_dim))
+
+!Allocate the arrays to be read from NetCDF file
+ ABI_MALLOC(kpt, (3,nkpt) )
+ ABI_MALLOC(nband_arr, (nkpt) )
+ ABI_MALLOC(ndegs_arr, (nkpt) )
+ ABI_MALLOC(degs_range_arr, (2,nkpt) )
+ ABI_MALLOC(ideg_arr, (mband,nkpt) )
+ ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
+ ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
+
+!Read from NetCDF file
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "number_of_states"), nband_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "number_of_degenerate_sets"), ndegs_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "degs_range_arr"),            degs_range_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ideg_arr"),                  ideg_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+
+!Prepare the efmas* datastructures
+ ABI_DT_MALLOC(efmasdeg,(nkpt))
+ ABI_DT_MALLOC(efmasval,(mband,nkpt))
+
+ ideg_tot=1
+ ieig=1
+ do ikpt=1,nkpt
+   efmasdeg(ikpt)%deg_range(:)=degs_range_arr(:,ikpt)
+   nband=nband_arr(ikpt)   
+   efmasdeg(ikpt)%nband=nband
+   ABI_MALLOC(efmasdeg(ikpt)%ideg, (nband))
+   efmasdeg(ikpt)%ideg=ideg_arr(1:nband,ikpt)
+   ndegs=ndegs_arr(ikpt) 
+   efmasdeg(ikpt)%ndegs=ndegs
+   ABI_MALLOC(efmasdeg(ikpt)%degs_bounds,(2,nband))
+   do ideg=1,ndegs
+     efmasdeg(ikpt)%degs_bounds(:,ideg)=degs_bounds_arr(:,ideg_tot)
+     ideg_tot=ideg_tot+1
+     if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
+       deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+       ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(3,3,deg_dim,deg_dim))
+       ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(3,3,deg_dim,deg_dim))
+       efmasval(ideg,ikpt)%ch2c=zero
+       efmasval(ideg,ikpt)%eig2_diag=zero
+       do jband=1,deg_dim
+         do iband=1,deg_dim
+           efmasval(ideg,ikpt)%ch2c(:,:,iband,jband)=&
+&           dcmplx(ch2c_arr(1,:,:,ieig+iband-1),ch2c_arr(2,:,:,ieig+iband-1))
+           efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=& 
+&           dcmplx(eig2_diag_arr(1,:,:,ieig+iband-1),eig2_diag_arr(2,:,:,ieig+iband-1))
+         enddo
+         ieig=ieig+deg_dim
+       enddo
+     else
+       ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(0,0,0,0))
+       ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(0,0,0,0))
+     end if
+   end do
+ enddo
+
+!Deallocate the arrays
+ ABI_FREE(nband_arr)
+ ABI_FREE(ndegs_arr)
+ ABI_FREE(degs_range_arr)
+ ABI_FREE(ideg_arr)
+ ABI_FREE(degs_bounds_arr)
+ ABI_FREE(ch2c_arr)
+ ABI_FREE(eig2_diag_arr)
+#endif
+
+ end subroutine efmas_ncread
+
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_efmas/print_tr_efmas
+!! NAME
+!! print_tr_efmas
+!!
+!! FUNCTION
 !! This routine prints the transport equivalent effective mass and others info
 !! for a degenerate set of bands
 !!
@@ -418,14 +707,14 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
+ subroutine print_tr_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
 &                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'print_efmas'
+#define ABI_FUNC 'print_tr_efmas'
 !End of the abilint section
 
    implicit none
@@ -450,19 +739,19 @@ CONTAINS
    if(deg_dim>1) then
      extras = present(efmas_eigval) .and. present(efmas_eigvec) 
      if(mdim==3 .and. .not. extras) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
      if(mdim==2 .and. .not. (extras .or. present(transport_tensor_scale))) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
    else
      extras = present(efmas_eigval) .and. present(efmas_eigvec)
      if(mdim>1 .and. .not. extras) then
-       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
+       write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
        MSG_ERROR(msg)
      end if
@@ -475,12 +764,12 @@ CONTAINS
      if(mdim>1) then
        write(io_unit,'(a)') '   are DEGENERATE (effective mass tensor is therefore not defined).'
        if(mdim==3) then
-         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).'
+         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).' ! [[cite:Laflamme2016]]
          write(io_unit,'(a,i7,a)') &
 &          ' - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.'
        elseif(mdim==2) then
          write(io_unit,'(a)') ' - Also, 2D requested (perpendicular to Z axis).'
-         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).'
+         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).' ! [[cite:Laflamme2016]]
        end if
        write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with ntheta=',ntheta,' points.'
      else
@@ -582,7 +871,7 @@ CONTAINS
 &     ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim,ch10
    endif
 
- end subroutine print_efmas
+ end subroutine print_tr_efmas
 !!***
 
 !----------------------------------------------------------------------
@@ -592,7 +881,7 @@ CONTAINS
 !! efmas_main
 !!
 !! FUNCTION
-!! This routine calculates the band curvature double tensor, Eq.50 of Laflamme2016,
+!! This routine calculates the generalized second-order k-derivative, Eq.66 of Laflamme2016,
 !! in reduced coordinates.
 !!
 !! INPUTS
@@ -624,15 +913,15 @@ CONTAINS
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
-!!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution double tensor
-!!    efmasval(:,:)%eig2_diag OUTPUT : band curvature double tensor
+!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order k-derivatives of eigenvalues
+!!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution to generalized 2nd order k-derivatives of eigenenergy
+!!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
 !!
 !! PARENTS
 !!      dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -742,6 +1031,8 @@ CONTAINS
   band2tot_index=0
   bandtot_index=0
 
+  !XG20180519 : in the original coding by Jonathan, there is a lack of care about using dtset%nkpt or nkpt_rbz ...
+  !Not important in the sequential case (?!) but likely problematic in the parallel case.
   do ikpt=1,dtset%nkpt
     npw_k = npwarr(ikpt,ipert)
     nband_k = dtset%nband(ikpt)
@@ -755,9 +1046,9 @@ CONTAINS
     ABI_ALLOCATE(cg0,(2,npw_k*nspinor))
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
-      degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
-      degl       = efmasdeg(ikpt)%degl(ideg)
-      deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+      degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
+      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
       ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
       !!! If treated band degenerate at 0th order, check that we are at extrema.
@@ -778,12 +1069,12 @@ CONTAINS
       end if !degenerate(1)
       ABI_DEALLOCATE(eigen1_deg)
 
-      ABI_ALLOCATE(eig2_diag,(deg_dim,deg_dim,3,3))
-      ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+      ABI_ALLOCATE(eig2_diag,(3,3,deg_dim,deg_dim))
+      ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
       eig2_diag = zero
 
       do iband=1,deg_dim
-        write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
+        write(std_out,*)"  In the set (possibly degenerate) compute band ",iband  ! This line here to avoid weird
         cg0(:,:) = cg(:,1+(degl+iband-1)*npw_k*nspinor+icg2:(degl+iband)*npw_k*nspinor+icg2)
         do jband=1,deg_dim
           eig2_part = zero
@@ -842,7 +1133,7 @@ CONTAINS
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_ch2c(adir,bdir) = efmasval(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(adir,bdir,iband,jband)
 
             end do !bdir
           end do  !adir
@@ -853,13 +1144,13 @@ CONTAINS
             end do
           end do
 
-          eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
-          efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
+          eig2_diag(:,:,iband,jband) = eig2_paral - eig2_gauge_change
+          efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=eig2_diag(:,:,iband,jband)
 
           !!! Decomposition of the hessian in into its different contributions.
           if(debug) then
 
-            eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+            eig2_diag_cart(:,:,iband,jband) = matmul(matmul(rprimd,eig2_diag(:,:,iband,jband)),transpose(rprimd))/two_pi**2
             eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
             eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
             eig2_ch2c                  = matmul(matmul(rprimd,eig2_ch2c),                 transpose(rprimd))/two_pi**2
@@ -868,7 +1159,7 @@ CONTAINS
             write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
             do adir=1,3
               write(std_out,'(3f12.8,2(a,3f12.8))')&
-&               real(eig2_diag_cart(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
+&               real(eig2_diag_cart(adir,:,iband,jband),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
             end do
             write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
             do adir=1,3
@@ -912,15 +1203,16 @@ CONTAINS
 !! efmas_analysis
 !!
 !! FUNCTION
-!! This routine analyzes the band curvature double tensor and compute the effective mass tensor
+!! This routine analyzes the generalized second-order k-derivatives of eigenenergies, 
+!! and compute the effective mass tensor
 !! (inverse of hessian of eigenvalues with respect to the wavevector)
-!! in cartesian coordinates.
+!! in cartesian coordinates along different directions in k-space, or also the transport equivalent effective mass.
 !!
 !! INPUTS
 !!  dtset = dataset structure containing the input variable of the calculation.
 !!  efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
+!!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!    efmasval(:,:)%eig2_diag band curvature double tensor
-!!  efmasval(nkpt_rbz,mband) <type(efmasdeg_type)>= double tensor datastructure
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
 !!  mpi_enreg = informations about MPI parallelization.
@@ -933,7 +1225,7 @@ CONTAINS
 !!      dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -960,8 +1252,8 @@ CONTAINS
  !arrays
   real(dp), intent(in) :: rprimd(3,3)
   real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
-  type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
-  type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
+  type(efmasdeg_type), intent(in) :: efmasdeg(:)
+  type(efmasval_type), intent(in) :: efmasval(:,:)
 
  !Local variables-------------------------------
   logical :: degenerate
@@ -1088,18 +1380,19 @@ CONTAINS
 
   ABI_ALLOCATE(eff_mass,(mdim,mdim))
 
+!XG20180519 : incoherent, efmasdeg is dimensioned at nkpt_rbz, and not at dtset%nkpt ...
   do ikpt=1,dtset%nkpt
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
 
-     degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
-     degl       = efmasdeg(ikpt)%degl(ideg)
-     deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+     deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+     degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
+     degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
  
      !!! Allocations
      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
      ABI_ALLOCATE(eigenval,(deg_dim))
 
-     ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+     ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
      do iband=1,deg_dim
         write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
@@ -1107,14 +1400,14 @@ CONTAINS
 
           eff_mass=zero
 
-          eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)          
-          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag_cart(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+          eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)          
+          eig2_diag_cart(:,:,iband,jband) = matmul(matmul(rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(rprimd))/two_pi**2
 
 
           if(.not. degenerate .and. iband==jband) then
 
             !Compute effective mass tensor from second derivative matrix. Simple inversion.
-            eff_mass(:,:) = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
+            eff_mass(:,:) = eig2_diag_cart(1:mdim,1:mdim,iband,jband)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
             ABI_ALLOCATE(work,(3))
             call zgetri(mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,work,3,info)
@@ -1161,7 +1454,7 @@ CONTAINS
                   unit_r(2)=sinth*sinph
                   unit_r(3)=costh
 
-                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),unit_r(:))) 
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),unit_r(:))) 
                   m_avg = m_avg + weight*sinth*f3d_scal
                   m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
@@ -1183,14 +1476,14 @@ CONTAINS
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
             do adir=1,ndirs
-              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),dirs(:,adir)))
+              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),dirs(:,adir)))
             end do
 
             !PRINTING RESULTS
-            call print_efmas(std_out,kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
+            call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
 &             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
 &             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
-            call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
+            call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
 &             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
 &             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
             ABI_DEALLOCATE(m_cart)
@@ -1286,11 +1579,11 @@ CONTAINS
 
             do iband=1,deg_dim
               do jband=1,deg_dim
-                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))
-                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dth))
-                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dph))
+                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))
+                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),dr_dth))
+                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(:,:,iband,jband),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(:,:,iband,jband),dr_dph))
               end do
             end do
             !DIAGONALIZATION
@@ -1400,10 +1693,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1460,9 +1753,9 @@ CONTAINS
 
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
 
         ABI_DEALLOCATE(unit_r)
@@ -1547,7 +1840,7 @@ CONTAINS
 
           do iband=1,deg_dim
             do jband=1,deg_dim
-              matr2d = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
+              matr2d = eig2_diag_cart(1:mdim,1:mdim,iband,jband)
               f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(matr2d,unit_r))
               df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(matr2d,unit_r))+&
 &              DOT_PRODUCT(unit_r,MATMUL(matr2d,dr_dph))
@@ -1619,10 +1912,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1676,9 +1969,9 @@ CONTAINS
 
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
 
         ABI_DEALLOCATE(unit_r)
@@ -1725,7 +2018,7 @@ CONTAINS
         m_avg_frohlich=zero
         saddle_warn=.false.
 
-        f3d(:,:) = eig2_diag_cart(:,:,1,1)
+        f3d(:,:) = eig2_diag_cart(1,1,:,:)
 
         !DIAGONALIZATION
         eigenvec = f3d        !IN
@@ -1750,7 +2043,7 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(:,:,iband,jband),dirs(:,adir)))
             end do
           end do
           eigenvec = f3d        !IN
@@ -1770,9 +2063,9 @@ CONTAINS
           m_cart(adir,:)=1._dp/eigf3d(:)
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+        call print_tr_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
 &          ntheta,m_avg,m_avg_frohlich,saddle_warn)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+        call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
 &          ntheta,m_avg,m_avg_frohlich,saddle_warn)
 
         ABI_DEALLOCATE(f3d)

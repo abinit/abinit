@@ -39,6 +39,7 @@ module m_entropyDMFT
   use m_pawang, only : pawang_type
   use m_pawrad, only : pawrad_type, simp_gen, poisson
   use m_pawtab, only : pawtab_type
+  use m_paw_correlations,only : pawpuxinit
   use m_io_tools, only : get_unit
   use m_data4entropyDMFT
 
@@ -693,7 +694,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_nextLambda'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
     type(entropyDMFT_t) , intent(inout) :: e_t

@@ -5,9 +5,9 @@
 !!
 !! FUNCTION
 !! Treat XC GGA functional of HCTH type.
-!! See Hamprecht, Cohen, Tozer and Handy, J. Chem. Phys. 109, 6264 (1998) for HCTH-93.
-!!  Boese, Doltsinis, Handy and Sprik, J. Chem. Phys. 112, 1670 (2000) for HCTH-120 and HCTH-147.
-!!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) for HCTH-407.
+!! See Hamprecht, Cohen, Tozer and Handy, J. Chem. Phys. 109, 6264 (1998) [[cite:Hamprecht1998]] for HCTH-93
+!!  Boese, Doltsinis, Handy and Sprik, J. Chem. Phys. 112, 1670 (2000) [[cite:Boese2000]] for HCTH-120 and HCTH-147.
+!!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) [[cite:Boese2001]] for HCTH-407.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2018 ABINIT group (XG,LG)
@@ -52,9 +52,9 @@ contains
 !!
 !! FUNCTION
 !! Treat XC GGA functional of HCTH type.
-!! See Hamprecht, Cohen, Tozer and Handy, J. Chem. Phys. 109, 6264 (1998) for HCTH-93.
-!!  Boese, Doltsinis, Handy and Sprik, J. Chem. Phys. 112, 1670 (2000) for HCTH-120 and HCTH-147.
-!!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) for HCTH-407.
+!! See Hamprecht, Cohen, Tozer and Handy, J. Chem. Phys. 109, 6264 (1998) [[cite:Hamprecht1998]] for HCTH-93.
+!!  Boese, Doltsinis, Handy and Sprik, J. Chem. Phys. 112, 1670 (2000) [[cite:Boese2000]] for HCTH-120 and HCTH-147.
+!!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) [[cite:Boese2001]] for HCTH-407.
 !!
 !! For a series of values of the density and the square of the
 !! gradient of the density, return the associated Exc energy,
@@ -214,7 +214,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
  end if
 
 !Parameters for the Perdew-Wang 92 LSD as well as LSD-RPA,
-!see Table I of Phys.Rev.B 45,13244 (1992)
+!see Table I of Phys.Rev.B 45,13244 (1992) [[cite:Perdew1992a]]
  ec0_aa=0.031091_dp ; ec1_aa=0.015545_dp ; mac_aa=0.016887_dp
  ec0_a1=0.21370_dp  ; ec1_a1=0.20548_dp  ; mac_a1=0.11125_dp
  ec0_b1=7.5957_dp   ; ec1_b1=14.1189_dp  ; mac_b1=10.357_dp

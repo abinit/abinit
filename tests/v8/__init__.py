@@ -25,6 +25,8 @@ inp_files = [
 "t13.in",
 "t14.in",
 "t15.in",
+"t16.in",
+"t17.in",
 "t30.in",
 "t31.in",
 "t32.in",
@@ -42,6 +44,7 @@ inp_files = [
 "t50.in",
 "t55.in",
 "t56.in",
+"t57.in",
 "t61.in",
 "t62.in",
 "t63.in",
@@ -76,5 +79,6 @@ inp_files = [
 "t104.in",
 "t105.in",
 "t106.in",
-"t107.in"
+"t107.in",
+"t110.in",
 ]

@@ -132,3 +132,21 @@ dmftbandf?2 25       # Precise the definition of Wannier functions (also used fo
 
 # -- Parallelism
  gwpara?4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tucrpa_3.in
+#%% [files]
+#%% files_to_test = 
+#%%   tucrpa_1.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
+#%% [shell] 
+#%% [paral_info]
+#%% nprocs_to_test = 32
+#%% max_nprocs = 32
+#%% [extra_info]
+#%% keywords = LDA, CRPA
+#%% authors = B. Amadon
+#%% description = For SrVO3, compute U, convergence study on ecuteps
+#%%<END TEST_INFO>

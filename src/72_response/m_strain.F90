@@ -342,15 +342,11 @@ subroutine strain_apply(rprim,rprim_def,strain)
 !scalar
  integer :: i
 !arrays
- real(dp) :: identity(3,3)
 ! *************************************************************************
 
  rprim_def(:,:) = zero
 ! Fill the identity matrix
- identity = zero
- forall(i=1:3)identity(i,i)=1
-
- rprim_def(:,:) = matmul(rprim(:,:),identity(:,:)+strain%strain(:,:))
+ rprim_def(:,:) = matmul(strain%strain(:,:),transpose(rprim(:,:)))
 
 end subroutine strain_apply
 !!***
@@ -523,30 +519,23 @@ subroutine strain_strain2def(mat_strain,strain)
  mat_strain(:,:) = zero
  forall(i=1:3)mat_strain(i,i)=1
 
- if(strain%name == "uniaxial") then
-   select case(strain%direction)
-   case(1)
-     mat_strain(1,1) = mat_strain(1,1) + strain%delta
-   case(2)
-     mat_strain(2,2) = mat_strain(2,2) + strain%delta
-   case(3)
-     mat_strain(3,3) = mat_strain(3,3) + strain%delta
-   end select
- else
-   if (strain%name == "shear") then
-     select case(strain%direction)
-     case(4)
-       mat_strain(3,2) =  strain%delta / 2
-       mat_strain(2,3) =  strain%delta / 2
-     case(5)
-       mat_strain(3,1) =  strain%delta / 2
-       mat_strain(1,3) =  strain%delta / 2
-     case(6)
-       mat_strain(2,1) =  strain%delta / 2
-       mat_strain(1,2) =  strain%delta / 2
-     end select
-   end if
- end if
+ select case(strain%direction)
+ case(1)
+   mat_strain(1,1) = mat_strain(1,1) + strain%delta
+ case(2)
+   mat_strain(2,2) = mat_strain(2,2) + strain%delta
+ case(3)
+   mat_strain(3,3) = mat_strain(3,3) + strain%delta
+ case(4)
+   mat_strain(3,2) =  strain%delta / 2
+   mat_strain(2,3) =  strain%delta / 2
+ case(5)
+   mat_strain(3,1) =  strain%delta / 2
+   mat_strain(1,3) =  strain%delta / 2
+ case(6)
+   mat_strain(2,1) =  strain%delta / 2
+   mat_strain(1,2) =  strain%delta / 2
+ end select
 
 end subroutine strain_strain2def
 !!***

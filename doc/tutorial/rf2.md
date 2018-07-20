@@ -2,46 +2,53 @@
 authors: XG
 ---
 
-# Second lesson on DFPT  
+# Second tutorial on DFPT:
 
 ## Phonon band structures, thermodynamical properties.  
 
-This lesson aims at showing how to get the following physical properties, for periodic solids:
+In this tutorial you will learn how to post-process the raw data of the Abinit DFPT calculations to
+get the following physical properties of periodic solids:
 
 * Interatomic forces constants 
 * Phonon band structures 
 * Thermodynamical properties 
 
-The calculations will be based on density-functional perturbation theory (DFPT).
+[TUTORIAL_README]
 
-This lesson should take about 1 hour.
+This tutorial should take about 1 hour.
 
 ## 1 Generation of a derivative database
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input?*
+for the other tutorials. Why not create Work_rf2 in \$ABI_TUTORESPFN/Input?*
+
+Then copy the files *trf2_1.files* and *trf2_1.in* from  \$ABI_TUTORESPFN/Input* to *Work_rf2*:
+
+```sh
+cd $ABI_TUTORESPFN/Input
+mkdir Work_rf2
+cd Work_rf2
+cp ../trf2_1_x.files .
+cp ../trf2_1.in .
+```
 
 This tutorial starts by the generation of a database, that might be quite time-consuming.
-We suggest you to start immediately this computation...
-Copy the files ~abinit/tests/tutorespfn/Input/trf2_1.files and
-~abinit/tests/tutorespfn/Input/trf2_1.in in "Work_rf2".
-Issue now:
+We suggest you to start immediately this computation with
 
     abinit < trf2_1.files >& log &
 
-It takes about 3-5 minutes to be completed on a PC 2.8 GHz ...
+It takes about 3-5 minutes to be completed on a PC 2.8 GHz.
 
-In order to do interatomic force constant calculations, and to compute
+In order to do interatomic force constant (IFC) calculations, and to compute
 associated phonon band structure and thermodynamical properties, you should
-first have some theoretical background.  
-Let us assume that you have read the litterature relative to the [first lesson on DFPT](rf1). 
-You might find additional material, related to the present section, in 
+first have some theoretical background.
+Let us assume that you have read the litterature relative to the [first tutorial on DFPT](rf1). 
+You might find additional material, related to the present section, in
 [[cite:Gonze1997a]] -especially section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].
-
-If you haven't read parts of these references, you should take the time to get and read them now.
+If you haven't read parts of these references, we strongly advise you take the time to read them now.
 
 In short, the idea is that, in order to compute properties for which the
-phonon frequencies are needed in all the Brillouin zone, one can use an
+phonon frequencies are needed in the full Brillouin zone, one can use an
 elaborate Fourier interpolation, so that only few dynamical matrices need to
 be computed directly. Others will be computed by interpolation.
 A schematic representation of the different steps required to compute the 
@@ -49,16 +56,16 @@ dynamical matrix in the IBZ and post-process the results with anaddb is given be
 
 ![](rf2_assets/ph_dde_workflow.png)
 
-Let us have a look at the input file trf2_1.in. 
+Let us have a look at the input file *trf2_1.in*. 
 
 {% dialog tests/tutorespfn/Input/trf2_1.in %}
 
-The calculation is done for AlAs, the same crystalline material as for the previous lesson on DFPT. 
+The calculation is done for AlAs, the same crystalline material as for the first tutorial on DFPT.
 Many input parameters are also quite similar, both at the level of the description
-of the unit cell, as for the choice of cut-off energy and k point grid.
+of the unit cell and for the choice of cut-off energy and k point grid.
 
 Still, this input file is rather complex: in one single run, one produces the
-(Derivative Databases) DDBs needed for the rest of this tutorial. 
+Derivative Databases (DDBs) needed for the rest of this tutorial. 
 So, it starts with a ground-state calculation (dataset 1), followed by the
 computation of the response to the d/dk perturbation (dataset 2), and the
 response to electric fields, and phonons at Gamma (dataset 3). Datasets 4 to
@@ -69,24 +76,27 @@ Also, the values of these q wavevectors are not determined automatically.
 They must correspond to the q wavevectors needed by the ANADDB utility (see later),
 that is, they should form a reduced set of symmetry-inequivalent wavevectors,
 corresponding to a regularly spaced grid. In principle, they might not include
-the Gamma point, but it is recommended to have it in the set, in order for the
-Fourier interpolation not to introduce errors at that important point. In
-order to minimize the number of preliminary non-self-consistent calculations,
-it is advised to take a q point mesh that is adjusted to the k point mesh used
-for the electronic structure : all q wavevectors should connect two k point
-wavevectors from this grid.
+the Gamma point, but it is **recommended** to have it in the set, in order for the
+Fourier interpolation not to introduce errors at that important point. 
+
+!!! tip
+
+    In order to minimize the number of preliminary non-self-consistent calculations,
+    it is advised to take a q point mesh that is adjusted to the k point mesh used
+    for the electronic structure: all q wavevectors should connect two k point
+    wavevectors from this grid.
 
 Such a set of q wavevectors can be generated straightforwardly by running a GS
-calculation with [[kptopt]]=1, [[nshiftk]]=1, [[shiftk]]=0 0 0 (to include
+calculation with [[kptopt]] = 1, [[nshiftk]] = 1, [[shiftk]] = 0 0 0 (to include
 gamma) and taking the output kpt set file as this qpt set. One might set
-[[nstep]]=1 and [[nline]]=1, so only one iteration runs, or even
-[[nstep]]=0 and [[prtvol]]=-1, so no real DFT calculation is done.
-The input file ~abinit/tests/tutorespfn/Input/trf2_2.in is precisely an input
+[[nstep]] = 1 and [[nline]] = 1, so only one iteration runs, or even
+[[nstep]] = 0 and [[prtvol]] = -1, so no real DFT calculation is done.
+
+The input file *\$ABI_TUTORESPFN/Input/trf2_2.in* is precisely an input
 file that can be used to generate such a set of k points. 
-Copy it in the present Work_rf2 directly, as well as the accompanying
-~abinit/tests/tutorespfn/Input/trf2_2.files. Examine these files, then run
-this calculation (it is very rapid - it won't hurt the trf2_1 job). The
-following k point set is obtained:
+Copy it in the present *Work_rf2* directly, as well as the accompanying *trf2_2.files*. 
+Examine these files, then run this calculation (it is very rapid - it won't hurt the trf2_1 job).
+The following k point set is obtained:
     
            kpt    0.00000000E+00  0.00000000E+00  0.00000000E+00
                   2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -97,49 +107,49 @@ following k point set is obtained:
                   5.00000000E-01  5.00000000E-01  0.00000000E+00
                  -2.50000000E-01  5.00000000E-01  2.50000000E-01
 
-It is, as promised, the same as the q point set in the trf2_1.in file.
+It is, as promised, the same as the q point set in the *trf2_1.in file*.
 
 Now, it might be worth to examine in some detail one of the Derivative
-Database that has been created by the trf2_1 run. 
-We suppose that the file trf2_1o_DS3_DDB has already been created. 
-It corresponds to the third dataset, namely the response to q=0 and electric field.  
-Edit this file, and read the [[help:respfn#ddb|6.5 section]] of the respfn help file. 
-Examine the trf2_1o_DS3_DDB file carefully.
+Database that has been created by the trf2_1 run.
+We suppose that the file *trf2_1o_DS3_DDB* has already been created. 
+It corresponds to the third dataset, namely the response to q = 0 and electric field.  
+Open this file, and read the [[help:respfn#ddb|6.5 section]] of the respfn help file. 
+Examine the *trf2_1o_DS3_DDB* file carefully.
 
 Seven other similar files will be generated by the trf2_1 run, containing the
 same header, but a different 2DTE block. It will be the duty of the MRGDDB
-utility, next section, to gather all these information.
+utility, next section, to gather all these information and merge them into a single DDB file.
 
 Now, there might be two possibilities: either the trf2_1 run is finished, and
-you can continue the tutorial with the section 2 about the MRGDDB utility, or the run is not finished.  
+you can continue the tutorial with the section 2 about the MRGDDB utility, or the run is not finished.
 In the latter case, instead of waiting for trf2_1 to be finished, we suggest
 you to pursue with section 3. You will use as DDB file the one that can be
-found in ~abinit/tests/tutorespfn/Refs, with the name trf2_3.ddb.out,
-[[tests/tutorespfn/Refs/trf2_3.ddb.out]], instead of the one that would result from the section 2. 
+found in *\$ABI_TUTORESPFN/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.out|trf2_3.ddb.out]],
+instead of the one that would result from the section 2.
 Copy this file to the present directory, then go to
 section section 3 of this tutorial. You might come back to section 2 afterwards.
 
 ## 2 Manipulation of the derivative databases (the MRGDDB utility)
   
-The use of the MRGDDB utility is described in its [[help:mrgddb|help file]]. 
+The use of the MRGDDB utility is described in its [[help:mrgddb|help file]].
 Please, read it carefully now.
 
 Use MRGDDB to create the merge DDB from the eight DDB's corresponding to
 datasets 3 to 10 of the trf2_1 job, containing the dynamical matrices for the
 8 q points, as well as the response to the electric field (dielectric tensor
-and Born effective charges). Name the new DDB trf2_3.ddb.out .
+and Born effective charges). Name the new DDB *trf2_3.ddb.out*.
 
 !!! note
 
-    Including also the one from dataset 1 won't hurt
+    Including also the DDB from dataset 1 won't hurt
     (it contains the forces and stresses), but is not needed for the computation
-    of phonon band structure, interatomic force constants, and thermodynamical properties. 
+    of phonon band structure, interatomic force constants, and thermodynamical properties.
 
-File ~abinit/tests/tutorespfn/Input/trf2_3.in is an example of input file for MRGDDB. 
+File *\$ABI_TUTORESPFN/Input/trf2_3.in* is an example of input file for MRGDDB. 
 
 {% dialog tests/tutorespfn/Input/trf2_3.in %}
 
-You can copy it in the Work_rf2 directory, and run the merge as follows:
+You can copy it in the *Work_rf2* directory, and run the merge as follows:
     
     mrgddb < trf2_3.in
     
@@ -151,7 +161,7 @@ Please, read it carefully.
 This ANADDB utility is able to perform many different tasks, each governed by
 a selected set of input variables, with also some input variables common to
 many of the different tasks. The list of tasks to be done in one run is
-governed by different flags. 
+governed by different flags.
 Here is the list of flags:
 
   * [[anaddb:dieflag]] 
@@ -170,9 +180,8 @@ In this tutorial, we will focus on the flags [[anaddb:ifcflag]] and [[anaddb:thm
 
 ## 4 The computation of interatomic force constants
   
-You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and
-~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.  
-Edit the file trf2_4.in. Note that [[anaddb:ifcflag]] is activated. 
+You can copy the files *trf2_4.in* and *trf2_4.files* from *\$ABI_TUTORESPFN/Input* to the *Work_rf2* directory.
+Open the file *trf2_4.in*. Note that [[anaddb:ifcflag]] is activated. 
 
 {% dialog tests/tutorespfn/Input/trf2_4.files tests/tutorespfn/Input/trf2_4.in %}
 
@@ -186,19 +195,18 @@ The first group of variables define the grid of q wavevectors:
 
 Unfortunately, the names of input variables and their meaning is not exactly
 the same as the names used to generate the k points in ABINIT. 
-This is a shame, a remnant of history ... 
+This is a shame, a remnant of history.
 Please read carefully the documentation that describes these input variables.
 
-The second group of variables allows to impose some known constraint on the
-dynamical matrices and Born effective charges before proceeding with the analysis:
+The second group of variables allows to impose the acoustic sum rule on the
+dynamical matrices and the charge neutrality on Born effective charges before proceeding with the analysis:
 
   * [[anaddb:asr]]
   * [[anaddb:chneut]]
 
 Please, read carefully the explanation for these input variables.
 
-Finally, a third group of variables is related specifically to the analysis of
-the Interatomic Force Constants:
+Finally, a third group of variables is related specifically to the analysis of the IFC:
 
   * [[anaddb:dipdip]]
   * [[anaddb:ifcana]]
@@ -214,8 +222,7 @@ Now, you should issue:
 
 It will last only a few seconds.
 
-The file trf2_4.out contains the list of interatomic force constants, as well
-as some analysis. 
+The file *trf2_4.out* contains the list of interatomic force constants, as well as some analysis.
 
 {% dialog tests/tutorespfn/Refs/trf2_4.out %}
 
@@ -239,16 +246,15 @@ with respect to the other nuclei is given, by order of increasing distance.
 For each pair of nuclei involving atom 1, there is first the output of the
 IFCs in cartesian coordinates, as well as their decomposition into an Ewald
 and a short-range part, then, the analysis with respect to a local system of
-coordinate. The latter is chosen such as to diagonalize the IFC tensor, in
+coordinate. The latter is chosen such that it diagonalizes the IFC tensor, in
 case of the self-force constant, and in the other cases, the first vector is
 the vector joining the two nuclei, in order to decompose the IFC into a
 longitudinal and a transverse component.
 
-## 5 The efficient computation of phonon band structures
+## 5 Computation of phonon band structures with efficient interpolation
   
-You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and
-~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.  
-Open the file trf2_5.in. 
+You can copy the files *trf2_5.in* and *trf2_5.files* from *\$ABI_TUTORESPFN/Input* to the *Work_rf2* directory.
+Then open *trf2_5.in*.
 
 {% dialog tests/tutorespfn/Input/trf2_5.files tests/tutorespfn/Input/trf2_5.in %}
 
@@ -266,29 +272,30 @@ Then, come the input variables needed to define the list of q wavevectors in the
 * [[anaddb:nph2l]]: number of q-directions for LO-TO correction
 * [[anaddb:qph2l]]: list of q-directions for LO-TO correction
 
-Now, you should issue :
+Now, you should issue:
     
     anaddb < trf2_5.files > trf2_5.log
 
 It will last only a few seconds.
 
-The file trf2_5.out contains the list of eigenvalues, for all the needed
-q-wavevectors. You can edit it, and have a look at the different sections of
+The file *trf2_5.out* contains the list of eigenvalues, for all the needed
+q-wavevectors. You can iopen it, and have a look at the different sections of
 the file. Note that the interatomic force constants are computed (they are
 needed for the Fourier interpolation), but not printed.
 
-{% dialog tests/tutorespfn/Refs/trf2_5.out  %}
+{% dialog tests/tutorespfn/Refs/trf2_5.out %}
 
-Please, edit also the other output file, named trf2_5_B2EPS.freq. 
+Please, open also the other output file, named *trf2_5_B2EPS.freq*.
 It contains the frequencies, in a format suitable for graphical output, using the program
-band2eps (the latter should be more documented, and will not be described in the present tutorial).
+*band2eps* (the latter should be more documented, and will not be described in the present tutorial).
 
-You can copy the files [[tests/tutorespfn/Input/trf2_6.in]] and
-[[tests/tutorespfn/Input/trf2_6.files]] to the Work_rf2 directory, then issue
+You can copy the files *trf2_6.in* and *trf2_6.files* to the *Work_rf2* directory, then issue
     
     band2eps < trf2_6.files > trf2_6.log
 
-The file trf2_6.out.eps has been produced. It is an .eps file (eps stand for
+{% dialog tests/tutorespfn/Input/trf2_6.files tests/tutorespfn/Input/trf2_6.in %}
+
+The file *trf2_6.out.eps* has been produced. It is an .eps file (eps stand for
 Encapsulated PostScript). You can use the program ghostview to vizualize it.
 The command to issue will depend on the way you have configured your machine,
 but the following might perhaps do the work:
@@ -304,26 +311,112 @@ The correct phonon band structure is:
 
 You can correct the LO-TO splitting by the following little hack.
 
-Edit the file trf2_5_B2EPS.freq, and note that the value of the frequency, in
+Open the file *trf2_5_B2EPS.freq*, and note that the value of the frequency, in
 the sixth column, has a discontinuity exactly for the Gamma point (the three
-first columns give the k point coordinates), that is, at lines 1 and 31 :
+first columns give the k point coordinates), that is, at lines 1 and 31:
     
      0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  0.156855D-02
 
 Replace these values (sixth column, line 1 and 31) by the correct value,
-including the LO-TO splitting, that you can find in the file trf2_5.out, at
-the end, second list of vector. That is, the lines 1 and 31 should now read :
+including the LO-TO splitting, that you can find in the file *trf2_5.out*, at
+the end, second list of vector. That is, the lines 1 and 31 should now read:
     
      0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  1.730353E-03
     
-Now, run again band2eps. Your phonon band structure should be perfect!
+Now, run *band2eps* again. Your phonon band structure should be perfect!
 
-It can be compared with the AlAs phonon band structure published in
-[[cite:Giannozzi1991]].
+It can be compared with the AlAs phonon band structure published in [[cite:Giannozzi1991]].
 
 Of course, one should make a convergence study, on the k and q point grids
-(separately !), as well as on the energy cut-off, and also test LDA and GGA
-... But this is left to the user !
+(separately!), as well as on the energy cut-off, and also test LDA and GGA...
+But this is left to the user! You can have a look at the paper [[cite:Petretto2018]]
+for a careful analysis of phonon dispersion convergence with Abinit.
+
+### Plotting phonon bands with AbiPy
+
+If |AbiPy| is installed on your machine, you can use the |abiopen| script
+with the `--expose` option to visualize the phonon band structure stored in the *PHBST.nc* file
+produced by *anaddb*.
+For instance:
+
+```sh
+abiopen.py trf2_5.out_PHBST.nc --expose --seaborn=talk
+```
+
+produces the following plot without LO-TO splitting:
+
+![](rf2_assets/abiopen_trf2_5_PHBST.png)
+:   (left) Phonon bands without LO-TO splitting
+    (right) Plot with band connection estimated from the overlap of the eigenvectors at adjacent q-points
+
+Alternatively, we can start from the DDB file and use the |abiview| script. 
+In this case, AbiPy will generate the anaddb input file
+with all the variables required to handle the plotting of the LO-TO splitting, 
+invoke anaddb for us and finally plot the results.
+All of this with just two lines:
+
+```sh
+# Copy the tutorial output file to have the correct file extension (DDB)
+# otherwise abiview does not know how to handle our file.
+cp trf2_3.ddb.out trf2_3_DDB  
+
+abiview.py ddb trf2_3_DDB -sns=talk
+```
+
+![](rf2_assets/abiview_ddb_trf2_3_DDB.png)
+
+We can also compare our results with the phonon band structure available on the |materials_project|.
+
+First of all, let's find the materials project identifier associated to this particular phase of AlAs.
+Of course, one could use the materials project web interface but we can also do it 
+from the shell by just passing our Abinit input file to the |abistruct| script:
+
+```shell
+abistruct.py mp_match trf2_1.in
+
+# Found 1 structures in Materials Project database (use `verbose` to get further info)
+
+######################### abivars input for mp-2172 #########################
+# Full Formula (Al1 As1)
+# Reduced Formula: AlAs
+# abc   :   4.054377   4.054377   4.054377
+# angles:  60.000000  60.000000  60.000000
+#
+# Spglib space group info (magnetic symmetries are not taken into account).
+# Spacegroup: F-43m (216), Hall: F -4 2 3, Abinit spg_number: None
+# Crystal_system: cubic, Lattice_type: cubic, Point_group: -43m
+#
+#   Idx  Symbol    Reduced_Coords              Wyck      EqIdx
+# -----  --------  --------------------------  ------  -------
+#     0  Al        +0.00000 +0.00000 +0.00000  a             0
+#     1  As        +0.25000 +0.25000 +0.25000  d             1
+
+ natom 2
+ ntypat 2
+ typat 1 2
+ znucl 13 33
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.2500000000    0.2500000000    0.2500000000
+ acell    1.0    1.0    1.0
+ rprim
+    6.6351943530    0.0000000000    3.8308312587
+    2.2117314510    6.2557212277    3.8308312587
+    0.0000000000    0.0000000000    7.6616624984
+```
+
+AbiPy found one entry in the MP database that matches the structure given in our input file
+and has generated the corresponding input file.
+Now we know that this phase of AlAs corresponds to `mp-2172` and we can 
+look at the phonon band structure computed by [[cite:Petretto2018a]] at
+<https://materialsproject.org/materials/mp-2172/>
+
+!!! tip
+
+    For further information on the AbiPy API, please consult the |DdbFileNb| .
+    To learn how to automate DFPT calculations with Python, see 
+    [this jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/dfpt/lesson_dfpt.ipynb).
+
 
 ## 6 Thermodynamical properties
   
@@ -333,11 +426,13 @@ farthest from a clean, stable, usage. By exploring the input variables, the
 user should be able to produce figures and data like the ones for SiO2 quartz
 and stishovite, published in [[cite:Lee1995]]. 
 
-You can copy the files ~abinit/tests/tutorespfn/Input/trf2_7.in and
-~abinit/tests/tutorespfn/Input/trf2_7.files to the Work_rf2 directory, and
-have a look at them.  
-The same DDB as for trf2_4 and trf2_5 is used, namely trf2_3.ddb.out. The
-following additional input variables are present:
+You can copy the files *trf2_7.in* and *trf2_7.files* from *\$ABI_TUTORESPFN/Input* to *Work_rf2*
+and have a look at them.
+The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.out*.
+
+{% dialog tests/tutorespfn/Input/trf2_7.files tests/tutorespfn/Input/trf2_7.in %}
+
+The following additional input variables are present:
 
   * [[anaddb:thmflag]]
   * [[anaddb:ng2qpt]]
@@ -350,8 +445,8 @@ following additional input variables are present:
   * [[anaddb:temperinc]]
   * [[anaddb:tempermin]]
 
-Examine the input file, the input variables, then run anaddb (as usual ...).
-Then, edit the output file. You should be able to find the crucial section:
+Examine the input file, the input variables, then run anaddb as usual.
+Then, open the output file. You should be able to find the crucial section:
     
     # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
     # (A mol-c is the abbreviation of a mole-cell, that is, the
@@ -369,11 +464,8 @@ Then, edit the output file. You should be able to find the crucial section:
     
 There, one finds, the phonon free energy, the phonon internal energy, the
 phonon entropy and the phonon heat capacity.
-The atomic temperature factors can also be computed. 
-An example is presented in tests/v5, test 22 .
-
-{% dialog tests/v5/Input/t22.in  %}
-
+The atomic temperature factors can also be computed.
+An example is presented in [[test:v5_22]]
 
 !!! important
 

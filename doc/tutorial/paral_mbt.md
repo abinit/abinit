@@ -6,7 +6,7 @@ authors: MG, MS
 
 ## G<sub>0</sub>W<sub>0</sub> corrections in &alpha;-quartz SiO<sub>2</sub>.  
 
-This lesson aims at showing how to perform parallel calculations with the GW
+This tutorial aims at showing how to perform parallel calculations with the GW
 part of ABINIT. We will discuss the approaches used to parallelize the
 different steps of a typical G0W0 calculation, and how to setup the parameters
 of the run in order to achieve good speedup. α-quartz SiO2 is used as test case.
@@ -15,38 +15,44 @@ It is supposed that you have some knowledge about UNIX/Linux, and you know how t
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar.md).
 
-This lesson should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
+[TUTORIAL_README]
 
-!!! important
+This tutorial should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
 
-    In the following, when "run ABINIT over nn CPU cores" appears, you have to use
-    a specific command line according to the operating system and architecture of
-    the computer you are using. This can be for instance:
-        
-        mpirun -n nn abinit < abinit.files 
 
-    or the use of a specific submission file.
+In the following, when "run ABINIT over nn CPU cores" appears, you have to use
+a specific command line according to the operating system and architecture of
+the computer you are using. This can be for instance:
+    
+    mpirun -n nn abinit < abinit.files 
+
+or the use of a specific submission file.
 
 ## 1 Generating the WFK file in parallel
 
-*Before beginning, you should create a working directory whose name might be
-"Work_mbt" (so ~abinit/tests/tutoparal/Input/Work_mbt).*
+*Before beginning, you should create a working directory in *\$ABI_TUTOPARAL/Input* 
+whose name might be Work_mbt.*
+
+```sh
+cd $ABI_TUTOPARAL/Input/
+mkdir Work_mbt && cd Work_mbt
+```
   
 The input files necessary to run the examples related to this tutorial are
-located in the directory ~abinit/tests/tutoparal/Input.
+located in the directory *\$ABI_TUTOPARAL/Input* .
 We will do most of the actions of this tutorial in this working directory. 
 
-In the [[lesson:gw1|first lesson]] of the GW tutorial, we have learned how to
+In the [first GW tutorial](gw1), we have learned how to
 generate the WFK file with the sequential version of the code. 
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
 
-First of all, you should copy the files file tmbt_1.files in the working directory Work_mbt:
+First of all, copy the files file tmbt_1.files in the working directory Work_mbt:
     
-    >>> cd Work_mbt
-    >>> cp ../tmbt_1.files . 
+    cd Work_mbt
+    cp ../tmbt_1.files . 
 
-Now open the input file ~abinit/tests/tutoparal/Input/tmbt_1.in in your
+Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_1.in* in your
 preferred editor, and look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_1.files tests/tutoparal/Input/tmbt_1.in %}
@@ -62,8 +68,8 @@ the Kohn-Sham band structure including many empty states:
     nband2      160    # Number of (occ and empty) bands computed in the NSCF cycle.
     nbdbuf2     10     # A large buffer helps to reduce the number of NSCF steps.
     
-We have already encountered these variables in the [[lesson:gw1|first lesson]] 
-of the GW tutorial so their meaning should be familiar to you.
+We have already encountered these variables in the [first GW tutorial](gw1) 
+so their meaning should be familiar to you.
 The only thing worth stressing is that this calculation solves the NSCF cycle
 with the conjugate-gradient method ([[paral_kgb]] == 0)
 
@@ -75,10 +81,10 @@ wedge) hence the theoretical maximum speedup is 9.
 
 Now run ABINIT over nn CPU cores using
     
-    (mpirun ...) abinit < tmbt_1.files >& tmbt_1.log &
+    mpirun -n 9 abinit < tmbt_1.files > tmbt_1.log 2> err &
     
 but keep in mind that, to avoid idle processors, the number of CPUs should
-divide 9. At the end of the run, the code will produce the file tmbt_1o_WFK
+divide 9. At the end of the run, the code will produce the file *tmbt_1o_WFK*
 needed for the subsequent GW calculations.
 
 With three nodes, the wall clock time is around 1.5 minutes.
@@ -95,7 +101,7 @@ With three nodes, the wall clock time is around 1.5 minutes.
     +Overall time at end (sec) : cpu=        626.9  wall=        626.9
     
 
-A reference output file is given in ~tests/tutoparal/Refs, under the name tmbt_1.out.
+A reference output file is given in *\$ABI_TUTOPARAL/Refs*, under the name *tmbt_1.out*.
 
 Note that 150 bands are not enough to obtain converged GW results, you might
 increase the number of bands in proportion to your computing resources.
@@ -106,12 +112,12 @@ In this part of the tutorial, we will compute the RPA polarizability with the
 Adler-Wiser approach. The basic equations are discussed in this
 [[theory:mbt#5-the-rpa-polarizability-in-fourier-space|section]] of the GW notes.
 
-First copy the files file tmbt_2.file in the working directory, then create a
+First copy the files file *tmbt_2.file* in the working directory, then create a
 symbolic link pointing to the WFK file we have generated in the previous step:
     
     >>> ln -s tmbt_1o_DS2_WFK tmbt_2i_WFK
 
-Now open the input file ~abinit/tests/tutoparal/Input/tmbt_2.in so that we can
+Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_2.in* so that we can
 discuss its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_2.in %}
@@ -129,7 +135,7 @@ The set of parameters controlling the screening computation is summarized below:
     inclvkb     2   # Correct treatment of the optical limit.
     
 Most of the variables have been already discussed in the
-[[lesson:gw1|first lesson]] of the GW tutorial. The only variables that
+[first GW tutorial](gw1). The only variables that
 deserve some additional explanation are [[gwpara]] and [[awtr]].
 
 [[gwpara]] selects the parallel algorithm used to compute the screening. Two
@@ -144,14 +150,14 @@ documentation of the variable. In this tutorial, we will be focusing on
 mostly important, it is the only one that allows for a significant reduction
 of the memory requirement.
 
-The option [[awtr]]=1 specifies that the system presents time reversal
+The option [[awtr]] = 1 specifies that the system presents time reversal
 symmetry so that it is possible to halve the number of transitions that have
 to be calculated explicitly (only resonant transitions are needed). Note that
-[[awtr]]=1 is MANDATORY when [[gwpara]]=2 is used.
+[[awtr]] = 1 is MANDATORY when [[gwpara]] = 2 is used.
 
 Before running the calculation in parallel, it is worth discussing some
 important technical details of the implementation. For our purposes, it
-suffices to say that, when [[gwpara]]=2 is used in the screening part, the
+suffices to say that, when [[gwpara]] = 2 is used in the screening part, the
 code distributes the wavefunctions such that each processing unit owns the
 FULL set of occupied bands while the empty states are distributed among the
 nodes. The parallel computation of the inverse dielectric matrix is done in
@@ -197,9 +203,9 @@ namely the reading of the WFK file and the matrix inversion (qloop).
 At this point, the most important technical details of the implementation have
 been covered, and we can finally run ABINIT over nn CPU cores using
     
-    (mpirun ...) abinit < tmbt_2.files >& tmbt_2.log &
+    (mpirun ...) abinit < tmbt_2.files > tmbt_2.log 2> err &
 
-Run the input file tmb_2.in using different number of processors and keep
+Run the input file *tmb_2.in* using different number of processors and keep
 track of the time for each processor number so that we can test the
 scalability of the implementation. The performance analysis reported in the
 figures above was obtained with PAW using ZnO as tests case, but you should
@@ -210,7 +216,7 @@ focuses on how to run efficient MPI computations, we won't perform any
 converge study for SiO2. Most of the parameters used in the input files are
 already close to converge, only the k-point sampling and the number of empty
 states should be increased. You might modify the input files to perform the
-standard converge tests following the procedure described in the [[lesson:gw1|first lesson]] of the GW tutorial.
+standard converge tests following the procedure described in the [first GW tutorial](gw1).
 
 In the main output file, there is a section reporting how the bands are
 distributed among the nodes. For a sequential calculation, we have
@@ -267,7 +273,7 @@ If enough processing units are available, the linear factor due to the q-point
 sampling can be trivially absorbed by splitting the calculation of the
 q-points into several independent runs using the variables [[nqptdm]] and
 [[qptdm]]. The results can then be gathered in a unique binary file by means
-of the **mrgscr** utility (see also the automatic tests v3/t87, v3/t88 and v3/t89).
+of the **mrgscr** utility (see also the automatic tests [[test:v3_87]], [[test:v3_88]] and [[test:v3_89]]).
 
 ## 3 Computing the screening in parallel using the Hilbert transform method
   
@@ -279,12 +285,12 @@ frequency mesh. The equations implemented in the code are documented in
 [[theory:mbt#hilbert_transform|in this section]].
 
 
-As usual, we have to copy the files file tmbt_3.file in the working directory,
+As usual, we have to copy the files file *tmbt_3.file* in the working directory,
 and then create a symbolic link pointing to the WFK file.
     
     >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
     
-The input file is ~abinit/tests/tutoparal/Input/tmbt_3.in. 
+The input file is *$\ABI_TUTOPARAL/Input/tmbt_3.in*. 
 Open it so that we can have a look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_3.in %}
@@ -310,7 +316,7 @@ As discussed in the [[theory:mbt#hilbert_transform|GW notes] for the spectral fu
 Hilbert transform method is much more memory demanding that the Adler-Wiser
 approach, mainly because of the large value of [[nomegasf]] that is usually
 needed to converge the results. Fortunately, the particular distribution of
-the data employed in [[gwpara]]=2 turns out to be well suited for the
+the data employed in [[gwpara]] = 2 turns out to be well suited for the
 calculation of the spectral function since each processor has to store and
 treat only a subset of the entire range of transition energies. The algorithm
 therefore presents good MPI-scalability since the number of ω′ frequencies
@@ -319,7 +325,7 @@ the number of processors.
 
 Now run ABINIT over nn CPU cores using
     
-    (mpirun ...) abinit < tmbt_3.files >& tmbt_3.log &
+    (mpirun ...) abinit < tmbt_3.files > tmbt_3.log 2> err
 
 and test the scaling by varying the number of processors. Keep in mind that,
 also in this case, the distribution of the computing work is well balanced
@@ -334,25 +340,24 @@ Note how the size of this array decreases when more processors are used.
 
 The figure below shows the electron energy loss function (EELF) of SiO2
 calculated using the Adler-Wiser and the Hilbert transform method. You might
-try to reproduce these results (the EELF is reported in the file tmbt_3o_EELF,
+try to reproduce these results (the EELF is reported in the file *tmbt_3o_EELF*,
 a much denser k-sampling is required to achieve convergence).
 
 ![](paral_mbt_assets/comp-AW-spect.png)
 
 ## 4 Computing the one-shot GW corrections in parallel
-
   
 In this last paragraph, we discuss how to calculate G0W0 corrections in
-parallel with [[gwpara]]=2. The basic equations used to compute the self-energy matrix elements are discussed in 
+parallel with [[gwpara]] = 2. The basic equations used to compute the self-energy matrix elements are discussed in 
 [[theory:mbt#evaluation_gw_sigma|this part]] of the GW notes.
 
-Before running the calculation, copy the files file tmbt_4.file in the working
+Before running the calculation, copy the files file *tmbt_4.file* in the working
 directory. Then create two symbolic links for the SCR and the WFK file:
     
     ln -s tmbt_1o_DS2_WFK tmbt_4i_WFK
     ln -s tmbt_2o_SCR     tmbt_4i_SCR
 
-Now open the input file ~abinit/tests/tutoparal/Input/tmbt_4.in.
+Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_4.in*.
 
 {% dialog tests/tutoparal/Input/tmbt_4.in %}
 
@@ -374,10 +379,10 @@ nband       50           # Number of bands for the correlation part.
     
 For our purposes, it suffices to say that this input file defines a standard
 one-shot calculation with the plasmon-pole model approximation. We refer to
-the documentation and to the [[lesson:gw1|first lesson]] of the GW
-tutorial for a more complete description of the meaning of these variables.
+the documentation and to the [first GW tutorial](gw1) 
+for a more complete description of the meaning of these variables.
 
-Also in this case, we use [[gwpara]]=2 to perform the calculation in parallel.
+Also in this case, we use [[gwpara]] = 2 to perform the calculation in parallel.
 Note, however, that the distribution of the orbitals employed in the self-
 energy part significantly differs from the one used to compute the screening.
 In what follows, we briefly describe the two-step procedure used to distribute
@@ -435,7 +440,7 @@ option is controlled by the first digit of [[gwmem]].
 Now that we know how distribute the load efficiently, we can finally run the
 calculation using
     
-    (mpirun ...) abinit < tmbt_4.files >& tmbt_4.log &
+    (mpirun ...) abinit < tmbt_4.files > tmbt_4.log 2> err &
 
 Keep track of the time for each processor number so that we can test the
 scalability of the self-energy part.
@@ -461,24 +466,24 @@ this tutorial).
 
 1. Remember that "Anything that can possibly go wrong, does" so, when writing your input file, try to "Keep It Short and Simple". 
 
-2. Do one thing and do it well:   
+2. Do one thing and do it well:
   Avoid using different values of [[optdriver]] in the same input file. Each
   runlevel employs different approaches to distribute memory and CPU time, hence
   it is almost impossible to find the number of processors that will produce a
   balanced run in each dataset.
 
-3. Prime number theorem:   
+3. Prime number theorem:
   Convergence studies should be executed in parallel only when the parameters
   that are tested do not interfere with the MPI algorithm. For example, the
   convergence study in the number of bands in the screening should be done in
   separated input files when [[gwpara]]=2 is used.
 
-4. Less is more:   
+4. Less is more:
   Split big calculations into smaller runs whenever possible. For example,
   screening calculations can be split over q-points. The calculation of the
   self-energy can be easily split over [[kptgw]] and [[bdgw]].
 
-5. Look before you leap:   
+5. Look before you leap:
   Use the converge tests to estimate how the CPU-time and the memory
   requirements depend on the parameter that is tested. Having an estimate of the
   computing resources is very helpful when one has to launch the final

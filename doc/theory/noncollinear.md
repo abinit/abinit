@@ -39,9 +39,11 @@ In the GGA approximation, on the contrary, we **assume** that it is a functional
 We therefore use exactly the same functional as in the spin polarized situation, using the local direction
 of $\vec m(\rr)$ as polarization direction.
 
-We then have 
+We then have
 
-$$ {\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)}$$, 
+$$ 
+{\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)},
+$$
 
 where $\widehat {m(\rr)} = {m(\rr) \over |m(\rr)|}$.
 Now, in the LDA-GGA formulations, $n_\uparrow + n_\downarrow =n$ and $|n_\uparrow-n_\downarrow|=|m|$
@@ -95,12 +97,6 @@ and compute $\rho(\rr)$ and $\vec m(\rr)$ with the help of:
 m_z(\rr)&=&\rho^{11}(\rr) - \rho^{22}(\rr)
 \end{eqnarray*}
 
-Note that only the forurier transform are performed in *mkrho.f*, while the final transformation to
-$\rho(\rr)$, $\vec m(\rr)$ is performed in *symrhg.f*.
-
-The computation of $V_{xc}$ is performed in *rhohxc.f*. The only transformation to this routine, is
-to compute $|\vec m(\rr)|$ and yield back the four component $V_{xc}$, from the expression 
-of ${\delta E_{xc} \over \delta |m (\rr)| }$.
 
 For more information about noncollinear magnetism see [[cite:Hobbs2000]] 
 and [[cite:Perdew1992]] for the xc functional.

@@ -35,7 +35,7 @@ module m_classify_bands
 
  use m_numeric_tools,  only : get_trace
  use m_symtk,          only : mati3inv
- use m_blas,           only : xdotc, xdotu, xcopy
+ use m_hide_blas,      only : xdotc, xdotu, xcopy
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
  use m_pawang,         only : pawang_type
@@ -44,6 +44,8 @@ module m_classify_bands
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_print, pawfgrtab_free
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_paw_sphharm,    only : setsym_ylm
+ use m_paw_nhat,       only : nhatgrid
  use m_wfd,            only : wfd_get_ur, wfd_t, wfd_ug2cprj, wfd_change_ngfft, wfd_paw_get_aeur
 
  implicit none
@@ -155,7 +157,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'classify_bands'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -304,8 +305,8 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
      !tmp_sym(:,:,isym) = Cryst%symrec(:,:,isym)
      !tmp_sym(:,:,isym) = TRANSPOSE(Cryst%symrec(:,:,isym))
    end do
-   !% call setsymrhoij(Cryst%rprimd,lmax,Cryst%nsym,3,Cryst%gprimd,tmp_sym,zarot)
-   !call setsymrhoij(Cryst%gprimd,lmax,Cryst%nsym,1,Cryst%rprimd,tmp_sym,zarot)
+   !% call setsym_ylm(Cryst%rprimd,lmax,Cryst%nsym,3,Cryst%gprimd,tmp_sym,zarot)
+   !call setsym_ylm(Cryst%gprimd,lmax,Cryst%nsym,1,Cryst%rprimd,tmp_sym,zarot)
    ABI_FREE(tmp_sym)
    zarot = Pawang%zarot
 

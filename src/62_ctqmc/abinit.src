@@ -19,11 +19,15 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_BathOperator.F90",
+ "m_BathOperatoroffdiag.F90",
  "m_data4entropyDMFT.F90",
  "m_Ctqmc.F90",
+ "m_Ctqmcoffdiag.F90",
  "m_CtqmcInterface.F90",
+ "m_CtqmcoffdiagInterface.F90",
  "m_FFTHyb.F90",
  "m_GreenHyb.F90",
+ "m_GreenHyboffdiag.F90",
  "m_ImpurityOperator.F90",
  "m_ListCdagC.F90",
  "m_MapHyb.F90",

@@ -120,7 +120,7 @@ CONTAINS
 !! PARENTS
 !!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,chern_number
-!!      classify_bands,cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools
+!!      classify_bands,cohsex_me,ctocprj,d2frnl,m_datafordmft,debug_tools
 !!      dfpt_accrho,dfpt_cgwf,dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk
 !!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
@@ -756,7 +756,7 @@ end subroutine pawcprj_zaxpby
 !!  ntypat :: number of types of atoms
 !!  typat(natom) :: type of each atom
 !!  zarot(2*lmax+1,2*lmax+1,lmax+1,nsym) :: elements of rotation matrix for angular momentum states
-!!                                          and symmetry operations. See setsymrhoij.F90
+!!                                          and symmetry operations. See m_paw_sphharm/setsym_ylm.
 !!
 !! OUTPUT
 !!  cprj_fkn (pawcprj_type) :: cprj for a single band and k point where the k point is related to

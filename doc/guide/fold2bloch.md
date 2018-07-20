@@ -16,7 +16,7 @@ Fold2Bloch uses **_wfk_open_read, wfk_read_band_block and hdr_io_** routines
 from the ABINIT package to read the _WFK file header and information about the
 element structure which is used for our calculations.
 
-It will be easier to discover the present file with the help of the tutorial ([[lesson:fold2bloch]]).  
+It will be easier to discover the present file with the help of the tutorial ([[tutorial:fold2bloch]]).  
 
 ## 1 Compiling instructions
   

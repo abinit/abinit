@@ -60,7 +60,7 @@ module m_dfpt_loopert
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main, efmas_analysis
+ use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -75,6 +75,7 @@ module m_dfpt_loopert
                           pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
+ use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
  use m_inwffil,    only : inwffil
@@ -86,6 +87,7 @@ module m_dfpt_loopert
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -200,7 +202,7 @@ contains
 !!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
-!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
+!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsym_ylm,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
 !!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
@@ -230,10 +232,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
  use interfaces_14_hidewrite
+ use interfaces_29_kpoints
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_72_response
 !End of the abilint section
@@ -885,7 +886,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
      call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
-     call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+     call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
 !  Initialize k+q array
@@ -2412,6 +2413,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
+   if(dtset%prtefmas==1)then
+     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
+     write(std_out,*)' dfpt_looppert : will write ',fname
+#ifdef HAVE_NETCDF
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
+     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     NCF_CHECK(nf90_close(ncid))
+#endif
+   endif
+
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
 
    ABI_DEALLOCATE(kpt_rbz_pert)
@@ -2730,7 +2743,7 @@ end subroutine getcgqphase
 !! enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !! enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
 !! eovl1=1st-order change of wave-functions overlap, part of 2nd-order energy
-!!       PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008)
+!!       PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !! epaw1=1st-order PAW on-site part of 2nd-order total energy.
 !! evdw=DFT-D semi-empirical part of 2nd-order total energy
 !! exc1=1st-order exchange-correlation part of 2nd-order total energy
