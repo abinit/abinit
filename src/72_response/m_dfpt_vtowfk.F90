@@ -194,7 +194,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtowfk'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
  use interfaces_72_response
 !End of the abilint section
 

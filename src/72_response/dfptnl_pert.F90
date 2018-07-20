@@ -160,10 +160,12 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
  use m_initylmg,   only : initylmg
  use m_mkffnl,     only : mkffnl
+ use m_getghc,     only : getgsc
  use m_getgh1c,    only : rf_transgrid_and_pack
  use m_mpinfo,     only : proc_distrb_cycle
  use m_nonlop,     only : nonlop
  use m_fourier_interpol, only : transgrid
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -171,7 +173,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 #define ABI_FUNC 'dfptnl_pert'
  use interfaces_14_hidewrite
  use interfaces_66_nonlocal
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
