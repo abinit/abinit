@@ -145,7 +145,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !scalars
  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,cpopt,ddkflag,dimffnl,epsabg
  integer :: gdir,gdx,gdxc,gfor,gsigma
- integer :: iatom,icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir,idx,ifor
+ integer :: iatom,icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir
  integer :: ikg,ikgb,ikgg,ikpt,ikptb,ikptg,ilm,ilmn,ipw,isppol,istwf_k,itrs,itypat
  integer :: jlmn,job,jpw
  integer :: klmn,mcg1_k,my_cpopt,my_nspinor,nband_k,ncpgr,ndat,nkpg,nn,n1,n2

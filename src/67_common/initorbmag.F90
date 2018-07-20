@@ -20,8 +20,6 @@
 !!  kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !!  npwarr(nkpt) = number of planewaves in basis and boundary at this k point
 !!  occ(mband*nkpt*nsppol) = occup number for each band at each k point
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
-!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3) = dimensional primitive vectors
@@ -50,7 +48,7 @@
 #include "abi_common.h"
 
 subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                     pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                     rprimd,symrec,xred)
 
  use defs_basis
@@ -64,8 +62,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_symtk,         only : symatm
  use m_fftcore,       only : kpgsph
  use m_kpts,          only : listkk, smpbz
- use m_pawang,        only : pawang_type
- use m_pawrad,        only : pawrad_type, simp_gen
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_alloc, pawcprj_getdim
  use m_paw_sphharm,   only : initylmr,setsym_ylm
@@ -88,7 +84,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
  type(orbmag_type),intent(out) :: dtorbmag
- type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
@@ -97,27 +92,25 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),pointer :: pwnsfac(:,:)
- type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: brav,exchn2n3d,fnkpt_computed
- integer :: iband,iatom,icg,icprj,idir,idum,idum1,idx,ierr,ifor,ikg,ikg1
- integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i,il,ilm,im,ilmn,iln
- integer :: index,ipw,ipwnsfac,ir,isign,isppol,istwf_k,isym,isym1,itrs,itypat
- integer :: jpw,ll,lmax,lmn2_size_max,lt
- integer :: mband_occ_k,me,me_g0,mesh_size,mkmem_,mkpt,my_nspinor,nband_k,nkptlatt,nproc,npw_k,npw_k1
- integer :: option,spaceComm,ylmr_normchoice,ylmr_npts,ylmr_option
- real(dp) :: arg,bnorm,diffk1,diffk2,diffk3,ecut_eff,intg
- real(dp) :: kpgnorm,kpt_shifted1,kpt_shifted2,kpt_shifted3,phfac,rdum
+ integer :: iband,icg,icprj,idir,idum,idum1,ierr,ifor,ikg,ikg1
+ integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i
+ integer :: index,ipw,ipwnsfac,isign,isppol,istwf_k,isym,isym1,itrs,itypat
+ integer :: jpw,lmax,lmn2_size_max
+ integer :: mband_occ_k,me,me_g0,mkmem_,mkpt,my_nspinor,nband_k,nkptlatt,nproc,npw_k,npw_k1
+ integer :: option,spaceComm
+ real(dp) :: diffk1,diffk2,diffk3,ecut_eff
+ real(dp) :: kpt_shifted1,kpt_shifted2,kpt_shifted3,rdum
  character(len=500) :: message
  !arrays
  integer :: iadum(3),iadum1(3),dg(3)
  integer,allocatable :: kg1_k(:,:)
- real(dp) :: bb(3),bbn(3),bcart(3),diffk(3),dk(3),dum33(3,3),kpgcart(3),kpoint(3),kpgvec(3),kpt1(3)
- real(dp) :: tsec(2),ylmgr(1,1,0),ylmr_nrm(1)
- real(dp),allocatable :: calc_expibi(:,:),ff(:),sb_out(:),spkpt(:,:),ylmb(:)
+ real(dp) :: diffk(3),dk(3),dum33(3,3),kpt1(3),tsec(2)
+ real(dp),allocatable :: spkpt(:,:)
 
 ! *************************************************************************
 
