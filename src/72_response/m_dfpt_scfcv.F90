@@ -42,7 +42,7 @@ module m_dfpt_scfcv
 #endif
 
  use m_dtfil,    only : status
- use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn
+ use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn, dotprod_g
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric, stresssym
  use m_time,     only : abi_wtime, sec2str, timab
@@ -1954,6 +1954,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 &          mpi_enreg,my_natom,nfft,nfftmix,ngfft,ngfftmix,npawmix,pawrhoij,&
 &          qphon,rhor,rprimd,usepaw,vresid,vtrial)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2391,7 +2392,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
- use interfaces_72_response, except_this_one => dfpt_nselt
+ use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -2794,7 +2795,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
  use m_wffile
- !use m_cgtools
 
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
  use m_mkffnl,      only : mkffnl
