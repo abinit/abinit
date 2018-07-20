@@ -31,7 +31,6 @@ sources = [
  "m_getgh1c.F90",
  "getgh2c.F90",
  "multithreaded_getghc.F90",
- "prep_bandfft_tabs.F90",
  "prep_fourwf.F90",
  "prep_getghc.F90",
  "prep_nonlop.F90",
