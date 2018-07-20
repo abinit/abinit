@@ -246,6 +246,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_odamix,           only : odamix
  use m_common,           only : scprqt, prtene
  use m_fourier_interpol, only : transgrid
+ use m_fock_getghc,      only : fock2ACE
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

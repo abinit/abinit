@@ -121,7 +121,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_spacepar,         only : meanvalue_g
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
- use m_nonlop,            only : nonlop
+ use m_nonlop,           only : nonlop
+ use m_fock_getghc,      only : fock_getghc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

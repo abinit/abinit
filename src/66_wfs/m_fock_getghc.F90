@@ -782,8 +782,6 @@ end subroutine fock_getghc
 !! fock%fockACE(ikpt,isppol)%xi
 !! if optfor=1, fock%fock_common%forces
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      scfcv
 !!
