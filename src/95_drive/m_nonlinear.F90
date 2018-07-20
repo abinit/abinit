@@ -77,6 +77,7 @@ module m_nonlinear
  use m_fourier_interpol, only : transgrid
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
+ use m_mkcore,           only : mkcore
 
  implicit none
 

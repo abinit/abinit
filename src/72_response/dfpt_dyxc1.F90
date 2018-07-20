@@ -97,6 +97,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use m_pawtab,        only : pawtab_type
  use m_atm2fft,       only : dfpt_atm2fft
  use m_dfpt_mkvxc,    only : dfpt_mkvxc
+ use m_mkcore,        only : dfpt_mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

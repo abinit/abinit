@@ -49,6 +49,7 @@ module m_forces
  use m_mklocl,           only : mklocl
  use m_predtk,           only : prtxvf
  use m_xchybrid,         only : xchybrid_ncpp_cc
+ use m_mkcore,           only : mkcore, mkcore_alt
 
  implicit none
 

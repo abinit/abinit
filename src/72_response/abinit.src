@@ -31,7 +31,6 @@ sources = [
  "m_dfpt_mkrho.F90",
  "dfpt_mkvxcstr.F90",
  "dfpt_mkvxcstrgga.F90",
- "dfpt_mkcore.F90",
  "dfpt_newvtr.F90",
  "dfpt_nselt.F90",
  "dfpt_nstdy.F90",

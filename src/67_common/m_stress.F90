@@ -47,6 +47,7 @@ module m_stress
  use m_vdw_dftd3,        only : vdw_dftd3
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl_recipspace
+ use m_mkcore,           only : mkcore, mkcore_alt
 
  implicit none
 
@@ -366,7 +367,7 @@ contains
  call timab(38,2,tsec)
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
-!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]  
+!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]
 !HONG  Nature Physics: M. Stengel et.al. (2009)) [[cite:Stengel1999]]
 !=======================================================================
 !=================== Berry phase contribution ==========================

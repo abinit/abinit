@@ -130,7 +130,8 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_pawtab,     only : pawtab_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
  use m_spacepar,   only : hartrestr
-use m_mpinfo,      only : proc_distrb_cycle
+ use m_mpinfo,      only : proc_distrb_cycle
+ use m_mkcore,      only : dfpt_mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

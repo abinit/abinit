@@ -111,6 +111,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use m_atm2fft,       only : atm2fft
  use m_dynmat,        only : dfpt_sydy
  use m_mklocl,        only : mklocl_recipspace
+ use m_mkcore,        only : mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

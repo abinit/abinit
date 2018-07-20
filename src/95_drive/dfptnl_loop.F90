@@ -156,6 +156,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_atm2fft,     only : dfpt_atm2fft
  use m_dfpt_mkvxc,  only : dfpt_mkvxc
  use m_dfpt_rhotov, only : dfpt_rhotov
+ use m_mkcore,      only : dfpt_mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

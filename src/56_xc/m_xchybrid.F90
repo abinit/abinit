@@ -35,6 +35,7 @@ module m_xchybrid
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
  use m_rhotoxc,     only : rhotoxc
+ use m_mkcore,      only : mkcore
 
  implicit none
 

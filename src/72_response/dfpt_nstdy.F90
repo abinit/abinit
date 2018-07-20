@@ -119,7 +119,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_hdr,       only : hdr_skip
  use m_pawtab,    only : pawtab_type
  use m_mpinfo,         only : proc_distrb_cycle
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
+ use m_dfpt_mkvxc,     only : dfpt_mkvxc
+ use m_mkcore,         only : dfpt_mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

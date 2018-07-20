@@ -56,6 +56,8 @@ module m_prcref
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
+ use m_mkcore,     only : mkcore
+
 
  implicit none
 
