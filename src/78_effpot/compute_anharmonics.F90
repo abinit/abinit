@@ -42,7 +42,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_profiling_abi
  use m_xmpi
  use m_io_tools, only : open_file
- 
+
  use m_ifc
  use m_anharmonics_terms
  use m_effective_potential
@@ -110,21 +110,21 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 ! Set MPI local varibaless
   nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
   iam_master = (my_rank == master)
- 
+
  !==========================================
  !1) Get the list of files
   nfile = 0
   jj=6
   do while (jj < 18)
-    if (filenames(jj)/="") then 
+    if (filenames(jj)/="") then
       if(jj==6) nfile = 0
       write(message, '(a,a)' )'  - ',trim(filenames(jj))
       call wrtout(std_out,message,'COLL')
-      call wrtout(ab_out,message,'COLL') 
+      call wrtout(ab_out,message,'COLL')
       jj = jj + 1
       nfile = nfile + 1
-    else 
-      exit 
+    else
+      exit
     end if
   end do
 
@@ -134,7 +134,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     call wrtout(std_out,message,'COLL')
   end if
 
-  write(message,'(a,(80a),a)') ch10,('-',ii=1,80),ch10  
+  write(message,'(a,(80a),a)') ch10,('-',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
@@ -152,7 +152,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
   ii = 1 ! Start at the index 1
   jj = 6 ! Start at the index 6
-  do while (jj < 18) 
+  do while (jj < 18)
     if (filenames(jj)/="".and.filenames(jj)/="no") then
       !Read and Intialisation of the effective potential type
       call effective_potential_file_read(filenames(jj),eff_pots(ii),inp,comm)
@@ -210,7 +210,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     end do
   end if
 
-! MPI BROADCAST 
+! MPI BROADCAST
   do ii=1,size(eff_pots)
     call xmpi_bcast (file_usable(ii), master, comm, ierr)
   end do
@@ -219,7 +219,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     write(message, '(2a)' )&
 &    ' There is several file corresponding to the reference ',ch10
     MSG_BUG(message)
-  end if  
+  end if
 
   have_strain = 0
 
@@ -227,7 +227,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   do ii=1,size(eff_pots)
-    if(effpot_strain(ii)%name /= "".and.file_usable(ii)) then 
+    if(effpot_strain(ii)%name /= "".and.file_usable(ii)) then
       write(message,'(a,a,a,I2,a,(ES10.2),a)')&
 &       ' A ',trim(effpot_strain(ii)%name),' strain in the direction ',&
 &       effpot_strain(ii)%direction,' with delta of ',effpot_strain(ii)%delta
@@ -251,7 +251,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     call wrtout(std_out,message,'COLL')
   end if
 
- !First check the strain  
+ !First check the strain
   do ii =1,6
     jj = 0
     jj = count(effpot_strain%direction==ii)
@@ -270,7 +270,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         has_all_strain = .False.
         have_strain(ii)=jj
       else
-        if(jj==2)then 
+        if(jj==2)then
           write(message, '(a,a,a,I1,a)' )&
 &          ' There is two files corresponding to strain ',trim(name),' in direction ',ii,ch10
           call wrtout(ab_out,message,'COLL')
@@ -282,20 +282,20 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           call wrtout(std_out,message,"COLL")
           has_all_strain = .False.
           if (inp%strcpling == 2) then
-            do kk = 1,2 
+            do kk = 1,2
               delta = inp%delta_df
-              if (kk==1) delta = -1 * delta 
+              if (kk==1) delta = -1 * delta
               call strain_init(strain,name=name,direction=ii,delta=delta)
               rprimd_def = matmul(eff_pot%crystal%rprimd,strain%strain)
               if(kk==1) then
-                write(message, '(a,a,a,a,a,I1,a,a,a,a)' )& 
+                write(message, '(a,a,a,a,a,I1,a,a,a,a)' )&
 &                 ' if you want to get the correct structure, please run dfpt calculation with',ch10,&
 &                 ' strain ',trim(name),' in the direction',ii,' with delta=',trim(ftoa(delta)),ch10,&
 &                 ' The corresponding primitive vectors are:'
               else
-                write(message, '(a,a,a,I1,a,a,a,a)' )& 
+                write(message, '(a,a,a,I1,a,a,a,a)' )&
 &                 ' And a strain ',trim(name),' in the direction',ii,' with delta = ',&
-&                 trim(ftoa(delta)),ch10,' The corresponding primitive vectors are:'               
+&                 trim(ftoa(delta)),ch10,' The corresponding primitive vectors are:'
               end if
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
@@ -335,14 +335,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           ia = ia + 1
         end if
       end do
-      if (have_strain(ii)==2)  then 
-        delta1 = deformation(ii,1) 
+      if (have_strain(ii)==2)  then
+        delta1 = deformation(ii,1)
         delta2 = deformation(ii,2)
         if (delta1+delta2 > tol15) then
           write(message, '(a,I1,a,a)' )&
 &             ' The deformations for strain ',ii,&
 &             ' are not the opposite',ch10
-          MSG_ERROR(message)   
+          MSG_ERROR(message)
         end if
       end if
     end if
@@ -381,7 +381,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-  if(has_all_strain) then 
+  if(has_all_strain) then
     write(message,'(3a)') ch10, ' The computation of the third order derivative ',&
 &    'is possible'
   else
@@ -409,7 +409,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
       end if
     end if
     call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')   
+    call wrtout(std_out,message,'COLL')
   end if
 
  !================================================
@@ -427,13 +427,13 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     do ii=1,6
       if(have_strain(ii)/=0) then
  !      We want the find the index of the perturbation ii in eff_pots(ii)
- !      And store in delta1 and delta2 
+ !      And store in delta1 and delta2
         delta1 = zero
         delta2 = zero
         do jj=1,size(eff_pots)
           if (effpot_strain(jj)%direction==ii.and.(effpot_strain(jj)%direction/=0))then
             if (abs(delta1)<tol16) then
-              delta1 = jj 
+              delta1 = jj
             else
               delta2 = jj
             end if
@@ -503,9 +503,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &    ' the phonon-strain coupling and the elastic-displacement coupling is done'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-  
+
   end if
-  
+
 
  !===============================================
  !4) Free the array of effective potential
@@ -520,7 +520,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   ABI_DEALLOCATE(file_usable)
 
 
-  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10  
+  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 

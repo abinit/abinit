@@ -133,9 +133,9 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 !   Get the atomic position for the new configuration
     call xcart2xred(thm_scells(iconfig)%natom,thm_scells(iconfig)%rprimd,&
 &                   thm_scells(iconfig)%xcart,xred_next)
-!   Just fill acell with the reference value, we apply strain on rprimd    
+!   Just fill acell with the reference value, we apply strain on rprimd
     acell_next(:) = acell(:)
-    
+
 !   Get the rprim for the new configuration
     if(.not.add_strain)then
       rprimd_next(:,:) = thm_scells(iconfig)%rprimd(:,:)
@@ -154,7 +154,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 !   Fill history with the values of xred, acell and rprimd
     call var2hist(acell_next,hist,natom,rprimd_next,xred_next,DEBUG)
     hist%ihist = abihist_findIndex(hist,+1)
-    
+
   end do
 
 ! Restart ihist before to leave
@@ -165,6 +165,6 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call thermal_supercell_free(nconfig,thm_scells)
   ABI_DATATYPE_DEALLOCATE(thm_scells)
   ABI_DEALLOCATE(zeff)
-  
+
 end subroutine generate_training_set
 !!***
