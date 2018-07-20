@@ -186,7 +186,6 @@ contains
 #define ABI_FUNC 'stress'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

@@ -163,6 +163,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

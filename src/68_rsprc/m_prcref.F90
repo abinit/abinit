@@ -206,7 +206,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -858,7 +857,6 @@ end subroutine prcref
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

@@ -140,7 +140,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 #undef ABI_FUNC
 #define ABI_FUNC 'elpolariz'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

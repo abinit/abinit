@@ -115,6 +115,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_spacepar, only : hartre
  use m_initylmg, only : initylmg
  use m_dfpt_mkvxc, only : dfpt_mkvxc
+ use m_mkcore,     only : dfpt_mkcore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
