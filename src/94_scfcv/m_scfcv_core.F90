@@ -337,6 +337,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
 &  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -347,7 +348,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_62_poisson
  use interfaces_66_nonlocal
  use interfaces_67_common
- use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section
 
  implicit none
@@ -2508,6 +2508,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
