@@ -61,12 +61,15 @@ module m_dfpt_scfcv
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
- use m_rf2,      only : rf2_getidirs
- use m_dens,     only : calcdensph
- use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_dfpt,    only : pawdfptenergy
+ use m_paw_nhat,    only : pawmknhat,pawnhatfr
+ use m_rf2,         only : rf2_getidirs
+ use m_dens,        only : calcdensph
+ use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_common,     only : scprqt
+ use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
+ use m_common,      only : scprqt
  use m_dfpt_rhotov, only : dfpt_rhotov
 
  implicit none
@@ -287,7 +290,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_65_paw
  use interfaces_72_response
 !End of the abilint section
 
@@ -1751,7 +1753,6 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 #undef ABI_FUNC
 #define ABI_FUNC 'newfermie1'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

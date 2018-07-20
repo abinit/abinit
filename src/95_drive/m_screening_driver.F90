@@ -83,10 +83,18 @@ module m_screening_driver
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_sphharm,   only : setsym_ylm
+ use m_paw_onsite,    only : pawnabla_init
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_denpot,    only : pawdenpot
+ use m_paw_init,      only : pawinit,paw_gencond
+ use m_paw_tools,     only : chkpawovlp,pawprt
  use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
+
+ use m_paw_correlations, only : pawpuxinit
 
  implicit none
 
@@ -161,7 +169,7 @@ contains
 !!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
 !!      pawrhoij_free,pawtab_get_lsize,pawtab_print,print_arr,print_ngfft
 !!      prtrhomxmn,pspini,random_stopping_power,rdgw,rdqps,rotate_fft_mesh
-!!      setsymrhoij,setup_screening,setvtr,spectra_free,spectra_repr
+!!      setsym_ylm,setup_screening,setvtr,spectra_free,spectra_repr
 !!      spectra_write,symdij,symdij_all,test_charge,timab,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_init,wfd_mkrho,wfd_print
 !!      wfd_read_wfk,wfd_rotate,wfd_test_ortho,write_screening,wrtout
@@ -178,7 +186,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -401,7 +408,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft

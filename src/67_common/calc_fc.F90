@@ -55,18 +55,17 @@
  use m_errors
  use m_xmpi, only : xmpi_comm_self
 
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
-
- use m_pawrad, only : pawrad_type
- use m_pawtab, only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_pawrhoij,   only : pawrhoij_type
+ use m_paw_nmr,    only : make_fc_paw
+ use m_paral_atom, only : get_my_atmtab,free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_fc'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

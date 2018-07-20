@@ -53,6 +53,7 @@ module m_cohsex
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_sym,       only : paw_symcprj
 
  implicit none
 
@@ -171,7 +172,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 #undef ABI_FUNC
 #define ABI_FUNC 'cohsex_me'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

@@ -152,6 +152,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat_psipsi
+ use m_paw_sym,       only : paw_symcprj
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur, wfd_get_many_ur,&
 &                            wfd_sym_ur
  use m_sigma,         only : sigma_t, sigma_distribute_bks
@@ -164,7 +166,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_sigx_me'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

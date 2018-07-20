@@ -72,7 +72,7 @@ xred
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Xu He
+#%% authors = X. He
 #%% keywords = NC
 #%% description = Geometry optimization with FIRE (ionmov 15)
 #%%<END TEST_INFO>

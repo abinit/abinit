@@ -45,13 +45,13 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
  use m_xmpi
  use m_errors
  use m_profiling_abi
- use m_orbmag
 
- use m_kg, only : getph, ph1d3d
- use m_initylmg, only : initylmg
- use m_mkffnl,           only : mkffnl
- use m_pawtab,           only : pawtab_type
- use m_pawcprj,  only :  pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_put, pawcprj_type
+ use m_kg,         only : getph, ph1d3d
+ use m_initylmg,   only : initylmg
+ use m_mkffnl,     only : mkffnl
+ use m_pawcprj,    only : pawcprj_type, pawcprj_put, pawcprj_alloc, pawcprj_free, pawcprj_getdim
+ use m_pawtab,     only : pawtab_type
+ use m_paw_orbmag, only : orbmag_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -76,11 +76,11 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
  integer,intent(in) :: nattyp(dtset%ntypat),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),xred(3,dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
- type(pawcprj_type),intent(inout) :: cprj_kb_k(dtorbmag%fnkpt,3,2,dtset%natom,dtorbmag%nspinor*dtset%mband)
+ type(pawcprj_type),intent(inout) :: cprj_kb_k(dtorbmag%fnkpt,6,dtset%natom,dtorbmag%nspinor*dtset%mband)
 
  !Locals------------------------------------
  !scalars
- integer :: bdir,bfor,bsigma,choice,cpopt,dimffnl,dimph1d,ia,iband,icg,ider,idir,ikg,ikpt
+ integer :: bdir,bdx,bfor,bsigma,choice,cpopt,dimffnl,dimph1d,ia,iband,icg,ider,idir,ikg,ikpt
  integer :: n1,n2,n3,nband_k,nkpg,npw_k,optder
  real(dp) :: arg
 
@@ -145,6 +145,8 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
              bsigma = -1
           end if
 
+          bdx = 2*bdir-2+bfor
+
           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
 
           kpointb(:) = kpoint(:) + dkb(:)
@@ -179,7 +181,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                   & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                   & phkxred,ph1d,ph3d,ucvol,psps%useylm)
              
-             call pawcprj_put(atindx1,cwaveprj,cprj_kb_k(ikpt,bdir,bfor,:,:),dtset%natom,&
+             call pawcprj_put(atindx1,cwaveprj,cprj_kb_k(ikpt,bdx,:,:),dtset%natom,&
                   & iband,0,ikpt,0,1,nband_k,1,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
 
           end do ! end loop over bands
