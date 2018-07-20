@@ -257,7 +257,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_53_ffts
  use interfaces_62_poisson
  use interfaces_66_nonlocal
- use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section

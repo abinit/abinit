@@ -102,6 +102,7 @@ contains
 
 subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -798,11 +799,12 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_66_wfs, except_this_one => fock2ACE
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -1209,6 +1211,7 @@ end subroutine fock2ACE
 !! SOURCE
 
 subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
