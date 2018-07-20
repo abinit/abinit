@@ -1,21 +1,59 @@
-!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_berryphase
+!! NAME
+!!  m_berryphase
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2000-2018 ABINIT  group (NSAI,XG,MKV)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_berryphase
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_hdr
+
+ use m_geometry,     only : xred2xcart
+ use m_hide_lapack,  only : dzgedi, dzgefa
+ use m_symtk,        only : matr3inv
+
+ implicit none
+
+ private
+!!***
+
+ public :: berryphase
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/berryphase
 !! NAME
 !! berryphase
-!!
 !!
 !! FUNCTION
 !! This routine is called in scfcv.f to compute the electronic Berry Phase
 !! polarization and the ionic contribution to the polarization
 !! Work for nsppol=1 or 2 ,but only accept nspinor=1, and mkmem=nkpt
 !! or 0, kptopt = 2 or 3
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT  group (NSAI,XG,MKV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -55,7 +93,6 @@
 !!  (the polarization is printed)
 !!
 !! SIDE EFFECTS
-!!
 !!
 !! TODO
 !!  Cleaning, checking for rules.
@@ -120,26 +157,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &  kptopt,kptrlatt,mband,mcg,&
 &  mkmem,mpw,natom,nattyp,nband,nberry,npwarr,nspinor,nsppol,ntypat,&
 &  nkpt_,rprimd,ucvol,xred,zion)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_hdr
-
- use m_geometry,    only : xred2xcart
- use m_hide_lapack,     only : dzgedi, dzgefa
- use m_symtk,       only : matr3inv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -773,5 +794,9 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
  ABI_DEALLOCATE(shift_g)
  ABI_DEALLOCATE(kpt)
  ABI_DEALLOCATE(kg_dum)
+
 end subroutine berryphase
+!!***
+
+end module m_berryphase
 !!***

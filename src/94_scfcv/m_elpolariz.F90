@@ -43,6 +43,8 @@ module m_elpolariz
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type
+ use m_berryphase, only : berryphase
+ use m_berryphase_new, only : berryphase_new
 
  implicit none
 

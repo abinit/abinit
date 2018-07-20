@@ -1,4 +1,66 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_berryphase_new
+!! NAME
+!!  m_berryphase_new
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2003-2018 ABINIT  group (MVeithen)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_berryphase_new
+
+ use defs_basis
+ use defs_abitypes
+ use defs_datatypes
+ use defs_wvltypes
+ use m_xmpi
+ use m_errors
+ use m_profiling_abi
+ use m_mpinfo, only : proc_distrb_cycle
+
+ use m_numeric_tools,only : rhophi
+ use m_io_tools,     only : open_file
+ use m_geometry,     only : xred2xcart
+ use m_iowf,         only : outwf
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only : pawrhoij_type
+ use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
+                            pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
+                            pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
+ use m_paw_dfpt,     only : dsdr_k_paw
+ use m_paw_overlap,  only : smatrix_k_paw
+
+ use m_efield
+ use m_berrytk,      only : smatrix, polcart
+ use m_paw_efield,   only : pawpolev
+
+ implicit none
+
+ private
+!!***
+
+ public :: berryphase_new
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/berryphase_new
 !! NAME
 !! berryphase_new
@@ -7,13 +69,6 @@
 !! This routine computes the Berry Phase polarization
 !!  and the finite difference expression of the ddk.
 !!  See for example Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]]
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group (MVeithen)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !! atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -101,43 +156,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  gprimd,hdr,indlmn,kg,lmnmax,mband,mcg,mcprj,&
 &  mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,nsppol,ntypat,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
-
- use defs_basis
- use defs_abitypes
- use defs_datatypes
- use defs_wvltypes
- use m_xmpi
- use m_errors
- use m_profiling_abi
- use m_mpinfo, only : proc_distrb_cycle
-
- use m_numeric_tools,only : rhophi
- use m_io_tools,     only : open_file
- use m_geometry,     only : xred2xcart
- use m_iowf,         only : outwf
- use m_pawtab,       only : pawtab_type
- use m_pawrhoij,     only : pawrhoij_type
- use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
-                            pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
-                            pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
- use m_paw_dfpt,     only : dsdr_k_paw
- use m_paw_overlap,  only : smatrix_k_paw
-
- use m_efield
- use m_berrytk,      only : smatrix, polcart
- use m_paw_efield,   only : pawpolev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1669,5 +1693,9 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !DEBUG
 !write(std_out,*)'berryphase_new exit'
 !END_DEBUG
+
 end subroutine berryphase_new
+!!***
+
+end module m_berryphase_new
 !!***

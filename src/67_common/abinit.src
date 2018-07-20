@@ -18,8 +18,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "berryphase.F90",
- "berryphase_new.F90",
+ "m_berryphase.F90",
+ "m_berryphase_new.F90",
  "calc_efg.F90",
  "calc_fc.F90",
  "chern_number.F90",
