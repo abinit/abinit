@@ -470,7 +470,6 @@ end subroutine make_invovl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'apply_invovl'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

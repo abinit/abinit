@@ -232,7 +232,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #define ABI_FUNC 'energy'
  use interfaces_53_ffts
  use interfaces_62_poisson
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -962,7 +961,6 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkresi'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

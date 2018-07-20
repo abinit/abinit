@@ -97,11 +97,13 @@ contains
 subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 &                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
 &                      already_transposed) ! optional argument
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_getghc'
- use interfaces_66_wfs, except_this_one => prep_getghc
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -613,11 +615,11 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 &                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
 &                      tim_nonlop,cwavef,gvnlc,already_transposed)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_nonlop'
- use interfaces_66_wfs, except_this_one => prep_nonlop
 !End of the abilint section
 
  implicit none
@@ -927,12 +929,12 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &          mpi_enreg,nband_k,ndat,ngfft,npw_k,n4,n5,n6,occ_k,option_fourwf,ucvol,wtk,&
 &          bandfft_kpt_tab,use_gpu_cuda) ! Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_fourwf'
  use interfaces_53_ffts
- use interfaces_66_wfs, except_this_one => prep_fourwf
 !End of the abilint section
 
  implicit none
@@ -1435,6 +1437,7 @@ subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
 &     ewavef_alltoall_sym,&
 &     index_wavef_send)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1710,6 +1713,7 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 &     gwavef_alltoall_sym,&
 &     index_wavef_send)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1938,6 +1942,7 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
                              recvcounts,rdispls,&
                              index_wavef_band)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2029,6 +2034,7 @@ end subroutine prep_index_wavef_bandpp
 !! SOURCE
 
 subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,index_wavef)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
