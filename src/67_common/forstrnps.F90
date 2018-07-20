@@ -113,7 +113,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
 &                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
- use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type

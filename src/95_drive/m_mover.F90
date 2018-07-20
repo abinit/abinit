@@ -202,7 +202,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #define ABI_FUNC 'mover'
  use interfaces_14_hidewrite
  use interfaces_45_geomoptim
- use interfaces_59_ionetcdf
  use interfaces_67_common
  use interfaces_78_effpot
  use interfaces_79_seqpar_mpi

@@ -47,7 +47,8 @@ module m_fock_getghc
  use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
- use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_savetabs,bandfft_kpt_restoretabs, &
+                                prep_bandfft_tabs
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_mkffnl,           only : mkffnl
@@ -804,7 +805,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
