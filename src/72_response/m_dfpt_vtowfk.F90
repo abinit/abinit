@@ -44,6 +44,7 @@ module m_dfpt_vtowfk
  use m_spacepar,     only : meanvalue_g
  use m_dfpt_mkrho,   only : dfpt_accrho
  use m_dfpt_cgwf,    only : dfpt_cgwf
+ use m_getghc,       only : getgsc
 
  implicit none
 
