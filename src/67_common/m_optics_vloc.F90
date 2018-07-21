@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_optics_vloc
+!! NAME
+!!  m_optics_vloc
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2010-2018 ABINIT group (SM,VR,FJ,MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_optics_vloc
+
+ implicit none
+
+ private
+!!***
+
+ public :: optics_vloc
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/optics_vloc
 !! NAME
 !! optics_vloc
@@ -7,12 +45,6 @@
 !! Compute matrix elements need for optical conductivity in a LOCAL potential
 !! and store them in a file.
 !! Matrix elements = <Phi_i|Nabla|Phi_j>
-!!
-!! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  cg(2,mcg)=planewave coefficients of wavefunctions.
@@ -44,12 +76,6 @@
 !!      hdr_io,timab,wffclose,wffopen,xmpi_exch,xmpi_sum_master
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
 &                       nkpt,npwarr,nsppol)
@@ -285,5 +311,8 @@
 
  DBG_EXIT("COLL")
 
- end subroutine optics_vloc
+end subroutine optics_vloc
+!!***
+
+end module m_optics_vloc
 !!***
