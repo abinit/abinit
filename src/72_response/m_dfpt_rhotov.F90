@@ -128,7 +128,6 @@ contains
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhotov'
  use interfaces_56_xc
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
