@@ -289,7 +289,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
- use interfaces_66_nonlocal
  use interfaces_67_common
 !End of the abilint section
 

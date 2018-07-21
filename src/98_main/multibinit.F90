@@ -76,7 +76,6 @@ program multibinit
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
  use interfaces_57_iovars
- use interfaces_78_effpot
 !End of the abilint section
 
  implicit none

@@ -32,6 +32,7 @@ module m_cgprj
  use m_xmpi
 
  use defs_abitypes, only : MPI_type
+ use defs_datatypes, only : pseudopotential_type
  use m_kg,       only : ph1d3d, mkkpg
  use m_geometry, only : strconv
  use m_mkffnl,   only : mkffnl
@@ -39,9 +40,6 @@ module m_cgprj
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
                         pawcprj_set_zero, pawcprj_mpi_sum
  use m_opernla_ylm, only : opernla_ylm
-
- !use defs_datatypes
- !use m_hdr
 
  implicit none
 
@@ -127,6 +125,7 @@ contains
 &                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,&
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
 &                   phkxred,ph1d,ph3d,ucvol,useylm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -454,11 +453,11 @@ contains
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ctocprj'
- use interfaces_66_nonlocal, except_this_one => ctocprj
 !End of the abilint section
 
  implicit none
