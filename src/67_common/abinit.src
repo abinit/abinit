@@ -59,7 +59,6 @@ sources = [
  "update_e_field_vars.F90",
  "m_vtorhotf.F90",
  "wvl_initro.F90",
- "wvl_mkrho.F90",
 ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
