@@ -314,7 +314,6 @@ end subroutine lobpcgwf2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc_gsc'
- use interfaces_66_wfs
 !End of the abilint section
 
   type(xgBlock_t), intent(inout) :: X

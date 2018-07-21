@@ -2394,7 +2394,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none

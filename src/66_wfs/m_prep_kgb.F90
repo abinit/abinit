@@ -104,7 +104,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_getghc'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

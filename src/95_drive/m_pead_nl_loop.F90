@@ -147,6 +147,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_initylmg, only : initylmg
  use m_dfpt_mkvxc, only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
+ use m_mklocl,     only : dfpt_vlocal
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

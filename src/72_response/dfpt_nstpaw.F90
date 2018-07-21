@@ -215,7 +215,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_56_xc
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 
  implicit none
