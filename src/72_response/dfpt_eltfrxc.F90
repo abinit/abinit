@@ -100,6 +100,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use m_spacepar,    only : redgr
  use m_atm2fft,     only : atm2fft, dfpt_atm2fft
  use m_mkcore,      only : dfpt_mkcore
+ use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

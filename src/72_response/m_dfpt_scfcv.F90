@@ -72,6 +72,7 @@ module m_dfpt_scfcv
  use m_common,      only : scprqt
  use m_prcref,      only : moddiel
  use m_dfpt_rhotov, only : dfpt_rhotov
+ use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
 
  implicit none
 
