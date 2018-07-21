@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_crystal
+!!****m* ABINIT/m_fock_getghc
 !! NAME
 !!
 !! FUNCTION

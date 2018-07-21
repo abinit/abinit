@@ -65,6 +65,7 @@ program multibinit
  use m_time,       only : asctime, timein
  use m_parser,     only : instrng
  use m_dtfil,      only : isfile
+ use m_mover_effpot, only : mover_effpot
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -232,11 +233,11 @@ program multibinit
 !Read the model (from DDB or XML)
     if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
      call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-     
+
  !Read the coefficient from fit
      if(filnam(4)/=''.and.filnam(4)/='no')then
        call effective_potential_file_getType(filnam(4),filetype)
-   ! TODO hexu: filetype==(33?) 
+   ! TODO hexu: filetype==(33?)
        if(filetype==3.or.filetype==23) then
          call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
        else
@@ -302,7 +303,7 @@ program multibinit
              write(message, '(3a)' )&
 &             'There is no MD file to bound the model ',ch10,&
 &             'Action: add MD file'
-             MSG_ERROR(message)           
+             MSG_ERROR(message)
            else if(inp%confinement==2) then
              write(message, '(3a)' )&
 &             'There is no MD file to compute the confinement',ch10,&
@@ -454,18 +455,18 @@ program multibinit
      call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
    end if
 
-!****************************************************************************************    
+!****************************************************************************************
 
 
 ! Run spin dynamics
-!****************************************************************************************    
+!****************************************************************************************
    if(inp%spin_dynamics>0) then
   ! TODO hexu: no mpi yet.
      if(iam_master) then
        call spin_model_t_run(spin_model)
      end if
    end if
-!****************************************************************************************    
+!****************************************************************************************
 
 
 !Free the effective_potential and dataset

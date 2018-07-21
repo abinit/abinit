@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pead_nl_loop
+!! NAME
+!!  m_pead_nl_loop
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pead_nl_loop
+
+ implicit none
+
+ private
+!!***
+
+ public :: pead_nl_loop
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pead_nl_loop
 !! NAME
 !! pead_nl_loop
@@ -82,13 +120,6 @@
 !!      wffclose,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 & gmet,gprimd,gsqcut, &
@@ -672,4 +703,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  call timab(502,2,tsec)
 
 end subroutine pead_nl_loop
+!!***
+
+end module m_pead_nl_loop
 !!***

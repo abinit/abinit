@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mover_effpot
+!! NAME
+!!  m_mover_effpot
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mover_effpot
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: mover_effpot
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mover_effpot
 !! NAME
 !! mover_effpot
@@ -40,12 +82,6 @@
 !!      xred2xcart
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
@@ -978,3 +1014,5 @@ implicit none
 end subroutine mover_effpot
 !!***
 
+end module m_mover_effpot
+!!***

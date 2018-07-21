@@ -78,6 +78,7 @@ module m_nonlinear
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
  use m_mkcore,           only : mkcore
+ use m_pead_nl_loop,     only : pead_nl_loop
 
  implicit none
 
