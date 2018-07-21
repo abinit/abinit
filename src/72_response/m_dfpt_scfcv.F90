@@ -73,6 +73,7 @@ module m_dfpt_scfcv
  use m_prcref,      only : moddiel
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
 
  implicit none
 

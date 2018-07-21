@@ -204,6 +204,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_dfpt_mkvxc,    only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

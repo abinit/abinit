@@ -88,7 +88,8 @@ module m_dfpt_loopert
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs
  use m_fourier_interpol, only : transgrid
- use m_mkcore,      only : dfpt_mkcore
+ use m_mkcore,     only : dfpt_mkcore
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
 
  implicit none
 

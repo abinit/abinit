@@ -30,7 +30,6 @@ sources = [
  "dfpt_nstwf.F90",
  "m_dfpt_rhotov.F90",
  "m_dfpt_scfcv.F90",
- "dfpt_vlocal.F90",
  "m_dfpt_vtorho.F90",
  "m_dfpt_vtowfk.F90",
  "d2frnl.F90",
@@ -45,7 +44,6 @@ sources = [
  "m_strain.F90",
  "pead_nl_resp.F90",
  "rf2_init.F90",
- "vlocalstr.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
