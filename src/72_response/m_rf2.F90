@@ -476,7 +476,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_apply_hamiltonian'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

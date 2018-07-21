@@ -134,7 +134,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 #define ABI_FUNC 'getghc'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -1447,6 +1446,7 @@ end subroutine multithreaded_getghc
 !! SOURCE
 
 subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

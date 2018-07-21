@@ -1254,6 +1254,7 @@ end subroutine getgh1c_setup
 subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 &                 mpi_enreg,natom,nband,npw1,nspinor,optcprj,s1cwave0)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

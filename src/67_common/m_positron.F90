@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_positrong
+module m_positron
 
  use defs_basis
  use defs_datatypes
@@ -186,6 +186,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -915,6 +916,7 @@ end subroutine setup_positron
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1864,13 +1866,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posdoppler'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_67_common, except_this_one => posdoppler
 !End of the abilint section
 
  implicit none
@@ -3360,6 +3362,7 @@ end subroutine posdoppler
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
