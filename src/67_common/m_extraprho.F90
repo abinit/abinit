@@ -45,7 +45,7 @@ module m_extraprho
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
-
+ use m_cgprj,    only : ctocprj
 
  implicit none
 

@@ -66,6 +66,7 @@ MODULE m_wfd
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
+ use m_cgprj,          only : getcprj
 
  implicit none
 

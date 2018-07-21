@@ -117,6 +117,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_kg,       only : getph
  use m_berryphase_new, only : berryphase_new
+ use m_cgprj,            only : ctocprj
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

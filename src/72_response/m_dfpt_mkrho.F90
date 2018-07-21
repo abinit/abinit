@@ -45,6 +45,7 @@ module m_dfpt_mkrho
  use m_paw_occupancies, only : pawaccrhoij
  use m_paral_atom,      only : get_my_atmtab
  use m_mpinfo,          only : proc_distrb_cycle
+ use m_cgprj,           only : getcprj
 
  implicit none
 

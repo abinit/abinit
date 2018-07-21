@@ -82,6 +82,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  use m_rf2
  use m_time   , only : timab
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
+ use m_cgprj,   only : getcprj
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

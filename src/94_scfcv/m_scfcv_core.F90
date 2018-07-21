@@ -111,6 +111,7 @@ module m_scfcv_core
  use m_fock_getghc,      only : fock2ACE
  use m_forstr,           only : nres2vres
  use m_positron,         only : setup_positron
+ use m_cgprj,            only : ctocprj
 
  implicit none
 
