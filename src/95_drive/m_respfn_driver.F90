@@ -92,10 +92,10 @@ module m_respfn_driver
  use m_common,      only : setup1, prteigrs
  use m_fourier_interpol, only : transgrid
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
-
  use m_paw_occupancies, only : initrhoij
  use m_paw_correlations,only : pawpuxinit
  use m_mkcore,     only : mkcore
+ use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
