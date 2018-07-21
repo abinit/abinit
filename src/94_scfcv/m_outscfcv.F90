@@ -213,6 +213,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
+ use m_positron,         only : poslifetime, posdoppler
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
