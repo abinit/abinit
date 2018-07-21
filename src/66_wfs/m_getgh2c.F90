@@ -1,6 +1,52 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/getgh2c
+!!****m* ABINIT/m_getgh2c
+!! NAME
+!!  m_getgh2c
 !!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2015-2018 ABINIT group (MT,JLJ)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_getgh2c
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+
+ use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
+ use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_nonlop,      only : nonlop
+
+ implicit none
+
+ private
+!!***
+
+ public :: getgh2c
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/getgh2c
 !! NAME
 !! getgh2c
 !!
@@ -15,13 +61,6 @@
 !!          natom+11 (dkdE)   : mixed 2nd derivative w.r.t wavector     and eletric field
 !!  also if natom+12<=ipert<=2*natom+11 :
 !!                   (dtaudE) : mixed 2nd derivative w.r.t atom. displ. and eletric field (nonlocal only)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (MT,JLJ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cwavef(2,npw*nspinor)=input wavefunction, in reciprocal space
@@ -64,23 +103,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl,optkin)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
-
- use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
- use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
- use m_nonlop,      only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -548,4 +572,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  DBG_EXIT("COLL")
 
 end subroutine getgh2c
+!!***
+
+end module m_getgh2c
 !!***

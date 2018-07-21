@@ -38,6 +38,7 @@ MODULE m_rf2
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
  use m_getghc,      only : getghc
  use m_nonlop,      only : nonlop
+ use m_getgh2c,     only : getgh2c
 
  implicit none
 
