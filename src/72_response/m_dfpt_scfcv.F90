@@ -3086,7 +3086,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 #define ABI_FUNC 'dfpt_nstdy'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_xc
  use interfaces_72_response
 !End of the abilint section
 
