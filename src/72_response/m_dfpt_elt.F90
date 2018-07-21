@@ -30,6 +30,7 @@ module m_dfpt_elt
  use defs_datatypes
  use defs_abitypes
  use m_profiling_abi
+ use m_errors
  use m_xmpi
 
  use m_time,        only : timab
@@ -134,12 +135,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 & nattyp,nfft,ngfft,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1d,psps,rhor,rprimd,&
 & usexcnhat,vxc,xccc3d,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrxc'
  use interfaces_53_ffts
- use interfaces_72_response, except_this_one => dfpt_eltfrxc
 !End of the abilint section
 
  implicit none
@@ -717,6 +718,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 & xcccrc,xccc1d,xred, &
 & mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1070,6 +1072,7 @@ end subroutine eltxccore
 
 subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,rhog,vlspl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1495,6 +1498,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 &  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1859,6 +1863,7 @@ end subroutine dfpt_eltfrkin
 !! SOURCE
 
 subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
