@@ -49,6 +49,7 @@ module m_lobpcgwf
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
+ use m_getghc,      only : multithreaded_getghc
 
  private
 

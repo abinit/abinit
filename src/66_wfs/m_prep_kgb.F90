@@ -37,6 +37,7 @@ module m_prep_kgb
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
+ use m_getghc,      only : multithreaded_getghc
 
  implicit none
 

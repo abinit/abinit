@@ -109,69 +109,7 @@ module m_scfcv_core
  use m_common,           only : scprqt, prtene
  use m_fourier_interpol, only : transgrid
  use m_fock_getghc,      only : fock2ACE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ use m_forstr,           only : nres2vres
 
  implicit none
 
