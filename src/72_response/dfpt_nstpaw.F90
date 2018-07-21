@@ -201,8 +201,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_getgh1c,  only : getgh1c, getdc1
  use m_dfpt_mkrho, only : dfpt_accrho
  use m_atm2fft,    only : dfpt_atm2fft
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
 

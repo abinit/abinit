@@ -34,7 +34,7 @@ module m_dfpt_rhotov
 
  use m_time,        only : timab
  use m_spacepar,    only : hartrestr, hartre
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
 
  implicit none

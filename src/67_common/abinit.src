@@ -38,8 +38,6 @@ sources = [
  "make_efg_el.F90",
  "make_efg_ion.F90",
  "make_grad_berry.F90",
- "mkcore_inner.F90",
- "mkcore_paw.F90",
  "mkcore_wvl.F90",
  "m_mklocl.F90",
  "mklocl_realspace.F90",

@@ -69,7 +69,7 @@ module m_forstr
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
  use m_rhotoxc,          only : rhotoxc
- use m_dfpt_mkvxc,       only : dfpt_mkvxc
+ use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
 
  implicit none
 
