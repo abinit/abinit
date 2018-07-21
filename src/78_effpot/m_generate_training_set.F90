@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_generate_training_set
+!! NAME
+!!  m_generate_training_set
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_generate_training_set
+
+ implicit none
+
+ private
+!!***
+
+ public :: generate_training_set
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/generate_training_set
 !!
 !! NAME
@@ -43,12 +81,6 @@
 !! CHILDREN
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom,namplitude,nconfig,&
 &                                ngqpt,nqshift,option,qshift,rlatt,rprimd,temperature_k,xred,comm,DEBUG)
@@ -167,4 +199,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   ABI_DEALLOCATE(zeff)
 
 end subroutine generate_training_set
+!!***
+
+end module m_generate_training_set
 !!***

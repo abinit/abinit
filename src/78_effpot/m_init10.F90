@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_init10
+!! NAME
+!!  m_init10
+!!
+!! FUNCTION
+!!   It should be "contained" in multibinit but abilint does not accept "contains" in programs.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_init10
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: init10
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/init10
 !!
 !! NAME
@@ -6,13 +48,6 @@
 !!
 !! FUNCTION
 !! Initialize the code multibinit: write heading and make the first i/os
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!
@@ -28,7 +63,7 @@
 !!     (4) Input for XML with polynomial coefficients (DDB file)
 !!     (5) Input for HIST file
 !!     (6-14) Input Derivative Database (XML format)
-!! 
+!!
 !! PARENTS
 !!      multibinit
 !!
@@ -36,13 +71,6 @@
 !!      xmpi_bcast
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine init10(filnam,comm)
 
@@ -75,7 +103,7 @@ subroutine init10(filnam,comm)
  integer :: ii,io
 !arrays
 ! *********************************************************************
- 
+
 !Determine who I am in comm
  me = xmpi_comm_rank(comm)
  nproc = xmpi_comm_size(comm)
@@ -118,4 +146,7 @@ subroutine init10(filnam,comm)
  call xmpi_bcast (filnam, master, comm, ierr)
 
 end subroutine init10
+!!***
+
+end module m_init10
 !!***

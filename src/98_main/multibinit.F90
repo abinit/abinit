@@ -66,6 +66,9 @@ program multibinit
  use m_parser,     only : instrng
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
+ !use m_generate_training_set, only : generate_training_set
+ use m_compute_anharmonics, only : compute_anharmonics
+ use m_init10,              only : init10
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_compute_anharmonics
+!! NAME
+!!  m_compute_anharmonics
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_compute_anharmonics
+
+ implicit none
+
+ private
+!!***
+
+ public :: compute_anharmonics
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/compute_anharmonics
 !!
 !! NAME
@@ -525,4 +562,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   call wrtout(std_out,message,'COLL')
 
 end subroutine compute_anharmonics
+!!***
+
+end module m_compute_anharmonics
 !!***
