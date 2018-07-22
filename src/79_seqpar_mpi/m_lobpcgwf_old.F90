@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_lobpcgwf_old
+!! NAME
+!!   m_lobpcgwf_old
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_lobpcgwf_old
+
+ implicit none
+
+ private
+!!***
+
+ public :: lobpcgwf
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/lobpcgwf
 !! NAME
 !! lobpcgwf
@@ -1255,4 +1293,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  end function gramindex
 
 end subroutine lobpcgwf
+!!***
+
+end module m_lobpcgwf_old
 !!***

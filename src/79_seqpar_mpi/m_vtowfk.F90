@@ -42,6 +42,7 @@ module m_vtowfk
  use m_paw_dmft,    only : paw_dmft_type
  use m_gwls_hamiltonian, only : build_H
  use m_cgwf,        only : cgwf
+ use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
