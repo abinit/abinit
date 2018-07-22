@@ -45,6 +45,7 @@ module m_dfpt_mkrho
  use m_paw_occupancies, only : pawaccrhoij
  use m_paral_atom,      only : get_my_atmtab
  use m_mpinfo,          only : proc_distrb_cycle
+ use m_cgprj,           only : getcprj
 
  implicit none
 
@@ -625,7 +626,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
  use interfaces_53_ffts
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

@@ -38,19 +38,20 @@ module m_scfcv
  use m_wffile
  use m_rec
  use m_efield
-
- use m_scf_history,      only: scf_history_type
- use m_results_gs ,      only: results_gs_type
- use m_electronpositron, only: electronpositron_type
- use m_pawang,           only: pawang_type
- use m_pawrad,           only: pawrad_type
- use m_pawtab,           only: pawtab_type
- use m_pawrhoij,         only: pawrhoij_type
- use m_pawfgr,           only: pawfgr_type
- use m_paw_dmft,         only: paw_dmft_type
- use m_paw_orbmag,       only : orbmag_type
  use m_entropyDMFT
+
+ use m_scf_history,      only : scf_history_type
+ use m_results_gs ,      only : results_gs_type
+ use m_electronpositron, only : electronpositron_type
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type
+ use m_pawrhoij,         only : pawrhoij_type
+ use m_pawfgr,           only : pawfgr_type
+ use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_orbmag,       only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
+ use m_scfcv_core,       only : scfcv
 
  implicit none
 
@@ -725,7 +726,6 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv_scfcv'
- use interfaces_94_scfcv
 !End of the abilint section
 
  type(scfcv_t), intent(inout) :: this

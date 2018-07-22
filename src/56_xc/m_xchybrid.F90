@@ -35,6 +35,7 @@ module m_xchybrid
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
  use m_rhotoxc,     only : rhotoxc
+ use m_mkcore,      only : mkcore
 
  implicit none
 
@@ -109,7 +110,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xchybrid_ncpp_cc'
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

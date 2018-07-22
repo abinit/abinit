@@ -53,8 +53,8 @@ module m_vtorho
  use m_energies,           only : energies_type
  use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian, &
                                   load_spin_hamiltonian, load_k_hamiltonian, gs_hamiltonian_type
- use m_bandfft_kpt,        only : bandfft_kpt,bandfft_kpt_type,bandfft_kpt_set_ikpt, &
-                                  bandfft_kpt_savetabs, bandfft_kpt_restoretabs
+ use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
+                                  bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
  use m_paw_correlations,   only : setnoccmmp
@@ -79,6 +79,7 @@ module m_vtorho
  use m_dmft,               only : dmft_solve
  use m_datafordmft,        only : datafordmft
  use m_fourier_interpol,   only : transgrid
+ use m_cgprj,              only : ctocprj
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
@@ -288,8 +289,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
- use interfaces_66_nonlocal
- use interfaces_66_wfs
  use interfaces_67_common
 !End of the abilint section
 

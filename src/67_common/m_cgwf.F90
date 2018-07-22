@@ -42,7 +42,8 @@ module m_cgwf
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
  use m_getghc,        only : getghc
  use m_berrytk,       only : smatrix
- use m_paw_overlap, only : smatrix_k_paw
+ use m_paw_overlap,   only : smatrix_k_paw
+ use m_cgprj,         only : getcprj
 
  implicit none
 
@@ -161,7 +162,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_66_nonlocal
  use interfaces_67_common
 !End of the abilint section
 

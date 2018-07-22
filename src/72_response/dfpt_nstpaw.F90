@@ -198,10 +198,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_spacepar, only : hartrestr, symrhg
  use m_initylmg, only : initylmg
  use m_mkffnl,   only : mkffnl
- use m_getgh1c,  only : getgh1c
+ use m_getgh1c,  only : getgh1c, getdc1
  use m_dfpt_mkrho, only : dfpt_accrho
  use m_atm2fft,    only : dfpt_atm2fft
- use m_dfpt_mkvxc,    only : dfpt_mkvxc
+ use m_mkcore,     only : dfpt_mkcore
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+ use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
+ use m_cgprj,           only : getcprj
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -209,10 +213,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #define ABI_FUNC 'dfpt_nstpaw'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_xc
- use interfaces_66_nonlocal
- use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 
  implicit none

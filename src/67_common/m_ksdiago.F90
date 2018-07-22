@@ -51,6 +51,7 @@ module m_ksdiago
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc
  use m_fourier_interpol,  only : transgrid
+ use m_cgprj,             only : getcprj
 
  implicit none
 
@@ -261,7 +262,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ksdiago'
  use interfaces_14_hidewrite
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
