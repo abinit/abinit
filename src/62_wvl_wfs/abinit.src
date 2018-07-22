@@ -21,6 +21,6 @@ sources = [
  "wvl_hpsitopsi.F90",
  "wvl_nl_gradient.F90",
  "wvl_psitohpsi.F90",
- "wvl_rwwf.F90",
+ "m_wvl_rwwf.F90",
  "wvl_tail_corrections.F90"
  ]

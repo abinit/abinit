@@ -34,12 +34,11 @@ module m_wvl_wfsinp
  use m_profiling_abi
  use m_errors
  use m_xmpi
- !use m_ab7_kpoints
- !use m_ab7_symmetry
 
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big
  use m_psolver,   only : psolver_kernel
+ use m_wvl_rwwf,  only : wvl_read
 
  implicit none
 
