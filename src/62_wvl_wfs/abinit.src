@@ -18,9 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "wvl_hpsitopsi.F90",
- "wvl_nl_gradient.F90",
- "wvl_psitohpsi.F90",
+ "m_wvl_psi.F90",
  "m_wvl_rwwf.F90",
- "wvl_tail_corrections.F90"
  ]

@@ -69,6 +69,7 @@ module m_afterscfloop
  use m_xctk,             only : xcden
  use m_forstr,           only : forstr
  use m_wvl_rho,          only : wvl_mkrho
+ use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
 
 #ifdef HAVE_BIGDFT
  use m_abi2big

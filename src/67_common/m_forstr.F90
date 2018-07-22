@@ -72,6 +72,7 @@ module m_forstr
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_hartree
+ use m_wvl_psi,          only : wvl_nl_gradient
 
  implicit none
 

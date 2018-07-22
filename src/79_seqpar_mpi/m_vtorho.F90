@@ -81,6 +81,7 @@ module m_vtorho
  use m_fourier_interpol,   only : transgrid
  use m_cgprj,              only : ctocprj
  use m_wvl_rho,            only : wvl_mkrho
+ use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
