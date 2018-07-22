@@ -205,7 +205,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim
 !End of the abilint section
 
 implicit none

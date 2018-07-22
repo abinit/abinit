@@ -164,8 +164,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #define ABI_FUNC 'vtowfk'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_wfs
- use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none
@@ -1016,6 +1014,7 @@ end subroutine vtowfk
 !! SOURCE
 
 subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useoverlap)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
