@@ -94,6 +94,7 @@ module m_gstate
  use m_mpinfo,           only : proc_distrb_cycle
  use m_common,           only : setup1, prteigrs, prtene
  use m_fourier_interpol, only : transgrid
+ use m_psolver,          only : psolver_kernel
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu

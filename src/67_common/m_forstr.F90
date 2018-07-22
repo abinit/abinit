@@ -71,6 +71,7 @@ module m_forstr
  use m_rhotoxc,          only : rhotoxc
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_cgprj,            only : ctocprj
+ use m_psolver,          only : psolver_hartree
 
  implicit none
 

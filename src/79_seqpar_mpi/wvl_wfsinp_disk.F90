@@ -243,6 +243,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  use m_xmpi
 
  use m_geometry,  only : xred2xcart
+ use m_psolver,   only : psolver_kernel
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : copy_old_wavefunctions, reformatmywaves, first_orthon, &

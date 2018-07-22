@@ -1,4 +1,56 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_psolver
+!! NAME
+!!  m_psolver
+!!
+!! FUNCTION
+!!  Poisson solver
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psolver
+
+ use defs_basis
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_errors
+ use m_abi2big
+ use m_cgtools
+ use m_xmpi
+
+ use m_geometry, only : metric
+ use m_drivexc,  only : mkdenpos
+
+ implicit none
+
+ private
+!!***
+
+ public :: psolver_rhohxc
+ public :: psolver_hartree
+ public :: psolver_kernel
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/psolver_rhohxc
 !! NAME
 !! psolver_rhohxc
@@ -11,13 +63,6 @@
 !! It can compute the xc energy and potential if required. This computation is
 !! built on the drivexc() routine of ABINIT but access it directly from real
 !! space. The present routine is a real space counter part to rhotoxc().
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
@@ -48,30 +93,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 & mpi_enreg, nfft, ngfft, nhat,nhatdim,&
 & nscforder, nspden, n3xccc, rhor, rprimd,&
 & usexcnhat,usepaw,usewvl,vhartr, vxc, vxcavg, wvl,wvl_den,wvl_e,&
 & xccc3d,xclevel,xc_denpos)
-
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_errors
- use m_abi2big
- use m_cgtools
-
- use m_xmpi, only: xmpi_comm_rank,xmpi_comm_size,xmpi_sum
- use m_geometry, only : metric
- use m_drivexc,     only : mkdenpos
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
@@ -498,8 +524,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 end subroutine psolver_rhohxc
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/Psolver_hartree
 !! NAME
 !! Psolver_hartree
@@ -512,13 +536,6 @@ end subroutine psolver_rhohxc
 !! It does not compute the xc energy nor potential. See psolver_rhohxc() to do it.
 !! WARNING : the XC energy and potential computation capability has been
 !! for spin-polarized case, as everything is done as if nspden=1
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
@@ -544,19 +561,9 @@ end subroutine psolver_rhohxc
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, nproc, &
      & nscforder, nspden, rhor, vhartr, usewvl)
 
- use defs_basis
- use m_errors
- use m_profiling_abi
 #if defined HAVE_BIGDFT
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
@@ -660,8 +667,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
 end subroutine psolver_hartree
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/psolver_kernel
 !! NAME
 !! psolver_kernel
@@ -674,13 +679,6 @@ end subroutine psolver_hartree
 !! the kernel is freed and recompute again. The build action has a returned variable
 !! which is a pointer on the kernel. The get action also returns the kernel, or
 !! NULL if none has been associated.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, TRangel).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  iaction=0 to free all kernel allocated array,
@@ -702,18 +700,8 @@ end subroutine psolver_hartree
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 & iproc, kernel, mpi_comm, ngfft, nproc, nscforder)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,     only  : coulomb_operator,nullify_coulomb_operator, &
@@ -875,4 +863,7 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 #endif
 
 end subroutine psolver_kernel
+!!***
+
+end module m_psolver
 !!***

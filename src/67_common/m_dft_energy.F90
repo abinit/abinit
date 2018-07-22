@@ -68,6 +68,7 @@ module m_dft_energy
  use m_nonlop,           only : nonlop
  use m_fourier_interpol, only : transgrid
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
+ use m_psolver,          only : psolver_rhohxc
 
  implicit none
 

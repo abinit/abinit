@@ -54,6 +54,7 @@ module m_setvtr
  use m_mklocl,            only : mklocl
  use m_xchybrid,          only : xchybrid_ncpp_cc
  use m_mkcore,            only : mkcore, mkcore_alt
+ use m_psolver,           only : psolver_rhohxc
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

@@ -112,6 +112,7 @@ module m_scfcv_core
  use m_forstr,           only : nres2vres
  use m_positron,         only : setup_positron
  use m_cgprj,            only : ctocprj
+ use m_psolver,          only : psolver_rhohxc
 
  implicit none
 

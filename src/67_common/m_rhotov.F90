@@ -45,6 +45,7 @@ module m_rhotov
  use m_dens,             only : mag_constr
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
+ use m_psolver,          only : psolver_rhohxc
 
  implicit none
 

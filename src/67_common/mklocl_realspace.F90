@@ -77,6 +77,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  use m_mpinfo,      only : ptabs_fourdp
  use m_pawtab,      only : pawtab_type
  use m_paw_numeric, only : paw_splint
+ use m_psolver,     only : psolver_hartree, psolver_kernel
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : coulomb_operator,deallocate_coulomb_operator
  use defs_PSolver
