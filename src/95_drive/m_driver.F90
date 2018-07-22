@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_driver
+!! NAME
+!!  m_driver
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_driver
+
+ implicit none
+
+ private
+!!***
+
+ public :: driver
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/driver
 !! NAME
 !! driver
@@ -70,12 +107,6 @@
 !!      xgscalapack_config,xmpi_bcast,xred2xcart
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
@@ -893,4 +924,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  DBG_EXIT("COLL")
 
 end subroutine driver
+!!***
+
+end module m_driver
 !!***

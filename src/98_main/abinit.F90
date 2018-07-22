@@ -129,6 +129,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_driver,       only : driver
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif
