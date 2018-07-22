@@ -68,6 +68,7 @@ module m_mover
  use m_pred_langevin,      only : pred_langevin
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
+ use m_pred_hmc,           only : pred_hmc
  use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
