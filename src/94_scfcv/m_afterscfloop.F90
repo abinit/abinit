@@ -68,6 +68,7 @@ module m_afterscfloop
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
  use m_forstr,           only : forstr
+ use m_wvl_rho,          only : wvl_mkrho
 
 #ifdef HAVE_BIGDFT
  use m_abi2big

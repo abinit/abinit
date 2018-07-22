@@ -48,6 +48,7 @@ module m_mkrho
  use m_splines,      only : spline,splint
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
+ use m_wvl_rho,      only : wvl_mkrho
 
  implicit none
 

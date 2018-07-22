@@ -30,6 +30,8 @@ module m_newrho
  use m_errors
  use m_profiling_abi
 
+ use m_wvl_rho, only wvl_prcref
+
  implicit none
 
  private

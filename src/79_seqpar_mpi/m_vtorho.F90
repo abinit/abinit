@@ -80,6 +80,7 @@ module m_vtorho
  use m_datafordmft,        only : datafordmft
  use m_fourier_interpol,   only : transgrid
  use m_cgprj,              only : ctocprj
+ use m_wvl_rho,            only : wvl_mkrho
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
