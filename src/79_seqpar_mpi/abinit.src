@@ -26,7 +26,7 @@ sources = [
  "m_tddft.F90",
  "m_vtowfk.F90",
  "m_vtorho.F90",
- "wvl_wfsinp_disk.F90",
+ "m_wvl_wfsinp.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -53,6 +53,7 @@ module m_inwffil
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc
  use m_rwwf,     only : rwwf, WffReadSkipK
+ use m_wvl_wfsinp, only : wvl_wfsinp_disk, wvl_wfsinp_scratch
 
  implicit none
 
