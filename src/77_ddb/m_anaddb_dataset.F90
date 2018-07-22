@@ -31,7 +31,7 @@ module m_anaddb_dataset
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
  use m_symtk,     only : mati3det
- use m_parser,    only : intagm
+ use m_parser,    only : intagm, chkvars_in_string
  use m_ddb,       only : DDB_QTOL
 
  implicit none

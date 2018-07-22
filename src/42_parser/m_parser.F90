@@ -30,7 +30,7 @@ module m_parser
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, itoa, inupper
- use m_nctk,   only : write_var_netcdf    ! FIXME Deprecated
+ use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
 
@@ -53,6 +53,7 @@ module m_parser
 
  public :: prttagm        ! Print the content of dprarr.
  public :: prttagm_images ! Extension to prttagm to include the printing of images information.
+ public :: chkvars_in_string   !  Analyze variable names in string. Abort if name is not recognized.
 
 CONTAINS  !===========================================================
 !!***
@@ -3492,6 +3493,148 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  end if
 
 end subroutine prttagm_images
+!!***
+
+!!****f* m_parser/chkvars_in_string
+!! NAME
+!!  chkvars_in_string
+!!
+!! FUNCTION
+!!  Analyze variable names in string. Abort if name is not recognized.
+!!
+!! INPUTS
+!!  protocol=
+!!    0 if parser does not accept multiple datasets and +* syntax (e.g. anaddb)
+!!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
+!!
+!!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
+!!  list_strings(len=*)=string with the (upper case) names of the character variables.
+!!  string(len=*)=string (with upper case) from the input file.
+!!
+!! OUTPUT
+!!  Abort if variable name is not recognized.
+!!
+!! PARENTS
+!!      chkvars,m_anaddb_dataset
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+
+ use defs_basis
+ use m_errors
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chkvars_in_string'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: protocol
+ character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+
+!Local variables-------------------------------
+ character,parameter :: blank=' '
+!scalars
+ integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ character(len=500) :: message
+
+!************************************************************************
+
+ index_current=1
+ do ! Infinite do-loop, to identify the presence of each potential variable names
+
+   if(len_trim(string)<=index_current)exit
+   index_blank=index(string(index_current:),blank)+index_current-1
+
+   if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
+
+     index_endword = index_blank -1
+     if (protocol == 1) then
+       ! Skip characters like : + or the digits at the end of the word
+       ! Start from the blank that follows the end of the word
+       do index_endword=index_blank-1,index_current,-1
+         if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
+       end do
+     end if
+     !write(std_out,*)"Will analyze:", string(index_current:index_endword)
+
+     ! Find the index of the potential variable name in the list of variables
+     index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+
+     ! Treat the complications due to the possibility of images
+     if (index_list_vars==0 .and. protocol==1) then
+
+       ! Treat possible LASTIMG appendix
+       if(index_endword-6>=1)then
+         if(string(index_endword-6:index_endword)=='LASTIMG')index_endword=index_endword-7
+       end if
+
+       ! Treat possible IMG appendix
+       if(index_endword-2>=1)then
+         if(string(index_endword-2:index_endword)=='IMG')index_endword=index_endword-3
+       end if
+
+       index_endwordnow=index_endword
+
+       ! Again skip characters like : + or the digits before IMG
+       ! Start from the blank that follows the end of the word
+       do index_endword=index_endwordnow,index_current,-1
+         if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
+       end do
+
+       ! Find the index of the potential variable name in the list of variables
+       index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+     end if
+
+     if(index_list_vars==0)then
+
+       ! Treat possible logical input variables
+       if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
+         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
+         index_blank=index(string(index_current:),blank)+index_current-1
+         if(index(' F T ',string(index_blank:index_blank+2))==0)then
+           write(message, '(8a)' )&
+&           'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+&           'This variable should be given a logical value (T or F), but the following string was found :',&
+&           string(index_blank:index_blank+2),ch10,&
+&           'Action: check your input file. You likely misused the input variable.'
+           MSG_ERROR(message)
+         else
+           index_blank=index_blank+2
+         end if
+!        Treat possible string input variables
+       else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
+!        Every following string is accepted
+         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
+         !write(std_out,*)"in string: ",trim(string(index_current:))
+         index_current=index(string(index_current:),blank)+index_current
+         index_blank=index(string(index_current:),blank)+index_current-1
+         !write(std_out,*)"next:: ",string(index_current:index_endword)
+
+!        If still not admitted, then there is a problem
+       else
+         write(message, '(7a)' )&
+&         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
+&         'Action: check your input file. You likely mistyped the input variable.'
+         MSG_ERROR(message)
+       end if
+     end if
+   end if
+
+   index_current=index_blank+1
+ end do
+
+end subroutine chkvars_in_string
 !!***
 
 end module m_parser
