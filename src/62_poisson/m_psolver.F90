@@ -109,7 +109,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_rhohxc'
  use interfaces_14_hidewrite
- use interfaces_62_poisson, except_this_one => psolver_rhohxc
 !End of the abilint section
 
   implicit none
@@ -574,7 +573,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_hartree'
  use interfaces_14_hidewrite
- use interfaces_62_poisson, except_this_one => psolver_hartree
 !End of the abilint section
 
   implicit none

@@ -30,7 +30,7 @@ module m_newrho
  use m_errors
  use m_profiling_abi
 
- use m_wvl_rho, only wvl_prcref
+ use m_wvl_rho, only : wvl_prcref
 
  implicit none
 
@@ -187,7 +187,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 #undef ABI_FUNC
 #define ABI_FUNC 'newrho'
  use interfaces_53_ffts
- use interfaces_68_rsprc
 !End of the abilint section
 
  implicit none

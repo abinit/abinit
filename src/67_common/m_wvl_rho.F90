@@ -531,6 +531,7 @@ end subroutine wvl_mkrho
 subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 & rhoijrespc,usepaw,vresid,vrespc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

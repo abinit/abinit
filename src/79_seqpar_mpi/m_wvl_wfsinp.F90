@@ -268,7 +268,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 #define ABI_FUNC 'wvl_wfsinp_reformat'
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
- use interfaces_62_poisson
 !End of the abilint section
 
   implicit none

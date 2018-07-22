@@ -1269,7 +1269,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'nres2vres'
  use interfaces_53_ffts
- use interfaces_62_poisson
 !End of the abilint section
 
  implicit none

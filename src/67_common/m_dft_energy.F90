@@ -232,7 +232,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
  use interfaces_53_ffts
- use interfaces_62_poisson
 !End of the abilint section
 
  implicit none
