@@ -45,7 +45,6 @@ module m_respfn_driver
  use m_dtfil,       only : status
  use m_time,        only : timab
  use m_fstrings,    only : strcat
- use m_special_funcs,  only : abi_derfc
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert

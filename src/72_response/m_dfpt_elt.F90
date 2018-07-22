@@ -34,6 +34,7 @@ module m_dfpt_elt
  use m_xmpi
 
  use m_time,        only : timab
+ use m_special_funcs,  only : abi_derfc
  use m_geometry,    only : metric
  use m_cgtools,     only : dotprod_vn
  use m_pawtab,      only : pawtab_type,pawtab_free,pawtab_nullify
