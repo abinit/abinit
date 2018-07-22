@@ -290,7 +290,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none
@@ -1838,7 +1837,6 @@ subroutine wvl_nscf_loop()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nscf_loop'
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none
@@ -1950,7 +1948,6 @@ subroutine wvl_nscf_loop_bigdft()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nscf_loop_bigdft'
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none

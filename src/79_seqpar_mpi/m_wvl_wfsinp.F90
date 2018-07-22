@@ -101,7 +101,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_disk'
  use interfaces_14_hidewrite
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
   implicit none

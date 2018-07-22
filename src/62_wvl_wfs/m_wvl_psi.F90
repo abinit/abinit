@@ -27,6 +27,7 @@ module m_wvl_psi
 
   use defs_basis
   use defs_abitypes
+  use defs_datatypes
   use defs_wvltypes
   use m_errors
   use m_xmpi
