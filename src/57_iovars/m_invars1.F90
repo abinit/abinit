@@ -51,8 +51,8 @@ module m_invars1
 
  public :: invars0
  public :: invars1
+ public :: invars1m
  public :: indefo
- !public :: invars1m
 !!***
 
 contains
@@ -98,6 +98,7 @@ contains
 
 subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 & msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -554,14 +555,6 @@ end subroutine invars0
 !!***
 
 
-
-
-
-
-
-
-
-
 !!****f* ABINIT/invars1m
 !! NAME
 !! invars1m
@@ -627,11 +620,11 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 & mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1m'
- use interfaces_57_iovars, except_this_one => invars1m
 !End of the abilint section
 
  implicit none
@@ -845,6 +838,7 @@ end subroutine invars1m
 !! SOURCE
 
 subroutine indefo1(dtset)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1069,6 +1063,7 @@ end subroutine indefo1
 
 subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 & string,symafm,symrel,tnons,zionpsp)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1993,7 +1988,7 @@ end subroutine invars1
 !! multi-dataset representation.
 !!
 !! TODO
-!!  Scalars and static arrays can be initilized directly at the level of the datatype declaration
+!!  Scalars and static arrays can be initialized directly at the level of the datatype declaration
 !!  provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
