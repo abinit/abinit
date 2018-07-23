@@ -44,6 +44,8 @@ module m_ab7_invars
   use m_dtset,    only : dtset_free, macroin, macroin2
   use m_dtfil,    only : status
   use m_pspheads, only : inpspheads, pspheads_comm
+  use m_invars1,  only : invars1m, invars0, indefo
+  use m_invars2,  only : invars2, invars2m
 
   implicit none
 

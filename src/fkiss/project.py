@@ -139,8 +139,10 @@ class FortranFile(object):
         lines = []; app = lines.append
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
         app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.used_mods)))
+        app("Use dir kevels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.used_mods))))))
         app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
         app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.usedby_mods)))
+        app("Used by dir levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.usedby_mods))))))
 
         for a in ["programs", "modules", "subroutines", "functions"]:
             plist = getattr(self, a)
@@ -695,7 +697,7 @@ class AbinitProject(object):
     #    fort_file = self.fort_files[os.path.basename(filename)]
 
     #def canimove_dir(self, dirname, dest_level):
-    #    dir2files = self.groupby_dirname()
+    #    dir2files = sel.groupby_dirname()
     #    dirpath = os.path.join(self.srcdir, dirname)
     #    if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
     #    for fort_file in dir2files[dirpath]:

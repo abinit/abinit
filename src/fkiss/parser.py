@@ -63,6 +63,14 @@ class Procedure(object):
         """name of the directory in which the procedure is located."""
         return None if self.path is None else os.path.basename(os.path.dirname(self.path))
 
+    @lazy_property
+    def dirlevel(self):
+        # 72_response --> 72
+        if self.dirname is None:
+            return -1
+        else:
+            return int(self.dirname.split("_")[0])
+
     @property
     def is_public(self):
         return self.visibility == "public"
