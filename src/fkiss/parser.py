@@ -32,6 +32,7 @@ class Procedure(object):
         self.num_f90lines, self.num_doclines = 0, 0
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
+        #self.datatypes = []
         # TODO
         self.visibility = "public"
         #self.has_implicit_none = False
@@ -334,17 +335,22 @@ re.I | re.VERBOSE)
                 num_f90lines += 1
 
             # Interface declaration.
-            if self.RE_INTERFACE_START.match(line):
+            m = self.RE_INTERFACE_START.match(line)
+            if m:
                 if self.verbose: print("begin interface", line)
                 inblock = "interface"
+                #self.consume_interface_block(m)
                 continue
-                #self.consume_interface_block()
 
             if inblock == "interface":
                 if self.verbose: print("in interface", line)
                 if self.RE_INTERFACE_END.match(line):
                     inblock = None
                 continue
+
+            #m = self.RE_TYPE_DECLARATION_START.match(line):
+            #if m:
+                #self.consume_type_declaration(m)
 
             # Handle include statement (CPP or Fortran version).
             if line.startswith("#include ") or line.startswith("include "):
@@ -512,6 +518,18 @@ re.I | re.VERBOSE)
         i = s.find("!")
         if i != -1: s = s[:i]
         return s.strip() == token
+
+    def consume_interface_block(self, start_match):
+        if self.verbose: print("begin interface", line)
+        buf = [start_match.string]
+        while self.lines:
+            line = lines.pop(0)
+            buf.append(line)
+            end_match = self.RE_INTERFACE_END.match(line)
+            if end_match:
+                #end_name = end_match
+                break
+        self.stack[-1][0].interfaces.append("\n".join(buf))
 
     #@staticmethod
     #def maybe_end_procedure(s):
