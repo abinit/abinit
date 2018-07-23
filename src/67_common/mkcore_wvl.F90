@@ -573,7 +573,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_wvl_old'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => mkcore_wvl_old
 !End of the abilint section
 
  implicit none
@@ -944,6 +943,7 @@ end subroutine mkcore_wvl_old
 subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,natom,ncmax,nfft,&
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

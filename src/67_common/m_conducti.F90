@@ -1770,6 +1770,7 @@ end subroutine msig
 
  subroutine emispec_paw(filnam,filnam_out,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

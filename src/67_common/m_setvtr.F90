@@ -213,7 +213,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

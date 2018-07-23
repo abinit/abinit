@@ -184,7 +184,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

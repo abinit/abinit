@@ -121,7 +121,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_realspace'
  use interfaces_53_ffts
- use interfaces_67_common, except_this_one => mklocl_realspace
 !End of the abilint section
 
  implicit none
@@ -639,7 +638,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'createIonicPotential_new'
- use interfaces_67_common, except_this_one => createIonicPotential_new
 !End of the abilint section
 
 implicit none
@@ -914,6 +912,7 @@ implicit none
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -958,6 +957,7 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1040,11 +1040,11 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'local_forces_new'
- use interfaces_67_common, except_this_one => local_forces_new
 !End of the abilint section
 
   implicit none
@@ -1247,6 +1247,7 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1291,6 +1292,7 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1372,6 +1374,7 @@ end subroutine local_forces_new
 !! SOURCE
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1456,7 +1459,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_wavelets'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => mklocl_wavelets
 !End of the abilint section
 
  implicit none
@@ -1899,6 +1901,7 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1943,6 +1946,7 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2000,4 +2004,7 @@ function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 !!***
 
 end subroutine local_forces_wvl
+!!***
+
+end module m_mklocl_realspace
 !!***
