@@ -2338,11 +2338,11 @@ end subroutine macroin2
 
 subroutine chkvars (string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkvars'
- use interfaces_57_iovars, except_this_one => chkvars
 !End of the abilint section
 
  implicit none

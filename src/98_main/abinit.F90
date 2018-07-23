@@ -121,6 +121,7 @@ program abinit
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
  use m_chkinp,      only : chkinp
+ use m_dtset,       only : chkvars
  use m_dtfil,       only : iofn1, status
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_parser,      only : parsefile
@@ -142,7 +143,6 @@ program abinit
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
  use interfaces_14_hidewrite
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
