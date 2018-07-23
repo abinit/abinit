@@ -38,6 +38,7 @@ module m_mklocl
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
  use m_pawtab,   only : pawtab_type
+ use m_mklocl_realspace, only : mklocl_realspace
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -128,12 +129,6 @@ contains
 !!      xred2xcart
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&

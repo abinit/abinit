@@ -1,23 +1,77 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mklocl_realspace
+!! NAME
+!!  m_mklocl_realspace
+!!
+!! FUNCTION
+!!   Routines related to the local part of the pseudopotentials.
+!!   Computation is done in real space (useful for isolated systems).
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2018 ABINIT group (TRangel, MT, DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!  This module could be merged with m_mklocl
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mklocl_realspace
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_xmpi
+ use m_profiling_abi
+ use m_errors
+
+ use m_time,        only : timab
+ use m_geometry,    only : xred2xcart
+ use m_fft_mesh,    only : mkgrid_fft
+ use m_mpinfo,      only : ptabs_fourdp
+ use m_pawtab,      only : pawtab_type
+ use m_paw_numeric, only : paw_splint, paw_splint_der
+ use m_psolver,     only : psolver_hartree, psolver_kernel
+ use m_abi2big,     only : wvl_rhov_abi2big
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: mklocl_realspace
+ public :: mklocl_wavelets
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mklocl_realspace
 !! NAME
 !!  mklocl_realspace
 !!
 !! FUNCTION
 !! This method is equivalent to mklocl_recipspace except that
-!! it uses real space pseudo-potentials. It is usefull for isolated
-!! systems. Then the option 3 and 4 are not available for this
-!! implementation.
+!! it uses real space pseudo-potentials. It is useful for isolated
+!! systems. Then the option 3 and 4 are not available for this implementation.
 !!
-!! Optionally compute :
+!! Optionally compute:
 !!  option=1 : local ionic potential throughout unit cell
 !!  option=2 : contribution of local ionic potential to E gradient wrt xred
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
@@ -44,9 +98,6 @@
 !!                 reduced coordinates. Multiply them by rprimd to get
 !!                 gradients in cartesian coordinates.
 !!
-!! SIDE EFFECTS
-!!
-!!
 !! PARENTS
 !!      mklocl
 !!
@@ -54,30 +105,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscforder, &
 &                           nspden,ntypat,option,pawtab,psps,rhog,rhor,rprimd,typat,&
 &                           ucvol,usewvl,vpsp,xred)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_profiling_abi
- use m_errors
-
- use m_time,        only : timab
- use m_geometry,    only : xred2xcart
- use m_fft_mesh,    only : mkgrid_fft
- use m_mpinfo,      only : ptabs_fourdp
- use m_pawtab,      only : pawtab_type
- use m_paw_numeric, only : paw_splint
- use m_psolver,     only : psolver_hartree, psolver_kernel
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : coulomb_operator,deallocate_coulomb_operator
  use defs_PSolver
@@ -597,18 +628,12 @@ end subroutine mklocl_realspace
 !! CHILDREN
 !!
 !! SOURCE
+
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 &  nproc,nat,ntypes,iatype,psppar,nelpsp,rxyz,gridcart,&
 &  hxh,hyh,hzh,n1i,n2i,n3d,n3i,kernel,pot_ion,spaceworld,pawtab,usepaw)
 
- use defs_basis
- use defs_datatypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
  use defs_wvltypes, only : coulomb_operator
- use m_pawtab,      only : pawtab_type
- use m_paw_numeric, only : paw_splint
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -876,12 +901,6 @@ implicit none
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (TRangel)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -892,9 +911,8 @@ implicit none
 !! CHILDREN
 !!
 !! SOURCE
-subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
- use defs_basis
+subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -931,12 +949,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !! FUNCTION
 !!  Use a quadratic interpolation to get limit of Vloc(x) at x->0
 !!
-!! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (TRangel,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -946,8 +958,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1025,14 +1035,10 @@ end subroutine createIonicPotential_new
 !! CHILDREN
 !!
 !! SOURCE
+
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
-
- use defs_basis
- use m_profiling_abi
- use m_pawtab,      only : pawtab_type
- use m_paw_numeric, only : paw_splint_der
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1228,12 +1234,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !! FUNCTION
 !!  Compute 1st-derivative of long-range HGH local ionic potential (derf)
 !!
-!! COPYRIGHT
-!! Copyright (C) 2016-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -1244,9 +1244,8 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !! CHILDREN
 !!
 !! SOURCE
-subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
- use defs_basis
+subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1283,12 +1282,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !! FUNCTION
 !!  Use a quadratic interpolation to get limit of (1/x).dVloc(x)/dx at x->0
 !!
-!! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (TRangel,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -1298,8 +1291,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1382,8 +1373,6 @@ end subroutine local_forces_new
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
- use m_profiling_abi
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1411,8 +1400,6 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
    end subroutine ind_positions_mklocl
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mklocl_wavelets
 !!
 !! NAME
@@ -1427,13 +1414,6 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !! Optionally compute :
 !!  option=1 : local ionic potential throughout unit cell
 !!  option=2 : contribution of local ionic potential to E gradient wrt xred
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC,TRangel,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  efield (3)=external electric field
@@ -1462,22 +1442,10 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
      & nspden, option, rprimd, vpsp, wvl_den, wvl_descr, xcart)
 
- use defs_basis
- use defs_abitypes
  use defs_wvltypes
- use m_abi2big, only : wvl_rhov_abi2big
- use m_profiling_abi
- use m_xmpi
- use m_errors
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY,createIonicPotential,local_forces
  use poisson_solver, only : H_potential
@@ -1705,19 +1673,10 @@ end subroutine mklocl_wavelets
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n2i,&
 &                           rho,pot,floc,wvl)
 
- use defs_basis
  use defs_wvltypes
- use m_errors
- use m_paw_numeric, only : paw_splint_der
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
@@ -1926,12 +1885,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !! FUNCTION
 !!  Compute 1st-derivative of long-range HGH local ionic potential (derf)
 !!
-!! COPYRIGHT
-!! Copyright (C) 2016-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -1945,8 +1898,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !! SOURCE
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1983,12 +1934,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !! FUNCTION
 !!  Use a quadratic interpolation to get limit of (1/x).dVloc(x)/dx at x->0
 !!
-!! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (TRangel,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -1998,8 +1943,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
