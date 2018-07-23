@@ -56,6 +56,7 @@ module m_setvtr
  use m_mkcore,            only : mkcore, mkcore_alt
  use m_psolver,           only : psolver_rhohxc
  use m_wvl_psi,          only : wvl_psitohpsi
+ use m_mkcore_wvl,       only : mkcore_wvl
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

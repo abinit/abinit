@@ -50,6 +50,7 @@ module m_forces
  use m_predtk,           only : prtxvf
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_mkcore,           only : mkcore, mkcore_alt
+ use m_mkcore_wvl,       only : mkcore_wvl
 
  implicit none
 

@@ -1,4 +1,59 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mkcore_wvl
+!! NAME
+!!  m_mkcore_wvl
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2016-2018 ABINIT group (MT,TRangel)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mkcore_wvl
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_splines
+ use m_xmpi
+ use defs_wvltypes
+
+ use m_time,        only : timab
+ use m_sort,        only : sort_dp
+ use m_geometry,    only : xcart2xred, xred2xcart, metric, strconv
+ use m_paw_numeric, only : paw_splint, paw_splint_der
+ use m_pawrad,      only : pawrad_type, pawrad_init, pawrad_free
+ use m_pawtab,      only : pawtab_type
+ use m_drivexc,     only : mkdenpos
+
+ implicit none
+
+ private
+!!***
+
+ public :: mkcore_wvl
+ !public :: mkcore_wvl_old
+ !public :: mkcore_inner
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mkcore_wvl
 !! NAME
 !!  mkcore_wvl
@@ -8,12 +63,6 @@
 !!  (1) pseudo core electron density throughout unit cell
 !!  (2) pseudo-core contribution to forces
 !!  (3) pseudo-core contribution to stress tensor
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2016-2018 ABINIT group (MT,TRangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
@@ -64,30 +113,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc,n3xccc,option,&
 &                     pawrad,pawtab,rprimd,vxc,xccc1d,xccc3d,xcccrc,xred,wvl_den,wvl_descr,&
 &                     mpi_comm_wvl) ! optional argument
 
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_time,        only : timab
- use m_sort,        only : sort_dp
- use m_geometry,    only : xcart2xred, xred2xcart, metric, strconv
- use m_paw_numeric, only : paw_splint
- use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
- use m_pawtab,      only : pawtab_type
- use m_drivexc,     only : mkdenpos
-
- use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
@@ -510,12 +539,6 @@ end subroutine mkcore_wvl
 !!  (4) contribution to frozen-wavefunction part of
 !!      the dynamical matrix (part 2)
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  argin(sizein)=description
 !!
@@ -535,29 +558,11 @@ end subroutine mkcore_wvl
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 & nattyp,nfft,nscatterarr,nspden,ntypat,n1,n1i,n2,n2i,n3,n3pi,&
 & n3xccc,option,pawrad,pawtab,psppar,rprimd,ucvol,&
 & vxc,xccc3d,xred,mpi_comm_wvl)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_splines
-
- use m_time,        only : timab
- use m_geometry, only : xred2xcart, xcart2xred, metric, strconv
- use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
- use m_pawtab,  only : pawtab_type
- use m_xmpi,    only : xmpi_comm_size,xmpi_sum
- use m_drivexc,     only : mkdenpos
 
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
@@ -910,19 +915,12 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 end subroutine mkcore_wvl_old
 !!***
 
-
 !!****f* ABINIT/mkcore_inner
 !! NAME
 !!  mkcore_inner
 !!
 !! FUNCTION
 !!  FIXME: add description.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  argin(sizein)=description
@@ -942,23 +940,10 @@ end subroutine mkcore_wvl_old
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,natom,ncmax,nfft,&
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_sort,   only : sort_dp
- use m_pawrad, only : pawrad_type
- use m_pawtab, only : pawtab_type
- use m_paw_numeric, only : paw_splint,paw_splint_der
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1097,6 +1082,8 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 end subroutine mkcore_inner
 !!***
 
+end module m_mkcore_wvl
+!!***
 
 !%% !!****f* ABINIT/mkcore_paw
 !%% !! NAME
@@ -1476,3 +1463,6 @@ end subroutine mkcore_inner
 !%%
 !%% end subroutine mkcore_paw
 !%% !!***
+
+
+
