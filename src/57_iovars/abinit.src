@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_chkinp.F90",
- "chkvars.F90",
  "indefo.F90",
  "m_ingeo.F90",
  "m_inkpts.F90",
