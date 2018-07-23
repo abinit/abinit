@@ -37,41 +37,6 @@ module m_wvl_psi
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
   use m_abi2big,  only : wvl_vxc_abi2big, wvl_vtrial_abi2big
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  implicit none
 
  private
