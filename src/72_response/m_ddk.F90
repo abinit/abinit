@@ -325,6 +325,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  real(dp) :: kbz(3)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  complex(gwpc),allocatable :: ihrc(:,:)
+ complex(gwpc)             :: vg(3), vr(3)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
 
 !************************************************************************
@@ -340,7 +341,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 #ifndef HAVE_NETCDF
   MSG_ERROR("The matrix elements are only written in NETCDF format")
 #endif
-    
+
  ! paralelism
  my_rank = xmpi_comm_rank(comm)
  nproc = xmpi_comm_size(comm)
@@ -447,15 +448,28 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
          ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,&
                             kbz,ug_c,ug_v,kg_k)
 
+         ! HM: 24/07/2018
+         ! Transform dipoles to be consistent with results from DFPT
+         ! Perturbations with DFPT are along the reciprocal lattice vectors
+         ! Perturbations with Commutator are along real space lattice vectors
+         ! dot(A, DFPT) = X
+         ! dot(B, COMM) = X 
+         ! B = 2 pi (A^{-1})^T =>
+         ! dot(B^T B,COMM) = 2 pi DFPT
+         vr = (2*pi)*(2*pi)*sum(ihrc(:,:),2)
+         vg(1) = dot_product(Cryst%gmet(1,:),vr)
+         vg(2) = dot_product(Cryst%gmet(2,:),vr)
+         vg(3) = dot_product(Cryst%gmet(3,:),vr)
+
          ! Save matrix elements of i*r in the IBZ
-         dipoles(:,1,ib_c,ib_v,ik,spin) = real(sum(ihrc(:,:),2))
-         dipoles(:,1,ib_v,ib_c,ik,spin) = real(sum(ihrc(:,:),2)) ! Hermitian conjugate
+         dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg)
+         dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg) ! Hermitian conjugate
          if (ib_v == ib_c) then 
             dipoles(:,2,ib_c,ib_v,ik,spin) = 0
             dipoles(:,2,ib_v,ib_c,ik,spin) = 0
          else
-            dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(sum(ihrc(:,:),2))
-            dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(sum(ihrc(:,:),2)) ! Hermitian conjugate
+            dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(vg)
+            dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(vg) ! Hermitian conjugate
          end if
        end do
      end do
@@ -488,8 +502,8 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
      do ii=1,3
          fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
-         NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
          hdr_tmp%pertcase = (cryst%natom*3)+ii
+         NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
          NCF_CHECK(ebands_ncwrite(ebands, ncid))
          ncerr = nctk_def_arrays(ncid, [ &
