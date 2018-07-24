@@ -128,10 +128,12 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
  use m_kg,       only : mkkin, mkkpg
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
  use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -139,7 +141,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 #define ABI_FUNC 'd2frnl'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

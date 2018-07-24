@@ -18,32 +18,47 @@ This tutorial aims at showing how to get the following physical properties:
 
 You will learn to use features of ABINIT which deal with spin.  
 
+[TUTORIAL_README]
+
 This tutorial should take about 1.5 hour.
 
 ## 1 A ferromagnetic material: *bcc* Fe
   
 *Before beginning, you might consider to work in a different subdirectory, as
-for the other tutorials. Why not "Work_spin" (so _~abinit/tests/tutorial/Input/Work_spin_)?*
+for the other tutorials. Why not Work_spin?*
 
-The file _~abinit/tests/tutorial/Input/tspin\_x.files_ lists the file names and root names. 
-You can copy it in the Work\_spin directory (and change it, when needed, as usual).  
-You can also copy the file _~abinit/tests/tutorial/Input/tspin\_1.in_ in Work\_spin. 
+The file *tspin_x.files* in *\$ABI_TUTORIAL/Input* lists the file names and root names. 
+while *tspin_1.in* is our input file.
+You can copy these two files in the *Work_spin* directory with:
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_spin
+cd Work_spin
+cp ../tspin_x.files .  # Change it, when needed, as usual.
+cp ../tspin_1.in .
+```
 
 {% dialog tests/tutorial/Input/tspin_x.files tests/tutorial/Input/tspin_1.in %}
 
-This is your input file. You can run the calculation, then you
-should edit the input file, and read it carefully.  
+You can now run the calculation with:
+
+```sh
+abinit < tspin_x.files > log 2> err &
+```
+
+then you should edit the input file, and read it carefully.  
 Because we are going to perform magnetic calculations, there a two new types of variables:  
 
 * [[nsppol]]
 * [[spinat]]
 
-You can read their description in the help file.  You will work at fixed
+You can read their description in the help file. You will work at fixed
 [[ecut]] (=18Ha) and k-point grid, defined by [[ngkpt]] (the 4x4x4
-Monkhorst-Pack grid).  It is implicit that in *real life*, you should do a
+Monkhorst-Pack grid). It is implicit that in *real life*, you should do a
 convergence test with respect to both convergence parameters (NB: one needs a
-minimal cut-off to exhibit magnetic effects).  This run takes about 12 seconds
-on a modern PC.
+minimal cut-off to exhibit magnetic effects).
+This run takes about 12 seconds on a modern PC.
 
 We will compare the output with and without magnetization. (Hence, there are two datasets in the run)  
 We now look at the output file: 
@@ -86,7 +101,7 @@ The total magnetization, i.e. the integrated in the unit cell, is now:
     Magnetization (Bohr magneton)=  1.96743463E+00  
     Total spin up =  4.98371731E+00   Total spin down =  3.01628269E+00  
   
-We observe that the total density (up+down) yields 8.000 as expected.  
+We observe that the total density (up + down) yields 8.000 as expected.  
   
 The magnetization density is not the only changed quantity. 
 The energy is changed too, and we get:  
@@ -102,9 +117,9 @@ magnetization. This would also be true for the forces, for a less symmetric mate
 It is interesting to consider in more detail the distribution of eigenvalues
 for each direction of magnetization, which is best done by looking at the
 respective densities of state.  
-To this end we have set [[prtdos]]= 1 in the input file, in order to obtain
-the density of states corresponding to spin-up and spin-down electrons (as soon as [[nsppol]]=2).  
-The values of the DOS are in the files tspin_1o_DS1_DOS and tspin_1o_DS2_DOS
+To this end we have set [[prtdos]] = 1 in the input file, in order to obtain
+the density of states corresponding to spin-up and spin-down electrons (as soon as [[nsppol]] = 2).  
+The values of the DOS are in the files *tspin_1o_DS1_DOS* and *tspin_1o_DS2_DOS*
 for the magnetic and non-magnetic cases respectively. We can extract the values
 for use in a plotting software.  
 Traditionally, in order to enhance visibility, one plots 
@@ -150,22 +165,22 @@ To describe such a structure, a unit cell with two atoms is sufficient, [0,0,0] 
 [1/2,0,1/2].  
 The atoms will be given opposite magnetization with the help of the variable [[spinat]].  
   
-You can copy the file ~abinit/tests/tutorial/Input/tspin_2.in in Work_spin.
+Copy the file *$ABI_TUTORIAL/Input/tspin_2.in* in *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_2.in %}
 
-This is your input file. Modify the tspin_x.files file accordingly. 
+This is your input file. Modify the *tspin_x.files* file accordingly. 
 
-You can run the calculation, then you should edit the tspin_2.in file, and briefly
-look at the two changes with respect to the file tspin_1.in: the 
+You can run the calculation, then you should edit the *tspin_2.in* file, and briefly
+look at the two changes with respect to the file *tspin_1.in*: the 
 unit cell basis vectors [[rprim]], and the new [[spinat]].  
   
-Note also we use now [[nsppol]]=1 and [[nspden]]=2: this combination of values
-is only valid when performing a strictly antiferromagnetic calculation: nspden=2 means
-that we have 2 independent components for the charge density while nsppol=1
+Note also we use now [[nsppol]] = 1 and [[nspden]] = 2: this combination of values
+is only valid when performing a strictly antiferromagnetic calculation: nspden = 2 means
+that we have 2 independent components for the charge density while nsppol = 1
 means that we have 1 independent component for the wave-functions.  
 In that case, ABINIT uses the so-called Shubnikov symmetries, to perform
-calculations twice faster than with [[nsppol]]=2 and [[nspden]]=2. The
+calculations twice faster than with [[nsppol]] = 2 and [[nspden]] = 2. The
 symmetry of the crystal is not the full fcc symmetry anymore, since the
 symmetry must now preserve the magnetization of each atom.  ABINIT is
 nevertheless able to detect such symmetry belonging to the Shubnikov groups
@@ -218,8 +233,8 @@ and obtain a rough estimation of the magnetic moment of each atom
     magnetization of atom 2=-0.33693  
   
 But here we want more precise results...  
-To perform the integration, we will use the utility cut3d which yields an
-interpolation of the magnetization at any point in space. cut3d is one of the
+To perform the integration, we will use the utility *cut3d* which yields an
+interpolation of the magnetization at any point in space. *cut3d* is one of the
 executables of the ABINIT package and is installed together with abinit.  
 For the moment cut3d is interactive, and we will use it through a very primitive script
 (written in Python) to perform a rough estimate of the magnetization on each atom.  
@@ -228,14 +243,19 @@ You can have a look at the [magnetization.py program](spin_assets/magnetization.
 side acell/2 around each atom; if applicable, you might consider adjusting the
 value of the "CUT3D" string in the Python script.  
   
-Copy it in your Work_spin directory. If you run the program, by typing 
-"python magnetization.py" , you will see the result:  
+Copy it in your *Work_spin* directory. If you run the program, by typing 
+
+```
+python magnetization.py
+```
+
+you will see the result:  
 
     magnetization of atom 1= 0.38212  
     magnetization of atom 2=-0.38203  
   
 which shows that the magnetizations of the two atoms are really opposite.  
-With the next input file tspin_3.in, we will consider this same problem, but
+With the next input file *tspin_3.in*, we will consider this same problem, but
 in a different way. We note, for future reference, that the total energy is:
 Etotal=-4.92489592898935E+01  
 
@@ -243,14 +263,14 @@ Etotal=-4.92489592898935E+01
   
 Instead of treating fcc Fe directly as an antiferromagnetic material, we will
 not make any hypotheses on its magnetic structure, and run the calculation
-like the one for fcc Fe, anticipating only that the two spin directions are going to be different.  
+like the one for fcc Fe, anticipating only that the two spin directions are going to be different.
 We will not even assume that the initial spins are of the same magnitude.  
   
-You can copy the file ~abinit/tests/tutorial/Input/tspin_3.in to Work_spin.
+You can copy the file *$ABI_TUTORIAL/Input/tspin_3.in* to *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_3.in %}
 
-This is your input file. You can modify the file tspin_x.files and immediately
+This is your input file. You can modify the file *tspin_x.files* and immediately
 start running the calculation. Then, you should edit it to understand its contents. 
 
 Note the values of [[spinat]]. In this job, we wish again to characterize the magnetic structure.  
@@ -275,24 +295,24 @@ calculation being run to generate the projected density of states.
 First, we note that the value of the energy is: Etotal=-4.92489557316370E+01,
 which shows that we have attained essentially the same state as above.  
   
-The density of states will be in the files tspin_3o_DS2_DOS_AT0001 for the
-first atom, and tspin_3o_DS3_DOS_AT0002 for the second atom.  
+The density of states will be in the files *tspin_3o_DS2_DOS_AT0001* for the
+first atom, and *tspin_3o_DS3_DOS_AT0002* for the second atom.  
 We can extract the density of d states, which carries most of the magnetic
 moment and whose integral up to the Fermi level will yield an estimate of the
-magnetization on each atom. We note the Fermi level (echoed the file tspin_3o_DS1_DOS):  
+magnetization on each atom. We note the Fermi level (echoed the file *tspin_3o_DS1_DOS*):  
   
     Fermi energy :      -0.28270392  
   
 If we have a look at the integrated site-projected density of states, we can
 compute the total moment on each atom. To this end, one can open the file
-tspin_3o_DS3_DOS_AT0002, which contains information pertaining to atom 2. This
+*tspin_3o_DS3_DOS_AT0002*, which contains information pertaining to atom 2. This
 file is self-documented, and describes the line content, for spin up and spin down:  
 
 ```
 # energy(Ha)  l=0   l=1   l=2   l=3   l=4    (integral=>)  l=0   l=1   l=2 l=3   l=4  
 ```
   
-If we look for the lines containing  an energy of "-0.28250",  we find  
+If we look for the lines containing  an energy of "-0.28250", we find  
  
 up  -0.28250  0.8026  2.6082  23.3966  0.7727  0.1687  0.30  0.34  <font color="red">3.42</font>  0.04  0.01  
 dn  -0.28250  0.3381  1.8716  24.0456  0.3104  0.1116  0.30  0.33  <font color="red">2.74</font>  0.04  0.01  
@@ -308,7 +328,7 @@ projected DOS, we can plot the up-down integrated dos difference for the d-chann
 ![](spin_assets/energy_diff_fccfe.jpg)
 
 Note that there is some scatter in this graph, due to the finite number of digits (2 decimal
-places) of the integrated dos given in the file tspin_3o_DS3_DOS_AT0002.  
+places) of the integrated dos given in the file *tspin_3o_DS3_DOS_AT0002*.  
   
 If we now look at the up and down DOS for each atom, we can see that the
 corner atom and the face atom possess opposite magnetizations, which roughly
@@ -331,7 +351,7 @@ necessary, and this can be accomplished through the relativistic LDA approximati
 ### 5.1 Norm-conserving pseudo-potentials  
 
 For atoms, the Dirac equation is solved and the 2(2l+1) l-channel
-degeneracy is lifted according to the eigenvalues of the L+S operator 
+degeneracy is lifted according to the eigenvalues of the $L+S$ operator 
 (l+1/2 and l-1/2 of degeneracy 2l+2 and 2l). 
 After pseudization, the associated wave functions can be recovered by adding to usual pseudo-potential projectors a
 spin-orbit term of the generic form $v(r).|l,s\rangle L.S \langle l,s|$. 
@@ -341,18 +361,18 @@ In a plane wave calculation, the wavefunctions will be two-component
 spinors, that is they will have a spin-up and a spin-down component, and these
 components will be coupled. This means the size of the Hamiltonian matrix is quadrupled.
 
-We will consider here a heavier atom than Iron: *Tantalum*.  
+We will consider here a heavier atom than Iron: *Tantalum*.
 You will have to change the "files" file accordingly, as we want to use the
-potential: 73ta.hghsc. It is a HGH pseudopotential, with semicore states.
+potential: *73ta.hghsc*. It is a HGH pseudopotential, with semicore states.
 Replace the last line of the tspin_x.files by
     
     ../../../Psps_for_tests/73ta.hghsc  
 
-You can copy the file ~abinit/tests/tutorial/Input/tspin_5.in in Work_spin.
+You can copy the file *$ABI_TUTORIAL/Input/tspin_5.in* in *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_5.in %}
 
-Change accordingly the file names in tspin_x.files, then run the calculation.
+Change accordingly the file names in *tspin_x.files*, then run the calculation.
 It takes about 20 secs on a recent computer.  
 
 The input file contains one new variable:  
@@ -410,7 +430,9 @@ A more converged (and more expensive calculation) would yield:
 
 Within the Projector Augmented-Wave method, the usual (pseudo-)Hamiltonian can be expressed as:  
 
-$H  =  K + V_{eff} + \Sigma_{ij} D_{ij}  |p_i \rangle \langle p_j|$
+$$
+H  =  K + V_{eff} + \Sigma_{ij} D_{ij}  |p_i \rangle \langle p_j|
+$$
   
 If the two following conditions are satisfied:  
 
@@ -420,12 +442,14 @@ If the two following conditions are satisfied:
 it can be shown that a very good approximation of the PAW Hamiltonian --
 including spin-orbit coupling -- is:  
 
-$H  \simeq  K + V_{eff} + \Sigma (D_{ij}+D^{SO}_{ij})  |p_i \rangle \langle p_j|$
+$$
+H  \simeq  K + V_{eff} + \Sigma (D_{ij}+D^{SO}_{ij})  |p_i \rangle \langle p_j|
+$$
   
 where $D^{SO}_{ij}$ is the projection of the ($L.S$) operator into the PAW augmentation regions.  
 As an immediate consequence , we thus have the possibility to use the standard $p_i$ PAW projectors; 
 in other words, it is possible to use the standard PAW datasets (pseudopotentials) to perform 
-calculations including spin-orbit coupling.  
+calculations including spin-orbit coupling.
 But, of course, it is still necessary to express the wave-functions as two
 components spinors (spin-up and a spin-down components).  
 Let's have a look at the following keyword:  
@@ -437,15 +461,14 @@ This activates the spin-orbit coupling within PAW (forcing [[nspinor]]=2).
 Now the practice:  
 We consider Bismuth.  
 You will have to change the "files" file accordingly, to use the new
-potential 83bi.paw. This is a PAW dataset with 5d, 6s and 6p electrons in the valence.  
+potential *83bi.paw*. This is a PAW dataset with 5d, 6s and 6p electrons in the valence.  
 Replace the last line of the tspin_x.files by:
 
     ../../../Psps_for_tests/83bi.paw  
 
-You can copy the file ~abinit/tests/tutorial/Input/tspin_6.in in Work_spin
+You can copy the file *$ABI_TUTORIAL/Input/tspin_6.in* in *Work_spin*
 (one Bismuth atom in a large cell). Change the file names in
-tspin_x.files accordingly, then run the calculation. It takes about 10 seconds on a recent
-computer. 
+*tspin_x.files* accordingly, then run the calculation. It takes about 10 seconds on a recent computer. 
 
 {% dialog tests/tutorial/Input/tspin_6.in %}
 
@@ -463,7 +486,8 @@ coord)
  6p   -0.11089  -0.11089  -0.03810  -0.03810  -0.03810  -0.03810  
 ```
   
-Again, the levels are not perfectly degenerate, due to the finite size and non spherical shape of the simulation box.  
+Again, the levels are not perfectly degenerate, due to the finite size and non spherical 
+shape of the simulation box.
 We can compute the splitting of the levels, and we obtain:  
 
     5d-channel: 0.93353-0.82304=0.11048 Ha  

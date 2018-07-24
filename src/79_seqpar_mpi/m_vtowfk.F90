@@ -46,6 +46,7 @@ module m_vtowfk
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
+ use m_prep_kgb,    only : prep_nonlop, prep_fourwf
 
  implicit none
 

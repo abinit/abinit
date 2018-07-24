@@ -48,6 +48,8 @@ module m_lobpcgwf
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
+ use m_prep_kgb,    only : prep_getghc, prep_nonlop
+ use m_getghc,      only : multithreaded_getghc
 
  private
 
@@ -81,7 +83,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf2'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -137,7 +138,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  cputime = abi_cpu_time()
  walltime = abi_wtime()
 
- ! Set module variables 
+ ! Set module variables
  l_paw = (gs_hamk%usepaw==1)
  l_cpopt=-1;l_sij_opt=0;if (l_paw) l_sij_opt=1
  l_istwf=gs_hamk%istwf_k
@@ -223,7 +224,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
- 
+
  ! Run lobpcg
  call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol)
 
@@ -249,10 +250,10 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    end if
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
- 
+
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
- 
+
    else
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
@@ -313,7 +314,6 @@ end subroutine lobpcgwf2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc_gsc'
- use interfaces_66_wfs
 !End of the abilint section
 
   type(xgBlock_t), intent(inout) :: X
@@ -327,11 +327,11 @@ end subroutine lobpcgwf2
   double precision, pointer :: cg(:,:)
   double precision, pointer :: ghc(:,:)
   double precision, pointer :: gsc(:,:)
- 
+
   call xgBlock_getSize(X,spacedim,blockdim)
   spacedim = spacedim/l_icplx
- 
- 
+
+
   !call xgBlock_get(X,cg(:,1:blockdim*spacedim),0,spacedim)
   call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
   call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
@@ -348,7 +348,7 @@ end subroutine lobpcgwf2
    ABI_FREE(l_gvnlc)
    ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
  end if
- 
+
   if (l_mpi_enreg%paral_kgb==0) then
 
     call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc(:,1:blockdim*spacedim),&
@@ -365,7 +365,7 @@ end subroutine lobpcgwf2
     !ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
     call xgBlock_scale(X,sqrt2,1)
     call xgBlock_scale(AX,sqrt2,1)
-    if(l_mpi_enreg%me_g0 == 1) then 
+    if(l_mpi_enreg%me_g0 == 1) then
       cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
       ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
     endif

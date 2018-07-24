@@ -20,6 +20,8 @@ The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
+[TUTORIAL_README]
+
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
@@ -79,16 +81,25 @@ Several parameters (both physical and technical) are important for the cRPA calc
     over atoms in this case. 
 
 ## 2 Electronic Structure of SrVO3 in LDA
-  
-You might create a subdirectory of the ~abinit/tests/tutoparal directory, and
-use it for the tutorial. In what follows, the names of files will be mentioned
-as if you were in this subdirectory
 
-Copy the files ../Input/tucrpa_1.in and ../Input/tucrpa_1.files in your Work
-directory, and run ABINIT: (as usual, the actual "abinit" command is something
-like ../../../../src/98_main/abinit):
+*Before continuing, you might consider to work in a different subdirectory as
+for the other tutorials. Why not Work_crpa?
+In what follows, the name of files are mentioned as if you were in this subdirectory.
+All the input files can be found in the `$ABI_TUTORIAL/Input` directory.*
+
+Copy the files *tucrpa_1.in* and *tucrpa_1.files* from *ABI_TUTORIAL/Input* to *Work_crpa* with:
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_crpa
+cd Work_crpa
+cp ../tucrpa_1.files . 
+cp ../tucrpa_1.in .
+```
+
+and run the code with:
     
-    abinit < tucrpa_1.files > log_1
+    mpirun -n 32 abinit < tucrpa_1.files > log_1 2> err &
 
 This run should take some time. It is recommended that you use at least 10
 processors (and 32 should be fast). It calculates the LDA ground state of
@@ -128,16 +139,16 @@ However, we clearly see an important hybridization. The Fermi level (at 0 eV)
 is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t<sub>2g</sub>_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use pawfatbnd=2 in tucrpa_1.in and relaunch the
-calculations. Then the file tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-2,
-tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-1 and
-tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m1 give you respectively the _xy_, _yz_ and
-_xz_ fatbands (ie _d-t<sub>2g</sub>_) and tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+0 and
-tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+2 give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands (ie _e<sub>g</sub>_).
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tucrpa_1.in* and relaunch the
+calculations. Then the file *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
+*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
+*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
+_xz_ fatbands (ie _d-t<sub>2g</sub>_) and *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+0* and
+*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+2* give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands
+(ie _e<sub>g</sub>_).
 
 So in conclusion of this study, the Kohn Sham bands which are mainly _t<sub>2g</sub>_
 are the bands 21, 22 and 23.
-_t_<sub>2g</sub>
 
 Of course, it could have been anticipated from classical crystal field theory:
 the vanadium is in the center of an octahedron of oxygen atoms, so _d_
@@ -175,7 +186,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
-input file for a typical cRPA calculation (tucrpa_2.in) contains four datasets
+input file for a typical cRPA calculation (*tucrpa_2.in*) contains four datasets
 (as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third
@@ -183,8 +194,14 @@ computes the constrained non interacting polarizability, and the fourth
 computes effective interaction parameters _U_ and _J_. We discuss these four
 datasets in the next four subsections.
 
-Copy the files ../Input/tucrpa_2.in and ../Input/tucrpa_2.files in your Work
-directory. The input file tucrpa_2.in contains standard data to perform a LDA
+Copy the files in your *Work_crpa* directory with:
+
+```sh
+cp ../tucrpa_2.in .
+cp ../tucrpa_2.files 
+```
+
+The input file *tucrpa_2.in* contains standard data to perform a LDA
 calculation on SrVO<sub>3</sub>. We focus in the next subsections on some peculiar input
 variables related to the fact that we perform a cRPA calculation. Before
 reading the following section, launch the abinit calculation:
@@ -356,8 +373,8 @@ interaction computed on Wannier orbitals.
  * First we see that diagonal interactions are larger than off-diagonal terms, 
    which is logical, because electron interaction is larger if electrons are located in the same orbital. 
  * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry 
-   (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are _xy_, _yz_, _z<sup>2<\sup>_,
-   _xy_, _x<sup>2</sup>-y<sup>2</sup>_). 
+   (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are _xy_, _yz_, 
+   _z<sup>2<\sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_). 
  * We note also that the interaction for _t<sub>2g</sub>_ and _e<sub>g</sub>_ orbitals are not the same. 
    This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual 
    Slater parametrization of interaction matrices. 
@@ -375,11 +392,12 @@ interaction computed on Wannier orbitals.
 (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514    0.0000)
 ```
     
+!!! important
 
-[To speed up the calculation and if one needs only these average values of _U_
-and _J_, one can use [[nsym]]=0 in the input file, but in this case, the
-interaction matrix does not anymore reproduce the correct symmetry. For
-several correlated atoms, the implementation is under test and it is mandatory to use [[nsym]]=1.]
+    To speed up the calculation and if one needs only these average values of _U_
+    and _J_, one can use [[nsym]] = 0 in the input file, but in this case, the
+    interaction matrix does not anymore reproduce the correct symmetry. For
+    several correlated atoms, the implementation is under test and it is mandatory to use [[nsym]]=1.]
 
   * Bare exchange interaction. The exchange interaction matrix is also written as well 
     as the average of off-diagonal elements, which is _J_. 
@@ -439,7 +457,7 @@ several correlated atoms, the implementation is under test and it is mandatory t
 
 We give here the results of some convergence studies, than can be made by the
 readers. Some are computationally expensive. It is recommanded to use at least
-32 processors. Input files are provided in tucrpa_3.in and tucrpa_3.files for the first case.
+32 processors. Input files are provided in *tucrpa_3.in* and *tucrpa_3.files* for the first case.
 
 ### 4.1 Cutoff in energy for the polarisability [[ecuteps]]
 
@@ -586,7 +604,7 @@ values of [[ucrpa_bands]].
   
 In this section, we are going to compute frequency dependent effective
 interactions. Just change the following input variables in order to compute
-effective interaction between 0 and 30 eV. We use [[nsym]]=0 in order to
+effective interaction between 0 and 30 eV. We use [[nsym]] = 0 in order to
 decrease the computational cost.
     
      # -- Frequencies for effective interactions
@@ -598,7 +616,7 @@ decrease the computational cost.
      freqspmax4 30 eV
      freqspmin4  0 eV
 
-An example of input file can be found in tucrpa_5.in. Note that we have
+An example of input file can be found in *tucrpa_5.in*. Note that we have
 decreased some parameters to speed-up the calculations. Importantly, however,
 we have increased the number of Kohn Sham bands, because calculation of
 screening at high frequency involves high energy transitions which requires

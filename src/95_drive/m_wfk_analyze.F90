@@ -136,6 +136,11 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_init,        only : pawinit,paw_gencond
+ use m_paw_nhat,        only : nhatgrid
+ use m_paw_tools,       only : chkpawovlp
+ use m_paw_correlations,only : pawpuxinit
  !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
  !use m_paw_dmft,       only : paw_dmft_type
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
@@ -147,7 +152,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -364,7 +368,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    pawtab(:)%useexexch = 0
    pawtab(:)%exchmix   =zero
 
-   call setsymrhoij(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
+   call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    !paw_dmft%use_dmft=dtset%usedmft

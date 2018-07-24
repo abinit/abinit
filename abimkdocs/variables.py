@@ -209,6 +209,7 @@ ABI_TOPICS = [
     "MagField",
     "MagMom",
     "MolecularDynamics",
+    "Macroave",
     "multidtset",
     "nonlinear",
     "Optic",
@@ -303,7 +304,7 @@ class Variable(object):
                 Either constant number, formula or another variable
             mnemonics (str): Mnemonic string (required).
             characteristics (list): List of characteristics or None
-            excludes (str): String with variables that are exluded if this variable is given.
+            excludes (str): String with variables that are excluded if this variable is given.
             requires (str): String with variables that are required.
             commentdefault=None,
             commentdims=None,

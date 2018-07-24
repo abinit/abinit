@@ -21,7 +21,6 @@ sources = [
  "m_chkinp.F90",
  "chkvars.F90",
  "indefo.F90",
- "indefo1.F90",
  "m_ingeo.F90",
  "m_inkpts.F90",
  "invars0.F90",

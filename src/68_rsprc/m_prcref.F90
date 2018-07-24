@@ -56,6 +56,8 @@ module m_prcref
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
+ use m_mkcore,     only : mkcore
+
 
  implicit none
 
@@ -204,7 +206,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -293,7 +294,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute the residuals corresponding to the solution
 !of an approximate realspace dielectric function according
-!to X. Gonze PRB vol54 nb7 p4383 (1996)
+!to X. Gonze PRB vol54 nb7 p4383 (1996) [[cite:Gonze1996]]
  if(dtset%iprcel>=71.and.dtset%iprcel<=79) then
    if (nfft==nfftprc) then
      if (dtset%iprcel<=78) then
@@ -856,7 +857,6 @@ end subroutine prcref
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -952,7 +952,7 @@ end subroutine prcref
 
 !Compute the residuals corresponding to the solution
 !of an approximate realspace dielectric function according
-!to X. Gonze PRB vol54 nb7 p4383 (1996)
+!to X. Gonze PRB vol54 nb7 p4383 (1996) [[cite:Gonze1996]]
  if(dtset%iprcel>=71.and.dtset%iprcel<=79) then
    if (nfft==nfftprc) then
      if (dtset%iprcel<=78) then

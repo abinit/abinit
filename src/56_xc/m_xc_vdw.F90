@@ -13,8 +13,8 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
-!!  RS09 = doi:10.1103/PhysRevLett.103.096102
+!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401 [[cite:Dion2004]]
+!!  RS09 = doi:10.1103/PhysRevLett.103.096102 [[cite:Romanperez2009]]
 !!
 !! SOURCE
 
@@ -2383,7 +2383,7 @@ end subroutine vdw_df_filter
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates.
 !!  Decides whether to use direct integration of Eq.(14) of
-!!  Dion et al., PRL 92, 246401 (2004), or to return a 4th-order
+!!  Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]], or to return a 4th-order
 !!  polynomial for small distances.
 !!
 !! INPUTS
@@ -2489,7 +2489,7 @@ end function vdw_df_kernel
 !!
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates. Uses
-!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
+!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]].
 !!
 !! INPUTS
 !!  d1= first coordinate

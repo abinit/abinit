@@ -46,8 +46,9 @@
 !! TODO
 !!
 !! NOTES
-!! See Ceresoli et al, PRB 74, 024408 (2006), and Gonze and Zwanziger, PRB 84
-!! 064446 (2011). This routine computes the Chern number as
+!! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]], 
+!! and Gonze and Zwanziger, PRB 84 064445 (2011) [[cite:Gonze2011a]]. 
+!! This routine computes the Chern number as
 !! $C_\alpha = \frac{i}{2\pi}\int_{\mathrm{BZ}} dk \epsilon_{\alpha\beta\gamma}
 !! \mathrm{Tr}[\rho_k \partial_\beta \rho_k (1 - \rho_k) \partial_gamma\rho_k] $
 !! The derivative of the density operator is obtained from a discretized formula
@@ -84,15 +85,16 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  use m_xmpi
  use m_errors
  use m_profiling_abi
- use m_orbmag
 
- use m_fftcore,  only : kpgsph
- use m_berrytk,  only : smatrix
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-                        pawcprj_get, pawcprj_getdim, pawcprj_set_zero
+ use m_fftcore,    only : kpgsph
+ use m_berrytk,    only : smatrix
+ use m_pawang,     only : pawang_type
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
+                          pawcprj_get, pawcprj_getdim, pawcprj_set_zero
+ use m_paw_overlap,only : overlap_k1k2_paw
+ use m_paw_orbmag, only : orbmag_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -100,7 +102,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 #define ABI_FUNC 'chern_number'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

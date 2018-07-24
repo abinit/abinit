@@ -49,7 +49,7 @@ MODULE m_exc_spectra
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
- use m_pawhr,           only : pawhur_t
+ use m_paw_hr,          only : pawhur_t
  use m_wfd,             only : wfd_t
  !use m_bse_io,          only : exc_amplitude
 

@@ -3516,7 +3516,7 @@ end subroutine cgpaw_gramschmidt
 !!
 !!  2) The new version employs BLAS2 routine so that the OMP parallelism is delegated to BLAS library.
 !!
-!!  3) Note for PAW: ref.= PRB 73, 235101 (2006), equations (71) and (72):
+!!  3) Note for PAW: ref.= PRB 73, 235101 (2006) [[cite:Audouze2006]], equations (71) and (72):
 !!     in normal use, projbd applies P_c projector
 !!     if cg and scg are inverted, projbd applies P_c+ projector
 !!
@@ -3862,7 +3862,7 @@ end subroutine cg_normev
 !!  $vect(2,npw)=<G|H|C_{n,k}>$.
 !!  npw=number of planewaves at this k point.
 !!  optekin= 1 if the kinetic energy used in preconditionning is modified
-!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
 !!           0 otherwise
 !!  mg_g0=1 if the node treats G0.
 !!  comm=MPI communicator
@@ -4002,7 +4002,7 @@ end subroutine cg_precon
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.
 !!  optekin= 1 if the kinetic energy used in preconditionning is modified
-!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
@@ -4302,7 +4302,7 @@ end subroutine cg_precon_block
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.
 !!  optekin= 1 if the kinetic energy used in preconditionning is modified
-!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+!!             according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)

@@ -27,4 +27,5 @@ linear            # Type of interpolation
 #%%  Si/Ge heterojunction, see test 42
 #%%  Analyze the charge density : one filter function,
 #%%  using the average width of a layer, and linear interpolation.
+#%% topics = Macroave
 #%%<END TEST_INFO>
