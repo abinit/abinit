@@ -100,6 +100,10 @@ def get_parser():
     #p_canimove.add_argument("what", help="File or procedure name.")
     #p_canimove.add_argument("dest_level", type=int, help="Destination level")
 
+    # notebook option
+    #p_notebook = subparser.add_parser("notebook", parents=[copts_parser], help="Analyze project in jupyter notebook")
+    #p_notebook.add_argument('--foreground', action='store_true', default=False,
+    #    help="Run jupyter notebook in the foreground.")
 
     # Subparser for stats.
     p_stats = subparsers.add_parser("stats", parents=[copts_parser],
@@ -250,6 +254,9 @@ def main():
     #        return proj.canimove_file(options.what, options.dest_level)
     #    else:
     #        raise TypeError("Requiring directory or file but received %s" % str(options.what))
+
+    #elif options.command == "notebook":
+    #    return proj.make_and_open_notebook(foreground=options.foreground)
 
     elif options.command == "pedit":
         return proj.pedit(options.what, verbose=options.verbose)

@@ -139,10 +139,10 @@ class FortranFile(object):
         lines = []; app = lines.append
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
         app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.used_mods)))
-        app("Use dir kevels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.used_mods))))))
+        app("Use dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.used_mods))))))
         app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
         app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.usedby_mods)))
-        app("Used by dir levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.usedby_mods))))))
+        app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.usedby_mods))))))
 
         for a in ["programs", "modules", "subroutines", "functions"]:
             plist = getattr(self, a)
@@ -151,7 +151,10 @@ class FortranFile(object):
             for p in plist:
                 app(p.to_string(verbose=verbose, width=width))
 
-        if verbose:
+        df = self.get_stats(as_dataframe=True)
+        app(df.to_string())
+
+        if verbose > 1:
             app(self.stree())
 
         return "\n".join(lines)
@@ -173,6 +176,14 @@ class FortranFile(object):
         # 72_response --> 72
         return int(os.path.basename(os.path.dirname(self.path)).split("_")[0])
 
+    @lazy_property
+    def min_dirlevel(self):
+        return max(mod.dirlevel for mod in self.used_mods) if self.used_mods else 999
+
+    @lazy_property
+    def max_dirlevel(self):
+        return min(mod.dirlevel for mod in self.usedby_mods) if self.usedby_mods else 0
+
     def iter_procedures(self, visibility="public"):
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
@@ -193,10 +204,55 @@ class FortranFile(object):
         """
         Return dictionary with FortFile stats or pandas dataframe if as_dataframe.
         """
-        d = {}
+        d = OrderedDict([
+            #("subroutines", len(self.subroutines)),
+            #("functions", len(self.functions)),
+            #("modules", len(self.modules)),
+            #("programs", len(self.programs)),
+            #("code_lines", self.num_f90lines),
+            #("doc_lines", self.num_doclines),
+            ("use", len(self.used_mods)),
+            ("usedby", len(self.usedby_mods)),
+            ("min_dirlevel", self.min_dirlevel),
+            ("this_dirlevel", self.dirlevel),
+            ("max_dirlevel", self.max_dirlevel),
+            ("includes", len(self.includes)),
+            #("class", self.__class__.__name__),
+        ])
+
         if not as_dataframe: return d
         import pandas as pd
-        return pd.DataFrame.from_dict(d)
+        return pd.DataFrame([d], index=[self.basename], columns=d.keys())
+
+    #def write_notebook(self, nbpath=None):
+    #    """
+    #    Write a jupyter_ notebook to ``nbpath``. If nbpath is None, a temporay file in the current
+    #    working directory is created. Return path to the notebook.
+    #    """
+    #    nbformat, nbv, nb = self.get_nbformat_nbv_nb(title=None)
+
+    #    nb.cells.extend([
+    #        nbv.new_markdown_cell("## %s" % title)),
+    #        nbv.new_code_cell("gsr = abilab.abiopen('%s')" % self.filepath),
+    #    ])
+
+    #    return self._write_nb_nbpath(nb, nbpath)
+
+    #@staticmethod
+    #def _write_nb_nbpath(nb, nbpath):
+    #    """
+    #    This method must be called at the end of ``write_notebook``.
+    #    nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
+    #    """
+    #    import io, os, tempfile
+    #    if nbpath is None:
+    #        _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix='.ipynb', dir=os.getcwd(), text=True)
+
+    #    # Write notebook
+    #    import nbformat
+    #    with io.open(nbpath, 'wt', encoding="utf8") as fh:
+    #        nbformat.write(nb, fh)
+    #        return nbpath
 
     def get_graphviz(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -762,8 +818,9 @@ class AbinitProject(object):
             try:
                 df = self.get_stats_dir(dirname)
                 df_list.append(df)
-            except:
-                print("exception dirname:", dirname)
+            except Exception as exc:
+                print("exception for dirname: %s\n%s" % (dirname, exc))
+                #raise exc
 
         import pandas as pd
         return pd.concat(df_list)
