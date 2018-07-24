@@ -64,7 +64,7 @@ module m_gstate
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_abi2big,          only : wvl_occ_abi2big
+ use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
  use m_energies,         only : energies_type, energies_init
  use m_args_gs,          only : args_gs_type
  use m_results_gs,       only : results_gs_type

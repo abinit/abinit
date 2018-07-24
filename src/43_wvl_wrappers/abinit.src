@@ -29,8 +29,6 @@ sources = [
  "wvl_descr_psp_set.F90",
  "wvl_paw_free.F90",
  "wvl_projectors_set.F90",
- "wvl_setboxgeometry.F90",
- "wvl_setngfft.F90",
  "wvl_wfs_set.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
