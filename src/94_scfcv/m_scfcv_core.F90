@@ -113,6 +113,7 @@ module m_scfcv_core
  use m_positron,         only : setup_positron
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
+ use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
 
  implicit none
 

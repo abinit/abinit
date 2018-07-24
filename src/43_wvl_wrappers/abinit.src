@@ -22,12 +22,9 @@ sources = [
  "defs_PSolver.F90",
  "m_abi2big.F90",
  "nullify_wvl_data.F90",
- "paw2wvl.F90",
- "paw2wvl_ij.F90",
- "wvl_cprjreorder.F90",
+ "m_paw2wvl.F90",
  "wvl_denspot_set.F90",
  "wvl_descr_psp_set.F90",
- "wvl_paw_free.F90",
  "wvl_projectors_set.F90",
  "wvl_wfs_set.F90",
  ]
