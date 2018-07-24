@@ -3206,7 +3206,7 @@ subroutine a2fw_ee_write(a2f,basename)
 
  call write_a2fw_header()
 
- write(unt,'(a)')"# en2, en1, Frequency, a2F_tot(w)"
+ write(unt,'(a)')"# en2, en1, Frequency, a2F_tot(w) (presently summed over spin)"
  do iw=1,a2f%nomega
    do iene=1,a2f%nene
      ene1 = a2f%enemin + (iene-1)*a2f%deltaene
@@ -3227,7 +3227,7 @@ subroutine a2fw_ee_write(a2f,basename)
 
  call write_a2fw_header()
 
- write(unt,'(a)')"# Frequency, a2F_tot(ef,ef,w) for comparison with normal a2F(w)"
+ write(unt,'(a)')"# Frequency, a2F_tot(ef,ef,w) for comparison with normal a2F(w) (presently summed over spin)"
  iene = int(a2f%nene/2)
  jene = int(a2f%nene/2)
  do iw=1,a2f%nomega
