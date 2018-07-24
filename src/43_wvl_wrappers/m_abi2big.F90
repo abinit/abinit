@@ -25,22 +25,17 @@
 #include "abi_common.h"
 
 module m_abi2big
-    
+
  use defs_basis
  use m_errors
  use defs_wvltypes
-use m_xmpi
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm_abi2big'
-!End of the abilint section
+ use m_xmpi
 
  implicit none
- 
+
  private
- 
- public :: wvl_vtrial_abi2big 
+
+ public :: wvl_vtrial_abi2big
  !to copy vtrial to wvl_den%rhov and viceversa.
 
  public :: wvl_rho_abi2big
@@ -54,7 +49,7 @@ use m_xmpi
 
  public :: wvl_occ_abi2big
  ! to copy occupations from/to ABINIT to/from BigDFT
- 
+
  public :: wvl_eigen_abi2big
  ! to copy eigenvalues from/to ABINIT to/from BigDFT
 
@@ -62,7 +57,7 @@ use m_xmpi
  ! maps occupation method in ABINIT and BigDFT
 
  public :: wvl_rhov_abi2big
- !generic routine to copy a density or potential from/to 
+ !generic routine to copy a density or potential from/to
  !ABINIT to/from BigDFT.
  interface wvl_rhov_abi2big
    module procedure wvl_rhov_abi2big_2D_4D
@@ -110,7 +105,7 @@ contains
 !! SOURCE
 
 subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
-    
+
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : KS_POTENTIAL
 #endif
@@ -133,9 +128,9 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
  integer :: shiftV
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
- 
+
  DBG_ENTER("COLL")
 
 #if defined HAVE_BIGDFT
@@ -204,7 +199,7 @@ end subroutine wvl_vtrial_abi2big
 !! SOURCE
 
 subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
-    
+
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY
 #endif
@@ -226,7 +221,7 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 #if defined HAVE_BIGDFT
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -292,7 +287,7 @@ end subroutine wvl_rho_abi2big
 !! SOURCE
 
 subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
-    
+
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : HARTREE_POTENTIAL
 #endif
@@ -315,9 +310,9 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
  integer :: shiftV
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
- 
+
  DBG_ENTER("COLL")
 
 #if defined HAVE_BIGDFT
@@ -403,7 +398,7 @@ subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
 #if defined HAVE_BIGDFT
  integer :: shiftV
 #endif
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -440,7 +435,7 @@ end subroutine wvl_vxc_abi2big
 !!  nsppol= number of spin polarization
 !!
 !! OUTPUT
-!!  
+!!
 !! SIDE EFFECTS
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
 !!
@@ -472,9 +467,9 @@ subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
  integer :: norb,norbd,norbu,ii
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
- 
+
  DBG_ENTER("COLL")
 
 #if defined HAVE_BIGDFT
@@ -531,7 +526,7 @@ end subroutine wvl_occ_abi2big
 !!       2) copy from BigDFT to ABINIT
 !!  nsppol= number of spin polarization
 !!
-!! OUTPUT 
+!! OUTPUT
 !!
 !! SIDE EFFECTS
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
@@ -564,9 +559,9 @@ subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
  integer :: ii,norb,norbd,norbu
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
- 
+
  DBG_ENTER("COLL")
 
 #if defined HAVE_BIGDFT
@@ -625,7 +620,7 @@ end subroutine wvl_eigen_abi2big
 !! SIDE EFFECTS
 !!
 !! NOTES
-!! Several smearing schemes do not exists in both codes such 
+!! Several smearing schemes do not exists in both codes such
 !! as the SMEARING_DIST_ERF in BigDFT.
 !!
 !! PARENTS
@@ -636,7 +631,7 @@ end subroutine wvl_eigen_abi2big
 !! SOURCE
 
 subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
-    
+
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : &
 &  SMEARING_DIST_FERMI, SMEARING_DIST_COLD1, SMEARING_DIST_COLD2,&
@@ -659,9 +654,9 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
 #if defined HAVE_BIGDFT
  character(len=500) :: message
 #endif
- 
+
 ! *************************************************************************
- 
+
  DBG_ENTER("COLL")
 
 #if defined HAVE_BIGDFT
@@ -670,7 +665,7 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
    if(occopt_abi==3) then
      occopt_big=SMEARING_DIST_FERMI
    elseif(occopt_abi==4) then
-     occopt_big=SMEARING_DIST_COLD1 
+     occopt_big=SMEARING_DIST_COLD1
    elseif(occopt_abi==5) then
      occopt_big=SMEARING_DIST_COLD2
    elseif(occopt_abi==6) then
@@ -758,7 +753,7 @@ subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
  integer :: nfft_abi,nfft_big,nspden,shift_
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -824,7 +819,7 @@ subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
  integer :: nfft_abi,nfft_big,shift_
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -889,7 +884,7 @@ subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
  integer :: nfft_abi,nfft_big,nspden,shift_
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -955,7 +950,7 @@ subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
  integer :: nfft_abi,nfft_big,shift_
  character(len=100) :: message
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -1019,7 +1014,7 @@ subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  integer :: nfft_abi,nfft_big,nspden,shift_
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -1080,7 +1075,7 @@ subroutine wvl_rhov_abi2big_1D_1D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  integer :: nfft_abi,nfft_big,shift_
 #endif
- 
+
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -1155,7 +1150,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
  character(len=100) :: message
  real(dp),allocatable :: rhoup(:),rhodn(:),rhotot(:)
 #endif
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1183,7 +1178,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
      ABI_ALLOCATE(rhotot,(nfft))
    end if
  end if
- 
+
  if (opt==1) then !ABINIT -> BIGDFT
    if (nspden==2) then
      if (hmem) then
@@ -1217,7 +1212,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
        rhotot(:)=rhov_big(:,1)+rhov_big(:,2)
        rhov_abi(shift+1:shift+nfft,1)=rhotot(1:nfft)
        rhov_abi(shift+1:shift+nfft,2)=rhov_big(1:nfft,1)
-     else 
+     else
        do ifft=1,nfft
          jfft=shift+ifft
 !        We change convention for BigDFT

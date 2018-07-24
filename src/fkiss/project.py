@@ -130,7 +130,7 @@ class FortranFile(object):
     def __str__(self):
         return self.to_string()
 
-    def to_string(self, verbose=0, width=90):
+    def to_string(self, verbose=0, with_dataframe=True, width=90):
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -151,8 +151,9 @@ class FortranFile(object):
             for p in plist:
                 app(p.to_string(verbose=verbose, width=width))
 
-        df = self.get_stats(as_dataframe=True)
-        app(df.to_string())
+        if with_dataframe:
+            df = self.get_stats(as_dataframe=True)
+            app(df.to_string())
 
         if verbose > 1:
             app(self.stree())
@@ -556,12 +557,16 @@ class AbinitProject(object):
         #dirname = os.path.basename(dirname).replace(os.sep, "")
         #dirname = dirname.replace(os.sep, "")
         #files = [f for f in self.fort_files.values() if os.path.basename(f.dirname) == dirname]
-        print("Print directory:", dirname)
         dir2files = self.groupby_dirname()
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+        print("Print directory:", dirname)
         dirname = os.path.join(self.srcdir, os.path.basename(dirname))
         for f in dir2files[dirname]:
-            print(f.to_string(verbose=verbose))
+            print(f.to_string(verbose=verbose, with_dataframe=False))
             print("")
+
+        df = self.get_stats_dir(dirname)
+        print(df)
 
     #def find_parents(self, obj):
     #    """
