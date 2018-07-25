@@ -75,6 +75,7 @@ module m_dfpt_scfcv
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
+ use m_dfpt_nstwf,   only : dfpt_nstpaw, dfpt_nstwf
 
  implicit none
 
@@ -294,7 +295,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -3086,7 +3086,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 #define ABI_FUNC 'dfpt_nstdy'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -3343,13 +3342,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !  End loop over spins
  end do
-
-!if(xmpi_paral==1)then
-!call timab(161,1,tsec)
-!call wrtout(std_out,' dfpt_nstdy: loop on k-points and spins done in parallel','COLL')
-!call xmpi_barrier(spaceworld)
-!call timab(161,2,tsec)
-!end if
 
  call destroy_hamiltonian(gs_hamkq)
 

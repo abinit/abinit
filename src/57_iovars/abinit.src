@@ -19,15 +19,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_chkinp.F90",
- "chkvars.F90",
- "indefo.F90",
  "m_ingeo.F90",
  "m_inkpts.F90",
- "invars0.F90",
- "invars1.F90",
- "invars1m.F90",
- "invars2.F90",
- "invars2m.F90",
+ "m_invars1.F90",
+ "m_invars2.F90",
  "m_memeval.F90",
  "m_mpi_setup.F90",
  "m_ab7_invars_f90.F90",

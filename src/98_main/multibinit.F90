@@ -64,6 +64,7 @@ program multibinit
  use m_fstrings,   only : replace, inupper
  use m_time,       only : asctime, timein
  use m_parser,     only : instrng
+ use m_dtset,      only : chkvars
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
  !use m_generate_training_set, only : generate_training_set
@@ -75,7 +76,6 @@ program multibinit
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none

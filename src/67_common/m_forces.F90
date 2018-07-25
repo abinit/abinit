@@ -50,6 +50,7 @@ module m_forces
  use m_predtk,           only : prtxvf
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_mkcore,           only : mkcore, mkcore_alt
+ use m_mkcore_wvl,       only : mkcore_wvl
 
  implicit none
 
@@ -183,7 +184,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
