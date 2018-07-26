@@ -28,6 +28,10 @@ module m_ddb_piezo
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_fstrings,       only : sjoin, itoa
  use m_hide_lapack,    only : matrginv
@@ -69,6 +73,7 @@ contains
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
 !! ucvol=unit cell volume
+!! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
 !!
 !! OUTPUT
 !! piezo = piezoelectric tensor
@@ -86,7 +91,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol)
+subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -100,7 +105,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
 !Arguments-------------------------------------------
 !scalars
- integer,intent(in) :: iblok,iout,mpert,natom,nblok
+ integer,intent(in) :: iblok,iout,mpert,natom,nblok,ncid
  real(dp),intent(in) :: ucvol
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
@@ -110,7 +115,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
 !Local variables---------------------------------------
 !scalars
- integer :: idir1,idir2,ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB
+ integer :: idir1,idir2,ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB,ncerr
  character(len=500) :: message
  logical :: iwrite
 !arrays
@@ -747,6 +752,8 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !end the part of printing out the free stress dielectric tensor
 
 !then print out the fixed displacement elastic tensor
+ elast_dis = zero; compliance_dis = zero
+
  if(anaddb_dtset%elaflag==4 .and. anaddb_dtset%dieflag>0)then
    if(anaddb_dtset%instrflag==0 .or. anaddb_dtset%dieflag==1 .or. &
 &   anaddb_dtset%dieflag==2 .or. anaddb_dtset%dieflag==0)then
@@ -827,6 +834,31 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end if
 !end if the elaflag==4 for the fixed didplacement field elastic tensor
 !end the part for computation of elastic at fixed displacement field
+
+#ifdef HAVE_NETCDF
+ ! write tensors to netcdf file.
+ if (ncid /= nctk_noid) then
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("piezo_clamped_ion", "dp", "six, three"), &
+     nctkarr_t("piezo_relaxed_ion", "dp", "six, three"), &
+     nctkarr_t("d_tensor_relaxed_ion", "dp", "six, three"), &
+     nctkarr_t("g_tensor_relaxed_ion", "dp", "three, six"), &
+     nctkarr_t("h_tensor_relaxed_ion", "dp", "three, six"), &
+     nctkarr_t("free_stress_dielectric_tensor", "dp", "three, three"), &
+     nctkarr_t("elastic_tensor_relaxed_ion_fixed_D", "dp", "six, six"), &
+     nctkarr_t("compliance_tensor_relaxed_ion_fixed_D", "dp", "six, six")], &
+   defmode=.True.)
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "piezo_clamped_ion"), piezo_clamped))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "d_tensor_relaxed_ion"), d_tensor))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "g_tensor_relaxed_ion"), g_tensor))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h_tensor_relaxed_ion"), h_tensor))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "free_stress_dielectric_tensor"), dielt_stress))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "elastic_tensor_relaxed_ion_fixed_D"), elast_dis))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "compliance_tensor_relaxed_ion_fixed_D"), compliance_dis))
+ end if
+#endif
 
 end subroutine ddb_piezo
 !!***

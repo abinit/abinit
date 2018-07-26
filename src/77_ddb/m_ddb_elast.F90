@@ -140,6 +140,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  real(dp) :: d2cart(2,3*natom,3*natom)
 
 !***************************************************************************
+ compl = zero; compl_clamped = zero; compl_stress = zero
+ elast = zero; elast_clamped = zero; elast_stress = zero
 
  ucvol = crystal%ucvol
  iwrite = iout > 0

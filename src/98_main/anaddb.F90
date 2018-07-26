@@ -134,7 +134,7 @@ program anaddb
  type(crystal_t) :: Crystal
  type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
- integer :: phdos_ncid, ec_ncid, ncerr
+ integer :: phdos_ncid, ncerr
 #endif
 
 !******************************************************************
@@ -824,11 +824,11 @@ program anaddb
 
 #ifdef HAVE_NETCDF
      if (iam_master) then
-       ncerr = nctk_open_create(ec_ncid, strcat(filnam(2), "_EC.nc"), xmpi_comm_self)
-       NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
-       NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
-       call elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,elast_stress,ec_ncid)
-       NCF_CHECK(nf90_close(ec_ncid))
+       !ncerr = nctk_open_create(ec_ncid, strcat(filnam(2), "_EC.nc"), xmpi_comm_self)
+       !NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
+       !NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
+       call elast_ncwrite(compl, compl_clamped, compl_stress, elast, elast_clamped, elast_stress, ana_ncid)
+       !NCF_CHECK(nf90_close(ec_ncid))
      end if
 #endif
    end if
@@ -855,7 +855,7 @@ program anaddb
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! then print out the piezoelectric constants
-     call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol)
+     call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol,ana_ncid)
    end if
  end if
 
