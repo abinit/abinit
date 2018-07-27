@@ -63,7 +63,6 @@ program anaddb
  use netcdf
 #endif
 
- use m_dfpt_io,        only : elast_ncwrite
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_specialmsg,     only : specialmsg_getcount, herald
@@ -271,7 +270,10 @@ program anaddb
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
    ncerr = nctk_def_dims(ana_ncid, [ &
-       nctkdim_t('number_of_phonon_modes', 3 * natom), nctkdim_t('anaddb_input_len', lenstr) &
+       nctkdim_t('number_of_atoms', natom), &
+       nctkdim_t('natom3', 3 * natom), &
+       !nctkdim_t('number_of_phonon_modes', 3 * natom),
+       nctkdim_t('anaddb_input_len', lenstr) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_arrays(ana_ncid, [ &
@@ -326,10 +328,17 @@ program anaddb
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
    defmode=.True.)
    NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ana_ncid, [character(len=nctk_slen) :: &
+       "asr", "chneut", "dipdip", "symdynmat"])
+   NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'emacro_cart'), dielt))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'becs_cart'), zeff))
+   ncerr = nctk_write_iscalars(ana_ncid, [character(len=nctk_slen) :: &
+     "asr", "chneut", "dipdip", "symdynmat"], &
+     [inp%asr, inp%chneut, inp%dipdip, inp%symdynmat])
+   NCF_CHECK(ncerr)
 #endif
  end if
 
@@ -829,13 +838,7 @@ program anaddb
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,natom,ddb%nblok)
-
-#ifdef HAVE_NETCDF
-     if (iam_master) then
-       call elast_ncwrite(compl, compl_clamped, compl_stress, elast, elast_clamped, elast_stress, ana_ncid)
-     end if
-#endif
+&     instrain,ab_out,mpert,natom,ddb%nblok,ana_ncid)
    end if
  end if !ending the part for elastic tensors
 
