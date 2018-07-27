@@ -285,7 +285,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
  use interfaces_67_common
 !End of the abilint section

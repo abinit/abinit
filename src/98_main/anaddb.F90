@@ -272,7 +272,7 @@ program anaddb
    ncerr = nctk_def_dims(ana_ncid, [ &
        nctkdim_t('number_of_atoms', natom), &
        nctkdim_t('natom3', 3 * natom), &
-       !nctkdim_t('number_of_phonon_modes', 3 * natom),
+       nctkdim_t('number_of_phonon_modes', 3 * natom), &
        nctkdim_t('anaddb_input_len', lenstr) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
