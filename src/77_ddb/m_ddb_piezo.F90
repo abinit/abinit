@@ -851,6 +851,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "piezo_clamped_ion"), piezo_clamped))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "piezo_relaxed_ion"), piezo_relaxed))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "d_tensor_relaxed_ion"), d_tensor))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "g_tensor_relaxed_ion"), g_tensor))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h_tensor_relaxed_ion"), h_tensor))

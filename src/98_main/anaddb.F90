@@ -270,8 +270,17 @@ program anaddb
  if (iam_master) then
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
-   NCF_CHECK(nctk_def_dims(ana_ncid, [nctkdim_t('number_of_phonon_modes', 3*natom)],defmode=.True.))
-   NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
+   ncerr = nctk_def_dims(ana_ncid, [ &
+       nctkdim_t('number_of_phonon_modes', 3 * natom), nctkdim_t('anaddb_input_len', lenstr) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_arrays(ana_ncid, [ &
+     nctkarr_t("anaddb_input_string", "char", "anaddb_input_len") &
+   ])
+   NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
+   NCF_CHECK(nctk_set_datamode(ana_ncid))
+   NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "anaddb_input_string"), string(:lenstr)))
    NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
 #endif
  end if
@@ -824,11 +833,7 @@ program anaddb
 
 #ifdef HAVE_NETCDF
      if (iam_master) then
-       !ncerr = nctk_open_create(ec_ncid, strcat(filnam(2), "_EC.nc"), xmpi_comm_self)
-       !NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
-       !NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
        call elast_ncwrite(compl, compl_clamped, compl_stress, elast, elast_clamped, elast_stress, ana_ncid)
-       !NCF_CHECK(nf90_close(ec_ncid))
      end if
 #endif
    end if
