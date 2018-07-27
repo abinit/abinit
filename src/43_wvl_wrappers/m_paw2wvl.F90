@@ -74,6 +74,7 @@ contains
 
 subroutine paw2wvl(pawtab,proj,wvl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -484,6 +485,7 @@ end subroutine paw2wvl_ij
 
 
 subroutine wvl_paw_free(wvl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
