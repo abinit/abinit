@@ -112,6 +112,8 @@ module m_scfcv_core
  use m_forstr,           only : nres2vres
  use m_positron,         only : setup_positron
  use m_cgprj,            only : ctocprj
+ use m_psolver,          only : psolver_rhohxc
+ use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
 
  implicit none
 
@@ -285,7 +287,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
- use interfaces_62_poisson
  use interfaces_67_common
 !End of the abilint section
 

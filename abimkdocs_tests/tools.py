@@ -25,7 +25,7 @@ class AbimkdocsTest(TestCase):
     def get_abinit_varnames_from_f90():
         # construct list of input keywords that appear in chkvars.F90
         home_dir = os.path.join(os.path.dirname(__file__) , "..")
-        path = os.path.join(home_dir, "src/57_iovars/chkvars.F90")
+        path = os.path.join(home_dir, "src/44_abitypes_defs/m_dtset.F90")
 
         in_block = False
         words = []

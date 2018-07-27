@@ -71,6 +71,8 @@ module m_forstr
  use m_rhotoxc,          only : rhotoxc
  use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_cgprj,            only : ctocprj
+ use m_psolver,          only : psolver_hartree
+ use m_wvl_psi,          only : wvl_nl_gradient
 
  implicit none
 
@@ -257,7 +259,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none
@@ -1268,7 +1269,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'nres2vres'
  use interfaces_53_ffts
- use interfaces_62_poisson
 !End of the abilint section
 
  implicit none
