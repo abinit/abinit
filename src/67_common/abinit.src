@@ -24,7 +24,6 @@ sources = [
  "calc_fc.F90",
  "chern_number.F90",
  "m_conducti.F90",
- "emispec_paw.F90",
  "m_dft_energy.F90",
  "m_extraprho.F90",
  "m_forces.F90",
@@ -39,8 +38,8 @@ sources = [
  "make_efg_ion.F90",
  "make_grad_berry.F90",
  "mkcore_wvl.F90",
+ "m_mklocl_realspace.F90",
  "m_mklocl.F90",
- "mklocl_realspace.F90",
  "m_mkrho.F90",
  "m_ioarr.F90",
  "m_iowf.F90",
@@ -57,7 +56,7 @@ sources = [
  "m_stress.F90",
  "update_e_field_vars.F90",
  "m_vtorhotf.F90",
- "wvl_initro.F90",
+ "m_wvl_rho.F90",
 ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

@@ -49,6 +49,7 @@ MODULE m_iowf
  use m_rwwf,           only : rwwf
  use m_mpinfo,         only : proc_distrb_cycle
  use m_vkbr,           only : calc_vkb
+ use m_wvl_rwwf,       only : wvl_write
 
  implicit none
 
@@ -125,7 +126,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #undef ABI_FUNC
 #define ABI_FUNC 'outwf'
  use interfaces_14_hidewrite
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none

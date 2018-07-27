@@ -64,7 +64,7 @@ module m_gstate
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_abi2big,          only : wvl_occ_abi2big
+ use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
  use m_energies,         only : energies_type, energies_init
  use m_args_gs,          only : args_gs_type
  use m_results_gs,       only : results_gs_type
@@ -94,6 +94,9 @@ module m_gstate
  use m_mpinfo,           only : proc_distrb_cycle
  use m_common,           only : setup1, prteigrs, prtene
  use m_fourier_interpol, only : transgrid
+ use m_psolver,          only : psolver_kernel
+ use m_wvl_rho,          only : wvl_initro, wvl_mkrho
+ use m_paw2wvl,          only : paw2wvl, wvl_paw_free
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -233,7 +236,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
- use interfaces_62_poisson
  use interfaces_67_common
 !End of the abilint section
 

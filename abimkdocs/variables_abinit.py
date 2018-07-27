@@ -6543,7 +6543,7 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2002]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
+  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2003]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
 ~~Related parameters: the time step ([[dtion]]), the temperatures
 ([[mdtemp]]), and the friction coefficient ([[friction]]).~~
 **Purpose:** Molecular dynamics
