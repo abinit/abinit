@@ -307,16 +307,17 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 !scalars
  integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb=0, master=0
  logical,parameter :: force_istwfk1=.True.
- integer :: iomode, mband, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer :: iomode, mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
- integer :: my_kstart, my_kstop, my_rank, nproc, ierr
+ integer :: my_rank, nproc, ierr
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
 !arrays
  integer,intent(in) :: ngfftc(18)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ integer,allocatable :: task_distrib(:,:,:,:)
  integer,allocatable :: nband(:,:)
  integer,allocatable :: kg_k(:,:)
  character(len=500) :: msg
@@ -325,7 +326,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  real(dp) :: kbz(3)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  complex(gwpc),allocatable :: ihrc(:,:)
- complex(gwpc)             :: vg(3), vr(3)
+ complex(dp)               :: vg(3), vr(3)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
 
 !************************************************************************
@@ -366,13 +367,13 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  !TODO: hardcoded for now but should be an arugment
  bandmin = 1
  bandmax = mband 
-
+ nbcalc  = bandmax-bandmin 
+ 
  ABI_MALLOC(ug_c,    (mpw))
  ABI_MALLOC(ug_v,    (mpw))
  ABI_MALLOC(kg_k,    (3,mpw))
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
- ihrc = (0.0,0.0)
 
  ABI_MALLOC(nband,   (nkpt, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
@@ -390,13 +391,23 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  keep_ur = .false.
  bks_mask = .false. 
  nband = mband
+
+ ! Distribute the k-points and bands over the processors
+ ABI_MALLOC(task_distrib,(bandmin:bandmax,bandmin:bandmax,nkpt,nsppol))
+ call xmpi_distab(nproc,task_distrib)
  
- ! Distribute the k-points over the processors
- call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
- ABI_CHECK(ierr==0, "k-point distribution failed")
- do ik=1,nkpt
- if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
-   bks_mask(:,ik,:) = .true.
+ ! create bks_mask to load the wavefunctions
+ do spin=1,nsppol ! Loop over spins
+   do ik=1,nkpt ! Loop over kpoints
+     do ib_v=bandmin,bandmax ! Loop over v bands
+       do ib_c=bandmin,bandmax ! Loop over c bands
+         if (task_distrib(ib_c,ib_v,ik,spin) == my_rank) then
+           bks_mask(ib_v,ik,spin) = .true. 
+           bks_mask(ib_c,ik,spin) = .true. 
+         end if
+       end do
+     end do
+   end do
  end do
 
  !initialize distributed wavefunctions object
@@ -414,14 +425,12 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  iomode = iomode_from_fname(wfk_path)
  call wfd_read_wfk(in_wfd,wfk_path,iomode)
 
- !start counting the time
- call cwtime(cpu,wall,gflops,"start")
+do spin=1,nsppol ! Loop over spins
 
- do spin=1,nsppol ! Loop over spins
-
-   do ik=1,nkpt ! Loop over full kpoints
+   do ik=1,nkpt ! Loop over kpoints
      ! Only do a subset a k-points
-     if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
+     if (all(task_distrib(bandmin:bandmax,bandmin:bandmax,ik,spin) /= my_rank)) cycle
+     call cwtime(cpu,wall,gflops,"start")
 
      nband_k  = in_wfk%nband(ik,spin)
      istwf_k  = in_wfk%hdr%istwfk(ik)
@@ -438,10 +447,12 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 
      ! Loop over bands
      do ib_v=bandmin,bandmax
+       if (all(task_distrib(:,ib_v,ik,spin) /= my_rank)) cycle
        ug_v(1:npw_k) = in_wfd%wave(ib_v,ik,spin)%ug
 
        ! Loop over bands
-       do ib_c=ib_v,mband
+       do ib_c=ib_v,bandmax
+         if (task_distrib(ib_c,ib_v,ik,spin) /= my_rank) cycle
          ug_c(1:npw_k) = in_wfd%wave(ib_c,ik,spin)%ug
 
          ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
@@ -477,8 +488,13 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-   end do
- end do
+     ! loop over k-points
+     call cwtime(cpu,wall,gflops,"stop")
+     write(msg,'(2(a,i0),2(a,f8.2))')"k-point [",ik,"/",nkpt,"] completed. cpu:",cpu,", wall:",wall
+     call wrtout(std_out, msg, do_flush=.True.)
+
+   end do ! loop over k-points
+ end do ! loop over spin
 
  ABI_FREE(ug_c)
  ABI_FREE(ug_v)
@@ -487,8 +503,6 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 
  ! Gather the k-points computed by all processes
  call xmpi_sum_master(dipoles,master,comm,ierr)
-
- call cwtime(cpu,wall,gflops,"stop")
 
  !write the matrix elements
 #ifdef HAVE_NETCDF
