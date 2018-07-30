@@ -51,6 +51,7 @@ program anaddb
  use m_xomp
  use m_profiling_abi
  use m_errors
+ !use m_argparse
  use m_ifc
  use m_ddb
  use m_ddb_hdr
@@ -124,6 +125,7 @@ program anaddb
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
  character(len=500) :: message
+ !type(args_t) :: args
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
@@ -147,6 +149,10 @@ program anaddb
  ! MPI variables
  comm = xmpi_world; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+ ! TODO
+ ! Parse command line arguments.
+ !args = args_parser(); if (args%exit /= 0) goto 100
 
 !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
 !set the argument of abimem_init to "2" instead of "0"
@@ -211,6 +217,11 @@ program anaddb
 
  ! Read the inputs
  call invars9(inp,lenstr,natom,string)
+
+ !if (args%dry_run /= 0) then
+ !  call wrtout(std_out, "Dry run mode. Exiting after have read the input")
+ !  goto 100
+ !end if
 
  ! Open output files and ab_out (might change its name if needed)
  ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
@@ -945,7 +956,7 @@ program anaddb
 
  if (iam_master) close(ab_out)
 
- call xmpi_end()
+ 100 call xmpi_end()
 
  end program anaddb
 !!***
