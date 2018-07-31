@@ -22,6 +22,8 @@
 !!   blocksize = size of the block for th LO.. algorithm
 !!               still have to be equal to nband
 !!   nspinor = number of spinor components
+!!   first_bandc = index of the first correlated band
+!!   nbandc = number of bands correlated
 !!   
 !!
 !! OUTPUT
@@ -47,7 +49,7 @@
 
 #include "abi_common.h"
 
-subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, occ_diag)
+subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, nbandc, occ_diag)
 
   use defs_basis
   use defs_abitypes
@@ -68,10 +70,10 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, occ_diag)
 
 !Arguments ------------------------------------
 !scalars
-  integer,intent(in) :: npw, nband, blocksize, nspinor
+  integer,intent(in) :: npw, nband, blocksize, nspinor, first_bandc, nbandc
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
-!! type(paw_dmft_type), intent(in)  :: paw_dmft
+!! type(paw_dmft_type), intent(in)  :: band_in
 !no_abirules
   real(kind=dp), intent(in) :: occ_nd(2, blocksize, blocksize)
   real(kind=dp), intent(inout) :: cwavef(2, npw, blocksize, nspinor)
@@ -84,8 +86,9 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, occ_diag)
   character(len=500) :: message
 
 !arrays
-  complex(kind=dpc) :: occ_nd_cpx(blocksize, blocksize)
-  complex(kind=dpc) :: cwavef_rot_g(blocksize, nspinor)
+  real(kind=dp) :: occ_diag_red(nbandc)
+  complex(kind=dpc) :: occ_nd_cpx(nbandc, nbandc)
+  complex(kind=dpc) :: cwavef_rot_g(nbandc, nspinor)
 
 ! *************************************************************************
 
@@ -98,28 +101,36 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, occ_diag)
 
 !! Initialisation
 
-  do n=1,blocksize
-    do np=1,blocksize
-      occ_nd_cpx(n,np) = cmplx(occ_nd(1,n,np), occ_nd(2,n,np), kind=dpc)
+  do n=1,nbandc
+    do np=1,nbandc
+      occ_nd_cpx(n,np) = cmplx(occ_nd(1,n+first_bandc-1,np+first_bandc-1), occ_nd(2,n+first_bandc-1,np+first_bandc-1), kind=dpc)
     end do
   end do
 
 !! Get diagonal occupations and associeted base
 
-  call diag_occ(occ_nd_cpx, blocksize, occ_diag)
+  call diag_occ(occ_nd_cpx, nbandc, occ_diag_red)
+  
+  do n=1,nband
+    if (n < first_bandc .or. n >= first_bandc+nbandc) then
+      occ_diag(n) = occ_nd(1, n, n)
+    else
+      occ_diag(n) = occ_diag_red(n-first_bandc+1)
+    end if
+  end do
 
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
   do ig=1,npw
     cwavef_rot_g(:,:) = czero
-    do n=1,blocksize
-      do np=1,blocksize
-        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + dconjg(occ_nd_cpx(np, n)) * &
-&                           cmplx(cwavef(1,ig,np,:), cwavef(2,ig,np,:), kind=dpc)
+    do n=1,nbandc
+      do np=1,nbandc
+        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
+&                           cmplx(cwavef(1,ig,np+first_bandc-1,:), cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
       end do
     end do
-    cwavef(1,ig,:,:) = dreal(cwavef_rot_g)
-    cwavef(2,ig,:,:) = dimag(cwavef_rot_g)
+    cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)
+    cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
   end do
   
   DBG_EXIT("COLL")
