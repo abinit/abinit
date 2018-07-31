@@ -49,7 +49,10 @@ module m_gemm_nonlop
  use m_profiling_abi
  use m_xmpi
 
+ use m_opernlc_ylm,    only :  opernlc_ylm
+
  implicit none
+
  private
 
  ! Use these routines in order : first call init, then call make_gemm_nonlop for each k point,
@@ -351,7 +354,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gemm_nonlop'
- use interfaces_66_nonlocal
 !End of the abilint section
 
   implicit none

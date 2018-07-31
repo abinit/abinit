@@ -31,9 +31,13 @@ module m_nonlop_ylm
  use m_profiling_abi
  use m_errors
 
- use m_geometry, only : strconv
- use m_kg,       only : ph1d3d, mkkpg
- use m_pawcprj,  only : pawcprj_type
+ use m_geometry,    only : strconv
+ use m_kg,          only : ph1d3d, mkkpg
+ use m_pawcprj,     only : pawcprj_type
+ use m_opernla_ylm, only : opernla_ylm
+ use m_opernlb_ylm, only : opernlb_ylm
+ use m_opernlc_ylm, only : opernlc_ylm
+ use m_opernld_ylm, only : opernld_ylm
 
  implicit none
 
@@ -328,7 +332,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_ylm'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

@@ -91,8 +91,8 @@ contains
 !!
 !! NOTES
 !!  Here follows PIMD in the NPT ensemble within the Langevin barostat algorithm
-!!  of Quigley and Probert: J. Chem. Phys. 120, 11432 (2004)
-!!  and Comput. Phys. Comm. 169, 322 (2005)
+!!  of Quigley and Probert: J. Chem. Phys. 120, 11432 (2004) [[cite:Quigley2004]]
+!!  and Comput. Phys. Comm. 169, 322 (2005) [[cite:Quigley2005]]
 !!
 !! PARENTS
 !!      predict_pimd
@@ -529,7 +529,7 @@ end subroutine pimd_langevin_npt
 !!    at output, values at time t+dt
 !!
 !! NOTES
-!!   See Quigley,Probert, JCP 120, 11432 (2004), part III
+!!   See Quigley,Probert, JCP 120, 11432 (2004) [[cite:Quigley2004]], part III
 !!
 !! PARENTS
 !!      predict_pimd

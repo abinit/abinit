@@ -2624,6 +2624,7 @@ end subroutine setmqgrid
 subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
  use defs_wvltypes
+ use m_abi2big, only : wvl_setBoxGeometry
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &

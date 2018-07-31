@@ -57,12 +57,11 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
  use m_profiling_abi
  use m_errors
 
- use m_orbmag
-
- use m_pawang,           only : pawang_type
- use m_pawcprj,  only : pawcprj_type
- use m_pawrad,           only : pawrad_type, simp_gen
- use m_pawtab, only : pawtab_type
+ use m_pawang,     only : pawang_type
+ use m_pawcprj,    only : pawcprj_type
+ use m_pawrad,     only : pawrad_type, simp_gen
+ use m_pawtab,     only : pawtab_type
+ use m_paw_orbmag, only : orbmag_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

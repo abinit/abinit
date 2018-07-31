@@ -1665,7 +1665,7 @@ end function pawrad_ifromr
 !! FUNCTION
 !!  Evaluates the kernel function used to compute the integral
 !!  of a screened Coulomb potential (with erfc function)
-!!  See Angyan, Gerber, Marsman, J. Phys. A: Math. Gen. 39, 8613 (2006)
+!!  See Angyan, Gerber, Marsman, J. Phys. A: Math. Gen. 39, 8613 (2006) [[cite:Angyan2006]]
 !!
 !! INPUTS
 !!  [formula]=optional; used to force formula (1=full; 2=dev. near r2=0; 3=dev near r1*r2=0)
@@ -1719,13 +1719,13 @@ function screened_coul_kernel(order,r1,r2,formula)
  end if
 
 !Choice of formula
-!Empirical criterion, inspired by J. Phys. A 39, pp8624 and adjusted
+!Empirical criterion, inspired by J. Phys. A 39, pp8624 [[cite:Angyan2006]] and adjusted
  formula_=1;if (xx<0.25_dp.and.yy<0.25_dp) formula_=2
  if (present(formula)) formula_=formula
  select case (formula_)
 
 !Full formula
-!J. Phys. A 39, 8613 (2006) - Eq. (21), (22), (24)
+!J. Phys. A 39, 8613 (2006) - Eq. (21), (22), (24) [[cite:Angyan2006]]
 !   Note: typo in the paper: in eq (22), the sum begins at p=0
 !------------------------------------------------------------------
  case(1)
@@ -1797,7 +1797,7 @@ function screened_coul_kernel(order,r1,r2,formula)
    end if
 
 !Development for yy->0
-!J. Phys. A 39, 8613 (2006) - Eq. (28), (29), (30)
+!J. Phys. A 39, 8613 (2006) - Eq. (28), (29), (30) [[cite:Angyan2006]]
 !------------------------------------------------------------------
  case(2)
    sqrtpi=sqrt(pi)
@@ -1838,7 +1838,7 @@ function screened_coul_kernel(order,r1,r2,formula)
    end if
 
 !Development for xx*yy->0
-!J. Phys. A 39, 8613 (2006) - Eq. (24), (26)
+!J. Phys. A 39, 8613 (2006) - Eq. (24), (26) [[cite:Angyan2006]]
 !   Note: typo in the paper: (2n+3)! should be (2n+3)!!
 !------------------------------------------------------------------
  case(3)

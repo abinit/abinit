@@ -32,11 +32,13 @@ parameters to adjust to the machine you have at hand. For the other parts of
 the tutorial, a 16-computing-core machine is recommended, in order to perform
 the scalability measurements.
 
-This tutorial should take less than two hours to be done if a powerful parallel
-computer is available.
-
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
+
+[TUTORIAL_README]
+
+This tutorial should take less than two hours to be done if a powerful parallel
+computer is available.
 
 ## 1 The structure of the parallelism for the DFPT part of ABINIT
 
@@ -92,50 +94,47 @@ The following are not parallelized:
 In the case of small systems, the maximum achievable speed-up will be limited
 by the input of the set of ground-state wavefunctions. For medium to large
 systems, the maximum achievable speed-up will be determined by the operations
-that do not depend on the k point and band indices.  
+that do not depend on the k point and band indices.
 Finally, the distribution of the set of ground-state wavefunctions to the
 computing cores that need them is partly parallelized, as no parallelism over
 bands can be exploited.
 
-!!! important
+*Before continuing you might work in a different subdirectory as for the other
+tutorials. Why not work_paral_dfpt?*
 
-    Before continuing you might work in a different subdirectory as for the other
-    tutorials. Why not "work_paral_dfpt"? All the input files can be found in the
-    ~abinit/tests/tutoparal/Input directory. You might have to adapt them to the
-    path of the directory in which you have decided to perform your runs. 
-    You can compare your results with reference output files located in
-    ~abinit/tests/tutoparal/Refs.  
-  
-    In the following, when "(mpirun ...) abinit" appears, you have to use a
-    specific command line according to the operating system and architecture of
-    the computer you are using. This can be for instance: mpirun -np 16 abinit  
+All the input files can be found in the *\$ABI_TUTOPARAL/Input* directory.
+You might have to adapt them to the path of the directory in which you have decided to perform your runs. 
+You can compare your results with reference output files located in *\$ABI_TUTOPARAL/Refs*.
+
+In the following, when "(mpirun ...) abinit" appears, you have to use a
+specific command line according to the operating system and architecture of
+the computer you are using. This can be for instance: mpirun -np 16 abinit  
 
 ## 2 Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum
   
 We start by treating the case of a small systems, namely FCC aluminum, for
-which there is only one atom per unit cell. Of course, many k points are needed.  
-The input files can be found in the directory ~abinit/tests/tutoparal/Input.
+which there is only one atom per unit cell. Of course, many k points are needed.
   
 **2.1.** The first step is the pre-computation of the ground state
-wavefunctions. This is driven by the files tdfpt_01.files (and tdfpt_01.in).
+wavefunctions. This is driven by the files *tdfpt_01.files* (and *tdfpt_01.in*).
 You should edit them and examine them.  
 
 {% dialog tests/tutoparal/Input/tdfpt_01.files tests/tutoparal/Input/tdfpt_01.in %}
 
-One relies on a k-point grid of 8x8x8 x 4 shifts (=2048 k points), and 5 bands. 
+One relies on a k-point grid of 8x8x8 x 4 shifts (=2048 k points), and 5 bands.
 For this ground-state calculation, symmetries can be used to reduce
 drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though). 
-This calculation is very fast, actually.  
+This calculation is very fast, actually.
 You can launch it:  
     
-    (mpirun ...)  abinit < tdfpt_01.files > tdfpt_01.log
+    mpirun -n 4  abinit < tdfpt_01.files > tdfpt_01.log &
 
-A reference output file is available in ~abinit/tests/tutoparal/Refs , under
-the name tdfpt_01.out. It was obtained using 4 computing cores, and took a few seconds.
+A reference output file is available in *\$ABI_TUTOPARAL/Refs*, under
+the name *tdfpt_01.out*. It was obtained using 4 computing cores, and took a few seconds.
 
 **2.2.** The second step is the DFPT calculation, for which the files are
-tdfpt_02.files (and tdfpt_02.in).  
+*tdfpt_02.files* (and *tdfpt_02.in*).  
 
 {% dialog tests/tutoparal/Input/tdfpt_02.files tests/tutoparal/Input/tdfpt_02.in %}
 
@@ -157,10 +156,10 @@ as the input of the DFPT calculation:
 
 Then, you can launch the calculation:
     
-    (mpirun ...)  abinit < tdfpt_02.files > tdfpt_02.log
+    mpirun -n 4 abinit < tdfpt_02.files > tdfpt_02.log &
 
-A reference output file is given in ~tests/tutoparal/Refs , under the name
-tdfpt_02.out. Edit it, and examine some information ...  
+A reference output file is given in *\$ABI_TUTOPARAL/Refs*, under the name
+*tdfpt_02.out*. Edit it, and examine some information.
 The calculation has been made with four computing cores:
     
 ```
@@ -258,6 +257,7 @@ and "vtorho3:synchro" will not benefit from parallelism.
 "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
 (you can find the source of the "inwffil" routine on [GitHub](https://github.com/abinit/abinit/tree/master/src/79_seqpar_mpi) or 
 [on the ABINIT Web site](https://www.abinit.org/sites/default/files/robodoc-html/masterindex.html)). 
+
 As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case
 of the DFPT computations (note that the reading is actually parallelized for
 e.g. ground-state calculations). In the output file provided as a reference
@@ -275,7 +275,7 @@ TiO2 layer on each face, with a reasonable k-point sampling of the Brillouin zon
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
-ngkpt 4 4 1 , there will be actually 4 k-points in the irreducible Brillouin
+ngkpt 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
 zone for the Ground state calculations. For the DFPT case, only one symmetry
 will survive, so that, after the calculation of the frozen-wavefunction part
 (for which no symmetry is used), the self-consistent part will be done with 8
@@ -286,13 +286,13 @@ present tutorial is too low to obtain physical results (it should be around 40 H
 
 As in the previous case, a preparatory ground-state calculation is needed.
 
-The input files are provided, in the directory ~abinit/tests/tutoparal/Input .
-The preparatory step is governed by tdfpt_03.files (and tdfpt_03.in). The real
-(=DFPT) test case is governed by tdfpt_04.files (and tdfpt_04.in). The
-reference output files are present in ~abinit/tests/tutoparal/Refs:
-tdfpt_0324.out and tdfpt_0432.out. The naming convention is such that the
+The input files are provided, in the directory *\$ABI_TUTOPARAL/Input*.
+The preparatory step is governed by *tdfpt_03.files* (and *tdfpt_03.in*). The real
+(=DFPT) test case is governed by *tdfpt_04.files* (and *tdfpt_04.in*). The
+reference output files are present in *\$ABI_TUTOPARAL/Refs*:
+*tdfpt_0324.out* and *tdfpt_0432.out*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
-tdfpt_03.in file was run with 24 cores, while the tdfpt_04.in was run with 32
+*tdfpt_03.in* file was run with 24 cores, while the *tdfpt_04.in* was run with 32
 cores. The preparatory step took about 5 minutes, and the DFPT step took about
 5 minutes as well. 
 
@@ -301,24 +301,24 @@ cores. The preparatory step took about 5 minutes, and the DFPT step took about
 You can run now these test cases. For tdfpt_03, you might
 need to change the [[npband]] value (presently 6), if you are not using 24
 processors. At variance, for tdfpt_04, no adaptation of the input file is
-needed to be able to run on an arbitrary number of processors.  
-To launch the ground-state computation, type:  
+needed to be able to run on an arbitrary number of processors.
+To launch the ground-state computation, type:
     
-    (mpirun ...)  abinit < tdfpt_03.files > tdfpt_03.log
+    mpirun -n 24 abinit < tdfpt_03.files > tdfpt_03.log &
 
 then copy the output of the ground-state calculation so that it can be used as
-the input of the DFPT calculation :
+the input of the DFPT calculation:
     
     cp tdfpt_03.o_WFK tdfpt_04.i_WFK
     cp tdfpt_03.o_WFK tdfpt_04.i_WFQ
     
-and launch the calculation :  
+and launch the calculation:  
     
-    (mpirun ...)  abinit < tdfpt_04.files > tdfpt_04.log
+    mpirun -n 24 abinit < tdfpt_04.files > tdfpt_04.log &
     
 Now, examine the obtained output file for test 04, especially the timing.
 
-In the reference file ~abinit/tests/tutoparal/Refs/tdfpt_0432.out, 
+In the reference file *\$ABI_TUTOPARAL/Refs/tdfpt_0432.out*,
 with 32 computing cores, the timing section delivers:
     
     - For major independent code sections, cpu and wall times (sec),
@@ -361,15 +361,15 @@ about 2 percents, vtowfk3(contrib), about 1.5 percent, "pspini", about
 law, the saturation will happen soon, with less than 100 processors.
 
 **3.2.** A better parallelism can be seen if the number of k-points is brought
-back to a converged value (8x8x1). 
-Try this if you have more than 100 processors at hand.  
+back to a converged value (8x8x1).
+Try this if you have more than 100 processors at hand.
 
-Set in your input file tdfpt_03.in:
+Set in your input file *tdfpt_03.in*:
     
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1 
        npkpt 16       ! This should replace npkpt 4
 
-Also, set in tdfpt_04.in:
+Also, set in *tdfpt_04.in*:
     
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
 
@@ -400,8 +400,7 @@ number of computing cores (also, the efficiency of the calculation).
 ![Schema 1](paral_dfpt_assets/Speedup.jpeg)  
 
 Beyond 300 computing cores, the sequential parts of the code start to dominate. 
-With more realistic computing parameters (ecut 40), they dominate
-only beyond 600 processors.
+With more realistic computing parameters (ecut 40), they dominate only beyond 600 processors.
 
 This last example is the end of the present tutorial. You have been explained
 the basics of the current implementation of the parallelism for the DFPT part

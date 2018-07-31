@@ -382,7 +382,8 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
        call xmpi_sum(den,comm,ierr)
 
        do ii=my_t1,my_t2
-         xx = hexc_diagonal(ii)/den ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+         ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
+         xx = hexc_diagonal(ii)/den 
          poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
          fac=poly/(poly+16._dp*xx**4)
          kprc = fac*four/(three*den)

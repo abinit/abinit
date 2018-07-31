@@ -14,6 +14,8 @@ variables controlling this type of calculation.
 It is supposed that you already know how to do PAW calculations using ABINIT.
 Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
 
+[TUTORIAL_README]
+
 This tutorial should take about 1 hour to complete.
 
 ## 0 Short summary of the DFT+U method
@@ -49,16 +51,25 @@ For some systems, the result might depend on the choice of the double-counting m
 However, the two methods generally give similar results.
 
 ## 1 Ground state calculation of NiO using LDA
-  
-You might create a subdirectory of the ~abinit/tests/tutorial directory, and
-use it for the tutorial. In what follows, the names of files will be mentioned
-as if you were in this subdirectory
 
-*Copy the files ../Input/tdftu_1.in and ../Input/tdftu_x.files in your Work directory and run*
+*Before continuing, you might consider to work in a different subdirectory as
+for the other tutorials. Why not Work_dftu?
+In what follows, the names of files will be mentioned as if you were in this subdirectory.*
+
+Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TUTORIAL/Input* to your *Work_dftu* directory with:
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_dftu
+cd Work_dftu
+cp ../tdftu_x.files .  # You will need to edit this file.
+cp ../tdftu_1.in .
+```
 
 {% dialog tests/tutorial/Input/tdftu_x.files tests/tutorial/Input/tdftu_1.in %}
 
-This run should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
+Now run the code as usual.
+The job should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
 ground state of the NiO crystal. A low cutoff and a small number of k-points
 are used in order to speed up the calculation. During this time you can take a
 look at the input file.
@@ -129,8 +140,8 @@ the rotationally invariant interaction is used.
     It is important to notice that in order to use LDA+U in Abinit, you must
     employ PAW pseudopotentials.
 
-*You should run abinit on the input file tdftu_2.in. This calculation takes
-less than 30 seconds on a PC 3.0 GHz*
+You should run abinit with the *tdftu_2.in* input file. This calculation takes
+less than 30 seconds on a PC 3.0 GHz
 During the calculation, you can take a look at the input file. 
 
 {% dialog tests/tutorial/Input/tdftu_2.in %}
@@ -208,7 +219,7 @@ thus the spin-density matrix is kept constant for 5 SCF steps.
 
 {% dialog tests/tutorial/Input/tdftu_3.in %}
 
-In the log file (not the usual output file), you might find for each step, the
+In the log file (not the usual output file), you will find for each step, the
 calculated density matrix, followed by the imposed density matrix. After the
 first 5 SCF steps, the initial density matrix is no longer imposed. Here is a
 section of the log file, in which the imposed occupation matrices are echoed:
@@ -258,13 +269,13 @@ Now we will use the other implementation for the double-counting term in LDA+U
 electrons for each spin independently and the complete interactions $U(m_1,m_2,m_3,m_4)$ and $J(m_1,m_2,m_3,m_4)$.
 
 As in the preceding run, we will start with a fixed density matrix for d
-orbitals. You might now start your calculation, with the tdftu_4.in and
-tdftu_4.files, or skip the calculation, and rely on the reference file
-provided in the ~abinit/tests/tutorial/Refs directory. Examine the tdftu_4.in file. 
+orbitals. You might now start your calculation, with the *tdftu_4.in* and
+*tdftu_4.files*, or skip the calculation, and rely on the reference file
+provided in the *\$ABI_TUTORIAL/Refs* directory. Examine the *tdftu_4.in* file. 
 
 {% dialog tests/tutorial/Input/tdftu_4.in %}
 
-The only difference in the input file compared to tdftu_3.in is the
+The only difference in the input file compared to *tdftu_3.in* is the
 value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
@@ -283,5 +294,5 @@ spin. The AMF should be used when orbital occupations are near the average occup
 
 ## 5 Projected density of states in LDA+U
   
-Using prtdos 3, you can now compute the projected d and f density of states.
+Using [[prtdos]] 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.
