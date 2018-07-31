@@ -166,7 +166,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
- use m_paw_nhat,      only : pawmknhat
+ use m_paw_nhat,      only : pawmknhat_psipsi
  use m_paw_sym,       only : paw_symcprj
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur
  use m_oscillators,   only : rho_tw_g
