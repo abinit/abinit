@@ -743,7 +743,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    iblok=0
 
    if (ddb%prtvol > 1) then
-     write(message, '(a,a,a)' )&
+     write(message, '(3a)' )&
 &     ' gtblk9 : ',ch10,&
 &     '  Unable to find block corresponding to the following specifications :'
      call wrtout(std_out,message,'COLL')
@@ -751,7 +751,6 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      call wrtout(std_out,message,'COLL')
      write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs'
      call wrtout(std_out,message,'COLL')
-!    write(std_out,*)' nder=',nder
      do ider=1,nder
        write(message, '(i4,4f6.2,3i7)' )&
        ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
@@ -761,7 +760,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  end if
 
  if (ok==1 .and. ddb%prtvol > 1) then
-   write(message,'(a,i0,a,a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
+   write(message,'(a,i0,2a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -899,8 +898,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !Local variables -------------------------
 !scalars
- integer :: band,iband,idir1,idir2,idir3,ii,ikpt,index,ipert1,ipert2,ipert3
- integer :: nelmts
+ integer :: band,iband,idir1,idir2,idir3,ii,ikpt,index,ipert1,ipert2,ipert3,nelmts
  real(dp) :: ai,ar
  character(len=32) :: name
  character(len=500) :: message

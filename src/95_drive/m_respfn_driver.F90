@@ -1456,7 +1456,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
+   !write(std_out,*)"blkflg before d2sym3: ", blkflg
    call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+   !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements

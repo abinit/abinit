@@ -765,6 +765,10 @@ program anaddb
    qphon(:,1)=zero; qphnrm(1)=zero
    rfphon(1:2)=0; rfelfd(1:2)=2; rfstrs(1:2)=0
    call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+   if (iblok == 0) then
+     MSG_ERROR("DDB file must contain both derivatives wrt electric field, Check your calculations")
+   end if
+
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
    ! Print the electronic dielectric tensor
@@ -815,6 +819,10 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+     end if
+
      ! then print the internal stain tensor
      call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
    end if
@@ -845,6 +853,9 @@ program anaddb
 
      ! for both diagonal and shear parts
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
+     end if
 
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
@@ -869,9 +880,12 @@ program anaddb
      ! looking for the gamma point block
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
-     ! for both diagonal and shear parts
 
+     ! for both diagonal and shear parts
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+     end if
 
      ! then print out the piezoelectric constants
      call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol,ana_ncid)
