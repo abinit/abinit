@@ -125,7 +125,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
     cwavef_rot_g(:,:) = czero
     do n=1,nbandc
       do np=1,nbandc
-        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + dconjg(occ_nd_cpx(np, n)) * &
+        cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
 &                           cmplx(cwavef(1,ig,np+first_bandc-1,:), cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
       end do
     end do
