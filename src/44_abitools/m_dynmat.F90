@@ -2172,7 +2172,7 @@ end subroutine q0dy3_calc
 !!
 !! NOTES
 !! the procedure of the symmetrization of the dynamical matrix follows the
-!! equations in: Hendrikse et al., Computer Phys. Comm. 86, 297 (1995)
+!! equations in: Hendrikse et al., Computer Phys. Comm. 86, 297 (1995) [[cite:Hendrikse1995]]
 !!
 !! TODO
 !! A full description of the equations should be included

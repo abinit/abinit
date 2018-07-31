@@ -63,6 +63,7 @@ MODULE m_io_kss
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -1029,7 +1030,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #undef ABI_FUNC
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

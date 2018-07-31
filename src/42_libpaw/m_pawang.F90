@@ -49,9 +49,6 @@ MODULE m_pawang
  public :: mat_mlms2jmj
  public :: mat_slm2ylm
 
- ! MGPAW: Private?
- public :: rfactorial         ! Calculates N!. as a double precision real.
- public :: perms              ! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
 !!***
 
 !----------------------------------------------------------------------
@@ -1046,7 +1043,8 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !! rfactorial
 !!
 !! FUNCTION
-!! Calculates N!. as a double precision real.
+!! Private function
+!! Calculates N! as a double precision real.
 !!
 !! INPUTS
 !!   nn=number to use
@@ -1060,7 +1058,7 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !!
 !! SOURCE
 
-function rfactorial(nn)
+elemental function rfactorial(nn)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1097,6 +1095,7 @@ end function rfactorial
 !! perms
 !!
 !! FUNCTION
+!! Private function
 !! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
 !!
 !! INPUTS

@@ -756,7 +756,7 @@ end subroutine pawcprj_zaxpby
 !!  ntypat :: number of types of atoms
 !!  typat(natom) :: type of each atom
 !!  zarot(2*lmax+1,2*lmax+1,lmax+1,nsym) :: elements of rotation matrix for angular momentum states
-!!                                          and symmetry operations. See setsymrhoij.F90
+!!                                          and symmetry operations. See m_paw_sphharm/setsym_ylm.
 !!
 !! OUTPUT
 !!  cprj_fkn (pawcprj_type) :: cprj for a single band and k point where the k point is related to

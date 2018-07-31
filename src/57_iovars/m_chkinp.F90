@@ -406,10 +406,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  boxcutmin
-   if(response==1)then
-     cond_string(1)='response' ; cond_values(1)=1
-     call chkdpr(1,1,cond_string,cond_values,ierr,'boxcutmin',dt%boxcutmin,1,two,iout)
-   end if
+   call chkdpr(0,0,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,1,zero,iout)
+!  if(response==1)then
+!    cond_string(1)='response' ; cond_values(1)=1
+!    call chkdpr(1,1,cond_string,cond_values,ierr,'boxcutmin',dt%boxcutmin,1,two,iout)
+!  end if
 
 !  builtintest
    call chkint_eq(0,0,cond_string,cond_values,ierr,'builtintest',dt%builtintest,8,(/0,1,2,3,4,5,6,7/),iout)
@@ -1043,13 +1044,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-&   dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,25,26,27/),iout)
+&   dt%ionmov,24,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27/),iout)
 
 !  When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
    if(dt%optcell/=0)then
      if (dt%imgmov==0) then
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,5,(/2,3,13,22,25/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,6,(/2,3,13,15,22,25/),iout)
      else
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
@@ -1536,19 +1537,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     '  But we strongly recommend users to use reduced ebar calculation (berryopt=14)',ch10,&
 &     '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
 &     '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
-&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10
+&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10 ! [[cite:Stengel2009]]
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
 
    if (dt%optcell /=0 .and. (dt%berryopt == 6 ))  then
-     write(message,'(a,a,a,a,a,a,a,a,a,a,a,a,a)') ch10,&
+     write(message,'(12a)') ch10,&
 &     ' chkinp : WARNING -',ch10,&
 &     '  Constant unreduced D calculation with relaxation of cell parameters is allowed.',ch10,&
 &     '  But we strongly recommend users to use reduced d calculation (berryopt=16)',ch10,&
 &     '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
 &     '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
-&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10
+&     '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.' ! [[cite:Stengel2009]]
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -2499,7 +2500,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      MSG_ERROR(message)
    end if
 
-!  prtefmas 
+!  prtefmas
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
    if(optdriver/=RUNL_RESPFN)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver

@@ -139,19 +139,19 @@ contains
   write(stdout,'(a)') ' Note also that it will be of great value to readers of publications presenting these results,'
   write(stdout,'(a)') ' to read papers enabling them to understand the theoretical formalism and details'
   write(stdout,'(a)') ' of the ABINIT implementation.'
-  write(stdout,'(a)') ' For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.'
+  write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\alpha$-U' 
-  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).'
+  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [2] Lattice dynamics of anharmonic solids from first principles'
-  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).'
+  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).' ! [[cite:Hellman2011]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [3] Temperature dependent effective potential method for accurate free energy calculations of solids'
-  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).'
+  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
 
  end subroutine tdep_print_Aknowledgments 
@@ -256,7 +256,7 @@ contains
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'_output')
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
 
 
 #if defined HAVE_NETCDF
@@ -311,7 +311,7 @@ contains
   write(InVar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
   write(InVar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
   write(InVar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
-  write(InVar%stdout,'(a)') ' Please read ~abinit/doc/users/acknowledgments.html for suggested'
+  write(InVar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
   write(InVar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
   write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
@@ -333,6 +333,7 @@ contains
     read(40,*) string,InVar%angle_alpha
     write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%angle_alpha
   else
+    read(40,*)
     InVar%angle_alpha=90.d0
   end if
   read(40,*) string,InVar%natom_unitcell

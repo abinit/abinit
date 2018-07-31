@@ -88,8 +88,9 @@ class FortranFile(object):
         # A file with program cannot contain other procedures/modules outside program
         # module/program must be followed by end [module|program] to facilitate parsing.
         self.path = os.path.abspath(path)
-        # TODO name --> basename
+        # TODO name --> basename and REMOVE self.name
         self.name = os.path.basename(self.path)
+        self.basename = self.name
         self.dirname = os.path.dirname(self.path)
 
         # Save initial stat values, used to understand if reload is needed.
@@ -129,7 +130,7 @@ class FortranFile(object):
     def __str__(self):
         return self.to_string()
 
-    def to_string(self, verbose=0, width=90):
+    def to_string(self, verbose=0, with_dataframe=True, width=90):
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -138,8 +139,10 @@ class FortranFile(object):
         lines = []; app = lines.append
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
         app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.used_mods)))
+        app("Use dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.used_mods))))))
         app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
         app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.usedby_mods)))
+        app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.usedby_mods))))))
 
         for a in ["programs", "modules", "subroutines", "functions"]:
             plist = getattr(self, a)
@@ -148,7 +151,11 @@ class FortranFile(object):
             for p in plist:
                 app(p.to_string(verbose=verbose, width=width))
 
-        if verbose:
+        if with_dataframe:
+            df = self.get_stats(as_dataframe=True)
+            app(df.to_string())
+
+        if verbose > 1:
             app(self.stree())
 
         return "\n".join(lines)
@@ -165,6 +172,19 @@ class FortranFile(object):
                 all_uses.extend(p.uses)
         return sorted(set(all_uses))
 
+    @lazy_property
+    def dirlevel(self):
+        # 72_response --> 72
+        return int(os.path.basename(os.path.dirname(self.path)).split("_")[0])
+
+    @lazy_property
+    def min_dirlevel(self):
+        return max(mod.dirlevel for mod in self.used_mods) if self.used_mods else 999
+
+    @lazy_property
+    def max_dirlevel(self):
+        return min(mod.dirlevel for mod in self.usedby_mods) if self.usedby_mods else 0
+
     def iter_procedures(self, visibility="public"):
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
@@ -180,6 +200,60 @@ class FortranFile(object):
                 for e in p.public_procedures:
                     if e.name == name: return e
         return None
+
+    def get_stats(self, as_dataframe=False):
+        """
+        Return dictionary with FortFile stats or pandas dataframe if as_dataframe.
+        """
+        d = OrderedDict([
+            #("subroutines", len(self.subroutines)),
+            #("functions", len(self.functions)),
+            #("modules", len(self.modules)),
+            #("programs", len(self.programs)),
+            #("code_lines", self.num_f90lines),
+            #("doc_lines", self.num_doclines),
+            ("use", len(self.used_mods)),
+            ("usedby", len(self.usedby_mods)),
+            ("min_dirlevel", self.min_dirlevel),
+            ("this_dirlevel", self.dirlevel),
+            ("max_dirlevel", self.max_dirlevel),
+            ("includes", len(self.includes)),
+            #("class", self.__class__.__name__),
+        ])
+
+        if not as_dataframe: return d
+        import pandas as pd
+        return pd.DataFrame([d], index=[self.basename], columns=d.keys())
+
+    #def write_notebook(self, nbpath=None):
+    #    """
+    #    Write a jupyter_ notebook to ``nbpath``. If nbpath is None, a temporay file in the current
+    #    working directory is created. Return path to the notebook.
+    #    """
+    #    nbformat, nbv, nb = self.get_nbformat_nbv_nb(title=None)
+
+    #    nb.cells.extend([
+    #        nbv.new_markdown_cell("## %s" % title)),
+    #        nbv.new_code_cell("gsr = abilab.abiopen('%s')" % self.filepath),
+    #    ])
+
+    #    return self._write_nb_nbpath(nb, nbpath)
+
+    #@staticmethod
+    #def _write_nb_nbpath(nb, nbpath):
+    #    """
+    #    This method must be called at the end of ``write_notebook``.
+    #    nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
+    #    """
+    #    import io, os, tempfile
+    #    if nbpath is None:
+    #        _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix='.ipynb', dir=os.getcwd(), text=True)
+
+    #    # Write notebook
+    #    import nbformat
+    #    with io.open(nbpath, 'wt', encoding="utf8") as fh:
+    #        nbformat.write(nb, fh)
+    #        return nbpath
 
     def get_graphviz(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -483,12 +557,16 @@ class AbinitProject(object):
         #dirname = os.path.basename(dirname).replace(os.sep, "")
         #dirname = dirname.replace(os.sep, "")
         #files = [f for f in self.fort_files.values() if os.path.basename(f.dirname) == dirname]
-        print("Print directory:", dirname)
         dir2files = self.groupby_dirname()
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+        print("Print directory:", dirname)
         dirname = os.path.join(self.srcdir, os.path.basename(dirname))
         for f in dir2files[dirname]:
-            print(f.to_string(verbose=verbose))
+            print(f.to_string(verbose=verbose, with_dataframe=False))
             print("")
+
+        df = self.get_stats_dir(dirname)
+        print(df)
 
     #def find_parents(self, obj):
     #    """
@@ -516,6 +594,14 @@ class AbinitProject(object):
     #            if child.depends_on(fort_file):
     #                cycles[fort_file].append(child)
     #    return cycles
+
+    def check_dirlevel(self):
+        errors = []
+        for fort_file in self.fort_files.values():
+            for child in fort_file.usedby_mods:
+                if child.dirlevel < fort_file.dirlevel:
+                    errors.append("%s should be below level: %s" % (repr(m), fort_file.dirlevel))
+        return "\n".join(errors)
 
     def find_allmods(self, head_path):
         """
@@ -668,6 +754,15 @@ class AbinitProject(object):
 
         return count
 
+    #def canimove_file(self, filename, dest_level):
+    #    fort_file = self.fort_files[os.path.basename(filename)]
+
+    #def canimove_dir(self, dirname, dest_level):
+    #    dir2files = sel.groupby_dirname()
+    #    dirpath = os.path.join(self.srcdir, dirname)
+    #    if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
+    #    for fort_file in dir2files[dirpath]:
+
     def validate(self, verbose=0):
         """
         Validate project. Return exit status.
@@ -679,6 +774,11 @@ class AbinitProject(object):
                 print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
                 retcode += 1
 
+        errstr = self.check_dirlevel()
+        if errstr:
+            print(errstr)
+            retcode += 1
+
         print("retcode", retcode)
         return retcode
 
@@ -686,13 +786,11 @@ class AbinitProject(object):
         """
         Edit all children of a public entity specified by name.
         """
-        #elif os.path.isfile(options.what):
         obj = self.find_public_entity(name)
         if obj is None:
             print("Cannot find public entity `%s`" % str(name))
             return 1
-        if verbose:
-            print(obj)
+        if verbose: print(obj)
 
         # Find files with procedures.
         paths = sorted(set(p.path for p in obj.parents))
@@ -703,23 +801,34 @@ class AbinitProject(object):
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
-    def get_stats_file(self, filename, verbose=0):
-        fort_file = self.fort_file[os.path.basename(filename)]
-        return fort_file.get_stats(as_dataframe=True)
+    def get_stats_file(self, filename, as_dataframe=True):
+        return self.fort_files[os.path.basename(filename)].get_stats(as_dataframe=as_dataframe)
 
-    def get_stats_dir(self, dirname, verbose=0):
+    def get_stats_dir(self, dirname):
         dir2files = self.groupby_dirname()
+        dirpath = os.path.join(self.srcdir, dirname)
+        if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
         index, rows = [], []
-        for fort_file in dir2files[dirname]:
+        for fort_file in dir2files[dirpath]:
             index.append(fort_file.basename)
             rows.append(fort_file.get_stats())
 
         import pandas as pd
         return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
 
-    #def get_stats(self, verbose=0):
-    #    import pandas as pd
-    #    return df
+    def get_stats(self):
+        df_list = []
+        for dirpath in self.dirpaths:
+            dirname = os.path.basename(dirpath)
+            try:
+                df = self.get_stats_dir(dirname)
+                df_list.append(df)
+            except Exception as exc:
+                print("exception for dirname: %s\n%s" % (dirname, exc))
+                #raise exc
+
+        import pandas as pd
+        return pd.concat(df_list)
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """

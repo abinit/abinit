@@ -43,6 +43,8 @@ program ujdet
  use m_build_info
  use m_errors
 
+ use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det
+
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
  use m_parser,      only : intagm, parsefile
@@ -54,7 +56,6 @@ program ujdet
 #undef ABI_FUNC
 #define ABI_FUNC 'ujdet'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

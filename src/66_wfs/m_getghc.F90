@@ -33,10 +33,11 @@ module m_getghc
  use m_xmpi
 
  use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_fock,        only : fock_common_type, fock_get_getghc_call
+ use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
 
  implicit none
@@ -44,7 +45,9 @@ module m_getghc
  private
 !!***
 
- public :: getghc
+ public :: getghc     ! Compute <G|H|C> for input vector |C> expressed in reciprocal space
+ public :: getgsc     ! Compute <G|S|C> for all input vectors |Cnk> at a given k-point
+ public :: multithreaded_getghc
 !!***
 
 contains
@@ -131,7 +134,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 #define ABI_FUNC 'getghc'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -1046,6 +1048,473 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
  ABI_DEALLOCATE(work)
 
 end subroutine getghc_mGGA
+!!***
+
+!!****f* ABINIT/getgsc
+!! NAME
+!! getgsc
+!!
+!! FUNCTION
+!! Compute <G|S|C> for all input vectors |Cnk> at a given k-point,
+!!              OR for one input vector |Cnk>.
+!! |Cnk> are expressed in reciprocal space.
+!! S is the overlap operator between |Cnk> (used for PAW).
+!!
+!! INPUTS
+!!  cg(2,mcg)=planewave coefficients of wavefunctions
+!!  cprj(natom,mcprj)= wave functions projected with non-local projectors: cprj=<p_i|Cnk>
+!!  gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
+!!  ibg=shift to be applied on the location of data in the array cprj (beginning of current k-point)
+!!  icg=shift to be applied on the location of data in the array cg (beginning of current k-point)
+!!  igsc=shift to be applied on the location of data in the array gsc (beginning of current k-point)
+!!  ikpt,isppol=indexes of current (spin.kpoint)
+!!  mcg=second dimension of the cg array
+!!  mcprj=second dimension of the cprj array
+!!  mgsc=second dimension of the gsc array
+!!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms in unit cell.
+!!  nband= if positive: number of bands at this k point for that spin polarization
+!!         if negative: abs(nband) is the index of the only band to be computed
+!!  npw_k=number of planewaves in basis for given k point.
+!!  nspinor=number of spinorial components of the wavefunctions
+!! [select_k]=optional, option governing the choice of k points to be used.
+!!             gs_ham datastructure contains quantities needed to apply overlap operator
+!!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
+!!             if select_k=1, <k^prime|S|k>       is applied [default]
+!!             if select_k=2, <k|S|k^prime>       is applied
+!!             if select_k=3, <k|S|k>             is applied
+!!             if select_k=4, <k^prime|S|k^prime> is applied
+!!
+!! OUTPUT
+!!  gsc(2,mgsc)= <g|S|Cnk> or <g|S^(1)|Cnk> (S=overlap)
+!!
+!! PARENTS
+!!      dfpt_vtowfk
+!!
+!! CHILDREN
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,timab,xmpi_sum
+!!
+!! SOURCE
+
+subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
+&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getgsc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
+ integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
+ integer,intent(in),optional :: select_k
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(gs_hamiltonian_type),intent(inout),target :: gs_ham
+!arrays
+ real(dp),intent(in) :: cg(2,mcg)
+ real(dp),intent(out) :: gsc(2,mgsc)
+ type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
+
+!Local variables-------------------------------
+!scalars
+ integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
+ integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: enlout_dum(1),tsec(2)
+ real(dp),allocatable :: cwavef(:,:),scwavef(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+!Compatibility tests
+ my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+ if(gs_ham%usepaw==0) then
+   MSG_BUG('Only compatible with PAW (usepaw=1) !')
+ end if
+ if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
+   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
+ end if
+
+!Keep track of total time spent in getgsc:
+ call timab(565,1,tsec)
+
+ gsc = zero
+
+!Prepare some data
+ ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
+ ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
+ if (gs_ham%usecprj==1) then
+   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
+   call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
+ else
+   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+ end if
+ dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
+ choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
+ select_k_=1;if (present(select_k)) select_k_=select_k
+ me=mpi_enreg%me_kpt
+
+!Loop over bands
+ index_cprj=ibg;index_cg=icg;index_gsc=igsc
+ if (nband>0) then
+   iband1=1;iband2=nband
+ else if (nband<0) then
+   iband1=abs(nband);iband2=iband1
+   index_cprj=index_cprj+(iband1-1)*my_nspinor
+   index_cg  =index_cg  +(iband1-1)*npw_k*my_nspinor
+   index_gsc =index_gsc +(iband1-1)*npw_k*my_nspinor
+ end if
+
+ do iband=iband1,iband2
+
+   if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
+     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
+     index_cprj=index_cprj+my_nspinor
+     index_cg=index_cg+npw_k*my_nspinor
+     index_gsc=index_gsc+npw_k*my_nspinor
+     cycle
+   end if
+
+!  Retrieve WF at (n,k)
+   cwavef(:,1:npw_k*my_nspinor)=cg(:,1+index_cg:npw_k*my_nspinor+index_cg)
+   if (gs_ham%usecprj==1) then
+     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
+   end if
+
+!  Compute <g|S|Cnk>
+   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&
+&   signs,scwavef,tim_nonlop,cwavef,cwavef,select_k=select_k_)
+
+   gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=scwavef(:,1:npw_k*my_nspinor)
+
+!  End of loop over bands
+   index_cprj=index_cprj+my_nspinor
+   index_cg=index_cg+npw_k*my_nspinor
+   index_gsc=index_gsc+npw_k*my_nspinor
+ end do
+
+!Reduction in case of parallelization
+ if ((xmpi_paral==1)) then
+   call timab(48,1,tsec)
+   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
+   call timab(48,2,tsec)
+ end if
+
+!Memory deallocation
+ ABI_DEALLOCATE(cwavef)
+ ABI_DEALLOCATE(scwavef)
+ if (gs_ham%usecprj==1) then
+   call pawcprj_free(cwaveprj)
+ end if
+ ABI_DATATYPE_DEALLOCATE(cwaveprj)
+
+ call timab(565,2,tsec)
+
+ DBG_EXIT("COLL")
+
+end subroutine getgsc
+!!***
+
+!!****f* ABINIT/multithreaded_getghc
+!!
+!! NAME
+!! multithreaded_getghc
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2016-2018 ABINIT group (JB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
+!!       (same meaning as in nonlop.F90 routine)
+!!       if cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
+!!       if cpopt= 0, <p_lmn|in> are computed here and saved
+!!       if cpopt= 1, <p_lmn|in> and first derivatives are computed here and saved
+!!       if cpopt= 2  <p_lmn|in> are already in memory;
+!!       if cpopt= 3  <p_lmn|in> are already in memory; first derivatives are computed here and saved
+!!       if cpopt= 4  <p_lmn|in> and first derivatives are already in memory;
+!! cwavef(2,npw*my_nspinor*ndat)=planewave coefficients of wavefunction.
+!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
+!! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
+!!        Typically lambda is the eigenvalue (or its guess)
+!! mpi_enreg=informations about MPI parallelization
+!! ndat=number of FFT to do in parallel
+!! prtvol=control print volume and debugging output
+!! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
+!!    (S=overlap)       if  1, matrix elements <G|S|C> have to be computed in gsc in addition to ghc
+!!                      if -1, matrix elements <G|H-lambda.S|C> have to be computed in ghc (gsc not used)
+!! tim_getghc=timing code of the calling subroutine(can be set to 0 if not attributed)
+!! type_calc= option governing which part of Hamitonian is to be applied:
+!             0: whole Hamiltonian
+!!            1: local part only
+!!            2: non-local+kinetic only (added to the exixting Hamiltonian)
+!!            3: local + kinetic only (added to the existing Hamiltonian)
+!! ===== Optional inputs =====
+!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
+!!                   instead of the one contained in gs_ham datastructure.
+!!                   Typically used for real WF (in parallel) which are FFT-transformed 2 by 2.
+!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT tranformation
+!!   [select_k]=optional, option governing the choice of k points to be used.
+!!             gs_ham datastructure contains quantities needed to apply Hamiltonian
+!!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
+!!             if select_k=1, <k^prime|H|k>       is applied [default]
+!!             if select_k=2, <k|H|k^prime>       is applied
+!!             if select_k=3, <k|H|k>             is applied
+!!             if select_k=4, <k^prime|H|k^prime> is applied
+!!
+!! OUTPUT
+!!  ghc(2,npw*my_nspinor*ndat)=matrix elements <G|H|C> (if sij_opt>=0)
+!!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
+!!  gvnlc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal|C> (if sij_opt>=0)
+!!                                            or <G|Vnonlocal-lambda.S|C> (if sij_opt=-1)
+!!  if (sij_opt=1)
+!!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
+!!
+!! SIDE EFFECTS
+!!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
+!!
+!! PARENTS
+!!      m_lobpcgwf,prep_getghc
+!!
+!! CHILDREN
+!!      getghc,mkl_set_num_threads,omp_set_nested
+!!
+!! SOURCE
+
+subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,ndat,&
+&                 prtvol,sij_opt,tim_getghc,type_calc,&
+&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+
+#ifdef HAVE_OPENMP
+   use omp_lib
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'multithreaded_getghc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cpopt,ndat, prtvol
+ integer,intent(in) :: sij_opt,tim_getghc,type_calc
+ integer,intent(in),optional :: select_k
+ real(dp),intent(in) :: lambda
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(gs_hamiltonian_type),intent(inout),target :: gs_ham
+!arrays
+ integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
+ real(dp),intent(out),target :: gsc(:,:)
+ real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(out) :: ghc(:,:),gvnlc(:,:)
+ type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: firstelt, lastelt
+ integer :: nthreads
+ integer :: ithread
+ integer :: chunk
+ integer :: residuchunk
+ integer :: firstband
+ integer :: lastband
+ integer :: spacedim
+#ifdef HAVE_OPENMP
+ logical :: is_nested
+#endif
+
+ integer :: select_k_default
+
+ ! *************************************************************************
+
+ select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
+
+ spacedim = size(cwavef,dim=2)/ndat
+
+    !$omp parallel default (none) private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt, is_nested), &
+    !$omp& shared(cwavef,ghc,gsc, gvnlc,spacedim,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
+    !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
+#ifdef HAVE_OPENMP
+ ithread = omp_get_thread_num()
+ nthreads = omp_get_num_threads()
+ is_nested = omp_get_nested()
+ call omp_set_nested(.false.)
+#ifdef HAVE_LINALG_MKL_THREADS
+ call mkl_set_num_threads(1)
+#endif
+#else
+ ithread = 0
+ nthreads = 1
+#endif
+ chunk = ndat/nthreads ! Divide by 2 to construct chunk of even number of bands
+ residuchunk = ndat - nthreads*chunk
+ if ( ithread < nthreads-residuchunk ) then
+   firstband = ithread*chunk+1
+   lastband = (ithread+1)*chunk
+ else
+   firstband = (nthreads-residuchunk)*chunk + ( ithread -(nthreads-residuchunk) )*(chunk+1) +1
+   lastband = firstband+chunk
+ end if
+
+ if ( lastband /= 0 ) then
+   firstelt = (firstband-1)*spacedim+1
+   lastelt = lastband*spacedim
+      ! Don't know how to manage optional arguments .... :(
+   if ( present(kg_fft_k) ) then
+     if (present(kg_fft_kp)) then
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+       gs_ham,gvnlc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
+       select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
+     else
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+       gs_ham,gvnlc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
+       select_k=select_k_default,kg_fft_k=kg_fft_k)
+     end if
+   else
+     if (present(kg_fft_kp)) then
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+       gs_ham,gvnlc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
+       select_k=select_k_default,kg_fft_kp=kg_fft_kp)
+     else
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+       gs_ham,gvnlc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
+       select_k=select_k_default)
+     end if
+   end if
+ end if
+#ifdef HAVE_OPENMP
+ call omp_set_nested(is_nested)
+#ifdef HAVE_LINALG_MKL_THREADS
+ call mkl_set_num_threads(nthreads)
+#endif
+#endif
+    !$omp end parallel
+
+end subroutine multithreaded_getghc
+!!***
+
+!!****f* ABINIT/getghcnd
+!!
+!! NAME
+!! getghcnd
+!!
+!! FUNCTION
+!! Compute <G|H_ND|C> for input vector |C> expressed in reciprocal space
+!! Result is put in array ghcnc. H_ND is the Hamiltonian due to magnetic dipoles
+!! on the nuclear sites.
+!!
+!! INPUTS
+!! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
+!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
+!! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
+!! ndat=number of FFT to do in //
+!!
+!! OUTPUT
+!! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
+!!
+!! NOTES
+!! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
+!!
+!! PARENTS
+!!      getghc
+!!
+!! CHILDREN
+!!      zhpmv
+!!
+!! NOTES
+!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
+!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
+!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
+!!  input vector in one shot.
+!!
+!! SOURCE
+
+subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getghcnd'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: my_nspinor,ndat
+ type(gs_hamiltonian_type),intent(in) :: gs_ham
+!arrays
+ real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
+ real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cwavedim
+ character(len=500) :: message
+ !arrays
+ complex(dpc),allocatable :: inwave(:),hggc(:)
+
+! *********************************************************************
+
+ if (gs_ham%matblk /= gs_ham%natom) then
+   write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
+   MSG_ERROR(message)
+ end if
+ if (ndat /= 1) then
+   write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
+   MSG_ERROR(message)
+ end if
+ if (my_nspinor /= 1) then
+   write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
+   MSG_ERROR(message)
+ end if
+ if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
+   message=' not allowed for kpt(left)/=kpt(right)!'
+   MSG_BUG(message)
+ end if
+
+ if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
+   cwavedim = gs_ham%npw_k*my_nspinor*ndat
+   ABI_ALLOCATE(hggc,(cwavedim))
+   ABI_ALLOCATE(inwave,(cwavedim))
+
+   inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
+
+    ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+    ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
+    ! objects, with the matrix as Hermitian in packed storage
+   call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
+
+   ghcnd(1,1:gs_ham%npw_k) = real(hggc)
+   ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
+
+   ABI_DEALLOCATE(hggc)
+   ABI_DEALLOCATE(inwave)
+
+ else
+
+   ghcnd(:,:) = zero
+
+ end if
+
+end subroutine getghcnd
 !!***
 
 end module m_getghc

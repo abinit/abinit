@@ -57,8 +57,8 @@ contains
 !! IONMOV 12:
 !! Isokinetic ensemble molecular dynamics.
 !! The equation of motion of the ions in contact with a thermostat
-!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
-!! as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
+!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)] [[cite:Zhang1997]],
+!! as worked out by Minary et al, J. Chem. Phys. 188, 2510 (2003) [[cite:Minary2003]].
 !! The conservation of the kinetic energy is obtained within machine precision, at each step.
 !! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)),
 !! the final temperature (mdtemp(2)), and the friction coefficient (friction).
@@ -286,7 +286,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  do ifirst=1,nfirst
 
-!  Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102)
+!  Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, [[cite:Zhang1997]] p.6102)
 
 !  v2gauss is twice the kinetic energy
    v2gauss=0.0_dp

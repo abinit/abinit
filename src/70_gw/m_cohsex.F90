@@ -53,6 +53,7 @@ module m_cohsex
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_sym,       only : paw_symcprj
 
  implicit none
 
@@ -132,7 +133,7 @@ contains
 !! OUTPUT
 !!
 !! NOTES
-!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) is included.
+!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) [[cite:Gigy1986]] is included.
 !!  2) The calculation of energy derivative is based on finite elements.
 !!  3) On the symmetrization of Sigma matrix elements ***/
 !!        If  Sk = k+G0 then  M_G(k, Sq)= e^{-i( Sq+G).t} M_{ S^-1(G}   (k,q)
@@ -171,7 +172,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 #undef ABI_FUNC
 #define ABI_FUNC 'cohsex_me'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
