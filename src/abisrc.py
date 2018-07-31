@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
+This script analyzes the Abinit source tree and generates the dependency graph
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
@@ -42,7 +43,7 @@ Usage example:
   abisrc.py touch              => Touch all files that have been changed + parents.
                                   so that make can recompile all the relevant files.
                                   Useful when changing API/ABI.
-  abisrc.py pedit fourdp       => Call $EDITOR to edit all the parents of fourdp.
+  abisrc.py pedit fourdp       => Call $EDITOR to edit all the parents of the fourdp routine.
   abisrc.py stats              =>
   abisrc.py abirules           =>
   abisrc.py master             => Master the Abinit source tree.
@@ -56,7 +57,7 @@ def get_parser():
     copts_parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
         help='verbose, can be supplied multiple times to increase verbosity.')
     copts_parser.add_argument('-r', '--regenerate', default=False, action="store_true",
-        help='Parse files, generate new pickle file')
+        help='Parse files, generate new pickle file.')
     #copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors.')
     #copts_parser.add_argument('--no-logo', default=False, action="store_true", help='Disable AbiPy logo.')
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
@@ -68,7 +69,7 @@ def get_parser():
     #parser.add_argument('-V', '--version', action='version', version=abilab.__version__)
 
     # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest='command', help='sub-command help', description="Valid subcommands")
+    subparsers = parser.add_subparsers(dest='command', help='sub-command help.', description="Valid subcommands")
 
     # Subparser for parse.
     p_parse = subparsers.add_parser('parse', parents=[copts_parser], help="Parse file.")
@@ -91,7 +92,23 @@ def get_parser():
     # Subparser for pedit.
     p_edit = subparsers.add_parser("pedit", parents=[copts_parser],
         help="Edit parents of public procedure or module.")
-    p_edit.add_argument("what", help="File or procedure name")
+    p_edit.add_argument("what", help="File or procedure name.")
+
+    # Subparser for canimode.
+    #p_canimove = subparsers.add_parser("canimove", parents=[copts_parser],
+    #    help="Check whether file or directory can be moved ")
+    #p_canimove.add_argument("what", help="File or procedure name.")
+    #p_canimove.add_argument("dest_level", type=int, help="Destination level")
+
+    # notebook option
+    #p_notebook = subparser.add_parser("notebook", parents=[copts_parser], help="Analyze project in jupyter notebook")
+    #p_notebook.add_argument('--foreground', action='store_true', default=False,
+    #    help="Run jupyter notebook in the foreground.")
+
+    # Subparser for stats.
+    p_stats = subparsers.add_parser("stats", parents=[copts_parser],
+        help="Print statistics about file or directory or project (if no argument is given).")
+    p_stats.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")
 
     # Subparser for graph.
     p_graph = subparsers.add_parser('graph', parents=[copts_parser],
@@ -100,10 +117,10 @@ def get_parser():
     p_graph.add_argument("-e", "--engine", type=str, default="automatic",
         help=("graphviz engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']. "
               "Default: automatic i.e. the engine is automatically selected. See http://www.graphviz.org/pdf/dot.1.pdf "
-              "Use `conda install python-graphviz` or `pip install graphviz` to install the python package"))
+              "Use `conda install python-graphviz` or `pip install graphviz` to install the python package."))
     #p_graph.add_argument("-d", '--dirtree', default=False, action="store_true",
     #    help='Visualize files and directories in workdir instead of tasks/works.')
-    p_graph.add_argument("what", nargs="?", default=None, help="File of directory to visualize")
+    p_graph.add_argument("what", nargs="?", default=None, help="File of directory to visualize.")
 
     # Subparser for validate.
     p_validate = subparsers.add_parser('validate', parents=[copts_parser],
@@ -162,7 +179,7 @@ def main():
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
         if needs_reload:
-            print("Source tree changed. Will parse source files to rebuild dependency graph...")
+            print("Source tree changed. Need to parse source files again to rebuild dependency graph...")
 
     if needs_reload:
 	# Parse the source and save new object.
@@ -218,7 +235,7 @@ def main():
         graph.view(directory=directory, cleanup=False)
 
     elif options.command == "validate":
-       proj.validate(verbose=options.verbose)
+       return proj.validate(verbose=options.verbose)
 
     #elif options.command == "plot":
     #    if os.path.isdir(options.what):
@@ -227,22 +244,40 @@ def main():
     #        key = os.path.basename(options.what)
     #        proj.plot_file(key)
 
+    #elif options.command == "html":
+    #   proj.html_view()
+
     #elif options.command == "canimove":
-    #   return proj.canimove(src, dest)
+    #    if os.path.isdir(options.what):
+    #        return proj.canimove_dir(options.what, options.dest_level)
+    #    elif os.path.isfile(options.what):
+    #        return proj.canimove_file(options.what, options.dest_level)
+    #    else:
+    #        raise TypeError("Requiring directory or file but received %s" % str(options.what))
+
+    #elif options.command == "notebook":
+    #    return proj.make_and_open_notebook(foreground=options.foreground)
 
     elif options.command == "pedit":
         return proj.pedit(options.what, verbose=options.verbose)
 
     elif options.command == "stats":
         if options.what is None:
-            df = proj.get_stats(verbose=options.verbose)
+            df = proj.get_stats()
         elif os.path.isdir(options.what):
-            df = proj.get_stats_dir(options.what, verbose=options.verbose)
+            df = proj.get_stats_dir(options.what)
         elif os.path.isfile(options.what):
-            df = proj.get_stats_file(options.what, verbose=options.verbose)
+            df = proj.get_stats_file(options.what)
         else:
-            raise TypeError("Don't know how to produce stats for %s" % str(options.what))
-        #print(df)
+            raise TypeError("Requiring directory or file or None but received %s" % str(options.what))
+        print(df)
+
+    #elif options.command == "types":
+    #    if options.types is None:
+    #        print(proj.show_datatypes())
+    #    else:
+    #        for typ in options.types:
+    #            proj.show_graph_type(typ)
 
     elif options.command == "master":
         print(proj.master())

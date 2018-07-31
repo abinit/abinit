@@ -103,7 +103,7 @@ subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
  integer, intent(in) :: ider,numarg,numnew
  real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
  real(dp), intent(out) :: derfun(numnew)
- real(dp), intent(inout) :: newfun(numnew) !vz_i
+ real(dp), intent(inout) :: newfun(numnew)
 
  integer :: i,jspl
  real(dp) :: argmin,delarg,d,aa,bb,cc,dd

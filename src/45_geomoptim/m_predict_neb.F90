@@ -202,7 +202,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        tangent(:,:,iimage)=coordif(:,:,iimage  )/dimage(iimage) &
 &       +coordif(:,:,iimage+1)/dimage(iimage+1)
      end do
-!    === Improved tangent (J. Chem. Phys. 113, 9978 (2000))
+!    === Improved tangent (J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]])
    else
      do iimage=2,nimage_tot-1
        test_minus_one=(etotal_all(iimage-1)<etotal_all(iimage))
@@ -279,7 +279,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
          vect(:,:)=spring(iimage+1)*coordif(:,:,iimage+1)-spring(iimage)*coordif(:,:,iimage)
          f_para2=mep_img_dotp(vect,tangent(:,:,iimage))
          ABI_DEALLOCATE(vect)
-       else                              ! Modification from (J. Chem. Phys. 113, 9978 (2000))
+       else       ! Modification from J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]]
          f_para2=spring(iimage+1)*dimage(iimage+1)-spring(iimage)*dimage(iimage)
        end if
        neb_forces_all(:,:,iimage)=fcart_all(:,:,iimage) &       ! F_ortho

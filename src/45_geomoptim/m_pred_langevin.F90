@@ -55,7 +55,7 @@ contains
 !!
 !! IONMOV 9:
 !! Uses a Langevin dynamics algorithm :
-!! see J. Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33
+!! see J. Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33 [[cite:Chelikowsky2000]]
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information

@@ -71,7 +71,7 @@ MODULE m_kxc
  public :: kxc_rpa         ! Hartree kernel
  public :: kxc_local       ! Compute local xc kernel in G space.
  public :: kxc_alda        ! AL(S)DA kernel in reciprocal space, on the FFT grid.
- public :: kxc_pgg         ! Compute the PGG-exchange kernel in reciprocal space (Phys. Rev. Lett. 76, 1212 (1996)).
+ public :: kxc_pgg         ! Compute the PGG-exchange kernel in reciprocal space (Phys. Rev. Lett. 76, 1212 (1996) [[cite:Petersilka1996]]).
  public :: kxc_eok         ! linear or non-linear (ixceok = 2) energy optimized kernel of Dobson and Wang.
  public :: kxc_driver      ! Driver routine (TODO)
  public :: kxc_ADA         ! Adiabatic density approximation
@@ -637,7 +637,7 @@ end subroutine kxc_alda
 !!
 !! FUNCTION
 !! Compute the PGG-exchange kernel in reciprocal space
-!! (Phys. Rev. Lett. 76, 1212 (1996)).
+!! (Phys. Rev. Lett. 76, 1212 (1996) [[cite:Petersilka1996]]).
 !!
 !! INPUTS
 !!  gmet=reciprocal space metrix (bohr**-2)
@@ -875,7 +875,7 @@ end subroutine kxc_pgg
 !!  Compute the linear (ixceok = 1) or non-linear (ixceok = 2)
 !!  energy optimized kernel of Dobson and Wang, in reciprocal
 !!  space, on the FFT grid.
-!!  [see J. Dobson and J. Wang, Phys. Rev. B 62, 10038 (2000)].
+!!  See J. Dobson and J. Wang, Phys. Rev. B 62, 10038 (2000) [[cite:Dobson2000]].
 !!
 !! INPUTS
 !!  ixceok = 1 linear energy optimized kernel.

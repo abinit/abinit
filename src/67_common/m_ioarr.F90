@@ -56,6 +56,7 @@ MODULE m_ioarr
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : init_distribfft_seq
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -143,7 +144,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 #undef ABI_FUNC
 #define ABI_FUNC 'ioarr'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1042,7 +1042,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 #undef ABI_FUNC
 #define ABI_FUNC 'read_rhor'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

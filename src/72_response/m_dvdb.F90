@@ -55,6 +55,7 @@ MODULE m_dvdb
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -899,7 +900,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1687,7 +1687,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  !if (psps%usepaw==1) then
  !  ! Allocate/initialize only zarot in pawang1 datastructure
  !  call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
- !  call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+ !  call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  !end if
 
  ! FIXME Be careful here because symrhg was written for densities!
@@ -4104,7 +4104,7 @@ end subroutine dvdb_test_ftinterp
 !!
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
-!!  due to the Born effective charges [PRL 115, 176401 (2015)].
+!!  due to the Born effective charges, PRL 115, 176401 (2015) [[cite:Verdi2015]].
 !!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))

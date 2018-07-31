@@ -258,7 +258,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing uncertified build examples",
     "rm -f doc/build/config-examples/uncertified/*.ac")
   run_script(my_name, "Removing RoboDOC tarball",
-    "rm -f infos_html*.tar.gz robodoc-html*.tar.gz")
+    "rm -f robodoc-html*.tar.gz")
 
   # Identify subdirs to clean, delegate the rest to the subsystems
   print_header(my_name, "Core-managed build files")

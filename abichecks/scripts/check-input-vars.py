@@ -32,8 +32,8 @@ src_dir        = os.path.join(top_dir,"src")
 bindings_dir        = os.path.join(top_dir,"bindings")
 parserdir = os.path.join(bindings_dir, "parser")
 
-with open(os.path.join(parserdir, "dtset.pickle", "rb") as fh:
-    ab_dtset = cPickle.load(fh,"r"))
+with open(os.path.join(parserdir, "dtset.pickle", "rb")) as fh:
+    ab_dtset = cPickle.load(fh,"r")
 
 # The documentation regexp.
 re_index = re.compile(r"\<a\s+href\s*=\s*['\"](?P<file>var[a-z]+\.html)#(?P<var_link>[a-z0-9_]+)['\"]\s*\>\s*(?P<var_name>[a-z0-9_,\s]+)\s*\</a\>", re.IGNORECASE + re.MULTILINE)

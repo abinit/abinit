@@ -47,6 +47,7 @@ MODULE m_qparticles
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -289,7 +290,6 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdqps'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

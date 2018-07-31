@@ -132,6 +132,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_paw_ij,      only : paw_ij_type
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_denpot,  only : paw_mknewh0
  use m_hide_blas,   only : xdotc
  use m_wfd,         only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, wfd_change_ngfft
  use m_crystal,     only : crystal_t
@@ -146,7 +147,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vhxc_me'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

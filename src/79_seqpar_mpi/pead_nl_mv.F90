@@ -6,9 +6,9 @@
 !! FUNCTION
 !! Compute the finite difference expression of the k-point derivative
 !! using the PEAD formulation of the third-order energy
-!! (see Nunes and Gonze PRB 63, 155107 (2001) Eq. 102)
+!! (see Nunes and Gonze PRB 63, 155107 (2001) [[cite:Nunes2001]] Eq. 102)
 !! and the finite difference formula of Marzari and Vanderbilt
-!! (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)
+!! (see Marzari and Vanderbilt, PRB 56, 12847 (1997) [[cite:Marzari1997]], Appendix B)
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (MVeithen)
@@ -188,7 +188,7 @@ spaceComm=mpi_enreg%comm_cell
 & ' pead_nl_mv : finite difference expression of the k-point derivative',ch10,&
 & '           is performed using the PEAD formulation of ',&
 & 'the third-order energy',ch10,&
-& '           (see Nunes and Gonze PRB 63, 155107 (2001) Eq. 102)',ch10
+& '           (see Nunes and Gonze PRB 63, 155107 (2001) [[cite:Nunes2001]] Eq. 102)',ch10
 !call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
@@ -614,7 +614,8 @@ spaceComm=mpi_enreg%comm_cell
 !fab: I think that in the following we have to make a distinction:
 !for the spin unpolarized case we leave the PEAD expression as it is, while
 !in the spin polarized case we have simply to divide by 2
-!(see eq.19 di PRB 63,155107, eq. 7 di PRB 71,125107 and eq 13 di PRB 71, 125107...
+!(see eq.19 di PRB 63,155107 [[cite:Nunes2001]], eq. 7 di PRB 71,125107 [[cite:Veithen2005]] 
+! and eq 13 di PRB 71, 125107 [[cite:Veithen2005]] ...
 !in this latter equation the 2 must be simply replaced by the sum over the spin components...
 !and indeed we have inserted the loop over the spin,
 !but there was a factor 2 already present in the routine due to spin degenracy that had to be removed)

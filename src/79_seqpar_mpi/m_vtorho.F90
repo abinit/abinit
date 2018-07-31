@@ -53,10 +53,13 @@ module m_vtorho
  use m_energies,           only : energies_type
  use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian, &
                                   load_spin_hamiltonian, load_k_hamiltonian, gs_hamiltonian_type
- use m_bandfft_kpt,        only : bandfft_kpt,bandfft_kpt_type,bandfft_kpt_set_ikpt, &
-                                  bandfft_kpt_savetabs, bandfft_kpt_restoretabs
+ use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
+                                  bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
+ use m_paw_correlations,   only : setnoccmmp
+ use m_paw_occupancies,   only : pawmkrhoij
+ use m_paw_mkrho,          only : pawmkrho
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
@@ -74,7 +77,12 @@ module m_vtorho
  use m_mpinfo,             only : proc_distrb_cycle
  use m_common,             only : prteigrs
  use m_dmft,               only : dmft_solve
- use m_datafordmft,         only : datafordmft
+ use m_datafordmft,        only : datafordmft
+ use m_fourier_interpol,   only : transgrid
+ use m_cgprj,              only : ctocprj
+ use m_wvl_rho,            only : wvl_mkrho
+ use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -282,11 +290,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
- use interfaces_62_wvl_wfs
- use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_66_wfs
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1844,7 +1847,6 @@ subroutine wvl_nscf_loop()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nscf_loop'
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none
@@ -1956,7 +1958,6 @@ subroutine wvl_nscf_loop_bigdft()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nscf_loop_bigdft'
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none

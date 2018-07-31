@@ -47,7 +47,7 @@ MODULE m_pawtab
 
  type,public :: wvlpaw_rholoc_type
 
-  integer :: msz             
+  integer :: msz
 ! mesh size 
 
   real(dp),allocatable :: d(:,:)
