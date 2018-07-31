@@ -101,7 +101,7 @@ contains
 !! OUTPUT
 !!
 !! NOTES
-!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) is included.
+!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) [[cite:Gigy1986]] is included.
 !!
 !!  2) On the symmetrization of Sigma matrix elements
 !!     If  Sk = k+G0 then  M_G(k, Sq)= e^{-i( Sq+G).t} M_{ S^-1(G}   (k,q)
@@ -166,6 +166,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat
+ use m_paw_sym,       only : paw_symcprj
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
@@ -176,7 +178,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

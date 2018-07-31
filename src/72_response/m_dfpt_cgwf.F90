@@ -38,8 +38,8 @@ module m_dfpt_cgwf
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
- use m_getgh1c,     only : getgh1c
  use m_getghc,      only : getghc
+ use m_getgh1c,     only : getgh1c, getdc1
 
  implicit none
 
@@ -59,7 +59,7 @@ contains
 !! FUNCTION
 !! Update one single wavefunction (cwavef), non self-consistently.
 !! Uses a conjugate-gradient algorithm.
-!! Try to keep close to the formulas in PRB55, 10337 (1997), for the
+!! Try to keep close to the formulas in PRB55, 10337 (1997) [[cite:Gonze1997]], for the
 !! non-self-consistent case, except that we are computing here
 !! the second-derivative of the total energy, and not E(2). There
 !! is a factor of 2 between the two quantities ...
@@ -134,7 +134,7 @@ contains
 !!  === if usedcwavef>0 ===
 !!  dcwavef(2,npw1*nspinor)=change of wavefunction due to change of overlap:
 !!         dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
-!!         see PRB 78, 035105 (2008), Eq. (42)
+!!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
 !!         input if usedcwavef=1, output if usedcwavef=2
 !!
 !! PARENTS
@@ -160,7 +160,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_cgwf'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -400,7 +399,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !    If generalized eigenPb and dcwavef requested, compute it:
 !    dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
-!    see PRB 78, 035105 (2008), Eq. (42)
+!    see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
      if (usedcwavef==2) then
        call getdc1(cgq,cprj_dummy,dcwavef,cprj_dummy,0,icgq,istwf_k,mcgq,0,&
 &       mpi_enreg,natom,nband,npw1,nspinor,0,gs1c)
@@ -446,7 +445,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !we do need all of the matrix element when outputing the full 1st-order wfn.
 !Note the subtlety:
 !-For the generalized eigenPb, S|cgq> is used in place of |cgq>,
-!in order to apply P_c+ projector (see PRB 73, 235101 (2006), Eq. (71), (72))
+!in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
  if(gen_eigenpb)then
    call projbd(gscq,gh1c,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
 &   cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
@@ -573,7 +572,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    ======================================================================
 !    ================= COMPUTE THE RESIDUAL ===============================
 !    ======================================================================
-!    Note that gresid (=steepest-descent vector, Eq.(26) of PRB 55, 10337 (1996))
+!    Note that gresid (=steepest-descent vector, Eq.(26) of PRB 55, 10337 (1996) [[cite:Gonze1997]])
 !    is precomputed to garantee cancellation of errors
 !    and allow residuals to reach values as small as 1.0d-24 or better.
      if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
@@ -610,7 +609,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    so, THIS IS TO BE REEXAMINED
 !    Note the subtlety:
 !    -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
-!    in order to apply P_c+ projector (see PRB 73, 235101 (2006), Eq. (71), (72)
+!    in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72)
      if (gen_eigenpb) then
        call projbd(gscq,gresid,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
 &       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
@@ -790,7 +789,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    ======================================================================
 !    ...along the search direction
 
-!    Compute dedt, Eq.(29) of of PRB55, 10337 (1997),
+!    Compute dedt, Eq.(29) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
 !    with an additional factor of 2 for the difference
 !    between E(2) and the 2DTE
      call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
@@ -824,7 +823,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end do
      end if
 
-!    compute d2edt2, Eq.(30) of of PRB55, 10337 (1997),
+!    compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
 !    with an additional factor of 2 for the difference
 !    between E(2) and the 2DTE, and neglect of local fields (SC terms)
      call dotprod_g(d2edt2,doti,istwf_k,npw1*nspinor,1,conjgr,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
@@ -838,7 +837,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
 !    ======================================================================
 
-!    see Eq.(31) of PRB55, 10337 (1997)
+!    see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
 !
      if(d2edt2<-tol_restart)then
 !      This may happen when the eigenvalue eig_mk(0) is higher than
@@ -898,7 +897,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    ======================================================================
 
      if(usetolrde/=0) then
-!      Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997)
+!      Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
        deltae=half*d2edt2*theta**2+theta*dedt
 
        if (iline==1) then

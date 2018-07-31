@@ -41,4 +41,5 @@ ntime  = 50
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and generate effective potential in XML file
+#%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

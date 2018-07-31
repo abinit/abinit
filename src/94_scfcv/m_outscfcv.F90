@@ -193,11 +193,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawtab,           only : pawtab_type
  use m_paw_an,           only : paw_an_type
  use m_paw_ij,           only : paw_ij_type
+ use m_paw_mkrho,        only : denfgr
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy
  use m_pawcprj,          only : pawcprj_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
+ use m_paw_optics,       only : optics_paw,optics_paw_core
+ use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
@@ -205,17 +208,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
- use m_pawmkaewf,        only : pawmkaewf
+ use m_paw_mkaewf,       only : pawmkaewf
  use m_dens,             only : mag_constr_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
- use m_datafordmft,       only : datafordmft
+ use m_datafordmft,      only : datafordmft
+ use m_mkrho,            only : read_atomden
+ use m_positron,         only : poslifetime, posdoppler
+ use m_optics_vloc,      only : optics_vloc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
- use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
 
@@ -257,7 +262,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -380,7 +385,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(951,1,tsec)
  if (dtset%prtwant==2) then
 
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -395,7 +400,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
+   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -505,7 +510,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (pawprtden>1.AND.pawprtden<6) then ! We will need the core density
      ABI_ALLOCATE(rhor_paw_core,(pawfgr%nfft,nspden))
-     call read_atomden(mpi_enreg,natom,nspden,ntypat,pawfgr,rhor_paw_core,&
+     call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_core,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='core   ')
 
      if (prtvol>9) then  ! Check normalisation
@@ -518,7 +523,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (pawprtden>2.AND.pawprtden<6) then ! We will need the valence protodensity
      ABI_ALLOCATE(rhor_paw_val,(pawfgr%nfft,nspden))
-     call read_atomden(mpi_enreg,natom,nspden,ntypat,pawfgr,rhor_paw_val,&
+     call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_val,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='valence')
 
      if (prtvol>9) then ! Check normalisation

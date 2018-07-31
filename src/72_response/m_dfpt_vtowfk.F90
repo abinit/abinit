@@ -44,6 +44,7 @@ module m_dfpt_vtowfk
  use m_spacepar,     only : meanvalue_g
  use m_dfpt_mkrho,   only : dfpt_accrho
  use m_dfpt_cgwf,    only : dfpt_cgwf
+ use m_getghc,       only : getgsc
 
  implicit none
 
@@ -193,7 +194,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtowfk'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
  use interfaces_72_response
 !End of the abilint section
 
@@ -403,7 +403,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,
-!    See X. Gonze, Phys. Rev. B 55, 10337 (1997) Eq. (79)
+!    See X. Gonze, Phys. Rev. B 55, 10337 (1997) [[cite:Gonze1997]] Eq. (79)
 !    the operator used to compute the first-order derivative
 !    of the wavefunctions with respect to an electric field
 !    is $+i \frac{d}{dk}$

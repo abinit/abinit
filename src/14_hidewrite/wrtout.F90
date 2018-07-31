@@ -99,7 +99,7 @@
 !!      pspnl_operat_rec,qmc_prep_ctqmc,randac,random_stopping_power
 !!      rayleigh_ritz,read_gkk,read_plowannier,recursion_nl,remove_inversion
 !!      respfn,rf2_init,rotmat,scfcge,scfcv,scfeig,scfopt,scprqt,screening
-!!      setnoccmmp,setrhoijpbe0,setsymrhoij,setup1,setup_bse,setup_bse_interp
+!!      setnoccmmp,setrhoijpbe0,setsym_ylm,setup1,setup_bse,setup_bse_interp
 !!      setup_positron,setup_screening,setup_sigma,shellstruct,sigma,smpbz
 !!      spectral_function,stress,sumrule,symanal,symatm,symaxes,symcharac
 !!      symfind,symkchk,symkpt,symlatt,symplanes,symspgr,tddft,testkgrid,thmeig

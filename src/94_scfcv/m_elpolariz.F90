@@ -43,6 +43,8 @@ module m_elpolariz
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type
+ use m_berryphase, only : berryphase
+ use m_berryphase_new, only : berryphase_new
 
  implicit none
 
@@ -138,7 +140,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 #undef ABI_FUNC
 #define ABI_FUNC 'elpolariz'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
