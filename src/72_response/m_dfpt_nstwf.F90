@@ -658,7 +658,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          if (ipert/=ipert1.or.idir/=idir1.or.force_recompute) then
            option=0
            call pawdijfr(cplex,gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
-&           nspden,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
+&           nspden,nsppol,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
 &           pawtab,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
 &           mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          else

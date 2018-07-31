@@ -340,7 +340,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    call paw_ij_init(paw_ij_tmp,cplex_loc,dtset%nspinor,nsp,nsp,dtset%pawspnorb,natom,psps%ntypat,&
 &   dtset%typat,pawtab,has_dijfr=1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,psps%ntypat,&
+   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
 &   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,&
 &   (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)

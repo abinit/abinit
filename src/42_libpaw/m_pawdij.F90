@@ -3250,6 +3250,7 @@ end subroutine pawdijexxc
 !!  natom=total number of atoms in cell
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components
+!!  nsppol=number of independent spin WF components
 !!  ntypat=number of types of atoms
 !!  option=0: computes full frozen part of Dij
 !!         1: computes frozen part of Dij without contribution from Vpsp1
@@ -3278,7 +3279,7 @@ end subroutine pawdijexxc
 !!
 !! SOURCE
 
-subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,ntypat,&
+subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,ntypat,&
 &          option,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphon,rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid) ! optional arguments (parallelism)
 
@@ -3293,7 +3294,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,my_natom,natom,nfft,nspden,ntypat,option
+ integer,intent(in) :: cplex,idir,ipert,my_natom,natom,nfft,nspden,nsppol,ntypat,option
  integer,optional,intent(in) :: comm_atom,mpi_comm_grid
  real(dp),intent(in) :: ucvol
  type(pawang_type),intent(in) :: pawang
@@ -3310,9 +3311,10 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij,dplex,iatom,iatom_tot,ic,ier,ils,ilslm,isel,ispden,istr,itypat,jc
+ integer :: cplex_dij,dplex,iatom,iatom_tot,ic,idij,idijend,ier,ils,ilslm,isel,ispden,istr,itypat,jc
  integer :: klm,klmn,klmn1,kln,lm_size,lmn2_size,lm0,lmax,lmin,mesh_size
- integer :: mm,my_comm_atom,my_comm_grid,mu,mua,mub,nfftot,nfgd,optgr0,optgr1,optgr2,usexcnhat
+ integer :: mm,my_comm_atom,my_comm_grid,mu,mua,mub,ndij,nfftot,nfgd,nsploop
+ integer :: optgr0,optgr1,optgr2,usexcnhat
  logical :: has_phase,my_atmtab_allocated,need_dijfr_1,need_dijfr_2,need_dijfr_3,need_dijfr_4
  logical :: paral_atom,qne0,testdij1,testdij2,testdij3
  real(dp) :: c1,fact,intg,rg1
@@ -3392,6 +3394,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
    lm_size=pawtab(itypat)%lcut_size**2
    lmn2_size=pawtab(itypat)%lmn2_size
    cplex_dij=paw_ij1(iatom)%cplex_dij
+   ndij=paw_ij1(iatom)%ndij
 
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    nfgd=0
@@ -3437,19 +3440,261 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
    end if
 
 !  Loop over spin components
-   do ispden=1,nspden
+   nsploop=nsppol;if (ndij==4) nsploop=4
+   do idij=1,nsploop
+     if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
 
-!    ============ Phonons ====================================
-     if (ipert<=natom) then
+       idijend=idij+idij/3;if (cplex==2) idijend=idij
+       do ispden=idij,idijend
 
-       if (need_dijfr_1.or.need_dijfr_2) then
 
-         LIBPAW_ALLOCATE(intv,(cplex,lm_size))
-         intv(:,:)=zero
+!        ============ Phonons ====================================
+         if (ipert<=natom) then
 
-!        First part: Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
-         if (need_dijfr_1) then
+           if (need_dijfr_1.or.need_dijfr_2) then
 
+             LIBPAW_ALLOCATE(intv,(cplex,lm_size))
+             intv(:,:)=zero
+
+!            First part: Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
+             if (need_dijfr_1) then
+
+!              ----- Retrieve potential Vlocal (subtle if nspden=4 ;-)
+               if (nspden/=4) then
+                 LIBPAW_ALLOCATE(vloc,(1,nfgd))
+                 if (usexcnhat==0) then
+                   do ic=1,nfgd
+                     jc=pawfgrtab(iatom)%ifftsph(ic)
+                     vloc(1,ic)=vtrial(jc,ispden)-vxc(jc,ispden)
+                   end do
+                 else
+                   do ic=1,nfgd
+                     vloc(1,ic)=vtrial(pawfgrtab(iatom)%ifftsph(ic),ispden)
+                   end do
+                 end if
+               else ! nspden==4
+                 LIBPAW_ALLOCATE(vloc,(2,nfgd))
+                 if (ispden<=2) then
+                   if (usexcnhat==0) then
+                     do ic=1,nfgd
+                       jc=pawfgrtab(iatom)%ifftsph(ic)
+                       vloc(1,ic)=vtrial(jc,ispden)-vxc(jc,ispden)
+                       vloc(2,ic)=zero
+                     end do
+                   else
+                     do ic=1,nfgd
+                       jc=pawfgrtab(iatom)%ifftsph(ic)
+                       vloc(1,ic)=vtrial(jc,ispden)
+                       vloc(2,ic)=zero
+                     end do
+                   end if
+                 else if (ispden==3) then
+                   if (usexcnhat==0) then
+                     vloc(:,:)=zero
+                   else
+                     do ic=1,nfgd
+                       jc=pawfgrtab(iatom)%ifftsph(ic)
+                       vloc(1,ic)=vtrial(jc,3)
+                       vloc(2,ic)=vtrial(jc,4)
+                     end do
+                   end if
+                 else ! ispden=4
+                   vloc(2,1:nfgd)=-vloc(2,1:nfgd)
+                 end if
+               end if
+
+!              ----- Compute Integral [ Vtrial(r).(g_l(r).Y_lm(r))^(1) dr ]
+               LIBPAW_ALLOCATE(intv_tmp,(cplex,3))
+               do ilslm=1,lm_size
+                 intv_tmp=zero
+                 if (nspden/=4) then
+                   do ic=1,nfgd
+                     do mu=1,3
+!                      Minus sign because dg(r-R)/dR = -dg(r-R)/dr
+                       contrib(1)=-vloc(1,ic)*pawfgrtab(iatom)%gylmgr(mu,ic,ilslm)
+                       intv_tmp(1,mu)=intv_tmp(1,mu)+contrib(1)
+                     end do
+                   end do
+                 else ! nspden=4
+                   do ic=1,nfgd
+                     do mu=1,3
+!                      Minus sign because dg(r-R)/dR = -dg(r-R)/dr
+                       contrib(1:2)=-vloc(1:2,ic)*pawfgrtab(iatom)%gylmgr(mu,ic,ilslm)
+                       intv_tmp(1:2,mu)=intv_tmp(1:2,mu)+contrib(1:2)
+                     end do
+                   end do
+                 end if
+!                Convert from cartesian to reduced coordinates
+                 intv(1:cplex,ilslm)=intv(1:cplex,ilslm) &
+&                   +(rprimd(1,idir)*intv_tmp(1:cplex,1) &
+&                   +rprimd(2,idir)*intv_tmp(1:cplex,2) &
+&                   +rprimd(3,idir)*intv_tmp(1:cplex,3))
+               end do
+               LIBPAW_DEALLOCATE(vloc)
+               LIBPAW_DEALLOCATE(intv_tmp)
+             end if ! need_dijfr_1
+
+!            2nd part: Int_R^3{Vloc^(1)*Sum_LM[Q_ij_q^LM]}
+             if (need_dijfr_2) then
+
+               if (ispden==1) then
+
+!                ----- Retrieve potential Vloc^(1)
+                 LIBPAW_ALLOCATE(vloc,(cplex,nfgd))
+                 do ic=1,nfgd
+                   jc=cplex*pawfgrtab(iatom)%ifftsph(ic)-dplex
+                   vloc(1:cplex,ic)=vpsp1(jc:jc+dplex)
+                 end do
+
+!                ----- Compute Integral [ Vloc^(1)(r).g_l(r).Y_lm(r) ]
+                 LIBPAW_ALLOCATE(intvloc,(cplex,lm_size))
+                 intvloc=zero
+                 if (has_phase) then
+                   if (cplex==1) then
+                     do ilslm=1,lm_size
+                       do ic=1,nfgd
+                         contrib(1)=vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                         intvloc(1,ilslm)=intvloc(1,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(1,ic)
+                       end do
+                     end do
+                   else
+                     do ilslm=1,lm_size
+                       do ic=1,nfgd
+                         contrib(1:cplex)=vloc(1:cplex,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                         intvloc(1,ilslm)=intvloc(1,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(1,ic) &
+&                         -contrib(2)*pawfgrtab(iatom)%expiqr(2,ic)
+                         intvloc(2,ilslm)=intvloc(2,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(2,ic) &
+&                         +contrib(2)*pawfgrtab(iatom)%expiqr(1,ic)
+                       end do
+                     end do
+                   end if
+                 else ! no phase
+                   do ilslm=1,lm_size
+                     do ic=1,nfgd
+                       contrib(1:cplex)=vloc(1:cplex,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                       intvloc(1:cplex,ilslm)=intvloc(1:cplex,ilslm)+contrib(1:cplex)
+                     end do
+                   end do
+                 end if
+                 LIBPAW_DEALLOCATE(vloc)
+               end if ! ispden=1
+
+               if (ispden<=min(nspden,2)) then
+                 intv(1:cplex,1:lm_size)=intv(1:cplex,1:lm_size)+intvloc(1:cplex,1:lm_size)
+                 if (ispden==min(nspden,2))  then
+                   LIBPAW_DEALLOCATE(intvloc)
+                 end if
+               end if
+             end if ! need_dijfr_2
+
+!            Apply ucvol/nfft factor on integral
+             intv(:,:)=fact*intv(:,:)
+
+!            --- Reduction in case of parallelization ---
+             call xmpi_sum(intv,my_comm_grid,ier)
+
+             paw_ij1(iatom)%dijfr(:,ispden)=zero
+
+!            ---- Loop over (i,j) components
+             klmn1=1
+             do klmn=1,lmn2_size
+               klm =pawtab(itypat)%indklmn(1,klmn)
+               lmin=pawtab(itypat)%indklmn(3,klmn)
+               lmax=pawtab(itypat)%indklmn(4,klmn)
+               do ils=lmin,lmax,2
+                 lm0=ils**2+ils+1
+                 do mm=-ils,ils
+                   ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                   if (isel>0) then
+    !                The following works only because cplex<=cplex_dij
+    !                if cplex<cplex_dij, add zero to imaginary par of dijfr
+                     paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden)= &
+    &                 paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden) &
+    &                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex,ilslm)
+                   end if
+                 end do
+               end do
+               klmn1=klmn1+cplex_dij
+             end do
+             LIBPAW_DEALLOCATE(intv)
+
+!            Dijfr is marked as computed
+             paw_ij1(iatom)%has_dijfr=2
+           end if
+
+!        ============ Electric field perturbation =======================
+         else if (ipert==natom+2.or.ipert==natom+11) then
+
+           if (need_dijfr_3) then
+
+!            The following factor arises in expanding the angular dependence of the dipole
+!            vector in terms of real spherical harmonics. The real spherical harmonics are as
+!            in the routine initylmr.F90;
+!            see http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
+             c1 = sqrt(four_pi/three)
+             mesh_size=pawtab(itypat)%mesh_size
+
+             if (ispden==1) then
+
+               LIBPAW_ALLOCATE(ff,(mesh_size))
+               LIBPAW_ALLOCATE(rg,(3))
+
+!              loop over basis state pairs for this atom
+               klmn1=1
+               do klmn = 1, paw_ij1(iatom)%lmn2_size
+                 klm =pawtab(itypat)%indklmn(1,klmn)
+                 kln =pawtab(itypat)%indklmn(2,klmn)
+                 lmin=pawtab(itypat)%indklmn(3,klmn)
+                 lmax=pawtab(itypat)%indklmn(4,klmn)
+
+!                Select only l=1, because the dipole is a vector operator
+                 if (lmin==1) then
+                   lm0=3  ! (l^2+l+1) for l=1
+
+!                  Computation of <phi_i|r|phi_j>- <tphi_i|r|tphi_j>
+!                  the dipole vector has radial dependence r
+                   ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
+&                   -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
+&                   *pawrad(itypat)%rad(1:mesh_size)
+!                   call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+                   call simp_gen(intg,ff,pawrad(itypat))
+
+!                  Compute <S_li_mi|r-R|S_lj_mj>: use a real Gaunt expression (with selection rule)
+                   rg(1:3)=zero
+                   do ic=1,3
+                     isel=pawang%gntselect(lm0+m_index(ic),klm)
+                     if (isel>0) rg(ic)=pawang%realgnt(isel)
+                   end do
+
+!                  Translate from cartesian to reduced coordinates (in idir direction)
+                   rg1=gprimd(1,idir)*rg(1)+gprimd(2,idir)*rg(2)+gprimd(3,idir)*rg(3)
+
+!                  Build sqrt(4pi/3).<S_li_mi|r-R|S_lj_mj>.(<phi_i|r-R|phi_j>- <tphi_i|r-R|tphi_j>
+                   paw_ij1(iatom)%dijfr(klmn1,ispden)=c1*rg1*intg
+                   if (cplex_dij==2) paw_ij1(iatom)%dijfr(klmn1+1,ispden)=zero
+
+                 else
+                   paw_ij1(iatom)%dijfr(klmn1,ispden)=zero
+                 end if ! end gaunt constraint
+
+                 klmn1=klmn1+cplex_dij
+               end do ! end loop over lmn2_size pairs of basis states
+               LIBPAW_DEALLOCATE(ff)
+               LIBPAW_DEALLOCATE(rg)
+
+!            Dijfr is spin-independent for electric field case
+             else if (ispden==2) then
+               paw_ij1(iatom)%dijfr(:,ispden)=paw_ij1(iatom)%dijfr(:,1)
+             else
+               paw_ij1(iatom)%dijfr(:,ispden)=zero
+             end if
+
+!            Dijfr is marked as computed
+             paw_ij1(iatom)%has_dijfr=2
+           end if
+
+!        ============ Elastic tensor ===============================
+         else if (ipert==natom+3.or.ipert==natom+4) then
 !          ----- Retrieve potential Vlocal (subtle if nspden=4 ;-)
            if (nspden/=4) then
              LIBPAW_ALLOCATE(vloc,(1,nfgd))
@@ -3494,328 +3739,109 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
              end if
            end if
 
-!          ----- Compute Integral [ Vtrial(r).(g_l(r).Y_lm(r))^(1) dr ]
-           LIBPAW_ALLOCATE(intv_tmp,(cplex,3))
-           do ilslm=1,lm_size
-             intv_tmp=zero
-             if (nspden/=4) then
+           LIBPAW_ALLOCATE(intv,(cplex,lm_size))
+           intv(:,:)=zero
+!          option = 0 Insulator case
+           if(option==0)then
+             do ilslm=1,lm_size
                do ic=1,nfgd
-                 do mu=1,3
-!                  Minus sign because dg(r-R)/dR = -dg(r-R)/dr
-                   contrib(1)=-vloc(1,ic)*pawfgrtab(iatom)%gylmgr(mu,ic,ilslm)
-                   intv_tmp(1,mu)=intv_tmp(1,mu)+contrib(1)
-                 end do
+                 jc=pawfgrtab(iatom)%ifftsph(ic)
+                 contrib(1) = 0
+!                Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
+                 mua=alpha(istr);mub=beta(istr)
+                 contrib(1)=contrib(1)+half*vloc(1,ic)&
+&                  *(pawfgrtab(iatom)%gylmgr(mua,ic,ilslm)*pawfgrtab(iatom)%rfgd(mub,ic)&
+&                  + pawfgrtab(iatom)%gylmgr(mub,ic,ilslm)*pawfgrtab(iatom)%rfgd(mua,ic))
+
+!                Int_R^3{Vloc^(1)*Sum_LM[Q_ij_q^LM]}
+                 contrib(1)=contrib(1)+vpsp1(jc)*pawfgrtab(iatom)%gylm(ic,ilslm)
+
+!                delta_{alphabeta}Int_R^3{Vloc*Sum_LM[Q_ij_q^LM]}
+                 if(istr<=3)then
+                   contrib(1)=contrib(1)+vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                 end if
+
+                 intv(1,ilslm)=intv(1,ilslm)+contrib(1)
                end do
-             else ! nspden=4
-               do ic=1,nfgd
-                 do mu=1,3
-!                  Minus sign because dg(r-R)/dR = -dg(r-R)/dr
-                   contrib(1:2)=-vloc(1:2,ic)*pawfgrtab(iatom)%gylmgr(mu,ic,ilslm)
-                   intv_tmp(1:2,mu)=intv_tmp(1:2,mu)+contrib(1:2)
-                 end do
-               end do
-             end if
-!            Convert from cartesian to reduced coordinates
-             intv(1:cplex,ilslm)=intv(1:cplex,ilslm) &
-&             +(rprimd(1,idir)*intv_tmp(1:cplex,1) &
-&             +rprimd(2,idir)*intv_tmp(1:cplex,2) &
-&             +rprimd(3,idir)*intv_tmp(1:cplex,3))
-           end do
-           LIBPAW_DEALLOCATE(vloc)
-           LIBPAW_DEALLOCATE(intv_tmp)
-         end if ! need_dijfr_1
-
-!        2nd part: Int_R^3{Vloc^(1)*Sum_LM[Q_ij_q^LM]}
-         if (need_dijfr_2) then
-
-           if (ispden==1) then
-
-!            ----- Retrieve potential Vloc^(1)
-             LIBPAW_ALLOCATE(vloc,(cplex,nfgd))
-             do ic=1,nfgd
-               jc=cplex*pawfgrtab(iatom)%ifftsph(ic)-dplex
-               vloc(1:cplex,ic)=vpsp1(jc:jc+dplex)
              end do
 
-!            ----- Compute Integral [ Vloc^(1)(r).g_l(r).Y_lm(r) ]
-             LIBPAW_ALLOCATE(intvloc,(cplex,lm_size))
-             intvloc=zero
-             if (has_phase) then
-               if (cplex==1) then
-                 do ilslm=1,lm_size
-                   do ic=1,nfgd
-                     contrib(1)=vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
-                     intvloc(1,ilslm)=intvloc(1,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(1,ic)
-                   end do
-                 end do
-               else
-                 do ilslm=1,lm_size
-                   do ic=1,nfgd
-                     contrib(1:cplex)=vloc(1:cplex,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
-                     intvloc(1,ilslm)=intvloc(1,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(1,ic) &
-&                     -contrib(2)*pawfgrtab(iatom)%expiqr(2,ic)
-                     intvloc(2,ilslm)=intvloc(2,ilslm)+contrib(1)*pawfgrtab(iatom)%expiqr(2,ic) &
-&                     +contrib(2)*pawfgrtab(iatom)%expiqr(1,ic)
-                   end do
-                 end do
-               end if
-             else ! no phase
-               do ilslm=1,lm_size
-                 do ic=1,nfgd
-                   contrib(1:cplex)=vloc(1:cplex,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
-                   intvloc(1:cplex,ilslm)=intvloc(1:cplex,ilslm)+contrib(1:cplex)
-                 end do
-               end do
-             end if
-             LIBPAW_DEALLOCATE(vloc)
-           end if ! ispden=1
+!          option = 1 Metal case (without Vpsp1)
+           else if (option==1)then
+             do ilslm=1,lm_size
+               do ic=1,nfgd
+                 jc=pawfgrtab(iatom)%ifftsph(ic)
+                 contrib(1) = 0
+!                Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
+                 mua=alpha(istr);mub=beta(istr)
+                 contrib(1)=contrib(1)+half*vloc(1,ic)&
+&                  *(pawfgrtab(iatom)%gylmgr(mua,ic,ilslm)*pawfgrtab(iatom)%rfgd(mub,ic)&
+&                  + pawfgrtab(iatom)%gylmgr(mub,ic,ilslm)*pawfgrtab(iatom)%rfgd(mua,ic))
 
-           if (ispden<=min(nspden,2)) then
-             intv(1:cplex,1:lm_size)=intv(1:cplex,1:lm_size)+intvloc(1:cplex,1:lm_size)
-             if (ispden==min(nspden,2))  then
-               LIBPAW_DEALLOCATE(intvloc)
-             end if
+!                delta_{alphabeta}Int_R^3{Vtrial*Sum_LM[Q_ij_q^LM]}
+                 if(istr<=3)then
+                   contrib(1)=contrib(1)+vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                 end if
+
+                 intv(1,ilslm)=intv(1,ilslm)+contrib(1)
+               end do
+             end do
            end if
-         end if ! need_dijfr_2
 
-!        Apply ucvol/nfft factor on integral
-         intv(:,:)=fact*intv(:,:)
+!          Apply ucvol/nfft factor on integral
+           intv(:,:)=fact*intv(:,:)
 
-!        --- Reduction in case of parallelization ---
-         call xmpi_sum(intv,my_comm_grid,ier)
+!          --- Reduction in case of parallelization ---
+           call xmpi_sum(intv,my_comm_grid,ier)
 
-         paw_ij1(iatom)%dijfr(:,ispden)=zero
+           paw_ij1(iatom)%dijfr(:,ispden)=zero
 
-!        ---- Loop over (i,j) components
-         klmn1=1
-         do klmn=1,lmn2_size
-           klm =pawtab(itypat)%indklmn(1,klmn)
-           lmin=pawtab(itypat)%indklmn(3,klmn)
-           lmax=pawtab(itypat)%indklmn(4,klmn)
-           do ils=lmin,lmax,2
-             lm0=ils**2+ils+1
-             do mm=-ils,ils
-               ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
-               if (isel>0) then
-!                The following works only because cplex<=cplex_dij
-!                if cplex<cplex_dij, add zero to imaginary par of dijfr
-                 paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden)= &
-&                 paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden) &
-&                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex,ilslm)
-               end if
-             end do
-           end do
-           klmn1=klmn1+cplex_dij
-         end do
-         LIBPAW_DEALLOCATE(intv)
-
-!        Dijfr is marked as computed
-         paw_ij1(iatom)%has_dijfr=2
-       end if
-
-!    ============ Electric field perturbation =======================
-     else if (ipert==natom+2.or.ipert==natom+11) then
-
-       if (need_dijfr_3) then
-
-!        The following factor arises in expanding the angular dependence of the dipole
-!        vector in terms of real spherical harmonics. The real spherical harmonics are as
-!        in the routine initylmr.F90;
-!        see http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
-         c1 = sqrt(four_pi/three)
-         mesh_size=pawtab(itypat)%mesh_size
-
-         if (ispden==1) then
-
-           LIBPAW_ALLOCATE(ff,(mesh_size))
-           LIBPAW_ALLOCATE(rg,(3))
-
-!          loop over basis state pairs for this atom
+!          ---- Loop over (i,j) components
            klmn1=1
-           do klmn = 1, paw_ij1(iatom)%lmn2_size
+           do klmn=1,lmn2_size
              klm =pawtab(itypat)%indklmn(1,klmn)
-             kln =pawtab(itypat)%indklmn(2,klmn)
              lmin=pawtab(itypat)%indklmn(3,klmn)
              lmax=pawtab(itypat)%indklmn(4,klmn)
-
-!            Select only l=1, because the dipole is a vector operator
-             if (lmin==1) then
-               lm0=3  ! (l^2+l+1) for l=1
-
-!              Computation of <phi_i|r|phi_j>- <tphi_i|r|tphi_j>
-!              the dipole vector has radial dependence r
-               ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
-&               -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
-&               *pawrad(itypat)%rad(1:mesh_size)
-!               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-               call simp_gen(intg,ff,pawrad(itypat))
-
-!              Compute <S_li_mi|r-R|S_lj_mj>: use a real Gaunt expression (with selection rule)
-               rg(1:3)=zero
-               do ic=1,3
-                 isel=pawang%gntselect(lm0+m_index(ic),klm)
-                 if (isel>0) rg(ic)=pawang%realgnt(isel)
+             do ils=lmin,lmax,2
+               lm0=ils**2+ils+1
+               do mm=-ils,ils
+                 ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                 if (isel>0) then
+!                  The following works only because cplex<=cplex_dij
+!                  if cplex<cplex_dij, add zero to imaginary par of dijfr
+                   paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden)= &
+&                    paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden) &
+&                    +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex,ilslm)
+                 end if
                end do
-
-!              Translate from cartesian to reduced coordinates (in idir direction)
-               rg1=gprimd(1,idir)*rg(1)+gprimd(2,idir)*rg(2)+gprimd(3,idir)*rg(3)
-
-!              Build sqrt(4pi/3).<S_li_mi|r-R|S_lj_mj>.(<phi_i|r-R|phi_j>- <tphi_i|r-R|tphi_j>
-               paw_ij1(iatom)%dijfr(klmn1,ispden)=c1*rg1*intg
-               if (cplex_dij==2) paw_ij1(iatom)%dijfr(klmn1+1,ispden)=zero
-
-             else
-               paw_ij1(iatom)%dijfr(klmn1,ispden)=zero
-             end if ! end gaunt constraint
-
+             end do
              klmn1=klmn1+cplex_dij
-           end do ! end loop over lmn2_size pairs of basis states
-           LIBPAW_DEALLOCATE(ff)
-           LIBPAW_DEALLOCATE(rg)
-
-!          Dijfr is spin-independent for electric field case
-         else if (ispden==2) then
-           paw_ij1(iatom)%dijfr(:,ispden)=paw_ij1(iatom)%dijfr(:,1)
-         else
-           paw_ij1(iatom)%dijfr(:,ispden)=zero
-         end if
-
-!        Dijfr is marked as computed
-         paw_ij1(iatom)%has_dijfr=2
-       end if
-
-!    ============ Elastic tensor ===============================
-     else if (ipert==natom+3.or.ipert==natom+4) then
-!     ----- Retrieve potential Vlocal (subtle if nspden=4 ;-)
-       if (nspden/=4) then
-         LIBPAW_ALLOCATE(vloc,(1,nfgd))
-         if (usexcnhat==0) then
-           do ic=1,nfgd
-             jc=pawfgrtab(iatom)%ifftsph(ic)
-             vloc(1,ic)=vtrial(jc,ispden)-vxc(jc,ispden)
            end do
-         else
-           do ic=1,nfgd
-             vloc(1,ic)=vtrial(pawfgrtab(iatom)%ifftsph(ic),ispden)
-           end do
-         end if
-       else ! nspden/=4
-         LIBPAW_ALLOCATE(vloc,(2,nfgd))
-         if (ispden<=2) then
-           if (usexcnhat==0) then
-             do ic=1,nfgd
-               jc=pawfgrtab(iatom)%ifftsph(ic)
-               vloc(1,ic)=vtrial(jc,ispden)-vxc(jc,ispden)
-               vloc(2,ic)=zero
-             end do
-           else
-             do ic=1,nfgd
-               jc=pawfgrtab(iatom)%ifftsph(ic)
-               vloc(1,ic)=vtrial(jc,ispden)
-               vloc(2,ic)=zero
-             end do
-           end if
-         else if (ispden==3) then
-           if (usexcnhat==0) then
-             vloc(:,:)=zero
-           else
-             do ic=1,nfgd
-               jc=pawfgrtab(iatom)%ifftsph(ic)
-               vloc(1,ic)=vtrial(jc,3)
-               vloc(2,ic)=vtrial(jc,4)
-             end do
-           end if
-         else ! ispden=4
-           vloc(2,1:nfgd)=-vloc(2,1:nfgd)
-         end if
-       end if
+           LIBPAW_DEALLOCATE(intv)
+           LIBPAW_DEALLOCATE(vloc)
+!          Dijfr is marked as computed
+           paw_ij1(iatom)%has_dijfr=2
 
-       LIBPAW_ALLOCATE(intv,(cplex,lm_size))
-       intv(:,:)=zero
-!      option = 0 Insulator case
-       if(option==0)then
-         do ilslm=1,lm_size
-           do ic=1,nfgd
-             jc=pawfgrtab(iatom)%ifftsph(ic)
-             contrib(1) = 0
-!            Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
-             mua=alpha(istr);mub=beta(istr)
-             contrib(1)=contrib(1)+half*vloc(1,ic)&
-&              *(pawfgrtab(iatom)%gylmgr(mua,ic,ilslm)*pawfgrtab(iatom)%rfgd(mub,ic)&
-&              + pawfgrtab(iatom)%gylmgr(mub,ic,ilslm)*pawfgrtab(iatom)%rfgd(mua,ic))
+         end if ! ipert
 
-!            Int_R^3{Vloc^(1)*Sum_LM[Q_ij_q^LM]}
-             contrib(1)=contrib(1)+vpsp1(jc)*pawfgrtab(iatom)%gylm(ic,ilslm)
+!----------------------------------------------------------
+!      End loops over spin components
+       end do ! ispden
 
-!            delta_{alphabeta}Int_R^3{Vloc*Sum_LM[Q_ij_q^LM]}
-             if(istr<=3)then
-               contrib(1)=contrib(1)+vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
-             end if
-
-             intv(1,ilslm)=intv(1,ilslm)+contrib(1)
-           end do
-         end do
-
-!      option = 1 Metal case (without Vpsp1)
-       else if (option==1)then
-         do ilslm=1,lm_size
-           do ic=1,nfgd
-             jc=pawfgrtab(iatom)%ifftsph(ic)
-             contrib(1) = 0
-!            Int_R^3{vtrial*Sum_LM[Q_ij_q^LM^(1)]}
-             mua=alpha(istr);mub=beta(istr)
-             contrib(1)=contrib(1)+half*vloc(1,ic)&
-&              *(pawfgrtab(iatom)%gylmgr(mua,ic,ilslm)*pawfgrtab(iatom)%rfgd(mub,ic)&
-&              + pawfgrtab(iatom)%gylmgr(mub,ic,ilslm)*pawfgrtab(iatom)%rfgd(mua,ic))
-
-!            delta_{alphabeta}Int_R^3{Vtrial*Sum_LM[Q_ij_q^LM]}
-             if(istr<=3)then
-               contrib(1)=contrib(1)+vloc(1,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
-             end if
-
-             intv(1,ilslm)=intv(1,ilslm)+contrib(1)
-           end do
-         end do
-       end if
-
-!      Apply ucvol/nfft factor on integral
-       intv(:,:)=fact*intv(:,:)
-
-!      --- Reduction in case of parallelization ---
-       call xmpi_sum(intv,my_comm_grid,ier)
-
-       paw_ij1(iatom)%dijfr(:,ispden)=zero
-
-!      ---- Loop over (i,j) components
-       klmn1=1
+     else if (nspden==4.and.idij==4) then ! cplex=1 here
+       paw_ij1(iatom)%dijfr(:,idij)=paw_ij1(iatom)%dijfr(:,idij-1)
+       klmn1=2
        do klmn=1,lmn2_size
-         klm =pawtab(itypat)%indklmn(1,klmn)
-         lmin=pawtab(itypat)%indklmn(3,klmn)
-         lmax=pawtab(itypat)%indklmn(4,klmn)
-         do ils=lmin,lmax,2
-           lm0=ils**2+ils+1
-           do mm=-ils,ils
-             ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
-             if (isel>0) then
-!              The following works only because cplex<=cplex_dij
-!              if cplex<cplex_dij, add zero to imaginary par of dijfr
-               paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden)= &
-&                paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex,ispden) &
-&                +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex,ilslm)
-             end if
-           end do
-         end do
+         paw_ij1(iatom)%dijfr(klmn1,idij)=-paw_ij1(iatom)%dijfr(klmn1,idij)
          klmn1=klmn1+cplex_dij
        end do
-       LIBPAW_DEALLOCATE(intv)
-       LIBPAW_DEALLOCATE(vloc)
-!      Dijfr is marked as computed
-       paw_ij1(iatom)%has_dijfr=2
+     else if (nsppol==1.and.idij==2) then ! cplex=1 here
+       paw_ij1(iatom)%dijfr(:,idij)=paw_ij1(iatom)%dijfr(:,idij-1)
+     end if
 
-     end if ! ipert
+!  End loop on Dij components
+   end do ! idij
 
-!    End loop over spin components
-   end do ! ispden
+!----------------------------------------------------------
 
 !  Eventually free temporary space for g_l(r).Y_lm(r) gradients and exp(-i.q.r)
    if (need_dijfr_1.or.need_dijfr_2) then

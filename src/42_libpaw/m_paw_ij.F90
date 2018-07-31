@@ -1160,9 +1160,15 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
      if (iatom_tot==1.or.iatom_tot==my_natom.or.my_prtvol<0) then
       write(msg,'(a)') '   ************** Dij(1) Frozen **************'
       call wrtout(my_unt,msg,my_mode)
-      dij2p =>  Paw_ij(iatom)%dijfr(:,idij)
-      call pawio_print_ij(my_unt,dij2p,lmn2_size,cplex,lmn_size,-1,idum,0, &
-&                   my_prtvol,idum,-1.d0,1,opt_sym=1,mode_paral=my_mode)
+      if ((idij<=nsppol.or.idij==2))then
+       opt_sym=2; tmp_cplex_dij=1
+       dij2p => Paw_ij(iatom)%dijfr(1:cplex_dij*lmn2_size:cplex_dij,idij)
+      else
+        opt_sym=1; tmp_cplex_dij=cplex_dij
+        dij2p => Paw_ij(iatom)%dijfr(1:cplex_dij*lmn2_size:1,idij)
+      end if
+      call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
+&                   my_prtvol,idum,-1.d0,1,opt_sym=opt_sym,mode_paral=my_mode)
      end if
     end if
    end if
