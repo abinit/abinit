@@ -32,7 +32,8 @@ MODULE m_paw_occupancies
  use m_pawrhoij,   only : pawrhoij_type,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked, &
 &                         pawrhoij_alloc,pawrhoij_free,pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
-&                         pawcprj_gather_spin, pawcprj_free
+&                         pawcprj_gather_spin, pawcprj_free, pawcprj_mpi_send, &
+&                         pawcprj_mpi_recv, pawcprj_copy
  use m_paw_io,     only : pawio_print_ij
  use m_paral_atom, only : get_my_atmtab,free_my_atmtab
  use m_paw_dmft,   only : paw_dmft_type

@@ -49,6 +49,7 @@ module m_mkrho
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
+ use m_rot_cg,       only : rot_cg
 
  implicit none
 
