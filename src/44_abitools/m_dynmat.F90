@@ -1569,7 +1569,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical, parameter :: do_final_sym=.true.
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
- integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,noccur,nsym_used,quit,quit1
+ integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
  real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
@@ -1753,11 +1753,13 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      sumr=zero
                      sumi=zero
                      noccur=0
+                     nblkflg_is_one=0
                      quit=0
                      do idisy1=1,3
                        do idisy2=1,3
                          if(sym1_(idir1,idisy1,isym)/=0 .and. sym2_(idir2,idisy2,isym)/=0 )then
                            if(blkflg(idisy1,ipesy1,idisy2,ipesy2)==1)then
+                             nblkflg_is_one=nblkflg_is_one+1
                              sumr=sumr+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
 &                             d2(1,idisy1,ipesy1,idisy2,ipesy2)
                              sumi=sumi+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
@@ -1808,8 +1810,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  Now, if still found, put the correct value into array d2
-                   if(found==1)then
+!                  Now, if still found and associated to at least one really computed matrix element, put the correct value into array d2
+                   if(found==1 .and. nblkflg_is_one/=0 )then
 
 !                    In case of phonons, need to take into account the
 !                    time-reversal symmetry, and the shift back to the unit cell
@@ -1883,7 +1885,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
 !MT oct. 20, 2014:
 !Once the matrix has been built, it does not necessarily fulfill the correct symmetries.
-!It has just been filled up from rows or columns that only fulfill symmetries perserving
+!It has just been filled up from rows or columns that only fulfill symmetries preserving
 !one particular perturbation.
 !An additional symmetrization might solve this (do not consider TR-symmetry)
  if (do_final_sym) then
