@@ -85,7 +85,7 @@
      xred   0.0  0.0  0.0
             0.25 0.25 0.25
 #Number of band
-    nband   9
+    nband   4
 #Definition of the planewave basis set
      ecut   3.0
 #Definition of the k-point grid
