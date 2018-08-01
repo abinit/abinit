@@ -2044,7 +2044,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
-   if (dt%usepaw==1) then
+   if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
      allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
      if(allow) then

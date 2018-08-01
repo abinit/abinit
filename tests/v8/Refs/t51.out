@@ -1,6 +1,6 @@
 
 .Version 8.9.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,15 +15,15 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Aug 2018.
-- ( at 15h25 )
+- ( at 16h01 )
   
 - input  file    -> t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
 
-- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -141,7 +141,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
@@ -661,9 +661,9 @@ P          mk1mem6        256
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -681,9 +681,9 @@ P          mk1mem6        256
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_develop/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -710,17 +710,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -8.5413206713356    -8.541E+00 1.100E-02 5.270E-01
- ETOT  2  -8.5453059420667    -3.985E-03 1.138E-07 7.450E-02
- ETOT  3  -8.5451975468128     1.084E-04 2.859E-06 1.726E-03
- ETOT  4  -8.5452708005917    -7.325E-05 1.427E-08 1.795E-04
- ETOT  5  -8.5452890140058    -1.821E-05 2.064E-09 3.741E-06
- ETOT  6  -8.5452892489266    -2.349E-07 6.275E-10 1.633E-07
- ETOT  7  -8.5452892532658    -4.339E-09 3.169E-11 1.392E-08
- ETOT  8  -8.5452892534685    -2.027E-10 1.979E-12 1.445E-09
- ETOT  9  -8.5452892535687    -1.002E-10 2.553E-14 1.538E-10
- ETOT 10  -8.5452892535637     5.052E-12 2.108E-14 2.475E-13
- ETOT 11  -8.5452892535638    -1.190E-13 7.331E-17 2.446E-14
- ETOT 12  -8.5452892535639    -1.510E-13 5.976E-19 4.250E-16
+ ETOT  2  -8.5453059438558    -3.985E-03 1.138E-07 7.450E-02
+ ETOT  3  -8.5451975385605     1.084E-04 2.859E-06 1.726E-03
+ ETOT  4  -8.5452707984909    -7.326E-05 1.427E-08 1.795E-04
+ ETOT  5  -8.5452890139487    -1.822E-05 2.064E-09 3.741E-06
+ ETOT  6  -8.5452892489178    -2.350E-07 6.275E-10 1.633E-07
+ ETOT  7  -8.5452892532681    -4.350E-09 3.169E-11 1.392E-08
+ ETOT  8  -8.5452892534694    -2.013E-10 1.978E-12 1.444E-09
+ ETOT  9  -8.5452892535688    -9.940E-11 2.551E-14 1.538E-10
+ ETOT 10  -8.5452892535636     5.173E-12 2.108E-14 2.475E-13
+ ETOT 11  -8.5452892535640    -3.126E-13 7.319E-17 2.448E-14
+ ETOT 12  -8.5452892535642    -2.025E-13 5.940E-19 4.250E-16
 
  At SCF step   12       nres2   =  4.25E-16 < tolvrs=  1.00E-15 =>converged.
 
@@ -738,8 +738,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.413895161738604
- Compensation charge over fine fft grid    =     -0.413900254036634
+ Compensation charge over spherical meshes =     -0.413895161769571
+ Compensation charge over fine fft grid    =     -0.413900254036056
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -789,27 +789,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.4757E-19; max=  5.9759E-19
+ Mean square residual over all n,k,spin=   1.4675E-19; max=  5.9400E-19
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  3.1092E-28; max dE/dt=  5.3853E-28; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  9.5199E-29; max dE/dt=  1.3463E-28; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40364254578497     1.40364254578497     1.40364254578497
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 4.1442707E-29 5.0756743E-29   0.000E+00  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 1.2148970E-29 1.9033779E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 2.1310695E-27 2.6100165E-27   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 6.2472513E-28 9.7875617E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
               =  5.614570183140  5.614570183140  5.614570183140 angstroms
  prteigrs : about to open file t51o_DS1_EIG
@@ -823,25 +823,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.09772464592769E+00
-    Hartree energy  =  7.80296471723146E-01
-    XC energy       = -7.47089798766545E+00
+    Kinetic energy  =  3.09772464592580E+00
+    Hartree energy  =  7.80296471721166E-01
+    XC energy       = -7.47089798769785E+00
     Ewald energy    = -8.47989583509473E+00
-    PspCore energy  =  8.86441344921509E-01
-    Loc. psp. energy= -1.89454809448906E+00
-    Spherical terms =  4.53559019810837E+00
-    >>>>>>>>> Etotal= -8.54528925656852E+00
+    PspCore energy  =  8.86441344921512E-01
+    Loc. psp. energy= -1.89454809448467E+00
+    Spherical terms =  4.53559019815889E+00
+    >>>>>>>>> Etotal= -8.54528925654988E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -7.47145686666912E-01
+    Band energy     = -7.47145686666722E-01
     Ewald energy    = -8.47989583509473E+00
-    PspCore energy  =  8.86441344921509E-01
-    Dble-C XC-energy= -4.44460857579048E+00
-    Spherical terms =  4.23991949906666E+00
-    >>>> Etotal (DC)= -8.54528925356395E+00
+    PspCore energy  =  8.86441344921512E-01
+    Dble-C XC-energy= -4.44460857578794E+00
+    Spherical terms =  4.23991949906373E+00
+    >>>> Etotal (DC)= -8.54528925356415E+00
 
-  >Total energy in eV           = -2.32529146155220E+02
-  >Total DC energy in eV        = -2.32529146073461E+02
+  >Total energy in eV           = -2.32529146154713E+02
+  >Total DC energy in eV        = -2.32529146073467E+02
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -850,9 +850,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   sigma(3 3)= -2.08848578E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  6.1445E-01 GPa]
-- sigma(1 1)= -6.14453627E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -6.14453627E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -6.14453627E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -6.14453626E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -6.14453626E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -6.14453626E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -917,23 +917,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.6559184987205     -8.656E+00 2.642E-02 0.000E+00
- ETOT  2  -8.6594301998937     -3.512E-03 1.281E-05 0.000E+00
- ETOT  3  -8.6594319264960     -1.727E-06 3.670E-08 0.000E+00
- ETOT  4  -8.6594319282982     -1.802E-09 6.494E-11 0.000E+00
- ETOT  5  -8.6594319283016     -3.345E-12 2.062E-13 0.000E+00
- ETOT  6  -8.6594319283017     -7.461E-14 3.975E-16 0.000E+00
- ETOT  7  -8.6594319283017     -8.882E-15 1.407E-18 0.000E+00
- ETOT  8  -8.6594319283017      1.243E-14 3.143E-21 0.000E+00
- ETOT  9  -8.6594319283016      3.553E-15 1.191E-23 0.000E+00
- ETOT 10  -8.6594319283016      0.000E+00 9.671E-26 0.000E+00
+-ETOT  1  -8.6559187262114     -8.656E+00 2.642E-02 0.000E+00
+ ETOT  2  -8.6594301998686     -3.511E-03 1.281E-05 0.000E+00
+ ETOT  3  -8.6594319265030     -1.727E-06 3.667E-08 0.000E+00
+ ETOT  4  -8.6594319283011     -1.798E-09 6.518E-11 0.000E+00
+ ETOT  5  -8.6594319283045     -3.356E-12 2.063E-13 0.000E+00
+ ETOT  6  -8.6594319283045     -1.954E-14 3.999E-16 0.000E+00
+ ETOT  7  -8.6594319283045      4.263E-14 1.410E-18 0.000E+00
+ ETOT  8  -8.6594319283045     -1.066E-14 3.163E-21 0.000E+00
+ ETOT  9  -8.6594319283045      5.329E-15 1.195E-23 0.000E+00
+ ETOT 10  -8.6594319283045      0.000E+00 9.669E-26 0.000E+00
 
  At SCF step   10   max residual=  9.67E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.3951E-26; max=  9.6709E-26
+ Mean square residual over all n,k,spin=   3.3991E-26; max=  9.6693E-26
  dfpt_looppert : ek2=    1.6833336546E+01
           f-sum rule ratio=    1.0517021530E+00
  prteigrs : about to open file t51_1WF1_EIG
@@ -975,23 +975,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.6559184986205     -8.656E+00 2.642E-02 0.000E+00
- ETOT  2  -8.6594301997937     -3.512E-03 1.281E-05 0.000E+00
- ETOT  3  -8.6594319263960     -1.727E-06 3.670E-08 0.000E+00
- ETOT  4  -8.6594319281982     -1.802E-09 6.494E-11 0.000E+00
- ETOT  5  -8.6594319282016     -3.316E-12 2.062E-13 0.000E+00
- ETOT  6  -8.6594319282016     -4.263E-14 3.975E-16 0.000E+00
- ETOT  7  -8.6594319282017     -4.263E-14 1.407E-18 0.000E+00
- ETOT  8  -8.6594319282016      4.263E-14 3.143E-21 0.000E+00
- ETOT  9  -8.6594319282016      7.105E-15 1.191E-23 0.000E+00
- ETOT 10  -8.6594319282016     -7.105E-15 9.670E-26 0.000E+00
+-ETOT  1  -8.6559187261115     -8.656E+00 2.642E-02 0.000E+00
+ ETOT  2  -8.6594301997686     -3.511E-03 1.281E-05 0.000E+00
+ ETOT  3  -8.6594319264030     -1.727E-06 3.667E-08 0.000E+00
+ ETOT  4  -8.6594319282011     -1.798E-09 6.518E-11 0.000E+00
+ ETOT  5  -8.6594319282044     -3.359E-12 2.063E-13 0.000E+00
+ ETOT  6  -8.6594319282045     -7.105E-14 3.999E-16 0.000E+00
+ ETOT  7  -8.6594319282045      2.309E-14 1.410E-18 0.000E+00
+ ETOT  8  -8.6594319282045      3.553E-15 3.163E-21 0.000E+00
+ ETOT  9  -8.6594319282045     -1.776E-15 1.195E-23 0.000E+00
+ ETOT 10  -8.6594319282045      5.329E-15 9.671E-26 0.000E+00
 
  At SCF step   10   max residual=  9.67E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.3950E-26; max=  9.6704E-26
+ Mean square residual over all n,k,spin=   3.3991E-26; max=  9.6711E-26
  dfpt_looppert : ek2=    1.6833336546E+01
           f-sum rule ratio=    1.0517021529E+00
  prteigrs : about to open file t51_1WF1_EIG
@@ -1033,23 +1033,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.6559184985205     -8.656E+00 2.642E-02 0.000E+00
- ETOT  2  -8.6594301996936     -3.512E-03 1.281E-05 0.000E+00
- ETOT  3  -8.6594319262959     -1.727E-06 3.670E-08 0.000E+00
- ETOT  4  -8.6594319280982     -1.802E-09 6.494E-11 0.000E+00
- ETOT  5  -8.6594319281015     -3.359E-12 2.062E-13 0.000E+00
- ETOT  6  -8.6594319281016     -6.750E-14 3.975E-16 0.000E+00
- ETOT  7  -8.6594319281016      2.132E-14 1.407E-18 0.000E+00
- ETOT  8  -8.6594319281016      3.553E-15 3.143E-21 0.000E+00
- ETOT  9  -8.6594319281016      3.553E-15 1.191E-23 0.000E+00
- ETOT 10  -8.6594319281016      3.553E-15 9.668E-26 0.000E+00
+-ETOT  1  -8.6559187260114     -8.656E+00 2.642E-02 0.000E+00
+ ETOT  2  -8.6594301996685     -3.511E-03 1.281E-05 0.000E+00
+ ETOT  3  -8.6594319263029     -1.727E-06 3.667E-08 0.000E+00
+ ETOT  4  -8.6594319281010     -1.798E-09 6.518E-11 0.000E+00
+ ETOT  5  -8.6594319281044     -3.427E-12 2.063E-13 0.000E+00
+ ETOT  6  -8.6594319281044     -1.776E-15 3.999E-16 0.000E+00
+ ETOT  7  -8.6594319281044      1.954E-14 1.410E-18 0.000E+00
+ ETOT  8  -8.6594319281044     -2.487E-14 3.163E-21 0.000E+00
+ ETOT  9  -8.6594319281044      1.599E-14 1.195E-23 0.000E+00
+ ETOT 10  -8.6594319281044     -3.553E-15 9.673E-26 0.000E+00
 
  At SCF step   10   max residual=  9.67E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.3949E-26; max=  9.6685E-26
+ Mean square residual over all n,k,spin=   3.3991E-26; max=  9.6732E-26
  dfpt_looppert : ek2=    1.6833336546E+01
           f-sum rule ratio=    1.0517021529E+00
  prteigrs : about to open file t51_1WF1_EIG
@@ -1159,21 +1159,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 -dfpt_looppert : read the wavefunctions from file: t51o_DS2_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -198.28448910745     -1.983E+02 1.102E+00 1.127E+04
- ETOT  2  -207.93465260427     -9.650E+00 3.056E-03 7.159E+02
- ETOT  3  -208.47210325701     -5.375E-01 3.289E-04 2.682E+01
- ETOT  4  -208.47639858404     -4.295E-03 5.036E-06 2.134E+00
- ETOT  5  -208.47653481340     -1.362E-04 9.264E-08 2.355E-01
- ETOT  6  -208.47654594617     -1.113E-05 8.720E-09 2.538E-02
- ETOT  7  -208.47654627582     -3.296E-07 2.041E-10 2.536E-03
- ETOT  8  -208.47654629038     -1.456E-08 1.159E-11 2.263E-04
- ETOT  9  -208.47654629104     -6.618E-10 4.805E-13 2.010E-05
- ETOT 10  -208.47654629112     -8.239E-11 8.118E-14 1.740E-06
- ETOT 11  -208.47654629113     -5.002E-12 3.792E-15 1.530E-07
- ETOT 12  -208.47654629113     -1.990E-12 7.644E-16 1.395E-08
- ETOT 13  -208.47654629113     -3.695E-13 4.886E-16 1.317E-09
+-ETOT  1  -198.28455089155     -1.983E+02 1.101E+00 1.127E+04
+ ETOT  2  -207.93464392587     -9.650E+00 3.056E-03 7.159E+02
+ ETOT  3  -208.47210331023     -5.375E-01 3.289E-04 2.682E+01
+ ETOT  4  -208.47639855472     -4.295E-03 5.039E-06 2.134E+00
+ ETOT  5  -208.47653485532     -1.363E-04 9.281E-08 2.353E-01
+ ETOT  6  -208.47654594503     -1.109E-05 8.673E-09 2.534E-02
+ ETOT  7  -208.47654627644     -3.314E-07 2.047E-10 2.531E-03
+ ETOT  8  -208.47654629108     -1.464E-08 1.163E-11 2.262E-04
+ ETOT  9  -208.47654629174     -6.577E-10 4.730E-13 2.007E-05
+ ETOT 10  -208.47654629182     -8.009E-11 7.876E-14 1.740E-06
+ ETOT 11  -208.47654629182     -4.263E-12 3.972E-15 1.528E-07
+ ETOT 12  -208.47654629183     -1.478E-12 6.809E-16 1.388E-08
+ ETOT 13  -208.47654629183     -1.023E-12 4.701E-16 1.308E-09
 
- At SCF step   13       vres2   =  1.32E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step   13       vres2   =  1.31E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
 -open ddk wf file :t51o_DS2_1WF8
 -open ddk wf file :t51o_DS2_1WF9
@@ -1181,21 +1181,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.8032E-17; max=  4.8855E-16
+ Mean square residual over all n,k,spin=   8.5616E-17; max=  4.7007E-16
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   6.66746289E+02 eigvalue=  -5.10089226E+01  local=  -6.11769060E+02
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    dotwf=  -4.16953092E+02  Hartree=   2.96329189E+01     xc=  -2.17307424E+01
+    dotwf=  -4.16953093E+02  Hartree=   2.96329189E+01     xc=  -2.17307424E+01
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.95697602E+02   enl1=   0.00000000E+00
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   9.08461736E-01
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   9.08461737E-01
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.08476546E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2084765463E+03 Ha. Also 2DEtotal=   -0.567293532694E+04 eV
-    (  non-var. 2DEtotal :   -2.0847654625E+02 Ha)
+ 2DEtotal=   -0.2084765463E+03 Ha. Also 2DEtotal=   -0.567293532695E+04 eV
+    (  non-var. 2DEtotal :   -2.0847654626E+02 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -1208,88 +1208,88 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    4        -5.8055845651         0.0000000000
+   1    1   1    4        -5.8055845697         0.0000000000
    1    1   2    4        -0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4        -5.8055845651         0.0000000000
+   2    1   2    4        -5.8055845697         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
   
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
-   3    1   3    4        -5.8055845651         0.0000000000
+   3    1   3    4        -5.8055845697         0.0000000000
   
-   1    2   1    4       -44.5480148931         0.0000000000
+   1    2   1    4       -44.5480148698         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
   
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -44.5480148931         0.0000000000
+   2    2   2    4       -44.5480148698         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
   
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
-   3    2   3    4       -44.5480148931         0.0000000000
+   3    2   3    4       -44.5480148698         0.0000000000
   
-   1    4   1    1        -5.8055845651         0.0000000000
+   1    4   1    1        -5.8055845697         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -44.5480148931         0.0000000000
+   1    4   1    2       -44.5480148698         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
-   1    4   1    4      -208.4765462467         0.0000000000
-   1    4   2    4        69.4921820822         0.0000000000
-   1    4   3    4        69.4921820822         0.0000000000
+   1    4   1    4      -208.4765462554         0.0000000000
+   1    4   2    4        69.4921820851         0.0000000000
+   1    4   3    4        69.4921820851         0.0000000000
   
    2    4   1    1        -0.0000000000         0.0000000000
-   2    4   2    1        -5.8055845651         0.0000000000
+   2    4   2    1        -5.8055845697         0.0000000000
    2    4   3    1        -0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -44.5480148931         0.0000000000
+   2    4   2    2       -44.5480148698         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
-   2    4   1    4        69.4921820822         0.0000000000
-   2    4   2    4      -208.4765462467         0.0000000000
-   2    4   3    4        69.4921820822         0.0000000000
+   2    4   1    4        69.4921820851         0.0000000000
+   2    4   2    4      -208.4765462554         0.0000000000
+   2    4   3    4        69.4921820851         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1        -0.0000000000         0.0000000000
-   3    4   3    1        -5.8055845651         0.0000000000
+   3    4   3    1        -5.8055845697         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
-   3    4   3    2       -44.5480148931         0.0000000000
-   3    4   1    4        69.4921820822         0.0000000000
-   3    4   2    4        69.4921820822         0.0000000000
-   3    4   3    4      -208.4765462467         0.0000000000
+   3    4   3    2       -44.5480148698         0.0000000000
+   3    4   1    4        69.4921820851         0.0000000000
+   3    4   2    4        69.4921820851         0.0000000000
+   3    4   3    4      -208.4765462554         0.0000000000
   
-   1    5   1    4        -0.0000000079         0.0000000000
+   1    5   1    4        -0.0000000082         0.0000000000
   
-   2    5   1    4        -0.0000000080         0.0000000000
+   2    5   1    4        -0.0000000083         0.0000000000
   
-   3    5   1    4        -0.0000000079         0.0000000000
+   3    5   1    4        -0.0000000082         0.0000000000
   
-   1    6   1    4         2.0756738500         0.0000000000
+   1    6   1    4         2.0756738518         0.0000000000
   
-   2    6   1    4        -2.0756738498         0.0000000000
+   2    6   1    4        -2.0756738516         0.0000000000
   
-   3    6   1    4        -2.0756738500         0.0000000000
+   3    6   1    4        -2.0756738518         0.0000000000
   
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    4         9.3393208555        -0.0000000000
+   1    4   1    4         9.3393208559        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
   
    2    4   1    4        -0.0000000000        -0.0000000000
-   2    4   2    4         9.3393208555        -0.0000000000
+   2    4   2    4         9.3393208559        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
   
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
-   3    4   3    4         9.3393208555        -0.0000000000
+   3    4   3    4         9.3393208559        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
@@ -1297,26 +1297,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         2.0760125189         0.0000000000
+   1    1   1    4         2.0760125182         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   3    1   1    4        -0.0000000000         0.0000000000
-   1    2   1    4        -2.0900367752         0.0000000000
+   3    1   1    4         0.0000000000         0.0000000000
+   1    2   1    4        -2.0900367715         0.0000000000
    2    2   1    4        -0.0000000000         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
   
    1    1   2    4         0.0000000000         0.0000000000
-   2    1   2    4         2.0760125189         0.0000000000
+   2    1   2    4         2.0760125182         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
-   2    2   2    4        -2.0900367752         0.0000000000
+   2    2   2    4        -2.0900367715         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
   
    1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
-   3    1   3    4         2.0760125189         0.0000000000
+   3    1   3    4         2.0760125182         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-   3    2   3    4        -2.0900367752         0.0000000000
+   3    2   3    4        -2.0900367715         0.0000000000
   
   Warning: The rigid-atom proper piezoelectric tensor
   from  electric field response requires nsym=1
@@ -1409,18 +1409,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.7030866706797     -1.153E+01 9.305E-03 1.186E+03
- ETOT  2   5.7610606628530     -9.420E-01 3.116E-04 1.400E+02
- ETOT  3   5.6401216623188     -1.209E-01 7.770E-05 1.602E+00
- ETOT  4   5.6393248669069     -7.968E-04 4.327E-07 1.027E-01
- ETOT  5   5.6392961868959     -2.868E-05 2.014E-08 1.372E-02
- ETOT  6   5.6392942644886     -1.922E-06 2.406E-09 1.670E-03
- ETOT  7   5.6392941979495     -6.654E-08 9.027E-11 1.815E-04
- ETOT  8   5.6392941970433     -9.063E-10 6.263E-13 1.656E-05
- ETOT  9   5.6392941970324     -1.083E-11 1.854E-14 1.554E-06
- ETOT 10   5.6392941970274     -5.041E-12 5.401E-15 1.272E-07
- ETOT 11   5.6392941970273     -1.084E-13 1.104E-16 1.180E-08
- ETOT 12   5.6392941970273     -3.375E-14 6.798E-18 1.072E-09
+-ETOT  1   6.7030862314232     -1.153E+01 9.305E-03 1.186E+03
+ ETOT  2   5.7610607206146     -9.420E-01 3.116E-04 1.400E+02
+ ETOT  3   5.6401216606711     -1.209E-01 7.770E-05 1.602E+00
+ ETOT  4   5.6393248669499     -7.968E-04 4.327E-07 1.027E-01
+ ETOT  5   5.6392961868433     -2.868E-05 2.014E-08 1.372E-02
+ ETOT  6   5.6392942644409     -1.922E-06 2.406E-09 1.670E-03
+ ETOT  7   5.6392941979019     -6.654E-08 9.027E-11 1.815E-04
+ ETOT  8   5.6392941969956     -9.062E-10 6.262E-13 1.656E-05
+ ETOT  9   5.6392941969848     -1.087E-11 1.854E-14 1.554E-06
+ ETOT 10   5.6392941969797     -5.082E-12 5.400E-15 1.272E-07
+ ETOT 11   5.6392941969796     -6.750E-14 1.104E-16 1.180E-08
+ ETOT 12   5.6392941969796     -5.862E-14 6.800E-18 1.072E-09
 
  At SCF step   12       vres2   =  1.07E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
@@ -1430,7 +1430,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.4105E-18; max=  6.7978E-18
+ Mean square residual over all n,k,spin=   2.4042E-18; max=  6.7997E-18
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1450,7 +1450,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -1.51861166E-01
  Resulting in :
- 2DEtotal=    0.5639294197E+01 Ha. Also 2DEtotal=    0.153452999095E+03 eV
+ 2DEtotal=    0.5639294197E+01 Ha. Also 2DEtotal=    0.153452999093E+03 eV
     (2DErelax=   -1.2595972569E+01 Ha. 2DEnonrelax=    1.8235266766E+01 Ha)
     (  non-var. 2DEtotal :    5.6392941205E+00 Ha)
 
@@ -1471,19 +1471,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   29.172572466811     -5.981E+01 1.029E-01 2.099E+04
- ETOT  2   7.7005303629685     -2.147E+01 8.046E-03 1.424E+03
- ETOT  3   6.2187381100476     -1.482E+00 6.788E-04 2.774E+01
- ETOT  4   6.1977227400478     -2.102E-02 2.590E-05 2.543E+00
- ETOT  5   6.1973888726986     -3.339E-04 5.211E-07 2.992E-01
- ETOT  6   6.1973824861563     -6.387E-06 8.824E-09 3.299E-02
- ETOT  7   6.1973822527490     -2.334E-07 2.761E-10 3.162E-03
- ETOT  8   6.1973822428631     -9.886E-09 1.586E-11 2.893E-04
- ETOT  9   6.1973822412905     -1.573E-09 2.904E-12 2.318E-05
- ETOT 10   6.1973822408936     -3.969E-10 3.055E-13 2.131E-06
- ETOT 11   6.1973822408675     -2.605E-11 1.427E-14 1.774E-07
- ETOT 12   6.1973822408624     -5.187E-12 3.332E-15 1.575E-08
- ETOT 13   6.1973822408618     -5.684E-13 1.452E-16 1.444E-09
+-ETOT  1   29.172455967338     -5.981E+01 1.029E-01 2.099E+04
+ ETOT  2   7.7005408175794     -2.147E+01 8.046E-03 1.424E+03
+ ETOT  3   6.2187380042504     -1.482E+00 6.788E-04 2.774E+01
+ ETOT  4   6.1977227387963     -2.102E-02 2.591E-05 2.543E+00
+ ETOT  5   6.1973888731581     -3.339E-04 5.211E-07 2.992E-01
+ ETOT  6   6.1973824861254     -6.387E-06 8.825E-09 3.299E-02
+ ETOT  7   6.1973822526930     -2.334E-07 2.758E-10 3.162E-03
+ ETOT  8   6.1973822428051     -9.888E-09 1.581E-11 2.893E-04
+ ETOT  9   6.1973822412303     -1.575E-09 2.862E-12 2.318E-05
+ ETOT 10   6.1973822408443     -3.861E-10 2.982E-13 2.129E-06
+ ETOT 11   6.1973822408162     -2.811E-11 1.415E-14 1.773E-07
+ ETOT 12   6.1973822408117     -4.476E-12 3.151E-15 1.573E-08
+ ETOT 13   6.1973822408123      5.969E-13 1.451E-16 1.441E-09
 
  At SCF step   13       vres2   =  1.44E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
@@ -1493,7 +1493,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7161E-17; max=  1.4517E-16
+ Mean square residual over all n,k,spin=   3.7151E-17; max=  1.4509E-16
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1513,9 +1513,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.04784599E+00
  Resulting in :
- 2DEtotal=    0.6197382241E+01 Ha. Also 2DEtotal=    0.168639347083E+03 eV
+ 2DEtotal=    0.6197382241E+01 Ha. Also 2DEtotal=    0.168639347082E+03 eV
     (2DErelax=   -8.2789377714E+01 Ha. 2DEnonrelax=    8.8986759955E+01 Ha)
-    (  non-var. 2DEtotal :    6.1973822086E+00 Ha)
+    (  non-var. 2DEtotal :    6.1973822101E+00 Ha)
 
 ================================================================================
 
@@ -1535,7 +1535,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    1    1   1    2        -5.6823659634        -0.0000000000
    1    1   2    2        -2.8411829817         0.0000000000
    1    1   3    2        -2.8411829817         0.0000000000
-   1    1   1    4        -5.8055846926         0.0000000000
+   1    1   1    4        -5.8055846924         0.0000000000
    1    1   2    4        -0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
@@ -1546,7 +1546,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    2    1   2    2        -5.6823659634        -0.0000000000
    2    1   3    2        -2.8411829817         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4        -5.8055846926         0.0000000000
+   2    1   2    4        -5.8055846924         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
   
    3    1   1    1         2.8196470602         0.0000000000
@@ -1557,58 +1557,58 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    3    1   3    2        -5.6823659634         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
-   3    1   3    4        -5.8055846926         0.0000000000
+   3    1   3    4        -5.8055846924         0.0000000000
   
    1    2   1    1        -5.6823659885         0.0000000000
    1    2   2    1        -2.8411829942        -0.0000000000
    1    2   3    1        -2.8411829942        -0.0000000000
-   1    2   1    2         6.1973822059         0.0000000000
-   1    2   2    2         3.0986911029         0.0000000000
-   1    2   3    2         3.0986911029         0.0000000000
-   1    2   1    4       -44.5480147073         0.0000000000
+   1    2   1    2         6.1973822079         0.0000000000
+   1    2   2    2         3.0986911040         0.0000000000
+   1    2   3    2         3.0986911040         0.0000000000
+   1    2   1    4       -44.5480147066         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
   
    2    2   1    1        -2.8411829942        -0.0000000000
    2    2   2    1        -5.6823659885         0.0000000000
    2    2   3    1        -2.8411829942        -0.0000000000
-   2    2   1    2         3.0986911029         0.0000000000
-   2    2   2    2         6.1973822059         0.0000000000
-   2    2   3    2         3.0986911029         0.0000000000
+   2    2   1    2         3.0986911040         0.0000000000
+   2    2   2    2         6.1973822079         0.0000000000
+   2    2   3    2         3.0986911040         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -44.5480147073         0.0000000000
+   2    2   2    4       -44.5480147066         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
   
    3    2   1    1        -2.8411829942        -0.0000000000
    3    2   2    1        -2.8411829942        -0.0000000000
    3    2   3    1        -5.6823659885        -0.0000000000
-   3    2   1    2         3.0986911029         0.0000000000
-   3    2   2    2         3.0986911029         0.0000000000
-   3    2   3    2         6.1973822059         0.0000000000
+   3    2   1    2         3.0986911040         0.0000000000
+   3    2   2    2         3.0986911040         0.0000000000
+   3    2   3    2         6.1973822079         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
-   3    2   3    4       -44.5480147073         0.0000000000
+   3    2   3    4       -44.5480147067         0.0000000000
   
-   1    4   1    1        -5.8055846926         0.0000000000
+   1    4   1    1        -5.8055846924         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -44.5480147073         0.0000000000
+   1    4   1    2       -44.5480147066         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1        -0.0000000000         0.0000000000
-   2    4   2    1        -5.8055846926         0.0000000000
+   2    4   2    1        -5.8055846924         0.0000000000
    2    4   3    1        -0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -44.5480147073         0.0000000000
+   2    4   2    2       -44.5480147066         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1        -0.0000000000         0.0000000000
-   3    4   3    1        -5.8055846926         0.0000000000
+   3    4   3    1        -5.8055846924         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
-   3    4   3    2       -44.5480147073         0.0000000000
+   3    4   3    2       -44.5480147067         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -1623,33 +1623,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.1001899071         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.1009551383         0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.1001899071         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.1009551383        -0.0000000000
   
    1    2   1    1        -0.1009551388         0.0000000000
-   1    2   2    1         0.0000000000        -0.0000000000
+   1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.1101051185         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
+   1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1        -0.1009551388        -0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.1101051185         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
@@ -1664,29 +1664,29 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1         2.0760124986         0.0000000000
+   1    4   1    1         2.0760124987         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1         2.0760124986         0.0000000000
+   2    4   2    1         2.0760124987         0.0000000000
    3    4   2    1        -0.0000000000         0.0000000000
   
    1    4   3    1        -0.0000000000         0.0000000000
    2    4   3    1        -0.0000000000         0.0000000000
-   3    4   3    1         2.0760124986         0.0000000000
+   3    4   3    1         2.0760124987         0.0000000000
   
-   1    4   1    2        -2.0900367456         0.0000000000
+   1    4   1    2        -2.0900367455         0.0000000000
    2    4   1    2        -0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2        -0.0000000000         0.0000000000
-   2    4   2    2        -2.0900367456         0.0000000000
+   2    4   2    2        -2.0900367455         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -2.0900367456         0.0000000000
+   3    4   3    2        -2.0900367455         0.0000000000
   
   
   
@@ -1782,27 +1782,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   286.32178848797      2.538E+02 2.383E-01 2.738E+06
- ETOT  2   19.486269058540     -2.668E+02 7.850E-02 1.393E+05
- ETOT  3   7.8076199331048     -1.168E+01 5.614E-03 1.193E+04
- ETOT  4   6.7084020384234     -1.099E+00 1.018E-03 1.334E+02
- ETOT  5   6.6960061889013     -1.240E-02 1.343E-05 8.878E+00
- ETOT  6   6.6955228700733     -4.833E-04 3.258E-07 1.001E+00
- ETOT  7   6.6954880028500     -3.487E-05 2.552E-08 1.097E-01
- ETOT  8   6.6954872185170     -7.843E-07 6.475E-10 1.028E-02
- ETOT  9   6.6954871282269     -9.029E-08 2.796E-11 9.389E-04
- ETOT 10   6.6954871251929     -3.034E-09 1.365E-12 8.513E-05
- ETOT 11   6.6954871281976      3.005E-09 5.173E-13 7.446E-06
- ETOT 12   6.6954871276410     -5.566E-10 1.273E-14 6.632E-07
- ETOT 13   6.6954871278512      2.103E-10 4.136E-16 6.012E-08
- ETOT 14   6.6954871278274     -2.388E-11 2.213E-17 5.329E-09
+-ETOT  1   286.32178416176      2.538E+02 2.383E-01 2.738E+06
+ ETOT  2   19.486273948500     -2.668E+02 7.850E-02 1.393E+05
+ ETOT  3   7.8076185415015     -1.168E+01 5.614E-03 1.193E+04
+ ETOT  4   6.7084021491956     -1.099E+00 1.018E-03 1.334E+02
+ ETOT  5   6.6960061937820     -1.240E-02 1.343E-05 8.878E+00
+ ETOT  6   6.6955228697164     -4.833E-04 3.259E-07 1.001E+00
+ ETOT  7   6.6954880028344     -3.487E-05 2.552E-08 1.097E-01
+ ETOT  8   6.6954872184695     -7.844E-07 6.474E-10 1.028E-02
+ ETOT  9   6.6954871281808     -9.029E-08 2.796E-11 9.389E-04
+ ETOT 10   6.6954871251463     -3.034E-09 1.365E-12 8.513E-05
+ ETOT 11   6.6954871281512      3.005E-09 5.173E-13 7.446E-06
+ ETOT 12   6.6954871275947     -5.564E-10 1.273E-14 6.632E-07
+ ETOT 13   6.6954871278049      2.102E-10 4.139E-16 6.012E-08
+ ETOT 14   6.6954871277812     -2.375E-11 2.211E-17 5.329E-09
 
  At SCF step   14       vres2   =  5.33E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.0116E-18; max=  2.2133E-17
+ Mean square residual over all n,k,spin=   5.0062E-18; max=  2.2105E-17
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1822,9 +1822,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -4.75999519E-01
  Resulting in :
- 2DEtotal=    0.6695487128E+01 Ha. Also 2DEtotal=    0.182193470365E+03 eV
+ 2DEtotal=    0.6695487128E+01 Ha. Also 2DEtotal=    0.182193470364E+03 eV
     (2DErelax=   -2.5842926397E+01 Ha. 2DEnonrelax=    3.2538413525E+01 Ha)
-    (  non-var. 2DEtotal :    6.6954870809E+00 Ha)
+    (  non-var. 2DEtotal :    6.6954870810E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1843,25 +1843,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   7.4525471064934     -1.129E+01 1.125E-02 2.101E+03
- ETOT  2   5.6497194051924     -1.803E+00 6.236E-04 1.891E+02
- ETOT  3   5.4796760447999     -1.700E-01 1.021E-04 2.815E+00
- ETOT  4   5.4778059695120     -1.870E-03 1.448E-06 1.349E-01
- ETOT  5   5.4777643473692     -4.162E-05 3.734E-08 1.311E-02
- ETOT  6   5.4777630927005     -1.255E-06 9.602E-10 1.499E-03
- ETOT  7   5.4777630506653     -4.204E-08 3.314E-11 1.586E-04
- ETOT  8   5.4777630519200      1.255E-09 1.310E-12 1.501E-05
- ETOT  9   5.4777630533327      1.413E-09 3.887E-14 1.395E-06
- ETOT 10   5.4777630533650      3.231E-11 2.818E-16 1.243E-07
- ETOT 11   5.4777630533430     -2.195E-11 4.965E-17 1.128E-08
- ETOT 12   5.4777630533451      2.128E-12 6.122E-19 1.016E-09
+-ETOT  1   7.4525471999603     -1.129E+01 1.125E-02 2.101E+03
+ ETOT  2   5.6497193731596     -1.803E+00 6.236E-04 1.891E+02
+ ETOT  3   5.4796760455862     -1.700E-01 1.021E-04 2.815E+00
+ ETOT  4   5.4778059694797     -1.870E-03 1.447E-06 1.349E-01
+ ETOT  5   5.4777643472894     -4.162E-05 3.734E-08 1.311E-02
+ ETOT  6   5.4777630926332     -1.255E-06 9.600E-10 1.499E-03
+ ETOT  7   5.4777630506172     -4.202E-08 3.313E-11 1.586E-04
+ ETOT  8   5.4777630518706      1.253E-09 1.309E-12 1.501E-05
+ ETOT  9   5.4777630532863      1.416E-09 3.882E-14 1.395E-06
+ ETOT 10   5.4777630533165      3.018E-11 2.795E-16 1.243E-07
+ ETOT 11   5.4777630532944     -2.210E-11 4.978E-17 1.128E-08
+ ETOT 12   5.4777630532967      2.338E-12 6.137E-19 1.016E-09
 
  At SCF step   12       vres2   =  1.02E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.6281E-19; max=  6.1215E-19
+ Mean square residual over all n,k,spin=   1.6307E-19; max=  6.1374E-19
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1881,9 +1881,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -1.60112602E-01
  Resulting in :
- 2DEtotal=    0.5477763053E+01 Ha. Also 2DEtotal=    0.149057513139E+03 eV
+ 2DEtotal=    0.5477763053E+01 Ha. Also 2DEtotal=    0.149057513137E+03 eV
     (2DErelax=   -1.3266795863E+01 Ha. 2DEnonrelax=    1.8744558916E+01 Ha)
-    (  non-var. 2DEtotal :    5.4777630672E+00 Ha)
+    (  non-var. 2DEtotal :    5.4777630673E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1903,28 +1903,28 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1328.2926859451      1.195E+03 8.094E-01 1.228E+07
- ETOT  2   46.859243033211     -1.281E+03 3.772E-01 4.206E+05
- ETOT  3   9.7786357757413     -3.708E+01 1.857E-02 2.995E+04
- ETOT  4   6.9603815688924     -2.818E+00 2.873E-03 6.059E+02
- ETOT  5   6.9110039257469     -4.938E-02 5.159E-05 3.281E+01
- ETOT  6   6.9095926138666     -1.411E-03 8.849E-07 4.264E+00
- ETOT  7   6.9094722426402     -1.204E-04 9.905E-08 4.771E-01
- ETOT  8   6.9094655370267     -6.706E-06 5.346E-09 3.972E-02
- ETOT  9   6.9094654517961     -8.523E-08 1.006E-10 3.622E-03
- ETOT 10   6.9094654632069      1.141E-08 5.344E-12 3.208E-04
- ETOT 11   6.9094654621225     -1.084E-09 7.447E-13 2.851E-05
- ETOT 12   6.9094654603691     -1.753E-09 4.689E-14 2.522E-06
- ETOT 13   6.9094654607611      3.920E-10 1.280E-15 2.259E-07
- ETOT 14   6.9094654608152      5.413E-11 8.417E-17 2.030E-08
- ETOT 15   6.9094654608101     -5.159E-12 5.916E-18 1.805E-09
+-ETOT  1   1328.2916664857      1.195E+03 8.094E-01 1.228E+07
+ ETOT  2   46.859391120805     -1.281E+03 3.772E-01 4.206E+05
+ ETOT  3   9.7786276630923     -3.708E+01 1.857E-02 2.995E+04
+ ETOT  4   6.9603823833897     -2.818E+00 2.873E-03 6.059E+02
+ ETOT  5   6.9110039566670     -4.938E-02 5.159E-05 3.281E+01
+ ETOT  6   6.9095926097654     -1.411E-03 8.849E-07 4.264E+00
+ ETOT  7   6.9094722420771     -1.204E-04 9.905E-08 4.770E-01
+ ETOT  8   6.9094655369643     -6.705E-06 5.346E-09 3.972E-02
+ ETOT  9   6.9094654517416     -8.522E-08 1.006E-10 3.622E-03
+ ETOT 10   6.9094654631552      1.141E-08 5.344E-12 3.208E-04
+ ETOT 11   6.9094654620671     -1.088E-09 7.448E-13 2.851E-05
+ ETOT 12   6.9094654603150     -1.752E-09 4.688E-14 2.522E-06
+ ETOT 13   6.9094654607034      3.884E-10 1.281E-15 2.259E-07
+ ETOT 14   6.9094654607674      6.403E-11 8.417E-17 2.030E-08
+ ETOT 15   6.9094654607574     -1.003E-11 5.904E-18 1.805E-09
 
  At SCF step   15       vres2   =  1.81E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.0897E-18; max=  5.9159E-18
+ Mean square residual over all n,k,spin=   1.0884E-18; max=  5.9043E-18
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1944,9 +1944,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -8.09525163E+00
  Resulting in :
- 2DEtotal=    0.6909465461E+01 Ha. Also 2DEtotal=    0.188016116922E+03 eV
+ 2DEtotal=    0.6909465461E+01 Ha. Also 2DEtotal=    0.188016116920E+03 eV
     (2DErelax=   -1.2600379723E+02 Ha. 2DEnonrelax=    1.3291326269E+02 Ha)
-    (  non-var. 2DEtotal :    6.9094654451E+00 Ha)
+    (  non-var. 2DEtotal :    6.9094654452E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1965,26 +1965,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   33.477778928414     -5.684E+01 1.258E-01 2.626E+04
- ETOT  2   7.7086301448812     -2.577E+01 1.036E-02 1.748E+03
- ETOT  3   5.9668418792349     -1.742E+00 7.489E-04 3.410E+01
- ETOT  4   5.9424489398537     -2.439E-02 4.236E-05 2.634E+00
- ETOT  5   5.9420878835971     -3.611E-04 4.730E-07 2.760E-01
- ETOT  6   5.9420804301146     -7.453E-06 7.565E-09 2.894E-02
- ETOT  7   5.9420799488905     -4.812E-07 2.216E-10 2.707E-03
- ETOT  8   5.9420799636872      1.480E-08 2.713E-11 2.485E-04
- ETOT  9   5.9420799581674     -5.520E-09 8.818E-13 2.273E-05
- ETOT 10   5.9420799597246      1.557E-09 4.438E-14 2.065E-06
- ETOT 11   5.9420799595890     -1.356E-10 9.802E-16 1.842E-07
- ETOT 12   5.9420799596065      1.755E-11 6.018E-18 1.659E-08
- ETOT 13   5.9420799596073      7.532E-13 1.390E-18 1.495E-09
+-ETOT  1   33.477785849243     -5.684E+01 1.258E-01 2.626E+04
+ ETOT  2   7.7086291754872     -2.577E+01 1.036E-02 1.748E+03
+ ETOT  3   5.9668418857574     -1.742E+00 7.489E-04 3.410E+01
+ ETOT  4   5.9424489374782     -2.439E-02 4.236E-05 2.634E+00
+ ETOT  5   5.9420878845579     -3.611E-04 4.731E-07 2.760E-01
+ ETOT  6   5.9420804301281     -7.454E-06 7.565E-09 2.894E-02
+ ETOT  7   5.9420799488327     -4.813E-07 2.218E-10 2.707E-03
+ ETOT  8   5.9420799636318      1.480E-08 2.712E-11 2.485E-04
+ ETOT  9   5.9420799581179     -5.514E-09 8.802E-13 2.273E-05
+ ETOT 10   5.9420799596713      1.553E-09 4.409E-14 2.065E-06
+ ETOT 11   5.9420799595370     -1.343E-10 9.771E-16 1.842E-07
+ ETOT 12   5.9420799595537      1.673E-11 6.022E-18 1.659E-08
+ ETOT 13   5.9420799595541      4.405E-13 1.388E-18 1.495E-09
 
  At SCF step   13       vres2   =  1.49E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4755E-19; max=  1.3898E-18
+ Mean square residual over all n,k,spin=   4.4717E-19; max=  1.3875E-18
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2004,7 +2004,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.19216216E+00
  Resulting in :
- 2DEtotal=    0.5942079960E+01 Ha. Also 2DEtotal=    0.161692218708E+03 eV
+ 2DEtotal=    0.5942079960E+01 Ha. Also 2DEtotal=    0.161692218706E+03 eV
     (2DErelax=   -8.4379440359E+01 Ha. 2DEnonrelax=    9.0321520318E+01 Ha)
     (  non-var. 2DEtotal :    5.9420799734E+00 Ha)
 
@@ -2020,45 +2020,45 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1         6.6954870665         0.0000050532
-   1    1   2    1         2.7388811706        -0.0000000000
-   1    1   3    1         2.7388811706         0.0000000000
-   1    1   1    2        -3.5779604665         2.7352635159
-   1    1   2    2        -2.6391421567         0.1411112526
-   1    1   3    2        -2.6391421567         0.1411112526
+   1    1   1    1         6.6954870667         0.0000050532
+   1    1   2    1         2.7388811707         0.0000000000
+   1    1   3    1         2.7388811707         0.0000000000
+   1    1   1    2        -3.5779604665         2.7352635158
+   1    1   2    2        -2.6391421567         0.1411112527
+   1    1   3    2        -2.6391421567         0.1411112527
   
-   2    1   1    1         2.7388811706        -0.0000000000
-   2    1   2    1         5.4777623412         0.0000000000
-   2    1   3    1         2.7388811706        -0.0000000000
-   2    1   1    2        -2.6391421567         0.1411112526
-   2    1   2    2        -5.2782843134         0.2822225053
-   2    1   3    2        -2.6391421567         0.1411112526
+   2    1   1    1         2.7388811707         0.0000000000
+   2    1   2    1         5.4777623413        -0.0000000000
+   2    1   3    1         2.7388811707        -0.0000000000
+   2    1   1    2        -2.6391421567         0.1411112527
+   2    1   2    2        -5.2782843133         0.2822225054
+   2    1   3    2        -2.6391421567         0.1411112527
   
-   3    1   1    1         2.7388811706         0.0000000000
-   3    1   2    1         2.7388811706        -0.0000000000
-   3    1   3    1         5.4777623412        -0.0000000000
-   3    1   1    2        -2.6391421567         0.1411112526
-   3    1   2    2        -2.6391421567         0.1411112526
-   3    1   3    2        -5.2782843134         0.2822225053
+   3    1   1    1         2.7388811707         0.0000000000
+   3    1   2    1         2.7388811707        -0.0000000000
+   3    1   3    1         5.4777623413        -0.0000000000
+   3    1   1    2        -2.6391421567         0.1411112527
+   3    1   2    2        -2.6391421567         0.1411112527
+   3    1   3    2        -5.2782843133         0.2822225054
   
-   1    2   1    1        -3.5778682931        -2.7349729444
-   1    2   2    1        -2.6391683554        -0.1410253343
-   1    2   3    1        -2.6391683554        -0.1410253343
-   1    2   1    2         6.9094656904         0.0000308269
+   1    2   1    1        -3.5778682936        -2.7349729438
+   1    2   2    1        -2.6391683556        -0.1410253340
+   1    2   3    1        -2.6391683556        -0.1410253340
+   1    2   1    2         6.9094656905         0.0000308269
    1    2   2    2         2.9710395994        -0.0000000000
-   1    2   3    2         2.9710395994         0.0000000000
+   1    2   3    2         2.9710395994        -0.0000000000
   
-   2    2   1    1        -2.6391683554        -0.1410253343
-   2    2   2    1        -5.2783367109        -0.2820506686
-   2    2   3    1        -2.6391683554        -0.1410253343
+   2    2   1    1        -2.6391683556        -0.1410253340
+   2    2   2    1        -5.2783367112        -0.2820506680
+   2    2   3    1        -2.6391683556        -0.1410253340
    2    2   1    2         2.9710395994        -0.0000000000
-   2    2   2    2         5.9420791988         0.0000000000
+   2    2   2    2         5.9420791988        -0.0000000000
    2    2   3    2         2.9710395994        -0.0000000000
   
-   3    2   1    1        -2.6391683554        -0.1410253343
-   3    2   2    1        -2.6391683554        -0.1410253343
-   3    2   3    1        -5.2783367109        -0.2820506686
-   3    2   1    2         2.9710395994         0.0000000000
+   3    2   1    1        -2.6391683556        -0.1410253340
+   3    2   2    1        -2.6391683556        -0.1410253340
+   3    2   3    1        -5.2783367112        -0.2820506680
+   3    2   1    2         2.9710395994        -0.0000000000
    3    2   2    2         2.9710395994        -0.0000000000
    3    2   3    2         5.9420791988        -0.0000000000
   
@@ -2200,27 +2200,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   28.367602123172      3.422E+00 3.474E-02 3.904E+04
- ETOT  2   6.6605482813337     -2.171E+01 7.667E-03 2.172E+03
- ETOT  3   5.5930180362039     -1.068E+00 4.446E-04 1.102E+02
- ETOT  4   5.5503835574730     -4.263E-02 3.563E-05 8.878E+00
- ETOT  5   5.5490191022656     -1.364E-03 1.309E-06 1.290E+00
- ETOT  6   5.5488956588968     -1.234E-04 1.554E-07 1.612E-01
- ETOT  7   5.5488913355447     -4.323E-06 6.308E-09 1.797E-02
- ETOT  8   5.5488895817435     -1.754E-06 7.770E-10 1.606E-03
- ETOT  9   5.5488896500840      6.834E-08 1.623E-11 1.489E-04
- ETOT 10   5.5488896554331      5.349E-09 4.443E-13 1.378E-05
- ETOT 11   5.5488896497989     -5.634E-09 3.730E-14 1.263E-06
- ETOT 12   5.5488896497977     -1.233E-12 1.369E-15 1.143E-07
- ETOT 13   5.5488896497730     -2.467E-11 1.096E-16 1.009E-08
- ETOT 14   5.5488896497768      3.848E-12 2.126E-18 9.212E-10
+-ETOT  1   28.367600881429      3.422E+00 3.474E-02 3.904E+04
+ ETOT  2   6.6605490933653     -2.171E+01 7.667E-03 2.172E+03
+ ETOT  3   5.5930179565089     -1.068E+00 4.446E-04 1.102E+02
+ ETOT  4   5.5503835542426     -4.263E-02 3.563E-05 8.878E+00
+ ETOT  5   5.5490191002709     -1.364E-03 1.309E-06 1.290E+00
+ ETOT  6   5.5488956586393     -1.234E-04 1.554E-07 1.612E-01
+ ETOT  7   5.5488913358170     -4.323E-06 6.307E-09 1.797E-02
+ ETOT  8   5.5488895816944     -1.754E-06 7.771E-10 1.606E-03
+ ETOT  9   5.5488896500481      6.835E-08 1.623E-11 1.489E-04
+ ETOT 10   5.5488896553812      5.333E-09 4.438E-13 1.378E-05
+ ETOT 11   5.5488896497488     -5.632E-09 3.729E-14 1.263E-06
+ ETOT 12   5.5488896497476     -1.187E-12 1.368E-15 1.143E-07
+ ETOT 13   5.5488896497225     -2.508E-11 1.101E-16 1.009E-08
+ ETOT 14   5.5488896497268      4.277E-12 2.103E-18 9.208E-10
 
  At SCF step   14       vres2   =  9.21E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.9945E-19; max=  2.1265E-18
+ Mean square residual over all n,k,spin=   4.8703E-19; max=  2.1029E-18
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2240,9 +2240,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -3.03867744E-01
  Resulting in :
- 2DEtotal=    0.5548889650E+01 Ha. Also 2DEtotal=    0.150992966257E+03 eV
+ 2DEtotal=    0.5548889650E+01 Ha. Also 2DEtotal=    0.150992966255E+03 eV
     (2DErelax=   -1.9396444005E+01 Ha. 2DEnonrelax=    2.4945333655E+01 Ha)
-    (  non-var. 2DEtotal :    5.5488896076E+00 Ha)
+    (  non-var. 2DEtotal :    5.5488896079E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -2261,27 +2261,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   33.031361140998      5.996E+00 3.751E-02 4.795E+04
- ETOT  2   7.5268934935997     -2.550E+01 7.266E-03 2.741E+03
- ETOT  3   6.2500514052480     -1.277E+00 4.055E-04 1.590E+02
- ETOT  4   6.1850361882129     -6.502E-02 3.596E-05 1.076E+01
- ETOT  5   6.1829768335136     -2.059E-03 2.157E-06 1.576E+00
- ETOT  6   6.1827999927161     -1.768E-04 1.702E-07 2.029E-01
- ETOT  7   6.1827998685727     -1.241E-07 1.453E-08 2.589E-02
- ETOT  8   6.1827920306800     -7.838E-06 2.119E-09 2.057E-03
- ETOT  9   6.1827924732802      4.426E-07 4.518E-11 1.810E-04
- ETOT 10   6.1827925433262      7.005E-08 7.703E-13 1.779E-05
- ETOT 11   6.1827924971918     -4.613E-08 2.712E-13 1.531E-06
- ETOT 12   6.1827924971657     -2.609E-11 6.026E-16 1.369E-07
- ETOT 13   6.1827924970917     -7.403E-11 3.053E-17 1.232E-08
- ETOT 14   6.1827924969398     -1.519E-10 1.016E-17 1.154E-09
+-ETOT  1   33.031358927080      5.996E+00 3.751E-02 4.795E+04
+ ETOT  2   7.5268938233524     -2.550E+01 7.266E-03 2.741E+03
+ ETOT  3   6.2500513683819     -1.277E+00 4.055E-04 1.590E+02
+ ETOT  4   6.1850361852756     -6.502E-02 3.596E-05 1.076E+01
+ ETOT  5   6.1829768336056     -2.059E-03 2.157E-06 1.576E+00
+ ETOT  6   6.1827999927936     -1.768E-04 1.702E-07 2.029E-01
+ ETOT  7   6.1827998685486     -1.242E-07 1.453E-08 2.589E-02
+ ETOT  8   6.1827920306480     -7.838E-06 2.119E-09 2.057E-03
+ ETOT  9   6.1827924731993      4.426E-07 4.518E-11 1.810E-04
+ ETOT 10   6.1827925432758      7.008E-08 7.701E-13 1.779E-05
+ ETOT 11   6.1827924971409     -4.613E-08 2.711E-13 1.531E-06
+ ETOT 12   6.1827924971180     -2.287E-11 6.024E-16 1.369E-07
+ ETOT 13   6.1827924970424     -7.556E-11 3.053E-17 1.232E-08
+ ETOT 14   6.1827924968910     -1.515E-10 1.018E-17 1.154E-09
 
  At SCF step   14       vres2   =  1.15E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.8109E-18; max=  1.0159E-17
+ Mean square residual over all n,k,spin=   2.8160E-18; max=  1.0179E-17
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2290,7 +2290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  loc psp =  -1.93195046E+01  Hartree=   1.00768779E+01     xc=  -2.40674070E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   7.00182561E+00   enl1=  -2.16700244E+01
+    edocc=   0.00000000E+00     enl0=   7.00182561E+00   enl1=  -2.16700245E+01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.91390375E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.08529203E+01
@@ -2301,9 +2301,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -3.58155858E-01
  Resulting in :
- 2DEtotal=    0.6182792497E+01 Ha. Also 2DEtotal=    0.168242339961E+03 eV
+ 2DEtotal=    0.6182792497E+01 Ha. Also 2DEtotal=    0.168242339960E+03 eV
     (2DErelax=   -2.0852920318E+01 Ha. 2DEnonrelax=    2.7035712815E+01 Ha)
-    (  non-var. 2DEtotal :    6.1827924433E+00 Ha)
+    (  non-var. 2DEtotal :    6.1827924436E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -2322,27 +2322,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   150.51461431160      4.103E+01 1.970E-01 2.352E+05
- ETOT  2   13.123071697736     -1.374E+02 4.179E-02 1.155E+04
- ETOT  3   7.0726420353561     -6.050E+00 3.014E-03 5.719E+02
- ETOT  4   6.8631284119847     -2.095E-01 1.838E-04 5.387E+01
- ETOT  5   6.8579321975222     -5.196E-03 4.932E-06 7.393E+00
- ETOT  6   6.8575949182194     -3.373E-04 3.899E-07 8.510E-01
- ETOT  7   6.8575596968253     -3.522E-05 1.641E-08 8.515E-02
- ETOT  8   6.8575580685097     -1.628E-06 1.393E-09 8.553E-03
- ETOT  9   6.8575581675820      9.907E-08 6.619E-11 8.254E-04
- ETOT 10   6.8575581559337     -1.165E-08 1.673E-12 7.368E-05
- ETOT 11   6.8575581495579     -6.376E-09 1.487E-13 6.729E-06
- ETOT 12   6.8575581489233     -6.347E-10 5.003E-15 6.117E-07
- ETOT 13   6.8575581492752      3.520E-10 1.436E-15 5.438E-08
- ETOT 14   6.8575581493762      1.009E-10 4.268E-17 4.807E-09
+-ETOT  1   150.51462615137      4.103E+01 1.970E-01 2.352E+05
+ ETOT  2   13.123068462508     -1.374E+02 4.179E-02 1.155E+04
+ ETOT  3   7.0726420122910     -6.050E+00 3.014E-03 5.719E+02
+ ETOT  4   6.8631283910212     -2.095E-01 1.838E-04 5.387E+01
+ ETOT  5   6.8579321966058     -5.196E-03 4.932E-06 7.393E+00
+ ETOT  6   6.8575949172207     -3.373E-04 3.899E-07 8.510E-01
+ ETOT  7   6.8575596967713     -3.522E-05 1.641E-08 8.515E-02
+ ETOT  8   6.8575580684636     -1.628E-06 1.393E-09 8.553E-03
+ ETOT  9   6.8575581675312      9.907E-08 6.618E-11 8.254E-04
+ ETOT 10   6.8575581558884     -1.164E-08 1.672E-12 7.368E-05
+ ETOT 11   6.8575581495124     -6.376E-09 1.487E-13 6.729E-06
+ ETOT 12   6.8575581488761     -6.363E-10 5.002E-15 6.117E-07
+ ETOT 13   6.8575581492321      3.560E-10 1.436E-15 5.438E-08
+ ETOT 14   6.8575581493323      1.002E-10 4.269E-17 4.807E-09
 
  At SCF step   14       vres2   =  4.81E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.5738E-18; max=  4.2675E-17
+ Mean square residual over all n,k,spin=   9.5756E-18; max=  4.2691E-17
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2362,9 +2362,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -6.58138658E+00
  Resulting in :
- 2DEtotal=    0.6857558149E+01 Ha. Also 2DEtotal=    0.186603647145E+03 eV
+ 2DEtotal=    0.6857558149E+01 Ha. Also 2DEtotal=    0.186603647144E+03 eV
     (2DErelax=   -1.0262410095E+02 Ha. 2DEnonrelax=    1.0948165910E+02 Ha)
-    (  non-var. 2DEtotal :    6.8575581704E+00 Ha)
+    (  non-var. 2DEtotal :    6.8575581703E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -2383,27 +2383,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   198.83292865873      8.270E+01 1.795E-01 3.222E+05
- ETOT  2   14.263772965238     -1.846E+02 5.447E-02 1.295E+04
- ETOT  3   7.6665705220914     -6.597E+00 3.101E-03 6.586E+02
- ETOT  4   7.4206259725012     -2.459E-01 2.039E-04 6.149E+01
- ETOT  5   7.4163217883280     -4.304E-03 5.156E-06 8.564E+00
- ETOT  6   7.4158798055269     -4.420E-04 5.399E-07 9.334E-01
- ETOT  7   7.4158327628254     -4.704E-05 1.615E-08 8.991E-02
- ETOT  8   7.4158317234467     -1.039E-06 8.170E-10 9.039E-03
- ETOT  9   7.4158321133420      3.899E-07 5.088E-11 8.697E-04
- ETOT 10   7.4158321010906     -1.225E-08 7.836E-13 7.761E-05
- ETOT 11   7.4158320797274     -2.136E-08 1.292E-13 7.110E-06
- ETOT 12   7.4158320794464     -2.810E-10 1.585E-15 6.444E-07
- ETOT 13   7.4158320800456      5.991E-10 4.879E-16 5.748E-08
- ETOT 14   7.4158320801085      6.293E-11 2.379E-17 5.079E-09
+-ETOT  1   198.83293080367      8.270E+01 1.794E-01 3.222E+05
+ ETOT  2   14.263767174490     -1.846E+02 5.447E-02 1.295E+04
+ ETOT  3   7.6665709805983     -6.597E+00 3.101E-03 6.586E+02
+ ETOT  4   7.4206259305916     -2.459E-01 2.039E-04 6.149E+01
+ ETOT  5   7.4163217959563     -4.304E-03 5.156E-06 8.564E+00
+ ETOT  6   7.4158798098256     -4.420E-04 5.399E-07 9.334E-01
+ ETOT  7   7.4158327628273     -4.705E-05 1.615E-08 8.991E-02
+ ETOT  8   7.4158317233995     -1.039E-06 8.171E-10 9.039E-03
+ ETOT  9   7.4158321132956      3.899E-07 5.088E-11 8.697E-04
+ ETOT 10   7.4158321010475     -1.225E-08 7.836E-13 7.761E-05
+ ETOT 11   7.4158320796821     -2.137E-08 1.292E-13 7.110E-06
+ ETOT 12   7.4158320794041     -2.781E-10 1.585E-15 6.444E-07
+ ETOT 13   7.4158320800018      5.978E-10 4.879E-16 5.748E-08
+ ETOT 14   7.4158320800646      6.277E-11 2.379E-17 5.079E-09
 
  At SCF step   14       vres2   =  5.08E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4405E-18; max=  2.3795E-17
+ Mean square residual over all n,k,spin=   4.4403E-18; max=  2.3794E-17
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2423,7 +2423,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -7.03361508E+00
  Resulting in :
- 2DEtotal=    0.7415832080E+01 Ha. Also 2DEtotal=    0.201795053373E+03 eV
+ 2DEtotal=    0.7415832080E+01 Ha. Also 2DEtotal=    0.201795053372E+03 eV
     (2DErelax=   -1.0871718955E+02 Ha. 2DEnonrelax=    1.1613302163E+02 Ha)
     (  non-var. 2DEtotal :    7.4158320482E+00 Ha)
 
@@ -2439,47 +2439,47 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1         5.5488902373         0.0001771042
-   1    1   2    1         3.0912472973        -0.2393703273
-   1    1   3    1         2.4576414336        -0.2393112926
-   1    1   1    2        -2.2473474105        -2.2472984606
-   1    1   2    2        -2.3809514700         0.0000090406
-   1    1   3    2        -2.2473383698         0.1336530094
+   1    1   1    1         5.5488902375         0.0001771042
+   1    1   2    1         3.0912472973        -0.2393703275
+   1    1   3    1         2.4576414337        -0.2393112927
+   1    1   1    2        -2.2473474104        -2.2472984606
+   1    1   2    2        -2.3809514701         0.0000090406
+   1    1   3    2        -2.2473383698         0.1336530095
   
-   2    1   1    1         3.0912488037         0.2394883968
-   2    1   2    1         6.1824961010         0.0001180695
-   2    1   3    1         3.0912472973        -0.2393703273
-   2    1   1    2        -2.1136944010         0.0000399092
-   2    1   2    2         0.0000000000        -0.0000000000
-   2    1   3    2        -2.1136944010         0.0000399092
+   2    1   1    1         3.0912488038         0.2394883970
+   2    1   2    1         6.1824961012         0.0001180695
+   2    1   3    1         3.0912472973        -0.2393703275
+   2    1   1    2        -2.1136944009         0.0000399092
+   2    1   2    2         0.0000000000         0.0000000000
+   2    1   3    2        -2.1136944009         0.0000399092
   
-   3    1   1    1         2.4576429400         0.2395474316
-   3    1   2    1         3.0912488037         0.2394883968
-   3    1   3    1         5.5488902373         0.0001771042
-   3    1   1    2        -2.2473075013        -0.1336040596
-   3    1   2    2        -2.3809514700         0.0000090406
-   3    1   3    2        -2.2472984606         2.2473474105
+   3    1   1    1         2.4576429402         0.2395474317
+   3    1   2    1         3.0912488038         0.2394883970
+   3    1   3    1         5.5488902375         0.0001771042
+   3    1   1    2        -2.2473075012        -0.1336040597
+   3    1   2    2        -2.3809514701         0.0000090406
+   3    1   3    2        -2.2472984606         2.2473474104
   
    1    2   1    1        -2.2475430564         2.2475741780
-   1    2   2    1        -2.1139399252        -0.0000098636
-   1    2   3    1        -2.2475331928         0.1336342528
-   1    2   1    2         6.8575606308         0.0000501216
+   1    2   2    1        -2.1139399250        -0.0000098636
+   1    2   3    1        -2.2475331928         0.1336342530
+   1    2   1    2         6.8575606307         0.0000501216
    1    2   2    2         3.7078735896        -0.2852823405
-   1    2   3    2         3.1496875194        -0.2852656334
+   1    2   3    2         3.1496875194        -0.2852656333
   
-   2    2   1    1        -2.3811773092         0.0000409852
-   2    2   2    1         0.0000000000         0.0000000000
-   2    2   3    1        -2.3811773092         0.0000409852
+   2    2   1    1        -2.3811773094         0.0000409852
+   2    2   2    1         0.0000000000        -0.0000000000
+   2    2   3    1        -2.3811773094         0.0000409852
    2    2   1    2         3.7078731114         0.2853157549
-   2    2   2    2         7.4157467010         0.0000334144
+   2    2   2    2         7.4157467009         0.0000334144
    2    2   3    2         3.7078735896        -0.2852823405
   
-   3    2   1    1        -2.2475840416        -0.1336031312
-   3    2   2    1        -2.1139399252        -0.0000098636
+   3    2   1    1        -2.2475840416        -0.1336031314
+   3    2   2    1        -2.1139399250        -0.0000098636
    3    2   3    1        -2.2475741780        -2.2475430564
    3    2   1    2         3.1496870412         0.2853324621
    3    2   2    2         3.7078731114         0.2853157549
-   3    2   3    2         6.8575606308         0.0000501216
+   3    2   3    2         6.8575606307         0.0000501216
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -2488,15 +2488,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.1098406461         0.0000020977
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000        -0.0000000000
    1    1   3    1         0.0000000268         0.0085075916
-   1    1   1    2         0.0000000000        -0.0000000000
+   1    1   1    2        -0.0000000000        -0.0000000000
    1    1   2    2        -0.0375520132         0.0375534313
    1    1   3    2         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1         0.0873268665         0.0000041953
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000        -0.0000000000
    2    1   1    2        -0.0423007553         0.0423010766
    2    1   2    2        -0.0000000000        -0.0000000000
    2    1   3    2        -0.0423010766        -0.0423007553
@@ -2506,7 +2506,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    3    1   3    1         0.1098406461         0.0000020977
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0375534313        -0.0375520132
-   3    1   3    2        -0.0000000000        -0.0000000000
+   3    1   3    2        -0.0000000000         0.0000000000
   
    1    2   1    1        -0.0000000000         0.0000000000
    1    2   2    1        -0.0423056565        -0.0423042001
@@ -2520,11 +2520,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
    2    2   3    1        -0.0375572595         0.0375569091
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.1119171546         0.0000011873
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   3    2        -0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1        -0.0423042001         0.0423056565
-   3    2   3    1        -0.0000000000         0.0000000000
+   3    2   3    1        -0.0000000000        -0.0000000000
    3    2   1    2         0.0000000085        -0.0101374692
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.1317510591         0.0000005937
@@ -2548,11 +2548,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
            etotal1    -8.5452892536E+00
            etotal2    -8.6594319281E+00
            etotal3    -2.0847654629E+02
-           etotal4     6.1973822409E+00
+           etotal4     6.1973822408E+00
            etotal5     5.9420799596E+00
            etotal6     7.4158320801E+00
-            fcart1     5.0756743132E-29 -0.0000000000E+00 -5.0756743132E-29
-                      -5.0756743132E-29 -0.0000000000E+00  5.0756743132E-29
+            fcart1     6.3445928915E-30  6.3445928915E-30 -1.9033778675E-29
+                      -6.3445928915E-30 -6.3445928915E-30  1.9033778675E-29
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2944,7 +2944,7 @@ P          mk1mem6        256
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         216
-           strten1    -2.0884857809E-05 -2.0884857809E-05 -2.0884857809E-05
+           strten1    -2.0884857780E-05 -2.0884857780E-05 -2.0884857780E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3128,10 +3128,10 @@ P          mk1mem6        256
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        224.4  wall=        224.9
+- Proc.   0 individual time (sec): cpu=        319.6  wall=        320.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  98 WARNINGs and  39 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        224.4  wall=        224.9
++Overall time at end (sec) : cpu=        319.6  wall=        320.9
