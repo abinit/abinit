@@ -56,6 +56,8 @@ module m_prcref
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
+ use m_mkcore,     only : mkcore
+
 
  implicit none
 
@@ -204,7 +206,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -856,7 +857,6 @@ end subroutine prcref
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

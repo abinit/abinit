@@ -685,6 +685,9 @@ radius, and the radius of the sphere that can be inserted in the FFT box, in rec
 In order for the density to be exact (in the case of the plane wave part, not the PAW on-site terms),
 this ratio should be at least two. If one uses a smaller ratio, one will gain speed, at the expense of accuracy.
 In the case of pure ground state calculation (e.g. for the determination of geometries), this is sensible.
+
+Prior to v8.9, the use of boxcutmin for DFPT calculations was forbidden. However, after testing, it was seen that
+the deterioration in phonon band structures could be alleviated to a large extent by the imposition of the Acoustic Sum Rule [[asr]].
 """,
 ),
 
@@ -6540,7 +6543,7 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2002]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
+  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2003]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
 ~~Related parameters: the time step ([[dtion]]), the temperatures
 ([[mdtemp]]), and the friction coefficient ([[friction]]).~~
 **Purpose:** Molecular dynamics

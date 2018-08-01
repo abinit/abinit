@@ -77,6 +77,8 @@ module m_nonlinear
  use m_fourier_interpol, only : transgrid
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
+ use m_mkcore,           only : mkcore
+ use m_pead_nl_loop,     only : pead_nl_loop
 
  implicit none
 
@@ -161,7 +163,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_95_drive
 !End of the abilint section
 

@@ -66,6 +66,7 @@ MODULE m_wfd
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
+ use m_cgprj,          only : getcprj
 
  implicit none
 
@@ -2139,7 +2140,6 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_ug2cprj'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

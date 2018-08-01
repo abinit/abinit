@@ -67,6 +67,7 @@ module m_afterscfloop
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
+ use m_forstr,           only : forstr
 
 #ifdef HAVE_BIGDFT
  use m_abi2big

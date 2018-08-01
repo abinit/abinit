@@ -53,6 +53,7 @@ module m_setvtr
  use m_rhotoxc,           only : rhotoxc
  use m_mklocl,            only : mklocl
  use m_xchybrid,          only : xchybrid_ncpp_cc
+ use m_mkcore,            only : mkcore, mkcore_alt
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -209,7 +210,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
- use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
  use interfaces_67_common
@@ -1069,16 +1069,9 @@ end subroutine ionion_realSpace
 
 subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, xred)
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: IonicEnergyandForces
 #endif
-
- use m_geometry,    only : xred2xcart
- use m_mklocl,      only : mklocl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
