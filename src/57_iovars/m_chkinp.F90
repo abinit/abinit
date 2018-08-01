@@ -1987,31 +1987,27 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  Linear and Non-linear response calculations
+   !Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Non-linear response not compatible with mkmem=0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Response function need all k-points
    if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_RESPFN,RUNL_NONLINEAR/),iout)
    end if
-   allow=(dt%ixc > 0).and.(dt%ixc /= 3).and.(dt%ixc /= 7).and.(dt%ixc /= 8)
-   if(.not.allow)then
-     allow=(dt%ixc < 0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())
-   end if
-   if(allow)then
-     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
-   end if
-!  occopt restricted to 1 for rf2_dkdk and rf2_dkde
+   !dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1) then
      cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
@@ -2020,11 +2016,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='rf2_dkde' ; cond_values(1)=dt%rf2_dkde
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
+   !PEAD non-linear response only for occopt=1 (insulators)
    if(dt%usepead==0.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepead'   ; cond_values(1)=dt%usepead
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
+   !PAW non-linear response only with DFPT (PEAD not allowed)
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
@@ -2033,11 +2031,45 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
    end if
+   !Non-linear response not compatible with autoparal
    if(dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
-     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
+   end if
+   !Linear Response function only for LDA/GGA
+   allow=(dt%ixc>0).and.((dt%ixc>16.and.dt%ixc<23).or.(dt%ixc>=40))
+   if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_ismgga()
+   if(allow)then
+     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
+   end if
+   !PAW+Linear Response+GGA function restricted to pawxcdev=0
+   if (dt%usepaw==1) then
+     allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
+     if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
+     if(allow) then
+       if (dt%pawxcdev/=0)then
+         write(message,'(7a)' )&
+&         'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
+&         '  This is restricted to pawxcdev=0!',ch10,&
+&         '  Action: change pawxcdev value in your input file!',ch10,&
+&         '    and be careful to run the preparatory Ground-State calculations also with pawxcdev=0!'
+         MSG_ERROR_NOSTOP(message, ierr)
+       else
+         write(message,'(5a)' )&
+&         'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
+&         '  - This is restricted to pawxcdev=0!',ch10,&
+&         '  - Be careful to run the preparatory Ground-State calculations also with pawxcdev=0!'
+         MSG_WARNING(message)
+       end if
+     end if
+   end if
+   !Non linear Response function only for LDA (restricted to ixc=3/7/8)
+   allow=(dt%ixc>0).and.(dt%ixc/=3.and.dt%ixc/=7.and.dt%ixc/=8)
+   if(.not.allow) allow=(dt%ixc<0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())
+   if(allow)then
+     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
 
 !  optforces
@@ -3161,6 +3193,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     'vdw_xc=',dt%vdw_xc,' is not yet available with Projector Augmented-Wave (PAW) formalism!'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
+
 !  vdw DFT-D2
    if (dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only for GS or RF calculations
