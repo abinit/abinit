@@ -85,7 +85,7 @@
      xred   0.0  0.0  0.0
             0.25 0.25 0.25
 #Number of band
-    nband   4
+    nband   9
 #Definition of the planewave basis set
      ecut   3.0
 #Definition of the k-point grid
@@ -110,7 +110,7 @@ pawecutdg   9.
 #%% [files]
 #%% files_to_test = 
 #%%   t51.out, tolnlines = 0, tolabs = 0., tolrel = 0., fld_options = -easy
-#%% psp_files = Al.GGA_PBE-JTH-paw.xml, As.GGA_PBE-JTH-paw.xml
+#%% psp_files = Al.GGA_PBE-JTH.xml, As.GGA_PBE-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
