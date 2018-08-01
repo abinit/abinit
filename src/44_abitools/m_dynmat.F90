@@ -1810,8 +1810,13 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
+!                  Must be associated to at least one really computed matrix element
+                   if(nblkflg_is_one==0)then
+                     found=0
+                   endif
+
 !                  Now, if still found and associated to at least one really computed matrix element, put the correct value into array d2
-                   if(found==1 .and. nblkflg_is_one/=0 )then
+                   if(found==1)then
 
 !                    In case of phonons, need to take into account the
 !                    time-reversal symmetry, and the shift back to the unit cell
