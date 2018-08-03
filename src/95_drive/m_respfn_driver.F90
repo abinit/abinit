@@ -68,6 +68,7 @@ module m_respfn_driver
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -731,10 +732,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*min(dtset%nspden,2)-1            ! LDA
-     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
-     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
-     if (dtset%nspden==4) nkxc1=nkxc1+3  ! Non-coll.: need to store 3 additional arrays in kxc
+     has_kxc=1
+     call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
@@ -4174,9 +4173,9 @@ end subroutine dfpt_dyfro
 !!  ixc= choice of exchange-correlation scheme
 !!  kxc(nfft,nkxc)=first-order derivative of the xc potential
 !!    if (nkxc=1) LDA kxc(:,1)= d2Exc/drho2
-!!    if (nkxc=2) LDA kxc(:,1)=d2Exc/drho_up drho_up
-!!                    kxc(:,2)=d2Exc/drho_up drho_dn
-!!                    kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if (nkxc=2) LDA kxc(:,1)= d2Exc/drho_up drho_up
+!!                    kxc(:,2)= d2Exc/drho_up drho_dn
+!!                    kxc(:,3)= d2Exc/drho_dn drho_dn
 !!    if (nkxc=7) GGA kxc(:,1)= d2Exc/drho2
 !!                    kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
 !!                    kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
