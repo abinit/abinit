@@ -153,7 +153,7 @@ module m_hamiltonian
    ! number of plane waves at k^prime used to apply Hamiltonian when band-FFT
    ! parallelism is activated (i.e. data are distributed in the "FFT" configuration)
 
-  integer:: nspinor
+  integer :: nspinor
    ! Number of spinorial components
 
   integer :: nsppol
@@ -226,6 +226,7 @@ module m_hamiltonian
    ! pspso(ntypat)
    ! For each type of psp, 1 if no spin-orbit component is taken
    ! into account, 2 if a spin-orbit component is used
+   ! Revelant for NC-psps and PAW
 
   integer, allocatable :: typat(:)
    ! typat(natom)
@@ -776,10 +777,16 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%n5         =ngfft(5)
  ham%n6         =ngfft(6)
  ham%usepaw     =psps%usepaw
- ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
  ham%use_gpu_cuda=0 ; if(PRESENT(use_gpu_cuda)) ham%use_gpu_cuda=use_gpu_cuda
+
+ ham%pspso(:)   =psps%pspso(1:psps%ntypat)
+ if (psps%usepaw==1) then
+   do itypat=1,psps%ntypat
+     if (pawtab(itypat)%usespnorb==1) ham%pspso(itypat)=2
+   end do
+ end if
 
  if (present(nucdipmom)) then
    ham%nucdipmom(:,:) = nucdipmom(:,:)

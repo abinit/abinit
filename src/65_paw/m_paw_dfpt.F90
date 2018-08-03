@@ -177,7 +177,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_a,cplex_b,cplex_dijh1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
+ integer :: cplex_a,cplex_b,cplex_dijh1,cplex_vxc1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
  integer :: klmn,lm_size_a,lm_size_b,mesh_size,my_comm_atom,nspden,nspdiag,opt_compch,optexc,optvxc
  integer :: usecore,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
@@ -226,6 +226,10 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='pawrhoij()%cplex must be >=paw_an1()%cplex  !'
        MSG_BUG(msg)
      end if
+     if (paw_ij1(1)%nspden/=paw_an1(1)%nspden) then
+       msg='paw_ij1()%nspden and paw_an1()%nspden must be equal !'
+       MSG_BUG(msg)
+     end if
      if (pawrhoij_a(1)%nspden/=pawrhoij_b(1)%nspden) then
        msg='pawrhoij_a()%nspden must =pawrhoij_b()%nspden  !'
        MSG_BUG(msg)
@@ -260,10 +264,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
    itypat=pawrhoij_a(iatom)%itypat
    mesh_size=pawtab(itypat)%mesh_size
-   nspden=pawrhoij_a(iatom)%nspden
+   nspden=paw_an1(iatom)%nspden
    cplex_a=pawrhoij_a(iatom)%cplex
    cplex_b=pawrhoij_b(iatom)%cplex
    cplex_dijh1=paw_ij1(iatom)%cplex
+   cplex_vxc1=paw_an1(iatom)%cplex
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
    if (ipert2> 0) lm_size_b=paw_an1(iatom)%lm_size
@@ -285,22 +290,22 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      ABI_DEALLOCATE(lmselect_tmp)
 !    Compute on-site 1st-order xc potentials
      if (pawxcdev/=0) then
-       call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxc1,&
+       call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an1(iatom)%vxc1,xclevel)
        call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&       cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxct1,&
+&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an1(iatom)%vxct1,xclevel)
      else
-       call pawxc_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxc1,&
+       call pawxc_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
        call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&       cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxct1,&
+&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel)
@@ -338,14 +343,14 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !  Compute contributions to 1st-order (or 2nd-order) energy
    if (pawxcdev/=0) then
      ABI_ALLOCATE(kxc_dum,(mesh_size,pawang%angl_size,0))
-     call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_a,eexc,ixc,kxc_dum,&
+     call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
 
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&     cplex_b,cplex_a,eexc,ixc,kxc_dum,&
+&     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
@@ -354,13 +359,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      delta_energy_xc(2)=delta_energy_xc(2)-eexc_im
    else
      ABI_ALLOCATE(kxc_dum,(mesh_size,lm_size_b,0))
-     call pawxc_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_a,eexc,ixc,kxc_dum,&
+     call pawxc_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&     cplex_b,cplex_a,eexc,ixc,kxc_dum,&
+&     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)

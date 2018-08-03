@@ -465,8 +465,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    Only displaced atom contributes
      cpopt=-1+5*usecprj ; choice=2 ; signs=2
      paw_opt=1;if (sij_opt/=0) paw_opt=sij_opt+3
-     call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
+gvnl1_=zero
+!      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+! &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
 !    2- Compute derivatives due to frozen part of D_ij^(1) (independent of VHxc^(1))
 !    All atoms contribute
      if (optnl>=1) then
@@ -483,8 +484,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=2) then
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
-       call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
+gvnl2=zero
+!        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+! &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      else if (optnl==1) then
        ABI_DEALLOCATE(gvnl2)
      end if

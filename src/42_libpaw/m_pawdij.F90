@@ -976,6 +976,14 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    if (dijxchat_need.and.paw_ij(iatom)%has_dijxc_hat>=1) paw_ij(iatom)%has_dijxc_hat=2
    if (dijxcval_need.and.paw_ij(iatom)%has_dijxc_val>=1) paw_ij(iatom)%has_dijxc_val=2
 
+!TEST
+! if (cplex_dij==2) then
+!  do klmn=2,2*lmn2_size,2
+!   if (paw_ij(iatom)%has_dij>=1.and.ipert>0) paw_ij(iatom)%dij(klmn,:)=zero
+!   if (paw_ij(iatom)%has_dijfr>=1.and.ipert>0) paw_ij(iatom)%dijfr(klmn,:)=zero
+!  end do
+! end if
+
 !End loop over atoms
  end do ! iatom
 
@@ -1298,7 +1306,7 @@ subroutine pawdijxc(cplex,cplex_dij,dijxc,ndij,nspden,nsppol,&
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
@@ -1591,10 +1599,11 @@ subroutine pawdijfock(cplex,cplex_dij,dijfock_vv,dijfock_cv,hyb_mixing,hyb_mixin
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
+
 !!!! WARNING : What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
        dijfock_idij_vv=zero
        dijfock_idij_cv=zero
@@ -1896,7 +1905,7 @@ subroutine pawdijxcm(cplex,cplex_dij,dijxc,lmselect,ndij,nspden,nsppol,&
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
@@ -2207,7 +2216,7 @@ subroutine pawdijhat(cplex,cplex_dij,dijhat,gprimd,iatom,ipert,&
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+   if ((idij<=nsppol).or.(nspden==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
@@ -3039,7 +3048,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
 
-   if (idij<=nsppol.or.(ndij==4.and.idij<=3).or.cplex==2) then
+   if (idij<=nsppol.or.(ndij==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
@@ -3442,7 +3451,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsp
 !  Loop over spin components
    nsploop=nsppol;if (ndij==4) nsploop=4
    do idij=1,nsploop
-     if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+     if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex==2.and.idij<=nspden)) then
 
        idijend=idij+idij/3;if (cplex==2) idijend=idij
        do ispden=idij,idijend

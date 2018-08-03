@@ -375,7 +375,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  only_SO_=0; if (present(only_SO)) only_SO_=only_SO
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
- hermdij=(any(abs(hamk%nucdipmom)>tol8))
+ hermdij=(any(abs(hamk%nucdipmom)>tol8).or.(hamk%usepaw==1.and.any(hamk%pspso>1)))
 
  force_recompute_ph3d=.false.
 

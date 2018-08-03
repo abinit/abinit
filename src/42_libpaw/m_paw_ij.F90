@@ -120,6 +120,9 @@ MODULE m_paw_ij
   integer :: has_pawu_occ=0
    ! 1 if PAW+U occupations are allocated
 
+  integer :: herm_dij=0
+   !  0 if total Dij is symmetric, 1 if it is hermitian
+
   integer :: itypat
    ! itypat=type of the atom
 
@@ -297,7 +300,7 @@ CONTAINS
 !!  has_dijexxc=to allocate Paw_ij%dijxx, 0 otherwise (default)
 !!  has_exexch_pot=1 to allocate potential used in PAW+(local exact exchange) formalism, 0 otherwise (default)
 !!  has_pawu_occ=1 to allocate occupations used in PAW+U formalism, 0 otherwise (default)
-!!  req_cplex_dij=2 (optional) reqested cplex_dij: Dij are complex although other quantities are not
+!!  req_cplex_dij=2 (optional) requested cplex_dij: Dij are complex although other quantities are not
 !!
 !! OUTPUT
 !!  Paw_ij(natom)<type(paw_ij_type)>=data structure containing PAW arrays given on (i,j) channels.
@@ -376,6 +379,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   Paw_ij(iat)%lmn_size   =Pawtab(itypat)%lmn_size
   Paw_ij(iat)%lmn2_size  =lmn2_size
   Paw_ij(iat)%ndij       =MAX(nspinor**2,nspden)
+  Paw_ij(iat)%herm_dij   =merge(0,1,(pawspnorb==0.and.cplex_dij_==1))
 
   ndij=Paw_ij(iat)%ndij
 
@@ -856,6 +860,7 @@ character(len=500) :: msg
      paw_ij_out(ij1)%has_dijxc_val=paw_ij_in(ij)%has_dijxc_val
      paw_ij_out(ij1)%has_exexch_pot=paw_ij_in(ij)%has_exexch_pot
      paw_ij_out(ij1)%has_pawu_occ=paw_ij_in(ij)%has_pawu_occ
+     paw_ij_out(ij1)%herm_dij=paw_ij_in(ij)%herm_dij
      paw_ij_out(ij1)%itypat=paw_ij_in(ij)%itypat
      paw_ij_out(ij1)%lmn_size=paw_ij_in(ij)%lmn_size
      paw_ij_out(ij1)%lmn2_size=paw_ij_in(ij)%lmn2_size
@@ -1534,6 +1539,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
        Paw_ij_gathered(iat)%has_dijxc_val =paw_ij_in(iat)%has_dijxc_val
        Paw_ij_gathered(iat)%has_exexch_pot=paw_ij_in(iat)%has_exexch_pot
        Paw_ij_gathered(iat)%has_pawu_occ  =paw_ij_in(iat)%has_pawu_occ
+       Paw_ij_gathered(iat)%herm_dij   =paw_ij_in(iat)%herm_dij
        paw_ij_gathered(iat)%itypat     =paw_ij_in(iat)%itypat
        paw_ij_gathered(iat)%lmn_size   =paw_ij_in(iat)%lmn_size
        paw_ij_gathered(iat)%lmn2_size  =paw_ij_in(iat)%lmn2_size
@@ -1674,9 +1680,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    cplxdij_lmn2_size=paw_ij_in(ij)%cplex_dij*paw_ij_in(ij)%lmn2_size
    ndij=paw_ij_in(ij)%ndij
    cplx_lmn2_size=paw_ij_in(ij)%cplex*lmn2_size
-!   buf_int_size=buf_int_size+23
-! JWZ increased to 24 due to addition of dijnd
-   buf_int_size=buf_int_size+24
+   buf_int_size=buf_int_size+25
    if (paw_ij_in(ij)%has_dij==2) then
      buf_dp_size=buf_dp_size +cplxdij_lmn2_size*ndij
    end if
@@ -1758,6 +1762,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    buf_int(indx_int)=paw_ij_in(ij)%has_dijxc_val ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%has_exexch_pot ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%has_pawu_occ ;indx_int=indx_int+1
+   buf_int(indx_int)=paw_ij_in(ij)%herm_dij ;indx_int=indx_int+1
    lmn2_size=paw_ij_in(ij)%lmn2_size
    cplxdij_lmn2_size=paw_ij_in(ij)%cplex_dij*paw_ij_in(ij)%lmn2_size
    ndij=paw_ij_in(ij)%ndij
@@ -1925,6 +1930,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      paw_ij_gathered(iat)%has_dijxc_val=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_exexch_pot=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_pawu_occ=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%herm_dij=buf_int_all(indx_int) ;indx_int=indx_int+1
      if (paw_ij_gathered(iat)%has_pawu_occ>=1) then
        nocc1=buf_int_all(indx_int) ;indx_int=indx_int+1
        nocc2=buf_int_all(indx_int) ;indx_int=indx_int+1
@@ -2637,6 +2643,7 @@ implicit none
    paw_ij1%has_dijxc_val=buf_int(indx_int) ;indx_int=indx_int+1
    paw_ij1%has_exexch_pot=buf_int(indx_int) ;indx_int=indx_int+1
    paw_ij1%has_pawu_occ=buf_int(indx_int) ;indx_int=indx_int+1
+   paw_ij1%herm_dij=buf_int(indx_int) ;indx_int=indx_int+1
    if (paw_ij1%has_pawu_occ>=1) then
      nocc1=buf_int(indx_int) ;indx_int=indx_int+1
      nocc2=buf_int(indx_int) ;indx_int=indx_int+1
@@ -2941,6 +2948,7 @@ implicit none
    buf_int(indx_int)=paw_ij1%has_dijxc_val ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij1%has_exexch_pot ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij1%has_pawu_occ ;indx_int=indx_int+1
+   buf_int(indx_int)=paw_ij1%herm_dij ;indx_int=indx_int+1
    lmn2_size=paw_ij1%lmn2_size
    cplxdij_lmn2_size=paw_ij1%cplex_dij*paw_ij1%lmn2_size
    ndij=paw_ij1%ndij
