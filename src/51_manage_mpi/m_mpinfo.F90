@@ -1687,7 +1687,8 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    mpi_enreg%comm_cell=mpi_enreg%comm_world
  end if
 
- if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%optdriver==RUNL_GSTATE) then
+ if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%npimage<=mpi_enreg%nproc.and. &
+&    dtset%optdriver==RUNL_GSTATE) then
 
 !  Activate flag for parallelization over images
    mpi_enreg%paral_img=1
