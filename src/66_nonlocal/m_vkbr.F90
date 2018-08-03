@@ -653,6 +653,8 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
+ ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use
+ ! k+G.
 
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
@@ -664,7 +666,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
      spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
        c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
-       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp*gvec(:,ig)
+       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp * (kpoint + gvec(:,ig))
      end do
    end do
  else
