@@ -164,7 +164,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  integer :: cplex_,ia,ierr,ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,ispinor,ispinor_index
  integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
  real(dp) :: enl2_cg,sijr
- logical :: hermdij_
+ logical :: hermdij_,hermdij_offdiag
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
  real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:)
@@ -179,6 +179,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 ! hermdij_ .false. invokes original coding, with Dij=Dji in complex case
 ! hermdij_ .true. invokes Dij = Dji*, needed for magnetic field cases
  hermdij_=.false.;if(present(hermdij)) hermdij_=hermdij
+ hermdij_offdiag=.true.
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
@@ -206,10 +207,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !-------------------------------------------------------------------
  if (paw_opt==1.or.paw_opt==2.or.paw_opt==4) then        ! Enl is psp strength Dij
    gxfac(1:cplex_fac,1:nlmn,1:nincat,1:nspinor)=zero      ! or (Dij-lambda.Sij)
+
 !  === Diagonal term(s) (up-up, down-down)
+
 !  1-Enl is real
    if (cplex_enl==1) then
-
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
@@ -304,13 +306,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                gxi(1:cplex)=gx(1:cplex,ilmn,ia,1)
                gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)+enl_(1)*gxi(1)
-               gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl2_cg*gxi(1)
+               gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(2)*gxi(1)
                if (cplex==2) then
-                 gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)-enl2_cg*gxi(2)
+                 gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)-enl_(2)*gxi(2)
                  gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(1)*gxi(2)
                end if
              end do
@@ -320,7 +321,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
        end do
 !$OMP END PARALLEL
+
      else ! -------------> SPINORIAL CASE
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
@@ -372,9 +375,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                  gxi(1:cplex)=gx(1:cplex,ilmn,ia,ispinor)
                  gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxi(1)
-                 gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl2_cg*gxi(1)
+                 gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(2)*gxi(1)
                  if (cplex==2) then
-                   gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl2_cg*gxi(2)
+                   gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl_(2)*gxi(2)
                    gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxi(2)
                  end if
                end do
@@ -389,6 +392,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    end if !complex_enl
 
 !  === Off-diagonal term(s) (up-down, down-up)
+
 !  --- No parallelization over spinors ---
    if (nspinortot==2.and.nspinor==nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
@@ -405,12 +409,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor )
-           if (hermdij_) enl_(2)=zero
+           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            gxi(1:cplex)=gx(1:cplex,jlmn,ia,ispinor)
            gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(1)*gxi(1)
-           gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl_(2)*gxi(1)
+           gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl2_cg*gxi(1)
            if (cplex==2) then
-             gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)-enl_(2)*gxi(2)
+             gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)-enl2_cg*gxi(2)
              gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl_(1)*gxi(2)
            end if
 #if !defined HAVE_OPENMP
@@ -419,7 +423,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
+             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              gxi(1:cplex)=gx(1:cplex,ilmn,ia,ispinor)
              gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(1)*gxi(1)
              gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl2_cg*gxi(1)
@@ -442,12 +446,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                gxi(1:cplex)=gx(1:cplex,ilmn,ia,jspinor)
                gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxi(1)
-               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl2_cg*gxi(1)
+               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(2)*gxi(1)
                if (cplex==2) then
-                 gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl2_cg*gxi(2)
+                 gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl_(2)*gxi(2)
                  gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxi(2)
                end if
              end do
@@ -458,6 +461,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
        end do
      end do
 !$OMP END PARALLEL
+
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
@@ -482,13 +486,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,jispin)
-             if(hermdij_) enl_(2)=-enl_(2)
+             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
+             if(hermdij_offdiag) enl_(2)=-enl_(2)
            else
              jilmn=i0lmn+jlmn
              enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
            end if
-           enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
            gxi(1:cplex)=gx(1:cplex,ilmn,ia,1)
            gxfac_(1,jlmn,ia,jspinor_index)=gxfac_(1,jlmn,ia,jspinor_index)+enl_(1)*gxi(1)
            gxfac_(2,jlmn,ia,jspinor_index)=gxfac_(2,jlmn,ia,jspinor_index)+enl_(2)*gxi(1)
@@ -587,7 +590,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !-------------------------------------------------------------------
  if (optder>=1.and.(paw_opt==1.or.paw_opt==2.or.paw_opt==4)) then  ! Enl is psp strength Dij
    dgxdtfac(1:cplex,1:ndgxdtfac,1:nlmn,1:nincat,1:nspinor)=zero
+
 !  === Diagonal term(s) (up-up, down-down)
+
 !  1-Enl is real
    if (cplex_enl==1) then
 !$OMP PARALLEL &
@@ -639,10 +644,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
 !    2-Enl is complex  ===== D_ij=D_ji or D_ij=D_ji^* if hermdij=true
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
+
      if (nspinortot==1) then ! -------------> NO SPINORS
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
        ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
@@ -701,7 +709,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                do mu=1,ndgxdtfac
                  if(cplex_dgxdt(mu)==2)then
@@ -710,9 +717,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,1)
                  end if
                  dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfi(1)
-                 dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl2_cg*gxfi(1)
+                 dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(2)*gxfi(1)
                  if (cplex_==2) then
-                   dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)-enl2_cg*gxfi(2)
+                   dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)-enl_(2)*gxfi(2)
                    dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfi(2)
                  end if
                end do
@@ -724,7 +731,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
        end do
        ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
      else ! -------------> SPINORIAL CASE
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
@@ -786,7 +795,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  i0lmn=ilmn*(ilmn-1)/2
                  ijlmn=i0lmn+jlmn
                  enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-                 enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                  if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                  do mu=1,ndgxdtfac
                    if(cplex_dgxdt(mu)==2)then
@@ -795,9 +803,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                      cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,ispinor)
                    end if
                    dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                   dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                   dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(1)
                    if (cplex_==2) then
-                     dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                     dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(2)
                      dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
                    end if
                  end do
@@ -812,7 +820,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
      end if !nspinortot
    end if !complex
+
 !  === Off-diagonal term(s) (up-down, down-up)
+
 !  --- No parallelization over spinors ---
    if (nspinortot==2.and.nspinor==nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
@@ -830,7 +840,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
-           if (hermdij_) enl_(2)=zero
+           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
                cplex_ = 2 ;
@@ -851,7 +861,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
+             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              do mu=1,ndgxdtfac
                if(cplex_dgxdt(mu)==2)then
                  cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn,ia,ispinor)
@@ -880,7 +890,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                do mu=1,ndgxdtfac
                  if(cplex_dgxdt(mu)==2)then
                    cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn,ia,jspinor)
@@ -888,9 +897,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,jspinor)
                  end if
                  dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                 dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                 dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(1)
                  if (cplex_==2) then
-                   dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                   dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(2)
                    dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
                  end if
                end do !mu
@@ -903,6 +912,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do !ispinor
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: opernlc_ylm: invalid cplex_enl/=2!")
@@ -932,8 +942,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,jispin)
-             if(hermdij_) enl_(2)=-enl_(2)
+             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
+             if(hermdij_offdiag) enl_(2)=-enl_(2)
            else
              jilmn=i0lmn+jlmn
              enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
@@ -1048,7 +1058,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !-------------------------------------------------------------------
  if (optder==2.and.(paw_opt==1.or.paw_opt==2.or.paw_opt==4)) then  ! Enl is psp strength Dij
    d2gxdtfac(1:cplex,1:nd2gxdtfac,1:nlmn,1:nincat,1:nspinor)=zero
+
 !  === Diagonal term(s) (up-up, down-down)
+
 !  1-Enl is real
    if (cplex_enl==1) then
 !$OMP PARALLEL &
@@ -1100,10 +1112,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
 !    2-Enl is complex  ===== D_ij=D_ji or D_ij=D_ji^* if hermdij=true
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
+
      if (nspinortot==1) then ! -------------> NO SPINORS
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
        ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
@@ -1162,7 +1177,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                do mu=1,nd2gxdtfac
                  if(cplex_d2gxdt(mu)==2)then
@@ -1171,9 +1185,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,1)
                  end if
                  d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfi(1)
-                 d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl2_cg*gxfi(1)
+                 d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(2)*gxfi(1)
                  if (cplex_==2) then
-                   d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)-enl2_cg*gxfi(2)
+                   d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)-enl_(2)*gxfi(2)
                    d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfi(2)
                  end if
                end do
@@ -1185,7 +1199,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
        end do
        ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
      else ! -------------> SPINORIAL CASE
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
@@ -1255,9 +1271,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                      cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,ispinor)
                    end if
                    d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                   d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                   d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(1)
                    if (cplex_==2) then
-                     d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                     d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(2)
                      d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
                    end if
                  end do
@@ -1272,7 +1288,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
      end if !nspinortot
    end if !complex
+
 !  === Off-diagonal term(s) (up-down, down-up)
+
 !  --- No parallelization over spinors ---
    if (nspinortot==2.and.nspinor==nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
@@ -1290,7 +1308,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
-           if (hermdij_) enl_(2)=zero
+           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            do mu=1,nd2gxdtfac
              if(cplex_d2gxdt(mu)==2)then
                cplex_ = 2 ;
@@ -1311,7 +1329,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
+             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              do mu=1,nd2gxdtfac
                if(cplex_d2gxdt(mu)==2)then
                  cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = d2gxdt(1,mu,ilmn,ia,ispinor)
@@ -1340,7 +1358,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                do mu=1,nd2gxdtfac
                  if(cplex_d2gxdt(mu)==2)then
                    cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = d2gxdt(1,mu,ilmn,ia,jspinor)
@@ -1348,9 +1365,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,jspinor)
                  end if
                  d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                 d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                 d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(1)
                  if (cplex_==2) then
-                   d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                   d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(2)
                    d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
                  end if
                end do !mu
@@ -1363,6 +1380,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do !ispinor
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
+
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: opernlc_ylm: invalid cplex_enl/=2!")
@@ -1392,8 +1410,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,jispin)
-             if(hermdij_) enl_(2)=-enl_(2)
+             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
+             if(hermdij_offdiag) enl_(2)=-enl_(2)
            else
              jilmn=i0lmn+jlmn
              enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
