@@ -2865,9 +2865,7 @@ implicit none
    cplxdij_lmn2_size=paw_ij1%cplex_dij*paw_ij1%lmn2_size
    ndij=paw_ij1%ndij
    cplx_lmn2_size=paw_ij1%cplex*lmn2_size
-!   buf_int_size=buf_int_size+22
-!  JWZ increase by one due to addition of dijnd
-   buf_int_size=buf_int_size+23
+   buf_int_size=buf_int_size+24
    if (paw_ij1%has_dij==2) then
      buf_dp_size=buf_dp_size +cplxdij_lmn2_size*ndij
    end if
