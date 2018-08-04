@@ -270,6 +270,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 &   (psps%pspso(ipsp)==1.and.pspso_old(ipsp)==pspso_zero(ipsp))) then
      new_pspso(ipsp)=0
    end if
+!  No new characteristics if PAW
+   if (psps%usepaw==1) new_pspso(ipsp)=0
 !  Prepare the saving of the intrinsic pseudopotential characteristics
    if(psps%pspso(ipsp)==1) pspso_zero(ipsp)=0
  end do
