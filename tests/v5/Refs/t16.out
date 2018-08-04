@@ -862,6 +862,14 @@ P           mkmem8          4
         pawspnorb6          0
         pawspnorb7          1
         pawspnorb8          1
+           so_psp1          1       1
+           so_psp2          1       1
+           so_psp3          1       1
+           so_psp4          1       1
+           so_psp5          1       1
+           so_psp6          1       1
+           so_psp7          2       2
+           so_psp8          2       2
            prtden           0
            prteig           0
             prtwf           0
@@ -6794,6 +6802,14 @@ P           mkmem8          4
         pawspnorb6          0
         pawspnorb7          1
         pawspnorb8          1
+           so_psp1          1       1
+           so_psp2          1       1
+           so_psp3          1       1
+           so_psp4          1       1
+           so_psp5          1       1
+           so_psp6          1       1
+           so_psp7          2       2
+           so_psp8          2       2
            prtden           0
            prteig           0
             prtwf           0
