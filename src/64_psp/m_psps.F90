@@ -383,7 +383,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      end if
      if(psps%pspso(ipsp)/=0)psps%mpspso=2
    else
-     psps%pspso(ipsp)=dtset%pawspnorb
+     psps%pspso(ipsp)=1+dtset%pawspnorb
    end if
 !  Ideally the following line should not exist, but at present, the space has to be booked
    if(pspheads(ipsp)%pspso/=0)psps%mpspso=2

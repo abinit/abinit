@@ -242,11 +242,6 @@ P           mkmem5          4
         pawspnorb3          1
         pawspnorb4          1
         pawspnorb5          1
-           so_psp1          1
-           so_psp2          2
-           so_psp3          2
-           so_psp4          2
-           so_psp5          2
            prtden           0
            prteig           0
             prtwf1          1
@@ -3017,11 +3012,6 @@ P           mkmem5          4
         pawspnorb3          1
         pawspnorb4          1
         pawspnorb5          1
-           so_psp1          1
-           so_psp2          2
-           so_psp3          2
-           so_psp4          2
-           so_psp5          2
            prtden           0
            prteig           0
             prtwf1          1

@@ -131,7 +131,6 @@ module m_hamiltonian
    ! For PAW: same as mpsang
    ! same as psps%mpssoang
 
-
   integer :: natom
    ! The number of atoms for this dataset; same as dtset%natom
 
@@ -787,7 +786,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  if (psps%usepaw==1) then
    do itypat=1,psps%ntypat
-     if (pawtab(itypat)%usespnorb==1) ham%pspso(itypat)=2
+     ham%pspso(itypat)=1+pawtab(itypat)%usespnorb
    end do
  end if
 
