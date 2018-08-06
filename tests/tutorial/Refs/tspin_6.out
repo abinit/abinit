@@ -107,8 +107,6 @@ P           mkmem           1
         pawecutdg      1.50000000E+01 Hartree
         pawspnorb1          0
         pawspnorb2          1
-           so_psp1          1
-           so_psp2          2
           spgroup           1
            toldfe      1.00000000E-07 Hartree
            tsmear      2.00000000E-02 Hartree
@@ -743,8 +741,6 @@ P           mkmem           1
         pawecutdg      1.50000000E+01 Hartree
         pawspnorb1          0
         pawspnorb2          1
-           so_psp1          1
-           so_psp2          2
           spgroup           1
            strten1    -6.5421561402E-05 -6.5422064340E-05 -6.5421256192E-05
                       -7.8367382310E-11  1.4687892343E-09 -2.9120941882E-09
