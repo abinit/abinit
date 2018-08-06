@@ -3135,7 +3135,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1)then
    dtset%so_psp(1:npsp)=intarr(1:npsp)
  end if
- if (dtset%pawspnorb==1) dtset%so_psp(1:npsp)=2
+ if (dtset%usepaw==1) dtset%so_psp(1:npsp)=dtset%pawspnorb
 
 !LOTF variables
 #if defined HAVE_LOTF

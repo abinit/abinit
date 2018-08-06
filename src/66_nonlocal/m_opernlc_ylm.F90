@@ -164,7 +164,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  integer :: cplex_,ia,ierr,ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,ispinor,ispinor_index
  integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
  real(dp) :: enl2_cg,sijr
- logical :: hermdij_,hermdij_offdiag
+ logical :: hermdij_,hermdij_diag,hermdij_offdiag
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
  real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:)
@@ -179,7 +179,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 ! hermdij_ .false. invokes original coding, with Dij=Dji in complex case
 ! hermdij_ .true. invokes Dij = Dji*, needed for magnetic field cases
  hermdij_=.false.;if(present(hermdij)) hermdij_=hermdij
- hermdij_offdiag=.true.
+ hermdij_diag=.true.;hermdij_offdiag=.true.
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
@@ -324,6 +324,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
      else ! -------------> SPINORIAL CASE
 
+!  === Diagonal term(s) (up-up, down-down)
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
@@ -336,19 +338,19 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
              j0lmn=jlmn*(jlmn-1)/2
              jjlmn=j0lmn+jlmn
              enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,ispinor_index)
-             if (hermdij_) enl_(2)=zero
+             if (hermdij_diag) enl_(2)=zero
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
              gxj(1:cplex)=gx(1:cplex,jlmn,ia,ispinor)
-             gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)+enl_(1)*gxj(1)
-             gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(2)*gxj(1)
+             gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxj(1)
+             gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(2)*gxj(1)
              if (cplex==2) then
-               gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)-enl_(2)*gxj(2)
-               gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(1)*gxj(2)
+               gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl_(2)*gxj(2)
+               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxj(2)
              end if
              do ilmn=1,jlmn-1
                ijlmn=j0lmn+ilmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
+               enl2_cg=enl_(2);if(hermdij_diag)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                gxi(1:cplex)=gx(1:cplex,ilmn,ia,ispinor)
                gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxi(1)
@@ -733,6 +735,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
 
      else ! -------------> SPINORIAL CASE
+
+!  === Diagonal term(s) (up-up, down-down)
 
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
@@ -1201,6 +1205,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
 
      else ! -------------> SPINORIAL CASE
+
+!  === Diagonal term(s) (up-up, down-down)
 
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &

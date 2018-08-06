@@ -125,9 +125,12 @@ module m_hamiltonian
 
   integer :: mpssoang
    ! Maximum number of channels, including those for treating the spin-orbit coupling
-   ! when mpspso=1, mpssoang=mpsang
-   ! when mpspso=2, mpssoang=2*mpsang-1
+   ! For NC pseudopotentials only:
+   !   when mpspso=1, mpssoang=mpsang
+   !   when mpspso=2, mpssoang=2*mpsang-1
+   ! For PAW: same as mpsang
    ! same as psps%mpssoang
+
 
   integer :: natom
    ! The number of atoms for this dataset; same as dtset%natom
