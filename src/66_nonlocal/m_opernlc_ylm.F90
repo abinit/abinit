@@ -178,7 +178,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
 ! hermdij_ .false. invokes original coding, with Dij=Dji in complex case
 ! hermdij_ .true. invokes Dij = Dji*, needed for magnetic field cases
- hermdij_=.false.;if(present(hermdij)) hermdij_=hermdij
+ hermdij_=.true.;if(present(hermdij)) hermdij_=hermdij
+!hermdij_=.false.;if(present(hermdij)) hermdij_=hermdij
  hermdij_diag=.true.;hermdij_offdiag=.true.
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
