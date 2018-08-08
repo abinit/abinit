@@ -229,7 +229,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(kinpw,(dtset%mpw))
 
  ABI_ALLOCATE(my_nucdipmom,(3,dtset%natom))
- my_nucdipmom(:,:) = zero
+ my_nucdipmom(:,:) = dtset%nucdipmom(:,:)
 
  ! input parameters for calls to smatrix.F90
  ddkflag = 1
@@ -264,14 +264,19 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
  !gs_hamk is the normal hamiltonian at k, needed for computing E_nk
+!  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+! & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
+! & paw_ij=paw_ij)
  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=my_nucdipmom,&
 & paw_ij=paw_ij)
 
  !gs_hamk123 is used to apply vlocal in <u_nk1|Hk2|u_mk3>
  ! my_nucdipmom can be used to override the input nuclear dipoles
+ ! call init_hamiltonian(gs_hamk123,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+ !      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom)
  call init_hamiltonian(gs_hamk123,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom)
+      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=my_nucdipmom)
 
  !---------construct local potential------------------
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
