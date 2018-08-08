@@ -43,7 +43,7 @@ module m_dft_energy
  use m_kg,               only : mkkin
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
- use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
                                 bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
@@ -67,6 +67,8 @@ module m_dft_energy
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
  use m_fourier_interpol, only : transgrid
+ use m_prep_kgb,         only : prep_getghc, prep_nonlop
+ use m_psolver,          only : psolver_rhohxc
 
  implicit none
 
@@ -230,8 +232,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
  use interfaces_53_ffts
- use interfaces_62_poisson
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -961,7 +961,6 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkresi'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

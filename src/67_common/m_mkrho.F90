@@ -47,6 +47,8 @@ module m_mkrho
  use m_io_tools,     only : open_file
  use m_splines,      only : spline,splint
  use m_sort,         only : sort_dp
+ use m_prep_kgb,     only : prep_fourwf
+ use m_wvl_rho,      only : wvl_mkrho
 
  implicit none
 
@@ -143,8 +145,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #define ABI_FUNC 'mkrho'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_66_wfs
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

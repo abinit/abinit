@@ -60,6 +60,7 @@ module m_nonlinear
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -77,6 +78,8 @@ module m_nonlinear
  use m_fourier_interpol, only : transgrid
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
+ use m_mkcore,           only : mkcore
+ use m_pead_nl_loop,     only : pead_nl_loop
 
  implicit none
 
@@ -161,7 +164,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_95_drive
 !End of the abilint section
 
@@ -752,9 +754,9 @@ end if
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
+   has_kxc=1
+   call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
-   if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,nk3xc1,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,has_k3xc=has_k3xc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)

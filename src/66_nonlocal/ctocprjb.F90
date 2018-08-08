@@ -46,6 +46,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
  use m_errors
  use m_profiling_abi
 
+ use m_cgprj,      only : getcprj
  use m_kg,         only : getph, ph1d3d
  use m_initylmg,   only : initylmg
  use m_mkffnl,     only : mkffnl
@@ -57,7 +58,6 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ctocprjb'
- use interfaces_66_nonlocal, except_this_one => ctocprjb
 !End of the abilint section
 
  implicit none
