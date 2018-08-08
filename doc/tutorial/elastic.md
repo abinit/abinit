@@ -23,6 +23,11 @@ features of ABINIT, and to use relevant parts of the associated codes Mrgddb and
 
 This tutorial should take about two hours.
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
 *Before beginning, you might consider working in a different subdirectory as for the other tutorials. 
