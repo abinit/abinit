@@ -4,7 +4,7 @@
 !!  m_mover
 !!
 !! FUNCTION
-!! Move ion or change acell acording to forces and stresses
+!! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)

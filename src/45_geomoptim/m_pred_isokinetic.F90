@@ -148,7 +148,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !write(std_out,*) 'isokinetic 02'
 !##########################################################
 !### 02. Allocate the vectors vin, vout and hessian matrix
-!###     These arrays could be allocated from a previus
+!###     These arrays could be allocated from a previous
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
@@ -231,7 +231,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
    end do
 
-!  Calcul de a et b (4.13 de Ref.1)
+!  Computation of a and b (4.13 of Ref.1)
    a=0.0_dp
    b=0.0_dp
    do iatom=1,ab_mover%natom
@@ -244,7 +244,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    b=b/v2gauss
 
 
-!  Calcul de s et scdot
+!  Computation of s and scdot
    sqb=sqrt(b)
    as=sqb*ab_mover%dtion/2.
 ! jmb
@@ -393,8 +393,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  end do
 
-!Computation of vel_nexthalf (4.16 de Ref.1)
-!Computation of a and b (4.13 de Ref.1)
+!Computation of vel_nexthalf (4.16 of Ref.1)
+!Computation of a and b (4.13 of Ref.1)
  a=0.0_dp
  b=0.0_dp
  do iatom=1,ab_mover%natom
