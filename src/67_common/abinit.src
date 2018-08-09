@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_berryphase.F90",
  "m_berryphase_new.F90",
- "calc_efg.F90",
  "chern_number.F90",
  "m_conducti.F90",
  "m_dft_energy.F90",
@@ -33,8 +32,6 @@ sources = [
  "m_cgwf.F90",
  "m_epjdos.F90",
  "m_ksdiago.F90",
- "make_efg_el.F90",
- "make_efg_ion.F90",
  "make_grad_berry.F90",
  "mkcore_wvl.F90",
  "m_mklocl_realspace.F90",
