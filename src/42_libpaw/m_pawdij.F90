@@ -4437,7 +4437,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
 !  Have to make a temporary copy of dij
    LIBPAW_DATATYPE_ALLOCATE(my_tmp_dij,(my_natom))
-   my_cplex_rf=1;my_cplex_dij=1
+   my_cplex_rf=1;my_cplex_dij=1;my_ndij=1
    if (my_natom>0) then
      my_cplex_rf=paw_ij(1)%cplex_rf
      my_cplex_dij=paw_ij(1)%cplex_dij
@@ -4976,8 +4976,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="DIJ";if (ipert>0) pertstrg="DIJ(1)"
    natinc=1;if(my_natom>1.and.pawprtvol>=0) natinc=my_natom-1
-   write(msg, '(6a)') ch10," PAW TEST:",ch10,&
-&     ' ========= Values of ',trim(pertstrg),' in symdij (Hartree) ========='
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of ',trim(pertstrg),' in symdij (Hartree) =========',ch10
    call wrtout(std_out,msg,wrt_mode)
    do iatom=1,my_natom,natinc
      iatom_tot=iatom; if (paral_atom) iatom_tot=my_atmtab(iatom)
@@ -5426,8 +5426,8 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 !Local variables-------------------------------
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
  integer :: idij,idij_sym,kk,lmn_size,lmn2_size,my_prtvol,my_unt,ndij,nsploop,tmp_cplex_dij
+ real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
- character(len=500) :: msg0
  character(len=2000) :: msg
 !arrays
  integer :: idum(0)
@@ -5436,18 +5436,11 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 
 ! *************************************************************************
 
+!Optional arguments
  my_unt   =std_out ; if (PRESENT(unit      )) my_unt   =unit
  my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
  my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
-
- ndij=size(dij,2)
- lmn2_size=size(dij,1)/(cplex_rf*cplex_dij)
- lmn_size=int(dsqrt(two*dble(lmn2_size)))
- nsploop= nsppol; if (ndij==4) nsploop=4
- if (cplex_rf==2) then
-   LIBPAW_ALLOCATE(dij1,(2*lmn2_size))
-   LIBPAW_ALLOCATE(dij2,(2*lmn2_size))
- end if
+ my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
 
 !Title
  if (present(title_msg)) then
@@ -5457,7 +5450,17 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
    end if
  end if
 
-! === Loop over density components ===
+!Inits
+ ndij=size(dij,2)
+ lmn2_size=size(dij,1)/(cplex_rf*cplex_dij)
+ lmn_size=int(dsqrt(two*dble(lmn2_size)))
+ nsploop= nsppol; if (ndij==4) nsploop=4
+ if (cplex_rf==2) then
+   LIBPAW_ALLOCATE(dij1,(2*lmn2_size))
+   LIBPAW_ALLOCATE(dij2,(2*lmn2_size))
+ end if
+
+! === Loop over Dij components ===
  do idij=1,nsploop
 
    idij_sym=idij;if (ndij==4.and.idij>2) idij_sym=7-idij
@@ -5502,8 +5505,9 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
    end if
 
    !Printing
+    test_value_eff=-one;if(my_test_value>zero.and.idij==1) test_value_eff=my_test_value
     call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                       my_prtvol,idum,test_value*dble(3-2*idij),1,&
+&                       my_prtvol,idum,test_value_eff,1,&
 &                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
 
   end do !idij

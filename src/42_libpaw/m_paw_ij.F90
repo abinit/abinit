@@ -27,7 +27,7 @@ MODULE m_paw_ij
 
  USE_DEFS
  USE_MSG_HANDLING
- use m_xmpi
+ USE_MPI_WRAPPERS
  USE_MEMORY_PROFILING
 
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab, get_my_natom
