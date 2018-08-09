@@ -91,7 +91,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
  ! make list of atoms with non-zero nuclear magnetic dipoles
  atom_nd_tot = 0
  do iatom = 1, natom
-   if(any(abs(nucdipmom(:,iatom))>tol8)) then
+   if(any(abs(nucdipmom(:,iatom))>tol12)) then
      atom_nd_tot = atom_nd_tot + 1
      atom_nd(atom_nd_tot) = iatom
    end if

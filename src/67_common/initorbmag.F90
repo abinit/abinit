@@ -20,8 +20,6 @@
 !!  kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !!  npwarr(nkpt) = number of planewaves in basis and boundary at this k point
 !!  occ(mband*nkpt*nsppol) = occup number for each band at each k point
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
-!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3) = dimensional primitive vectors
@@ -50,7 +48,7 @@
 #include "abi_common.h"
 
 subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                     pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                     rprimd,symrec,xred)
 
  use defs_basis
@@ -64,8 +62,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_symtk,         only : symatm
  use m_fftcore,       only : kpgsph
  use m_kpts,          only : listkk, smpbz
- use m_pawang,        only : pawang_type
- use m_pawrad,        only : pawrad_type, simp_gen
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_alloc, pawcprj_getdim
  use m_paw_sphharm,   only : initylmr,setsym_ylm
@@ -88,7 +84,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
  type(orbmag_type),intent(out) :: dtorbmag
- type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
@@ -97,27 +92,25 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),pointer :: pwnsfac(:,:)
- type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: brav,exchn2n3d,fnkpt_computed
- integer :: iband,iatom,icg,icprj,idir,idum,idum1,idx,ierr,ifor,ikg,ikg1
- integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i,il,ilm,im,ilmn,iln
- integer :: index,ipw,ipwnsfac,ir,isign,isppol,istwf_k,isym,isym1,itrs,itypat
- integer :: jpw,ll,lmax,lmn2_size_max,lt
- integer :: mband_occ_k,me,me_g0,mesh_size,mkmem_,mkpt,my_nspinor,nband_k,nkptlatt,nproc,npw_k,npw_k1
- integer :: option,spaceComm,ylmr_normchoice,ylmr_npts,ylmr_option
- real(dp) :: arg,bnorm,diffk1,diffk2,diffk3,ecut_eff,intg
- real(dp) :: kpgnorm,kpt_shifted1,kpt_shifted2,kpt_shifted3,phfac,rdum
+ integer :: iband,icg,icprj,idir,idum,idum1,ierr,ifor,ikg,ikg1
+ integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i
+ integer :: index,ipw,ipwnsfac,isign,isppol,istwf_k,isym,isym1,itrs,itypat
+ integer :: jpw,lmax,lmn2_size_max
+ integer :: mband_occ_k,me,me_g0,mkmem_,mkpt,my_nspinor,nband_k,nkptlatt,nproc,npw_k,npw_k1
+ integer :: option,spaceComm
+ real(dp) :: diffk1,diffk2,diffk3,ecut_eff
+ real(dp) :: kpt_shifted1,kpt_shifted2,kpt_shifted3,rdum
  character(len=500) :: message
  !arrays
  integer :: iadum(3),iadum1(3),dg(3)
  integer,allocatable :: kg1_k(:,:)
- real(dp) :: bb(3),bbn(3),bcart(3),diffk(3),dk(3),dum33(3,3),kpgcart(3),kpoint(3),kpgvec(3),kpt1(3)
- real(dp) :: tsec(2),ylmgr(1,1,0),ylmr_nrm(1)
- real(dp),allocatable :: calc_expibi(:,:),ff(:),sb_out(:),spkpt(:,:),ylmb(:)
+ real(dp) :: diffk(3),dk(3),dum33(3,3),kpt1(3),tsec(2)
+ real(dp),allocatable :: spkpt(:,:)
 
 ! *************************************************************************
 
@@ -220,8 +213,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_ALLOCATE(dtorbmag%cprjindex,(dtset%nkpt,dtset%nsppol))
  dtorbmag%cprjindex(:,:) = 0
-
- ABI_ALLOCATE(dtorbmag%twdij0,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
 
  if (dtset%kptopt /= 3) then
    ABI_ALLOCATE(dtorbmag%atom_indsym,(4,dtset%nsym,dtorbmag%natom))
@@ -640,153 +631,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_DEALLOCATE(kg1_k)
 
- ! ! =======================================================================================
- ! ! compute various PAW related terms
- ! ! =======================================================================================
-
- ! ABI_ALLOCATE(calc_expibi,(2,dtorbmag%natom))
- ! ABI_ALLOCATE(dtorbmag%expibi,(6,dtorbmag%natom))
- 
- ! ABI_ALLOCATE(ylmb,(pawang%l_size_max*pawang%l_size_max))
- ! ABI_ALLOCATE(dtorbmag%ylmb,(6,pawang%l_size_max*pawang%l_size_max))
- ! ABI_ALLOCATE(sb_out, (pawang%l_size_max))
- ! ABI_ALLOCATE(dtorbmag%jb_bessel,(3,dtset%ntypat,maxval(pawtab(:)%mesh_size),pawang%l_size_max))
-
- ! ylmr_normchoice = 0 ! input to initylmr are normalized
- ! ylmr_npts = 1 ! only 1 point to compute in initylmr
- ! ylmr_nrm(1) = one ! weight of normed point for initylmr
- ! ylmr_option = 1 ! compute only ylm's in initylmr
-
- ! do idir = 1, 3
- !    do ifor = 1, 2
- !       idx = ifor + 2*(idir-1)
- !       dk(:) = dtorbmag%dkvecs(:,idir)
- !       if (ifor .EQ. 2) dk(:) = -dk(:)
- 
- !       !    compute Y_LM(\hat{-b}) here
- !       bb(:) = -dk(:)
- !       !    reference bb to cartesian axes
- !       bcart(1:3)=MATMUL(gprimd(1:3,1:3),bb(1:3))
- !       !    bbn is b-hat (the unit vector in the b direction)
- !       bnorm=dsqrt(dot_product(bcart,bcart))
- !       bbn(:) = bcart(:)/bnorm
- !       call initylmr(pawang%l_size_max,ylmr_normchoice,ylmr_npts,ylmr_nrm,ylmr_option,bbn,ylmb(:),ylmgr)
- !       dtorbmag%ylmb(idx,:) = ylmb(:)
-
- !       ! compute exp(-i*b*I), note expibi supplies the additional minus sign
- !       call expibi(calc_expibi,dk,dtorbmag%natom,xred)
- !       do iatom = 1, dtorbmag%natom
- !          dtorbmag%expibi(idx,iatom)=cmplx(calc_expibi(1,iatom),calc_expibi(2,iatom))
- !       end do
-
- !       ! compute j_L(br), the spherical Bessel functions, at each mesh point*b
- !       !    as an argument to the bessel function, need 2pi*b*r = 1 so b is re-normed to two_pi
- !       if (ifor .EQ. 1) then
- !          !depends on |b| so only do this for the +b, not -b
- !          bnorm = two_pi*bnorm
- !          do itypat = 1, dtset%ntypat
- 
- !             mesh_size = pawtab(itypat)%mesh_size
- !             do ir=1,mesh_size
- !                arg=bnorm*pawrad(itypat)%rad(ir)
- !                ! spherical bessel functions |b||r| at each mesh point
- !                call sbf8(pawang%l_size_max,arg,sb_out) 
- !                dtorbmag%jb_bessel(idir,itypat,ir,:) = sb_out
- !             end do ! end loop over mesh
- 
- !          end do ! end loop over ntypat
- !       end if ! end check on ifor
- 
- !    end do ! end loop over ifor
- ! end do ! end loop over idir
-
-
- ! ! compute terms depending on k+G
- ! ABI_ALLOCATE(dtorbmag%phkgi,(dtorbmag%fnkpt,dtset%mpw,dtorbmag%natom))
- ! ABI_ALLOCATE(dtorbmag%jkg_bessel,(dtset%ntypat,maxval(pawtab(:)%mesh_size),dtorbmag%fnkpt,dtset%mpw,pawang%l_size_max))
- ! do ikpt = 1, dtorbmag%fnkpt
- !    kpoint(:) = dtorbmag%fkptns(:,ikpt)
- !    npw_k = npwarr(ikpt)
- !    ikg = dtorbmag%fkgindex(ikpt)
- !    do ipw = 1, npw_k
- !       kpgvec(:) = kpoint(:) + kg(:,ipw+ikg)
- !       ! compute phase factors exp(i*(k+G).xred)
- !       do iatom = 1, dtorbmag%natom
- !          phfac=two_pi*DOT_PRODUCT(kpgvec(:),xred(:,iatom))
- !          dtorbmag%phkgi(ikpt,ipw,iatom)=cmplx(cos(phfac),sin(phfac),kind=dpc)
- !       end do ! end loop over natom
-
- !       ! reference to cartesian axes
- !       kpgcart(1:3)=MATMUL(gprimd(1:3,1:3),kpgvec(1:3))
- !       kpgnorm=dsqrt(dot_product(kpgcart,kpgcart))
- !       kpgnorm=two_pi*kpgnorm
- !       do itypat=1, dtset%ntypat
- !          mesh_size = pawtab(itypat)%mesh_size
- !          do ir = 1, mesh_size
- !             arg=kpgnorm*pawrad(itypat)%rad(ir)
- !             ! spherical bessel functions |kb+Gb||r| at each mesh point
- !             call sbf8(pawang%l_size_max,arg,sb_out) 
- !             dtorbmag%jkg_bessel(itypat,ir,ikpt,ipw,:)=sb_out(:)
- !          end do ! end loop over mesh_size
- !       end do ! end loop over ntypat
- 
- !    end do ! end loop over npw_k
-
- ! end do ! end loop over fnkpt
-
- ! ABI_ALLOCATE(dtorbmag%has_pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),pawang%l_size_max,pawang%l_size_max,3,dtorbmag%fnkpt))
-
- ! ABI_ALLOCATE(dtorbmag%pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),pawang%l_size_max,pawang%l_size_max,3,dtorbmag%fnkpt,dtset%mpw))
-
- ! dtorbmag%has_pjj_integral = .FALSE.
- ! dtorbmag%pjj_integral = zero
-
- ! do itypat=1,dtset%ntypat
-
- !    mesh_size = pawtab(itypat)%mesh_size
- !    ABI_ALLOCATE(ff,(mesh_size))
-
- !    do ilmn=1,pawtab(itypat)%lmn_size
- !       il=pawtab(itypat)%indlmn(1,ilmn)
- !       im=pawtab(itypat)%indlmn(2,ilmn)
- !       ilm=pawtab(itypat)%indlmn(4,ilmn)
- !       iln=pawtab(itypat)%indlmn(5,ilmn)
-
- !       do ll=0,pawtab(itypat)%l_size-1
- !          do lt=0,pawtab(itypat)%l_size-1
- !             ! require |ll-lt| <= il <= ll+lt
- !             if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
- !             if ( mod((il+ll+lt),2) .NE. 0 ) cycle
-
- !             do idir = 1, 3
- !                do ikpt = 1, dtorbmag%fnkpt
-
- !                   if(.NOT. dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt)) then
- !                      do ipw=1,npwarr(ikpt)
- !                         ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
- !                              &pawtab(itypat)%tproj(1:mesh_size,iln)*&
- !                              &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
- !                              &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikpt,ipw,lt+1)
- !                         call simp_gen(intg,ff,pawrad(itypat))
- !                         dtorbmag%pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt,ipw)=intg
- !                      end do
- !                      dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt) = .TRUE.
- !                   end if
- !                end do ! end loop over ikpt
- !             end do ! end loop over idir
- !          end do ! end loop over lt
- !       end do ! end loop over ll
- !    end do ! end loop over ilmn
-
- !    ABI_DEALLOCATE(ff)
- 
- ! end do ! end loop over itypat
- 
-
- 
- ! ABI_DEALLOCATE(calc_expibi)
- ! ABI_DEALLOCATE(ylmb)
- ! ABI_DEALLOCATE(sb_out)
 
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)

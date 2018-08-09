@@ -551,7 +551,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
  if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
  end if
 
