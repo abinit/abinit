@@ -97,6 +97,7 @@ module m_gstate
  use m_psolver,          only : psolver_kernel
  use m_wvl_rho,          only : wvl_initro, wvl_mkrho
  use m_paw2wvl,          only : paw2wvl, wvl_paw_free
+ use m_berryphase_new,   only : init_e_field_vars,prtefield
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu

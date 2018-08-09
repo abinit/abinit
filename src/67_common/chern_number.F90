@@ -86,8 +86,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  use m_errors
  use m_profiling_abi
 
- use m_fftcore,    only : kpgsph
  use m_berrytk,    only : smatrix
+ use m_fftcore,    only : kpgsph
+ use m_kg, only : mkpwind_k
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -101,7 +102,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

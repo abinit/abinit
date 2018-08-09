@@ -44,6 +44,7 @@ module m_scfcv_core
  use m_xcdata
  use m_cgtools
 
+ use m_berryphase_new,   only : update_e_field_vars
  use m_dtfil,            only : status
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
@@ -286,7 +287,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
