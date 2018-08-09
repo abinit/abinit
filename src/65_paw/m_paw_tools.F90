@@ -33,6 +33,7 @@ MODULE m_paw_tools
  use m_pawang,           only : pawang_type, mat_slm2ylm, mat_mlms2jmj
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_free, paw_ij_nullify, paw_ij_gather
+ use m_pawdij,           only : pawdij_print_dij
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
  use m_paw_io,           only : pawio_print_ij
  use m_paw_sphharm,      only : mat_mlms2jmj, mat_slm2ylm
@@ -440,50 +441,29 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
      do unt=1,2
-       if ((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)) then
-         write(msg,'(a)') ' Total pseudopotential strength Dij (hartree):'
-         call wrtout(unitfi,msg,'COLL')
-       else if ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2)) then
-         write(msg,'(a)') ' Total pseudopotential strength Dij (eV):'
-         call wrtout(unitfi,msg,'COLL')
-       end if
-       if (ipositron>0) then
-         if (((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)).or.&
-&         ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2))) then
+       if (((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)).or.&
+&          ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2))) then
+         if ((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)) then
+           write(msg,'(a)') ' Total pseudopotential strength Dij (hartree):'
+           call wrtout(unitfi,msg,'COLL')
+         else if ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2)) then
+           write(msg,'(a)') ' Total pseudopotential strength Dij (eV):'
+           call wrtout(unitfi,msg,'COLL')
+         end if
+         if (ipositron>0) then
            if (electronpositron%has_pos_ham==0) then
-             write(msg,'(a)') ' -Note: these are the electronic Dij'
+             write(msg,'(3a)') trim(msg),ch10,' -Note: these are the electronic Dij'
            else
-             write(msg,'(a)') ' -Note: these are the positronic Dij'
+             write(msg,'(3a)') trim(msg),ch10,' -Note: these are the positronic Dij'
            end if
            call wrtout(unitfi,msg,'COLL')
          end if
-       end if
-       if (((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)).or.&
-&       ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2))) then
+         call wrtout(unitfi,msg,'COLL')
          do iat=1,natprt
-           iatom=jatom(iat);nspden=paw_ij_all(iatom)%nspden;ndij=paw_ij_all(iatom)%ndij
-           cplex_dij=paw_ij_all(iatom)%cplex_dij
-           optsym=2;if (cplex_dij==2.and.dtset%nspinor==1) optsym=1
-           do ispden=1,ndij
-             valmx=100._dp;if (ispden==1) valmx=-1._dp
-             msg='' ; msg0=''
-             if (dtset%natom>1.or.nspden>1.or.ndij==4) write(msg0, '(a,i3)' ) ' Atom #',iatom
-             if (nspden==1.and.ndij/=4) write(msg,'(a)')     trim(msg0)
-             if (nspden==2) write(msg,'(2a,i1)') trim(msg0),' - Spin component ',ispden
-             if (ndij==4) write(msg,'(3a)')    trim(msg0),' - Component ',trim(dspin1(ispden+2*(ndij/4)))
-             if (dtset%natom>1.or.nspden>1.or.ndij==4) then
-               call wrtout(unitfi,msg,'COLL')
-             end if
-             if (ndij/=4.or.ispden<=2) then
-               call pawio_print_ij(unitfi,paw_ij_all(iatom)%dij(:,ispden),paw_ij_all(iatom)%lmn2_size,&
-&               cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
-&               idum,valmx,unt,opt_sym=optsym)
-             else
-               call pawio_print_ij(unitfi,paw_ij_all(iatom)%dij(:,ispden),paw_ij_all(iatom)%lmn2_size,&
-&               cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
-&               idum,valmx,unt,asym_ij=paw_ij_all(iatom)%dij(:,7-ispden),opt_sym=optsym)
-             end if
-           end do
+           iatom=jatom(iat)
+           call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
+&                  paw_ij_all(iatom)%cplex_rf,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
+&                  paw_ij_all(iatom)%nsppol,test_value=100._dp,unit=unitfi,opt_prtvol=dtset%pawprtvol)
          end do
        end if
        msg=' '

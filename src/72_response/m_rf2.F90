@@ -705,10 +705,10 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
          ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         enl_temp(:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,1) + rf_hamk_idir%e1kbsc(:,:,:,1)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
-         enl_ptr => rf_hamk_idir%e1kbfr
+         enl_ptr => rf_hamk_idir%e1kbfr(:,:,:,1)
        end if
 
 !      Compute application of dS/dk1 to cwavef
@@ -744,10 +744,10 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
          ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         enl_temp(:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,1) + rf_hamk_idir%e1kbsc(:,:,:,1)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
-         enl_ptr => rf_hamk_idir%e1kbfr
+         enl_ptr => rf_hamk_idir%e1kbfr(:,:,:,1)
        end if
 
        iatom = gs_hamkq%atindx(ipert - natom - 11)  ! Atoms are type-sorted in enlout()

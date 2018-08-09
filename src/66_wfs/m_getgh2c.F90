@@ -182,14 +182,21 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    MSG_BUG(msg)
  end if
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
+   if (gs_hamkq%nvloc>1) then
+     msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
+     MSG_BUG(msg)
+   end if
    if (present(enl)) then
      enl_ptr => enl
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: cplex_rf>1!')
      ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-     enl_temp = rf_hamkq%e1kbfr + rf_hamkq%e1kbsc
+     enl_temp(:,:,:) = rf_hamkq%e1kbfr(:,:,:,1) + rf_hamkq%e1kbsc(:,:,:,1)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
-     enl_ptr => rf_hamkq%e1kbfr
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     enl_ptr => rf_hamkq%e1kbfr(:,:,:,1)
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'
      MSG_BUG(msg)
@@ -400,6 +407,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      if (iatm<1.or.iatm>natom) then
        MSG_BUG(" iatm must be between 1 and natom")
      end if
+
      ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
 
      if (usecprj==1) then

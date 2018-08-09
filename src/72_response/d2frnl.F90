@@ -203,7 +203,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
- real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:),cg_left(:,:)
+ real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
  real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
  real(dp),allocatable :: enlout_piez1(:),enlout_piez2(:),enlout_phon(:),enlout_strs(:)
@@ -386,7 +386,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,1,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
@@ -405,7 +405,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
-         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,ii),mpi_atmtab=my_atmtab)
+         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,:,ii),mpi_atmtab=my_atmtab)
        end do
      end do
      call paw_ij_free(paw_ij_tmp)
@@ -656,7 +656,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_piezofr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,1,ii))
            piezofrnlk(:,ii)=piezofrnlk(:,ii)+occ_k*enlout_piez1(:)
          end do !end do ii
        end if
@@ -665,7 +665,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_becfr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_bec2,cpopt,cwaveprj,enlout_bec1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,1,ii))
            becfrnlk(:,:,ii)=becfrnlk(:,:,ii)+occ_k*reshape(enlout_bec1(:),(/3,natom/))
          end do !end do ii
        end if

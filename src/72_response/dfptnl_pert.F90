@@ -251,7 +251,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  real(dp) :: rmet(3,3),wtk_k
  real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef2(:,:),cwavef3(:,:),dkinpw(:)
  real(dp),allocatable :: eig1_k_i2pert(:),eig1_k_stored(:)
- real(dp),allocatable :: chi_ij(:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
+ real(dp),allocatable :: chi_ij(:,:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),occ_k(:)
  real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
@@ -344,12 +344,12 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,&
 &   (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
+   ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2,cplex_loc))
    call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
-   ABI_ALLOCATE(chi_ij,(0,0,0))
+   ABI_ALLOCATE(chi_ij,(0,0,0,0))
    ABI_ALLOCATE(phkxred,(0,0))
    ABI_DATATYPE_ALLOCATE(pawrhoij21,(0))
    pawrhoij21_unsym => pawrhoij21
@@ -809,7 +809,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            call rf2_getidir(idir_phon,idir_elfd,idir_getgh2c)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwavef2,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
 &           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-&           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
+&           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij(:,:,:,1),ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1a   = sum_psi0H2psi1a   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout1(1) ! be careful : factor 0.5
@@ -826,7 +826,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            iddk(2,:) =  s_cwave(1,:)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cgj,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
 &           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-&           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
+&           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij(:,:,:,1),ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1b   = sum_psi0H2psi1b   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout2(1) ! be careful : factor 0.5

@@ -438,15 +438,15 @@ module m_hamiltonian
 
 ! ===== Real arrays
 
-  real(dp), allocatable :: e1kbfr_spin(:,:,:,:)
-   ! e1kbfr_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+  real(dp), allocatable :: e1kbfr_spin(:,:,:,:,:)
+   ! e1kbfr_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbfr array for all spins treated by current process
-   ! See e1kbfr description ; e1kbfr is pointer to e1kbfr_spin(:,:,:,isppol)
+   ! See e1kbfr description ; e1kbfr is pointer to e1kbfr_spin(:,:,:,:,isppol)
 
-  real(dp), allocatable :: e1kbsc_spin(:,:,:,:)
-   ! e1kbsc_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+  real(dp), allocatable :: e1kbsc_spin(:,:,:,:,:)
+   ! e1kbsc_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbsc array for all spins treated by current process
-   ! See e1kbsc description ; e1kbsc is pointer to e1kbsc_spin(:,:,:,isppol)
+   ! See e1kbsc description ; e1kbsc is pointer to e1kbsc_spin(:,:,:,:,isppol)
 
 ! ===== Real pointers
 
@@ -466,17 +466,17 @@ module m_hamiltonian
    ! ddkinpw_kp(npw_kp)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: e1kbfr(:,:,:) => null()
-   ! Frozen part of 1st derivative of ekb
-   ! for the considered perturbation (not depending on VHxc^(1))
-   ! e1kbfr(dime1kb1,dime1kb2,nspinor**2)
-   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,my_isppol)
+  real(dp), pointer :: e1kbfr(:,:,:,:) => null()
+   ! Frozen part of 1st derivative of ekb for the considered perturbation
+   ! (part not depending on VHxc^(1))
+   ! e1kbfr(dime1kb1,dime1kb2,nspinor**2,cplex)
+   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
-  real(dp), ABI_CONTIGUOUS pointer :: e1kbsc(:,:,:) => null()
-   ! Self-consistent part of 1st derivative of ekb
-   ! for the considered perturbation (depending on VHxc^(1))
-   ! e1kbsc(dime1kb1,dime1kb2,nspinor**2)
-   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,my_isppol)
+  real(dp), ABI_CONTIGUOUS pointer :: e1kbsc(:,:,:,:) => null()
+   ! Self-consistent 1st derivative of ekb for the considered perturbation
+   ! (part depending only on self-consistent VHxc^(1))
+   ! e1kbsc(dime1kb1,dime1kb2,nspinor**2,cplex)
+   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
   real(dp), pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
@@ -850,7 +850,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  else ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
    req_cplex_dij=1; if (any(abs(ham%nucdipmom)>tol8)) req_cplex_dij=2
-   cplex=1;cplex_dij=max(cplex,req_cplex_dij,nspinor)
+   cplex=1;cplex_dij=max(req_cplex_dij,nspinor)
    ham%dimekb1=psps%dimekb*cplex_dij
    ham%dimekb2=natom
    ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
@@ -1598,7 +1598,7 @@ end subroutine destroy_rf_hamiltonian
 !!  cplex_paw=1 if all on-site PAW quantities are real (GS), 2 if they are complex (RF)
 !!  gs_Ham<gs_hamiltonian_type>=Structured datatype containing data for ground-state Hamiltonian at (k+q)
 !!  [has_e1kbsc]=optional, true if rf_Ham%e1kbsc has to be initialized.
-!!               e1kbsc contains the self-consistent part of 1st-order PAW Dij coefficients.
+!!               e1kbsc contains the self-consistent 1st-order PAW Dij coefficients (depending on VHxc^(1))
 !!  ipert=index of perturbation
 !!  [mpi_atmtab(:)]=optional, indexes of the atoms treated by current proc
 !!  [mpi_spintab(2)]=optional, flags defining the spin(s) treated be current process:
@@ -1651,7 +1651,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  logical :: has_e1kbsc_
 !arrays
  integer :: my_spintab(2)
- real(dp),allocatable,target :: e1kb_tmp(:,:,:)
+ real(dp),allocatable,target :: e1kb_tmp(:,:,:,:)
 
 ! *************************************************************************
 
@@ -1665,7 +1665,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  my_spintab=0;my_spintab(1:gs_Ham%nsppol)=1;if(present(mpi_spintab)) my_spintab=mpi_spintab
  my_nsppol=count(my_spintab==1)
 
- rf_Ham%cplex  =cplex
+ rf_Ham%cplex    =cplex
 
  rf_Ham%n4       =gs_Ham%n4
  rf_Ham%n5       =gs_Ham%n5
@@ -1677,7 +1677,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  rf_Ham%dime1kb1=0
  rf_Ham%dime1kb2=gs_Ham%dimekb2
  if (gs_Ham%usepaw==1.and.ipert/=gs_Ham%natom+1.and.ipert/=gs_Ham%natom+10) then
-   cplex_dij1=max(cplex,rf_Ham%nspinor)
+   cplex_dij1=rf_Ham%nspinor
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
@@ -1688,24 +1688,24 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
 &    ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
 
-     ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,my_nsppol))
+     ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
      rf_Ham%e1kbfr_spin=zero
      if (has_e1kbsc_) then
-       ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,my_nsppol))
+       ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
        rf_Ham%e1kbsc_spin=zero
      end if
 
      if (present(paw_ij1)) then
 
        if (my_nsppol<rf_Ham%nsppol) then
-         ABI_ALLOCATE(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2))
+         ABI_ALLOCATE(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
        end if
 
 !      === Frozen term
        jsp=0
        do isp=1,rf_Ham%nsppol
          if (my_spintab(isp)==1) then
-           jsp=jsp+1 ; rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsp)
+           jsp=jsp+1 ; rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,:,jsp)
          else
            rf_Ham%e1kbfr => e1kb_tmp
          end if
@@ -1721,7 +1721,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
          jsp=0
          do isp=1,rf_Ham%nsppol
            if (my_spintab(isp)==1) then
-             jsp=jsp+1 ; rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsp)
+             jsp=jsp+1 ; rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,:,jsp)
            else
              rf_Ham%e1kbsc => e1kb_tmp
            end if
@@ -1742,10 +1742,10 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  end if
 
  if (.not.allocated(rf_Ham%e1kbfr_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,0))
+   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,0,0))
  end if
  if (.not.allocated(rf_Ham%e1kbsc_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,0))
+   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,0,0))
  end if
  nullify(rf_Ham%e1kbfr)
  nullify(rf_Ham%e1kbsc)
@@ -1819,12 +1819,12 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      if (size(rf_Ham%e1kbfr_spin)>0) then
-       jsppol=min(isppol,size(rf_Ham%e1kbfr_spin,4))
-       if (jsppol>0) rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsppol)
+       jsppol=min(isppol,size(rf_Ham%e1kbfr_spin,5))
+       if (jsppol>0) rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,:,jsppol)
      end if
      if (size(rf_Ham%e1kbsc_spin)>0) then
-       jsppol=min(isppol,size(rf_Ham%e1kbsc_spin,4))
-       if (jsppol>0) rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsppol)
+       jsppol=min(isppol,size(rf_Ham%e1kbsc_spin,5))
+       if (jsppol>0) rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,:,jsppol)
      end if
    end if
  end if
@@ -2036,12 +2036,13 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  integer,intent(in) :: isppol,comm_atom
 !arrays
  integer,intent(in),optional,target :: mpi_atmtab(:)
- real(dp),optional,intent(out) :: e1kbfr(:,:,:),e1kbsc(:,:,:)
+ real(dp),optional,intent(out) :: e1kbfr(:,:,:,:),e1kbsc(:,:,:,:)
  type(paw_ij_type),intent(in) :: paw_ij1(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: dimdij1,dime1kb1,dime1kb3,iatom,iatom_tot,ierr,isp,ispden,my_natom,natom
+ integer :: cplex_rf,dimdij1,dime1kb1,dime1kb3,dime1kb4,iatom,iatom_tot,ierr,isp,ispden
+ integer :: my_natom,natom
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -2066,16 +2067,17 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 !Retrieve 1st-order PAW Dij coefficients for this spin component (frozen)
  if (my_natom>0.and.present(e1kbfr)) then
    if (allocated(paw_ij1(1)%dijfr)) then
-     dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3)
+     dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3) ; dime1kb4=size(e1kbfr,4)
+     ABI_CHECK(paw_ij1(1)%cplex_rf==dime1kb4,'BUG in pawdij2e1kb (1)!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
+         cplex_rf=paw_ij1(iatom)%cplex_rf
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         if (dimdij1>dime1kb1) then
-           MSG_BUG(' size of paw_ij1%dij>dime1kb1 !')
-         end if
-         e1kbfr(1:dimdij1,iatom_tot,ispden)=paw_ij1(iatom)%dijfr(1:dimdij1,isp)
+         ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
+         e1kbfr(1:dimdij1,iatom_tot,1,ispden)=paw_ij1(iatom)%dijfr(1:dimdij1,isp)
+         if (cplex_rf==2) e1kbfr(1:dimdij1,iatom_tot,2,ispden)=paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
      end do
    end if
@@ -2084,17 +2086,20 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 !Retrieve 1st-order PAW Dij coefficients for this spin component (self-consistent)
  if (my_natom>0.and.present(e1kbsc)) then
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
-     dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3)
+     dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
+     ABI_CHECK(paw_ij1(1)%cplex_rf==dime1kb4,'BUG in pawdij2e1kb (1)!')
+     ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
+         cplex_rf=paw_ij1(iatom)%cplex_rf
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         if (dimdij1>dime1kb1) then
-           MSG_BUG(' size of paw_ij1%dij>dime1kb1 !')
-         end if
-         e1kbsc(1:dimdij1,iatom_tot,ispden)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
-&                                          -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
+         ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
+         e1kbsc(1:dimdij1,iatom_tot,1,ispden)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
+&                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
+         if (cplex_rf==2) e1kbsc(1:dimdij1,iatom_tot,2,ispden)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
+&                                                             -paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
      end do
    end if

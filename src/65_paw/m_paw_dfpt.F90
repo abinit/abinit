@@ -218,7 +218,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='XC kernels for ground state must be in memory !'
        MSG_BUG(msg)
      end if
-     if (paw_ij1(1)%cplex/=paw_an1(1)%cplex) then
+     if (paw_ij1(1)%cplex_rf/=paw_an1(1)%cplex) then
        msg='paw_ij1()%cplex and paw_an1()%cplex must be equal !'
        MSG_BUG(msg)
      end if
@@ -267,7 +267,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    nspden=paw_an1(iatom)%nspden
    cplex_a=pawrhoij_a(iatom)%cplex
    cplex_b=pawrhoij_b(iatom)%cplex
-   cplex_dijh1=paw_ij1(iatom)%cplex
+   cplex_dijh1=paw_ij1(iatom)%cplex_rf
    cplex_vxc1=paw_an1(iatom)%cplex
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
