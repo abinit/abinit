@@ -279,8 +279,6 @@ CONTAINS
 !!
 !! INPUTS
 !!  cplex=1 if no phase is applied (GS), 2 if a exp(-iqr) phase is applied (Response Function at q<>0)
-!!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
-!!  comm_atom=--optional-- MPI communicator over atoms
 !!  natom=Number of atoms.
 !!  ntypat=Number of types of atoms in cell.
 !!  nspinor=number of spinor components
@@ -306,7 +304,9 @@ CONTAINS
 !!  has_dijexxc=to allocate Paw_ij%dijxx, 0 otherwise (default)
 !!  has_exexch_pot=1 to allocate potential used in PAW+(local exact exchange) formalism, 0 otherwise (default)
 !!  has_pawu_occ=1 to allocate occupations used in PAW+U formalism, 0 otherwise (default)
-!!  req_cplex_dij=2 (optional) requested cplex_dij: Dij are complex although other on-site quantities are not
+!!  nucdipmom(3,natom)= (optional) array of nuclear dipole moments at atomic sites
+!!  mpi_atmtab(:)=indexes of the atoms treated by current proc
+!!  comm_atom=MPI communicator over atoms
 !!
 !! OUTPUT
 !!  Paw_ij(natom)<type(paw_ij_type)>=data structure containing PAW arrays given on (i,j) channels.
@@ -324,7 +324,7 @@ CONTAINS
 subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat,typat,Pawtab,&
 &                      has_dij,has_dij0,has_dijfock,has_dijfr,has_dijhartree,has_dijhat,& ! Optional
 &                      has_dijxc,has_dijxc_hat,has_dijxc_val,has_dijnd,has_dijso,has_dijU,has_dijexxc,&  ! Optional
-&                      has_exexch_pot,has_pawu_occ,req_cplex_dij,& ! Optional
+&                      has_exexch_pot,has_pawu_occ,nucdipmom,& ! Optional
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 
@@ -342,20 +342,19 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
  integer,optional,intent(in) :: has_dij,has_dij0,has_dijfr,has_dijhat,has_dijxc,has_dijxc_hat,has_dijxc_val
  integer,optional,intent(in) :: has_dijnd,has_dijso,has_dijhartree,has_dijfock,has_dijU,has_dijexxc
  integer,optional,intent(in) :: has_exexch_pot,has_pawu_occ
- integer,optional,intent(in) :: req_cplex_dij
  integer,optional,intent(in) :: comm_atom
 
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),optional,intent(in) :: nucdipmom(3,natom)
  type(Paw_ij_type),intent(inout) :: Paw_ij(:)
  type(Pawtab_type),intent(in) :: Pawtab(ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: cplex_dij,cplex_rf,iat,iat_tot,itypat,lmn2_size,my_comm_atom,my_natom,ndij
- integer :: req_cplex_dij_
- logical :: my_atmtab_allocated,paral_atom
+ logical :: my_atmtab_allocated,paral_atom,with_nucdipmom
 !arrays
  integer,pointer :: my_atmtab(:)
 
@@ -363,8 +362,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 
 !@Paw_ij_type
 
-!Optional argument
- req_cplex_dij_=1; if(PRESENT(req_cplex_dij)) req_cplex_dij_=req_cplex_dij
+ with_nucdipmom=.false.;if (present(nucdipmom)) with_nucdipmom=any(abs(nucdipmom)>tol8)
 
 !Set up parallelism over atoms
  my_natom=size(paw_ij);if (my_natom==0) return
@@ -377,7 +375,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   iat_tot=iat;if (paral_atom) iat_tot=my_atmtab(iat)
   itypat=typat(iat_tot)
 
-  cplex_dij=MAX(nspinor,req_cplex_dij_)
+  cplex_dij=1;if ((nspinor==2).or.(with_nucdipmom)) cplex_dij=2
   cplex_rf=cplex
 
   lmn2_size              =Pawtab(itypat)%lmn2_size
@@ -469,7 +467,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   ! === Allocation for Dij nuclear dipole moment ===
   Paw_ij(iat)%has_dijnd=0
   if (PRESENT(has_dijnd)) then
-    if (has_dijnd/=0) then
+    if (has_dijnd/=0.and.with_nucdipmom) then
       Paw_ij(iat)%has_dijnd=1
       LIBPAW_ALLOCATE(Paw_ij(iat)%dijnd,(cplex_dij*lmn2_size,ndij))
       Paw_ij(iat)%dijnd(:,:)=zero
@@ -1139,7 +1137,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijexxc)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij Fock
@@ -1148,7 +1146,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijfock)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij Frozen (RF)
@@ -1193,18 +1191,18 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
      if (Paw_ij(iatom)%has_dijnd/=0.and.my_ipert<=0) then
        write(msg,'(a)') '   *********** Dij Nuclear Dipole **********'
        call wrtout(my_unt,msg,my_mode)
-       call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd)
+       call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij spin-orbit
      if (Paw_ij(iatom)%has_dijso/=0.and.my_ipert<=0) then
        write(msg,'(a)') '   ************** Dij SpinOrbit ************'
        call wrtout(my_unt,msg,my_mode)
-       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dijso)
+       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dijso,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij LDA+U
@@ -1213,7 +1211,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%diju)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij XC
@@ -1248,18 +1246,18 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                   my_prtvol,idum,-1.d0,1,opt_sym=2,mode_paral=my_mode)
+&                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
      !Dij TOTAL
-     if (Paw_ij(iatom)%has_dij/=0.and.(idij<=2.or.nspden==4)) then
+     if (Paw_ij(iatom)%has_dij/=0) then
        if (my_ipert<=0) then
          write(msg,'(a)') '   **********    TOTAL Dij in Ha   **********'
        else
          write(msg,'(a)') '   **********  TOTAL Dij(1) in Ha  **********'
        end if
        call wrtout(my_unt,msg,my_mode)
-       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dij)
+       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dij,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &           my_prtvol,idum,50.d0*dble(3-2*idij),1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
        if (my_enunit>0) then
@@ -1269,7 +1267,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
           write(msg,'(a)') '   **********  TOTAL Dij(1) in eV  **********'
          end if
          call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&           my_prtvol,idum,50.d0*dble(3-2*idij),2,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
+&           my_prtvol,idum,-1._dp,2,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
        end if
      end if
 
@@ -1304,7 +1302,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 
      !Dij TOTAL
      if (Paw_ij(iatom)%has_dij/=0) then
-       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dij)
+       call get_dij_parts(cplex_dij,cplex_rf,Paw_ij(iatom)%dij,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &           my_prtvol,idum,50.d0*dble(3-2*idij),1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
@@ -1329,7 +1327,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
  contains
 
 !Real and imaginary parts of phase.
-   subroutine get_dij_parts(my_cplex_dij,my_cplex_rf,my_dij)
+   subroutine get_dij_parts(my_cplex_dij,my_cplex_rf,my_dij,always_img)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1338,33 +1336,39 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 #define ABI_FUNC 'get_dij_parts'
 !End of the abilint section
 
-     integer :: my_cplex_dij,my_cplex_rf,kk
-     real(dp),target :: my_dij(:,:)
+     integer,intent(in) :: my_cplex_dij,my_cplex_rf
+     logical,intent(in),optional :: always_img
+     real(dp),intent(in),target :: my_dij(:,:)
+     integer :: my_idij,my_idij_sym,kk
+     logical :: always_img_
+     always_img_=.false.;if(present(always_img)) always_img_=always_img
+     my_idij=min(size(my_dij,2),idij)
+     my_idij_sym=min(size(my_dij,2),idij_sym)
      if (my_cplex_rf==1) then
-       if ((idij<=nsppol.or.idij==2))then
+       if ((idij<=nsppol.or.idij==2).and.(.not.always_img_))then
          tmp_cplex_dij=1
-         dij2p  => my_dij(1:cplex_dij*lmn2_size:cplex_dij,idij)
+         dij2p  => my_dij(1:my_cplex_dij*lmn2_size:my_cplex_dij,my_idij)
          dij2p_ => dij2p
        else
-         tmp_cplex_dij=cplex_dij
-         dij2p  => my_dij(1:cplex_dij*lmn2_size:1,idij)
-         dij2p_ => my_dij(1:cplex_dij*lmn2_size:1,idij_sym)
+         tmp_cplex_dij=my_cplex_dij
+         dij2p  => my_dij(1:my_cplex_dij*lmn2_size:1,my_idij)
+         dij2p_ => my_dij(1:my_cplex_dij*lmn2_size:1,my_idij_sym)
        end if
      else
        tmp_cplex_dij=2
-       if (cplex_dij==1) then
+       if (my_cplex_dij==1) then
          do kk=1,lmn2_size
-           dij(2*kk-1)= my_dij(kk,idij)
-           dij(2*kk  )= my_dij(kk+lmn2_size,idij)
-           dijs(2*kk-1)= my_dij(kk,idij_sym)
-           dijs(2*kk  )=-my_dij(kk+lmn2_size,idij_sym)
+           dij(2*kk-1)= my_dij(kk,my_idij)
+           dij(2*kk  )= my_dij(kk+lmn2_size,my_idij)
+           dijs(2*kk-1)= my_dij(kk,my_idij)
+           dijs(2*kk  )=-my_dij(kk+lmn2_size,my_idij)
          end do
        else
          do kk=1,lmn2_size
-           dij(2*kk-1)= my_dij(2*kk-1,idij)-my_dij(2*kk  +2*lmn2_size,idij)
-           dij(2*kk  )= my_dij(2*kk  ,idij)+my_dij(2*kk-1+2*lmn2_size,idij)
-           dijs(2*kk-1)= my_dij(2*kk-1,idij_sym)+my_dij(2*kk  +2*lmn2_size,idij_sym)
-           dijs(2*kk  )= my_dij(2*kk  ,idij_sym)-my_dij(2*kk-1+2*lmn2_size,idij_sym)
+           dij(2*kk-1)= my_dij(2*kk-1,idij)-my_dij(2*kk  +2*lmn2_size,my_idij)
+           dij(2*kk  )= my_dij(2*kk  ,idij)+my_dij(2*kk-1+2*lmn2_size,my_idij)
+           dijs(2*kk-1)= my_dij(2*kk-1,idij_sym)+my_dij(2*kk  +2*lmn2_size,my_idij_sym)
+           dijs(2*kk  )= my_dij(2*kk  ,idij_sym)-my_dij(2*kk-1+2*lmn2_size,my_idij_sym)
          end do
        end if
        dij2p => dij ; dij2p_ => dijs

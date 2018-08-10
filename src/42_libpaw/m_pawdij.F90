@@ -4815,20 +4815,20 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                  end do
                end do
              end do
-           end if
-!          Transfer back to Dij^{alpha,beta}
-           if(.not.lsymnew) then
-             !Remember: cplex_dij is 2 in that case
-             do iplex_rf=1,cplex_rf
-               dijnew(1,1,iplex_rf)=half*(dijnew(1,1,iplex_rf)+rotmag(1,3,iplex_rf))
-               dijnew(2,1,iplex_rf)=half*(dijnew(2,1,iplex_rf)+rotmag(2,3,iplex_rf))
-               dijnew(1,2,iplex_rf)=      dijnew(1,1,iplex_rf)-rotmag(1,3,iplex_rf)
-               dijnew(2,2,iplex_rf)=      dijnew(2,1,iplex_rf)-rotmag(2,3,iplex_rf)
-               dijnew(1,3,iplex_rf)=half*(rotmag(1,1,iplex_rf)+rotmag(2,2,iplex_rf))
-               dijnew(2,3,iplex_rf)=half*(rotmag(2,1,iplex_rf)-rotmag(1,2,iplex_rf))
-               dijnew(1,4,iplex_rf)=half*(rotmag(1,1,iplex_rf)-rotmag(2,2,iplex_rf))
-               dijnew(2,4,iplex_rf)=half*(rotmag(2,1,iplex_rf)+rotmag(1,2,iplex_rf))
-             end do
+!            Transfer back to Dij^{alpha,beta}
+             if(.not.lsymnew) then
+               !Remember: cplex_dij is 2 in that case
+               do iplex_rf=1,cplex_rf
+                 dijnew(1,1,iplex_rf)=half*(dijnew(1,1,iplex_rf)+rotmag(1,3,iplex_rf))
+                 dijnew(2,1,iplex_rf)=half*(dijnew(2,1,iplex_rf)+rotmag(2,3,iplex_rf))
+                 dijnew(1,2,iplex_rf)=      dijnew(1,1,iplex_rf)-rotmag(1,3,iplex_rf)
+                 dijnew(2,2,iplex_rf)=      dijnew(2,1,iplex_rf)-rotmag(2,3,iplex_rf)
+                 dijnew(1,3,iplex_rf)=half*(rotmag(1,1,iplex_rf)+rotmag(2,2,iplex_rf))
+                 dijnew(2,3,iplex_rf)=half*(rotmag(2,1,iplex_rf)-rotmag(1,2,iplex_rf))
+                 dijnew(1,4,iplex_rf)=half*(rotmag(1,1,iplex_rf)-rotmag(2,2,iplex_rf))
+                 dijnew(2,4,iplex_rf)=half*(rotmag(2,1,iplex_rf)+rotmag(1,2,iplex_rf))
+               end do
+             end if
            end if
 
 !          Transfer new value of Dij in suitable pointer
@@ -5425,7 +5425,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 
 !Local variables-------------------------------
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
- integer :: idij,idij_sym,kk,lmn_size,lmn2_size,my_prtvol,my_unt,ndij,nsploop,tmp_cplex_dij
+ integer :: idij,idij_sym,kk,lmn_size,lmn2_size,my_idij,my_idij_sym,my_prtvol,my_unt,ndij,tmp_cplex_dij
  real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
  character(len=2000) :: msg
@@ -5454,14 +5454,13 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
  ndij=size(dij,2)
  lmn2_size=size(dij,1)/(cplex_rf*cplex_dij)
  lmn_size=int(dsqrt(two*dble(lmn2_size)))
- nsploop= nsppol; if (ndij==4) nsploop=4
  if (cplex_rf==2) then
    LIBPAW_ALLOCATE(dij1,(2*lmn2_size))
    LIBPAW_ALLOCATE(dij2,(2*lmn2_size))
  end if
 
 ! === Loop over Dij components ===
- do idij=1,nsploop
+ do idij=1,ndij
 
    idij_sym=idij;if (ndij==4.and.idij>2) idij_sym=7-idij
 
@@ -5474,31 +5473,27 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
    end if
 
    !Select upper and lower triangular parts
+   my_idij=min(size(dij,2),idij)
+   my_idij_sym=min(size(dij,2),idij_sym)
    if (cplex_rf==1) then
-     if ((idij<=nsppol.or.idij==2))then
-       tmp_cplex_dij=1
-       dij2p  => dij(1:cplex_dij*lmn2_size:cplex_dij,idij)
-       dij2p_ => dij2p
-     else
-       tmp_cplex_dij=cplex_dij
-       dij2p  => dij(1:cplex_dij*lmn2_size:1,idij)
-       dij2p_ => dij(1:cplex_dij*lmn2_size:1,idij_sym)
-     end if
+     tmp_cplex_dij=cplex_dij
+     dij2p  => dij(1:cplex_dij*lmn2_size:1,my_idij)
+     dij2p_ => dij(1:cplex_dij*lmn2_size:1,my_idij_sym)
    else
      tmp_cplex_dij=2
      if (cplex_dij==1) then
        do kk=1,lmn2_size
-         dij1(2*kk-1)= dij(kk,idij)
-         dij1(2*kk  )= dij(kk+lmn2_size,idij)
-         dij2(2*kk-1)= dij(kk,idij_sym)
-         dij2(2*kk  )=-dij(kk+lmn2_size,idij_sym)
+         dij1(2*kk-1)= dij(kk,my_idij)
+         dij1(2*kk  )= dij(kk+lmn2_size,my_idij)
+         dij2(2*kk-1)= dij(kk,my_idij_sym)
+         dij2(2*kk  )=-dij(kk+lmn2_size,my_idij_sym)
        end do
      else
        do kk=1,lmn2_size
-         dij1(2*kk-1)= dij(2*kk-1,idij)-dij(2*kk  +2*lmn2_size,idij)
-         dij1(2*kk  )= dij(2*kk  ,idij)+dij(2*kk-1+2*lmn2_size,idij)
-         dij2(2*kk-1)= dij(2*kk-1,idij_sym)+dij(2*kk  +2*lmn2_size,idij_sym)
-         dij2(2*kk  )= dij(2*kk  ,idij_sym)-dij(2*kk-1+2*lmn2_size,idij_sym)
+         dij1(2*kk-1)= dij(2*kk-1,idij)-dij(2*kk  +2*lmn2_size,my_idij)
+         dij1(2*kk  )= dij(2*kk  ,idij)+dij(2*kk-1+2*lmn2_size,my_idij)
+         dij2(2*kk-1)= dij(2*kk-1,idij_sym)+dij(2*kk  +2*lmn2_size,my_idij_sym)
+         dij2(2*kk  )= dij(2*kk  ,idij_sym)-dij(2*kk-1+2*lmn2_size,my_idij_sym)
        end do
      end if
      dij2p => dij1 ; dij2p_ => dij2

@@ -129,7 +129,6 @@ contains
 !!          for the application of the nonlocal operator to the |out> vector
 !!  -----------------------------------------------------------
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  hermdij,optional,logical :: if true forces Hermitial Dij behavior in opernlc_ylm
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,signs=2S)
 !!                          for choice 53, twisted derivative involves idir+1 and idir-1
@@ -325,7 +324,7 @@ contains
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
-&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,hermdij)
+&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -342,7 +341,6 @@ contains
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
  real(dp),intent(in) :: lambda,ucvol
- logical,optional,intent(in) :: hermdij
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),kgin(3,npwin)
@@ -371,7 +369,7 @@ contains
  integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
  real(dp) :: enlk
- logical :: check,hermdij_,testnl
+ logical :: check,testnl
  character(len=500) :: message
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -394,8 +392,6 @@ contains
 
 !Check consistency of arguments
 !==============================================================
-
- hermdij_=.FALSE.; if(present(hermdij)) hermdij_=hermdij
 
 !signs=1, almost all choices
  if (signs==1) then
@@ -845,7 +841,7 @@ contains
            call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,enl,gx,gxfac,gxfac_sij,&
 &           iatm,indlmn_typ,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-&           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ,hermdij=hermdij_)
+&           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
          else
            gxfac_sij=gx
          end if

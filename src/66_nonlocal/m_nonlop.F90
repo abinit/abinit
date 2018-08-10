@@ -348,7 +348,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer :: dimenl1,dimenl2,dimenl2_,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
  integer :: ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
- logical :: atom_pert,force_recompute_ph3d,hermdij,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
+ logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
  character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
@@ -375,7 +375,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  only_SO_=0; if (present(only_SO)) only_SO_=only_SO
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
- hermdij=(any(abs(hamk%nucdipmom)>tol8).or.(hamk%usepaw==1.and.any(hamk%pspso>1)))
 
  force_recompute_ph3d=.false.
 
@@ -386,9 +385,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
    if (cpopt/=-1) then
      MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
-   end if
-   if (hermdij) then
-     MSG_BUG('If useylm=0, ie no PAW, nucdipmom/=0 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
      msg = 'When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.'
@@ -723,7 +719,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),hermdij=hermdij)
+&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
 !    GPU version
      else
        call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&

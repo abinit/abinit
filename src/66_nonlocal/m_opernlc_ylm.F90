@@ -97,8 +97,6 @@ contains
 !!           paw_opt=3 : PAW overlap matrix (Sij)
 !!           paw_opt=4 : both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
 !!  sij(nlm*(nlmn+1)/2)=overlap matrix components (only if paw_opt=2, 3 or 4)
-!!  hermdij=optional logical argument governing whether Dij are to be applied explicitly Hermitian (true)
-!!          or just symmetry Dij=Dji (false,default)
 !!
 !! OUTPUT
 !!  if (paw_opt=0, 1, 2 or 4)
@@ -125,7 +123,7 @@ contains
 subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &                      d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,enl,gx,gxfac,gxfac_sij,iatm,indlmn,itypat,&
 &                      lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nlmn,&
-&                      nspinor,nspinortot,optder,paw_opt,sij,hermdij)
+&                      nspinor,nspinortot,optder,paw_opt,sij)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -142,7 +140,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  integer,intent(in) :: natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nspinor,nspinortot,optder,paw_opt
  integer,intent(inout) :: nlmn
  real(dp) :: lambda
- logical,optional,intent(in) :: hermdij
  type(MPI_type) , intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indlmn(6,nlmn),cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
@@ -163,8 +160,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !scalars
  integer :: cplex_,ia,ierr,ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,ispinor,ispinor_index
  integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
- real(dp) :: enl2_cg,sijr
- logical :: hermdij_,hermdij_diag,hermdij_offdiag
+ real(dp) :: sijr
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
  real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:)
@@ -175,12 +171,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
 !Parallelization over spinors treatment
  shift=0;if (mpi_enreg%paral_spinor==1) shift=mpi_enreg%me_spinor
-
-! hermdij_ .false. invokes original coding, with Dij=Dji in complex case
-! hermdij_ .true. invokes Dij = Dji*, needed for magnetic field cases
- hermdij_=.true.;if(present(hermdij)) hermdij_=hermdij
-!hermdij_=.false.;if(present(hermdij)) hermdij_=hermdij
- hermdij_diag=.true.;hermdij_offdiag=.true.
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
@@ -256,7 +246,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
 !$OMP END PARALLEL
 
-!    2-Enl is complex  ===== D_ij=D_ji or D_ij=D_ji^* if hermdij=true
+!    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
 
@@ -270,30 +260,24 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          do jlmn=1,nlmn
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
-           enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,1)
-           if (hermdij_) enl_(2)=zero
+           enl_(1)=enl(2*jjlmn-1,index_enl,1)
            if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
            gxj(1:cplex)=gx(1:cplex,jlmn,ia,1)
            gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)+enl_(1)*gxj(1)
-           gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(2)*gxj(1)
-           if (cplex==2) then
-             gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)-enl_(2)*gxj(2)
-             gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(1)*gxj(2)
-           end if
+           if (cplex==2) gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(1)*gxj(2)
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
              gxi(1:cplex)=gx(1:cplex,ilmn,ia,1)
              gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)+enl_(1)*gxi(1)
-             gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl2_cg*gxi(1)
+             gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)-enl_(2)*gxi(1)
 #if !defined HAVE_OPENMP
              gxfac(1,ilmn,ia,1)=gxfac(1,ilmn,ia,1)+enl_(1)*gxj(1)
              gxfac(2,ilmn,ia,1)=gxfac(2,ilmn,ia,1)+enl_(2)*gxj(1)
 #endif
              if (cplex==2) then
-               gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)-enl2_cg*gxi(2)
+               gxfac(1,jlmn,ia,1)=gxfac(1,jlmn,ia,1)+enl_(2)*gxi(2)
                gxfac(2,jlmn,ia,1)=gxfac(2,jlmn,ia,1)+enl_(1)*gxi(2)
 #if !defined HAVE_OPENMP
                gxfac(1,ilmn,ia,1)=gxfac(1,ilmn,ia,1)-enl_(2)*gxj(2)
@@ -338,30 +322,24 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do jlmn=1,nlmn
              j0lmn=jlmn*(jlmn-1)/2
              jjlmn=j0lmn+jlmn
-             enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,ispinor_index)
-             if (hermdij_diag) enl_(2)=zero
+             enl_(1)=enl(2*jjlmn-1,index_enl,ispinor_index)
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
              gxj(1:cplex)=gx(1:cplex,jlmn,ia,ispinor)
              gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxj(1)
-             gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(2)*gxj(1)
-             if (cplex==2) then
-               gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl_(2)*gxj(2)
-               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxj(2)
-             end if
+             if (cplex==2)  gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxj(2)
              do ilmn=1,jlmn-1
                ijlmn=j0lmn+ilmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-               enl2_cg=enl_(2);if(hermdij_diag)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                gxi(1:cplex)=gx(1:cplex,ilmn,ia,ispinor)
                gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(1)*gxi(1)
-               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl2_cg*gxi(1)
+               gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)-enl_(2)*gxi(1)
 #if !defined HAVE_OPENMP
                gxfac(1,ilmn,ia,ispinor)=gxfac(1,ilmn,ia,ispinor)+enl_(1)*gxj(1)
                gxfac(2,ilmn,ia,ispinor)=gxfac(2,ilmn,ia,ispinor)+enl_(2)*gxj(1)
 #endif
                if (cplex==2) then
-                 gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)-enl2_cg*gxi(2)
+                 gxfac(1,jlmn,ia,ispinor)=gxfac(1,jlmn,ia,ispinor)+enl_(2)*gxi(2)
                  gxfac(2,jlmn,ia,ispinor)=gxfac(2,jlmn,ia,ispinor)+enl_(1)*gxi(2)
 #if !defined HAVE_OPENMP
                  gxfac(1,ilmn,ia,ispinor)=gxfac(1,ilmn,ia,ispinor)-enl_(2)*gxj(2)
@@ -412,12 +390,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor )
-           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            gxi(1:cplex)=gx(1:cplex,jlmn,ia,ispinor)
            gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(1)*gxi(1)
-           gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl2_cg*gxi(1)
+           gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)-enl_(2)*gxi(1)
            if (cplex==2) then
-             gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)-enl2_cg*gxi(2)
+             gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(2)*gxi(2)
              gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl_(1)*gxi(2)
            end if
 #if !defined HAVE_OPENMP
@@ -426,16 +403,15 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              gxi(1:cplex)=gx(1:cplex,ilmn,ia,ispinor)
              gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(1)*gxi(1)
-             gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl2_cg*gxi(1)
+             gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)-enl_(2)*gxi(1)
 #if !defined HAVE_OPENMP
              gxfac(1,ilmn,ia,ispinor)=gxfac(1,ilmn,ia,ispinor)+enl_(1)*gxj(1)
              gxfac(2,ilmn,ia,ispinor)=gxfac(2,ilmn,ia,ispinor)+enl_(2)*gxj(1)
 #endif
              if (cplex==2) then
-               gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)-enl2_cg*gxi(2)
+               gxfac(1,jlmn,ia,jspinor)=gxfac(1,jlmn,ia,jspinor)+enl_(2)*gxi(2)
                gxfac(2,jlmn,ia,jspinor)=gxfac(2,jlmn,ia,jspinor)+enl_(1)*gxi(2)
 #if !defined HAVE_OPENMP
                gxfac(1,ilmn,ia,ispinor)=gxfac(1,ilmn,ia,ispinor)-enl_(2)*gxj(2)
@@ -489,11 +465,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
-             if(hermdij_offdiag) enl_(2)=-enl_(2)
+             enl_(1)= enl(2*ijlmn-1,index_enl,ijspin)
+             enl_(2)=-enl(2*ijlmn  ,index_enl,ijspin)
            else
              jilmn=i0lmn+jlmn
-             enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
+             enl_(1)= enl(2*jilmn-1,index_enl,jispin)
+             enl_(2)= enl(2*jilmn  ,index_enl,jispin)
            end if
            gxi(1:cplex)=gx(1:cplex,ilmn,ia,1)
            gxfac_(1,jlmn,ia,jspinor_index)=gxfac_(1,jlmn,ia,jspinor_index)+enl_(1)*gxi(1)
@@ -648,7 +625,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
 
-!    2-Enl is complex  ===== D_ij=D_ji or D_ij=D_ji^* if hermdij=true
+!    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
 
@@ -663,8 +640,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          do jlmn=1,nlmn
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
-           enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,1)
-           if (hermdij_) enl_(2)=zero
+           enl_(1)=enl(2*jjlmn-1,index_enl,1)
            if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
@@ -673,16 +649,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                cplex_ = cplex ; gxfj(1:cplex,mu)=dgxdt(1:cplex,mu,jlmn,ia,1)
              end if
              dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfj(1,mu)
-             dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(2)*gxfj(1,mu)
-             if (cplex_==2) then
-               dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)-enl_(2)*gxfj(2,mu)
-               dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfj(2,mu)
-             end if
+             if (cplex_==2) dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfj(2,mu)
            end do
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
              do mu=1,ndgxdtfac
                if(cplex_dgxdt(mu)==2)then
@@ -691,13 +662,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,1)
                end if
                dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfi(1)
-               dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl2_cg*gxfi(1)
+               dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                dgxdtfac(1,mu,ilmn,ia,1)=dgxdtfac(1,mu,ilmn,ia,1)+enl_(1)*gxfj(1,mu)
                dgxdtfac(2,mu,ilmn,ia,1)=dgxdtfac(2,mu,ilmn,ia,1)+enl_(2)*gxfj(1,mu)
 #endif
                if (cplex_==2) then
-                 dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)-enl2_cg*gxfi(2)
+                 dgxdtfac(1,mu,jlmn,ia,1)=dgxdtfac(1,mu,jlmn,ia,1)+enl_(2)*gxfi(2)
                  dgxdtfac(2,mu,jlmn,ia,1)=dgxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                  dgxdtfac(1,mu,ilmn,ia,1)=dgxdtfac(1,mu,ilmn,ia,1)-enl_(2)*gxfj(2,mu)
@@ -751,8 +722,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do jlmn=1,nlmn
              j0lmn=jlmn*(jlmn-1)/2
              jjlmn=j0lmn+jlmn
-             enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,ispinor_index)
-             if (hermdij_) enl_(2)=zero
+             enl_(1)=enl(2*jjlmn-1,index_enl,ispinor_index)
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
              do mu=1,ndgxdtfac
                if(cplex_dgxdt(mu)==2)then
@@ -761,16 +731,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfj(1:cplex,mu)=dgxdt(1:cplex,mu,jlmn,ia,ispinor)
                end if
                dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
-               dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
-               if (cplex_==2) then
-                 dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
-                 dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(2,mu)
-               end if
+               if (cplex_==2) dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(2,mu)
              end do
              do ilmn=1,jlmn-1
                ijlmn=j0lmn+ilmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                do mu=1,ndgxdtfac
                  if(cplex_dgxdt(mu)==2)then
@@ -779,13 +744,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,ispinor)
                  end if
                  dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                 dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                 dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                  dgxdtfac(1,mu,ilmn,ia,ispinor)=dgxdtfac(1,mu,ilmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
                  dgxdtfac(2,mu,ilmn,ia,ispinor)=dgxdtfac(2,mu,ilmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
 #endif
                  if (cplex_==2) then
-                   dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                   dgxdtfac(1,mu,jlmn,ia,ispinor)=dgxdtfac(1,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(2)
                    dgxdtfac(2,mu,jlmn,ia,ispinor)=dgxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                    dgxdtfac(1,mu,ilmn,ia,ispinor)=dgxdtfac(1,mu,ilmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
@@ -845,7 +810,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
-           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
                cplex_ = 2 ;
@@ -857,16 +821,15 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                gxfj(1:cplex,mu)=dgxdt(1:cplex,mu,jlmn,ia,jspinor)
              end if
              dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(1)
-             dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(1)
+             dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(1)
              if (cplex_==2) then
-               dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(2)
+               dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(2)
                dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(2)
              end if
            end do
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              do mu=1,ndgxdtfac
                if(cplex_dgxdt(mu)==2)then
                  cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn,ia,ispinor)
@@ -874,13 +837,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn,ia,ispinor)
                end if
                dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(1)
-               dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)+enl2_cg*gxfi(1)
+               dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                dgxdtfac(1,mu,ilmn,ia,ispinor)=dgxdtfac(1,mu,ilmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
                dgxdtfac(2,mu,ilmn,ia,ispinor)=dgxdtfac(2,mu,ilmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
 #endif
                if (cplex_==2) then
-                 dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)-enl2_cg*gxfi(2)
+                 dgxdtfac(1,mu,jlmn,ia,jspinor)=dgxdtfac(1,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(2)
                  dgxdtfac(2,mu,jlmn,ia,jspinor)=dgxdtfac(2,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                  dgxdtfac(1,mu,ilmn,ia,ispinor)=dgxdtfac(1,mu,ilmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
@@ -947,11 +910,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
-             if(hermdij_offdiag) enl_(2)=-enl_(2)
+             enl_(1)= enl(2*ijlmn-1,index_enl,ijspin)
+             enl_(2)=-enl(2*ijlmn  ,index_enl,ijspin)
            else
              jilmn=i0lmn+jlmn
-             enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
+             enl_(1)= enl(2*jilmn-1,index_enl,jispin)
+             enl_(2)= enl(2*jilmn  ,index_enl,jispin)
            end if
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
@@ -1118,7 +1082,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      ABI_DEALLOCATE(gxfj)
 !$OMP END PARALLEL
 
-!    2-Enl is complex  ===== D_ij=D_ji or D_ij=D_ji^* if hermdij=true
+!    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
 
@@ -1133,8 +1097,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          do jlmn=1,nlmn
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
-           enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,1)
-           if (hermdij_) enl_(2)=zero
+           enl_(1)=enl(2*jjlmn-1,index_enl,1)
            if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
            do mu=1,nd2gxdtfac
              if(cplex_d2gxdt(mu)==2)then
@@ -1143,16 +1106,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                cplex_ = cplex ; gxfj(1:cplex,mu)=d2gxdt(1:cplex,mu,jlmn,ia,1)
              end if
              d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfj(1,mu)
-             d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(2)*gxfj(1,mu)
-             if (cplex_==2) then
-               d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)-enl_(2)*gxfj(2,mu)
-               d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfj(2,mu)
-             end if
+             if (cplex_==2) d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfj(2,mu)
            end do
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1)
-             enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
              do mu=1,nd2gxdtfac
                if(cplex_d2gxdt(mu)==2)then
@@ -1161,13 +1119,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,1)
                end if
                d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)+enl_(1)*gxfi(1)
-               d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl2_cg*gxfi(1)
+               d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                d2gxdtfac(1,mu,ilmn,ia,1)=d2gxdtfac(1,mu,ilmn,ia,1)+enl_(1)*gxfj(1,mu)
                d2gxdtfac(2,mu,ilmn,ia,1)=d2gxdtfac(2,mu,ilmn,ia,1)+enl_(2)*gxfj(1,mu)
 #endif
                if (cplex_==2) then
-                 d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)-enl2_cg*gxfi(2)
+                 d2gxdtfac(1,mu,jlmn,ia,1)=d2gxdtfac(1,mu,jlmn,ia,1)+enl_(2)*gxfi(2)
                  d2gxdtfac(2,mu,jlmn,ia,1)=d2gxdtfac(2,mu,jlmn,ia,1)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                  d2gxdtfac(1,mu,ilmn,ia,1)=d2gxdtfac(1,mu,ilmn,ia,1)-enl_(2)*gxfj(2,mu)
@@ -1221,8 +1179,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            do jlmn=1,nlmn
              j0lmn=jlmn*(jlmn-1)/2
              jjlmn=j0lmn+jlmn
-             enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,ispinor_index)
-             if (hermdij_) enl_(2)=zero
+             enl_(1)=enl(2*jjlmn-1,index_enl,ispinor_index)
              if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(jjlmn)
              do mu=1,nd2gxdtfac
                if(cplex_d2gxdt(mu)==2)then
@@ -1231,16 +1188,11 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfj(1:cplex,mu)=d2gxdt(1:cplex,mu,jlmn,ia,ispinor)
                end if
                d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
-               d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
-               if (cplex_==2) then
-                 d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
-                 d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(2,mu)
-               end if
+               if (cplex_==2) d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfj(2,mu)
              end do
              do ilmn=1,jlmn-1
                ijlmn=j0lmn+ilmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
-               enl2_cg=enl_(2);if(hermdij_)enl2_cg=-enl2_cg
                if (paw_opt==2) enl_(1)=enl_(1)-lambda*sij(ijlmn)
                do mu=1,nd2gxdtfac
                  if(cplex_d2gxdt(mu)==2)then
@@ -1249,13 +1201,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                    cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,ispinor)
                  end if
                  d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(1)
-                 d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl2_cg*gxfi(1)
+                 d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                  d2gxdtfac(1,mu,ilmn,ia,ispinor)=d2gxdtfac(1,mu,ilmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
                  d2gxdtfac(2,mu,ilmn,ia,ispinor)=d2gxdtfac(2,mu,ilmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
 #endif
                  if (cplex_==2) then
-                   d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)-enl2_cg*gxfi(2)
+                   d2gxdtfac(1,mu,jlmn,ia,ispinor)=d2gxdtfac(1,mu,jlmn,ia,ispinor)+enl_(2)*gxfi(2)
                    d2gxdtfac(2,mu,jlmn,ia,ispinor)=d2gxdtfac(2,mu,jlmn,ia,ispinor)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                    d2gxdtfac(1,mu,ilmn,ia,ispinor)=d2gxdtfac(1,mu,ilmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
@@ -1315,7 +1267,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1:2)=enl(2*jjlmn-1:2*jjlmn,index_enl,2+ispinor)
-           enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
            do mu=1,nd2gxdtfac
              if(cplex_d2gxdt(mu)==2)then
                cplex_ = 2 ;
@@ -1327,16 +1278,15 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                gxfj(1:cplex,mu)=d2gxdt(1:cplex,mu,jlmn,ia,jspinor)
              end if
              d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(1)
-             d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(1)
+             d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(1)
              if (cplex_==2) then
-               d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(2)
+               d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(2)
                d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(2)
              end if
            end do
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,2+ispinor)
-             enl2_cg=enl_(2);if(hermdij_offdiag)enl2_cg=-enl2_cg
              do mu=1,nd2gxdtfac
                if(cplex_d2gxdt(mu)==2)then
                  cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = d2gxdt(1,mu,ilmn,ia,ispinor)
@@ -1344,13 +1294,13 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
                  cplex_ = cplex ; gxfi(1:cplex)=d2gxdt(1:cplex,mu,ilmn,ia,ispinor)
                end if
                d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(1)
-               d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)+enl2_cg*gxfi(1)
+               d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)-enl_(2)*gxfi(1)
 #if !defined HAVE_OPENMP
                d2gxdtfac(1,mu,ilmn,ia,ispinor)=d2gxdtfac(1,mu,ilmn,ia,ispinor)+enl_(1)*gxfj(1,mu)
                d2gxdtfac(2,mu,ilmn,ia,ispinor)=d2gxdtfac(2,mu,ilmn,ia,ispinor)+enl_(2)*gxfj(1,mu)
 #endif
                if (cplex_==2) then
-                 d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)-enl2_cg*gxfi(2)
+                 d2gxdtfac(1,mu,jlmn,ia,jspinor)=d2gxdtfac(1,mu,jlmn,ia,jspinor)+enl_(2)*gxfi(2)
                  d2gxdtfac(2,mu,jlmn,ia,jspinor)=d2gxdtfac(2,mu,jlmn,ia,jspinor)+enl_(1)*gxfi(2)
 #if !defined HAVE_OPENMP
                  d2gxdtfac(1,mu,ilmn,ia,ispinor)=d2gxdtfac(1,mu,ilmn,ia,ispinor)-enl_(2)*gxfj(2,mu)
@@ -1417,11 +1367,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
            i0lmn=ilmn*(ilmn-1)/2
            if (ilmn<=jlmn) then
              ijlmn=j0lmn+ilmn
-             enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,ijspin)
-             if(hermdij_offdiag) enl_(2)=-enl_(2)
+             enl_(1)= enl(2*ijlmn-1,index_enl,ijspin)
+             enl_(2)=-enl(2*ijlmn  ,index_enl,ijspin)
            else
              jilmn=i0lmn+jlmn
-             enl_(1:2)=enl(2*jilmn-1:2*jilmn,index_enl,jispin)
+             enl_(1)= enl(2*jilmn-1,index_enl,jispin)
+             enl_(2)= enl(2*jilmn  ,index_enl,jispin)
            end if
            do mu=1,nd2gxdtfac
              if(cplex_d2gxdt(mu)==2)then

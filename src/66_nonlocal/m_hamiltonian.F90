@@ -712,7 +712,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex,cplex_dij,jsp,req_cplex_dij
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex,cplex_dij,jsp
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -849,8 +849,11 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 #endif
 
  else ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
-   req_cplex_dij=1; if (any(abs(ham%nucdipmom)>tol8)) req_cplex_dij=2
-   cplex=1;cplex_dij=max(req_cplex_dij,nspinor)
+   cplex_dij=1
+   if (present(paw_ij)) then
+     if (size(paw_ij)>0) cplex_dij=paw_ij(1)%cplex_dij
+   end if
+   if ((nspinor==2).or.any(abs(ham%nucdipmom)>tol8)) cplex_dij=2
    ham%dimekb1=psps%dimekb*cplex_dij
    ham%dimekb2=natom
    ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))

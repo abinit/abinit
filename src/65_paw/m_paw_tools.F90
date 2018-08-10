@@ -445,11 +445,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &          ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2))) then
          if ((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)) then
            write(msg,'(a)') ' Total pseudopotential strength Dij (hartree):'
-           call wrtout(unitfi,msg,'COLL')
          else if ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2)) then
            write(msg,'(a)') ' Total pseudopotential strength Dij (eV):'
-           call wrtout(unitfi,msg,'COLL')
          end if
+         call wrtout(unitfi,msg,'COLL')
          if (ipositron>0) then
            if (electronpositron%has_pos_ham==0) then
              write(msg,'(3a)') trim(msg),ch10,' -Note: these are the electronic Dij'
@@ -458,7 +457,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            end if
            call wrtout(unitfi,msg,'COLL')
          end if
-         call wrtout(unitfi,msg,'COLL')
          do iat=1,natprt
            iatom=jatom(iat)
            call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
