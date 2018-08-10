@@ -224,13 +224,12 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
 !and because of the fixing of the total momentum for each dimension, in case no atom position is fixed for that dimension 
 !This was not done until v8.9 of ABINIT ...
- ndegfreedom=natfree
-!ndegfreedom=ndegfreedom-1
-!do idim=1,3
-!  if(sum(ab_mover%iatfix(idim,:))==0)then
-!    ndegfreedom=ndegfreedom-1
-!  endif
-!enddo
+ ndegfreedom=natfree-1
+ do idim=1,3
+   if(sum(ab_mover%iatfix(idim,:))==0)then
+     ndegfreedom=ndegfreedom-1
+   endif
+ enddo
 
 !write(std_out,*) 'isokinetic 04'
 !##########################################################
