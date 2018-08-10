@@ -60,8 +60,7 @@ contains
 !! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)] [[cite:Zhang1997]],
 !! as worked out by Minary et al, J. Chem. Phys. 188, 2510 (2003) [[cite:Minary2003]].
 !! The conservation of the kinetic energy is obtained within machine precision, at each step.
-!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)),
-!! the final temperature (mdtemp(2)), and the friction coefficient (friction).
+!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
@@ -123,6 +122,11 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 !Beginning of executable session
 !***************************************************************************
+
+!DEBUG
+!write(std_out,*)' pred_isokinetic : enter '
+!stop
+!ENDDEBUG
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
@@ -224,12 +228,13 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
 !and because of the fixing of the total momentum for each dimension, in case no atom position is fixed for that dimension 
 !This was not done until v8.9 of ABINIT ...
- ndegfreedom=natfree-1
- do idim=1,3
-   if(sum(ab_mover%iatfix(idim,:))==0)then
-     ndegfreedom=ndegfreedom-1
-   endif
- enddo
+ ndegfreedom=natfree
+!ndegfreedom=natfree-1
+!do idim=1,3
+!  if(sum(ab_mover%iatfix(idim,:))==0)then
+!    ndegfreedom=ndegfreedom-1
+!  endif
+!enddo
 
 !write(std_out,*) 'isokinetic 04'
 !##########################################################
@@ -333,7 +338,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
    end do
 
-!  If there is no kinetic energy
+!  If there is no kinetic energy to start with ...
    if (v2gauss<=v2tol.and.itime==1) then
 !    Maxwell-Boltzman distribution
      v2gauss=zero
