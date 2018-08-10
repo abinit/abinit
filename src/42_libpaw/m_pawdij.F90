@@ -5381,6 +5381,7 @@ end subroutine pawdij_gather
 !!  natom=total number of atoms in the system
 !!  nspden=number of spin density components
 !!  nsppol = number of spin polarizations
+!!  [Ha_or_eV]= 1: output in hartrees, 2: output in eV
 !!  [opt_prtvol]= >=0 if up to 12 components of _ij matrix have to be printed
 !!                 <0 if all components of ij_ matrix have to be printed (optional)
 !!  [mode_paral]= parallel printing mode (optional, default='COLL')
@@ -5401,7 +5402,7 @@ end subroutine pawdij_gather
 !! SOURCE
 
 subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
-&                           test_value,title_msg,unit,opt_prtvol,mode_paral) ! Optional arguments
+&           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -5416,7 +5417,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,cplex_rf,iatom,natom,nspden,nsppol
- integer,optional,intent(in) :: opt_prtvol,unit
+ integer,optional,intent(in) :: Ha_or_eV,opt_prtvol,unit
  real(dp),intent(in),optional :: test_value
  character(len=4),optional,intent(in) :: mode_paral
  character(len=100),optional,intent(in) :: title_msg
@@ -5425,7 +5426,8 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 
 !Local variables-------------------------------
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
- integer :: idij,idij_sym,kk,lmn_size,lmn2_size,my_idij,my_idij_sym,my_prtvol,my_unt,ndij,tmp_cplex_dij
+ integer :: idij,idij_sym,kk,lmn_size,lmn2_size,my_idij,my_idij_sym
+ integer :: my_prtvol,my_unt,my_Ha_or_eV,ndij,tmp_cplex_dij
  real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
  character(len=2000) :: msg
@@ -5441,6 +5443,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
  my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
  my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
  my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
+ my_Ha_or_eV=1     ; if (PRESENT(Ha_or_eV))   my_Ha_or_eV=Ha_or_eV
 
 !Title
  if (present(title_msg)) then
@@ -5502,7 +5505,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
    !Printing
     test_value_eff=-one;if(my_test_value>zero.and.idij==1) test_value_eff=my_test_value
     call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&                       my_prtvol,idum,test_value_eff,1,&
+&                       my_prtvol,idum,test_value_eff,my_Ha_or_eV,&
 &                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
 
   end do !idij
