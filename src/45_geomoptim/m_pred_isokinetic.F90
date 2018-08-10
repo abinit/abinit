@@ -221,7 +221,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    end do
 
 !  Computation of vel(:,:) at the next positions
-!  Computation of v2gauss
+!  Computation of v2gauss, actually twice the kinetic energy. 
+!  Called 2K, cf Eq. (A13) of [[cite:Minary2003]].
    v2gauss=0.0_dp
    do iatom=1,ab_mover%natom
      do idim=1,3
@@ -231,7 +232,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
    end do
 
-!  Computation of a and b (4.13 of Ref.1)
+!  Computation of a and b (4.13 of [[cite:Minary2003]])
    a=0.0_dp
    b=0.0_dp
    do iatom=1,ab_mover%natom
@@ -393,8 +394,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  end do
 
-!Computation of vel_nexthalf (4.16 of Ref.1)
-!Computation of a and b (4.13 of Ref.1)
+!Computation of vel_nexthalf (4.16 of [[cite:Minary2003]])
+!Computation of a and b (4.13 of [[cite:Minary2003]])
  a=0.0_dp
  b=0.0_dp
  do iatom=1,ab_mover%natom
