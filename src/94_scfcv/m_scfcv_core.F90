@@ -76,7 +76,7 @@ module m_scfcv_core
  use m_paw_denpot,       only : pawdenpot
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
- use m_paw_orbmag,       only : orbmag_type
+ use m_orbmag,           only : orbmag_type
  use m_paw_mkrho,        only : pawmkrho
  use m_paw_uj,           only : pawuj_red
  use m_paw_dfpt,         only : pawgrnl
