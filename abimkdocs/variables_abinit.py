@@ -6544,11 +6544,9 @@ friction coefficient ([[friction]]).
 **Related variables:**
 
   * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2003]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
-~~Related parameters: the time step ([[dtion]]), the temperatures
-([[mdtemp]]), and the friction coefficient ([[friction]]).~~
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+**Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case the velocities [[vel]] are not initialized, or all initialized to zero.
 
   * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
 If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in
@@ -8647,6 +8645,9 @@ Give the initial and final temperature of the Nose-Hoover thermostat
 ([[ionmov]] = 8) and Langevin dynamics ([[ionmov]] = 9), in Kelvin. This
 temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
+
+In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run. 
 """,
 ),
 
