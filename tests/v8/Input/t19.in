@@ -31,7 +31,7 @@ chkexit 0
  ionmov 12
  dtion 10
  ntime 10
- natfix 1
+ natfixz 1
  iatfixz 1
  #Electronic population (Fermi-Dirac)
  occopt 0
