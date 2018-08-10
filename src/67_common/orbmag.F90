@@ -92,7 +92,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  use m_geometry,         only : metric
  use m_berrytk,          only : smatrix
- use m_kg,               only : mkkin,mkpwind_k
+ use m_kg,               only : mkkin,mkpwind_k,mknucdipmom_k
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
 &                               load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
  use m_getghc,           only : getghc
@@ -113,7 +113,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'orbmag'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 
