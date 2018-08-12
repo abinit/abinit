@@ -1244,7 +1244,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
      if (Paw_ij(iatom)%has_dijxc_val/=0.and.(idij<=2.or.nspden==4).and.my_ipert<=0) then
        write(msg, '(a)') '   *************** Dij_xc_val ***************'
        call wrtout(my_unt,msg,my_mode)
-       call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd)
+       call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijxc_val)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if

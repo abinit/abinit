@@ -36,7 +36,6 @@ MODULE m_energy
 
  use m_pawtab, only : pawtab_type
  use m_paw_correlations, only : pawuenergy
- use m_paw_ij, only : paw_ij_type,paw_ij_init,paw_ij_free,paw_ij_nullify
 
  use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
  use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
@@ -855,24 +854,19 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 
 !Local variables-------------------------------
  integer :: iatom,idijeff,im,im1,ispinor,ispinor1,isppol,ldim,lpawu
- integer :: nsploop
- character(len=500) :: message
+ integer :: nsploop,prt_pawuenergy
+ real(dp) :: upawu,jpawu
  real(dp) :: eldaumdcdc,eldaumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ character(len=500) :: message
 ! arrays
- real(dp) :: upawu
- real(dp) :: jpawu
- type(paw_ij_type), allocatable :: paw_ij(:)
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
- integer :: prt_pawuenergy
+ real(dp),allocatable :: noccmmp(:,:,:,:),nocctot(:)
+
 ! *********************************************************************
 
 ! - allocations
 ! -----------------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(paw_ij,(cryst_struc%natom))
- call paw_ij_nullify(paw_ij)
-!Should be contained in one of the arguments
- call paw_ij_init(paw_ij,2,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%nspden, &
-&      1,paw_dmft%natom,cryst_struc%ntypat,cryst_struc%typat,pawtab,has_pawu_occ=1)
+
  nsploop=max(paw_dmft%nsppol,paw_dmft%nspinor**2)
  e_ee=zero
  e_dc=zero
@@ -889,9 +883,14 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
+
+     ABI_ALLOCATE(noccmmp,(2,2*lpawu+1,2*lpawu+1,paw_dmft%nspden))
+     ABI_ALLOCATE(nocctot,(paw_dmft%nspden))
+     noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
+
 ! - Setup nocctot and noccmmp
 ! -----------------------------------------------------------------------
-     paw_ij(iatom)%nocctot(:)=zero ! contains nmmp in the n m representation
+     nocctot(:)=zero ! contains nmmp in the n m representation
 ! Begin loop over spin/spinors to initialize noccmmp
      do idijeff=1,nsploop
        if(nsploop==2) then
@@ -913,10 +912,10 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! Initialize noccmmp
        do im1 = 1 , ldim
          do im = 1 ,  ldim
-            paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-            paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-!            paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-!            paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+            noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+            noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+!            noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+!            noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
          enddo
        enddo
 ! Compute nocctot
@@ -924,32 +923,32 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
          do im1=1,ldim
            if(nsploop==4) then
              if(idijeff<=2) then
-               paw_ij(iatom)%nocctot(1)=paw_ij(iatom)%nocctot(1)+&
-&                paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+               nocctot(1)=nocctot(1)+&
+&                noccmmp(1,im1,im1,idijeff)
              endif
            else if (nsploop==2.or.nsploop==1) then
-             paw_ij(iatom)%nocctot(idijeff)=paw_ij(iatom)%nocctot(idijeff)+&
-&              paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+             nocctot(idijeff)=nocctot(idijeff)+&
+&              noccmmp(1,im1,im1,idijeff)
            end if
          enddo
        else
          if(nsploop==4) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,2) !  total nb of elec for nspinor=2 is (iatom,2) !!
-           paw_ij(iatom)%nocctot(2)=zero
-           paw_ij(iatom)%nocctot(3)=zero
-           paw_ij(iatom)%nocctot(4)=zero
+           nocctot(1)=green%charge_matlu_solver(iatom,2) !  total nb of elec for nspinor=2 is (iatom,2) !!
+           nocctot(2)=zero
+           nocctot(3)=zero
+           nocctot(4)=zero
           else if (nsploop==2) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,1) !  first spin
-           paw_ij(iatom)%nocctot(2)=green%charge_matlu_solver(iatom,2) !  second one
+           nocctot(1)=green%charge_matlu_solver(iatom,1) !  first spin
+           nocctot(2)=green%charge_matlu_solver(iatom,2) !  second one
           else if (nsploop==1) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,1)
+           nocctot(1)=green%charge_matlu_solver(iatom,1)
          end if
        endif
      enddo
-     paw_ij(iatom)%has_pawu_occ=2
+
      xe1=e_dc
      xe2=e_ee
-    ! write(std_out,*)" nocctot(1)",paw_ij(iatom)%nocctot(1),green%charge_matlu_solver(iatom,1)
+    ! write(std_out,*)" nocctot(1)",nocctot(1),green%charge_matlu_solver(iatom,1)
      eldaumdc = zero
      eldaumdcdc = zero
      if ( present(renorm) ) then
@@ -962,8 +961,10 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        prt_pawuenergy=3
      end if
 
-     call pawuenergy(iatom,eldaumdc,eldaumdcdc,prt_pawuenergy,pawtab(cryst_struc%typat(iatom)),paw_ij(iatom),&
-&                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,u_dmft=upawu,j_dmft=jpawu)
+     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,&
+     &               pawtab(cryst_struc%typat(iatom)),&
+&                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
+&                    u_dmft=upawu,j_dmft=jpawu)
 
      energies_dmft%e_dc(iatom)=e_dc-xe1
      energies_dmft%e_hu_ldau(iatom)=e_ee-xe2
@@ -974,12 +975,6 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! -----------------------------------------------------------------------
  energies_dmft%e_dc_tot=e_dc ! todo_ab: here or not ?
  energies_dmft%e_hu_ldau_tot=e_ee
-
-! - dealloc
-! -----------------------------------------------------------------------
- call paw_ij_free(paw_ij)
- ABI_DATATYPE_DEALLOCATE(paw_ij)
-
 
 end subroutine compute_ldau_energy
 !!***

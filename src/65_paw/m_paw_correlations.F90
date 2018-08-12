@@ -722,14 +722,13 @@ CONTAINS  !=====================================================================
 !! Compute contributions to energy for PAW+U calculations
 !!
 !! INPUTS
-!!  iatom=index of current atom (note: this is the absolute index, not the index on current proc)
+!!  iatom=index of current atom (absolute index, the index on current proc)
+!!  noccmmp(2*lpawu+1,2*lpawu+1,nspden)=density matrix in the PAW augm. region
+!!  nocctot(nspden)=number of electrons in the correlated subspace
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data:
 !!     %lpawu=l used for lda+u
 !!     %vee(2*lpawu+1*4)=screened coulomb matrix
-!!  paw_ij <type(paw_ij_type)>=paw arrays given on (i,j) channels
-!!     %noccmmp(2*lpawu+1,2*lpawu+1,nspden)=density matrix in the PAW augm. region
-!!     %nocctot(nspden)=number of electrons in the correlated subspace
 !!  dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft= optional arguments for DMFT
 !!
 !! OUTPUT
@@ -744,7 +743,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,pawprtvol,pawtab,paw_ij,&
+ subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
 
@@ -761,10 +760,10 @@ CONTAINS  !=====================================================================
 !scalars
  integer,intent(in) :: iatom,pawprtvol
  integer,optional,intent(in) :: dmft_dc
+ real(dp),intent(in) :: noccmmp(:,:,:,:),nocctot(:)
  real(dp),intent(inout) :: eldaumdc,eldaumdcdc
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
- type(paw_ij_type),intent(in) :: paw_ij
  type(pawtab_type),intent(in) :: pawtab
 
 !Local variables ---------------------------------------
@@ -773,8 +772,7 @@ CONTAINS  !=====================================================================
 !           1: E_int=-U/4.N.(N-2)
 !           2: E_int=-U/2.(Nup.(Nup-1)+Ndn.(Ndn-1))
  integer,parameter :: option_interaction=1
-
- integer :: cplex_dij,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41
+ integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
  real(dp) :: eks_opt3,edcdc_opt3,edcdctemp,edctemp,eldautemp,jpawu,jpawu_dc,mnorm,mx,my,mz
  real(dp) :: n_sig,n_sigs,n_msig,n_msigs,n_dndn,n_tot,n_upup
  real(dp) :: n12_ud_im,n12_du_im
@@ -787,12 +785,18 @@ CONTAINS  !=====================================================================
 
 ! *****************************************************
 
+ nspden=size(nocctot)
+ cplex_occ=size(noccmmp,1)
+
+ if (size(noccmmp,4)/=nspden) then
+   message='size of nocctot and noccmmp are inconsistent!'
+   MSG_BUG(message)
+ end if
  if(present(dmft_dc))  then
    dmftdc=dmft_dc
    if(pawtab%usepawu<10) then
-     write(message,'(4x,2a,i5)') "Error, usepawu should be equal to 10 if", &
-&     " dmft_dc is an argument of pawuenergy",pawtab%usepawu
-     call wrtout(std_out,message,'COLL')
+     write(message,'(a,i5)') "usepawu should be =10 if dmft_dc is present ",pawtab%usepawu
+     MSG_BUG(message)
    end if
  else
    dmftdc=0
@@ -811,22 +815,21 @@ CONTAINS  !=====================================================================
  eldautemp=zero
  edcdc_opt3=zero
  eks_opt3=zero
- cplex_dij=paw_ij%cplex_dij
- ABI_ALLOCATE(n12_sig,(cplex_dij))
- ABI_ALLOCATE(n34_msig,(cplex_dij))
- ABI_ALLOCATE(n34_sig,(cplex_dij))
- do ispden=1,min(paw_ij%ndij,2)
-   jspden=min(paw_ij%ndij,2)-ispden+1
+ ABI_ALLOCATE(n12_sig,(cplex_occ))
+ ABI_ALLOCATE(n34_msig,(cplex_occ))
+ ABI_ALLOCATE(n34_sig,(cplex_occ))
+ do ispden=1,min(nspden,2)
+   jspden=min(nspden,2)-ispden+1
 !  compute n_sigs and n_msigs for pawtab%usepawu=3
-   if (paw_ij%nspden<=2) then
-     n_sig =paw_ij%nocctot(ispden)
-     n_msig=paw_ij%nocctot(jspden)
+   if (nspden<=2) then
+     n_sig =nocctot(ispden)
+     n_msig=nocctot(jspden)
      n_tot=n_sig+n_msig
    else
-     n_tot=paw_ij%nocctot(1)
-     mx=paw_ij%nocctot(2)
-     my=paw_ij%nocctot(3)
-     mz=paw_ij%nocctot(4)
+     n_tot=nocctot(1)
+     mx=nocctot(2)
+     my=nocctot(3)
+     mz=nocctot(4)
      mnorm=sqrt(mx*mx+my*my+mz*mz)
      if (ispden==1) then
 !      n_sig =half*(n_tot+mnorm)
@@ -843,9 +846,9 @@ CONTAINS  !=====================================================================
    n_sigs =n_sig/(float(2*lpawu+1))
    n_msigs =n_msig/(float(2*lpawu+1))
 !  if(pawtab%usepawu==3) then
-!  write(message,fmt=12) "noccmmp11 ",ispden,paw_ij%noccmmp(1,1,1,ispden)
+!  write(message,fmt=12) "noccmmp11 ",ispden,noccmmp(1,1,1,ispden)
 !  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "noccmmp11 ",jspden,paw_ij%noccmmp(1,1,1,jspden)
+!  write(message,fmt=12) "noccmmp11 ",jspden,noccmmp(1,1,1,jspden)
 !  call wrtout(std_out,message,'COLL')
 !  write(message,fmt=12) "n_sig      ",ispden,n_sig
 !  call wrtout(std_out,message,'COLL')
@@ -862,14 +865,14 @@ CONTAINS  !=====================================================================
      m11=m1+lpawu+1
      do m2=-lpawu,lpawu
        m21=m2+lpawu+1
-       n12_sig(:)=paw_ij%noccmmp(:,m11,m21,ispden)
+       n12_sig(:)=noccmmp(:,m11,m21,ispden)
        if(m21==m11.and.(pawtab%usepawu==3.or.dmftdc==3)) n12_sig(1)=n12_sig(1)-n_sigs
        do m3=-lpawu,lpawu
          m31=m3+lpawu+1
          do m4=-lpawu,lpawu
            m41=m4+lpawu+1
-           n34_sig(:) =paw_ij%noccmmp(:,m31,m41,ispden)
-           n34_msig(:)=paw_ij%noccmmp(:,m31,m41,jspden)
+           n34_sig(:) =noccmmp(:,m31,m41,ispden)
+           n34_msig(:)=noccmmp(:,m31,m41,jspden)
            if(m31==m41.and.(pawtab%usepawu==3.or.dmftdc==3)) then
              n34_sig(1)= n34_sig(1) - n_sigs
              n34_msig(1)= n34_msig(1) - n_msigs
@@ -877,7 +880,7 @@ CONTAINS  !=====================================================================
            eldautemp=eldautemp &
 &           + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
 &           + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-           if(cplex_dij==2) then
+           if(cplex_occ==2) then
              eldautemp=eldautemp &
 &             - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
 &             - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
@@ -887,12 +890,12 @@ CONTAINS  !=====================================================================
 &             + n_sigs*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
 &             + n_sigs*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
              eks_opt3=eks_opt3 &
-&             + paw_ij%noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&             + paw_ij%noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-             if(cplex_dij==2) then
+&             + noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&             + noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+             if(cplex_occ==2) then
                eks_opt3=eks_opt3 &
-&               - paw_ij%noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
-&               - paw_ij%noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+&               - noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
+&               - noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
              end if
            end if
          end do ! m4
@@ -900,29 +903,29 @@ CONTAINS  !=====================================================================
      end do ! m2
    end do ! m1
  end do ! ispden
- if (paw_ij%ndij==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
+ if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
  ABI_DEALLOCATE(n12_sig)
  ABI_DEALLOCATE(n34_msig)
  ABI_DEALLOCATE(n34_sig)
 
 !Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
- if (paw_ij%ndij==4) then
+ if (nspden==4) then
    do m1=-lpawu,lpawu
      m11=m1+lpawu+1
      do m2=-lpawu,lpawu
        m21=m2+lpawu+1
-       n12_ud_re=paw_ij%noccmmp(1,m11,m21,3) ! updn
-       n12_ud_im=paw_ij%noccmmp(2,m11,m21,3) ! updn
-       n12_du_re=paw_ij%noccmmp(1,m11,m21,4) ! dnup
-       n12_du_im=paw_ij%noccmmp(2,m11,m21,4) ! dnup
+       n12_ud_re=noccmmp(1,m11,m21,3) ! updn
+       n12_ud_im=noccmmp(2,m11,m21,3) ! updn
+       n12_du_re=noccmmp(1,m11,m21,4) ! dnup
+       n12_du_im=noccmmp(2,m11,m21,4) ! dnup
        do m3=-lpawu,lpawu
          m31=m3+lpawu+1
          do m4=-lpawu,lpawu
            m41=m4+lpawu+1
-           n34_ud_re=paw_ij%noccmmp(1,m31,m41,3)  ! updn
-           n34_ud_im=paw_ij%noccmmp(2,m31,m41,3)  ! updn
-           n34_du_re=paw_ij%noccmmp(1,m31,m41,4)  ! dnup
-           n34_du_im=paw_ij%noccmmp(2,m31,m41,4)  ! dnup
+           n34_ud_re=noccmmp(1,m31,m41,3)  ! updn
+           n34_ud_im=noccmmp(2,m31,m41,3)  ! updn
+           n34_du_re=noccmmp(1,m31,m41,4)  ! dnup
+           n34_du_im=noccmmp(2,m31,m41,4)  ! dnup
            eldautemp=eldautemp-pawtab%vee(m11,m31,m41,m21) &
 &           *(n12_ud_re*n34_du_re-n12_ud_im*n34_du_im &
 &           +n12_du_re*n34_ud_re-n12_du_im*n34_ud_im)
@@ -940,19 +943,19 @@ CONTAINS  !=====================================================================
 !Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008) [[cite:Amadon2008a]]
  eldautemp=half*eldautemp
 
-!if (paw_ij%ndij==1) then
-!n_tot=two*paw_ij%nocctot(1)
-!n_upup=paw_ij%nocctot(1)
-!n_dndn=paw_ij%nocctot(1)
-!else if (paw_ij%ndij==2) then
-!n_tot=paw_ij%nocctot(1)+paw_ij%nocctot(2)
-!n_upup=paw_ij%nocctot(1)
-!n_dndn=paw_ij%nocctot(2)
-!else if (paw_ij%ndij==4) then
-!n_tot=paw_ij%nocctot(1)
-!mx=paw_ij%nocctot(2)
-!my=paw_ij%nocctot(3)
-!mz=paw_ij%nocctot(4)
+!if (nspden==1) then
+!n_tot=two*nocctot(1)
+!n_upup=nocctot(1)
+!n_dndn=nocctot(1)
+!else if (nspden==2) then
+!n_tot=nocctot(1)+nocctot(2)
+!n_upup=nocctot(1)
+!n_dndn=nocctot(2)
+!else if (nspden==4) then
+!n_tot=nocctot(1)
+!mx=nocctot(2)
+!my=nocctot(3)
+!mz=nocctot(4)
 !mnorm=sqrt(mx*mx+my*my+mz*mz)
 !n_upup=half*(n_tot+mnorm)
 !n_dndn=half*(n_tot-mnorm)
@@ -970,7 +973,7 @@ CONTAINS  !=====================================================================
    end if
    edcdctemp=edcdctemp-half*upawu*n_tot**2
    edctemp  =edctemp  +half*upawu*(n_tot*(n_tot-one))
-   if (paw_ij%ndij/=4.or.option_interaction==2) then
+   if (nspden/=4.or.option_interaction==2) then
      if(dmftdc/=5) then
        edcdctemp=edcdctemp+half*jpawu_dc*(n_upup**2+n_dndn**2)
        edctemp  =edctemp  -half*jpawu_dc*(n_upup*(n_upup-one)+n_dndn*(n_dndn-one))
@@ -978,12 +981,12 @@ CONTAINS  !=====================================================================
        edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
        edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
      end if
-   else if (paw_ij%ndij==4.and.option_interaction==1) then
+   else if (nspden==4.and.option_interaction==1) then
 !    write(message,'(a)') "  warning: option_interaction==1 for test         "
 !    call wrtout(std_out,message,'COLL')
      edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
      edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
-   else if (paw_ij%ndij==4.and.option_interaction==3) then
+   else if (nspden==4.and.option_interaction==3) then
 !    edcdctemp= \frac{J}/{4}[ N(N) + \vect{m}.\vect{m}]
      edcdctemp=edcdctemp+quarter*jpawu_dc*(n_tot**2 + &
 &     mx**2+my**2+mz**2)  ! +\frac{J}/{4}\vect{m}.\vect{m}

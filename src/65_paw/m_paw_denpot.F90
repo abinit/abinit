@@ -815,7 +815,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ==========================================================
 
    if (pawtab(itypat)%usepawu>0.and.ipert==0.and.ipositron/=1.and.option/=1.and.pawtab(itypat)%usepawu<10) then
-     call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,pawprtvol,pawtab(itypat),paw_ij(iatom))
+     call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,paw_ij(iatom)%noccmmp, &
+&                    paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
    end if
 
 !  ========= Compute nuclear dipole moment energy contribution  ========

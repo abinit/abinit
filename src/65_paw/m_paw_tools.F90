@@ -451,9 +451,9 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
          call wrtout(unitfi,msg,'COLL')
          if (ipositron>0) then
            if (electronpositron%has_pos_ham==0) then
-             write(msg,'(3a)') trim(msg),ch10,' -Note: these are the electronic Dij'
+             write(msg,'(a)') ' -Note: these are the electronic Dij'
            else
-             write(msg,'(3a)') trim(msg),ch10,' -Note: these are the positronic Dij'
+             write(msg,'(a)') ' -Note: these are the positronic Dij'
            end if
            call wrtout(unitfi,msg,'COLL')
          end if
