@@ -44,7 +44,7 @@ module m_invars2
  use m_parser,    only : intagm
  use m_geometry,   only : mkrdim, metric
  use m_gsphere,    only : setshells
- use m_ingeo_img, only : ingeo_img
+ use m_intagm_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
@@ -239,7 +239,7 @@ end subroutine invars2m
 !!      invars2m,m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,ingeo_img,inkpts
+!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,intagm_img,inkpts
 !!      intagm,invacuum,libxc_functionals_end
 !!      libxc_functionals_get_hybridparams,libxc_functionals_init,matr3inv
 !!      sort_int,timab,wrtout
@@ -3206,13 +3206,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')
      if(tread==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
-     call ingeo_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'upawu',tread_alt,'ENE')
+     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'upawu',tread_alt,'ENE')
      if(tread_alt==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
 
      dprarr(1:ntypat)=dtset%jpawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'jpawu',tread,'ENE')
      if(tread==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
-     call ingeo_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'jpawu',tread_alt,'ENE')
+     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'jpawu',tread_alt,'ENE')
      if(tread_alt==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
 
      if (dtset%usedmatpu/=0.and.dmatsize>0) then
@@ -3242,7 +3242,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
            iat=iat+1;jj=jj+isiz
          end if
        end do
-       call ingeo_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, &
+       call intagm_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, &
 &       string,'dmatpawu',tread_alt,'DPR')
        if(tread_alt==1) then
          iat=1;jj=1

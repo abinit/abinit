@@ -947,7 +947,7 @@ end subroutine incomprs
 !!
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_ingeo_img
+!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
 !!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
