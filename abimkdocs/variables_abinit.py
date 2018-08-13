@@ -11272,11 +11272,12 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points have the same number of bands and the same occupancies of bands.
-[[nband]] is given as a single number, and [[occ]]([[nband]]) is an array of
-[[nband]] elements, read in by the code.
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin 
+(but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
+[[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
+[[nband]] * [[nsppol]] elements, read in by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
-the code to add to 1.
+the code to add to 1. They cannot differ for differing spins.
 
   * [[occopt]] = 1:
 Same as [[occopt]] = 0, except that the array [[occ]] is automatically generated
@@ -11289,18 +11290,18 @@ equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 
   * [[occopt]] = 2:
 k points may optionally have different numbers of bands and different
-occupancies. [[nband]]([[nkpt]]*[[nsppol]]) is given explicitly as an array of
-[[nkpt]]*[[nsppol]] elements. [[occ]]() is given explicitly for all bands at
+occupancies. [[nband]]([[nkpt]] * [[nsppol]]) is given explicitly as an array of
+[[nkpt]] * [[nsppol]] elements. [[occ]]() is given explicitly for all bands at
 each k point, and eventually for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
-  * [[occopt]] = 3, 4, 5, 6 and 7
+  * [[occopt]] = 3, 4, 5, 6 and 7:
 Metallic occupation of levels, using different occupation schemes (see below).
 The corresponding thermal broadening, or cold smearing, is defined by the
 input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
 divided by [[tsmear]])
-Like for [[occopt]] = 1, the variable [[occ]] is not read
+Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
 number, read by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
