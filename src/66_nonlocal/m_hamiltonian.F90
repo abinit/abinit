@@ -86,7 +86,7 @@ module m_hamiltonian
 ! ===== Integer scalars
 
   integer :: dimekb1
-   ! First dimension of Ekb (see ekb in defs_datatypes.F90)
+   ! First dimension of Ekb
    ! Same as psps%dimekb
    ! ->Norm conserving : Max. number of Kleinman-Bylander energies
    !                     for each atom type
@@ -96,9 +96,13 @@ module m_hamiltonian
    !                     dimekb1=cplex_dij*lmnmax*(lmnmax+1)/2
 
   integer :: dimekb2
-   ! Second dimension of Ekb (see ekb in defs_datatypes.F90)
+   ! Second dimension of Ekb
    ! ->Norm conserving psps: dimekb2=ntypat
    ! ->PAW                 : dimekb2=natom
+
+  integer :: dimekbq
+   ! Fourth dimension of Ekb
+   ! 2 if Ekb factors contain a exp(-iqR) phase, 1 otherwise
 
   integer :: istwf_k
    ! option parameter that describes the storage of wfs at k
@@ -261,10 +265,10 @@ module m_hamiltonian
 
 ! ===== Real arrays
 
-  real(dp), allocatable :: ekb_spin(:,:,:,:)
-   ! ekb_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+  real(dp), allocatable :: ekb_spin(:,:,:,:,:)
+   ! ekb_spin(dimekb1,dimekb2,nspinor**2,dimekbq,my_nsppol)
    ! Contains the values of ekb array for all spins treated by current process
-   ! See ekb description ; ekb is pointer to ekb_spin(:,:,:,my_isppol)
+   ! See ekb description ; ekb is pointer to ekb_spin(:,:,:,:,my_isppol)
 
   real(dp), allocatable :: sij(:,:)
    ! sij(dimekb1,ntypat*usepaw) = overlap matrix for paw calculation
@@ -302,19 +306,24 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:) => null()
-   ! ekb(dimekb1,dimekb2,nspinor**2)
+  real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:,:) => null()
+   ! ekb(dimekb1,dimekb2,nspinor**2,dimekbq)
    !  ->Norm conserving : (Real) Kleinman-Bylander energies (hartree)
    !          for number of basis functions (l,n) (lnmax)
    !          and number of atom types (ntypat)
-   !          dimekb1=lnmax ; dimekb2=ntypat
+   !          dimekb1=lnmax ; dimekb2=ntypat ; dimekbq=1
    !  ->PAW : (Real, symmetric) Frozen part of Dij coefficients
    !                            to connect projectors
    !          for number of basis functions (l,m,n) (lmnmax)
    !          and number of atom (natom)
-   !          dimekb1=lmnmax*(lmnmax+1)/2 ; dimekb2=natom
+   !          dimekb1=lmnmax*(lmnmax+1)/2 ; dimekb2=natom ; dimekbq=1
    ! ekb is spin dependent in the case of PAW calculations.
-   ! For each spin component, ekb points to ekb_spin(:,:,:,my_isppol)
+   ! For each spin component, ekb points to ekb_spin(:,:,:,:,my_isppol)
+   ! dimekbq=2 if Ekb factors contain a exp(-iqR) phase, dimekbq=1 otherwise
+   ! About the non-local factors symmetry:
+   !   - The lower triangular part of the Dij matrix can be deduced from the upper one
+   !     with the following relation: D^s2s1_ji = (D^s1s2_ij)^*
+   !     where s1,s2 are spinor components
 
   real(dp), pointer :: ffnl_k(:,:,:,:) => null()
    ! ffnl_k(npw_fft_k,2,dimffnl_k,ntypat)
@@ -717,7 +726,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !arrays
  integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable,target :: ekb_tmp(:,:,:)
+ real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
 
 ! *************************************************************************
 
@@ -829,22 +838,23 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  if (ham%usepaw==0) then ! Norm-conserving: use constant Kleimann-Bylander energies.
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
-   ABI_ALLOCATE(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1))
-   ham%ekb => ham%ekb_spin(:,:,:,1)
+   ham%dimekbq=1
+   ABI_ALLOCATE(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1,1))
+   ham%ekb => ham%ekb_spin(:,:,:,:,1)
    ABI_ALLOCATE(ham%sij,(0,0))
-   ham%ekb(:,:,1)=psps%ekb(:,:)
+   ham%ekb(:,:,1,1)=psps%ekb(:,:)
    if (nspinor==2) then
-     ham%ekb(:,:,2)=psps%ekb(:,:)
-     ham%ekb(:,:,3:4)=zero
+     ham%ekb(:,:,2,1)=psps%ekb(:,:)
+     ham%ekb(:,:,3:4,1)=zero
    end if
    if (PRESENT(electronpositron)) then
-     if (electronpositron_calctype(electronpositron)==1) ham%ekb(:,:,:)=-ham%ekb(:,:,:)
+     if (electronpositron_calctype(electronpositron)==1) ham%ekb(:,:,:,:)=-ham%ekb(:,:,:,:)
    end if
 
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
    if (ham%use_gpu_cuda==1) then
-     call gpu_update_ham_data(ham%ekb,size(ham%ekb),ham%sij,size(ham%sij),ham%gprimd,size(ham%gprimd))
+     call gpu_update_ham_data(ham%ekb(:,:,:,1),size(ham%ekb),ham%sij,size(ham%sij),ham%gprimd,size(ham%gprimd))
    end if
 #endif
 
@@ -856,6 +866,10 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    if ((nspinor==2).or.any(abs(ham%nucdipmom)>tol8)) cplex_dij=2
    ham%dimekb1=psps%dimekb*cplex_dij
    ham%dimekb2=natom
+   ham%dimekbq=1
+   if (present(paw_ij)) then
+     if (size(paw_ij)>0) ham%dimekbq=paw_ij(1)%cplex_rf
+   end if
    ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
    do itypat=1,psps%ntypat
      if (cplex_dij==1) then
@@ -872,16 +886,16 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    end do
    !We preload here PAW non-local factors in order to avoid a communication over atoms
    ! inside the loop over spins.
-   ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,my_nsppol))
+   ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
    ham%ekb_spin=zero
    if (present(paw_ij)) then
      if (my_nsppol<ham%nsppol) then
-       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2))
+       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekb2))
      end if
      jsp=0
      do isp=1,ham%nsppol
        if (my_spintab(isp)==1) then
-         jsp=jsp+1 ; ham%ekb => ham%ekb_spin(:,:,:,jsp)
+         jsp=jsp+1 ; ham%ekb => ham%ekb_spin(:,:,:,:,jsp)
        else
          ham%ekb => ekb_tmp
        end if
@@ -1296,7 +1310,7 @@ implicit none
  type(gs_hamiltonian_type),intent(out),target :: gs_hamk_out
 
 !Local variables-------------------------------
- integer :: tmp2i(4)
+ integer :: tmp2i(5)
 #if defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: ham_ptr
 #endif
@@ -1309,6 +1323,7 @@ implicit none
 
  gs_hamk_out%dimekb1 = gs_hamk_in%dimekb1
  gs_hamk_out%dimekb2 = gs_hamk_in%dimekb2
+ gs_hamk_out%dimekbq = gs_hamk_in%dimekbq
  gs_hamk_out%istwf_k = gs_hamk_in%istwf_k
  gs_hamk_out%istwf_kp = gs_hamk_in%istwf_kp
  gs_hamk_out%lmnmax = gs_hamk_in%lmnmax
@@ -1363,10 +1378,10 @@ implicit none
  gs_hamk_out%ph1d = gs_hamk_in%ph1d
  ABI_ALLOCATE(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
  gs_hamk_out%pspso = gs_hamk_in%pspso
- tmp2i(1:4)=shape(gs_hamk_in%ekb_spin)
- ABI_ALLOCATE(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4)))
+ tmp2i(1:5)=shape(gs_hamk_in%ekb_spin)
+ ABI_ALLOCATE(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4),tmp2i(5)))
  gs_hamk_out%ekb_spin = gs_hamk_in%ekb_spin
- gs_hamk_out%ekb => gs_hamk_out%ekb_spin(:,:,:,1)
+ gs_hamk_out%ekb => gs_hamk_out%ekb_spin(:,:,:,:,1)
  tmp2i(1:2)=shape(gs_hamk_in%sij)
  ABI_ALLOCATE(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
  gs_hamk_out%sij = gs_hamk_in%sij
@@ -1507,15 +1522,15 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
 !Retrieve non-local factors for this spin component
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
-     jsppol=min(isppol,size(Ham%ekb_spin,4))
-     if (jsppol>0) Ham%ekb => Ham%ekb_spin(:,:,:,jsppol)
+     jsppol=min(isppol,size(Ham%ekb_spin,5))
+     if (jsppol>0) Ham%ekb => Ham%ekb_spin(:,:,:,:,jsppol)
    end if
  end if
 
 !Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
  if (Ham%use_gpu_cuda==1) then
-   call gpu_update_ham_data(Ham%ekb,size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
+   call gpu_update_ham_data(Ham%ekb(:,:,:,1),size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
  end if
 #endif
 
@@ -1680,7 +1695,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  rf_Ham%dime1kb1=0
  rf_Ham%dime1kb2=gs_Ham%dimekb2
  if (gs_Ham%usepaw==1.and.ipert/=gs_Ham%natom+1.and.ipert/=gs_Ham%natom+10) then
-   cplex_dij1=rf_Ham%nspinor
+   cplex_dij1=1;if ((gs_Ham%nspinor==2).or.any(abs(gs_Ham%nucdipmom)>tol8)) cplex_dij1=2
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
@@ -1948,12 +1963,12 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  integer,intent(in) :: isppol,comm_atom
 !arrays
  integer,intent(in),optional,target :: mpi_atmtab(:)
- real(dp),intent(out) :: ekb(:,:,:)
+ real(dp),intent(out) :: ekb(:,:,:,:)
  type(paw_ij_type),intent(in) :: paw_ij(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: dimdij,dimekb1,dimekb3,iatom,iatom_tot,ierr,isp,ispden,my_natom,natom
+ integer :: cplex,dimdij,dimekb1,dimekb3,dimekb4,iatom,iatom_tot,ierr,ii,isp,ispden,my_natom,natom
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -1973,16 +1988,18 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  !Retrieve PAW Dij coefficients for this spin component
  if (my_natom>0) then
    if (allocated(paw_ij(1)%dij)) then
-     dimekb1=size(ekb,1) ; dimekb3=size(ekb,3)
-     do ispden=1,dimekb3
-       isp=isppol; if (dimekb3==4) isp=ispden
-       do iatom=1,my_natom
-         iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
-         dimdij=paw_ij(iatom)%cplex_dij*paw_ij(iatom)%lmn2_size
-         if (dimdij>dimekb1) then
-           MSG_BUG(' size of paw_ij%dij>dimekb1 !')
-         end if
-         ekb(1:dimdij,iatom_tot,ispden)=paw_ij(iatom)%dij(1:dimdij,isp)
+     dimekb1=size(ekb,1) ; dimekb3=size(ekb,3) ; dimekb4=size(ekb,4)
+     cplex=paw_ij(1)%cplex_rf
+     ABI_CHECK(cplex<=dimekb4,'paw_ij%cplex_rf>dimekb4!')
+     do ii=1,cplex
+       do ispden=1,dimekb3
+         isp=isppol; if (dimekb3==4) isp=ispden
+         do iatom=1,my_natom
+           iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
+           dimdij=paw_ij(iatom)%cplex_dij*paw_ij(iatom)%lmn2_size
+           ABI_CHECK(dimdij<=dimekb1,'Size of paw_ij%dij>dimekb1!')
+           ekb(1:dimdij,iatom_tot,ispden,ii)=paw_ij(iatom)%dij(1+(ii-1)*dimdij:ii*dimdij,isp)
+         end do
        end do
      end do
    end if

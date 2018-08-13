@@ -916,7 +916,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_CHECK(cplex==1,'BUG in pawdenpot: Dij^Fock not available for cplex=2!')
 
      if (ipositron/=1) then
-
 !      Fock contribution to Dij
        ABI_ALLOCATE(dijfock_vv,(cplex_dij*lmn2_size,ndij))
        ABI_ALLOCATE(dijfock_cv,(cplex_dij*lmn2_size,ndij))

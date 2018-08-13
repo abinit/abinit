@@ -109,12 +109,14 @@ contains
 !!    Only choices 1,2,3,5,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  dimenl1,dimenl2=dimensions of enl (see enl)
+!!  dimekbq=1 if enl factors do not contain a exp(-iqR) phase, 2 is they do
 !!  dimffnlin=second dimension of ffnlin (1+number of derivatives)
 !!  dimffnlout=second dimension of ffnlout (1+number of derivatives)
-!!  enl(dimenl1,dimenl2,nspinortot**2)=
+!!  enl(cplex_enl*dimenl1,dimenl2,nspinortot**2,dimekbq)=
 !!  ->Norm conserving : ==== when paw_opt=0 ====
 !!                      (Real) Kleinman-Bylander energies (hartree)
 !!                      dimenl1=lmnmax  -  dimenl2=ntypat
+!!                      dimekbq is 2 if Enl contains a exp(-iqR) phase, 1 otherwise
 !!  ->PAW :             ==== when paw_opt=1, 2 or 4 ====
 !!                      (Real or complex, hermitian) Dij coefs to connect projectors
 !!                      dimenl1=cplex_enl*lmnmax*(lmnmax+1)/2  -  dimenl2=natom
@@ -123,6 +125,7 @@ contains
 !!                        enl(:,:,2) contains Dij^dn-dn
 !!                        enl(:,:,3) contains Dij^up-dn (only if nspinor=2)
 !!                        enl(:,:,4) contains Dij^dn-up (only if nspinor=2)
+!!                      dimekbq is 2 if Dij contains a exp(-iqR) phase, 1 otherwise
 !!  ffnlin(npwin,dimffnlin,lmnmax,ntypat)=nonlocal form factors to be used
 !!          for the application of the nonlocal operator to the |in> vector
 !!  ffnlout(npwout,dimffnlout,lmnmax,ntypat)=nonlocal form factors to be used
@@ -319,7 +322,7 @@ contains
 !!
 !! SOURCE
 
- subroutine nonlop_ylm(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
+ subroutine nonlop_ylm(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                      enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
@@ -337,7 +340,7 @@ contains
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimffnlin,dimffnlout,idir
+ integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
  real(dp),intent(in) :: lambda,ucvol
@@ -346,7 +349,7 @@ contains
  integer,intent(in) :: atindx1(natom),kgin(3,npwin)
  integer,intent(in),target :: indlmn(6,lmnmax,ntypat)
  integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
- real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2)
+ real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
  real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
  real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat)
  real(dp),intent(in) :: gprimd(3,3)
@@ -383,8 +386,6 @@ contains
  real(dp),allocatable :: sij_typ(:),strnlk(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
-!TEST
- logical :: ex
 
 ! **********************************************************************
 
@@ -465,7 +466,8 @@ contains
  if (cpopt>=2) choice_a=-choice_a
  cplex=2;if (istwf_k>1) cplex=1 !Take into account TR-symmetry
  cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1))
- cplex_fac=cplex;if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2
+ cplex_fac=max(cplex,dimekbq)
+ if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2
 
 !Define dimensions of projected scalars
  ndgxdt=0;ndgxdtfac=0;nd2gxdt=0;nd2gxdtfac=0
@@ -626,16 +628,9 @@ contains
 !  Select quantities specific to the current type of atom
    nlmn=count(indlmn(3,:,itypat)>0)
 
-!  Temporary test on local part
+!  Test on local part
    testnl=(paw_opt/=0)
-   if (paw_opt==0) then
-     do ispinor=1,nspinortot
-       do ilmn=1,nlmn
-         iln=indlmn(5,ilmn,itypat)
-         if (abs(enl(iln,itypat,ispinor))>tol10) testnl=.true.
-       end do
-     end do
-   end if
+   if (paw_opt==0) testnl=any(enl(:,:,:,:)>tol10)
 
 !  Some non-local part is to be applied for that type of atom
    if (testnl) then
@@ -839,7 +834,7 @@ contains
          if(choice/=7) then
 !          Contraction from <p_i|c> to Sum_j[Dij.<p_j|c>] (and derivatives)
            call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
-&           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,enl,gx,gxfac,gxfac_sij,&
+&           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,gx,gxfac,gxfac_sij,&
 &           iatm,indlmn_typ,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
          else

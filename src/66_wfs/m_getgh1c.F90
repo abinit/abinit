@@ -472,22 +472,11 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
        cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr(:,:,:,1))
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
          gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
        end do
-       !At q<>0, add an imaginary part due to exp(-iqr) phase
-       if (size(rf_hamkq%e1kbfr,4)==2) then
-         cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
-         call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&         paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr(:,:,:,2))
-!$OMP PARALLEL DO
-         do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-           gvnl1_(1,ipw)=gvnl1_(1,ipw)-nonlop_out(2,ipw)
-           gvnl1_(2,ipw)=gvnl1_(2,ipw)+nonlop_out(1,ipw)
-         end do
-       end if
        ABI_DEALLOCATE(nonlop_out)
      end if
 
@@ -497,20 +486,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc(:,:,:,1))
-       !At q<>0, add an imaginary part due to exp(-iqr) phase
-       if (size(rf_hamkq%e1kbfr,4)==2) then
-         ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
-         cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
-         call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&         paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbsc(:,:,:,2))
-!$OMP PARALLEL DO
-         do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-           gvnl2(1,ipw)=gvnl2(1,ipw)-nonlop_out(2,ipw)
-           gvnl2(2,ipw)=gvnl2(2,ipw)+nonlop_out(1,ipw)
-         end do
-         ABI_DEALLOCATE(nonlop_out)
-       end if
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
 
      if (usecprj==0) then
@@ -537,7 +513,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  -------------------------------------------
  else if (ipert==natom+1.and.(optnl>0.or.sij_opt/=0)) then
 
-!  Remember, q=0, so can take all RF data...
    tim_nonlop=8 ; signs=2 ; choice=5
    if (gs_hamkq%usepaw==1) then
      if (usecprj==1) then
@@ -611,9 +586,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
 
 !      PAW: Compute part of H^(1) due to derivative of electric field part of Dij
-       cpopt=2 ; choice=1 ; paw_opt=1 ; signs=2  ! Note: e1kbfr is real because q=0
+       cpopt=2 ; choice=1 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr(:,:,:,1))
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
          gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
@@ -626,9 +601,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (optnl>=2) then
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
        cpopt=-1+3*usecprj;if (opt_gvnl1==2) cpopt=2
-       choice=1 ; paw_opt=1 ; signs=2  ! Note: e1kbfr is real because q=0
+       choice=1 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc(:,:,:,1))
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
 
      if (sij_opt==1) then
@@ -691,9 +666,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=1) then
        ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
-       cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1 ! Note: e1kbfr is real because q=0
+       cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr(:,:,:,1))
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
          gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
@@ -705,9 +680,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=2) then
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
-       cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1 ! Note: e1kbfr is real because q=0
+       cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc(:,:,:,1))
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
 
      if (usecprj==0) then

@@ -125,7 +125,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
 !arrays
- real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2)
+ real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq)
  real(dp),intent(inout) :: cwavef(:,:)
  real(dp),intent(inout),target :: gvnl2(:,:)
  real(dp),intent(out) :: gh2c(:,:),gs2c(:,:)
@@ -146,8 +146,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  real(dp) :: svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: nonlop_out(:,:)
  real(dp), pointer :: gvnl2_(:,:)
- real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:)
- real(dp),allocatable,target :: enl_temp(:,:,:)
+ real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 
@@ -191,12 +191,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
      ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
      ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: cplex_rf>1!')
-     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-     enl_temp(:,:,:) = rf_hamkq%e1kbfr(:,:,:,1) + rf_hamkq%e1kbsc(:,:,:,1)
+     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
+     enl_temp(:,:,:,:) = rf_hamkq%e1kbfr(:,:,:,:) + rf_hamkq%e1kbsc(:,:,:,:)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
      ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
-     enl_ptr => rf_hamkq%e1kbfr(:,:,:,1)
+     enl_ptr => rf_hamkq%e1kbfr
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'
      MSG_BUG(msg)

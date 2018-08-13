@@ -652,8 +652,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== DijFock already computed
      if (paw_ij(iatom)%has_dijfock==2) then
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij,:)=paw_ij(iatom)%dij(1:cplex_dij,:) &
-&                                                    +paw_ij(iatom)%dijfock(1:cplex_dij,:)
+       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                   +paw_ij(iatom)%dijfock(1:cplex_dij*lmn2_size,:)
 
      else
 
@@ -667,7 +668,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &                        ndij,nspden,nsppol,pawrhoij(iatom),pawtab(itypat))
        end if
        if (dijfock_need) paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
-       if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijfock_vv(:,:)+dijfock_cv(:,:)
+       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                   +dijfock_vv(1:cplex_dij*lmn2_size,:)+dijfock_cv(1:cplex_dij*lmn2_size,:)
        LIBPAW_DEALLOCATE(dijfock_vv)
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
@@ -697,6 +700,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end if
        if (dijhartree_need) paw_ij(iatom)%dijhartree(:)=dijhartree(:)
      end if
+
      if (dij_need) then
        do idij=1,min(nsploop,2)
          klmn1=1
@@ -784,15 +788,18 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Dijnd already computed
      if (paw_ij(iatom)%has_dijnd==2) then
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij,:)=paw_ij(iatom)%dij(1:cplex_dij,:) &
-&                                                    +paw_ij(iatom)%dijnd(1:cplex_dij,:)
+       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                   +paw_ij(iatom)%dijnd(1:cplex_dij*lmn2_size,:)
      else
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
        call pawdijnd(cplex_dij,dijnd,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij,:)=paw_ij(iatom)%dij(1:cplex_dij,:)+dijnd(1:cplex_dij,:)
+       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                   +dijnd(1:cplex_dij*lmn2_size,:)
        LIBPAW_DEALLOCATE(dijnd)
      end if
 
@@ -865,8 +872,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== DijEXXC already computed
      if (paw_ij(iatom)%has_dijexxc==2) then
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij,:)=paw_ij(iatom)%dij(1:cplex_dij,:) &
-&                                                    +paw_ij(iatom)%dijexxc(1:cplex_dij,:)
+       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                   +paw_ij(iatom)%dijexxc(1:cplex_dij*lmn2_size,:)
      else
 
 !    ===== Need to compute DijEXXC
@@ -888,7 +896,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
             LIBPAW_POINTER_DEALLOCATE(vpawx)
          end if
          if (dijexxc_need) paw_ij(iatom)%dijexxc(:,:)=dijexxc(:,:)
-         if (dij_need) paw_ij(iatom)%dij(1:cplex_dij,:)=paw_ij(iatom)%dij(1:cplex_dij,:)+dijexxc(1:cplex_dij,:)
+         if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&                      paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
+&                     +dijexxc(1:cplex_dij*lmn2_size,:)
          LIBPAW_DEALLOCATE(dijexxc)
        end if
      end if
@@ -904,7 +914,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        klmn1=1
        do klmn=1,lmn2_size
          paw_ij(iatom)%dij(klmn1,idij)=paw_ij(iatom)%dij(klmn1,idij)+pawtab(itypat)%gammaij(klmn)*charge/ucvol
-         klmn1=klmn1+cplex_dij
+         klmn1=klmn1+cplex_dij*cplex_rf
        end do
      end do
    end if
@@ -3541,6 +3551,9 @@ subroutine pawdijfr(cplex_rf,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,
                !Add to previous contribution
                if (ispden<=min(nspden,2)) then
                  intv2(1:cplex_rf,1:lm_size)=intv2(1:cplex_rf,1:lm_size)+intvloc(1:cplex_rf,1:lm_size)
+                 if (ispden==min(nspden,2)) then
+                   LIBPAW_DEALLOCATE(intvloc)
+                 end if
                end if
              end if ! need_dijfr_2
 
