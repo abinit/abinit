@@ -3054,15 +3054,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      call intagm(dprarr,intarr,jdtset,marr,bantot,string(1:lenstr),'occ',tread,'DPR')
      if(tread==1) dtset%occ_orig(1:bantot)=dprarr(1:bantot)
    else if(occopt==0) then
-!    Read usual occupancy--same for all k points and spins
-     call intagm(dprarr,intarr,jdtset,marr,dtset%nband(1),string(1:lenstr),'occ',tread,'DPR')
-     if(tread==1) dtset%occ_orig(1:dtset%nband(1))=dprarr(1:dtset%nband(1))
+     nband1=dtset%nband(1)
+!    Read usual occupancy--same for all k points but might differ for spins
+     call intagm(dprarr,intarr,jdtset,marr,nband1*nsppol,string(1:lenstr),'occ',tread,'DPR')
+     if(tread==1) dtset%occ_orig(1:nband1*nsppol)=dprarr(1:nband1*nsppol)
 !    Fill in full occ array using input values for each k and spin
 !    (make a separate copy for each k point and spin)
-     do ikpt=1,nkpt*nsppol
-       dtset%occ_orig(1+(ikpt-1)*dtset%nband(1):ikpt*dtset%nband(1))=&
-&       dtset%occ_orig(1:dtset%nband(1))
-     end do
+     if(nkpt>1)then
+       do isppol=nsppol,1,-1
+         do ikpt=2,nkpt
+           dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1))=&
+&           dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol)
+         end do
+       end do
+     endif
    end if
  end if
 
