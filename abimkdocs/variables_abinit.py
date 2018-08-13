@@ -3017,13 +3017,13 @@ Variable(
     topics=['PIMD_expert', 'TransPath_expert'],
     dimensions=['[[nimage]]'],
     defaultval=MultipleValue(number=None, value=1),
-    mnemonics="DYNamics of the IMAGE",
+    mnemonics="list of DYNamic IMAGEs",
     commentdefault="if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.",
     text="""
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case the
+impose that the extremal configurations of the string are fixed. In case 
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
