@@ -1,5 +1,5 @@
 # H2 molecule, in a somewhat small box.
-# Computation of transition path between two local minima of the geometry space, using the NEB method.
+# Computation of transition path between two local minima of the geometry space, using the CI-NEB method.
 
 ntimimage 15
 nimage 7
@@ -48,7 +48,7 @@ ngkpt 4 4 4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t29.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t29.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% psp_files = 1h.pspnc, 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 20
@@ -57,8 +57,8 @@ ngkpt 4 4 4
 #%% keywords = NEB
 #%% description = 
 #%%   Hydrogen diatomic molecule in a cell, close to BCC
-#%%   Test the NEB method : 7 images, exploring the transition
-#%%   path. Use the climbing image methode to refine the position of the saddle point. 
+#%%   Test the CI-NEB method : 7 images, exploring the transition
+#%%   path. Use the climbing image method to refine the position of the saddle point. 
 #%%   Except the number of images, similar to test 22 (but with NEB).
 #%%   NOTE : This algorithm (neb_algo=2) seems to be BROKEN !
 #%% topics = TransPath
