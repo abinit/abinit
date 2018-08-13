@@ -1,6 +1,6 @@
 # Oxygen molecule, treated with fixed occupation numbers with LDA.
 
- nimage 2
+ nimage 1
 
 #Structure
  ntypat  1
@@ -18,9 +18,9 @@
 #Electronic structure
  nsppol 2
  nband 8 8
- occopt 2
+ occopt 0
  occ 7*1 1*0 5*1 3*0
- occ 5*1 0.7765 0.2235  0.0 5*1 0.7765 0.2235  0.0
+#occ 5*1 0.7765 0.2235  0.0 5*1 0.7765 0.2235  0.0
 
 #Optimization of structure
  ionmov 2

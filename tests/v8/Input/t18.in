@@ -19,7 +19,7 @@
 #Electronic structure
  nsppol 2
  nband 8 8
- occopt 2
+ occopt 0
  occ?1 7*1 1*0 5*1 3*0
  occ?2 5*1 0.7765 0.2235  0.0 5*1 0.7765 0.2235  0.0
 
