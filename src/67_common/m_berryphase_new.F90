@@ -2034,20 +2034,20 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
               
-              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
+             if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
                  
-                 write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
-                 write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
-                      &           ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
-                      &           ",    maxestep=",dtset%maxestep
+               write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
+               write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
+&               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
+&               ",    maxestep=",dtset%maxestep
                  
                  
-                 if (efield_test_cart(ii) > efield_old_cart(ii)) then
-                    efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
-                 else
-                    efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
-                 end if
-              end if
+               if (efield_test_cart(ii) > efield_old_cart(ii)) then
+                 efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
+               else
+                 efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
+               end if
+             end if
            end do
 
            dtset%efield(:) = efield_test_cart(:)
@@ -2098,19 +2098,19 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
               
-              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
+             if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
                  
-                 write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
-                 write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
-                      &           ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
-                      &           ",    maxestep=",dtset%maxestep
+               write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
+               write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
+&               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
+&               ",    maxestep=",dtset%maxestep
                  
-                 if (efield_test_cart(ii) > efield_old_cart(ii)) then
-                    efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
-                 else
-                    efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
-                 end if
-              end if
+               if (efield_test_cart(ii) > efield_old_cart(ii)) then
+                 efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
+               else
+                 efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
+               end if
+             end if
            end do
            
            dtset%efield(:) = efield_test_cart(:)
@@ -2220,19 +2220,19 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            !      ! test whether change in efield in any direction exceed maxestep, if so, set the
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
-              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
+             if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
                  
-                 write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
-                 write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
-                      &           ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
-                      &           ",    maxestep=",dtset%maxestep
+               write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
+               write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
+&               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
+&               ",    maxestep=",dtset%maxestep
                  
-                 if (efield_test_cart(ii) > efield_old_cart(ii)) then
-                    efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
-                 else
-                    efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
-                 end if
-              end if
+               if (efield_test_cart(ii) > efield_old_cart(ii)) then
+                 efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
+               else
+                 efield_test_cart(ii) = efield_old_cart(ii) - dabs(dtset%maxestep)
+               end if
+             end if
            end do
            
            dtset%efield(:) = efield_test_cart(:)
@@ -2471,11 +2471,12 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      call wrtout(iunit,message,'COLL')
      
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
-          &   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
-          &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-          &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
-          &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
-          &   'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10  ! eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))=8.854187817620*5.14220652*1d-1
+&     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
+&     '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
+&     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10,&
+&     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3),ch10,&
+&     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10&
+&       ! eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))=8.854187817620*5.14220652*1d-1
      call wrtout(iunit,message,'COLL')
      
      !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
@@ -2574,11 +2575,11 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      call wrtout(iunit,message,'COLL')
 
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
-          &   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
-          &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-          &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
-          &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
-          &   'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
+&     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
+&     '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
+&     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
+&     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
+&     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
      call wrtout(iunit,message,'COLL')
      
   end if  ! berryopt ==16
@@ -2672,11 +2673,11 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      call wrtout(iunit,message,'COLL')
      
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)')  ch10, &
-          &   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
-          &   '       E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-          &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
-          &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
-          &   'eps0*E+P:  ', (dtefield%efield2(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
+&     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
+&     '       E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
+&     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
+&     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
+&     'eps0*E+P:  ', (dtefield%efield2(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
      call wrtout(iunit,message,'COLL')
      
   end if  ! berryopt ==17
