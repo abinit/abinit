@@ -9463,6 +9463,7 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
+XG 20180813 : This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
