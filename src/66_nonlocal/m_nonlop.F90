@@ -387,7 +387,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (cpopt/=-1) then
      MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
-   if (dimekbq/=-1) then
+   if (hamk%dimekbq/=-1) then
      MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
@@ -395,7 +395,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      MSG_BUG(msg)
    end if
  end if
- if (hamk%use_gpu_cuda/=0.and.dimekbq/=1) then
+ if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
    msg = 'GPU version of nonlop not compatible with a exp(-iqR) phase!'
    MSG_BUG(msg)
  end if
