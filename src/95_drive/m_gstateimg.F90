@@ -256,7 +256,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   'METADYNAMICS                                                ',& ! 3
 &   'GENETIC ALGORITHM                                           ',& ! 4
 &   'NUDGED ELASTIC BAND                                         ',& ! 5
-&   '                                                            ',& ! 6
+&   'LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES              ',& ! 6
 &   '                                                            ',& ! 7
 &   '                                                            ',& ! 8
 &   'PATH-INTEGRAL MOLECULAR DYNAMICS (LANGEVIN)                 ',& ! 9
@@ -554,8 +554,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          occ_img(:,iimage)            =occ(:)
        end if
 
-!    check change de rprim et reecriture dans hist
-!    check change de xred et reecriture dans hist
+!    check change of rprim and rewriting in hist
+!    check change of xred and rewriting in hist
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)

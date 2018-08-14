@@ -1266,7 +1266,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   if (dtset%ionmov==0) then
+   if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 

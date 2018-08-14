@@ -1016,8 +1016,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  imgmov
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,8,(/0,1,2,4,5,9,10,13/),iout)
-   if (dt%imgmov>0) then ! when imgmov>0, allow only ionmov0 and optcell 0 (temporary)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,9,(/0,1,2,4,5,6,9,10,13/),iout)
+   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov0 and optcell 0 (temporary)
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
      if (dt%imgmov==9.or.dt%imgmov==10.or.dt%imgmov==13) then
