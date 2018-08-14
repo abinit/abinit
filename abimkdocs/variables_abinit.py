@@ -3017,13 +3017,13 @@ Variable(
     topics=['PIMD_expert', 'TransPath_expert'],
     dimensions=['[[nimage]]'],
     defaultval=MultipleValue(number=None, value=1),
-    mnemonics="DYNamics of the IMAGE",
+    mnemonics="list of DYNamic IMAGEs",
     commentdefault="if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.",
     text="""
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case the
+impose that the extremal configurations of the string are fixed. In case 
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -6307,9 +6307,9 @@ Variable(
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-
-consistent calculations for different geometries is managed, while with
-[[ionmov]], only one geometry for self-consistent calculation is managed.
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent 
+calculations for possibly different (evolving) geometries is managed, while with
+[[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
 [[ntimimage]], corresponding to the input variable [[ntime]] of the single
 geometry case. Also, the stopping criterion is governed by [[tolimg]],
@@ -6341,11 +6341,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     enddo
 ```
 
-  * = 0 --> simply **copy** images from previous timimage step.
+  * = 0 --> simply **copy** images from previous itimimage step.
   * = 1 --> move images according to **Steepest Descent** following the (scaled) forces,
     the scaling factor being [[fxcartfactor]].
-  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting to minima
-    (see [[cite:Weinan2002]]); the algorithm variant can be selected with the [[string_algo]] keyword
+  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting two minima
+    (see [[cite:Weinan2002]]), or even two configurations that are not local minima; the algorithm variant can be selected with the [[string_algo]] keyword
     (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE)
     can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.
   * = 3 --> (tentatively, not yet coded) **Metadynamics**.
@@ -9463,6 +9463,7 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
+XG 20180813 : This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -16062,19 +16063,19 @@ Gives the variant of the String Method method used.
 Possible values can be:
 
   * 0 -->  **Original String Method**.
-NOT YET IMPLEMENTED
+NOT YET IMPLEMENTED.
 See [[cite:Weinan2002]]
 
   * 1 --> **Simplified String Method** with parametrization by **equal arc length**.
-Instead of using the normal force (wr the band), the full force is used; the
+Instead of using the normal force (wrt the band), the full force is used; the
 reparametrization is enforced by keeping the points of the string equally
 spaced.
 See [[cite:Weinan2007]]
 
   * 2 --> **Simplified String Method** with parametrization by **energy-weighted arc length**.
-A variant of the Simplified String Method (like 2-); the reparametrization is
+A variant of the Simplified String Method (like 1-); the reparametrization is
 done by using energy-weight arc-lengths, giving a finer distribution near the
-saddle point..
+saddle point.
 See [[cite:Weinan2007]] and [[cite:Goodrow2009]]
 """,
 ),
