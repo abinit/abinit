@@ -236,7 +236,7 @@ contains
  if(mxvals%nimage==1)then
    ndtset_alloc_tmp=ndtset_alloc
    if(ncid<0)ndtset_alloc_tmp=1
-   call prtocc(dtsets,iout,jdtset_,ndtset_alloc_tmp,prtvol_glob,results_out)
+   call prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
  end if
 
  intarr(1,:)=dtsets(:)%occopt
@@ -1574,7 +1574,7 @@ contains
 !!
 !! SOURCE
 
-subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
+subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1591,6 +1591,8 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
  integer,intent(in) :: iout,ndtset_alloc,prtvol_glob
 !arrays
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
+ integer,intent(in) :: nimagem(0:ndtset_alloc)
+ character(len=8),intent(in) :: strimg(mxvals%nimage)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
  type(results_out_type),intent(in) :: results_out(0:ndtset_alloc)
 
@@ -1601,10 +1603,13 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
 !scalars
  integer,parameter :: nkpt_max=50
  integer :: generic,iban,idtset,ikpsp,ikpt,isppol,jdtset,multi,multi_nband
+ integer :: multi_nimage
  integer :: multi_nkpt,multi_nsppol,multi_occopt,nban,nkpt,nkpt_eff
  integer :: multi_tsmear
  integer :: print,tnkpt
+ logical, allocatable :: test_multiimages(:)
  character(len=4) :: appen
+ character(len=16) :: keywd
  character(len=500) :: message
 
 ! *************************************************************************
@@ -1668,21 +1673,50 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
    multi_nband=1
  end if
 
-!There is a possibility of a generic occupation-number set if
-!multi_occopt==0 and multi_nband==0
+ multi_nimage=0
+ if(ndtset_alloc>1)then
+   do idtset=1,ndtset_alloc
+     if(dtsets(1)%nimage/=dtsets(idtset)%nimage .and. &
+&     dtsets(idtset)%iscf/=-2 )multi_nimage=1
+   end do
+ end if
+
+!Test whether for this variable, the content of different images differ.
+!test_multiimages(idtset)=.false. if, for that dataset, the content for different
+!images is identical.
+ ABI_MALLOC(test_multiimages,(0:ndtset_alloc))
+ test_multiimages=.false.
+ do idtset=1,ndtset_alloc
+   if(nimagem(idtset)>1)then
+     nban=sum(dtsets(idtset)%nband(1:dtsets(idtset)%nsppol*dtsets(idtset)%nkpt))
+     do iban=1,nban
+       if(sum(abs( occ(iban,2:nimagem(idtset),idtset)- &
+&       occ(iban,1,idtset)))>tol12)then
+         test_multiimages(idtset)=.true.
+       end if
+     end do
+   end if
+ end do
+ if(nimagem(0)==0)test_multiimages(0)=.true.
+
+!There is a possibility of a single generic occupation-number set (common to all datasets) if
+!multi_occopt==0 and multi_nband==0  and multi_nimage==0
+!This might occur even if occupation numbers differ for different images.
  multi=1
- if(multi_occopt==0 .and. multi_nband==0) then
+ if(multi_occopt==0 .and. multi_nband==0 .and. multi_nimage==0) then
    nban=sum(dtsets(1)%nband(1:dtsets(1)%nsppol*dtsets(1)%nkpt))
    multi=0
    if(ndtset_alloc>1)then
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%iscf/=-2)then
 !        nban counts all bands and kpoints and spins: see above
-         do iban=1,nban
-!          Use of tol8, because the format for multi=1 is f16.6, so will not
-!          discriminate between relative values, or absolute values that
-!          agree within more than 6 digits
-           if( abs(results_out(1)%occ(iban,1)-results_out(idtset)%occ(iban,1)) > tol8) multi=1
+         do iimage=1,nimage(idtset)
+           do iban=1,nban
+!            Use of tol8, because the format for multi=1 is f16.6, so will not
+!            discriminate between relative values, or absolute values that
+!            agree within more than 6 digits
+             if( abs(results_out(1)%occ(iban,iimage)-results_out(idtset)%occ(iban,iimage)) > tol8) multi=1
+           end do
          end do
        end if
      end do
@@ -1713,35 +1747,40 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
      nkpt_eff=nkpt_max
      tnkpt=1
    end if
-!  The quantity of data to be output vary with occopt
-   if(dtsets(1)%occopt>=2)then
-     iban=1
-     do isppol=1,dtsets(1)%nsppol
-       do ikpt=1,nkpt_eff
-         ikpsp=ikpt+dtsets(1)%nkpt*(isppol-1)
-         nban=dtsets(generic)%nband(ikpsp)
-         if(ikpsp==1)then
-           write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
-&           token,results_out(generic)%occ(iban:iban+nban-1,1)
-         else
-           write(iout, '((t22,6f10.6))' )results_out(generic)%occ(iban:iban+nban-1,1)
+   do iimage=1,nimage(idtset)
+     if(iimage==1 .or.  test_multiimages(idtset)==.true.)then
+       keywd=token//trim(strimg(iimage))
+!      The quantity of data to be output vary with occopt
+       if(dtsets(1)%occopt>=2)then
+         iban=1
+         do isppol=1,dtsets(1)%nsppol
+           do ikpt=1,nkpt_eff
+             ikpsp=ikpt+dtsets(1)%nkpt*(isppol-1)
+             nban=dtsets(generic)%nband(ikpsp)
+             if(ikpsp==1)then
+               write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
+&               trim(keyword),results_out(generic)%occ(iban:iban+nban-1,iimage)
+             else
+               write(iout, '((t22,6f10.6))' )results_out(generic)%occ(iban:iban+nban-1,iimage)
+             end if
+             iban=iban+nban
+           end do
+           if(tnkpt==1) write(iout,'(23x,a)' ) &
+&           'prtocc : prtvol=0, do not print more k-points.'
+         end do
+       else
+!        The number of bands is identical for all k points and spin
+         nban=dtsets(generic)%nband(1)
+         write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
+&         trim(keyword),results_out(generic)%occ(1:nban,iimage)
+!        if occopt==1, the occ might differ with the spin
+         if(dtsets(1)%nsppol/=1)then
+           write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(1)%nkpt+1:&
+&           nban*dtsets(1)%nkpt+nban,iimage)
          end if
-         iban=iban+nban
-       end do
-       if(tnkpt==1) write(iout,'(23x,a)' ) &
-&       'prtocc : prtvol=0, do not print more k-points.'
-     end do
-   else
-!    The number of bands is identical for all k points and spin
-     nban=dtsets(generic)%nband(1)
-     write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
-&     token,results_out(generic)%occ(1:nban,1)
-!    if occopt==1, the occ might differ with the spin
-     if(dtsets(1)%nsppol/=1)then
-       write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(1)%nkpt+1:&
-&       nban*dtsets(1)%nkpt+nban,1)
+       end if
      end if
-   end if
+   end do
  end if
 
 !Now, print in the other cases
@@ -1790,6 +1829,8 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
 !    Endloop on idtset
    end do
  end if
+
+ ABI_DEALLOCATE(test_multiimages)
 
 end subroutine prtocc
 !!***
