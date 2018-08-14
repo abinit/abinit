@@ -1618,7 +1618,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
 !DEBUG
  write(std_out,*)' prtocc : enter '
- write(iout,*)' prtocc : enter '
 !ENDDEBUG
 
  if(ndtset_alloc<1)then
@@ -1682,7 +1681,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
 
 !DEBUG
- write(iout,*)' prtocc : 1 '
+ write(std_out,*)' prtocc : 1 '
 !ENDDEBUG
 
  multi_nimage=0
@@ -1694,7 +1693,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
 !DEBUG
- write(iout,*)' prtocc : 2, multi_nimage= ',multi_nimage
+ write(std_out,*)' prtocc : 2, multi_nimage= ',multi_nimage
 !ENDDEBUG
 
 !Test whether for this variable, the content of different images differ.
@@ -1716,7 +1715,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  if(nimagem(0)==0)test_multiimages(0)=.true.
 
 !DEBUG
- write(iout,*)' prtocc : 3, test_multiimages= ',test_multiimages
+ write(std_out,*)' prtocc : 3, test_multiimages= ',test_multiimages
 !ENDDEBUG
 
 !There is a possibility of a single generic occupation-number set (common to all datasets) if
@@ -1744,7 +1743,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
 !DEBUG
- write(iout,*)' prtocc : 4, multi= ',multi
+ write(std_out,*)' prtocc : 4, multi= ',multi
 !ENDDEBUG
 
 !At this stage, if multi==1, the occ must be printed
@@ -1763,7 +1762,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end do
 
 !DEBUG
- write(iout,*)' prtocc : 5, print= ',print
+ write(std_out,*)' prtocc : 5, print= ',print
 !ENDDEBUG
 
 !Now, print in the generic occupation-number set case.
@@ -1777,7 +1776,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end if
 
 !DEBUG
- write(iout,*)' prtocc : 6, do-loop over iimage '
+ write(std_out,*)' prtocc : 6, do-loop over iimage '
 !ENDDEBUG
 
    do iimage=1,nimagem(generic)
@@ -1817,7 +1816,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
 !DEBUG
- write(iout,*)' prtocc : 7, finished do-loop over iimage '
+ write(std_out,*)' prtocc : 7, finished do-loop over iimage '
 !ENDDEBUG
 
 !Now, print in the other cases
@@ -1871,7 +1870,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
 !DEBUG
  write(std_out,*)' prtocc : exit '
- write(iout,*)' prtocc : exit '
 !ENDDEBUG
 
 end subroutine prtocc
