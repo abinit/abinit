@@ -6354,6 +6354,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
+  * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
+    and their total energies are combined linearly using the factors in [[miximagef]], giving the actual total energy of the ensemble
+    of constrained DFT images. The geometry is the same for all images, forces and stresses are computed, and all usual
+    algorithms for MD or geometry optimization are allowed, using [[ionmov]] (instead of [[imgmov]], this is the exception to the rule)
+    and related variables.
   * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [[cite:Marx1996]]).
     Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[vis]])
     and 13 for **Nose-Hoover thermostat chains** (associated input variables are the number of thermostats in the chains,
@@ -8845,6 +8850,22 @@ characteristics can thus be considered, and can be made to evolve, e.g. with a
 genetic algorithm (not coded in v7.0.0 though). There is one restriction to
 this possibility: the value of [[ziontypat]] for the atoms that are mixed
 should be identical.
+""",
+),
+
+Variable(
+    abivarname="miximagef",
+    varset="rlx",
+    vartype="real",
+    topics=['CrossingBarriers_useful'],
+    dimensions=['[[nimage]]'],
+    mnemonics="MIXing IMAGEs Factors",
+    text="""
+Used in the algorithm Linear Combination of Constrained DFT Energies, that is, when [[imgmov]]==6.
+
+This array gives, for each one of the [[nimage]] images, the factor
+by which the total energies are linearly combined.
+The sum of these factors must equal 1.
 """,
 ),
 
