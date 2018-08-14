@@ -1765,7 +1765,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  write(std_out,*)' prtocc : 5, print= ',print
 !ENDDEBUG
 
-!Now, print in the generic occupation-number set case.
+!Now, print occ in the generic occupation-number set case (occ is independent of the dtset).
  if(print==1 .and. multi==0)then
 !  Might restrict the number of k points to be printed
    tnkpt=0
@@ -1819,7 +1819,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  write(std_out,*)' prtocc : 7, finished do-loop over iimage '
 !ENDDEBUG
 
-!Now, print in the other cases
+!Now, print occ in the other cases (occ depends on the dataset)
  if(print==1 .and. multi==1)then
    do idtset=1,ndtset_alloc
 !    Might restrict the number of k points to be printed
@@ -1832,35 +1832,40 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      if(dtsets(idtset)%iscf/=-2)then
        jdtset=jdtset_(idtset)
        call appdig(jdtset,'',appen)
-!      The quantity of data to be output vary with occopt
-       if(dtsets(idtset)%occopt>=2)then
-         iban=1
-         do isppol=1,dtsets(idtset)%nsppol
-           do ikpt=1,nkpt_eff
-             ikpsp=ikpt+dtsets(idtset)%nkpt*(isppol-1)
-             nban=dtsets(idtset)%nband(ikpsp)
-             if(ikpsp==1)then
-               write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&               token,appen,results_out(idtset)%occ(iban:iban+nban-1,1)
-             else
-               write(iout, '((t22,6f10.6))' )results_out(idtset)%occ(iban:iban+nban-1,1)
+       do iimage=1,nimagem(idtset)
+         if(iimage==1 .or. test_multiimages(idtset) )then
+           keywd=trim(token)//trim(strimg(iimage))
+!          The quantity of data to be output vary with occopt
+           if(dtsets(idtset)%occopt>=2)then
+             iban=1
+             do isppol=1,dtsets(idtset)%nsppol
+               do ikpt=1,nkpt_eff
+                 ikpsp=ikpt+dtsets(idtset)%nkpt*(isppol-1)
+                 nban=dtsets(idtset)%nband(ikpsp)
+                 if(ikpsp==1)then
+                   write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
+&                   trim(keywd),appen,results_out(idtset)%occ(iban:iban+nban-1,iimage)
+                 else
+                   write(iout, '((t22,6f10.6))' )results_out(idtset)%occ(iban:iban+nban-1,iimage)
+                 end if
+                 iban=iban+nban
+               end do
+               if(tnkpt==1) write(iout,'(23x,a)' ) &
+&               'prtocc : prtvol=0, do not print more k-points.'
+             end do
+           else
+!            The number of bands is identical for all k points and spin
+             nban=dtsets(idtset)%nband(1)
+             write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
+&             trim(keywd),appen,results_out(idtset)%occ(1:nban,iimage)
+!            if occopt==1, the occ might differ with the spin
+             if(dtsets(idtset)%nsppol/=1)then
+               write(iout, '((t22,6f10.6))' ) &
+&               results_out(idtset)%occ(nban*dtsets(idtset)%nkpt+1:nban*dtsets(idtset)%nkpt+nban,iimage)
              end if
-             iban=iban+nban
-           end do
-           if(tnkpt==1) write(iout,'(23x,a)' ) &
-&           'prtocc : prtvol=0, do not print more k-points.'
-         end do
-       else
-!        The number of bands is identical for all k points and spin
-         nban=dtsets(idtset)%nband(1)
-         write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&         token,appen,results_out(idtset)%occ(1:nban,1)
-!        if occopt==1, the occ might differ with the spin
-         if(dtsets(idtset)%nsppol/=1)then
-           write(iout, '((t22,6f10.6))' ) &
-&           results_out(idtset)%occ(nban*dtsets(idtset)%nkpt+1:nban*dtsets(idtset)%nkpt+nban,1)
+           end if
          end if
-       end if
+       enddo
      end if
 !    Endloop on idtset
    end do
