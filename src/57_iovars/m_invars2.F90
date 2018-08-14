@@ -3046,38 +3046,113 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%pvelmax(1:3)=dprarr(1:3)
  end if
 
-!Only read occ if (iscf >0 or iscf=-1 or iscf=-3) and (occopt==0 or occopt==2)
- if  (iscf>=0.or.iscf==-1.or.iscf==-3)  then
-   if (occopt==2 .and. getocc==0) then
-!    Read occ(nband(kpt)*nkpt*nsppol) explicitly
-     call wrtout(std_out,' invars2: reading occ(nband*nkpt*nsppol) explicitly','COLL')
-     call intagm(dprarr,intarr,jdtset,marr,bantot,string(1:lenstr),'occ',tread,'DPR')
-     if(tread==1) then
-       do iband=1,bantot
-         dtset%occ_orig(iband,:)=dprarr(iband)
-       enddo
-     endif
-   else if(occopt==0) then
-     nband1=dtset%nband(1)
-!    Read usual occupancy--same for all k points but might differ for spins
-     call intagm(dprarr,intarr,jdtset,marr,nband1*nsppol,string(1:lenstr),'occ',tread,'DPR')
-     if(tread==1)then
-       do iband=1,nband1*nsppol
-         dtset%occ_orig(iband,:)=dprarr(iband)
-       enddo
-     endif
-!    Fill in full occ array using input values for each k and spin
-!    (make a separate copy for each k point and spin)
-     if(nkpt>1)then
-       do isppol=nsppol,1,-1
-         do ikpt=2,nkpt
-           dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1),:)=&
-&           dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol,:)
+!Read remaining input variables depending on images : occ_orig, upawu, jpawu.
+!MT oct 15: these lines are inspired from invars1 but are not really understood
+ intimage=2 ; if(dtset%nimage==1)intimage=1
+ do ii=1,dtset%nimage+1
+   iimage=ii
+   if(dtset%nimage==1 .and. ii==2)exit
+   if(dtset%nimage==2 .and. ii==3)exit
+   if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
+   if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
+
+!  Only read occ if (iscf >0 or iscf=-1 or iscf=-3) and (occopt==0 or occopt==2)
+   if  (iscf>=0.or.iscf==-1.or.iscf==-3)  then
+     if (occopt==2 .and. getocc==0) then
+!      Read occ(nband(kpt)*nkpt*nsppol) explicitly
+       call wrtout(std_out,' invars2: reading occ(nband*nkpt*nsppol) explicitly','COLL')
+       call intagm(dprarr,intarr,jdtset,marr,bantot,string(1:lenstr),'occ',tread,'DPR')
+       if(tread==1) dtset%occ_orig(1:bantot,iimage)=dprarr(1:bantot)
+       call intagm_img(dprarr(1:bantot),iimage,jdtset,lenstr,dtset%nimage,bantot,string,'occ',tread_alt,'DPR')
+       if(tread_alt==1) dtset%occ_orig(1:bantot,iimage)=dprarr(1:bantot)
+     else if(occopt==0) then
+       nband1=dtset%nband(1)
+!      Read usual occupancy--same for all k points but might differ for spins
+       call intagm(dprarr,intarr,jdtset,marr,nband1*nsppol,string(1:lenstr),'occ',tread,'DPR')
+       if(tread==1) dtset%occ_orig(1:nband1*nsppol,iimage)=dprarr(1:nband1*nsppol)
+       call intagm_img(dprarr(1:nband1*nsppol),iimage,jdtset,lenstr,dtset%nimage,nband1*nsppol,string,'occ',tread_alt,'DPR')
+       if(tread_alt==1) dtset%occ_orig(1:nband1*nsppol,iimage)=dprarr(1:nband1*nsppol)
+!      Fill in full occ array using input values for each k and spin
+!      (make a separate copy for each k point and spin)
+       if(nkpt>1)then
+         do isppol=nsppol,1,-1
+           do ikpt=2,nkpt
+             dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1),iimage)=&
+&             dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol,iimage)
+           end do
          end do
-       end do
-     endif
+       endif
+     end if
    end if
- end if
+
+   if (dtset%usepawu>0.or.dtset%usedmft>0) then
+
+     dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
+     call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')
+     if(tread==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
+     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'upawu',tread_alt,'ENE')
+     if(tread_alt==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
+
+     dprarr(1:ntypat)=dtset%jpawu(1:ntypat,iimage)
+     call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'jpawu',tread,'ENE')
+     if(tread==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
+     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'jpawu',tread_alt,'ENE')
+     if(tread_alt==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
+
+     if (dtset%usedmatpu/=0.and.dmatsize>0) then
+       nsp=nsppol*nspinor
+       call intagm(dprarr,intarr,jdtset,marr,dmatsize,string(1:lenstr),'dmatpawu',tread,'DPR')
+       if(tread==1) then
+         iat=1;jj=1
+         do iatom=1,natom
+           lpawu=dtset%lpawu(dtset%typat(iatom))
+           if (lpawu/=-1) then
+             isiz=nsp*(2*lpawu+1)**2
+             dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage)= &
+&             reshape(dprarr(jj:jj+isiz),(/2*lpawu+1,2*lpawu+1,nsp/))
+             iat=iat+1;jj=jj+isiz
+           end if
+         end do
+       end if
+
+       ABI_ALLOCATE(dmatpawu_tmp,(dmatsize))
+       iat=1;jj=1
+       do iatom=1,natom
+         lpawu=dtset%lpawu(dtset%typat(iatom))
+         if (lpawu/=-1) then
+           isiz=nsp*(2*lpawu+1)**2
+           dmatpawu_tmp(jj:jj+isiz-1)= &
+&           reshape(dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage),(/isiz/))
+           iat=iat+1;jj=jj+isiz
+         end if
+       end do
+       call intagm_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, &
+&       string,'dmatpawu',tread_alt,'DPR')
+       if(tread_alt==1) then
+         iat=1;jj=1
+         do iatom=1,natom
+           lpawu=dtset%lpawu(dtset%typat(iatom))
+           if (lpawu/=-1) then
+             isiz=nsp*(2*lpawu+1)**2
+             dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage)= &
+&             reshape(dmatpawu_tmp(jj:jj+isiz-1),(/2*lpawu+1,2*lpawu+1,nsp/))
+             iat=iat+1;jj=jj+isiz
+           end if
+         end do
+       end if
+       ABI_DEALLOCATE(dmatpawu_tmp)
+
+       if (tread/=1.and.tread_alt/=1) then
+         write(message, '(3a)' )&
+&         'When LDA/GGA+U is activated and usedmatpu/=0, dmatpawu MUST be defined.',ch10,&
+&         'Action: add dmatpawu keyword in input file.'
+         MSG_ERROR(message)
+       end if
+     end if
+
+   end if
+
+ end do
 
  if(dtset%jellslab/=0)then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slabwsrad',tread,'LEN')
@@ -3203,85 +3278,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    MSG_ERROR(sjoin("wfk_task must be specified when optdriver=",itoa(dtset%optdriver)))
  end if
-
-!Read remaining input variables depending on images
-!MT oct 15: these lines are inspired from invars1 but are not really understood
- intimage=2 ; if(dtset%nimage==1)intimage=1
- do ii=1,dtset%nimage+1
-   iimage=ii
-   if(dtset%nimage==1 .and. ii==2)exit
-   if(dtset%nimage==2 .and. ii==3)exit
-   if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
-   if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
-
-   if (dtset%usepawu>0.or.dtset%usedmft>0) then
-
-     dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
-     call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')
-     if(tread==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
-     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'upawu',tread_alt,'ENE')
-     if(tread_alt==1) dtset%upawu(1:ntypat,iimage)=dprarr(1:ntypat)
-
-     dprarr(1:ntypat)=dtset%jpawu(1:ntypat,iimage)
-     call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'jpawu',tread,'ENE')
-     if(tread==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
-     call intagm_img(dprarr(1:ntypat),iimage,jdtset,lenstr,dtset%nimage,ntypat,string,'jpawu',tread_alt,'ENE')
-     if(tread_alt==1) dtset%jpawu(1:ntypat,iimage)=dprarr(1:ntypat)
-
-     if (dtset%usedmatpu/=0.and.dmatsize>0) then
-       nsp=nsppol*nspinor
-       call intagm(dprarr,intarr,jdtset,marr,dmatsize,string(1:lenstr),'dmatpawu',tread,'DPR')
-       if(tread==1) then
-         iat=1;jj=1
-         do iatom=1,natom
-           lpawu=dtset%lpawu(dtset%typat(iatom))
-           if (lpawu/=-1) then
-             isiz=nsp*(2*lpawu+1)**2
-             dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage)= &
-&             reshape(dprarr(jj:jj+isiz),(/2*lpawu+1,2*lpawu+1,nsp/))
-             iat=iat+1;jj=jj+isiz
-           end if
-         end do
-       end if
-
-       ABI_ALLOCATE(dmatpawu_tmp,(dmatsize))
-       iat=1;jj=1
-       do iatom=1,natom
-         lpawu=dtset%lpawu(dtset%typat(iatom))
-         if (lpawu/=-1) then
-           isiz=nsp*(2*lpawu+1)**2
-           dmatpawu_tmp(jj:jj+isiz-1)= &
-&           reshape(dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage),(/isiz/))
-           iat=iat+1;jj=jj+isiz
-         end if
-       end do
-       call intagm_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, &
-&       string,'dmatpawu',tread_alt,'DPR')
-       if(tread_alt==1) then
-         iat=1;jj=1
-         do iatom=1,natom
-           lpawu=dtset%lpawu(dtset%typat(iatom))
-           if (lpawu/=-1) then
-             isiz=nsp*(2*lpawu+1)**2
-             dtset%dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsp,iat,iimage)= &
-&             reshape(dmatpawu_tmp(jj:jj+isiz-1),(/2*lpawu+1,2*lpawu+1,nsp/))
-             iat=iat+1;jj=jj+isiz
-           end if
-         end do
-       end if
-       ABI_DEALLOCATE(dmatpawu_tmp)
-
-       if (tread/=1.and.tread_alt/=1) then
-         write(message, '(3a)' )&
-&         'When LDA/GGA+U is activated and usedmatpu/=0, dmatpawu MUST be defined.',ch10,&
-&         'Action: add dmatpawu keyword in input file.'
-         MSG_ERROR(message)
-       end if
-     end if
-
-   end if
-
- end do
 
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
