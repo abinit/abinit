@@ -44,7 +44,7 @@ module m_invars2
  use m_parser,    only : intagm
  use m_geometry,   only : mkrdim, metric
  use m_gsphere,    only : setshells
- use m_intagm_img, only : ingeo_img
+ use m_intagm_img, only : intagm_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts

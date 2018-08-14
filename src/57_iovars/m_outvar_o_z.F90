@@ -232,7 +232,7 @@ contains
 !The use of prttagm for occ if occopt>=2 is not possible because
 !the different k-point and spins must be separated on different lines ...
 !Do not print the occupation when there is more than one image ... TO BE DONE
-!Also, if prtvol=-1 and NC file has been creates, only print one dataset
+!Also, if prtvol=-1 and NC file has been created, only print one dataset
  if(mxvals%nimage==1)then
    ndtset_alloc_tmp=ndtset_alloc
    if(ncid<0)ndtset_alloc_tmp=1
@@ -1737,7 +1737,7 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
      write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
 &     token,results_out(generic)%occ(1:nban,1)
 !    if occopt==1, the occ might differ with the spin
-     if(dtsets(1)%nsppol/=1 .and. dtsets(1)%occopt==1)then
+     if(dtsets(1)%nsppol/=1)then
        write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(1)%nkpt+1:&
 &       nban*dtsets(1)%nkpt+nban,1)
      end if
@@ -1781,7 +1781,7 @@ subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
          write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
 &         token,appen,results_out(idtset)%occ(1:nban,1)
 !        if occopt==1, the occ might differ with the spin
-         if(dtsets(idtset)%nsppol/=1 .and. dtsets(idtset)%occopt==1)then
+         if(dtsets(idtset)%nsppol/=1)then
            write(iout, '((t22,6f10.6))' ) &
 &           results_out(idtset)%occ(nban*dtsets(idtset)%nkpt+1:nban*dtsets(idtset)%nkpt+nban,1)
          end if

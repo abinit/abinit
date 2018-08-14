@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Aug 2018.
-- ( at 18h43 )
+.Starting date : Tue 14 Aug 2018.
+- ( at 07h11 )
   
 - input  file    -> t18.in
 - output file    -> t18.out
@@ -30,7 +30,7 @@
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -47,7 +47,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -64,7 +64,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -98,7 +98,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -115,7 +115,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -132,7 +132,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -149,7 +149,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -166,7 +166,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -183,7 +183,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -200,7 +200,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -217,7 +217,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -234,7 +234,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -251,7 +251,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -268,7 +268,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -285,7 +285,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -302,7 +302,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -319,7 +319,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
      lnmax =       1     mgfft =      36  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =       8    n1xccc =    2501    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         502          nfft =       19440          nkpt =           1
 ================================================================================
@@ -351,7 +351,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
            kptopt           0
 P           mkmem           1
             natom           2
-            nband           8       8
+            nband           8
            ndtset          18
             ngfft          18      30      36
              nkpt           1
@@ -431,7 +431,7 @@ P           mkmem           1
                        0.223500  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  0.776500
                        0.223500  0.000000
-           occopt           2
+           occopt           0
           spgroup          47
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -2836,7 +2836,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1003.000    1003.000
            kptopt           0
 P           mkmem           1
             natom           2
-            nband           8       8
+            nband           8
            ndtset          18
             ngfft          18      30      36
              nkpt           1
@@ -2916,7 +2916,7 @@ P           mkmem           1
                        0.223500  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  0.776500
                        0.223500  0.000000
-           occopt           2
+           occopt           0
           spgroup          47
            strten11    3.7370016688E-03  3.6177688655E-03  3.2591416340E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3145,10 +3145,10 @@ P           mkmem           1
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.7
+- Proc.   0 individual time (sec): cpu=         12.9  wall=         13.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  75 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.7
++Overall time at end (sec) : cpu=         12.9  wall=         13.0
