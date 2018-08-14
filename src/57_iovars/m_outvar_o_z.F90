@@ -1733,7 +1733,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
        if(dtsets(idtset)%iscf/=-2)then
 !        nban counts all bands and kpoints and spins: see above
          do iimage=1,nimagem(idtset)
-           if(iimage==1 .and. test_multiimages(idtset))then
+           if(iimage==1 .or. test_multiimages(idtset))then
              do iban=1,nban
 !              Use of tol8, because the format for multi=1 is f16.6, so will not
 !              discriminate between relative values, or absolute values that
