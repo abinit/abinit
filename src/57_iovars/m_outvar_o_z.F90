@@ -1716,13 +1716,16 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
 !DEBUG
  write(std_out,*)' prtocc : 3, test_multiimages= ',test_multiimages
+ write(std_out,*)' prtocc : multi_occopt, multi_nband, multi_nimage=',multi_occopt, multi_nband, multi_nimage
+ write(std_out,*)' prtocc : test_multiimages(1:ndtset_alloc)=',test_multiimages(1:ndtset_alloc)
+ write(std_out,*)' prtocc : any(test_multiimages(1:ndtset_alloc))=',any(test_multiimages(1:ndtset_alloc))
 !ENDDEBUG
 
 !There is a possibility of a single generic occupation-number set (common to all datasets) if
-!multi_occopt==0 and multi_nband==0  and multi_nimage==0
+!multi_occopt==0 and multi_nband==0  and (multi_nimage==0  or the content of the different images is always the same)
 !This might occur even if occupation numbers differ for different images.
  multi=1
- if(multi_occopt==0 .and. multi_nband==0 .and. multi_nimage==0) then
+ if(multi_occopt==0 .and. multi_nband==0 .and. (multi_nimage==0 .or. .not. any(test_multiimages(1:ndtset_alloc)))) then
    nban=sum(dtsets(1)%nband(1:dtsets(1)%nsppol*dtsets(1)%nkpt))
    multi=0
    if(ndtset_alloc>1)then
@@ -1730,12 +1733,14 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
        if(dtsets(idtset)%iscf/=-2)then
 !        nban counts all bands and kpoints and spins: see above
          do iimage=1,nimagem(idtset)
-           do iban=1,nban
-!            Use of tol8, because the format for multi=1 is f16.6, so will not
-!            discriminate between relative values, or absolute values that
-!            agree within more than 6 digits
-             if( abs(results_out(1)%occ(iban,iimage)-results_out(idtset)%occ(iban,iimage)) > tol8) multi=1
-           end do
+           if(iimage==1 .and. test_multiimages(idtset))then
+             do iban=1,nban
+!              Use of tol8, because the format for multi=1 is f16.6, so will not
+!              discriminate between relative values, or absolute values that
+!              agree within more than 6 digits
+               if( abs(results_out(1)%occ(iban,iimage)-results_out(idtset)%occ(iban,iimage)) > tol8) multi=1
+             end do
+           end if   
          end do
        end if
      end do
