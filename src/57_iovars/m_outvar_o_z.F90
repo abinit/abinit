@@ -231,13 +231,14 @@ contains
 !occ
 !The use of prttagm for occ if occopt>=2 is not possible because
 !the different k-point and spins must be separated on different lines ...
-!Do not print the occupation when there is more than one image ... TO BE DONE
 !Also, if prtvol=-1 and NC file has been created, only print one dataset
- if(mxvals%nimage==1)then
-   ndtset_alloc_tmp=ndtset_alloc
-   if(ncid<0)ndtset_alloc_tmp=1
-   call prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
- end if
+ ndtset_alloc_tmp=ndtset_alloc
+ if(ncid<0)ndtset_alloc_tmp=1
+ call prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc_tmp,nimagem,prtvol_glob,results_out,strimg)
+
+!DEBUG
+!stop
+!ENDEBUG
 
  intarr(1,:)=dtsets(:)%occopt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'occopt','INT',0)
@@ -1592,9 +1593,10 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !arrays
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
  integer,intent(in) :: nimagem(0:ndtset_alloc)
- character(len=8),intent(in) :: strimg(mxvals%nimage)
+ type(ab_dimensions),intent(in) :: mxvals
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
  type(results_out_type),intent(in) :: results_out(0:ndtset_alloc)
+ character(len=8),intent(in) :: strimg(mxvals%nimage)
 
 !Local variables-------------------------------
  character(len=*), parameter :: f_occ    ="(1x,a16,1x,(t22,6f10.6))"
@@ -1613,6 +1615,11 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  character(len=500) :: message
 
 ! *************************************************************************
+
+!DEBUG
+ write(std_out,*)' prtocc : enter '
+ write(iout,*)' prtocc : enter '
+!ENDDEBUG
 
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it should be >= 1.'
@@ -1673,6 +1680,11 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    multi_nband=1
  end if
 
+
+!DEBUG
+ write(iout,*)' prtocc : 1 '
+!ENDDEBUG
+
  multi_nimage=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
@@ -1680,6 +1692,10 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 &     dtsets(idtset)%iscf/=-2 )multi_nimage=1
    end do
  end if
+
+!DEBUG
+ write(iout,*)' prtocc : 2, multi_nimage= ',multi_nimage
+!ENDDEBUG
 
 !Test whether for this variable, the content of different images differ.
 !test_multiimages(idtset)=.false. if, for that dataset, the content for different
@@ -1690,14 +1706,18 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    if(nimagem(idtset)>1)then
      nban=sum(dtsets(idtset)%nband(1:dtsets(idtset)%nsppol*dtsets(idtset)%nkpt))
      do iban=1,nban
-       if(sum(abs( occ(iban,2:nimagem(idtset),idtset)- &
-&       occ(iban,1,idtset)))>tol12)then
+       if(sum(abs( results_out(idtset)%occ(iban,2:nimagem(idtset))- &
+&       results_out(idtset)%occ(iban,1)))>tol12)then
          test_multiimages(idtset)=.true.
        end if
      end do
    end if
  end do
  if(nimagem(0)==0)test_multiimages(0)=.true.
+
+!DEBUG
+ write(iout,*)' prtocc : 3, test_multiimages= ',test_multiimages
+!ENDDEBUG
 
 !There is a possibility of a single generic occupation-number set (common to all datasets) if
 !multi_occopt==0 and multi_nband==0  and multi_nimage==0
@@ -1710,7 +1730,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%iscf/=-2)then
 !        nban counts all bands and kpoints and spins: see above
-         do iimage=1,nimage(idtset)
+         do iimage=1,nimagem(idtset)
            do iban=1,nban
 !            Use of tol8, because the format for multi=1 is f16.6, so will not
 !            discriminate between relative values, or absolute values that
@@ -1722,6 +1742,10 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      end do
    end if
  end if
+
+!DEBUG
+ write(iout,*)' prtocc : 4, multi= ',multi
+!ENDDEBUG
 
 !At this stage, if multi==1, the occ must be printed
 !if multi==0, then it might be that we have the default values.
@@ -1738,6 +1762,10 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end if
  end do
 
+!DEBUG
+ write(iout,*)' prtocc : 5, print= ',print
+!ENDDEBUG
+
 !Now, print in the generic occupation-number set case.
  if(print==1 .and. multi==0)then
 !  Might restrict the number of k points to be printed
@@ -1747,19 +1775,24 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      nkpt_eff=nkpt_max
      tnkpt=1
    end if
-   do iimage=1,nimage(idtset)
-     if(iimage==1 .or.  test_multiimages(idtset)==.true.)then
+
+!DEBUG
+ write(iout,*)' prtocc : 6, do-loop over iimage '
+!ENDDEBUG
+
+   do iimage=1,nimagem(generic)
+     if(iimage==1 .or. test_multiimages(generic) )then
        keywd=token//trim(strimg(iimage))
 !      The quantity of data to be output vary with occopt
-       if(dtsets(1)%occopt>=2)then
+       if(dtsets(generic)%occopt>=2)then
          iban=1
-         do isppol=1,dtsets(1)%nsppol
+         do isppol=1,dtsets(generic)%nsppol
            do ikpt=1,nkpt_eff
-             ikpsp=ikpt+dtsets(1)%nkpt*(isppol-1)
+             ikpsp=ikpt+dtsets(generic)%nkpt*(isppol-1)
              nban=dtsets(generic)%nband(ikpsp)
              if(ikpsp==1)then
                write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
-&               trim(keyword),results_out(generic)%occ(iban:iban+nban-1,iimage)
+&               trim(keywd),results_out(generic)%occ(iban:iban+nban-1,iimage)
              else
                write(iout, '((t22,6f10.6))' )results_out(generic)%occ(iban:iban+nban-1,iimage)
              end if
@@ -1772,16 +1805,20 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !        The number of bands is identical for all k points and spin
          nban=dtsets(generic)%nband(1)
          write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
-&         trim(keyword),results_out(generic)%occ(1:nban,iimage)
+&         trim(keywd),results_out(generic)%occ(1:nban,iimage)
 !        if occopt==1, the occ might differ with the spin
-         if(dtsets(1)%nsppol/=1)then
-           write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(1)%nkpt+1:&
-&           nban*dtsets(1)%nkpt+nban,iimage)
+         if(dtsets(generic)%nsppol/=1)then
+           write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(generic)%nkpt+1:&
+&           nban*dtsets(generic)%nkpt+nban,iimage)
          end if
        end if
      end if
    end do
  end if
+
+!DEBUG
+ write(iout,*)' prtocc : 7, finished do-loop over iimage '
+!ENDDEBUG
 
 !Now, print in the other cases
  if(print==1 .and. multi==1)then
@@ -1831,6 +1868,11 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
  ABI_DEALLOCATE(test_multiimages)
+
+!DEBUG
+ write(std_out,*)' prtocc : exit '
+ write(iout,*)' prtocc : exit '
+!ENDDEBUG
 
 end subroutine prtocc
 !!***

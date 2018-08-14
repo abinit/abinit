@@ -3308,7 +3308,7 @@ end subroutine prttagm
 
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
-& mxmnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
+& mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
 
 
 !This section has been created automatically by the script Abilint (TD).
