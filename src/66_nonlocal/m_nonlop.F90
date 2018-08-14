@@ -387,7 +387,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (cpopt/=-1) then
      MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
-   if (hamk%dimekbq/=-1) then
+   if (hamk%dimekbq/=1) then
      MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
