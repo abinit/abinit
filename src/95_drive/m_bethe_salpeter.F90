@@ -1601,7 +1601,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
          jj=jj+1
          eigen  (jj)=energies_p(ib,ik_ibz,isppol)
          if (occ_from_dtset) then
-           occfact(jj)=Dtset%occ_orig(ibtot)
+           !Not occupations must be the same for different images
+           occfact(jj)=Dtset%occ_orig(ibtot,1)
          else
            occfact(jj)=Hdr_wfk%occ(ibtot)
          end if

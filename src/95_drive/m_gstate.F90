@@ -719,7 +719,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  Create access arrays for wavefunctions and allocate wvl%wfs%psi (other arrays are left unallocated).
    call wvl_wfs_set(dtset%strprecon,dtset%spinmagntarget, dtset%kpt, mpi_enreg%me_wvl,&
 &   dtset%natom, sum(dtset%nband), &
-&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig, &
+&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, occ, &
 &   psps, rprimd, wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, &
 &   xred)
 !  We transfer wavelets information to the hdr structure.

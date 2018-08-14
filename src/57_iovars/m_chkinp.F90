@@ -1907,29 +1907,31 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  occ
 !  Do following tests only for occopt==0 or 2, when occupation numbers are needed
    if ((dt%iscf>0.or.dt%iscf==-1.or.dt%iscf==-3) .and. (dt%occopt==0 .or. dt%occopt==2) ) then
-!    make sure occupation numbers (occ(n)) were defined:
-     sumocc=zero
-     bantot=0
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         do iband=1,dt%nband(ikpt+(isppol-1)*nkpt)
-           bantot=bantot+1
-           sumocc=sumocc+dt%occ_orig(bantot)
-           if (dt%occ_orig(bantot)<zero) then
-             write(message, '(a,2i6,a,e20.10,a,a,a)' )&
-&             'iband,ikpt=',iband,ikpt,' has negative occ=',dt%occ_orig(bantot),' =>stop',ch10,&
-&             'Action: correct this occupation number in input file.'
-             MSG_ERROR_NOSTOP(message,ierr)
-           end if
+     do iimage=1,dt%nimage
+!      make sure occupation numbers (occ(n)) were defined:
+       sumocc=zero
+       bantot=0
+       do isppol=1,nsppol
+         do ikpt=1,nkpt
+           do iband=1,dt%nband(ikpt+(isppol-1)*nkpt)
+             bantot=bantot+1
+             sumocc=sumocc+dt%occ_orig(bantot,iimage)
+             if (dt%occ_orig(bantot,iimage)<-tol8) then
+               write(message, '(a,3i6,a,e20.10,a,a,a)' )&
+&               'iband,ikpt,iimage=',iband,ikpt,iimage,' has negative occ=',dt%occ_orig(bantot,iimage),' =>stop',ch10,&
+&               'Action: correct this occupation number in input file.'
+               MSG_ERROR_NOSTOP(message,ierr)
+             end if
+           end do
          end do
        end do
-     end do
-     if (sumocc<=1.0d-8) then
-       write(message, '(a,1p,e20.10,a,a,a)')&
-&       'Sum of occ=',sumocc, ' =>occ not defined => stop',ch10,&
-&       'Action: correct the array occ in input file.'
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
+       if (sumocc<=1.0d-8) then
+         write(message, '(a,1p,e20.10,a,a,a)')&
+&         'Sum of occ=',sumocc, ' =>occ not defined => stop',ch10,&
+&         'Action: correct the array occ in input file.'
+         MSG_ERROR_NOSTOP(message, ierr)
+       end if
+     enddo
    end if
 
 !  occopt
@@ -3446,16 +3448,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      else
        mband = dt%mband
      end if
-     do ii = 1, mband, 1
-       if (dt%occ_orig(ii) < tol8 .and. dt%iscf == 0) then
-         write(message,'(a,f7.4,a,a,a,a,a,a)')&
-&         'One value of occ is found to be ', dt%occ_orig(ii), ch10, &
-&         'The direct minimization is not allowed with empty bands.',ch10,&
-&         'Action: use occopt = 1 for automatic band filling or', ch10, &
-&         'change occ value in your input file'
-         MSG_ERROR_NOSTOP(message,ierr)
-       end if
-     end do
+     do iimage=1,dt%nimage
+       do ii = 1, mband, 1
+         if (dt%occ_orig(ii,iimage) < tol8 .and. dt%iscf == 0) then
+           write(message,'(a,f7.4,a,a,a,a,a,a)')&
+&           'One value of occ is found to be ', dt%occ_orig(ii,iimage), ch10, &
+&           'The direct minimization is not allowed with empty bands.',ch10,&
+&           'Action: use occopt = 1 for automatic band filling or', ch10, &
+&           'change occ value in your input file'
+           MSG_ERROR_NOSTOP(message,ierr)
+         end if
+       end do
+     enddo
      if (npsp /= dt%ntypat) then
        write(message, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
 &       'wvl_wfs_set:  consistency checks failed,', ch10, &

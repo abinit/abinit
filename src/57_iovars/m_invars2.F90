@@ -2219,7 +2219,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    do ikpt=1,nkpt*nsppol
      do ii=1,dtset%nband(ikpt)
        bantot=bantot+1
-       dtset%occ_orig(bantot)=0.0_dp
+       dtset%occ_orig(bantot,:)=zero
      end do
    end do
  end if
@@ -3052,19 +3052,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !    Read occ(nband(kpt)*nkpt*nsppol) explicitly
      call wrtout(std_out,' invars2: reading occ(nband*nkpt*nsppol) explicitly','COLL')
      call intagm(dprarr,intarr,jdtset,marr,bantot,string(1:lenstr),'occ',tread,'DPR')
-     if(tread==1) dtset%occ_orig(1:bantot)=dprarr(1:bantot)
+     if(tread==1) then
+       do iband=1,bantot
+         dtset%occ_orig(iband,:)=dprarr(iband)
+       enddo
+     endif
    else if(occopt==0) then
      nband1=dtset%nband(1)
 !    Read usual occupancy--same for all k points but might differ for spins
      call intagm(dprarr,intarr,jdtset,marr,nband1*nsppol,string(1:lenstr),'occ',tread,'DPR')
-     if(tread==1) dtset%occ_orig(1:nband1*nsppol)=dprarr(1:nband1*nsppol)
+     if(tread==1)then
+       do iband=1,nband1*nsppol
+         dtset%occ_orig(iband,:)=dprarr(iband)
+       enddo
+     endif
 !    Fill in full occ array using input values for each k and spin
 !    (make a separate copy for each k point and spin)
      if(nkpt>1)then
        do isppol=nsppol,1,-1
          do ikpt=2,nkpt
-           dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1))=&
-&           dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol)
+           dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1),:)=&
+&           dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol,:)
          end do
        end do
      endif
@@ -3105,7 +3113,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        do ikpt=1,dtset%nkpt
          do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
            bantot=bantot+1
-           if(abs(dtset%occ_orig(bantot))>tol8)then
+           if(maxval(abs(dtset%occ_orig(bantot,:)))>tol8)then
              if(iband>nband1)nband1=iband
            end if
          end do
