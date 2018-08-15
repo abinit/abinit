@@ -890,7 +890,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ham%ekb_spin=zero
    if (present(paw_ij)) then
      if (my_nsppol<ham%nsppol) then
-       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekb2))
+       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq))
      end if
      jsp=0
      do isp=1,ham%nsppol

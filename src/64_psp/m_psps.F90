@@ -375,6 +375,9 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      !  MSG_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
+!    Ideally the following line should not exist,
+!      but at present, the space has to be booked
+     if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
    else if (psps%usepaw==0) then
      if(dtset%so_psp(ipsp)/=1)then
        psps%pspso(ipsp)=dtset%so_psp(ipsp)
@@ -382,8 +385,6 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
        psps%pspso(ipsp)=pspheads(ipsp)%pspso
      end if
      if(psps%pspso(ipsp)/=0)psps%mpspso=2
-!    Ideally the following line should not exist,
-!      but at present, the space has to be booked
      if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
    else
      psps%pspso(ipsp)=1+dtset%pawspnorb
@@ -400,6 +401,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    psps%lmnmax=lmnmaxso
    psps%lnmax=lnmaxso
  end if
+
 !T. Rangel: for wvl + paw do not change psps%lmnmax
  if (psps%useylm==0 .and. psps%usepaw/=1 ) then
    psps%lmnmax=psps%lnmax

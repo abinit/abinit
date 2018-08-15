@@ -826,7 +826,7 @@ end subroutine compute_migdal_energy
 !!      m_dmft,m_energy
 !!
 !! CHILDREN
-!!      wrtout
+!!      pawpuenergy,wrtout
 !!
 !! SOURCE
 
@@ -854,7 +854,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 
 !Local variables-------------------------------
  integer :: iatom,idijeff,im,im1,ispinor,ispinor1,isppol,ldim,lpawu
- integer :: nsploop,prt_pawuenergy
+ integer :: nocc,nsploop,prt_pawuenergy
  real(dp) :: upawu,jpawu
  real(dp) :: eldaumdcdc,eldaumdc,e_ee,e_dc,e_dcdc,xe1,xe2
  character(len=500) :: message
@@ -868,6 +868,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! -----------------------------------------------------------------------
 
  nsploop=max(paw_dmft%nsppol,paw_dmft%nspinor**2)
+ nocc=nsploop
  e_ee=zero
  e_dc=zero
  e_dcdc=zero
@@ -884,8 +885,8 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
 
-     ABI_ALLOCATE(noccmmp,(2,2*lpawu+1,2*lpawu+1,paw_dmft%nspden))
-     ABI_ALLOCATE(nocctot,(paw_dmft%nspden))
+     ABI_ALLOCATE(noccmmp,(2,2*lpawu+1,2*lpawu+1,nocc))
+     ABI_ALLOCATE(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
 
 ! - Setup nocctot and noccmmp
@@ -968,6 +969,9 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 
      energies_dmft%e_dc(iatom)=e_dc-xe1
      energies_dmft%e_hu_ldau(iatom)=e_ee-xe2
+
+     ABI_DEALLOCATE(noccmmp)
+     ABI_DEALLOCATE(nocctot)
    endif ! lpawu/=-1
  enddo
 

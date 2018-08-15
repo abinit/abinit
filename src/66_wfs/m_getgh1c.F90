@@ -673,7 +673,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        do ipw=1,npw1*my_nspinor
          gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
        end do
-       ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+       ABI_DEALLOCATE(nonlop_out)
      end if
 
 !    3- Compute derivatives due to part of D_ij^(1) depending on VHxc^(1)

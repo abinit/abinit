@@ -178,8 +178,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_a,cplex_b,cplex_dijh1,cplex_vxc1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
- integer :: klmn,lm_size_a,lm_size_b,mesh_size,my_comm_atom,nspden,nspdiag,opt_compch,optexc,optvxc
- integer :: usecore,usetcore,usexcnhat
+ integer :: klmn,lm_size_a,lm_size_b,nlmn2_dijh1,mesh_size,my_comm_atom,nspden,nspdiag
+ integer :: opt_compch,optexc,optvxc,usecore,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: compch,eexc,eexc_im
  character(len=500) :: msg
@@ -269,6 +269,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    cplex_b=pawrhoij_b(iatom)%cplex
    cplex_dijh1=paw_ij1(iatom)%cplex_rf
    cplex_vxc1=paw_an1(iatom)%cplex
+   nlmn2_dijh1=paw_ij1(iatom)%lmn2_size
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
    if (ipert2> 0) lm_size_b=paw_an1(iatom)%lm_size
@@ -398,7 +399,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        jrhoij=1
        do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
          klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-         dij(1:2)=paw_ij1(iatom)%dijhartree(2*klmn-1:2*klmn)
+         dij(1)=paw_ij1(iatom)%dijhartree(klmn)
+         dij(2)=paw_ij1(iatom)%dijhartree(klmn+nlmn2_dijh1)
          ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
          delta_energy_h(2)=delta_energy_h(2)-ro(1)*dij(2)
@@ -412,7 +414,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      end if
    end do
 
-!  ================ End loop oon atomic sites =======================
+!  ================ End loop on atomic sites =======================
  end do
 
 !Final building of 1st-order (or 2nd-order) energy

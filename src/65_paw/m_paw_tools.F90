@@ -457,11 +457,12 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            end if
            call wrtout(unitfi,msg,'COLL')
          end if
+         valmx=100._dp;if (ipositron>0) valmx=-1._dp
          do iat=1,natprt
            iatom=jatom(iat)
            call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
 &                  paw_ij_all(iatom)%cplex_rf,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
-&                  paw_ij_all(iatom)%nsppol,test_value=100._dp,unit=unitfi,&
+&                  paw_ij_all(iatom)%nsppol,test_value=valmx,unit=unitfi,&
 &                  Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
          end do
        end if
@@ -515,7 +516,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        iatom=jatom(iat);nspden=pawrhoij_all(iatom)%nspden
        optsym=2;if (pawrhoij_all(iatom)%cplex==2.and.dtset%nspinor==1) optsym=1
        do ispden=1,nspden
-         valmx=25._dp;if (ispden==1) valmx=-1._dp
+         valmx=-1._dp;if (ispden==1) valmx=25._dp
          msg='' ; msg0=''
          if (dtset%natom>1.or.nspden>1) write(msg0, '(a,i3)' ) ' Atom #',iatom
          if (nspden==1) write(msg,'(a)')     trim(msg0)

@@ -1585,6 +1585,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
 
 !Test on sizes
  npaw_ij_in_sum=npaw_ij_in
+
  call xmpi_sum(npaw_ij_in_sum,comm_atom,ierr)
   if (master==-1) then
    if (npaw_ij_out/=npaw_ij_in_sum) then
@@ -1672,7 +1673,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    buf_int(indx_int)=paw_ij_in(ij)%cplex_rf ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%cplex_dij ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%itypat ;indx_int=indx_int+1
-   buf_int(indx_int)=nspden ;indx_int=indx_int+1
+   buf_int(indx_int)=paw_ij_in(ij)%nspden ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%nsppol ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%lmn_size ;indx_int=indx_int+1
    buf_int(indx_int)=paw_ij_in(ij)%lmn2_size ;indx_int=indx_int+1
@@ -1698,7 +1699,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    cplxdijrf_lmn2_size=cplxdij_lmn2_size*paw_ij_in(ij)%cplex_rf
    ndij=paw_ij_in(ij)%ndij
    if (paw_ij_in(ij)%has_dij==2) then
-     ii=cplxdijrf_lmn2_size*paw_ij_in(ij)%ndij
+     ii=cplxdijrf_lmn2_size*ndij
      buf_dp(indx_dp:indx_dp+ii-1)=reshape(paw_ij_in(ij)%dij,(/ii/))
      indx_dp=indx_dp+ii
    end if
@@ -1723,7 +1724,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      indx_dp=indx_dp+ii
    end if
    if (paw_ij_in(ij)%has_dijhartree==2) then
-     ii=cplxrf_lmn2_size*ndij
+     ii=cplxrf_lmn2_size
      buf_dp(indx_dp:indx_dp+ii-1)=paw_ij_in(ij)%dijhartree(1:ii)
      indx_dp=indx_dp+ii
    end if
@@ -1787,7 +1788,8 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
  end do
 
 !Check
- if ((indx_int-1/=buf_int_size).or.(indx_dp-1 /=buf_dp_size)) then
+ indx_int=indx_int-1;indx_dp=indx_dp-1
+ if ((indx_int/=buf_int_size).or.(indx_dp/=buf_dp_size)) then
    write(msg,*) 'Wrong buffer sizes: buf_int_size=',buf_int_size, &
      ' indx_int_size=',indx_int,' buf_dp_size=',buf_dp_size , ' indx_dp=', indx_dp
    MSG_BUG(msg)
@@ -2014,7 +2016,8 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
        end if
      end if
    end do
-   if ((indx_int/=1+buf_int_size_all).or.(indx_dp /=1+buf_dp_size_all)) then
+   indx_int=indx_int-1;indx_dp=indx_dp-1
+   if ((indx_int/=buf_int_size_all).or.(indx_dp/=buf_dp_size_all)) then
      write(msg,*) 'Wrong buffer sizes: buf_int_size_all=',buf_int_size_all, &
 &      ' indx_int=',indx_int, ' buf_dp_size_all=',buf_dp_size_all,' indx_dp=',indx_dp
      MSG_BUG(msg)
@@ -2929,7 +2932,7 @@ implicit none
      indx_dp=indx_dp+ii
    end if
    if (paw_ij1%has_dijfr==2) then
-     ii=cplxdij_lmn2_size*ndij
+     ii=cplxdijrf_lmn2_size*ndij
      buf_dp(indx_dp:indx_dp+ii-1)=reshape(paw_ij1%dijfr,(/ii/))
      indx_dp=indx_dp+ii
    end if
@@ -2996,7 +2999,8 @@ implicit none
      indx_dp=indx_dp+ii
    end if
  end do
- if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
+ indx_int=indx_int-1;indx_dp=indx_dp-1
+ if ((indx_int/=buf_int_size).or.(indx_dp/=buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
    MSG_BUG(msg)
  end if

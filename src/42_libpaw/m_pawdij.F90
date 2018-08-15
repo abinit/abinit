@@ -387,7 +387,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !  Dij^hat_FR: only for RF and when it was previously computed
    dijhatfr_available=(ipert>0.and.paw_ij(iatom)%has_dijfr==2) ; dijhatfr_prereq=.true.
 !  DijND: not available for RF, requires non-zero nucdipmom
-   dijnd_available=.false. ; dijnd_prereq=.true.
+   dijnd_available=.false. ; dijnd_prereq=(cplex_dij==2)
    if (has_nucdipmom) dijnd_available=(ipert<=0.and.any(abs(nucdipmom(:,iatom))>tol8))
 !  DijSO: not available for RF, positron; only for spin-orbit ; VHartree and Vxc needed
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
@@ -931,7 +931,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        call pawdijhat(1,cplex_dij,dijxchat,gprimd,iatom_tot,ipert,&
 &                     natom,ndij,nfft,nfftot,nspden,nsppol,pawang,pawfgrtab(iatom),&
 &                     pawtab(itypat),vxc,qphon,ucvol,xred,mpi_comm_grid=my_comm_grid)
-       paw_ij(iatom)%dijxc_hat(1:cplex_dij,:)=dijxchat(1:cplex_dij,:)
+       paw_ij(iatom)%dijxc_hat(1:cplex_dij*lmn2_size,:)=dijxchat(1:cplex_dij*lmn2_size,:)
        LIBPAW_DEALLOCATE(dijxchat)
 
      else ! usexcnhat=0
@@ -961,7 +961,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &                    pawang,pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1_val,&
 &                    paw_an(iatom)%vxct1_val,0)
      end if
-     paw_ij(iatom)%dijxc_val(1:cplex_dij,:)=dijxcval(1:cplex_dij,:)
+     paw_ij(iatom)%dijxc_val(1:cplex_dij*lmn2_size,:)=dijxcval(1:cplex_dij*lmn2_size,:)
      LIBPAW_DEALLOCATE(dijxcval)
 
    end if
@@ -4399,7 +4399,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
  integer :: idum(0)
- real(dp) :: fact(2),factsym(2),phase(2)
+ real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ", &
@@ -4744,15 +4744,25 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
 !            Apply phase for phonons
              if (have_phase) then
+               !Remember, Dij is stored as follows:
+               ! Dij=  [Dij(2klmn-1)+i.Dij(2klmn)]
+               !    +i.[Dij(lnm2_size+2klmn-1)+i.Dij(lmn2_size+2klmn)]
+               !Note: have_phase=true implies cplex_rf=2
                if((.not.noncoll).or.(.not.lsymnew)) then
-                 do iplex_rf=1,cplex_rf
-                   sumdij(1:cplex_dij,iafm,iplex_rf)=phase(iplex_rf)*sumdij(1:cplex_dij,iafm,iplex_rf)
+                 do iplex=1,cplex_dij
+                   dijc(1)=sumdij(iplex,iafm,1)
+                   dijc(2)=sumdij(iplex,iafm,2)
+                   sumdij(iplex,iafm,1)=phase(1)*dijc(1)-phase(2)*dijc(2)
+                   sumdij(iplex,iafm,2)=phase(1)*dijc(2)+phase(2)*dijc(1)
                  end do
                end if
                if (noncoll.and.(.not.lsymnew)) then
-                 do iplex_rf=1,cplex_rf
+                 do iplex=1,cplex_dij
                    do mu=1,3
-                     summag(1:cplex_dij,mu,iplex_rf)=phase(iplex_rf)*summag(1:cplex_dij,mu,iplex_rf)
+                     dijc(1)=summag(iplex,mu,1)
+                     dijc(2)=summag(iplex,mu,2)
+                     summag(iplex,mu,1)=phase(1)*dijc(1)-phase(2)*dijc(2)
+                     summag(iplex,mu,2)=phase(1)*dijc(2)+phase(2)*dijc(1)
                    end do
                  end do
                end if
@@ -4843,7 +4853,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                end do
              end if
            end if
-
 !          Transfer new value of Dij in suitable pointer
            ii=klmnc
            do iplex_rf=1,cplex_rf
