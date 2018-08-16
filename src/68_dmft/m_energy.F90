@@ -848,7 +848,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type),intent(in) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(pawtab_type),intent(in)  :: pawtab(cryst_struc%ntypat)
+ type(pawtab_type),target,intent(in)  :: pawtab(cryst_struc%ntypat)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 
@@ -861,6 +861,7 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  real(dp),allocatable :: noccmmp(:,:,:,:),nocctot(:)
+ type(pawtab_type),pointer :: pawtab_
 
 ! *********************************************************************
 
@@ -881,11 +882,12 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! - Loop and call to pawuenergy
 ! -----------------------------------------------------------------------
  do iatom=1,cryst_struc%natom
+   pawtab_ => pawtab(cryst_struc%typat(iatom))
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-
-     ABI_ALLOCATE(noccmmp,(2,2*lpawu+1,2*lpawu+1,nocc))
+     
+     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
      ABI_ALLOCATE(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
 
@@ -957,13 +959,12 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        jpawu = renorm(iatom)
        prt_pawuenergy=0
      else
-       upawu = pawtab(cryst_struc%typat(iatom))%upawu
-       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu
+       upawu = pawtab_%upawu
+       jpawu = pawtab_%jpawu
        prt_pawuenergy=3
      end if
 
-     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,&
-     &               pawtab(cryst_struc%typat(iatom)),&
+     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
 &                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
 &                    u_dmft=upawu,j_dmft=jpawu)
 

@@ -115,19 +115,20 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type), intent(in) :: green
  type(paw_dmft_type), intent(in)  :: paw_dmft
- type(pawtab_type),intent(in)  :: pawtab(cryst_struc%ntypat)
+ type(pawtab_type),target,intent(in)  :: pawtab(cryst_struc%ntypat)
  type(self_type), intent(inout) :: self !vz_i
  integer, intent(in) :: opt_ldau,prtopt
 
 !Local variables ------------------------------
 !scalars
  character(len=500) :: message
- integer :: iatom,idijeff,isppol,ispinor,ispinor1,itypat,lpawu
+ integer :: iatom,idijeff,isppol,ispinor,ispinor1,lpawu
  integer :: ifreq,im,im1,ldim,natom,nocc,nsppol,nspinor,nsploop
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  real(dp),allocatable :: noccmmp(:,:,:,:),nocctot(:)
  real(dp),allocatable :: vpawu(:,:,:,:)
+ type(pawtab_type),pointer :: pawtab_
 
 !************************************************************************
 
@@ -151,13 +152,13 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !&   pawrhoij_dum,pawtab,cryst_struc%spinat,cryst_struc%symafm,struct%typat,0,10)
 
  do iatom=1,cryst_struc%natom
-   itypat=cryst_struc%typat(iatom)
    lpawu=paw_dmft%lpawu(iatom)
+   pawtab_ => pawtab(cryst_struc%typat(iatom))
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
      ABI_ALLOCATE(vpawu,(2,ldim,ldim,nocc))
 
-     ABI_ALLOCATE(noccmmp,(2,2*lpawu+1,2*lpawu+1,nocc))
+     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
      ABI_ALLOCATE(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero ! contains nmmp in the n m representation
 
@@ -223,7 +224,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !    ===============================
 !    Compute LDA+U vpawu from noccmmp
 !    ===============================
-     call pawpupot(2,nocc,noccmmp,nocctot,2,pawtab(itypat),vpawu)
+     call pawpupot(2,nocc,noccmmp,nocctot,2,pawtab_,vpawu)
 !    do idijeff=1,size(vpawu,4)
 !    write(message,'(2a)') ch10," == The vpawu matrix is"
 !    call wrtout(std_out,message,'COLL')
