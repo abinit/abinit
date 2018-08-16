@@ -2118,7 +2118,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
          ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
          e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
 &                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
-         if (cplex_rf==2) e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
+         if (cplex_rf==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
 &                                                             -paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
      end do

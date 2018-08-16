@@ -179,7 +179,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  real(dp),allocatable :: gxfac_offdiag(:,:,:,:),gxfj(:,:)
  real(dp),pointer :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:)
  real(dp),pointer :: enl_ptr(:,:,:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
