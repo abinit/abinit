@@ -2095,7 +2095,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
          cplex_rf=paw_ij1(iatom)%cplex_rf
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
+         ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbfr(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dijfr(1:dimdij1,isp)
          if (cplex_rf==2) e1kbfr(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
@@ -2108,14 +2108,13 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
      dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
      ABI_CHECK(paw_ij1(1)%cplex_rf==dime1kb4,'BUG in pawdij2e1kb (1)!')
-     ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
          cplex_rf=paw_ij1(iatom)%cplex_rf
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         ABI_CHECK(dimdij1<=dime1kb1,'size of paw_ij1%dij>dime1kb1!')
+         ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
 &                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
          if (cplex_rf==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
