@@ -815,7 +815,7 @@ subroutine pawpsxml2ab( psxml, pspheads,option )
    end do
    pspheads%nprojso=0
    pspheads%pspdat=27061961
-   pspheads%pspso=0
+   pspheads%pspso=1
    pspheads%xccc=1
    pspheads%title=psxml%atom%symbol
 !

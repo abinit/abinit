@@ -731,7 +731,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        if (ipert==dtset%natom+11) then
          call rf2_getidirs(idir,idir_dum,idir_paw1)
        end if
-       call pawdijfr(cplex,gprimd,idir_paw1,ipert,my_natom,dtset%natom,nfftf,ngfftf,nspden,&
+       call pawdijfr(cplex,gprimd,idir_paw1,ipert,my_natom,dtset%natom,nfftf,ngfftf,nspden,dtset%nsppol,&
 &       psps%ntypat,optfr,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphon,&
 &       rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
@@ -3829,7 +3829,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom )
    optfr=1
    ABI_ALLOCATE(buffer1,(0))
-   call pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfftf,ngfftf,dtset%nspden,&
+   call pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfftf,ngfftf,dtset%nspden,dtset%nsppol,&
 &   dtset%ntypat,optfr,paw_ij1fr,pawang,pawfgrtab,pawrad,pawtab,&
 &   dtset%qptn,rprimd,ucvol,buffer1,vtrial,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
