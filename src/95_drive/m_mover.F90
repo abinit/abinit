@@ -847,7 +847,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 
-     write(message,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
+     write(message,'(2a)') 'Geometry Optimization Precondition:',ab_mover%goprecon
      if(need_verbose)call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
@@ -1101,9 +1101,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 23. Deallocate hist and ab_mover datatypes
 
- if (ab_mover%goprecon>0)then
-   call prec_simple(ab_mover,preconforstr,hist,1,1,1)
- end if
+!This is useless
+! if (ab_mover%goprecon>0)then
+!   call prec_simple(ab_mover,preconforstr,hist,1,1,1)
+! end if
 
  if (ab_mover%ionmov==13)then
    call mttk_fin(mttk_vars)

@@ -179,8 +179,8 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !scalars
  integer,intent(in) :: iexit,itime,icycle
  type(abimover),intent(in) :: ab_mover
- type(abihist),intent(inout) :: hist
- type(abiforstr),intent(inout) :: forstr
+ type(abihist),intent(in) :: hist
+ type(abiforstr),intent(out) :: forstr
 
 !Local variables-------------------------------
 !scalars
@@ -239,7 +239,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  call xred2xcart(ab_mover%natom,rprimd,xcart,hist%xred(:,:,hist%ihist))
 
 !##########################################################
-!### 03. Decide based on kind of precondiotioner if
+!### 03. Decide based on kind of preconditioner if
 !###     a new matrix should be computed
 
  if (ab_mover%goprecon==2)then
