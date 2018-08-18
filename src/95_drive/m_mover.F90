@@ -54,6 +54,7 @@ module m_mover
  use m_dtfil,              only : dtfil_init_time, status
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
+ use m_precpred_1geo,      only : precpred_1geo
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_fire,          only : pred_fire
@@ -845,6 +846,20 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
 
      if (itime==ntime.and.icycle==ncycle) iexit=1
+
+!    ###########################################################
+!    ### 16. => Precondition forces, stress and energy
+!    ### 17. => Call to each predictor
+     if(.false.)then
+       call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),&
+&       scfcv_args%dtset%chkdilatmx,&
+&       scfcv_args%mpi_enreg%comm_cell,
+&       scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
+&       scfcv_args%dtset%hmctt,&
+&       icycle,iexit,itime,mttkvars,nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
+&       scfcv_args%dtset%rprimd_orig,skipcycle,&
+&       scfcv_args%dtset%usewvl,xred,verbose=verbose) 
+      endif
 
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy

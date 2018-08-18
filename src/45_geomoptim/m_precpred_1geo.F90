@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_precpred_1geo
 !! NAME
 !!  m_precpred_1geo
@@ -46,7 +45,6 @@ module m_precpred_1geo
  use m_geometry,           only : chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
- use m_scfcv,              only : scfcv_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  ese m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
@@ -121,8 +119,9 @@ contains
 !!
 !! SOURCE
 
-subroutine precpred_1geo(scfcv_args,ab_xfh,dtfil,rprimd,xred,verbose)
-
+subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,chkdilatmx,comm_cell,dilatmx,filnam_ds4,hmctt,&
+& icycle,iexit,itime,mttkvars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
+& usewvl,xred,verbose)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -135,40 +134,40 @@ implicit none
 
 !Arguments ------------------------------------
 !scalars
-type(scfcv_t),intent(inout) :: scfcv_args
-type(datafiles_type),intent(inout),target :: dtfil
-type(ab_xfh_type),intent(inout) :: ab_xfh
+integer, intent(in) :: comm_cell,chkdilatmx,hmctt,icycle,itime,nctime,ncycle,ntime
+integer, intent(inout) :: iexit,nerr_dilatmx
+integer, intent(in) :: usewvl
+real(dp), intent(in) :: dilatmx
+logical, intent(in) :: skipcycle
 logical,optional,intent(in) :: verbose
+character(len=fnlen), intent(in) :: filnam_ds4
+type(ab_xfh_type),intent(inout) :: ab_xfh
+type(abihist), intent(inout) :: hist
+type(abimover), intent(in) :: ab_mover
+type(mttk_type), intent(in) :: mttk_vars
 !arrays
-real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom)
+
+real(dp), intent(in) :: amu_orig1(ab_mover%ntypat)
+real(dp), intent(in) :: xred(3,ab_mover%natom)
+real(dp), intent(in) :: rprimd_orig(3,3)
 real(dp), intent(inout) :: rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
 integer,parameter :: master=0
-type(abihist) :: hist
-type(abimover) :: ab_mover
-type(abiforstr) :: preconforstr ! Preconditioned forces and stress
-type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit,ncycle,me
-integer :: nloop,ntime,comm
-integer :: nerr_dilatmx
+integer :: ii,me,nloop
+logical :: DEBUG=.FALSE., need_verbose=.TRUE.
 character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
 character(len=fnlen) :: filename
-logical :: DEBUG=.FALSE., need_verbose=.TRUE.
-logical :: skipcycle
-integer :: ii
+type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(crystal_t) :: crystal
-!arrays
-real(dp) :: rprim(3,3)
-real(dp),allocatable :: amu(:)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
 
- comm=scfcv_args%mpi_enreg%comm_cell
- me=xmpi_comm_rank(comm)
+ comm_cell=scfcv_args%mpi_enreg%comm_cell
+ me=xmpi_comm_rank(comm_cell)
 
 !Precondition forces, stress and energy
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -241,9 +240,8 @@ real(dp),allocatable :: amu(:)
  end do
 
  ! check dilatmx here and correct if necessary
- if (scfcv_args%dtset%usewvl == 0) then
-   call chkdilatmx(scfcv_args%dtset%chkdilatmx,scfcv_args%dtset%dilatmx,&
-    rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
+ if (usewvl == 0) then
+   call chkdilatmx(chkdilatmx,dilatmx,rprimd,rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
    _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
    if (LEN_TRIM(dilatmx_errmsg) /= 0) then
      MSG_WARNING(dilatmx_errmsg)
@@ -253,19 +251,19 @@ real(dp),allocatable :: amu(:)
        ! zion is not available, but it's not useful here.
        if (me == master) then
          ! Init crystal
-         call crystal_init(scfcv_args%dtset%amu_orig(:,1),crystal,0,ab_mover%natom,&
-&         scfcv_args%dtset%npsp,ab_mover%ntypat,scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
+         call crystal_init(amu_orig(:,1),crystal,0,ab_mover%natom,&
+&         npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
 &         [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&         symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
+&         symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
 
 #ifdef HAVE_NETCDF
          ! Write netcdf file
-         filename = strcat(dtfil%filnam_ds(4), "_DILATMX_STRUCT.nc")
+         filename = strcat(filnam_ds4, "_DILATMX_STRUCT.nc")
          NCF_CHECK(crystal_ncwrite_path(crystal, filename))
 #endif
          call crystal_free(crystal)
        end if
-       call xmpi_barrier(comm)
+       call xmpi_barrier(comm_cell)
        write (dilatmx_errmsg, '(a,i0,3a)') &
         'Dilatmx has been exceeded too many times (', nerr_dilatmx, ')',ch10, &
         'Restart your calculation from larger lattice vectors and/or a larger dilatmx'

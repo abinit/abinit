@@ -31,6 +31,7 @@ sources = [
  "m_use_ga.F90",
  "m_pimd_langevin.F90",
  "m_pimd_nosehoover.F90",
+ "m_precpred_1geo.F90",
  "m_pred_bfgs.F90",
  "m_pred_delocint.F90",
  "m_pred_diisrelax.F90",
