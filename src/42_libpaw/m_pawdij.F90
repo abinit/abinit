@@ -1422,7 +1422,7 @@ subroutine pawdijxc(cplex_rf,cplex_dij,dijxc,ndij,nspden,nsppol,&
        end do
        if (cplex_rf==2) then
          !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size;klmn2=2
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
            dijxc(klmn1,idij)=dijxc_idij(klmn2)
            klmn1=klmn1+cplex_dij
@@ -1711,7 +1711,7 @@ subroutine pawdijfock(cplex_rf,cplex_dij,dijfock_vv,dijfock_cv,hyb_mixing,hyb_mi
        end do
        if (cplex_rf==2) then
          !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size;klmn2=2
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
            dijfock_vv(klmn1,idij)=dijfock_idij_vv(klmn2)
            dijfock_cv(klmn1,idij)=dijfock_idij_cv(klmn2)
@@ -1987,7 +1987,7 @@ subroutine pawdijxcm(cplex_rf,cplex_dij,dijxc,lmselect,ndij,nspden,nsppol,&
        end do
        if (cplex_rf==2) then
          !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size;klmn2=2
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
            dijxc(klmn1,idij)=dijxc_idij(klmn2)
            klmn1=klmn1+cplex_dij
@@ -2302,7 +2302,7 @@ subroutine pawdijhat(cplex_rf,cplex_dij,dijhat,gprimd,iatom,ipert,&
        end do
        if (cplex_rf==2) then
          !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size;klmn2=2
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
            dijhat(klmn1,idij)=dijhat_idij(klmn2)
            klmn1=klmn1+cplex_dij
@@ -3160,7 +3160,7 @@ subroutine pawdijexxc(cplex_rf,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
        end do
        if (cplex_rf==2) then
          !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size;klmn2=2
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
            dijexxc(klmn1,idij)=dijexxc_idij(klmn2)
            klmn1=klmn1+cplex_dij
@@ -3557,7 +3557,7 @@ subroutine pawdijfr(cplex_rf,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,
                end if
              end if ! need_dijfr_2
 
-!            Sum contribution and apply ucvol/nfft factor on integral
+!            Sum contributions and apply ucvol/nfft factor on integral
              intv(1:cplex_nspden,1:lm_size)=intv1(1:cplex_nspden,1:lm_size)
              intv(1,1:lm_size)=intv(1,1:lm_size)+intv2(1,1:lm_size)
              if (cplex_rf==2) intv(cplex_nspden+1,1:lm_size)=intv(cplex_nspden+1,1:lm_size)+intv2(2,1:lm_size)
@@ -3571,7 +3571,7 @@ subroutine pawdijfr(cplex_rf,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,
              paw_ij1(iatom)%dijfr(:,ispden)=zero
 
 !            ---- Loop over (i,j) components
-             klmn1=1;klmn2=1+lmn2_size
+             klmn1=1;klmn2=1+lmn2_size*cplex_dij
              do klmn=1,lmn2_size
                klm =pawtab(itypat)%indklmn(1,klmn)
                lmin=pawtab(itypat)%indklmn(3,klmn)
