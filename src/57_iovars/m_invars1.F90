@@ -518,6 +518,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%lpawu,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%mixalch_orig,(npsp,mxntypat,mxnimage))
+   ABI_ALLOCATE(dtsets(idtset)%mixesimgf,(mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%nucdipmom,(3,mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%pimass,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%ptcharge,(mxntypat))
@@ -2414,6 +2415,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%mffmem=1
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
+   dtsets(idtset)%mixesimgf(:)=zero
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0

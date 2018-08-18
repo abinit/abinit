@@ -117,7 +117,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
  integer :: fftalg !,fftalga,fftalgc,
- real(dp) :: delta,dz,sumalch,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: message,msg
  type(dataset_type) :: dt
 !arrays
@@ -1406,8 +1406,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'mffmem',dt%mffmem,2,(/0,1/),iout)
 
 !  mixalch_orig
-!  For each type of atom, the sum of the psp components
-!  must be one.
+!  For each type of atom, the sum of the psp components must be one.
    do iimage=1,dt%nimage
      if(dt%ntypalch>0)then
        do itypat=1,dt%ntypalch
@@ -1429,6 +1428,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end do
      end if
    end do
+
+!  mixesimgf
+!  The sum of the mixing image factors must be one
+   if(dt%imgmov==6)then
+     summix=sum(dt%mixesimgf(1:dt%nimage))
+     if(abs(summix-one)>tol10)then
+       write(message, '(2a,20es12.4)' )ch10,' chkinp : mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
+       call wrtout(iout,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+       write(message, '(a,es12.4,4a)' )&
+&        'The sum of the mixing image factors is',summix,ch10,&
+&        'while it should be one.',ch10,&
+&        'Action: check the content of the input variable mixesimgf.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+   end if
 
 !  natom
    if(dt%prtgeo>0)then

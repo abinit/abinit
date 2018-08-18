@@ -1179,6 +1179,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
 
+ call alloc_copy( dtin%mixesimgf, dtout%mixesimgf)
+
  call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
 
  call alloc_copy( dtin%occ_orig, dtout%occ_orig)
@@ -1418,6 +1420,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%mixalch_orig))     then
    ABI_DEALLOCATE(dtset%mixalch_orig)
+ end if
+ if (allocated(dtset%mixesimgf))     then
+   ABI_DEALLOCATE(dtset%mixesimgf)
  end if
  if (allocated(dtset%nucdipmom))      then
    ABI_DEALLOCATE(dtset%nucdipmom)
@@ -2470,7 +2475,7 @@ subroutine chkvars (string)
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
- list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch'
+ list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixesimgf'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'

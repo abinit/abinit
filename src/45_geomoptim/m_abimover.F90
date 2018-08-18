@@ -480,8 +480,8 @@ subroutine abimover_ini(ab_mover,specs,&
 #define ABI_FUNC 'abimover_ini'
 !End of the abilint section
 
-type(abimover),intent(inout) :: ab_mover
-type(abimover_specs),intent(inout) :: specs
+type(abimover),intent(out) :: ab_mover
+type(abimover_specs),intent(out) :: specs
 ! Delay of Permutation (Used by pred_langevin only)
 integer,target, intent(in)  :: delayperm
 ! DIIS memory (Used by pred_diisrelax only)
@@ -671,7 +671,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !Default values first
 !--------------------
 
-!acell and rprimd are never change except if optcell/=0
+!acell and rprimd are never changed except if optcell/=0
  if (ab_mover%optcell/=0)then
    specs%isARused=.TRUE.
  else
