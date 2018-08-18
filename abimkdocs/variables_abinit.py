@@ -5958,6 +5958,34 @@ Variable(
 ),
 
 Variable(
+    abivarname="hmctt",
+    varset="rlx",
+    vartype="integer",
+    topics=['MolecularDynamics_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Hybrid Monte Carlo Trial Trajectory",
+    requires="[[ionmov]] == 25",
+    text="""
+Number of steps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+""",
+),
+
+Variable(
+    abivarname="hmcsst",
+    varset="rlx",
+    vartype="integer",
+    topics=['MolecularDynamics_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Hybrid Monte Carlo Strain Step Trajectory",
+    requires="[[ionmov]] == 25",
+    text="""
+Number of strain teps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+""",
+),
+
+Variable(
     abivarname="hyb_mixing",
     varset="gstate",
     vartype="real",
