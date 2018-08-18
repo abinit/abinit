@@ -20,4 +20,4 @@ The curl utility can be downloaded from:
   http://curl.haxx.se/download.html
 
 For more info, please consult the Abinit forums at
-http://forum.abinit.org/.
+https://forum.abinit.org/.

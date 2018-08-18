@@ -89,6 +89,11 @@ There are two ways to compute the temperature dependence with Abinit:
           TIMER flavor  : abinit
           TRIO flavor   : netcdf
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## 1 Calculation of the ZPR of eigenenergies at q=Γ. 
   
 The reference input files for this tutorial are located in

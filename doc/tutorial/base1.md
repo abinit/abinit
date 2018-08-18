@@ -23,6 +23,11 @@ like a tourist, and you discover a town in a coach.
 You will have a bit more freedom after that first step.
 It is supposed that you have some good knowledge of UNIX/Linux.
 
+Visualisation tools are NOT covered in the basic ABINIT tutorials. 
+Powerful visualisation procedures have been developed in the Abipy context, 
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 [TUTORIAL_README]
 
 This tutorial should take about 2 hours.

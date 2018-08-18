@@ -1,8 +1,8 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_ingeo_img
+!!****m* ABINIT/m_intagm_img
 !!
 !! NAME
-!! m_ingeo_img
+!! m_intagm_img
 !!
 !! FUNCTION
 !! This module provides a generic interface that allows to
@@ -52,7 +52,7 @@
 
 #include "abi_common.h"
 
-MODULE m_ingeo_img
+MODULE m_intagm_img
 
  use defs_basis
  use m_profiling_abi
@@ -65,21 +65,21 @@ MODULE m_ingeo_img
  private
 !!***
 
- public :: ingeo_img   !  Read input file variables according to images path definition (1D array)
+ public :: intagm_img   !  Read input file variables according to images path definition (1D array)
 
-interface ingeo_img
-  module procedure ingeo_img_1D
-  module procedure ingeo_img_2D
-end interface ingeo_img
+interface intagm_img
+  module procedure intagm_img_1D
+  module procedure intagm_img_2D
+end interface intagm_img
 
 CONTAINS  !===========================================================
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ingeo_img/ingeo_img_1D
+!!****f* m_intagm_img/ingeo_img_1D
 !! NAME
-!!  ingeo_img_1D
+!!  intagm_img_1D
 !!
 !! FUNCTION
 !!  Read input file variables according to images path definition (1D array)
@@ -93,13 +93,13 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine ingeo_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
+subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ingeo_img_1D'
+#define ABI_FUNC 'intagm_img_1D'
 !End of the abilint section
 
  implicit none
@@ -212,16 +212,16 @@ subroutine ingeo_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,t
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
 
-end subroutine ingeo_img_1D
+end subroutine intagm_img_1D
 !!***
 
 
 !----------------------------------------------------------------------
 
 
-!!****f* m_ingeo_img/ingeo_img_2D
+!!****f* m_intagm_img/ingeo_img_2D
 !! NAME
-!!  ingeo_img_2D
+!!  intagm_img_2D
 !!
 !! FUNCTION
 !!  Read input file variables according to images path definition (2D array)
@@ -235,13 +235,13 @@ end subroutine ingeo_img_1D
 !!
 !! SOURCE
 
-subroutine ingeo_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
+subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ingeo_img_2D'
+#define ABI_FUNC 'intagm_img_2D'
 !End of the abilint section
 
  implicit none
@@ -357,10 +357,10 @@ subroutine ingeo_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,t
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
 
-end subroutine ingeo_img_2D
+end subroutine intagm_img_2D
 !!***
 
 !------------------------------------------------------------------------------------
 
-END MODULE m_ingeo_img
+END MODULE m_intagm_img
 !!***

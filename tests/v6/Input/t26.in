@@ -1,66 +1,48 @@
-# H2 molecule in a big box
-#
-# In this input file, the location of the information on this or that line
-# is not important : a keyword is located by the parser, and the related
-# information should follow.
-# The "#" symbol indicates the beginning of a comment : the remaining
-# of the line will be skipped.
+# H2 molecule, in a somewhat small box.
+# Computation of transition path between two local minima of the geometry space, using the NEB method.
 
+ndtset 2
 
-#TO BE CHANGED BY GREGORY
-imgmov 9
-pitransform 0
-pimass 1.00794
-vel_cell 9*0.
+ neb_algo1 0
+ neb_algo2 1
 
-#Definition of the unit cell
-acell 10 10 10    # The keyword "acell" refers to the
-                  # lengths of the primitive vectors (in Bohr)
-#rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
-                           # is commented, because it is precisely the default value of rprim
+ntimimage 15
+nimage 6
+imgmov 5
+chksymbreak 0
+fxcartfactor 10.0
+tolimg 1.d-5
+istatimg 0
 
-#Definition of the atom types
-ntypat 1          # There is only one type of atom
-znucl 1           # The keyword "znucl" refers to the atomic number of the
-                  # possible type(s) of atom. The pseudopotential(s)
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Hydrogen.
+dynimage  0 4*1 0   # Will do relaxation only for the four internal images
 
+natfix 1
+iatfix 1
 
-#Definition of the atoms
-natom 2           # There are two atoms
-typat 1 1         # They both are of type 1, that is, Hydrogen
-xcart             # This keyword indicates that the location of the atoms
-                  # will follow, one triplet of number for each atom
-  -0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 1, in Bohr
-   0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 2, in Bohr
+xcart         3*0d0              3*0.766911
+xcart_lastimg 3*0d0     2.233089 2*0.766911
 
-#Definition of the planewave basis set
-ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
+#Common data
 
-#Definition of the k-point grid
-kptopt 0          # Enter the k points manually
-nkpt 1            # Only one k point is needed for isolated system,
-                  # taken by default to be 0.0 0.0 0.0
+acell  3*3.0d0
+ecut 15.0d0
+ecutsm 0.5d0
+natom  2
+nband  1
+nstep 20
+ntypat  2
+toldff  2.0d-6
+typat  1 2  # Treat the two atoms as inequivalent, in order ot be able to fix the position of one of them, and not the other.
+znucl 1 1
 
-#Definition of the SCF procedure
-nstep 10          # Maximal number of SCF cycles
-toldfe 1.0d-6     # Will stop when, twice in a row, the difference
-                  # between two consecutive evaluations of total energy
-                  # differ by less than toldfe (in Hartree)
-                  # This value is way too large for most realistic studies of materials
-diemac 2.0        # Although this is not mandatory, it is worth to
-                  # precondition the SCF cycle. The model dielectric
-                  # function used as the standard preconditioner
-                  # is described in the "dielng" input variable section.
-                  # Here, we follow the prescriptions for molecules
-                  # in a big box
+kptopt 1
+ngkpt 4 4 4
 
-#This keyword is added in order to have a deterministic random numbers generator
-#This is not recommended in general to use the Langevin algorithm
-#But needed to have reproducible results
-irandom 1
+#This is to save memory and prevent density history storage
+ densfor_pred 1
 
+ mep_solver  0
+ mep_mxstep 100.
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -69,15 +51,16 @@ irandom 1
 #%% [files]
 #%% files_to_test = 
 #%%   t26.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
-#%% psp_files = 01h.pspgth
+#%% psp_files = 1h.pspnc, 1h.pspnc
 #%% [paral_info]
-#%% max_nprocs = 6
+#%% max_nprocs = 20
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = STRING
+#%% keywords = NEB
 #%% description = 
-#%% (TO BE MODIFIED BY GREGORY)
-#%% Hydrogen diatomic molecule in a cell, close to BCC
-#%% Test the string method : 6 images, exploring the transition
-#%% path but keeping X coordinated fixed. Similar to test 24
+#%%   Hydrogen diatomic molecule in a cell, close to BCC
+#%%   Test the NEB method : 6 images, exploring the transition
+#%%   path. Similar to test 22 (but with NEB).
+#%%   First dataset with neb_algo=0 (original NEB method), and second dataset with neb_algo=1 (improved tangent).
+#%% topics = TransPath
 #%%<END TEST_INFO>

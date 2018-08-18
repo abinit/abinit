@@ -175,6 +175,7 @@ ABI_TOPICS = [
     "ConstrainedPol",
     "Control",
     "Coulomb",
+    "CrossingBarriers",
     "CRPA",
     "crystal",
     "DFT+U",

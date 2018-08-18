@@ -4,7 +4,7 @@
 !!  m_mover
 !!
 !! FUNCTION
-!! Move ion or change acell acording to forces and stresses
+!! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
@@ -691,7 +691,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
-!          Check if the simulation does not diverged...
+!          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.

@@ -323,7 +323,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
              ABI_DEALLOCATE(tmp)
            end if
            if (nocc_>0) then
-             results_out(ii)%occ(1:nocc_,jj)=dtsets(ii)%occ_orig(1:nocc_)
+             results_out(ii)%occ(1:nocc_,jj)=dtsets(ii)%occ_orig(1:nocc_,kk)
            end if
          end do
        end if

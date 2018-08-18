@@ -4663,7 +4663,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 ! *************************************************************************
 
  !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
- ! See http://forum.abinit.org/viewtopic.php?f=19&t=3339
+ ! See https://forum.abinit.org/viewtopic.php?f=19&t=3339
 
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol
