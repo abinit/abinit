@@ -51,7 +51,7 @@ module m_parser
  public :: chkint_ne      ! Checks the value of an input integer variable against a list.
  !public :: chkint_prt
 
- public :: prttagm        ! Print the content of dprarr.
+ public :: prttagm        ! Print the content of intarr or dprarr.
  public :: prttagm_images ! Extension to prttagm to include the printing of images information.
  public :: chkvars_in_string   !  Analyze variable names in string. Abort if name is not recognized.
 
