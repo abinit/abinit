@@ -2300,7 +2300,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
                  do ispinor = 1, nspinor
                     qijbkk(klmn,iatom,ispinor,1) = dtefield%qijb_kk(1,klmn,gs_hamk%atindx1(iatom),idir)
                     qijbkk(klmn,  iatom,ispinor,2) = dtefield%qijb_kk(2,klmn,gs_hamk%atindx1(iatom),idir)
-                    if (ifor > 1) qijbkk(klmn,iatom,ispinor,2) = -qijbkk(2*klmn,iatom,ispinor,2)
+                    if (ifor > 1) qijbkk(klmn,iatom,ispinor,2) = -qijbkk(klmn,iatom,ispinor,2)
                  end do
               end do ! end loop over lmn2_size
            end do ! end loop over natom
