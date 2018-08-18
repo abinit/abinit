@@ -1435,14 +1435,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      summix=sum(dt%mixesimgf(1:dt%nimage))
      if(abs(summix-one)>tol10)then
        write(message, '(2a,20es12.4)' )ch10,' chkinp : mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
+       call wrtout(iout,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+       write(message, '(a,es12.4,4a)' )&
+&        'The sum of the mixing image factors is',summix,ch10,&
+&        'while it should be one.',ch10,&
+&        'Action: check the content of the input variable mixesimgf.'
+       MSG_ERROR_NOSTOP(message,ierr)
      end if
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,es12.4,4a)' )&
-&      'The sum of the mixing image factors is',summix,ch10,&
-&      'while it should be one.',ch10,&
-&      'Action: check the content of the input variable mixesimgf.'
-     MSG_ERROR_NOSTOP(message,ierr)
    end if
 
 !  natom

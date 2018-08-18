@@ -781,10 +781,15 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'mixalch','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
- do idtset=0,ndtset_alloc
-   dprarr(1:mxvals%nimage,idtset)=dtsets(idtset)%mixesimgf(1:mxvals%nimage)
+!mixesimgf
+ dprarr(1:marr,0)=zero              ! default value
+ narr=mxvals%nimage                ! default size for all datasets
+ do idtset=1,ndtset_alloc           ! specific size and array for each dataset
+   narrm(idtset)=dtsets(idtset)%nimage
+   dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%mixesimgf(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,mxvals%nimage,nimagem,ncid,ndtset_alloc,'mixesimgf','DPR',1)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
+& narrm,ncid,ndtset_alloc,'mixesimgf','DPR',multivals%nimage)
 
  intarr(1,:)=dtsets(:)%mkmem
  call prttagm(dprarr,intarr,iout,jdtset_,5,marr,1,narrm,ncid,ndtset_alloc,'mkmem','INT',0)

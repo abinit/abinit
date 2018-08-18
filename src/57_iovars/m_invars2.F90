@@ -389,10 +389,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%ga_opt_percent=dprarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,dtset%ga_n_rules,string(1:lenstr),'ga_rules',tread,'INT')
-!  DEBUG AHR
-!  write(std_out,*) ' write ga_n_rules ',dtset%ga_n_rules
-!  call flush(std_out)
-!  ENDDEBUG
    if(tread==1)then
      dtset%ga_rules(1:dtset%ga_n_rules)=intarr(1:dtset%ga_n_rules)
      do ii=1,dtset%ga_n_rules
@@ -3045,6 +3041,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'pvelmax',tread,'DPR')
    if(tread==1) dtset%pvelmax(1:3)=dprarr(1:3)
  end if
+
+ if(dtset%imgmov==6)then
+   call intagm(dprarr,intarr,jdtset,marr,dtset%nimage,string(1:lenstr),'mixesimgf',tread,'DPR')
+   if(tread==1)dtset%mixesimgf(1:dtset%nimage)=dprarr(1:dtset%nimage)
+ endif
 
 !Read remaining input variables depending on images : occ_orig, upawu, jpawu.
 !MT oct 15: these lines are inspired from invars1 but are not really understood
