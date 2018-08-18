@@ -6355,7 +6355,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
   * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
-    and their total energies are combined linearly using the factors in [[miximagef]], giving the actual total energy of the ensemble
+    and their total energies are combined linearly using the factors in [[mixesimgf]], giving the actual total energy of the ensemble
     of constrained DFT images. The geometry is the same for all images, forces and stresses are computed, and all usual
     algorithms for MD or geometry optimization are allowed, using [[ionmov]] (instead of [[imgmov]], this is the exception to the rule)
     and related variables.
@@ -8854,17 +8854,17 @@ should be identical.
 ),
 
 Variable(
-    abivarname="miximagef",
+    abivarname="mixesimgf",
     varset="rlx",
     vartype="real",
     topics=['CrossingBarriers_useful'],
     dimensions=['[[nimage]]'],
-    mnemonics="MIXing IMAGEs Factors",
+    mnemonics="MIXing Electronic Structure IMAGE Factors",
     text="""
 Used in the algorithm Linear Combination of Constrained DFT Energies, that is, when [[imgmov]]==6.
 
 This array gives, for each one of the [[nimage]] images, the factor
-by which the total energies are linearly combined.
+by which the total energies for systems with same geometry but different electronic structures (occupation numbers) are linearly combined.
 The sum of these factors must equal 1.
 """,
 ),

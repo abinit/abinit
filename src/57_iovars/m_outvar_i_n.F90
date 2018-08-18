@@ -781,6 +781,11 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'mixalch','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
+ do idtset=0,ndtset_alloc
+   dprarr(1:mxvals%nimage,idtset)=dtsets(idtset)%mixesimgf(1:mxvals%nimage)
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,mxvals%nimage,nimagem,ncid,ndtset_alloc,'mixesimgf','DPR',1)
+
  intarr(1,:)=dtsets(:)%mkmem
  call prttagm(dprarr,intarr,iout,jdtset_,5,marr,1,narrm,ncid,ndtset_alloc,'mkmem','INT',0)
 

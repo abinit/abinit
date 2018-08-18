@@ -20,7 +20,7 @@ energy being not computed with a single common density, but from each density se
 
 In ABINIT, with [[imgmov]]==6, it is possible to deal with such 
 linear combination of systems with the same geometry, but differing occupation factors [[occ]].
-It is possible to find the geometry at which the resulting energy is minimal, for a given value of the mixing factors [[miximagef]].
+It is possible to find the geometry at which the resulting energy is minimal, for a given value of the mixing factors [[mixesimgf]].
 Set [[nimage]]=2, and set the occupation numbers for image 1 to the ground-state occupations, and for image 2 to the excited-state occupations.
 
 ## Related Input Variables
