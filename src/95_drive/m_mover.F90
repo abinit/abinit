@@ -348,6 +348,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & scfcv_args%dtset%strprecon,&
 & scfcv_args%dtset%vis,&
 & scfcv_args%dtset%iatfix,&
+& scfcv_args%dtset%symafm,&
 & scfcv_args%dtset%symrel,&
 & scfcv_args%dtset%ph_freez_disp_addStrain,&
 & scfcv_args%dtset%ph_freez_disp_ampl,&
@@ -356,6 +357,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & scfcv_args%dtset%ph_ngqpt,&
 & scfcv_args%dtset%ph_nqshift,&
 & scfcv_args%dtset%ph_qshift,&
+& scfcv_args%dtset%tnons,&
 & scfcv_args%dtset%typat,&
 & scfcv_args%dtset%prtatlist,&
 & amass,&

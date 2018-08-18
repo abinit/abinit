@@ -42,19 +42,13 @@ module m_precpred_1geo
  use m_pred_lotf
 #endif
 
- use m_fstrings,           only : strcat, sjoin, indent
- use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
+ use m_fstrings,           only : strcat
+ use m_geometry,           only : chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
- use m_time,               only : abi_wtime, sec2str
- use m_exit,               only : get_start_time
- use m_scfcv,              only : scfcv_t, scfcv_run
- use m_dtfil,              only : dtfil_init_time, status
- use m_initylmg,           only : initylmg
- use m_xfpack,             only : xfh_update
- use m_pred_delocint,      only : pred_delocint
+ use m_scfcv,              only : scfcv_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
+ ese m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
  use m_pred_isokinetic,    only : pred_isokinetic
  use m_pred_diisrelax,     only : pred_diisrelax
@@ -69,8 +63,6 @@ module m_precpred_1geo
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
  use m_generate_training_set, only : generate_training_set
- use m_wvl_wfsinp, only : wvl_wfsinp_reformat
- use m_wvl_rho,      only : wvl_mkrho
 
  implicit none
 
@@ -107,34 +99,13 @@ contains
 !!   | nspden=number of spin-density components
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetry elements in space group
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=informations about MPI parallelization
-!!  nfftf=(effective) number of FFT grid points (for this processor)
-!!       for the "fine" grid (see NOTES below)
-!!  npwarr(nkpt)=number of planewaves in basis and boundary at this k point.
-!!  nattyp(ntypat)= # atoms of each type.
-!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!   | mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!
 !! OUTPUT
-!!  results_gs <type(results_gs_type)>=results (energy and its components,
-!!   forces and its components, the stress tensor) of a ground-state computation
-!!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
-!!  resid(mband*nkpt*nsppol)=residuals for each band over all k points.
 !!
 !! SIDE EFFECTS
 !! Rest of i/o is related to lda
-!!  cg(2,mcg)=array for planewave coefficients of wavefunctions.
-!!  initialized= if 0 the initialisation of the gstate run is not yet finished
-!!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  pawrhoij(natom*usepaw) <type(pawrhoij_type)>= -PAW only- atomic occupancies
-!!  occ(mband*nkpt*nsppol=occupation number for each band (usually 2) at each k point.
-!!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
-!!  symrec(3,3,nsym)=symmetry operations in reciprocal space
-!!  taug(2,nfftf*dtset%usekden)=array for Fourier transform of kinetic energy density
-!!  taur(nfftf,nspden*dtset%usekden)=array for kinetic energy density
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
 !!  verbose = optional, default is true, flag to disable the verbose mode
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file

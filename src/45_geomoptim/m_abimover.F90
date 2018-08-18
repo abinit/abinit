@@ -182,8 +182,12 @@ real(dp),pointer :: vis
 ! arrays
 ! Indices of AToms that are FIXed
 integer,pointer  :: iatfix(:,:)         ! iatfix(3,natom)
+! SYMmetries, Anti-FerroMagnetic characteristics
+integer,pointer  :: symafm(:)           ! symafm(nsym)
 ! SYMmetry in REaL space
 integer,pointer  :: symrel(:,:,:)       ! symrel(3,3,nsym)
+! Translation NON-Symmorphic vectors
+real(dp),pointer :: tnons(:,:)          ! tnons(3,nsym)
 ! TYPe of ATom
 integer,pointer  :: typat(:)            ! typat(natom)
 ! PRTint ATom LIST
@@ -193,7 +197,7 @@ integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
 ! List of PHonon FREEZe DISPlacement AMPLitude
 real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
-real(dp),pointer :: ph_qshift(:,:)       ! symrel(3,nsym)
+real(dp),pointer :: ph_qshift(:,:)       ! 
 ! Mass of each atom (NOT IN DTSET)
 real(dp),pointer :: amass(:)            ! amass(natom)
 ! Geometry Optimization Preconditioner PaRaMeters
@@ -467,8 +471,9 @@ subroutine abimover_ini(ab_mover,specs,&
 & natom,nconeq,nnos,nsym,ntypat,&
 & optcell,restartxf,signperm,ionmov,&
 & bmass,dtion,friction,mdwall,noseinert,strprecon,vis,&
-& iatfix,symrel,ph_freez_disp_addStrain,ph_freez_disp_ampl,&
-& ph_freez_disp_nampl,ph_freez_disp_option,ph_ngqpt,ph_nqshift,ph_qshift,typat,prtatlist,&
+& iatfix,symafm,symrel,ph_freez_disp_addStrain,ph_freez_disp_ampl,&
+& ph_freez_disp_nampl,ph_freez_disp_option,ph_ngqpt,ph_nqshift,ph_qshift,&
+& tnons,typat,prtatlist,&
 & amass,goprecprm,mdtemp,strtarget,qmass,znucl,fnameabi_hes,filnam_ds)
 
 !Arguments ------------------------------------
@@ -536,9 +541,13 @@ real(dp),target, intent(in) :: vis
 ! Indices of AToms that are FIXed
 integer,target, intent(in)  :: iatfix(:,:)         ! iatfix(3,natom)
 ! Qpoint grid
-integer,target,intent(in)  :: ph_ngqpt(:)         !  ph_ngqpt(3)
+integer,target,intent(in)  :: ph_ngqpt(:)          !  ph_ngqpt(3)
+! SYMmetries, Anti-FerroMagnetic characteristics
+integer,target, intent(in)  :: symafm(:)           ! symafm(nsym)
 ! SYMmetry in REaL space
 integer,target, intent(in)  :: symrel(:,:,:)       ! symrel(3,3,nsym)
+! Translation NON-Symmorphic vectors
+real(dp),target, intent(in) :: tnons(:,:)          ! tnons(3,nsym)
 ! TYPe of ATom
 integer,target, intent(in)  :: typat(:)            ! typat(natom)
 ! PRTint ATom LIST
@@ -627,7 +636,9 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !Indices of AToms that are FIXed
  ab_mover%iatfix=>iatfix(:,1:natom)
 !SYMmetry in REaL space
+ ab_mover%symafm=>symafm
  ab_mover%symrel=>symrel
+ ab_mover%tnons=>tnons
  !Phonon q grid in the DDB (ionmov 26 and 27)
  ab_mover%ph_freez_disp_addStrain=>ph_freez_disp_addStrain
  ab_mover%ph_freez_disp_option=>ph_freez_disp_option
@@ -1114,8 +1125,12 @@ subroutine abimover_nullify(ab_mover)
 !arrays
 ! Indices of AToms that are FIXed
  nullify(ab_mover%iatfix)
+! SYMmetries, Anti-FerroMagnetic characteristics
+ nullify(ab_mover%symafm)
 ! SYMmetry in REaL space
  nullify(ab_mover%symrel)
+! Translation NON-Symmorphic vectors
+ nullify(ab_mover%tnons)
 ! TYPe of ATom
  nullify(ab_mover%typat)
 ! TYPe of ATom
@@ -1272,15 +1287,19 @@ character(len=110)   :: fmt
 & 'RESTART Xcart and Fred',ab_mover%restartxf,ch10, &
 & 'Molecular Dynamics Initial Temperature',ab_mover%mdtemp(1),ch10, &
 & 'Molecular Dynamics Final Temperature',ab_mover%mdtemp(2),ch10, &
-& 'NOT DOCUMENTED',ab_mover%noseinert,ch10, &
+& 'NOSE thermostat INERTia factor',ab_mover%noseinert,ch10, &
 & 'STRess PRECONditioner',ab_mover%strprecon,ch10, &
 & 'VIScosity',ab_mover%vis,ch10
 
 ! ! arrays
 ! ! Indices of AToms that are FIXed
 ! integer,  pointer :: iatfix(:,:)
+! ! SYMmetries, Anti-FerroMagnetic characteristics
+! integer,  pointer :: symafm(:)
 ! ! SYMmetry in REaL space
 ! integer,  pointer :: symrel(:,:,:)
+! Translation NON-Symmorphic vectors
+! real(dp),  pointer :: tnons(:,:)
 ! ! Mass of each atom (NOT IN DTSET)
 ! real(dp), pointer :: amass(:)
 ! ! STRess TARGET
@@ -1288,7 +1307,7 @@ character(len=110)   :: fmt
 ! Filename for Hessian matrix
 ! character(len=fnlen), pointer :: fnameabi_hes
 
- write(iout,*) 'CONTENTS of ab_mover'
+ write(iout,*) 'CONTENT of ab_mover (scalar only)'
  write(iout,'(a)') message
 
 end subroutine abimover_print
