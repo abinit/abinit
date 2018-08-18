@@ -46,7 +46,7 @@ module m_precpred_1geo
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- ese m_pred_delocint,      only : pred_delocint
+ use m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
  use m_pred_isokinetic,    only : pred_isokinetic
  use m_pred_diisrelax,     only : pred_diisrelax
@@ -120,21 +120,21 @@ contains
 !! SOURCE
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,chkdilatmx,comm_cell,dilatmx,filnam_ds4,hmctt,&
-& icycle,iexit,itime,mttkvars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
+& icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
 & usewvl,xred,verbose)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'mover'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'precpred_1geo'
 !End of the abilint section
 
 implicit none
 
 !Arguments ------------------------------------
 !scalars
-integer, intent(in) :: comm_cell,chkdilatmx,hmctt,icycle,itime,nctime,ncycle,ntime
+integer, intent(in) :: comm_cell,chkdilatmx,hmctt,icycle,itime,nctime,ncycle,npsp,ntime
 integer, intent(inout) :: iexit,nerr_dilatmx
 integer, intent(in) :: usewvl
 real(dp), intent(in) :: dilatmx

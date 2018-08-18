@@ -856,7 +856,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       scfcv_args%mpi_enreg%comm_cell,
 &       scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
 &       scfcv_args%dtset%hmctt,&
-&       icycle,iexit,itime,mttkvars,nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
+&       icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
 &       scfcv_args%dtset%rprimd_orig,skipcycle,&
 &       scfcv_args%dtset%usewvl,xred,verbose=verbose) 
       endif
