@@ -2931,6 +2931,55 @@ end subroutine pawdiju
 !!
 !! OUTPUT
 !!  diju(cplex_rf*cplex_dij*lmn2_size,ndij)=  D_ij^U terms
+!!  diju_im(cplex_rf*cplex_dij*lmn2_size,ndij)=
+!!
+!! NOTES
+!! There are some subtleties :
+!!   Contrary to eijkl, eu_ijkl is not invariant with respect to the permutation of i <--> j or k <--> l.
+!!   So the correct expression of Dij is:
+!!
+!!     D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ji eu_jikl )
+!!
+!!   In the following, we will use that: (according to the rules in pawpuxinit.F90)
+!!    (a) eu_ijkl + eu_jikl =   eu_ijlk + eu_jilk (invariant      when exchanging k <--> l)
+!!    (b) eu_ijkl - eu_jikl = - eu_ijlk + eu_jilk (change of sign when exchanging k <--> l)
+!!   and :
+!!    (c) eu_iikl = eu_iilk (if i=j, invariant when exchanging k <--> l)
+!!    (d) eu_ijkk = eu_jikk (if k=l, invariant when exchanging i <--> j)
+!!
+!!   1) If cplex=1 (ipert=0 or q=0) we have simply:
+!!        rho_ji = rho_ij^*
+!!      So:
+!!           D_kl  = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ij^* eu_jikl )
+!!      As eu_ijkl is real:
+!! [I] :  Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!      So:
+!!        Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)  ( using (a) and (c) )
+!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)  ( using (b) and (c) )
+!!
+!!   2) If cplex=2 (so ipert>0 and q/=0), we have:
+!!        rho_ji = rhoA_ji + rhoB_ji
+!!      where:
+!!        rhoA_ji = rhoA_ij^*
+!!        rhoB_ji = rhoB_ij
+!!      So:
+!!           D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) (rhoA_ij^* + rhoB_ij) eu_jikl )
+!!      As eu_ijkl is real:
+!! [Ib] : Re(D_kl) = sum_i<=j Re(rho_ij)  ( eu_ijkl + (1-delta_ij) eu_jikl )  (same as [I])
+!! [II] : Im(D_kl) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!                 + sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!      where:
+!!        Im(rhoB_ij) is stored in the imaginary part of "pawrhoij%rhoijp(:)"
+!!        Im(rhoA_ij) is stored in the array "pawrhoij%rhoijim(:)"
+!!      We note:
+!!        Im(D_kl^A) = sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!        Im(D_kl^B) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!      We still have:
+!!        Re(D_kl)  =  Re(D_lk)
+!!      but:
+!!        Im(D_kl^A) = -Im(D_lk^A)  ( using (b) and (c) )
+!!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
 !! PARENTS
 !!      m_pawdij,pawdenpot,pawdfptenergy
@@ -2940,7 +2989,7 @@ end subroutine pawdiju
 !!
 !! SOURCE
 
-subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
+subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2956,12 +3005,15 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
  integer,intent(in) :: cplex_dij,cplex_rf,ndij
 !arrays
  real(dp),intent(out) :: diju(:,:)
+ real(dp),intent(out),optional :: diju_im(:,:)
  type(pawrhoij_type),intent(in) :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
 
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_rhoij,ilmn,ilmnp,irhoij,jlmn,jlmnp,jrhoij,kklmn,kklmn1,klmn,klmn1,lmn2_size,sig1,sig2
+ logical :: compute_diju_im
+ real(dp) :: ro_im
  character(len=500) :: msg
 !arrays
  real(dp) :: ro(cplex_rf)
@@ -2971,11 +3023,18 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
 !Useful data
  lmn2_size=pawtab%lmn2_size
  cplex_rhoij=pawrhoij%cplex
+ compute_diju_im=(cplex_rf==2.and.present(diju_im))
 
 !Check data consistency
  if (size(diju,1)/=cplex_rf*lmn2_size.or.size(diju,2)/=ndij) then
    msg='invalid sizes for diju!'
    MSG_BUG(msg)
+ end if
+ if (compute_diju_im) then
+   if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
+     msg='invalid sizes for diju_im !'
+     MSG_BUG(msg)
+   end if  
  end if
  if (cplex_rhoij<cplex_rf) then
    msg='cplex_rhoij must be >=cplex_rf!'
@@ -2991,6 +3050,7 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
 !------------------------------------------------------------------------
 
  diju=zero
+ if (compute_diju_im) diju_im = zero
 
 !Real on-site quantities
  if (cplex_rf==1) then
@@ -3005,27 +3065,13 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
          do jlmnp=1,pawtab%lmn_size
            do ilmnp=1,jlmnp
              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
-!
-!            There is a subtlety here : eu_ijkl is not invariant with respect to the permutation of i <--> j or k <--> l.
-!            However, we have :
-!              D_kl^U = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ij^* eu_jikl )
-!            As eu_ijkl is real:
-!              Re(D_kl^U) = sum_i<=j Re(rho_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
-!              Im(D_kl^U) = sum_i<=j Im(rho_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
-!            However, according to the rules in pawpuxinit.F90, one gets:
-!              eu_ijkl + eu_jikl =   eu_ijlk + eu_jilk (invariant      when exchanging k <--> l)
-!              eu_ijkl - eu_jikl = - eu_ijlk + eu_jilk (change of sign when exchanging k <--> l)
-!            and :
-!              eu_iikl = eu_iilk (if i=j, invariant when exchanging k <--> l)
-!              eu_ijkk = eu_jikk (if k=l, invariant when exchanging i <--> j)
-!            So:
-!              Re(D_kl^U) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk^U)
-!              Im(D_kl^U) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk^U)
-!
+
+!            Thanks to Eq.[I] in the comment above:
              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
              if (ilmn/=jlmn) then
                diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
              end if
+
            end do
          end do
          jrhoij=jrhoij+cplex_rhoij
@@ -3047,11 +3093,23 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab)
            do ilmnp=1,jlmnp
              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
              kklmn1 = klmn1 + lmn2_size
+             ro_im = pawrhoij%rhoijim(klmn1,sig2)
+
+!            Thanks to Eq.[I] in the comment above:
              diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
              diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             if (compute_diju_im) then
+               diju_im(klmn1,sig1)=diju_im(klmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             end if
+
              if (ilmn/=jlmn) then
                diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               if (compute_diju_im) then 
+                   diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               end if
              end if
            end do
          end do

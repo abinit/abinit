@@ -181,13 +181,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  integer :: klmn,lm_size_a,lm_size_b,nlmn2_dij1,mesh_size,my_comm_atom,nspden,nspdiag
  integer :: opt_compch,optexc,optvxc,usecore,usepawu,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: compch,eexc,eexc_im
+ real(dp) :: compch,eexc,dij_im,eexc_im,ro_im
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_a(:),lmselect_b(:),lmselect_tmp(:)
  real(dp) :: dij(2),delta_energy_h(2),delta_energy_u(2),delta_energy_xc(2),ro(2),tsec(2)
- real(dp),allocatable :: kxc_dum(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+ real(dp),allocatable :: diju_im(:,:),kxc_dum(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
 
 ! *************************************************************************
 
@@ -431,9 +431,15 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      ABI_CHECK(paw_ij1(iatom)%cplex_dij==1,'cplex_dij not yet available!')
      ABI_CHECK(paw_ij1(iatom)%ndij/=4,'ndij not yet available!')
 !    If DijU are not in memory, compute them
-     if (paw_ij1(iatom)%has_dijU/=2) then
-       call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,paw_ij1(iatom)%ndij,&
-&            pawrhoij_a(iatom),pawtab(itypat))
+     if (paw_ij1(iatom)%has_dijU/=2.or.cplex_diju1/=1) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
+       if (cplex_diju1/=1) then
+         ABI_ALLOCATE(diju_im,(pawtab(itypat)%lmn2_size,paw_ij1(iatom)%ndij))
+         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
+&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat),diju_im=diju_im)
+       else
+         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
+&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
+       end if
        paw_ij1(iatom)%has_dijU=2
      end if
      if (cplex_diju1==1) then
@@ -444,10 +450,10 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
            dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
            ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
            delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)
-           if (cplex_b==2) then
-             ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-             delta_energy_u(2)=delta_energy_u(2)+ro(2)*dij(1)
-           end if
+!          The imaginary part is not implemented (because not used)
+!          if (cplex_b==2) then
+!            ...
+!          end if
            jrhoij=jrhoij+cplex_b
          end do
        end do
@@ -458,17 +464,24 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
            klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
            dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
            dij(2)=paw_ij1(iatom)%dijU(klmn+nlmn2_dij1,ispden)
-           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)
-           delta_energy_u(2)=delta_energy_u(2)-ro(1)*dij(2)
-           if (cplex_b==2) then
-             ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-             delta_energy_u(1)=delta_energy_u(1)+ro(2)*dij(2)
-             delta_energy_u(2)=delta_energy_u(2)+ro(2)*dij(1)
+           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)
+           if (cplex_b==1) then
+             delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)*pawtab(itypat)%dltij(klmn)
+           else
+             ro_im = pawrhoij_b(iatom)%rhoijim(klmn,ispden)
+             if (abs(pawtab(itypat)%dltij(klmn)-1)<tol14) then ! case i=j
+               delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)+(ro(2)+ro_im)*dij(2)
+             else ! case i/=j (factor of two for taking into account dltij)
+               dij_im = diju_im(klmn,ispden)
+               delta_energy_u(1)=delta_energy_u(1)+two*ro(1)*dij(1)           ! re  * re
+               delta_energy_u(1)=delta_energy_u(1)+two*ro_im*dij_im           ! ima * ima
+               delta_energy_u(1)=delta_energy_u(1)+two*ro(2)*(dij(2)-dij_im)  ! imb * imb
+             end if
            end if
            jrhoij=jrhoij+cplex_b
          end do
        end do
+       ABI_DEALLOCATE(diju_im)
      end if
    end if
 
