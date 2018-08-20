@@ -1806,14 +1806,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  new%mu_e = ebands%fermie
 
  ! TODO T == 0 >> SIGSEGV
-#if 0
+ !#if 0
  call ebands_copy(ebands, tmp_ebands)
  do it=1,new%ntemp
    call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
    new%mu_e(it) = tmp_ebands%fermie
  end do
  call ebands_free(tmp_ebands)
-#endif
+ !#endif
 
  ! Frequency mesh for sigma(w) and spectral function.
  ! TODO: Use GW variables but change default

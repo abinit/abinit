@@ -213,8 +213,13 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    !normal evaluation of occupations and entropy
 
 !  Compute the arguments of the occupation and entropy functions
-   arg(:)=(fermie-eigen(1:bantot))*tsmearinv
-
+!  HM 20/08/2018 Treat the T --> 0 limit
+   if (tsmearinv > huge(tsmearinv)) then
+     arg(:)=sign(huge(tsmearinv),fermie-eigen(1:bantot))
+   else
+     arg(:)=(fermie-eigen(1:bantot))*tsmearinv
+   endif
+ 
 !  Compute the values of the occupation function, and the entropy function
 !  Note : splfit also takes care of the points outside of the interval,
 !  and assign to them the value of the closest extremal point,
