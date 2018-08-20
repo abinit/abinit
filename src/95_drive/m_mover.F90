@@ -236,8 +236,8 @@ type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,ntime,option,comm
+integer :: icenter,irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: nloop,nshell,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -376,7 +376,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  end if
 
  
- if(ab_mover%ionmov==10 .or ab_mover%ionmov==11)then
+ if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
 !Should create a separate subroutine
 !  call deloc_ini(deloc, )
    nshell=3
@@ -873,12 +873,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
      if(.false.)then
-       call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),&
+       call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),deloc,&
 &       scfcv_args%dtset%chkdilatmx,&
-&       scfcv_args%mpi_enreg%comm_cell,
+&       scfcv_args%mpi_enreg%comm_cell,&
 &       scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
 &       hist,scfcv_args%dtset%hmctt,&
-&       icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
+&       icycle,iexit,itime,mttk_vars,&
+&       scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
 &       scfcv_args%dtset%rprimd_orig,skipcycle,&
 &       scfcv_args%dtset%usewvl,xred,verbose=verbose) 
       endif

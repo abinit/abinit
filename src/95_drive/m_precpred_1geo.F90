@@ -119,7 +119,7 @@ contains
 !!
 !! SOURCE
 
-subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
+subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
 & usewvl,xred,verbose)
 
@@ -144,6 +144,7 @@ character(len=fnlen), intent(in) :: filnam_ds4
 type(ab_xfh_type),intent(inout) :: ab_xfh
 type(abihist), intent(inout) :: hist
 type(abimover), intent(in) :: ab_mover
+type(delocint), intent(inout) :: deloc
 type(mttk_type), intent(inout) :: mttk_vars
 !arrays
 
@@ -202,7 +203,7 @@ type(crystal_t) :: crystal
    case (9)
      call pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle)
    case (10,11)
-     call pred_delocint(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
+     call pred_delocint(ab_mover,ab_xfh,deloc,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
    case (12)
      call pred_isokinetic(ab_mover,hist,itime,ntime,DEBUG,iexit)
    case (13)
@@ -240,7 +241,7 @@ type(crystal_t) :: crystal
 
  ! check dilatmx here and correct if necessary
  if (usewvl == 0) then
-   call chkdilatmx(dt_chkdilatmx,dilatmx,rprimd,rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
+   call chkdilatmx(dt_chkdilatmx,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
    _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
    if (LEN_TRIM(dilatmx_errmsg) /= 0) then
      MSG_WARNING(dilatmx_errmsg)
