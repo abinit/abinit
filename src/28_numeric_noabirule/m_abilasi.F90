@@ -3461,7 +3461,7 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The ESSL routine dgeicd failed.',ch10,&
-&   '  Action : Contact ABINIT group '
+&   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 
@@ -3474,7 +3474,7 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The ASL routine dbgmlu failed.',ch10,&
-&   '  Action : Contact ABINIT group '
+&   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
  call dbgmdi(a,lda,n,ipvt,det,-1,work,ierr)
@@ -3484,7 +3484,7 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The ASL routine dbgmdi failed.',ch10,&
-&   '  Action : Contact ABINIT group '
+&   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 
@@ -3497,7 +3497,7 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The LAPACK routine dgetrf failed.',ch10,&
-&   '  Action : Contact ABINIT group '
+&   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
  call dgetri(n,a,lda,ipvt,work,n,ierr)
@@ -3507,7 +3507,7 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The LAPACK routine dgetri failed.',ch10,&
-&   '  Action : Contact ABINIT group '
+&   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 

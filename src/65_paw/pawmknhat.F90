@@ -92,7 +92,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
- use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
  use m_fft,          only : zerosym
  use m_distribfft,   only : distribfft_type, init_distribfft_seq, destroy_distribfft
 
@@ -100,7 +100,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat'
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmknhat
 !End of the abilint section

@@ -38,7 +38,8 @@ module m_iogkk
 
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
- use m_geometry,        only : phdispl_cart2red
+ use m_symtk,           only : mati3inv, littlegroup_q
+ use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_dynmat,          only : d2sym3
@@ -103,9 +104,6 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 #undef ABI_FUNC
 #define ABI_FUNC 'read_gkk'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1474,6 +1472,829 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
  ABI_DEALLOCATE(tmpval)
 
 end subroutine completeperts
+!!***
+
+!!****f* ABINIT/normsq_gkq
+!!
+!! NAME
+!! normsq_gkq
+!!
+!! FUNCTION
+!! This routine takes the gkq matrix elements for a given qpoint,
+!!   does the scalar product with the phonon displacement vector,
+!!   squares the gkq matrix elements multiplies by the appropriate weights
+!!   and puts them in a uniform (atom,icart) basis
+!!
+!! INPUTS
+!!   displ_red = phonon mode displacement vectors in reduced coordinated.
+!!   eigvec = eigenvectors of phonons (to turn to cartesian coord frame)
+!!   elph_ds = datastructure with gkk matrix elements
+!!   FSfullpqtofull = mapping of k + q to k
+!!   h1_mat_el_sq = matrix elements $<psi_{k+q,m} | H^{1} | psi_{k,n}>$ matrix-squared
+!!   iqptirred = index of present qpoint
+!!   phfrq_tmp = phonon frequencies
+!!   qpt_irred = array of qpoint coordinates
+!!
+!! OUTPUT
+!!   elph_ds%gkq filled
+!!   qdata(elph_ds%nbranch,elph_ds%nsppol,3) = array containing the phonon frequency, the linewidth and $\lambda_{q,\nu}$.
+!!
+!! PARENTS
+!!      read_gkk
+!!
+!! CHILDREN
+!!      gam_mult_displ,nmsq_gam,nmsq_gam_sumfs,nmsq_pure_gkk
+!!      nmsq_pure_gkk_sumfs,wrtout,xmpi_sum,zhpev
+!!
+!! SOURCE
+
+subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
+&    h1_mat_el_sq,iqptirred,phfrq_tmp,qpt_irred,qdata)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'normsq_gkq'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqptirred
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(in) :: eigvec(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(inout) :: &
+& h1_mat_el_sq(2,elph_ds%nFSband*elph_ds%nFSband,elph_ds%nbranch*elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol)
+ real(dp),intent(in) :: phfrq_tmp(elph_ds%nbranch),qpt_irred(3,elph_ds%nqptirred)
+ real(dp),intent(out) :: qdata(elph_ds%nbranch,elph_ds%nsppol,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,ier,ii,isppol,jbranch,comm
+ real(dp) :: lambda_tot
+ character(len=500) :: message
+!arrays
+ real(dp) :: accum_mat(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp) :: accum_mat2(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp) :: gam_now2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: lambda(elph_ds%nsppol)
+ real(dp),allocatable :: matrx(:,:),val(:),vec(:,:,:)
+ real(dp),allocatable :: zhpev1(:,:),zhpev2(:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ accum_mat  = zero
+ accum_mat2 = zero
+ comm = xmpi_world
+
+ if (elph_ds%ep_scalprod == 1) then
+!
+   if (elph_ds%ep_keepbands == 0) then
+     call wrtout(std_out,' normsq_gkq : calling nmsq_gam_sumFS',"COLL")
+     call nmsq_gam_sumFS (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
+&     h1_mat_el_sq,iqptirred)
+
+   else if (elph_ds%ep_keepbands == 1) then
+     call wrtout(std_out,' normsq_gkq : calling nmsq_gam',"COLL")
+     call nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
+&     h1_mat_el_sq,iqptirred)
+
+   else
+     write (message,'(a,i0)')' Wrong value for elph_ds%ep_keepbands = ',elph_ds%ep_keepbands
+     MSG_BUG(message)
+   end if
+!
+ else if (elph_ds%ep_scalprod == 0) then  ! Interpolate on the pure "matrix of matrix elements" and do the scalar products later.
+!
+   if (elph_ds%ep_keepbands == 0) then
+     call wrtout(std_out,' normsq_gkq : calling nmsq_pure_gkk_sumFS',"COLL")
+     call nmsq_pure_gkk_sumFS (accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
+&     h1_mat_el_sq,iqptirred)
+
+   else if (elph_ds%ep_keepbands == 1) then
+     call wrtout(std_out,' normsq_gkq : calling nmsq_pure_gkk',"COLL")
+
+     call nmsq_pure_gkk (accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
+&     h1_mat_el_sq,iqptirred)
+   else
+     write (message,'(a,i0)')' Wrong value for elph_ds%ep_keepbands = ',elph_ds%ep_keepbands
+     MSG_BUG(message)
+   end if
+!
+ else
+   write (message,'(a,i0)')' Wrong value for elph_ds%ep_scalprod = ',elph_ds%ep_scalprod
+   MSG_BUG(message)
+ end if
+!end if flag for doing scalar product now.
+
+
+!MG: values without the good prefactor
+ accum_mat = accum_mat * elph_ds%occ_factor/elph_ds%k_phon%nkpt
+
+!MG: accum_mat2 contains the line-widhts before the Fourier interpolation
+ accum_mat2 = accum_mat2 * elph_ds%occ_factor/elph_ds%k_phon%nkpt
+
+!mpi sum over procs for accum_mat2
+ call xmpi_sum (accum_mat, comm, ier)
+ call xmpi_sum (accum_mat2, comm, ier)
+
+!MG20060531i
+!write e-ph quantities before Fourier interpolation
+!save e-ph values in the temporary array qdata that will be copied into elph_ds%qgrid_data
+
+ write (message,'(4a,3es16.6,63a)')ch10,                  &
+& ' Phonon linewidths before interpolation ',ch10,        &
+& ' Q point = ',qpt_irred(:,iqptirred),ch10,('=',ii=1,60),ch10,&
+& ' Mode          Frequency (Ha)  Linewidth (Ha)  Lambda '
+ call wrtout(std_out,message,'COLL')
+
+ lambda_tot = zero
+ do isppol=1,elph_ds%nsppol
+   do ii=1,elph_ds%nbranch
+     lambda(isppol)=zero
+!    MG: the tolerance factor is somehow arbitrary
+     if (abs(phfrq_tmp(ii)) > tol10) lambda(isppol)=accum_mat2(1,ii,ii,isppol)/&
+&     (pi*elph_ds%n0(isppol)*phfrq_tmp(ii)**2)
+     lambda_tot=lambda_tot+lambda(isppol)
+     write(message,'(i8,es20.6,2es16.6)' )ii,phfrq_tmp(ii),accum_mat2(1,ii,ii,isppol),lambda(isppol)
+     call wrtout(std_out,message,'COLL')
+!    save values
+     qdata(ii,isppol,1)=phfrq_tmp(ii)
+     qdata(ii,isppol,2)=accum_mat2(1,ii,ii,isppol)
+     qdata(ii,isppol,3)=lambda(isppol)
+   end do !loop over branch
+ end do !loop over sppol
+
+!normalize for number of spins
+ lambda_tot = lambda_tot / elph_ds%nsppol
+
+ write(message,'(61a,44x,es16.6,62a)' )('=',ii=1,60),ch10,lambda_tot,ch10,('=',ii=1,60),ch10
+ call wrtout(std_out,message,'COLL')
+!ENDMG20060531
+
+!immediately calculate linewidths:
+ write(std_out,*) 'summed accum_mat = '
+ write(std_out,'(3(2E18.6,1x))') accum_mat(:,:,:,1)
+ write(std_out,*) 'summed accum_mat2 = '
+ write(std_out,'(3(2E18.6,1x))')  (accum_mat2(:,ii,ii,1),ii=1,elph_ds%nbranch)
+ write(std_out,*) 'displ_red  = '
+ write(std_out,'(3(2E18.6,1x))') displ_red
+
+ if (elph_ds%ep_scalprod == 1) then
+   do isppol=1,elph_ds%nsppol
+!    Diagonalize gamma matrix at qpoint (complex matrix). Copied from dfpt_phfrq
+     ier=0
+     ii=1
+     ABI_ALLOCATE(matrx,(2,(elph_ds%nbranch*(elph_ds%nbranch+1))/2))
+     do i2=1,elph_ds%nbranch
+       do i1=1,i2
+         matrx(1,ii)=accum_mat2(1,i1,i2,isppol)
+         matrx(2,ii)=accum_mat2(2,i1,i2,isppol)
+         ii=ii+1
+       end do
+     end do
+     ABI_ALLOCATE(zhpev1,(2,2*elph_ds%nbranch-1))
+     ABI_ALLOCATE(zhpev2,(3*elph_ds%nbranch-2))
+     ABI_ALLOCATE(val,(elph_ds%nbranch))
+     ABI_ALLOCATE(vec,(2,elph_ds%nbranch,elph_ds%nbranch))
+     call ZHPEV ('V','U',elph_ds%nbranch,matrx,val,vec,elph_ds%nbranch,zhpev1,zhpev2,ier)
+
+     write (std_out,*) ' normsq_gkq : accumulated eigenvalues isppol ',isppol, ' = '
+     write (std_out,'(3E18.6)') val
+     ABI_DEALLOCATE(matrx)
+     ABI_DEALLOCATE(zhpev1)
+     ABI_DEALLOCATE(zhpev2)
+     ABI_DEALLOCATE(vec)
+     ABI_DEALLOCATE(val)
+   end do ! isppol
+
+ else if (elph_ds%ep_scalprod == 0) then
+
+
+   do isppol=1,elph_ds%nsppol
+     call gam_mult_displ(elph_ds%nbranch, displ_red, accum_mat(:,:,:,isppol), gam_now2)
+
+     write (std_out,*) ' normsq_gkq : accumulated eigenvalues isppol ', isppol, ' = '
+     write (std_out,'(3(E14.6,1x))') (gam_now2(1,jbranch,jbranch), jbranch=1,elph_ds%nbranch)
+     write (std_out,*) ' normsq_gkq : imag part = '
+     write (std_out,'(3(E14.6,1x))') (gam_now2(2,jbranch,jbranch), jbranch=1,elph_ds%nbranch)
+   end do ! isppol
+
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine normsq_gkq
+!!***
+
+!!****f* ABINIT/nmsq_gam
+!!
+!! NAME
+!! nmsq_gam
+!!
+!! FUNCTION
+!!  Calculate gamma matrices keeping full dependence on bands
+!!  from original h1_mat_el_sq matrix elements (no averaging over
+!!  bands near the Fermi surface)
+!!
+!! INPUTS
+!!   displ_red = phonon mode displacement vectors, post-multiplied by gprim matrix
+!!     (ie. turned to reduced coordinates)
+!!   eigvec = phonon eigenvectors
+!!   elph_ds = datastructure with gkk matrix elements
+!!   FSfullpqtofull = mapping of k+q to k
+!!   kpt_phon = coordinates of kpoints near to FS
+!!   h1_mat_el_sq = matrix elements $<psi_{k+q,m} | H^{1} | psi_{k,n}>$ squared
+!!   iqptirred = index of present qpoint
+!!
+!! OUTPUT
+!!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
+!!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
+!!
+!! PARENTS
+!!      normsq_gkq
+!!
+!! CHILDREN
+!!      gam_mult_displ,zgemm
+!!
+!! SOURCE
+
+subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
+&  h1_mat_el_sq,iqptirred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nmsq_gam'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqptirred
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(in) :: eigvec(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(inout) :: &
+& h1_mat_el_sq(2,elph_ds%nFSband*elph_ds%nFSband,elph_ds%nbranch*elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat2(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+
+!Local variables-------------------------------
+! tmp variables for diagonalization
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ibranch,isppol,ipert1
+ integer :: jbranch
+ integer :: iqpt_fullbz
+ integer :: ik_this_proc
+ real(dp) :: sd1,sd2
+ character(len=500) :: message
+!arrays
+ real(dp) :: gkq_1band(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_mat2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: zgemm_tmp_mat(2,elph_ds%nbranch,elph_ds%nbranch)
+
+! *************************************************************************
+
+ if (elph_ds%ep_keepbands == 0) then
+   write (message,'(a,i0)')' elph_ds%ep_keepbands should be 1 while is ',elph_ds%ep_keepbands
+   MSG_ERROR(message)
+ end if
+
+!MG20060603 NOTE:
+!accum_mat and accum_mat2 are real, the imaginary part is used for debugging purpose
+!accum_mat2 is used to store the phonon-linewidhts before interpolation
+
+ iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
+ write(std_out,*) 'nmsq_gam : iqptirred = ', iqptirred
+
+ do isppol=1,elph_ds%nsppol
+   do ik_this_proc =1, elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     do ib1=1,elph_ds%nFSband
+       sd1 = elph_ds%k_phon%wtk(ib1,ikpt_phon,isppol) !weights for distance from the fermi surface
+
+       do ib2=1,elph_ds%nFSband
+         sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol) !weights for distance from the fermi surface
+         ibeff = ib2+elph_ds%nFSband*(ib1-1)
+
+         gkq_1band(:,:,:) = zero
+
+         zgemm_tmp_mat= reshape (h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+
+         call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
+
+!        sum over bands
+         do ipert1=1,elph_ds%nbranch
+           gkq_1band(1,ipert1,ipert1) = gkq_1band(1,ipert1,ipert1) + tmp_mat2(1,ipert1,ipert1)
+         end do
+
+!        summing over k points and bands, still diagonal in jbranch
+         accum_mat(:,:,:,isppol) = accum_mat(:,:,:,isppol) + gkq_1band(:,:,:)*sd1*sd2
+
+!        MG20060603 : summing over bands and kpoints with weights to calculate the phonon linewidth
+         do jbranch=1,elph_ds%nbranch
+           accum_mat2(:,jbranch,jbranch,isppol) = accum_mat2(:,jbranch,jbranch,isppol) + gkq_1band(:,jbranch,jbranch)*sd1*sd2
+         end do
+!        END MG
+
+
+!        now turn to cartesian coordinates
+
+!        Final Gamma matrix (hermitian) = E * D_g * E^{+}
+!        Where E^{+} is the hermitian conjugate of the eigenvector matrix E
+!        And D_g is the diagonal matrix of values of gamma for this qpoint
+
+!        Here gkq_1band is indexed with real phonon modes (not atom+idir)
+!        turn gkq_1band to atom+cartesian coordinates (instead of normal coordinates for qpoint)
+         tmp_mat2(:,:,:) = zero
+         do ibranch =1,elph_ds%nbranch
+           do jbranch =1,elph_ds%nbranch
+             tmp_mat2(1,ibranch,jbranch) = tmp_mat2(1,ibranch,jbranch) + &
+&             eigvec(1,ibranch,jbranch) * gkq_1band(1,jbranch,jbranch)
+             tmp_mat2(2,ibranch,jbranch) = tmp_mat2(2,ibranch,jbranch) + &
+&             eigvec(2,ibranch,jbranch) * gkq_1band(1,jbranch,jbranch)
+           end do
+         end do
+         gkq_1band(:,:,:) = zero
+
+!        here eigvec is transposed and complexconjugated.
+         zgemm_tmp_mat=zero
+         call zgemm('n','c',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,cone,&
+&         tmp_mat2,elph_ds%nbranch,eigvec,elph_ds%nbranch,czero,zgemm_tmp_mat,elph_ds%nbranch)
+
+         gkq_1band = zgemm_tmp_mat
+
+!        gamma matrix contribution in cartesian coordinates (ie interpolatable form)
+         h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol) = reshape(gkq_1band,(/2,elph_ds%nbranch*elph_ds%nbranch/))
+
+       end do
+     end do
+!    END loop over bands ib1 ib2
+
+   end do
+!  END loop over kpt_phon
+ end do
+!END loop over nsppol
+
+
+end subroutine nmsq_gam
+!!***
+
+!!****f* ABINIT/nmsq_gam_sumfs
+!!
+!! NAME
+!! nmsq_gam_sumfs
+!!
+!! FUNCTION
+!!  Calculate gamma matrices from original h1_mat_el_sq matrix
+!!  elements averaging over bands near the Fermi surface
+!!
+!! INPUTS
+!!   displ_red = phonon mode displacement vectors, post-multiplied by gprim matrix
+!!     (ie. turned to reduced coordinates)
+!!   eigvec = eigenvectors of phonons (to turn to cartesian coord frame)
+!!   elph_ds = datastructure with gkk matrix elements
+!!   FSfullpqtofull = mapping of k+q to k
+!!   kpt_phon = coordinates of kpoints near to FS
+!!   h1_mat_el_sq = matrix elements $<psi_{k+q,m} | H^{1} | psi_{k,n}>$ squared
+!!   iqptirred = index of present qpoint
+!!
+!! OUTPUT
+!!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
+!!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
+!!
+!! PARENTS
+!!      normsq_gkq
+!!
+!! CHILDREN
+!!      gam_mult_displ,zgemm
+!!
+!! SOURCE
+
+subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
+&   h1_mat_el_sq,iqptirred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nmsq_gam_sumFS'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqptirred
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(in) :: eigvec(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(inout) :: &
+& h1_mat_el_sq(2,elph_ds%nFSband*elph_ds%nFSband,elph_ds%nbranch*elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat2(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ibranch,ipert1,isppol,jbranch,iqpt_fullbz
+ integer :: ik_this_proc
+ real(dp) :: sd1,sd2
+ character(len=500) :: message
+!arrays
+ real(dp) :: gkq_sum_bands(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_gkq_sum_bands(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_mat2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),allocatable :: zgemm_tmp_mat(:,:,:)
+
+! *************************************************************************
+
+ if (elph_ds%ep_keepbands /= 0) then
+   write (message,'(a,i0)')' elph_ds%ep_keepbands should be 0 in order to average over bands!',elph_ds%ep_keepbands
+   MSG_ERROR(message)
+ end if
+
+ iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
+
+
+!MG20060603 NOTE:
+!accum_mat and accum_mat2 are real, the imaginary part is used for debugging purpose
+!accum_mat2 is used to store the phonon-linewidhts before interpolation
+
+ ABI_ALLOCATE(zgemm_tmp_mat ,(2,elph_ds%nbranch,elph_ds%nbranch))
+
+ do isppol=1,elph_ds%nsppol
+   do ik_this_proc =1, elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     gkq_sum_bands = zero
+     tmp_gkq_sum_bands = zero
+
+
+     do ib1=1,elph_ds%nFSband
+!      weights for distance from the fermi surface
+       sd1 = elph_ds%k_phon%wtk(ib1,ikpt_phon,isppol)
+
+       do ib2=1,elph_ds%nFSband
+!        weights for distance from the fermi surface
+         sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
+         ibeff=ib2+(ib1-1)*elph_ds%nFSband
+
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+
+         call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
+
+!        sum over bands in gkq_sum_bands
+         do ipert1=1,elph_ds%nbranch
+           gkq_sum_bands(1,ipert1,ipert1) = gkq_sum_bands(1,ipert1,ipert1) + sd1*sd2*tmp_mat2(1,ipert1,ipert1)
+         end do
+
+
+
+       end do
+     end do
+!    END loop over bands
+
+!    summing over k points, still diagonal in jbranch
+     accum_mat(:,:,:,isppol) = accum_mat(:,:,:,isppol) + gkq_sum_bands(:,:,:)
+     accum_mat2(:,:,:,isppol) = accum_mat2(:,:,:,isppol) + gkq_sum_bands(:,:,:)
+
+!    summed over bands, now turn to cartesian coordinates
+
+!    Final Gamma matrix (hermitian) = E * D_g * E^{+}
+!    Where E^{+} is the hermitian conjugate of the eigenvector matrix E
+!    And D_g is the diagonal matrix of values of gamma for this qpoint
+
+!    Here gkq_sum_bands is indexed with real phonon modes (not atom+idir)
+!    turn gkq_sum_bands to atom+cartesian coordinates (instead of normal coordinates for qpoint)
+!    This is not a full matrix multiplication, just vector one, by
+!    gkq_sum_bands(1,jbranch,jbranch)
+     tmp_mat2(:,:,:) = zero
+     do ibranch =1,elph_ds%nbranch
+       do jbranch =1,elph_ds%nbranch
+         tmp_mat2(1,ibranch,jbranch) = tmp_mat2(1,ibranch,jbranch) + &
+&         eigvec(1,ibranch,jbranch) * &
+&         gkq_sum_bands(1,jbranch,jbranch)
+         tmp_mat2(2,ibranch,jbranch) = tmp_mat2(2,ibranch,jbranch) + &
+&         eigvec(2,ibranch,jbranch) * &
+&         gkq_sum_bands(1,jbranch,jbranch)
+       end do
+     end do
+
+!    here eigvec is transposed and complex conjugated.
+     zgemm_tmp_mat=zero
+     call zgemm('n','c',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,cone,&
+&     tmp_mat2,elph_ds%nbranch,eigvec,elph_ds%nbranch,czero,zgemm_tmp_mat,elph_ds%nbranch)
+
+     gkq_sum_bands = zgemm_tmp_mat
+
+!    ! gamma matrix contribution in cartesian coordinates (ie interpolatable form)
+!    gamma matrix contribution in reduced coordinates (ie interpolatable form)
+     h1_mat_el_sq(:,1,:,ik_this_proc,isppol) = reshape(gkq_sum_bands(:,:,:),(/2,elph_ds%nbranch*elph_ds%nbranch/))
+
+!    accum_mat(:,:,:,isppol) = accum_mat(:,:,:,isppol) + gkq_sum_bands(:,:,:)
+   end do
+!  END loop over kpt_phon
+ end do
+!END loop over sppol
+
+ ABI_DEALLOCATE(zgemm_tmp_mat)
+
+end subroutine nmsq_gam_sumFS
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/nmsq_pure_gkk
+!!
+!! NAME
+!! nmsq_pure_gkk
+!!
+!! FUNCTION
+!!  Calculate gamma matrices for pure gkk case, ie when the
+!!  scalar product with the displacement vector is done later
+!!  Sum over bands is carried out later.
+!!
+!! INPUTS
+!!   displ_red = phonon displacement in reduced coordinates (used to calculate the ph linewidth)
+!!   elph_ds = datastructure with gkk matrix elements
+!!   FSfullpqtofull = mapping of k+q to k
+!!   kpt_phon = coordinates of kpoints near to FS
+!!   h1_mat_el_sq = matrix elements $<psi_{k+q,m} | H^{1} | psi_{k,n}>$ squared
+!!   iqptirred = index of present qpoint
+!!
+!! OUTPUT
+!!   elph_ds%gkq filled
+!!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
+!!   accum_mat2 = complex array whose real part contains the phonon linewidth
+!!
+!! PARENTS
+!!      normsq_gkq
+!!
+!! CHILDREN
+!!      gam_mult_displ
+!!
+!! SOURCE
+
+subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
+&   h1_mat_el_sq,iqptirred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nmsq_pure_gkk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqptirred
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(inout) :: &
+& h1_mat_el_sq(2,elph_ds%nFSband*elph_ds%nFSband,elph_ds%nbranch*elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat2(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ipert1,isppol
+ integer :: iqpt_fullbz
+ integer :: ik_this_proc
+ real(dp) :: sd1,sd2
+ character(len=500) :: message
+!arrays
+ real(dp) :: gkq_sum_bands(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_mat2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: zgemm_tmp_mat(2,elph_ds%nbranch,elph_ds%nbranch)
+
+! *************************************************************************
+
+ if (elph_ds%ep_keepbands /= 1) then
+   message = ' elph_ds%ep_keepbands should be 1 to keep bands!'
+   MSG_ERROR(message)
+ end if
+
+ iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
+
+!h1_mat_el_sq is already fine here - nothing to do
+
+
+!MG20060603 NOTE:
+!accum_mat and accum_mat2 are real, the imaginary part is used for debugging purpose
+!accum_mat2 is used to store the phonon-linewidhts before interpolation
+
+!MJV 20070525 NOTE:
+!in some of the nmsq routines, in particular this one, the work done to
+!calculate accum_mat,accum_mat2 is completely superfluous and will be re-done
+!on the interpolated values.
+!MG uses them for the QPT output, however, so keep it for consistency for the
+!moment.
+
+ do isppol=1,elph_ds%nsppol
+   do ik_this_proc =1, elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     gkq_sum_bands(:,:,:) = zero
+
+!    gkq_sum_bands = \sum_{ib1,ib2} \langle k+q \mid H^{(1)}_{q,\tau_i,\alpha_i} \mid k   \rangle
+!    \cdot \langle k   \mid H^{(1)}_{q,\tau_j,\alpha_j} \mid k+q \rangle
+!    where ibranch -> \tau_i,\alpha_i  and  jbranch -> \tau_j,\alpha_j
+
+     do ib1=1,elph_ds%nFSband
+
+       sd1 = elph_ds%k_phon%wtk(ib1,ikpt_phon,isppol)      !  weights for distance from the fermi surface
+
+       do ib2=1,elph_ds%nFSband
+
+         sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)  !  weights for distance from the fermi surface
+         ibeff = ib2+(ib1-1)*elph_ds%nFSband
+
+         gkq_sum_bands = gkq_sum_bands + &
+&         sd1*sd2*reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+
+       end do !ib2
+     end do !ib1
+!    END loops over bands
+
+
+     accum_mat(:,:,:,isppol) = accum_mat(:,:,:,isppol) + gkq_sum_bands(:,:,:)
+   end do
+!  END loop over kpt_phon
+
+!  MG20060603
+!  do scalar product with the displ_red to calculate the ph lwdth before interpolation (stored in accum_mat2)
+
+   zgemm_tmp_mat = accum_mat(:,:,:,isppol)
+
+   call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
+
+   do ipert1=1,elph_ds%nbranch
+     accum_mat2(1,ipert1,ipert1,isppol) = accum_mat2(1,ipert1,ipert1,isppol) + tmp_mat2(1,ipert1,ipert1)
+   end do
+
+!  ENDMG
+
+ end do ! isppol
+
+end subroutine nmsq_pure_gkk
+!!***
+
+!!****f* ABINIT/nmsq_pure_gkk_sumfs
+!!
+!! NAME
+!! nmsq_pure_gkk_sumfs
+!!
+!! FUNCTION
+!!  Calculate gamma matrices for pure gkk case, i.e, when the
+!!  scalar product with the displacement vector is done later
+!!  Sum over bands is carried out now.
+!!
+!! INPUTS
+!!   displ_red = phonon displacement in reduced coordinates (used to calculate the ph linewidth)
+!!   elph_ds = datastructure with gkk matrix elements
+!!   FSfullpqtofull = mapping of k+q to k
+!!   kpt_phon = coordinates of kpoints near to FS
+!!   h1_mat_el_sq = matrix elements $<psi_{k+q,m} | H^{1} | psi_{k,n}>$ squared
+!!   iqptirred = index of present qpoint
+!!
+!! OUTPUT
+!!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
+!!   accum_mat2 = complex array whose real part contains the phonon linewidth
+!!
+!! PARENTS
+!!      normsq_gkq
+!!
+!! CHILDREN
+!!      gam_mult_displ
+!!
+!! SOURCE
+
+subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,h1_mat_el_sq,iqptirred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nmsq_pure_gkk_sumfs'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqptirred
+ type(elph_type),intent(in) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),intent(inout) :: &
+& h1_mat_el_sq(2,elph_ds%nFSband*elph_ds%nFSband,elph_ds%nbranch*elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+ real(dp),intent(inout) :: accum_mat2(2,elph_ds%nbranch,elph_ds%nbranch,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ipert1,isppol,iqpt_fullbz
+ integer :: nbranch,nsppol,nFSband,nkpt_phon
+ integer :: ik_this_proc
+ real(dp) :: sd1,sd2
+ !character(len=500) :: message
+!arrays
+ real(dp) :: gkq_sum_bands(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_mat2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: zgemm_tmp_mat(2,elph_ds%nbranch,elph_ds%nbranch)
+
+! *************************************************************************
+
+ if (elph_ds%ep_keepbands /= 0) then
+   MSG_BUG('ep_keepbands should be 0 to average over bands!')
+ end if
+
+ nbranch   = elph_ds%nbranch
+ nsppol    = elph_ds%nsppol
+ nFSband   = elph_ds%nFSband
+ nkpt_phon = elph_ds%k_phon%nkpt
+
+ iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
+
+!MG20060603 NOTE:
+!accum_mat and accum_mat2 are real, the imaginary part is used for debugging purpose
+!accum_mat2 is used to store the phonon-linewidhts before interpolation
+
+ do isppol=1,nsppol
+   do ik_this_proc =1, elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+!
+!    The index of k+q in the BZ.
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+!
+!    gkq_sum_bands =
+!    \sum_{ib1,ib2} <k+q| H^{(1)}_{q,\tau_i,\alpha_i} |k> \cdot <k| H^{(1)}_{q,\tau_j,\alpha_j}|k+q>
+!
+!    where ibranch = (\tau_i,\alpha_i) and  jbranch = (\tau_j,\alpha_j).
+     gkq_sum_bands(:,:,:) = zero
+
+     do ib1=1,nFSband
+       sd1 = elph_ds%k_phon%wtk(ib1,ikpt_phon,isppol)      !  weights for distance from the fermi surface
+
+       do ib2=1,nFSband
+         sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)  !  weights for distance from the fermi surface
+         ibeff=ib2+(ib1-1)*nFSband
+
+         gkq_sum_bands = gkq_sum_bands + &
+&         sd1*sd2* reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,nbranch,nbranch/))
+       end do !ib2
+     end do !ib1
+!
+!    gamma matrix contribution in reduced coordinates (ie interpolatable form)
+!    The sum over Fermi surface bands is done here, and fed into (ib1,ib2)=(1,1)
+     h1_mat_el_sq(:,1,:,ik_this_proc,isppol) = reshape(gkq_sum_bands,(/2,nbranch**2/))
+
+     accum_mat(:,:,:,isppol) = accum_mat(:,:,:,isppol) + gkq_sum_bands(:,:,:)
+   end do ! kpt_phon
+ end do ! isppol
+!
+!MG20060603
+!do scalar product wit displ_red to calculate the ph lwdth before interpolation (stored in accum_mat2)
+ do isppol=1,nsppol
+   zgemm_tmp_mat = accum_mat(:,:,:,isppol)
+!
+   call gam_mult_displ(nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
+
+   do ipert1=1,nbranch
+     accum_mat2(1,ipert1,ipert1,isppol) = accum_mat2(1,ipert1,ipert1,isppol) + tmp_mat2(1,ipert1,ipert1)
+   end do
+!
+ end do
+
+end subroutine nmsq_pure_gkk_sumfs
 !!***
 
 end module m_iogkk

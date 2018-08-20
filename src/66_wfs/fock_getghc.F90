@@ -54,24 +54,24 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  use m_fock
  use m_pawcprj
 
+ use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab
+ use m_symtk,        only : matr3inv
  use m_cgtools,      only : dotprod_g
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian
  use m_pawdij,       only : pawdijhat
- use defs_datatypes, only : pseudopotential_type
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
+ use m_spacepar,     only : hartre
+ use m_nonlop,       only : nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_getghc'
- use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -660,7 +660,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
-!* inspired from the routine 53_spacepar/meanvalue_g but without the reference to parallelism and filtering
+!* inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
    if(gs_ham%istwf_k==2) then
      eigen=half*cwavef(1,1)*ghc1(1,1)
    else

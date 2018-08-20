@@ -55,6 +55,7 @@ module m_sigmaph
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
  use m_cgtools,        only : dotprod_g !set_istwfk
+ use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
@@ -62,6 +63,7 @@ module m_sigmaph
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -251,7 +253,7 @@ module m_sigmaph
 
   real(dp),allocatable :: qibz(:,:)
   ! qibz(3,nqibz)
-  ! Reduced coordinates of the q-points in the IBZ.
+  ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
 
   real(dp),allocatable :: wtq(:)
   ! wtq(nqibz)
@@ -260,6 +262,9 @@ module m_sigmaph
   real(dp),allocatable :: qibz_k(:,:)
   ! qibz(3,nqibz_k)
   ! Reduced coordinates of the q-points in the IBZ(k). Depends on ikcalc.
+
+  integer,allocatable:: indkk(:, :)
+   ! Mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
 
   real(dp),allocatable :: wtq_k(:)
   ! wtq(nqibz_k)
@@ -397,8 +402,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -425,7 +428,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,bcorr0=0
+ integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
@@ -461,9 +464,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
- real(dp) :: lf(2),rg(2),res(2)
+ real(dp) :: phfrq_ibz(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
- !real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom)
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
@@ -759,7 +761,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        !call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+       ! DEBUG
+       !call ifc_fourq(ifc, cryst, sigma%qibz(:, sigma%indkk(iq_ibz, 1)), &
+       !   phfrq_ibz, displ_cart, out_displ_red=displ_red)
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+       !phfrq = phfrq_ibz
 
        ! Find k+q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered:
@@ -948,9 +954,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
            call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, cgwork)
-           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                          npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
+                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
+                            npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
            !bra_kq = zero
          end if
 
@@ -1168,7 +1174,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          end if
 #endif
          ! Get phonons for this q-point.
+         ! DEBUG
+         !call ifc_fourq(ifc, cryst, sigma%qibz(:, sigma%indkk(iq_ibz, 1)), phfrq_ibz, displ_cart)
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+         !phfrq = phfrq_ibz
 
          ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
          ! Needed for Giustino's equation.
@@ -1412,10 +1421,9 @@ subroutine sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, comm)
   ! iqlk is the index of the q-point in the IBZ(k) that must be passed to the ephwg routines
   ! The case symsigma == 0 is tricky because we are summing over the BZ but ephwg always used IBZ(k)
   ! Thus we have to find the corresponding image in the IBZ(k).
-  iqlk = iq_ibz
-  if (sigma%symsigma == 0) iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
+  iqlk = iq_ibz; if (sigma%symsigma == 0) iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
   ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
-  if (sigma%symsigma == 1) then
+  if (abs(sigma%symsigma) == 1) then
     ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz) - sigma%ephwg%lgk%ibz(:, iqlk)) < tol12), "Mismatch in qpoints.")
   end if
 
@@ -1562,7 +1570,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,occopt3=3,qptopt1=1
+ integer,parameter :: master=0,occopt3=3,qptopt1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj,bstart,nbcount
@@ -1626,8 +1634,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (new%nwr > 0) then
    if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
  end if
- !dtset%freqspmin
- !dtset%freqspmax
+ !dtset%freqspmin; dtset%freqspmax
  new%wr_step = 0.05 * eV_Ha
 
  ! Define q-mesh for integration of the self-energy.
@@ -1643,7 +1650,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
 
  ! Select k-point and bands where corrections are wanted
- ! if symsigma == 1, we have to include all degenerate states in the set
+ ! if symsigma == +1, we have to include all degenerate states in the set
  ! because the final QP corrections will be obtained by averaging the results in the degenerate subspace.
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
@@ -1774,7 +1781,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
- if (new%symsigma == 1) then
+ if (abs(new%symsigma) == 1) then
    ABI_DT_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
  end if
 
@@ -1950,7 +1957,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
-   !NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
    NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
@@ -2156,6 +2162,9 @@ subroutine sigmaph_free(self)
  if (allocated(self%qibz_k)) then
    ABI_FREE(self%qibz_k)
  end if
+ if (allocated(self%indkk)) then
+   ABI_FREE(self%indkk)
+ end if
  if (allocated(self%wtq_k)) then
    ABI_FREE(self%wtq_k)
  end if
@@ -2243,6 +2252,8 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  type(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
+ integer,parameter :: sppoldbl1 = 1
+ real(dp) :: dksqmax
  type(lgroup_t) :: lgk
 
 ! *************************************************************************
@@ -2276,6 +2287,16 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  else
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if
+
+ ! DEBUGGING
+ ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+ if (allocated(self%indkk)) then
+   ABI_FREE(self%indkk)
+ end if
+ ABI_MALLOC(self%indkk, (self%nqibz_k, 6))
+ call listkk(dksqmax, cryst%gmet, self%indkk, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym,&
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ if (dksqmax > tol12) MSG_ERROR("Wrong mapping")
 
 end subroutine sigmaph_setup_kcalc
 !!***
@@ -2601,7 +2622,7 @@ subroutine sigmaph_print(self, dtset, unt)
 
  ! Write dimensions
  write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
- write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
+ write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  !write(unt, "(2a)")sjoin("Method for q-space integration:", itoa(self%qint_method))
  !if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma) will be computed."

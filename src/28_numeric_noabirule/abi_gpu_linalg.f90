@@ -4,7 +4,7 @@
 !!  m_abi_gpu_linalg
 !!
 !! FUNCTION
-!!  Interfaces of GPU subroutines wrapper 
+!!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2011-2018 ABINIT group (FDahm ))

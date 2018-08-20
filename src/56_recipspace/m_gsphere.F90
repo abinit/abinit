@@ -41,7 +41,7 @@ MODULE m_gsphere
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fftcore,       only : kpgsph, kgindex, sphereboundary
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -519,7 +519,6 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gsph_fft_tabs'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -1205,7 +1204,6 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
 #undef ABI_FUNC
 #define ABI_FUNC 'merge_and_sort_kg'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -1862,7 +1860,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setshells'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

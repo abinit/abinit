@@ -40,6 +40,7 @@ module m_conducti
 
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
+ use m_symtk,        only : matr3inv
  use m_abilasi,      only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric
@@ -903,7 +904,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_nc'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

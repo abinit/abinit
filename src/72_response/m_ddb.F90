@@ -38,6 +38,7 @@ MODULE m_ddb
 
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
+ use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
@@ -1150,8 +1151,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdddb9'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3692,15 +3691,13 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-
    write(message, '(a,a,a,a,a)' )&
 &   'The initialisation mode of MRGDDB, that uses nddb=1,',&
 &   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action : you should use DDBs that include the symmetry',&
+&   'Action: you should use DDBs that include the symmetry',&
 &   'information (and that can be used and merged without',&
 &   'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
-
  end if
 
 !Evaluate the maximal dimensions of arrays
@@ -3770,7 +3767,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=2,nddb
 
 !  Open the corresponding input DDB,
-!  and read the database file informations
+!  and read the database file information
    write(message, '(a,a,i6)' )ch10,&
 &   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
@@ -4044,15 +4041,13 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-
    write(message, '(a,a,a,a,a)' )&
 &   'The initialisation mode of MRGDDB, that uses nddb=1,',&
 &   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action : you should use DDBs that include the symmetry',&
+&   'Action: you should use DDBs that include the symmetry',&
 &   'information (and that can be used and merged without',&
 &   'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
-
  end if
 
 !Evaluate the maximal dimensions of arrays
@@ -4128,7 +4123,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=2,nddb
 
 !  Open the corresponding input DDB,
-!  and read the database file informations
+!  and read the database file information
    write(message, '(a,a,i6)' )ch10,&
 &   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
