@@ -49,7 +49,7 @@ module m_bethe_salpeter
  use m_io_tools,        only : file_exists, iomode_from_fname
  use m_geometry,        only : mkrdim, metric, normv
  use m_abilasi,         only : matrginv
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
@@ -63,7 +63,7 @@ module m_bethe_salpeter
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj
+                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_mkrho, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
  use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
@@ -85,6 +85,10 @@ module m_bethe_salpeter
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
  use m_exc_build,       only : exc_build_ham
+ use m_setvtr,          only : setvtr
+ use m_mkrho,           only : prtrhomxmn
+ use m_pspini,          only : pspini
+ use m_drivexc,         only : mkdenpos
 
  implicit none
 
@@ -183,13 +187,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #undef ABI_FUNC
 #define ABI_FUNC 'bethe_salpeter'
  use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none
@@ -635,7 +634,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call paw_an_nullify(KS_paw_an)
 
    nkxc1=0
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
 &   cplex1,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    ! Calculate onsite vxc with and without core charge ===

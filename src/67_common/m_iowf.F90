@@ -46,6 +46,8 @@ MODULE m_iowf
  use m_cgtools,        only : cg_zcopy
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite, crystal_from_hdr
+ use m_rwwf,           only : rwwf
+use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 
@@ -95,7 +97,7 @@ CONTAINS  !=====================================================================
 !!   where resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2 for the ground state
 !!  response: if == 0, GS wavefunctions , if == 1, RF wavefunctions
 !!  unwff2=unit for output of wavefunction
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  (only writing)
@@ -122,8 +124,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #undef ABI_FUNC
 #define ABI_FUNC 'outwf'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_56_io_mpi
  use interfaces_62_wvl_wfs
 !End of the abilint section
 
@@ -649,7 +649,6 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_ncwrite'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -1946,6 +1946,8 @@ end subroutine tetra_get_onewk
 !! nibz=number of irreducible kpoints
 !! wvals(nw)=Frequency points.
 !! eigen_ibz(nkibz)=eigenenergies for each k point
+!! [wtol]: If present, frequency points that differ by less that wtol are treated as equivalent.
+!!  and the tetrahedron integration is performed only once per frequency point.
 !!
 !! OUTPUT
 !!  weights(nw,2) = integration weights for
@@ -1958,7 +1960,7 @@ end subroutine tetra_get_onewk
 !!
 !! SOURCE
 
-subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz, weights)
+subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz, weights, wtol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1972,6 +1974,7 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
+ real(dp_), optional, intent(in) :: wtol
  type(t_tetrahedron), intent(in) :: tetra
 !arrays
  real(dp_),intent(in) :: wvals(nw)
@@ -1983,6 +1986,7 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
  !integer,save :: done = 0
  integer,parameter :: nene=3
  integer :: itetra,ii,iw,ie
+ logical :: samew
  real(dp_),parameter :: max_occ1 = one
  real(dp_) :: enemin, enemax
 !arrays
@@ -2004,11 +2008,20 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
    eigen_1tetra(:) = eig_ibz(ind_ibz(:))
    call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
+   ! Loop over frequency points
    do iw=1,nw
-     enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
-     ie = nene / 2 + 1
-     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
-        theta_tmp, delta_tmp)
+     samew = .False.
+     if (present(wtol)) then
+       if (iw > 1) samew = abs(wvals(iw) - wvals(iw - 1)) < wtol
+     end if
+     if (.not. samew) then
+         enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
+         ie = nene / 2 + 1
+         call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
+            theta_tmp, delta_tmp)
+     else
+        !write(*,*)"Got same omega"
+     end if
 
      !if (iw == 5 .and. ik_ibz /= 1 .and. wvals(iw) > eigen_1tetra(2) .and. wvals(iw) < eigen_1tetra(3)) then
      !  done = done + 1

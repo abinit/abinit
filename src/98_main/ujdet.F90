@@ -46,15 +46,14 @@ program ujdet
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
  use m_parser,      only : intagm, parsefile
- use m_mpinfo,      only : destroy_mpi_enreg
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
+ use m_dtfil,       only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ujdet'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_51_manage_mpi
  use interfaces_65_paw
 !End of the abilint section
 
@@ -104,8 +103,8 @@ program ujdet
 #if defined HAVE_MPI_IO
  if(xmpi_paral==0)then
    write(message,'(3a)')&
-&   '  In order to use MPI_IO, you must compile with the MPI flag ',ch10,&
-&   '  Action : recompile your code with different CPP flags.'
+&   'In order to use MPI_IO, you must compile with the MPI flag ',ch10,&
+&   'Action : recompile your code with different CPP flags.'
    MSG_ERROR(message)
  end if
 #endif

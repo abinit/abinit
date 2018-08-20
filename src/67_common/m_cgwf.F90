@@ -34,12 +34,14 @@ module m_cgwf
  use m_cgtools
  use m_efield
 
- use m_time, only : timab
+ use m_time,          only : timab
  use m_numeric_tools, only : rhophi
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
-&                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_fock,        only : fock_set_ieigen,fock_set_getghc_call
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
+                             pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
+ use m_hamiltonian,   only : gs_hamiltonian_type
+ use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
+ use m_getghc,        only : getghc
+ use m_berrytk,       only : smatrix
 
  implicit none
 
@@ -81,7 +83,7 @@ contains
 !!  mcgq=second dimension of the cgq array
 !!  mgsc=second dimension of the gsc array
 !!  mkgq = second dimension of pwnsfacq
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw
 !!  nband=number of bands.
 !!  nbdblock=number of bands in a block
@@ -158,10 +160,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_66_wfs
  use interfaces_67_common
 !End of the abilint section
 

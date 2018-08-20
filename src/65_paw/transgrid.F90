@@ -76,13 +76,12 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
  use m_errors
 
  use m_pawfgr, only : pawfgr_type
- use m_fft,    only : zerosym
+ use m_fft,    only : zerosym, indirect_parallel_Fourier
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'transgrid'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
 !End of the abilint section
 

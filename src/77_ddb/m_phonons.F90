@@ -43,6 +43,7 @@ module m_phonons
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
+ use m_symtk,           only : matr3inv
  use m_time,            only : cwtime
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
@@ -1872,7 +1873,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -2228,7 +2228,7 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 &           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
-   imode_acoustic = imode_acoustic + 1
+   imode_acoustic = min(imode_acoustic + 1, 3)
 
 !   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
 !   call wrtout(std_out,msg,'COLL')
@@ -2414,7 +2414,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
  do io=1, PHdos%nomega
-     if (PHdos%omega(io) >= 1.d-10) exit
+     if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
  end do
  iomin = io
 
@@ -2423,7 +2423,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  bose_msqv = zero
  do itemp = 1, ntemper
    temper = tempermin + (itemp-1) * temperinc
-   if (abs(temper) < 1.e-10) cycle
+   if (temper < 1.e-3) cycle ! millikelvin at least to avoid exploding Bose factor(TM)
    do io = iomin, PHdos%nomega
 ! NB: factors follow convention in phonopy documentation
 !   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
@@ -3559,7 +3559,6 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_symph'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3752,6 +3751,105 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
  ABI_DEALLOCATE(symind)
 
 end subroutine dfpt_symph
+!!***
+
+!!****f* m_phonons/freeze_displ_allmodes
+!!
+!! NAME
+!! freeze_displ_allmodes
+!!
+!! FUNCTION
+!!  From a given set of phonon modes, generate and output supercells and
+!!  displaced configurations of atoms.
+!!  Typically useful to follow soft modes and see distorsions of crystal structures
+!!
+!! INPUTS
+!! amu(ntypat) = mass of the atoms (atomic mass unit)
+!! displ(2,3*natom,3*natom) = phonon mode displacements (complex)
+!! freeze_displ = amplitude of the displacement to freeze into the supercell
+!! natom = number of atoms in the unit cell
+!! ntypat = number of atom types
+!! phfrq(3*natom) = phonon frequencies
+!! qphnrm = norm of phonon q vector (should be 1 or 0)
+!! qphon = phonon wavevector
+!! rprimd(3,3) = dimensionfull primitive translations in real space
+!! typat(natom) = integer label of each type of atom (1,2,...)
+!! xcart(3,natom) = cartesian coords of atoms in unit cell (bohr)
+!!
+!! OUTPUT
+!! for the moment only prints to file, but could also return pointer to supercell object, with
+!! rprimd and atomic positions, for further use
+!!
+!! NOTES
+!! freeze_displ could be determined automatically from a temperature and the phonon frequency,
+!! as the average displacement of the mode with a Bose distribution.
+!!
+!! PARENTS
+!!      m_phonons
+!!
+!! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
+!!
+!! SOURCE
+!!
+
+subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfreq,  &
+&         qphon, rprimd, typat, xcart, znucl)
+
+
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'freeze_displ_allmodes'
+!End of the abilint section
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'freeze_displ_allmodes'
+!End of the abilint section
+
+ implicit none
+
+! arguments
+! scalar
+ integer,intent(in) :: natom
+ character(len=*),intent(in) :: outfile_radix
+ real(dp), intent(in) :: freeze_displ
+
+!arrays
+ integer,intent(in) :: typat(natom)
+
+ real(dp),intent(in) :: displ(2,3*natom,3*natom)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: phfreq(3*natom)
+ real(dp),intent(in) :: qphon(3)
+ real(dp),intent(in) :: xcart(3,natom)
+ real(dp),intent(in) :: znucl(:)
+
+! local vars
+ integer :: jmode
+ type(supercell_type) :: scell
+
+! *************************************************************************
+
+!determine supercell needed to freeze phonon
+ call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart, znucl, scell)
+
+ do jmode = 1, 3*natom
+! reset positions
+   scell%xcart = scell%xcart_ref
+
+!  displace atoms according to phonon jmode
+   call freeze_displ_supercell(displ(:,:,jmode), freeze_displ, scell)
+
+!  print out everything for this wavevector and mode
+   call prt_supercell_for_qpt (phfreq(jmode), jmode, outfile_radix, scell)
+ end do
+
+ call destroy_supercell (scell)
+
+end subroutine freeze_displ_allmodes
 !!***
 
 end module m_phonons

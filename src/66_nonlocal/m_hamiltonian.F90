@@ -290,6 +290,13 @@ module m_hamiltonian
    ! phkxred(2,natom)
    ! phase factors exp(2 pi k.xred) at k
 
+! ===== Complex arrays
+
+  complex(dpc), allocatable :: nucdipmom_k(:)
+   ! nucdipmom_k(npw_k*(npw_k+1)/2)
+   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+   ! lower triangular part of Hermitian matrix
+
 ! ===== Real pointers
 
   real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:) => null()
@@ -330,11 +337,6 @@ module m_hamiltonian
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
-  ! real(dp), ABI_CONTIGUOUS pointer :: nucdipmom_k(:,:) => null()
-  !  ! nucdipmom_k(2,npw_k*(npw_k+1)/2)
-  !  ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-  !  ! lower triangular part of Hermitian matrix
-
   real(dp), ABI_CONTIGUOUS pointer :: phkpxred(:,:) => null()
    ! phkpxred(2,natom)
    ! phase factors exp(2 pi k^prime.xred) at k^prime
@@ -359,14 +361,6 @@ module m_hamiltonian
   real(dp), ABI_CONTIGUOUS pointer :: xred(:,:) => null()
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
-
-! ===== Complex array points
-
-  complex(dpc), ABI_CONTIGUOUS pointer :: nucdipmom_k(:) => null()
-   ! nucdipmom_k(npw_k*(npw_k+1)/2)
-   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-   ! lower triangular part of Hermitian matrix
-
 
 ! ===== Structured datatype pointers
 
@@ -588,14 +582,10 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%kg_kp)) nullify(Ham%kg_kp)
  if (associated(Ham%kpg_k)) nullify(Ham%kpg_k)
  if (associated(Ham%kpg_kp)) nullify(Ham%kpg_kp)
- ! if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
  if (associated(Ham%ffnl_k)) nullify(Ham%ffnl_k)
  if (associated(Ham%ffnl_kp)) nullify(Ham%ffnl_kp)
  if (associated(Ham%ph3d_k)) nullify(Ham%ph3d_k)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
-
-! Complex pointers
- if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
 
 ! Real arrays
  if (allocated(Ham%ekb_spin))   then
@@ -609,6 +599,11 @@ subroutine destroy_hamiltonian(Ham)
  end if
  if (allocated(Ham%ph1d))   then
    ABI_DEALLOCATE(Ham%ph1d)
+ end if
+
+! Complex arrays
+ if(allocated(Ham%nucdipmom_k)) then
+   ABI_DEALLOCATE(Ham%nucdipmom_k)
  end if
 
 ! Structured datatype pointers
@@ -959,8 +954,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- ! real(dp),intent(in),optional,target :: nucdipmom_k(:,:)
- complex(dpc),intent(in),optional,target :: nucdipmom_k(:)
+ complex(dpc),intent(in),optional :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
@@ -997,6 +991,11 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_kp = npw_k
  end if
 
+ ! k-dependend complex quantities
+  if (present(nucdipmom_k)) then
+   ham%nucdipmom_k(:) = nucdipmom_k(:)
+  end if
+
 !Pointers to k-dependent quantitites
  if (present(kinpw_k)) then
    ham%kinpw_k  => kinpw_k
@@ -1013,9 +1012,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  if (present(ffnl_k)) then
    ham%ffnl_k  => ffnl_k
    ham%ffnl_kp => ffnl_k
- end if
- if (present(nucdipmom_k)) then
-   ham%nucdipmom_k => nucdipmom_k
  end if
  if (present(ph3d_k)) then
    ham%ph3d_k  => ph3d_k

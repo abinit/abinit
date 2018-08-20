@@ -69,7 +69,9 @@ program anaddb
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time,           only : asctime, timein
  use m_parser,         only : instrng
+ use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
+ use m_ddb_interpolate, only : ddb_interpolate
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
@@ -77,14 +79,17 @@ program anaddb
  use m_harmonic_thermo,only : harmonic_thermo
  use m_thmeig,         only : thmeig
  use m_raman,          only : ramansus, electrooptic
+ use m_ddb_diel,       only : ddb_diel
+ use m_relaxpol,       only : relaxpol
+ use m_ddb_elast,      only : ddb_elast
+ use m_ddb_piezo,      only : ddb_piezo
+ use m_ddb_internalstr, only : ddb_internalstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -571,7 +576,7 @@ program anaddb
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
    close(ddbun)
 
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
  end if
@@ -878,7 +883,7 @@ program anaddb
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_DEALLOCATE(thm_scells)
  end if
- 
+
  ! Close files
  if (iam_master) then
 #ifdef HAVE_NETCDF

@@ -41,6 +41,7 @@ MODULE m_ddk
 #endif
 
  use m_fstrings,      only : sjoin, itoa, endswith
+ use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type
  use m_geometry,      only : mkradim
@@ -180,7 +181,6 @@ subroutine ddk_init(ddk, paths, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddk_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

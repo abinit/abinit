@@ -42,7 +42,7 @@ module m_fftcore
 
  use m_time,         only : timab
  use defs_abitypes,  only : MPI_type
- use m_mpinfo,       only : destroy_mpi_enreg
+ use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -4835,7 +4835,6 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_kg'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

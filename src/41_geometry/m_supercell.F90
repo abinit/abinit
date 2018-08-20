@@ -10,7 +10,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MJV)
+!! Copyright (C) 2010-2018 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +30,7 @@ module m_supercell
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,    only : matr3inv
  use m_copy,     only : alloc_copy
  use m_io_tools, only : open_file
  use m_fstrings, only : int2char4, write_num
@@ -76,6 +77,8 @@ module m_supercell
  public :: findBound_supercell
  public :: getPBCIndexes_supercell
  public :: destroy_supercell
+
+ public :: mksupercell  !  computes atomic positons, magnetic ordering of supercell
 !!***
 
 CONTAINS  !===========================================================================================
@@ -91,7 +94,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! natom_primcell = number of atoms in primitive cell
 !! qphon(3) = phonon wavevector
-!!      find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2) 
+!!      find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2)
 !! rprimd_primcell(3,3) = real space lattice vectors (bohr)
 !! typat_primcell = types of atoms
 !! xcart_primcell(3,natom) = cartesian positions of atoms in primitive cell
@@ -280,7 +283,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
      call order_supercell_typat(scell)
    end if
  end if
- 
+
 end subroutine init_supercell
 !!***
 
@@ -296,7 +299,7 @@ end subroutine init_supercell
 !! scell = supercell structure with reference atomic positions etc...
 !!
 !! OUTPUT
-!! scell = supercell structure: typat, xcart and so on will be updated 
+!! scell = supercell structure: typat, xcart and so on will be updated
 !!
 !! PARENTS
 !!      m_supercell
@@ -323,7 +326,7 @@ subroutine order_supercell_typat (scell)
 ! local tmp variables
  integer :: itypat, iatom_supercell, iatom
  type(supercell_type) :: scell_tmp
-  
+
  call copy_supercell (scell,scell_tmp)
 
  iatom_supercell = 0
@@ -398,8 +401,10 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
  zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&
 &                reshape(displ(2,:), (/3,scell%natom_primcell/))))
 
- ! fix gauge by imposing real displacement for first atom in first direction 
+ ! fix gauge by imposing real displacement for first atom in first direction
  ! multiply by normalized complex conjugate of first element
+ ! NB 6 March 2018: this may be imposing a positive (not just real) displacement for 1st atom along x!!! 
+ ! That might be problematic below, though for the thermal displacement method freeze_displ swaps sign for each new mode 
  phase = cmplx(one,zero)
  if (abs(zdispl(1,1)) > tol10) then
    phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
@@ -525,7 +530,6 @@ subroutine prt_supercell (filename, scell, title1, title2)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prt_supercell'
- use interfaces_32_util
 !End of the abilint section
 
   implicit none
@@ -557,7 +561,7 @@ subroutine prt_supercell (filename, scell, title1, title2)
   write (scunit, '(a)') '#'
   write (scunit, '(a)') title1
   write (scunit, '(a)') title2
-  write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt 
+  write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
   write (scunit, '(a,I7,a)') '# and has ', scell%ncells, ' primitive unit cells '
   write (scunit, '(a)') '#'
   write (scunit, '(a)') '# lattice vectors for supercell :'
@@ -714,9 +718,9 @@ end subroutine getPBCIndexes_supercell
 !!  compute the bound of the supercell by considering the 0 0 0 (reference)
 !!  in the center of the supercell.
 !!  for example: (4 4 4) => min = -1 and max = 2
-!! 
+!!
 !! INPUTS
-!! n_cell(3) = size of the supercell (for example 3 3 3)   
+!! n_cell(3) = size of the supercell (for example 3 3 3)
 !!
 !! OUTPUT
 !! min = minimun of the range
@@ -761,14 +765,14 @@ end subroutine findBound_supercell
 !! compute the distance_supercell betwen 2 atoms in different cell
 !!
 !! INPUTS
-!! xcart1(3) = cartesian coordinates of the first atom 
+!! xcart1(3) = cartesian coordinates of the first atom
 !! xcart1(3) = cartesian coordinates of the second atom
 !! rprimd(3,3) = primitive lattice vectors
 !! cell1(3) = index of the cell of the first atom (for example -1 0 2)
 !! cell2(3) = index of the cell of the second atom (for example  0 0 2)
 !!
 !! OUTPUT
-!! distance_supercell = distance_supercell between the 2 atoms 
+!! distance_supercell = distance_supercell between the 2 atoms
 !!
 !! SOURCE
 !!
@@ -839,7 +843,7 @@ subroutine destroy_supercell (scell)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(inout) :: scell 
+  type(supercell_type), intent(inout) :: scell
 
 ! *************************************************************************
 
@@ -863,6 +867,109 @@ subroutine destroy_supercell (scell)
   end if
 
 end subroutine destroy_supercell
+!!***
+
+!!****f* m_supercell/mksupercell
+!! NAME
+!!  mksupercell
+!!
+!! FUNCTION
+!!  computes atomic positons, magnetic ordering of supercell
+!!
+!! INPUTS
+!!  magv_org (optional) magnetic ordering of atoms in primitive cell,
+!!   ordering of atoms given als 1 and -1, if not given fm is assumed
+!!  xred_org relative position of atoms in primitive cell
+!!  rprimd_org unit cell dimensions of primitive cell
+!!  natom=number of atoms in unit cell
+!!  option= 1 output ion-ion distances / 2 output ordering of ion-ion distances / 3 output variables in varlist
+!!           according to ion-ion distances * magnetic ordering
+!!
+!! OUTPUT
+!!  magv_sc magnetic ordering of atoms in supercell
+!!  xred_sc relative position of atoms in supercell
+!!  rprimd_sc unit cell dimensions of supercell
+!!
+!! PARENTS
+!!      pawuj_det
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_sc,rprimd_sc,ext,prtvol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mksupercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)              :: nat_org,nat_sc
+ integer,intent(in),optional     :: prtvol
+!arrays
+ real(dp),intent(in)             :: rprimd_org(3,3)
+ integer,intent(in)              :: ext(3)
+ real(dp),intent(in)             :: xred_org(3,nat_org)
+ real(dp),intent(out)            :: xred_sc(3,nat_sc)
+ real(dp),intent(out)            :: magv_sc(nat_sc)
+ real(dp),intent(out)            :: rprimd_sc(3,3)
+ integer,intent(in),optional     :: magv_org(nat_org)
+
+!Local variables-------------------------------
+!scalars
+ integer :: prtvoll,ix,iy,iz,nprcl,iprcl,jdim,iatom
+!arrays
+ real(dp) :: magvv_org(nat_org)
+ real(dp),allocatable :: transv(:,:,:)
+
+! *************************************************************************
+
+ if (present(magv_org)) then
+   magvv_org=magv_org
+ else
+   magvv_org=(/ (1, iatom=1,nat_org)  /)
+ end if
+
+ if (present(prtvol)) then
+   prtvoll=prtvol
+ else
+   prtvoll=1
+ end if
+
+ rprimd_sc=reshape((/ (rprimd_org(ix,:)*ext(ix) ,ix=1,3) /),(/3,3 /))
+ nprcl=product(ext)
+ ABI_ALLOCATE(transv,(3,nat_org,nprcl))
+
+ transv=reshape((/ (((((/ ix,iy,iz /),iatom=1,nat_org),ix=0,ext(1)-1),iy=0,ext(2)-1),iz=0,ext(3)-1) /), (/ 3, nat_org,nprcl/) )
+
+!DEBUG
+!write(std_out,*)'mksupercell: xred_org ' ,xred_org
+!END DEBUG
+
+ do iprcl=1,nprcl
+   xred_sc(:,1+(iprcl-1)*nat_org:iprcl*nat_org)=xred_org+transv(:,:,iprcl)
+   magv_sc(1+(iprcl-1)*nat_org:iprcl*nat_org)=magv_org
+ end do
+
+
+ do jdim=1,3
+   xred_sc(jdim,:)=xred_sc(jdim,:)/ext(jdim)
+ end do
+
+!DEBUG
+!write(std_out,*)'mksupercell: xred_sc ', xred_sc
+!write(std_out,*)'mksupercell: magv_sc ', magv_sc
+!END DEBUG
+
+ ABI_DEALLOCATE(transv)
+
+end subroutine mksupercell
 !!***
 
 end module m_supercell
