@@ -37,7 +37,7 @@ MODULE m_paw_dfpt
  use m_paw_an,       only : paw_an_type
  use m_paw_ij,       only : paw_ij_type
  use m_pawcprj,      only : pawcprj_type
- use m_pawdij,       only : pawdijhartree
+ use m_pawdij,       only : pawdijhartree,pawdiju_euijkl
  use m_pawrhoij,     only : pawrhoij_type,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
  use m_pawfgrtab,    only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_nullify, pawfgrtab_gather
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
@@ -177,16 +177,16 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_a,cplex_b,cplex_dijh1,cplex_vxc1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
- integer :: klmn,lm_size_a,lm_size_b,nlmn2_dijh1,mesh_size,my_comm_atom,nspden,nspdiag
- integer :: opt_compch,optexc,optvxc,usecore,usetcore,usexcnhat
+ integer :: cplex_a,cplex_b,cplex_dijh1,cplex_diju1,cplex_vxc1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
+ integer :: klmn,lm_size_a,lm_size_b,nlmn2_dij1,mesh_size,my_comm_atom,nspden,nspdiag
+ integer :: opt_compch,optexc,optvxc,usecore,usepawu,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: compch,eexc,eexc_im
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_a(:),lmselect_b(:),lmselect_tmp(:)
- real(dp) :: dij(2),delta_energy_h(2),delta_energy_xc(2),ro(2),tsec(2)
+ real(dp) :: dij(2),delta_energy_h(2),delta_energy_u(2),delta_energy_xc(2),ro(2),tsec(2)
  real(dp),allocatable :: kxc_dum(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
 
 ! *************************************************************************
@@ -195,43 +195,54 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
  call timab(567,1,tsec)
 
+ usepawu=maxval(pawtab(1:ntypat)%usepawu)
  if (.not.(ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11 &
 & .or.ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11)) then
    if((abs(nzlmopt_a)/=1.and.nzlmopt_a/=0).or.(abs(nzlmopt_b)/=1.and.nzlmopt_b/=0)) then
-     msg='invalid value for nzlmopt !'
+     msg='invalid value for nzlmopt!'
      MSG_BUG(msg)
    end if
    if (my_natom>0) then
      if(paw_ij1(1)%has_dijhartree==0) then
-       msg='dijhartree must be allocated !'
+       msg='dijhartree must be allocated!'
        MSG_BUG(msg)
      end if
+     if (usepawu==1.or.usepawu==2.or.usepawu==5.or.usepawu==6) then
+       if(paw_ij1(1)%has_dijU==0) then
+         msg='dijU must be allocated!'
+         MSG_BUG(msg)
+       end if
+       if ((usepawu==1.or.usepawu==5).and.(ipert1==0.or.ipert2==0)) then
+         msg='If usepawu=1 or 5, pawdfptenergy is not implemented when ipert1=0 or ipert2=0!'
+         MSG_BUG(msg)
+       end if
+     end if
      if(paw_an1(1)%has_vxc==0) then
-       msg='vxc1 and vxct1 must be allocated !'
+       msg='vxc1 and vxct1 must be allocated!'
        MSG_BUG(msg)
      end if
      if(paw_an0(1)%has_kxc==0) then
-       msg='kxc1 must be allocated !'
+       msg='kxc1 must be allocated!'
        MSG_BUG(msg)
      end if
      if ((ipert1<=natom.or.ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).and.paw_an0(1)%has_kxc/=2) then
-       msg='XC kernels for ground state must be in memory !'
+       msg='XC kernels for ground state must be in memory!'
        MSG_BUG(msg)
      end if
      if (paw_ij1(1)%cplex_rf/=paw_an1(1)%cplex) then
-       msg='paw_ij1()%cplex and paw_an1()%cplex must be equal !'
+       msg='paw_ij1()%cplex and paw_an1()%cplex must be equal!'
        MSG_BUG(msg)
      end if
      if (pawrhoij_a(1)%cplex<paw_an1(1)%cplex.or.pawrhoij_b(1)%cplex<paw_an1(1)%cplex) then
-       msg='pawrhoij()%cplex must be >=paw_an1()%cplex  !'
+       msg='pawrhoij()%cplex must be >=paw_an1()%cplex!'
        MSG_BUG(msg)
      end if
      if (paw_ij1(1)%nspden/=paw_an1(1)%nspden) then
-       msg='paw_ij1()%nspden and paw_an1()%nspden must be equal !'
+       msg='paw_ij1()%nspden and paw_an1()%nspden must be equal!'
        MSG_BUG(msg)
      end if
      if (pawrhoij_a(1)%nspden/=pawrhoij_b(1)%nspden) then
-       msg='pawrhoij_a()%nspden must =pawrhoij_b()%nspden  !'
+       msg='pawrhoij_a()%nspden must =pawrhoij_b()%nspden !'
        MSG_BUG(msg)
      end if
    end if
@@ -254,7 +265,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  opt_compch=0;optvxc=1;optexc=3
  usecore=0;usetcore=0  ! This is true for phonons and Efield pert.
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
- delta_energy_xc(1:2)=zero;delta_energy_h(1:2)=zero
+ delta_energy_xc(1:2)=zero;delta_energy_h(1:2)=zero;delta_energy_u(1:2)=zero
  dij(1:2)=zero;ro(1:2)=zero
 
 
@@ -268,8 +279,9 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    cplex_a=pawrhoij_a(iatom)%cplex
    cplex_b=pawrhoij_b(iatom)%cplex
    cplex_dijh1=paw_ij1(iatom)%cplex_rf
+   cplex_diju1=paw_ij1(iatom)%cplex_rf
    cplex_vxc1=paw_an1(iatom)%cplex
-   nlmn2_dijh1=paw_ij1(iatom)%lmn2_size
+   nlmn2_dij1=paw_ij1(iatom)%lmn2_size
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
    if (ipert2> 0) lm_size_b=paw_an1(iatom)%lm_size
@@ -400,7 +412,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
          klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
          dij(1)=paw_ij1(iatom)%dijhartree(klmn)
-         dij(2)=paw_ij1(iatom)%dijhartree(klmn+nlmn2_dijh1)
+         dij(2)=paw_ij1(iatom)%dijhartree(klmn+nlmn2_dij1)
          ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
          delta_energy_h(2)=delta_energy_h(2)-ro(1)*dij(2)
@@ -414,11 +426,57 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      end if
    end do
 
+!  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order PAW+U potential
+   if (usepawu==5.or.usepawu==6) then
+     ABI_CHECK(paw_ij1(iatom)%cplex_dij==1,'cplex_dij not yet available!')
+     ABI_CHECK(paw_ij1(iatom)%ndij/=4,'ndij not yet available!')
+!    If DijU are not in memory, compute them
+     if (paw_ij1(iatom)%has_dijU/=2) then
+       call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,paw_ij1(iatom)%ndij,&
+&            pawrhoij_a(iatom),pawtab(itypat))
+       paw_ij1(iatom)%has_dijU=2
+     end if
+     if (cplex_diju1==1) then
+       do ispden=1,paw_ij1(iatom)%ndij
+         jrhoij=1
+         do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
+           klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
+           dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
+           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
+           delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)
+           if (cplex_b==2) then
+             ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
+             delta_energy_u(2)=delta_energy_u(2)+ro(2)*dij(1)
+           end if
+           jrhoij=jrhoij+cplex_b
+         end do
+       end do
+     else ! cplex_dijh1==2
+       do ispden=1,paw_ij1(iatom)%ndij
+         jrhoij=1
+         do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
+           klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
+           dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
+           dij(2)=paw_ij1(iatom)%dijU(klmn+nlmn2_dij1,ispden)
+           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
+           delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)
+           delta_energy_u(2)=delta_energy_u(2)-ro(1)*dij(2)
+           if (cplex_b==2) then
+             ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
+             delta_energy_u(1)=delta_energy_u(1)+ro(2)*dij(2)
+             delta_energy_u(2)=delta_energy_u(2)+ro(2)*dij(1)
+           end if
+           jrhoij=jrhoij+cplex_b
+         end do
+       end do
+     end if
+   end if
+
 !  ================ End loop on atomic sites =======================
  end do
 
 !Final building of 1st-order (or 2nd-order) energy
- delta_energy(1:2)=delta_energy_xc(1:2)+delta_energy_h(1:2)
+ delta_energy(1:2)=delta_energy_xc(1:2)+delta_energy_h(1:2)+delta_energy_u(1:2)
 
 !Reduction in case of parallelism
  if (paral_atom) then
