@@ -105,7 +105,6 @@ contains
 !! SIDE EFFECTS
 !! Rest of i/o is related to lda
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
-!!  verbose = optional, default is true, flag to disable the verbose mode
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
@@ -121,7 +120,7 @@ contains
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
-& usewvl,xred,verbose)
+& usewvl,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -139,7 +138,6 @@ integer, intent(inout) :: iexit,ncycle,nerr_dilatmx
 integer, intent(in) :: usewvl
 real(dp), intent(in) :: dilatmx
 logical, intent(inout) :: skipcycle
-logical,optional,intent(in) :: verbose
 character(len=fnlen), intent(in) :: filnam_ds4
 type(ab_xfh_type),intent(inout) :: ab_xfh
 type(abihist), intent(inout) :: hist
@@ -157,22 +155,19 @@ real(dp), intent(inout) :: rprimd(3,3)
 !scalars
 integer,parameter :: master=0
 integer :: ii,me,nloop
-logical :: DEBUG=.FALSE., need_verbose=.TRUE.
+logical :: DEBUG=.FALSE.
 character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
 character(len=fnlen) :: filename
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(crystal_t) :: crystal
 ! ***************************************************************
- need_verbose=.TRUE.
- if(present(verbose)) need_verbose = verbose
 
  me=xmpi_comm_rank(comm_cell)
 
 !Precondition forces, stress and energy
  call abiforstr_ini(preconforstr,ab_mover%natom)
- write(message,'(2a)') 'Geometry Optimization Precondition:',ab_mover%goprecon
- if(need_verbose)call wrtout(std_out,message,'COLL')
+
  if (ab_mover%goprecon>0)then
    call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
  end if
@@ -273,6 +268,11 @@ type(crystal_t) :: crystal
  end if
 
  call abiforstr_fin(preconforstr)
+
+!DEBUG
+!write(std_out,*)' m_precpred_1geo : exit '
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine precpred_1geo
 !!***

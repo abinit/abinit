@@ -872,7 +872,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
-     if(.false.)then
+
+!DEBUG
+     write(std_out,*)' m_mover : will call precpred_1geo'
+     call flush(std_out)
+!ENDDEBUG
+
+     if(.true.)then
        call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),deloc,&
 &       scfcv_args%dtset%chkdilatmx,&
 &       scfcv_args%mpi_enreg%comm_cell,&
@@ -881,13 +887,21 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       icycle,iexit,itime,mttk_vars,&
 &       scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
 &       scfcv_args%dtset%rprimd_orig,skipcycle,&
-&       scfcv_args%dtset%usewvl,xred,verbose=verbose) 
+&       scfcv_args%dtset%usewvl,xred) 
       endif
+
+!DEBUG
+     write(std_out,*)' m_mover : after calling precpred_1geo'
+     call flush(std_out)
+!ENDDEBUG
+
 
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 
-     write(message,'(2a)') 'Geometry Optimization Precondition:',ab_mover%goprecon
+     if(.false.)then
+
+     write(message,'(a,i3)') 'Geometry Optimization Precondition:',ab_mover%goprecon
 
      if(need_verbose)call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
@@ -997,6 +1011,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
      end if
 
+     endif
+
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
      if(need_scfcv_cycle .and. (ab_mover%ionmov/=23 .or. icycle==1))then
@@ -1014,6 +1030,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
      end if
      if(iexit/=0) exit
+
+!DEBUG
+     write(std_out,*)' m_mover : before 18 '
+     call flush(std_out)
+!ENDDEBUG
+
 
 !    ###########################################################
 !    ### 18. Use the history  to extract the new values
@@ -1076,6 +1098,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      write(message,*) 'NCYCLE',ncycle
      if(need_verbose)call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
+
+!DEBUG
+     write(std_out,*)' m_mover : will call precpred_1geo'
+     call flush(std_out)
+!ENDDEBUG
+
 
 !    ###########################################################
 !    ### 19. End loop icycle
