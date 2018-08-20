@@ -71,7 +71,7 @@ contains
 !!      impurity_solve,spectral_function
 !!
 !! CHILDREN
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,pawpupot,wrtout
+!!      pawpupot,wrtout
 !!
 !! SOURCE
 
@@ -96,7 +96,6 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  use m_energy, only : energy_type,compute_energy
 
  use m_pawtab, only : pawtab_type
- use m_paw_ij, only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawdij, only : pawpupot
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_correlations, only : setnoccmmp
@@ -116,37 +115,31 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type), intent(in) :: green
  type(paw_dmft_type), intent(in)  :: paw_dmft
- type(pawtab_type),intent(in)  :: pawtab(cryst_struc%ntypat)
+ type(pawtab_type),target,intent(in)  :: pawtab(cryst_struc%ntypat)
  type(self_type), intent(inout) :: self !vz_i
  integer, intent(in) :: opt_ldau,prtopt
 
 !Local variables ------------------------------
 !scalars
  character(len=500) :: message
- integer :: iatom,idijeff,isppol,ispinor,ispinor1,itypat,lpawu
- integer :: ifreq,im,im1,ldim,natom,nspden,nsppol,nspinor,nsploop
+ integer :: iatom,idijeff,isppol,ispinor,ispinor1,lpawu
+ integer :: ifreq,im,im1,ldim,natom,nocc,nsppol,nspinor,nsploop
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
+ real(dp),allocatable :: noccmmp(:,:,:,:),nocctot(:)
  real(dp),allocatable :: vpawu(:,:,:,:)
- type(paw_ij_type), allocatable :: paw_ij(:)
+ type(pawtab_type),pointer :: pawtab_
 
 !************************************************************************
 
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol
  nspinor=paw_dmft%nspinor
- nspden=paw_dmft%nspden
- nsploop=max(paw_dmft%nsppol,paw_dmft%nspinor**2)
+ nsploop=max(nsppol,nspinor**2)
+ nocc=nsploop
  isppol=0
  ispinor=0
  ispinor1=0
-!write(std_out,*) "nsploop ",nsploop
- if(opt_ldau==1) then
- end if
- ABI_DATATYPE_ALLOCATE(paw_ij,(cryst_struc%natom))
- call paw_ij_nullify(paw_ij)
- call paw_ij_init(paw_ij,2,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%nspden, &
-& 1,paw_dmft%natom,cryst_struc%ntypat,cryst_struc%typat,pawtab,has_pawu_occ=1)
 
 !===============================
 !Impose density matrix
@@ -159,13 +152,16 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !&   pawrhoij_dum,pawtab,cryst_struc%spinat,cryst_struc%symafm,struct%typat,0,10)
 
  do iatom=1,cryst_struc%natom
-   itypat=cryst_struc%typat(iatom)
    lpawu=paw_dmft%lpawu(iatom)
+   pawtab_ => pawtab(cryst_struc%typat(iatom))
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     ABI_ALLOCATE(vpawu,(paw_ij(iatom)%cplex_dij,ldim,ldim,paw_ij(iatom)%ndij))
+     ABI_ALLOCATE(vpawu,(2,ldim,ldim,nocc))
 
-     paw_ij(iatom)%nocctot(:)=zero ! contains nmmp in the n m representation
+     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_ALLOCATE(nocctot,(nocc))
+     noccmmp(:,:,:,:)=zero ; nocctot(:)=zero ! contains nmmp in the n m representation
+
 !    ===============================
 !    Begin loop over spin/spinors to initialize noccmmp
      do idijeff=1,nsploop
@@ -191,51 +187,44 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !      ===============================
        do im1 = 1 , ldim
          do im = 1 ,  ldim
-!          paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-!          paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-           paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-           paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+!          noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+!          noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+           noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+           noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
          end do
        end do
 
-!      paw_ij(1)%noccmmp(1,3,3,1)=0.d0
-!      paw_ij(1)%noccmmp(1,5,5,1)=0.d0
-!      paw_ij(2)%noccmmp(1,3,3,2)=0.d0
-!      paw_ij(2)%noccmmp(1,5,5,2)=0.d0
 !      ===============================
 !      Compute nocctot for pawpupot =
 !      ===============================
        do im1=1,ldim
          if(nsploop==4) then
            if(idijeff<=2) then
-             paw_ij(iatom)%nocctot(1)=paw_ij(iatom)%nocctot(1)+paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+             nocctot(1)=nocctot(1)+noccmmp(1,im1,im1,idijeff)
            end if
          else
-           paw_ij(iatom)%nocctot(idijeff)=paw_ij(iatom)%nocctot(idijeff)+paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+           nocctot(idijeff)=nocctot(idijeff)+noccmmp(1,im1,im1,idijeff)
          end if
        end do
 !      write(message,'(2a)') ch10," == The noccmmp matrix is"
 !      call wrtout(std_out,message,'COLL')
 !      do im=1,ldim
-!      write(message,'(12(1x,9(1x,f10.5)))') (paw_ij(iatom)%noccmmp(1,im,im1,idijeff),im1=1,ldim)
+!      write(message,'(12(1x,9(1x,f10.5)))') (noccmmp(1,im,im1,idijeff),im1=1,ldim)
 !      call wrtout(std_out,message,'COLL')
-!      write(message,'(12(1x,9(1x,f10.5)))') (paw_ij(iatom)%noccmmp(2,im,im1,idijeff),im1=1,ldim)
+!      write(message,'(12(1x,9(1x,f10.5)))') (noccmmp(2,im,im1,idijeff),im1=1,ldim)
 !      call wrtout(std_out,message,'COLL')
 !      end do
 !      !     write(message,'(2a)') ch10," == The nocctot are"
 !      call wrtout(std_out,message,'COLL')
-!      write(std_out,*) paw_ij(iatom)%nocctot(idijeff)
+!      write(std_out,*) nocctot(idijeff)
      end do
-     paw_ij(iatom)%has_pawu_occ=2
 
 !    warning  dmft works here if nspden=nsppol (this is checked elsewhere)
 
 !    ===============================
 !    Compute LDA+U vpawu from noccmmp
 !    ===============================
-     call pawpupot(paw_ij(iatom)%cplex_dij,paw_ij(iatom)%ndij,&
-&     paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
-&     2,pawtab(itypat),vpawu)
+     call pawpupot(2,nocc,noccmmp,nocctot,2,pawtab_,vpawu)
 !    do idijeff=1,size(vpawu,4)
 !    write(message,'(2a)') ch10," == The vpawu matrix is"
 !    call wrtout(std_out,message,'COLL')
@@ -286,15 +275,15 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
      end do ! idijeff
 !    write(std_out,*) "check im,im1 in vpawu",iatom
      ABI_DEALLOCATE(vpawu)
+
 !    ===============================
 !    Compute energy
 !    ===============================
 
+     ABI_DEALLOCATE(noccmmp)
+     ABI_DEALLOCATE(nocctot)
    end if
  end do
-
- call paw_ij_free(paw_ij)
- ABI_DATATYPE_DEALLOCATE(paw_ij)
 
  if(abs(prtopt)>0) then
  end if

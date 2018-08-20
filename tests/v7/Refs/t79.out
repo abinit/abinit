@@ -1571,6 +1571,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Number of (i,j) elements for PAW+U or EXX .....    3
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1614,6 +1615,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1655,6 +1657,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2161,6 +2164,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Number of (i,j) elements for PAW+U or EXX .....    3
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2204,6 +2208,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2245,6 +2250,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0

@@ -2148,7 +2148,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   
   !Local variables-------------------------------
   !scalars
-  integer :: choice,cpopt,ddkflag,dimenlc1,dimenlr1,iatom,icg1,icp2,idum1
+  integer :: choice,cpopt,ddkflag,dimenlr1,iatom,icg1,icp2,idum1
   integer :: idir,ifor,ikgf,ikptf,ikpt2,ikpt2f,ipw,i_paw_band,ispinor,itrs,itypat,job
   integer :: klmn,mcg1_k,mcg_q,nbo,npw_k2,nspinortot,paw_opt,shiftbd,signs
   real(dp) :: fac
@@ -2159,8 +2159,8 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   real(dp) :: smat_k(2,dtefield%mband_occ,dtefield%mband_occ)
   real(dp) :: smat_inv(2,dtefield%mband_occ,dtefield%mband_occ),svectout_dum(2,0)
   real(dp) :: dummy_enlout(0)
-  real(dp),allocatable :: cgq_k(:,:),enl_rij(:,:,:),grad_berry_ev(:,:)
-  real(dp),allocatable :: qijbkk(:,:,:),smat_k_paw(:,:,:)
+  real(dp),allocatable :: cgq_k(:,:),enl_rij(:,:,:,:),grad_berry_ev(:,:)
+  real(dp),allocatable :: qijbkk(:,:,:,:),smat_k_paw(:,:,:)
   ! type(pawcprj_type) :: cprj_dum(1,1) ! was used in on-site dipole, now suppressed
   ! 15 June 2012 J Zwanziger
   type(pawcprj_type),allocatable :: cprj_kb(:,:),cprj_band_srt(:,:)
@@ -2184,9 +2184,8 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   
   if (gs_hamk%usepaw /= 0) then
      dimenlr1 = gs_hamk%lmnmax*(gs_hamk%lmnmax+1)/2
-     dimenlc1 = 2*dimenlr1
-     ABI_ALLOCATE(qijbkk,(dimenlc1,natom,nspinor**2))
-     ABI_ALLOCATE(enl_rij,(nspinor*dimenlr1,natom,nspinor**2))
+     ABI_ALLOCATE(qijbkk,(dimenlr1,natom,nspinor**2,2))
+     ABI_ALLOCATE(enl_rij,(nspinor*dimenlr1,natom,nspinor**2,1))
      ABI_ALLOCATE(smat_k_paw,(2,nbo,nbo))
      ABI_ALLOCATE(grad_berry_ev,(2,npw*nspinor))
      enl_rij = zero
@@ -2206,8 +2205,8 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         ABI_DATATYPE_ALLOCATE(cprj_ikn,(0,0))
      end if
   else
-     ABI_ALLOCATE(qijbkk,(0,0,0))
-     ABI_ALLOCATE(enl_rij,(0,0,0))
+     ABI_ALLOCATE(qijbkk,(0,0,0,0))
+     ABI_ALLOCATE(enl_rij,(0,0,0,0))
      ABI_ALLOCATE(smat_k_paw,(0,0,0))
      ABI_ALLOCATE(grad_berry_ev,(0,0))
      ABI_DATATYPE_ALLOCATE(cprj_kb,(0,0))
@@ -2299,9 +2298,9 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
                  !          note: D_ij-like terms have 4 spinor components: 11, 22, 12, and 21. Here the qijb is diagonal
                  !          in spin space so only the first two are nonzero and they are equal
                  do ispinor = 1, nspinor
-                    qijbkk(2*klmn-1,iatom,ispinor) = dtefield%qijb_kk(1,klmn,gs_hamk%atindx1(iatom),idir)
-                    qijbkk(2*klmn,  iatom,ispinor) = dtefield%qijb_kk(2,klmn,gs_hamk%atindx1(iatom),idir)
-                    if (ifor > 1) qijbkk(2*klmn,iatom,ispinor) = -qijbkk(2*klmn,iatom,ispinor)
+                    qijbkk(klmn,iatom,ispinor,1) = dtefield%qijb_kk(1,klmn,gs_hamk%atindx1(iatom),idir)
+                    qijbkk(klmn,  iatom,ispinor,2) = dtefield%qijb_kk(2,klmn,gs_hamk%atindx1(iatom),idir)
+                    if (ifor > 1) qijbkk(klmn,iatom,ispinor,2) = -qijbkk(klmn,iatom,ispinor,2)
                  end do
               end do ! end loop over lmn2_size
            end do ! end loop over natom

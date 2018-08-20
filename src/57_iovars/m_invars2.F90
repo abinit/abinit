@@ -3221,7 +3221,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%densty(1:ntypat,1)=dprarr(1:ntypat)
 
  call intagm(dprarr,intarr,jdtset,marr,npsp,string(1:lenstr),'so_psp',tread,'INT')
- if(tread==1)then
+ if(tread==1.and.dtset%usepaw==0)then
    dtset%so_psp(1:npsp)=intarr(1:npsp)
  end if
 

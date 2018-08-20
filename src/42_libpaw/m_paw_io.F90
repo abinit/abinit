@@ -80,8 +80,7 @@ CONTAINS !===========================================================
 !!              magnitude of a_ij is greater than opt_test
 !!              No test when test_value<0
 !!  unit=the unit number for output
-!!  unt= units of output: if 1, no change (output is in Hartree)
-!!                        if 2, output is in eV
+!!  Ha_or_eV= 1: output in hartrees, 2: output in eV
 !!
 !! PARENTS
 !!      m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij,pawmkrhoij,pawprt
@@ -92,8 +91,9 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index,opt_pack,opt_prtvol,pack2ij,test_value,unt, &
-&                   mode_paral,opt_sym,asym_ij)    !Optional arguments
+subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
+&                         opt_pack,opt_prtvol,pack2ij,test_value,Ha_or_eV, &
+&                         mode_paral,opt_sym,asym_ij) ! Optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -107,7 +107,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index,opt_pack,o
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: adim,cplex,ndim,opt_l,opt_pack,opt_prtvol,unit,unt
+ integer,intent(in) :: adim,cplex,ndim,opt_l,opt_pack,opt_prtvol,unit,Ha_or_eV
  integer,intent(in),optional :: opt_sym
  character(len=*),optional,intent(in) :: mode_paral
  real(dp),intent(in) :: test_value
@@ -263,7 +263,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index,opt_pack,o
    LIBPAW_DEALLOCATE(bsym_ij)
  end if
 
- if (unt==2) then
+ if (Ha_or_eV==2) then
    prtab=prtab*Ha_eV
    if (opt_prtvol<0.and.opt_l<0) then
      tabmax=tabmax*Ha_eV
@@ -317,7 +317,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index,opt_pack,o
  end if
 
  if (test_value>zero) then
-   testval=test_value;if (unt==2) testval=testval*Ha_eV
+   testval=test_value;if (Ha_or_eV==2) testval=testval*Ha_eV
    nhigh=0;nhigh=count(abs(prtab(:,:,:))>=testval)
    if (nhigh>0) then
      write(msg,'(5a,i3,a,f6.1,7a)')&
