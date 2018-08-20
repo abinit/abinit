@@ -222,7 +222,6 @@ type(delocint) :: deloc
 end type abimover
 
  public :: abimover_ini
- public :: abimover_fin
  public :: abimover_nullify
 !!***
 
@@ -578,6 +577,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 
 !Local variables-------------------------------
 !scalars
+ integer :: icenter, ii, irshift, jj, kk, nshell 
  character(len=500) :: msg
 !arrays
 
@@ -804,28 +804,18 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%method = 'Langevin molecular dynamics'
 !  Number of history
    specs%nhist = 3
-!  This is the initialization for ionmov==10
+!  This is the initialization for ionmov==10 and 11
 !  -------------------------------------------
- case (10)
+ case (10,11)
 !  TEMPORARLY optcell is not allow
    specs%isARused=.FALSE.
 !  Values use in XML Output
-   specs%type4xml='delocint'
+   if(ab_mover%ionmov==10)specs%type4xml='delocint'
+   if(ab_mover%ionmov==11)specs%type4xml='cg'
    specs%crit4xml='tolmxf'
 !  Name of specs%method
-   specs%method = 'BFGS with delocalized internal coordinates'
-!  Number of history
-   specs%nhist = 3
-!  This is the initialization for ionmov==11
-!  -------------------------------------------
- case (11)
-!  TEMPORARLY optcell is not allow
-   specs%isARused=.FALSE.
-!  Values use in XML Output
-   specs%type4xml='cg'
-   specs%crit4xml='tolmxf'
-!  Name of specs%method
-   specs%method = 'Conjugate gradient algorithm'
+   if(ab_mover%ionmov==10)specs%method = 'BFGS with delocalized internal coordinates'
+   if(ab_mover%ionmov==10)specs%method = 'Conjugate gradient with deloc. int. coord.'
 !  Number of history
    specs%nhist = 3
 !  This is the initialization for ionmov==12
@@ -1160,69 +1150,6 @@ subroutine abimover_nullify(ab_mover)
  nullify(ab_mover%filnam_ds)
 
 end subroutine abimover_nullify
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abimover/abimover_fin
-!! NAME
-!! abimover_fin
-!!
-!! FUNCTION
-!! Deallocate all the pointers in a ab_mover
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  ab_mover <type(abimover)> = The ab_mover to destroy
-!!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
-!! NOTES
-!!  At present 32 variables are present in abimover
-!!  if a new variable is added in abimover it should
-!!  be added also for deallocate here
-!!
-!! STATS
-!!  integer         => 13
-!!  real            =>  7
-!!  integer array   =>  4
-!!  real array      =>  6
-!!  character array =>  1
-!!  structures      =>  1
-!!  TOTAL              32
-!!
-!! SOURCE
-
-subroutine abimover_fin(ab_mover)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimover_fin'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- type(abimover),intent(inout) :: ab_mover
-
-! ***************************************************************
-
- call delocint_fin(ab_mover%deloc)
-
-! ab_mover is only pointer associated to other data, except possibly amass.
-! TODO: check for amass in mover.F90
- call abimover_nullify(ab_mover)
-
-end subroutine abimover_fin
 !!***
 
 !----------------------------------------------------------------------
@@ -2157,7 +2084,7 @@ subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(delocint),intent(inout) :: deloc
+ type(delocint),intent(in) :: deloc
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
  real(dp),intent(out) :: prim_int(deloc%ninternal)

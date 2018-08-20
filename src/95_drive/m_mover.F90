@@ -234,6 +234,7 @@ type(abihist) :: hist,hist_prev
 type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
+type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,ntime,option,comm
@@ -286,7 +287,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !06. First output before any itime or icycle
 !07. Fill the history of the first SCFCV
 !08. Loop for itime (From 1 to ntime)
-!09. Loop for icycle (From 1 to ncycles)
+!09. Loop for icycle (From 1 to ncycle)
 !10. Output for each icycle (and itime)
 !11. Symmetrize atomic coordinates over space group elements
 !12. => Call to SCFCV routine and fill history with forces
@@ -372,6 +373,27 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
+ end if
+
+ 
+ if(ab_mover%ionmov==10 .or ab_mover%ionmov==11)then
+!Should create a separate subroutine
+!  call deloc_ini(deloc, )
+   nshell=3
+   deloc%nrshift=(2*nshell+1)**3
+   icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
+
+   ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
+   irshift=0
+   do ii=-nshell,nshell
+     do jj=-nshell,nshell
+       do kk=-nshell,nshell
+         irshift=irshift+1
+         deloc%rshift(:,irshift) = (/dble(ii),dble(jj),dble(kk)/)
+       end do
+     end do
+   end do
+
  end if
 
 !###########################################################
@@ -588,7 +610,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #endif
 
 !  ###########################################################
-!  ### 09. Loop for icycle (From 1 to ncycles)
+!  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
 
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
@@ -855,7 +877,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       scfcv_args%dtset%chkdilatmx,&
 &       scfcv_args%mpi_enreg%comm_cell,
 &       scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
-&       scfcv_args%dtset%hmctt,&
+&       hist,scfcv_args%dtset%hmctt,&
 &       icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
 &       scfcv_args%dtset%rprimd_orig,skipcycle,&
 &       scfcv_args%dtset%usewvl,xred,verbose=verbose) 
@@ -902,7 +924,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (9)
          call pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle)
        case (10,11)
-         call pred_delocint(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
+         call pred_delocint(ab_mover,ab_xfh,deloc,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
        case (12)
          call pred_isokinetic(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (13)
@@ -1127,13 +1149,17 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    call mttk_fin(mttk_vars)
  end if
 
+ if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
+   call delocint_fin(deloc)
+ end if
+
  ABI_DEALLOCATE(amu)
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
 
- call abimover_fin(ab_mover)
+ call abimover_nullify(ab_mover)
  call abiforstr_fin(preconforstr)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
