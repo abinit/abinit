@@ -305,7 +305,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !### 05. Compute internals for first time
 
  if (itime==1)then
-   call make_prim_internals(deloc,icenter,ab_mover%natom,&
+   call make_prim_internals(deloc,ab_mover%natom,&
 &   ab_mover%ntypat,rprimd,ab_mover%typat,xcart,ab_mover%znucl)
 
    ABI_ALLOCATE(prim_int,(deloc%ninternal))

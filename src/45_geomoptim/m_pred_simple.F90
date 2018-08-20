@@ -180,7 +180,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  integer,intent(in) :: iexit,itime,icycle
  type(abimover),intent(in) :: ab_mover
  type(abihist),intent(in) :: hist
- type(abiforstr),intent(out) :: forstr
+ type(abiforstr),intent(inout) :: forstr
 
 !Local variables-------------------------------
 !scalars

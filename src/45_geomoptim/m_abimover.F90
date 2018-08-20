@@ -53,6 +53,7 @@ module m_abimover
 !! NOTES
 !!   deloc <type(delocint)>=Important variables for pred_delocint
 !!   |
+!!   ! icenter  = Index of the center of the number of shifts
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions (used for constraints)
@@ -77,6 +78,7 @@ module m_abimover
 type,public :: delocint
 
 ! scalars
+ integer :: icenter
  integer :: nang
  integer :: nbond
  integer :: ncart
@@ -577,7 +579,6 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 
 !Local variables-------------------------------
 !scalars
- integer :: icenter, ii, irshift, jj, kk, nshell 
  character(len=500) :: msg
 !arrays
 
@@ -815,7 +816,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    if(ab_mover%ionmov==10)specs%method = 'BFGS with delocalized internal coordinates'
-   if(ab_mover%ionmov==10)specs%method = 'Conjugate gradient with deloc. int. coord.'
+   if(ab_mover%ionmov==11)specs%method = 'Conjugate gradient with deloc. int. coord.'
 !  Number of history
    specs%nhist = 3
 !  This is the initialization for ionmov==12
@@ -1436,7 +1437,6 @@ end subroutine abiforstr_fin
 !!
 !! INPUTS
 !! natom  = Number of atoms (dtset%natom)
-!! icenter= index of the center of the number of shifts
 !! nrshift= dimension of rshift
 !! rprimd(3,3)=dimensional real space primitive translations (bohr)
 !! rshift(3,nrshift)=shift in xred that must be done to find all neighbors of
@@ -1444,9 +1444,11 @@ end subroutine abiforstr_fin
 !! xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
 !! OUTPUT
+!!
+!! SIDE EFFECTS
 !!   deloc <type(delocint)>=Important variables for
 !!   |                           pred_delocint
-!!   |
+!!   ! icenter  = Index of the center of the number of shifts 
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions
@@ -1470,8 +1472,6 @@ end subroutine abiforstr_fin
 !!   |                    all neighbors of a given atom within a
 !!   |                    given number of neighboring shells
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!
 !!   Adds cartesian coordinates if the number of internals with a
@@ -1486,7 +1486,7 @@ end subroutine abiforstr_fin
 !!
 !! SOURCE
 
-subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znucl)
+subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1500,7 +1500,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
 !Arguments ------------------------------------
 !scalars
  type(delocint),intent(inout) :: deloc
- integer,intent(in) :: icenter,natom,ntypat
+ integer,intent(in) :: natom,ntypat
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
  integer,intent(in) :: typat(natom)
@@ -1520,7 +1520,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
 
  particip_atom(:) = 0
 
- call make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
+ call make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
  do ibond=1,deloc%nbond
    write(std_out,'(a,i4,2(2i5,2x))') 'bond ', ibond, deloc%bonds(:,:,ibond)
@@ -1528,7 +1528,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
    particip_atom(deloc%bonds(1,2,ibond)) = particip_atom(deloc%bonds(1,2,ibond))+1
  end do
 
- call make_angles(deloc,icenter,natom)
+ call make_angles(deloc,natom)
 
  ABI_ALLOCATE(badangles,(deloc%nang))
  badangles(:) = 0
@@ -1582,7 +1582,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
    end if
  end do
 
- call make_dihedrals(badangles,deloc,icenter)
+ call make_dihedrals(badangles,deloc)
  ABI_DEALLOCATE(badangles)
 
  do idihed=1,deloc%ndihed
@@ -1661,7 +1661,7 @@ end subroutine make_prim_internals
 !!
 !! SOURCE
 
-subroutine make_angles(deloc,icenter,natom)
+subroutine make_angles(deloc,natom)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1674,7 +1674,7 @@ subroutine make_angles(deloc,icenter,natom)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter,natom
+ integer,intent(in) :: natom
  type(delocint),intent(inout) :: deloc
 !arrays
 
@@ -1700,7 +1700,7 @@ subroutine make_angles(deloc,icenter,natom)
    do jbond=ibond+1,deloc%nbond
      ja1 = deloc%bonds(1,1,jbond)
      ja2 = deloc%bonds(1,2,jbond)
-     do ishift=-(icenter-1),+(icenter-1)
+     do ishift=-(deloc%icenter-1),+(deloc%icenter-1)
        js1 = deloc%bonds(2,1,jbond)+ishift
        js2 = deloc%bonds(2,2,jbond)+ishift
 
@@ -1771,7 +1771,7 @@ end subroutine make_angles
 !!
 !! SOURCE
 
-subroutine make_dihedrals(badangles,deloc,icenter)
+subroutine make_dihedrals(badangles,deloc)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1784,7 +1784,6 @@ subroutine make_dihedrals(badangles,deloc,icenter)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter
  type(delocint),intent(inout) :: deloc
 !arrays
  integer,intent(in) :: badangles(deloc%nang)
@@ -1819,7 +1818,7 @@ subroutine make_dihedrals(badangles,deloc,icenter)
      ja1 = deloc%angs(1,1,jang)
      ja2 = deloc%angs(1,2,jang)
      ja3 = deloc%angs(1,3,jang)
-     do ishift=-(icenter-1),(icenter-1)
+     do ishift=-(deloc%icenter-1),(deloc%icenter-1)
        js1 = deloc%angs(2,1,jang)+ishift
        js2 = deloc%angs(2,2,jang)+ishift
        js3 = deloc%angs(2,3,jang)+ishift
@@ -1928,7 +1927,7 @@ end subroutine make_dihedrals
 !!
 !! SOURCE
 
-subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
+subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1941,7 +1940,6 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter
  integer,intent(in) :: natom,ntypat
  type(delocint),intent(inout) :: deloc
 !arrays
@@ -1997,7 +1995,7 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
            MSG_ERROR('make_bonds: error too many bonds !')
          end if
          bonds_tmp(1,1,deloc%nbond) = iatom
-         bonds_tmp(2,1,deloc%nbond) = icenter
+         bonds_tmp(2,1,deloc%nbond) = deloc%icenter
          bonds_tmp(1,2,deloc%nbond) = jatom
          bonds_tmp(2,2,deloc%nbond) = irshift
 
@@ -2015,11 +2013,13 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
  do ibond=1,deloc%nbond
    deloc%bonds(:,:,ibond) = bonds_tmp(:,:,ibond)
  end do
- ABI_DEALLOCATE(bonds_tmp)
 
-!do ibond=1,deloc%nbond
-!write(std_out,*) 'bond ', ibond, deloc%bonds(:,:,ibond)
-!end do
+! do ibond=1,deloc%nbond
+! write(std_out,*) ' make_bonds : bonds_tmp ', ibond, bonds_tmp(:,:,ibond)
+! write(std_out,*) ' make_bonds : deloc%bonds ', ibond, deloc%bonds(:,:,ibond)
+! end do
+
+  ABI_DEALLOCATE(bonds_tmp)
 
 end subroutine make_bonds
 !!***
@@ -2099,7 +2099,7 @@ subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 
 !DEBUG
 !write(std_out,*) ' calc_prim_int : enter'
-!write(std_out,*) shape(angs),shape(deloc%bonds),shape(dihedrals)
+!write(std_out,*) shape(deloc%bonds)
 !do ibond=1,deloc%nbond
 !do i1=1,2
 !write(std_out,'(2I5)') deloc%bonds(:,i1,ibond)

@@ -236,7 +236,7 @@ type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
-integer :: icenter,irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,nshell,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -381,7 +381,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  call deloc_ini(deloc, )
    nshell=3
    deloc%nrshift=(2*nshell+1)**3
-   icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
+   deloc%icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
 
    ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
    irshift=0
@@ -888,6 +888,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 16. => Precondition forces, stress and energy
 
      write(message,'(2a)') 'Geometry Optimization Precondition:',ab_mover%goprecon
+
      if(need_verbose)call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
