@@ -1321,7 +1321,7 @@ end subroutine pawrhoij_copy
    if (with_rhoijres_)use_rhoijres=pawrhoij_in(irhoij)%use_rhoijres
    if (with_rhoijim_)use_rhoijim=pawrhoij_in(irhoij)%use_rhoijim
    if (with_rhoij__) use_rhoij_=pawrhoij_in(irhoij)%use_rhoij_
-   buf_int_size=buf_int_size+15
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij_in(irhoij)%nrhoijsel
      buf_int_size=buf_int_size+nselect
@@ -1684,7 +1684,7 @@ end subroutine pawrhoij_gather
      use_rhoijres=pawrhoij_in(jrhoij)%use_rhoijres
      use_rhoijim =pawrhoij_in(jrhoij)%use_rhoijim
      use_rhoij_  =pawrhoij_in(jrhoij)%use_rhoij_
-     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+15
+     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+16
      if (ngrhoij>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*lmn2_size*nspden*ngrhoij
      if (use_rhoijres>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*lmn2_size*nspden
      if (use_rhoijim>0)  buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+lmn2_size*nspden
@@ -4287,7 +4287,7 @@ implicit none
    use_rhoijres=pawrhoij1%use_rhoijres
    use_rhoijim=pawrhoij1%use_rhoijim
    use_rhoij_=pawrhoij1%use_rhoij_
-   buf_int_size=buf_int_size+15
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij1%nrhoijsel
      buf_int_size=buf_int_size+nselect
