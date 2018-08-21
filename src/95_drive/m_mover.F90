@@ -183,7 +183,7 @@ contains
 !!
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
-!!      abihist_free,abihist_init,abimover_fin,abimover_ini,abimover_nullify
+!!      abihist_free,abihist_init,abimover_fin,abimover_ini 
 !!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
 !!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
@@ -303,97 +303,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !22. XML Output at the end
 !23. Deallocate hist and ab_mover datatypes
 !
-!IONMOV values:
-!
-!1.  Molecular dynamics without viscosity (vis=0)
-!1.  Molecular dynamics with viscosity (vis/=0)
-!2.  Broyden-Fletcher-Goldfard-Shanno method (forces)
-!3.  Broyden-Fletcher-Goldfard-Shanno method (forces,Tot energy)
-!4.  Conjugate gradient of potential and ionic degrees of freedom
-!5.  Simple relaxation of ionic positions
-!6.  Verlet algorithm for molecular dynamics
-!7.  Verlet algorithm blocking every atom where dot(vel,force)<0
-!8.  Verlet algorithm with a nose-hoover thermostat
-!9.  Langevin molecular dynamics
-!10. BFGS with delocalized internal coordinates
-!11. Conjugate gradient algorithm
-!12. Isokinetic ensemble molecular dynamics
-!13. Isothermal/isenthalpic ensemble molecular dynamics
-!14. Symplectic algorithm Runge-Kutta-Nystrom SRKNa14
-!15. Fast inertial relaxation engine method for relaxation.
-!20. Ionic positions relaxation using DIIS
-!21. Steepest descent algorithm
-!23. LOTF method
-!24. Velocity verlet molecular dynamics
+ call abimover_ini(ab_mover,amass,dtfil,scfcv_args%dtset,specs)
 
- call abimover_nullify(ab_mover)
-
- call abimover_ini(ab_mover,specs,&
-& scfcv_args%dtset%delayperm,&
-& scfcv_args%dtset%diismemory,&
-& scfcv_args%dtset%goprecon,&
-& scfcv_args%dtset%jellslab,&
-& scfcv_args%dtset%natom,&
-& scfcv_args%dtset%nconeq,&
-& scfcv_args%dtset%nnos,&
-& scfcv_args%dtset%nsym,&
-& scfcv_args%dtset%ntypat,&
-& scfcv_args%dtset%optcell,&
-& scfcv_args%dtset%restartxf,&
-& scfcv_args%dtset%signperm,&
-& scfcv_args%dtset%ionmov,&
-& scfcv_args%dtset%bmass,&
-& scfcv_args%dtset%dtion,&
-& scfcv_args%dtset%friction,&
-& scfcv_args%dtset%mdwall,&
-& scfcv_args%dtset%noseinert,&
-& scfcv_args%dtset%strprecon,&
-& scfcv_args%dtset%vis,&
-& scfcv_args%dtset%iatfix,&
-& scfcv_args%dtset%symafm,&
-& scfcv_args%dtset%symrel,&
-& scfcv_args%dtset%ph_freez_disp_addStrain,&
-& scfcv_args%dtset%ph_freez_disp_ampl,&
-& scfcv_args%dtset%ph_freez_disp_nampl,&
-& scfcv_args%dtset%ph_freez_disp_option,&
-& scfcv_args%dtset%ph_ngqpt,&
-& scfcv_args%dtset%ph_nqshift,&
-& scfcv_args%dtset%ph_qshift,&
-& scfcv_args%dtset%tnons,&
-& scfcv_args%dtset%typat,&
-& scfcv_args%dtset%prtatlist,&
-& amass,&
-& scfcv_args%dtset%goprecprm,&
-& scfcv_args%dtset%mdtemp,&
-& scfcv_args%dtset%strtarget,&
-& scfcv_args%dtset%qmass,&
-& scfcv_args%dtset%znucl,&
-& dtfil%fnameabi_hes,&
-& dtfil%filnam_ds)
+ if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
+   call delocint_ini(deloc)
+ end if
 
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
- end if
-
- 
- if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
-!Should create a separate subroutine
-!  call deloc_ini(deloc, )
-   nshell=3
-   deloc%nrshift=(2*nshell+1)**3
-   deloc%icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
-
-   ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
-   irshift=0
-   do ii=-nshell,nshell
-     do jj=-nshell,nshell
-       do kk=-nshell,nshell
-         irshift=irshift+1
-         deloc%rshift(:,irshift) = (/dble(ii),dble(jj),dble(kk)/)
-       end do
-     end do
-   end do
-
  end if
 
 !###########################################################
@@ -873,145 +790,15 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
 
-!DEBUG
-     write(std_out,*)' m_mover : will call precpred_1geo'
-     call flush(std_out)
-!ENDDEBUG
-
-     if(.true.)then
-       call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),deloc,&
-&       scfcv_args%dtset%chkdilatmx,&
-&       scfcv_args%mpi_enreg%comm_cell,&
-&       scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
-&       hist,scfcv_args%dtset%hmctt,&
-&       icycle,iexit,itime,mttk_vars,&
-&       scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
-&       scfcv_args%dtset%rprimd_orig,skipcycle,&
-&       scfcv_args%dtset%usewvl,xred) 
-      endif
-
-!DEBUG
-     write(std_out,*)' m_mover : after calling precpred_1geo'
-     call flush(std_out)
-!ENDDEBUG
-
-
-!    ###########################################################
-!    ### 16. => Precondition forces, stress and energy
-
-     if(.false.)then
-
-     write(message,'(a,i3)') 'Geometry Optimization Precondition:',ab_mover%goprecon
-
-     if(need_verbose)call wrtout(std_out,message,'COLL')
-     if (ab_mover%goprecon>0)then
-       call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
-     end if
-
-!    ###########################################################
-!    ### 17. => Call to each predictor
-
-!    MT->GAF: dirty trick to predict vel(t)
-!    do a double loop: 1- compute vel, 2- exit
-     nloop=1
-
-     !write(message,'(a,i4,a,i4,a,i4)') ' DBGHMC itime= ',itime,' icycle= ',icycle,' ihist= ',hist%ihist
-     !call wrtout(ab_out,message,'COLL')
-
-
-     if (scfcv_args%dtset%nctime>0.and.iexit==1) then
-       iexit=0;nloop=2
-     end if
-
-     do ii=1,nloop
-       if (ii==2) iexit=1
-
-       select case (ab_mover%ionmov)
-       case (1)
-         call pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit)
-       case (2,3)
-         call pred_bfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (4,5)
-         call pred_simple(ab_mover,hist,iexit)
-       case (6,7)
-         call pred_verlet(ab_mover,hist,ab_mover%ionmov,itime,ntime,DEBUG,iexit)
-       case (8)
-         call pred_nose(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (9)
-         call pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle)
-       case (10,11)
-         call pred_delocint(ab_mover,ab_xfh,deloc,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (12)
-         call pred_isokinetic(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (13)
-         call pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,DEBUG,iexit)
-       case (14)
-         call pred_srkna14(ab_mover,hist,icycle,DEBUG,iexit,skipcycle)
-       case (15)
-         call pred_fire(ab_mover, ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (20)
-         call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (21)
-         call pred_steepdesc(ab_mover,preconforstr,hist,itime,DEBUG,iexit)
-       case (22)
-         call pred_lbfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-#if defined HAVE_LOTF
-       case (23)
-         call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
-#endif
-       case (24)
-         call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (25)
-         call pred_hmc(ab_mover,hist,itime,icycle,ntime,scfcv_args%dtset%hmctt,DEBUG,iexit)
-       case (27)
-         !In case of ionmov 27, all the atomic configurations have been computed at the
-         !begining of the routine in generate_training_set, thus we just need to increase the indexes
-         !in the hist
-         hist%ihist = abihist_findIndex(hist,+1)
-
-
-       case default
-         write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
-         MSG_ERROR(message)
-       end select
-
-     end do
-
-     ! check dilatmx here and correct if necessary
-     if (scfcv_args%dtset%usewvl == 0) then
-       call chkdilatmx(scfcv_args%dtset%chkdilatmx,scfcv_args%dtset%dilatmx,&
-&       rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
-       _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
-       if (LEN_TRIM(dilatmx_errmsg) /= 0) then
-         MSG_WARNING(dilatmx_errmsg)
-         nerr_dilatmx = nerr_dilatmx+1
-         if (nerr_dilatmx > 3) then
-           ! Write last structure before aborting, so that we can restart from it.
-           ! zion is not available, but it's not useful here.
-           if (me == master) then
-             ! Init crystal
-             call crystal_init(scfcv_args%dtset%amu_orig(:,1),crystal,0,ab_mover%natom,&
-&             scfcv_args%dtset%npsp,ab_mover%ntypat,scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
-&             [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&             symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
-
-#ifdef HAVE_NETCDF
-             ! Write netcdf file
-             filename = strcat(dtfil%filnam_ds(4), "_DILATMX_STRUCT.nc")
-             NCF_CHECK(crystal_ncwrite_path(crystal, filename))
-#endif
-             call crystal_free(crystal)
-           end if
-           call xmpi_barrier(comm)
-           write (dilatmx_errmsg, '(a,i0,3a)') &
-&           'Dilatmx has been exceeded too many times (', nerr_dilatmx, ')',ch10, &
-&           'Restart your calculation from larger lattice vectors and/or a larger dilatmx'
-           MSG_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
-         end if
-       end if
-     end if
-
-     endif
+     call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),deloc,&
+&     scfcv_args%dtset%chkdilatmx,&
+&     scfcv_args%mpi_enreg%comm_cell,&
+&     scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
+&     hist,scfcv_args%dtset%hmctt,&
+&     icycle,iexit,itime,mttk_vars,&
+&     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
+&     scfcv_args%dtset%rprimd_orig,skipcycle,&
+&      scfcv_args%dtset%usewvl,xred) 
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
@@ -1030,12 +817,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
      end if
      if(iexit/=0) exit
-
-!DEBUG
-     write(std_out,*)' m_mover : before 18 '
-     call flush(std_out)
-!ENDDEBUG
-
 
 !    ###########################################################
 !    ### 18. Use the history  to extract the new values
@@ -1101,7 +882,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !DEBUG
      write(std_out,*)' m_mover : will call precpred_1geo'
-     call flush(std_out)
+!    call flush(std_out)
 !ENDDEBUG
 
 
@@ -1189,7 +970,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  call abihist_free(hist)
  call abihist_free(hist_prev)
 
- call abimover_nullify(ab_mover)
+ call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')

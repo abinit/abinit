@@ -841,8 +841,8 @@ function abihist_findIndex(hist,step) result(index)
 
  if ((mxhist ==1.and.step/=+1).or.&
 &    (mxhist /=1.and.abs(step) >=mxhist)) then
-   write(msg,'(a,I0,2a)')' The requested step must be lass than ',mxhist,ch10,&
-&                     'Action: increase the number of history store in the hist'
+   write(msg,'(a,I0,2a)')' The requested step must be less than ',mxhist,ch10,&
+&                     'Action: increase the number of history stored in the hist'
    MSG_BUG(msg)
  end if
 

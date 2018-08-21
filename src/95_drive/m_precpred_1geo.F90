@@ -119,8 +119,7 @@ contains
 !! SOURCE
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_orig1,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
-& icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd,rprimd_orig,skipcycle,&
-& usewvl,xred)
+& icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
 
 
 !This section has been created automatically by the script Abilint (TD).
