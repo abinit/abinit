@@ -1077,6 +1077,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      ! Electronic eigenvalue
                      ikq_ibz_fine = eph_dg_mapping(5, jj)
                      eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
                      wqnu = phfrq_dense(nu,jj)
@@ -1102,6 +1103,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      ! Double Grid shared points weights
                      ikq_bz_fine  = eph_dg_mapping(2, jj)
                      weight = eph_dg%weights_dense(ikq_bz_fine)
+
+                     ! Electronic eigenvalue
+                     ikq_ibz_fine = eph_dg_mapping(5, jj)
+                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
                      wqnu = phfrq_dense(nu,jj)
@@ -1807,7 +1813,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! TODO T == 0 >> SIGSEGV
  !#if 0
- call ebands_copy(ebands, tmp_ebands)
+ if (new%use_doublegrid) then
+   call ebands_copy(ebands, tmp_ebands)
+ else
+   call ebands_copy(ebands_dense, tmp_ebands)
+ endif
+ !
  do it=1,new%ntemp
    call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
    new%mu_e(it) = tmp_ebands%fermie
