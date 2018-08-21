@@ -652,7 +652,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !dynimage
  intarr(1:marr,0)=1                 ! default value
  narr=nimage                        ! default size for all datasets
- do idtset=1,ndtset_alloc           ! especific size and array for each dataset
+ do idtset=1,ndtset_alloc           ! specific size and array for each dataset
    narrm(idtset)=dtsets(idtset)%nimage
    intarr(1:narrm(idtset),idtset)=dtsets(idtset)%dynimage(1:narrm(idtset))
  end do

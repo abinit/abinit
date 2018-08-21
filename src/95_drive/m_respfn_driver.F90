@@ -68,6 +68,7 @@ module m_respfn_driver
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -255,7 +256,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
@@ -726,22 +727,17 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_dijnd=0; req_cplex_dij=1
-   if(any(abs(dtset%nucdipmom)>tol8)) then
-     has_dijnd=1; req_cplex_dij=2
-   end if
+   has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*min(dtset%nspden,2)-1            ! LDA
-     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
-     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
-     if (dtset%nspden==4) nkxc1=nkxc1+3  ! Non-coll.: need to store 3 additional arrays in kxc
+     has_kxc=1
+     call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
+&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -1456,7 +1452,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
+   !write(std_out,*)"blkflg before d2sym3: ", blkflg
    call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+   !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
@@ -4172,9 +4170,9 @@ end subroutine dfpt_dyfro
 !!  ixc= choice of exchange-correlation scheme
 !!  kxc(nfft,nkxc)=first-order derivative of the xc potential
 !!    if (nkxc=1) LDA kxc(:,1)= d2Exc/drho2
-!!    if (nkxc=2) LDA kxc(:,1)=d2Exc/drho_up drho_up
-!!                    kxc(:,2)=d2Exc/drho_up drho_dn
-!!                    kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if (nkxc=2) LDA kxc(:,1)= d2Exc/drho_up drho_up
+!!                    kxc(:,2)= d2Exc/drho_up drho_dn
+!!                    kxc(:,3)= d2Exc/drho_dn drho_dn
 !!    if (nkxc=7) GGA kxc(:,1)= d2Exc/drho2
 !!                    kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
 !!                    kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho

@@ -17,6 +17,11 @@ get the following physical properties of periodic solids:
 
 This tutorial should take about 1 hour.
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## 1 Generation of a derivative database
   
 *Before beginning, you might consider to work in a different subdirectory as

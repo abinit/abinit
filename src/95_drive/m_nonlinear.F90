@@ -60,6 +60,7 @@ module m_nonlinear
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -198,7 +199,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
- integer :: psp_gencond,pead,req_cplex_dij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
+ integer :: psp_gencond,pead,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
  integer :: use_sym,usecprj,usexcnhat
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -749,19 +750,16 @@ end if
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_dijnd=0; req_cplex_dij=1
-   if(any(abs(dtset%nucdipmom)>tol8)) then
-     has_dijnd=1; req_cplex_dij=2
-   end if
+   has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
+   call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
-   if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,nk3xc1,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,has_k3xc=has_k3xc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
+&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else ! PAW vs NCPP
    usexcnhat=0;usecprj=0

@@ -284,6 +284,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.297     291.192
    0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840   0.00000   0.00000
    0.00000   0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840   0.00000
    0.00000   0.00000   0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  1 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  Atom #  2
    0.47155  73.55528   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
   73.55528 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -293,6 +299,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.297     291.192
    0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840   0.00000   0.00000
    0.00000   0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840   0.00000
    0.00000   0.00000   0.00000   0.00000  -1.06732   0.00000   0.00000   7.62840
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  1 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
 
 
  Augmentation waves occupancies Rhoij:
