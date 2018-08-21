@@ -38,6 +38,8 @@ module m_occ
  use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
+ 
+ real(dp) :: huge_tsmearinv = 1e50_dp
 
  private
 !!***
@@ -49,7 +51,6 @@ module m_occ
  public :: occ_be        ! Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
  public :: dos_hdr_write
  public :: pareigocc
-
 
 contains
 !!***
@@ -214,8 +215,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 
 !  Compute the arguments of the occupation and entropy functions
 !  HM 20/08/2018 Treat the T --> 0 limit
-   if (tsmearinv > huge(tsmearinv)) then
-     arg(:)=sign(huge(tsmearinv),fermie-eigen(1:bantot))
+   if (tsmear==0) then
+     arg(:)=sign(huge_tsmearinv,fermie-eigen(1:bantot))
    else
      arg(:)=(fermie-eigen(1:bantot))*tsmearinv
    endif

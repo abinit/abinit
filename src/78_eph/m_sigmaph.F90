@@ -1055,7 +1055,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              do it=1,sigma%ntemp
                nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
-               !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                ! Here we have to handle 3 different logical values
                ! leading to 9 different cases:
@@ -2004,6 +2004,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (abs(new%symsigma) == 1) then
      do spin=1,new%nsppol
        ibstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
+       write(*,*) new%bstart_ks(ikcalc,spin), ibstop
        call enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), ibstop, &
          changed, tol_enediff, degblock=degblock)
        if (changed) then
@@ -2012,6 +2013,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
            "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),ibstop
          MSG_COMMENT(msg)
+         write(msg,'(2(a,i0),2a)') "The number of included states ",ibstop,&
+                      " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
+                      "Please increase nband."
+         ABI_CHECK( ibstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg )
        end if
        ! Store band indices used for averaging.
        ndeg = size(degblock, dim=2)
