@@ -27,6 +27,7 @@ module m_abimover
  use m_profiling_abi
  use m_atomdata
  use m_errors
+ use defs_abitypes
 
  use m_geometry,  only : acrossb
 
@@ -424,10 +425,17 @@ contains  !=============================================================
 subroutine abimover_ini(ab_mover,amass,dtfil,dtset,specs)
 
 !Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abimover_ini'
+!End of the abilint section
+
 real(dp),target, intent(in) :: amass(:)            ! amass(natom)  (NOT IN DTSET)
 type(abimover),intent(out) :: ab_mover
-type(dtfil_type),target,intent(in) :: dtfil
-type(dtset_type),target,intent(in) :: dtset
+type(datafiles_type),target,intent(in) :: dtfil
+type(dataset_type),target,intent(in) :: dtset
 type(abimover_specs),intent(out) :: specs
 
 !Local variables-------------------------------
@@ -465,19 +473,19 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%friction    =dtset%friction
  ab_mover%mdwall      =dtset%mdwall
  ab_mover%noseinert   =dtset%noseinert
+ ab_mover%ph_nqshift  =dtset%ph_nqshift
  ab_mover%strprecon   =dtset%strprecon
  ab_mover%vis         =dtset%vis
+ ab_mover%ph_freez_disp_addStrain =dtset%ph_freez_disp_addStrain
+ ab_mover%ph_freez_disp_option    =dtset%ph_freez_disp_option
+ ab_mover%ph_freez_disp_nampl     =dtset%ph_freez_disp_nampl
 
  ab_mover%iatfix      =>dtset%iatfix(:,1:natom)
  ab_mover%symafm      =>dtset%symafm
  ab_mover%symrel      =>dtset%symrel
  ab_mover%tnons       =>dtset%tnons
- ab_mover%ph_freez_disp_addStrain =>dtset%ph_freez_disp_addStrain
- ab_mover%ph_freez_disp_option    =>dtset%ph_freez_disp_option
- ab_mover%ph_freez_disp_nampl     =>dtset%ph_freez_disp_nampl
- ab_mover%ph_ngqpt                =>dtset%ph_ngqpt
- ab_mover%ph_nqshift              =>dtset%ph_nqshift
- ab_mover%ph_qshift               =>dtset%ph_qshift
+ ab_mover%ph_ngqpt    =>dtset%ph_ngqpt
+ ab_mover%ph_qshift   =>dtset%ph_qshift
  ab_mover%ph_freez_disp_ampl      =>dtset%ph_freez_disp_ampl
  ab_mover%typat       =>dtset%typat(1:natom)
  ab_mover%prtatlist   =>dtset%prtatlist(1:natom)
@@ -813,6 +821,12 @@ subroutine abimover_destroy(ab_mover)
 
 !Arguments ------------------------------------
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abimover_destroy'
+!End of the abilint section
+
  type(abimover),intent(inout) :: ab_mover
 
 ! ***************************************************************
@@ -821,12 +835,8 @@ subroutine abimover_destroy(ab_mover)
  nullify(ab_mover%iatfix)
  nullify(ab_mover%mdtemp)
  nullify(ab_mover%ph_ngqpt)
- nullify(ab_mover%ph_freez_disp_addStrain)
  nullify(ab_mover%ph_freez_disp_ampl)
- nullify(ab_mover%ph_freez_disp_nampl)
- nullify(ab_mover%ph_freez_disp_option)
  nullify(ab_mover%ph_qshift)
- nullify(ab_mover%ph_nqshift)
 
  nullify(ab_mover%prtatlist)
  nullify(ab_mover%qmass)
@@ -2499,6 +2509,7 @@ end subroutine print_bonds
 
 subroutine delocint_ini(deloc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2513,7 +2524,7 @@ subroutine delocint_ini(deloc)
 
  !Local variables ------------------------------
  !scalars
- integer :: ii,jj,kk,nshell
+ integer :: ii,irshift,jj,kk,nshell
 
 ! *********************************************************************
 

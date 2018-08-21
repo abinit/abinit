@@ -144,11 +144,8 @@ type(abimover), intent(in) :: ab_mover
 type(delocint), intent(inout) :: deloc
 type(mttk_type), intent(inout) :: mttk_vars
 !arrays
-
 real(dp), intent(in) :: amu_orig1(ab_mover%ntypat)
-real(dp), intent(in) :: xred(3,ab_mover%natom)
 real(dp), intent(in) :: rprimd_orig(3,3)
-real(dp), intent(inout) :: rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -160,6 +157,10 @@ character(len=500) :: dilatmx_errmsg
 character(len=fnlen) :: filename
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(crystal_t) :: crystal
+!arrays
+real(dp) :: acell(3),rprimd(3,3)
+real(dp), allocatable :: xred(:,:)
+
 ! ***************************************************************
 
  me=xmpi_comm_rank(comm_cell)
@@ -233,6 +234,9 @@ type(crystal_t) :: crystal
 
  end do
 
+ ABI_ALLOCATE(xred,(3,ab_mover%natom))
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+
  ! check dilatmx here and correct if necessary
  if (usewvl == 0) then
    call chkdilatmx(dt_chkdilatmx,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
@@ -245,6 +249,8 @@ type(crystal_t) :: crystal
        ! zion is not available, but it's not useful here.
        if (me == master) then
          ! Init crystal
+         hist%ihist = abihist_findIndex(hist,-1)
+         call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
          call crystal_init(amu_orig1,crystal,0,ab_mover%natom,&
 &         npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
 &         [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
@@ -267,6 +273,7 @@ type(crystal_t) :: crystal
  end if
 
  call abiforstr_fin(preconforstr)
+ ABI_FREE(xred)
 
 !DEBUG
 !write(std_out,*)' m_precpred_1geo : exit '

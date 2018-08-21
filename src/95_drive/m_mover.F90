@@ -796,9 +796,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &     scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
 &     hist,scfcv_args%dtset%hmctt,&
 &     icycle,iexit,itime,mttk_vars,&
-&     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,rprimd,&
+&     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
 &     scfcv_args%dtset%rprimd_orig,skipcycle,&
-&      scfcv_args%dtset%usewvl,xred) 
+&     scfcv_args%dtset%usewvl) 
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
