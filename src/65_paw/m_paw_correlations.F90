@@ -156,7 +156,6 @@ CONTAINS  !=====================================================================
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- integer,allocatable :: ilmn0_nproju(:)
  real(dp) :: euijkl_temp(2,2),euijkl_temp2(2,2),euijkl_dc(2,2)
  real(dp),allocatable :: ff(:),fk(:),gg(:)
 
@@ -274,14 +273,12 @@ CONTAINS  !=====================================================================
        ABI_DEALLOCATE(pawtab(itypat)%lnproju)
      end if
      ABI_ALLOCATE(pawtab(itypat)%lnproju,(pawtab(itypat)%nproju))
-     ABI_ALLOCATE(ilmn0_nproju,(pawtab(itypat)%nproju))
      icount=0
      do ilmn=1,lmn_size
        if(indlmn(1,ilmn)==lcur) then
          itemp=icount/(2*lcur+1)
          if (itemp*(2*lcur+1)==icount) then
            pawtab(itypat)%lnproju(itemp+1)=indlmn(5,ilmn)
-           ilmn0_nproju(itemp+1)=ilmn
          end if
          icount=icount+1
        end if

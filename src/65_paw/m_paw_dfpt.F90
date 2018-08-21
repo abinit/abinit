@@ -432,13 +432,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      ABI_CHECK(paw_ij1(iatom)%ndij/=4,'ndij not yet available!')
 !    If DijU are not in memory, compute them
      if (paw_ij1(iatom)%has_dijU/=2.or.cplex_diju1/=1) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
-       if (cplex_diju1/=1) then
+       if (cplex_diju1==1) then
+         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
+&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
+       else
          ABI_ALLOCATE(diju_im,(pawtab(itypat)%lmn2_size,paw_ij1(iatom)%ndij))
          call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
 &             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat),diju_im=diju_im)
-       else
-         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
-&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
        end if
        paw_ij1(iatom)%has_dijU=2
      end if
@@ -457,7 +457,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
            jrhoij=jrhoij+cplex_b
          end do
        end do
-     else ! cplex_dijh1==2
+     else ! cplex_diju1==2
        do ispden=1,paw_ij1(iatom)%ndij
          jrhoij=1
          do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
