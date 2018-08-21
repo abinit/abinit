@@ -47,6 +47,8 @@ module m_abimover
  public :: bond_length
  public :: print_bonds
  public :: make_bonds_new
+ public :: calc_prim_int
+ public :: make_prim_internals
 
  integer,public, parameter :: mover_BEFORE=0
  integer,public, parameter :: mover_AFTER=1

@@ -269,6 +269,8 @@ real(dp), allocatable :: xred(:,:)
         'Restart your calculation from larger lattice vectors and/or a larger dilatmx'
        MSG_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
      end if
+   else
+     nerr_dilatmx=0
    end if
  end if
 
