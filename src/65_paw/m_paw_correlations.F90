@@ -563,7 +563,7 @@ CONTAINS  !=====================================================================
      !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
      !  write(std_out,*) "------------------------"
 
-!      c. For usepawu == 4 or 5, compute euijkl
+!      c. For usepawu == 5 or 6, compute euijkl
 !      ---------------------------------------------
        compute_euijkl=(usepawu==5.or.usepawu==6)
        if (compute_euijkl) then
