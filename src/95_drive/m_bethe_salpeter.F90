@@ -78,7 +78,7 @@ module m_bethe_salpeter
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
+&                              pawrhoij_free, pawrhoij_get_nspden, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
@@ -431,12 +431,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij,KS_Pawrhoij)
 
-   ! Re-symmetrize symrhoij ===
+   ! Re-symmetrize rhoij ===
    ! this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1
-!  call symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
-!  &  Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
-!  &  Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
+!  call pawrhoij_symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
+!  &             Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
+!  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
    ! Evaluate form factor of radial part of phi.phj-tphi.tphj ===
    rhoxsp_method=1 ! Arnaud-Alouani

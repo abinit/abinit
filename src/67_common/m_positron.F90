@@ -47,7 +47,7 @@ module m_positron
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
-                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_get_nspden, symrhoij
+                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_get_nspden, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
  use m_pawfgr,   only : pawfgr_type
@@ -1850,7 +1850,7 @@ end subroutine poslifetime
 !!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send
 !!      pawpsp_read_corewf,pawrhoij_alloc,pawrhoij_free,pawrhoij_gather
 !!      pawrhoij_nullify,poslifetime,posratecore,prep_fourwf,ptabs_fourdp,sbf8
-!!      set_mpi_enreg_fft,simp_gen,sphereboundary,symrhoij,unset_mpi_enreg_fft
+!!      set_mpi_enreg_fft,simp_gen,sphereboundary,pawrhoij_symrhoij,unset_mpi_enreg_fft
 !!      wffclose,wffopen,wrtout,xderivewrecend,xderivewrecinit,xderivewrite
 !!      xmoveoff,xmpi_bcast,xmpi_recv,xmpi_send,xmpi_sum
 !!
@@ -2821,10 +2821,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                              call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),cprj_k(:,ib_cprj),0,isppol,&
 &                             dtset%natom,dtset%natom,dtset%nspinor,occ_el,1,pawrhoij_dop_el,usetimerev,wtk_k)
 !                            Is it correct to apply symetries here (on a single band)?
-!                            If not, call symrhoij with nsym=1
-                             call symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,Crystal%indsym,0,dtset%natom,&
-&                             Crystal%nsym,dtset%ntypat,1,pawang,-10001,pawtab,Crystal%rprimd,Crystal%symafm,&
-&                             Crystal%symrec,dtset%typat)
+!                            If not, call pawrhoij_symrhoij with nsym=1
+                             call pawrhoij_symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,&
+&                             Crystal%indsym,0,dtset%natom,Crystal%nsym,dtset%ntypat,1,pawang,-10001,&
+&                             pawtab,Crystal%rprimd,Crystal%symafm,Crystal%symrec,dtset%typat)
                            end if
 !                          Has to call poslifetime in sequential because we are in a parallel section
 !                          Only FFT parallelism is allowed

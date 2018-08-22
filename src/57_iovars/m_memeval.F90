@@ -1070,7 +1070,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6d) and (6e)           in suscep and dielmt, called by vtorho,
 !see (10) and (11) -------------------------------
 
-!(6f)  in pawmkrhoij or symrhoij called by pawmkrho, called by vtorho--------
+!(6f)  in pawmkrhoij or pawrhoij_symrhoij called by pawmkrho, called by vtorho--------
 !only when paralellim over atoms is activated
  dttyp(63)=8
  if((usepaw==1) .and. ((iscf>0) .or. (iscf == -3) .and. mpi_enreg%nproc_atom>1 ))then

@@ -87,7 +87,7 @@
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,symrhoij
+!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
 !!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -125,7 +125,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawtab,   only : pawtab_type,pawtab_get_lsize
  use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+&                       pawrhoij_nullify, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
  use m_paw_dfpt, only : pawgrnl
@@ -941,12 +942,12 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  This symetrization is necessary in the antiferromagnetic case...
    if (rfphon==1.and.rfstrs==0) then
      option_rhoij=2;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    else if (rfphon==1.and.rfstrs==1) then
      option_rhoij=23;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    end if

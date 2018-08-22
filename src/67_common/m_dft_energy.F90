@@ -50,7 +50,8 @@ module m_dft_energy
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_init_unpacked, &
-                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_get_nspden, symrhoij
+                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_get_nspden, &
+&                               pawrhoij_symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -214,7 +215,7 @@ contains
 !!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
 !!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,symrhoij,timab
+!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,pawrhoij_symrhoij,timab
 !!      transgrid,xcdata_init,xmpi_sum
 !!
 !! SOURCE
@@ -863,7 +864,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  else
 !  === PAW case: symmetrize rhoij and add compensation charge density
    tim_mkrho=3;option=1;choice=1
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,0,dtset%natom,dtset%nsym,&
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,0,dtset%natom,dtset%nsym,&
 &   dtset%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_free_unpacked(pawrhoij_unsym)

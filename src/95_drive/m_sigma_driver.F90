@@ -82,8 +82,8 @@ module m_sigma_driver
  use m_paw_an,        only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij, &
-                             pawrhoij_unpack
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+&                            pawrhoij_get_nspden, pawrhoij_symrhoij, pawrhoij_unpack
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, paw_overlap
  use m_pawdij,        only : pawdij, symdij_all
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
@@ -519,12 +519,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij,KS_Pawrhoij)
 
-   ! Re-symmetrize symrhoij.
+   ! Re-symmetrize rhoij.
    ! FIXME this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1; ipert=0; idir=0
-!  call symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
-!  &             Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
-!  &             Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
+!  call pawrhoij_symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
+!  &                      Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
+!  &                      Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
    !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
    rhoxsp_method=1 ! Arnaud-Alouani
@@ -3834,7 +3834,7 @@ end subroutine sigma_bksmask
 !!
 !! CHILDREN
 !!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_unpack,symrhoij,wfd_pawrhoij,wrtout
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_unpack,pawrhoij_symrhoij,wfd_pawrhoij,wrtout
 !!
 !! SOURCE
 
@@ -3904,7 +3904,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  !
  ! * Symmetrize QP $\rho_{ij}$.
  choice=1; optrhoij=1; ipert=0
- call symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
+ call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
 &              Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
 &              Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
@@ -3953,7 +3953,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
    !
    ! * Re-Symmetrize mixed QP $\rho_{ij}$.
    choice=1; optrhoij=1; ipert=0
-   call symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
+   call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
 &                Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
 &                Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
  end if

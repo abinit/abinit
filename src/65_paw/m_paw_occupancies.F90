@@ -414,7 +414,8 @@ CONTAINS  !=====================================================================
          write(msg,'(3a)') '   Component ',trim(dspin(isppol+2*(pawrhoij(iatom)%nspden/4))),':'
          call wrtout(std_out,msg,wrt_mode)
        end if
-       option=2;if (pawrhoij(iatom)%cplex==2.and.pawrhoij(iatom)%nspinor==1) option=1
+       option=2
+       !if (pawrhoij(iatom)%cplex==2.and.pawrhoij(iatom)%nspinor==1) option=1
        call pawio_print_ij(std_out,pawrhoij(iatom)%rhoij_(:,isppol),pawrhoij(iatom)%lmn2_size,&
 &       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,-1,idum,0,pawprtvol,idum,&
 &       -1._dp,1,opt_sym=option,mode_paral=wrt_mode)

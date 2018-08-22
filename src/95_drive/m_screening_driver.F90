@@ -78,7 +78,7 @@ module m_screening_driver
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                            pawrhoij_free, symrhoij, pawrhoij_get_nspden
+&                            pawrhoij_free, pawrhoij_symrhoij, pawrhoij_get_nspden
  use m_pawdij,        only : pawdij, symdij_all
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
@@ -423,10 +423,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
 
-   ! Re-symmetrize symrhoij.
+   ! Re-symmetrize rhoij.
 !  this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1; ipert=0; idir=0
-!  call symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
+!  call pawrhoij_symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
 !  &             Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
 !  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 !
@@ -681,7 +681,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(319,1,tsec) ! screening(1)
 
  if (Cryst%nsym/=Dtset%nsym .and. Dtset%usepaw==1) then
-   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and symrhoij')
+   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and pawrhoij_symrhoij')
  end if
 
 ! Get the FFT index of $ (R^{-1}(r-\tau)) $

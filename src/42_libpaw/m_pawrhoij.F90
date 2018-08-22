@@ -56,10 +56,10 @@ MODULE m_pawrhoij
  public :: pawrhoij_init_unpacked
  public :: pawrhoij_free_unpacked
  public :: pawrhoij_get_nspden
- public :: symrhoij
+ public :: pawrhoij_print_dij
+ public :: pawrhoij_symrhoij
 
  public :: pawrhoij_mpisum_unpacked
-
  interface pawrhoij_mpisum_unpacked
    module procedure pawrhoij_mpisum_unpacked_1D
    module procedure pawrhoij_mpisum_unpacked_2D
@@ -2980,9 +2980,9 @@ end function pawrhoij_get_nspden
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawrhoij/symrhoij
+!!****f* m_pawrhoij/pawrhoij_symrhoij
 !! NAME
-!! symrhoij
+!! pawrhoij_symrhoij
 !!
 !! FUNCTION
 !! Symmetrize rhoij quantities (augmentation occupancies) and/or gradients
@@ -3045,15 +3045,15 @@ end function pawrhoij_get_nspden
 !!
 !! SOURCE
 
-subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
-&                   ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
-&                   mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
+subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
+&                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
+&                            mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'symrhoij'
+#define ABI_FUNC 'pawrhoij_symrhoij'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -3113,23 +3113,44 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom)
 
+!Test: consistency between choice and ngrhoij
+ ngrhoij=0
+ if (nrhoij>0) then
+   ngrhoij=pawrhoij(1)%ngrhoij
+   if(choice==2) ngrhoij=min(3,pawrhoij(1)%ngrhoij)
+   if(choice==3.or.choice==4)   ngrhoij=min(6,pawrhoij(1)%ngrhoij)
+   if(choice==23.or.choice==24) ngrhoij=min(9,pawrhoij(1)%ngrhoij)
+   if ((choice==1.and.ngrhoij/=0).or.(choice==2.and.ngrhoij/=3).or. &
+&      (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
+&      (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
+     msg='Inconsistency between variables choice and ngrhoij !'
+     MSG_BUG(msg)
+   end if
+ end if
+
+!Antiferro case ?
+ antiferro=.false.;if (nrhoij>0) antiferro=(pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1)
+!Non-collinear case
+ noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
+!Do we use antiferro symmetries ?
+ use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
+
+! Does not symmetrize imaginary part for GS calculations
+ cplex_eff=1
+ if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex
+
+!Do we have a phase due to q-vector (phonons only) ?
+ have_phase=.false.
+ if (ipert>0.and.present(qphon).and.nrhoij>0) then
+   have_phase=(abs(qphon(1))>tol8.or.abs(qphon(2))>tol8.or.abs(qphon(3))>tol8)
+   if (have_phase.and.cplex_eff==1) then
+     msg='Should have cplex_rhoij=2 for a non-zero q!'
+     MSG_BUG(msg)
+   end if
+ end if
+
 !Symetrization occurs only when nsym>1
  if (nsym>1) then
-
-!  Test: consistency between choice and ngrhoij
-   ngrhoij=0
-   if (nrhoij>0) then
-     ngrhoij=pawrhoij(1)%ngrhoij
-     if(choice==2) ngrhoij=min(3,pawrhoij(1)%ngrhoij)
-     if(choice==3.or.choice==4)   ngrhoij=min(6,pawrhoij(1)%ngrhoij)
-     if(choice==23.or.choice==24) ngrhoij=min(9,pawrhoij(1)%ngrhoij)
-     if ((choice==1.and.ngrhoij/=0).or.(choice==2.and.ngrhoij/=3).or. &
-&     (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
-&     (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
-       msg='Inconsistency between variables choice and ngrhoij !'
-       MSG_BUG(msg)
-     end if
-   end if
 
 !  Symetrization of gradients not compatible with nspden=4
    if (nrhoij>0) then
@@ -3145,28 +3166,9 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
      MSG_BUG(msg)
    end if
 
-!  Antiferro case ?
-   antiferro=.false.;if (nrhoij>0) antiferro=(pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1)
-!  Non-collinear case
-   noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
-!  Do we use antiferro symmetries ?
-   use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
-
-   cplex_eff=1
-   if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex ! Does not symmetrize imaginary part for GS calculations
-
-!  Do we have a phase due to q-vector (phonons only) ?
-   have_phase=.false.
-   if (ipert>0.and.present(qphon).and.nrhoij>0) then
-     have_phase=(abs(qphon(1))>tol8.or.abs(qphon(2))>tol8.or.abs(qphon(3))>tol8)
-     if (choice>1) then
-       msg='choice>1 not compatible with q-phase !'
-       MSG_BUG(msg)
-     end if
-     if (have_phase.and.cplex_eff==1) then
-       msg='Should have cplex_dij=2 for a non-zero q!'
-       MSG_BUG(msg)
-     end if
+   if (have_phase.and.choice>1) then
+     msg='choice>1 not compatible with q-phase !'
+     MSG_BUG(msg)
    end if
 
 !  Several inits/allocations
@@ -3341,10 +3343,12 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
                  indexii=indexi+mi
                  if (indexii<=indexjj) then
                    indexk=indexjj0+indexii
-                   if(cplex_eff==2.and.nspinor==2) factsym(2)=one
+                   if(.not.have_phase) factsym(2)=one
+                   !if(cplex_eff==2.and.nspinor==2) factsym(2)=one
                  else
                    indexk=indexii*(indexii-1)/2+indexjj
-                   if(cplex_eff==2.and.nspinor==2) factsym(2)=-one
+                   if(.not.have_phase) factsym(2)=-one
+                   !if(cplex_eff==2.and.nspinor==2) factsym(2)=-one
                  end if
 !                Be careful: use here R_rel^-1 in term of spherical harmonics
 !                which is tR_rec in term of spherical harmonics
@@ -3806,7 +3810,7 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
    do iatm=1,nrhoij,natinc
      iatom=iatm;if (paral_atom) iatom=my_atmtab(iatm)
      if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
-     idum1=2;if (pawrhoij(iatm)%cplex==2.and.pawrhoij(iatm)%nspinor==1) idum1=1
+     idum1=2;if (have_phase) idum1=1
      if (abs(pawprtvol)>=1) then
        write(msg, '(6a,i3,a)') ch10," PAW TEST:",ch10,&
 &       ' ====== Values of ',trim(pertstrg),' in symrhoij (iatom=',iatom,') ======'
@@ -3878,7 +3882,7 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
    end do
    end function symrhoij_symcart
 
-end subroutine symrhoij
+end subroutine pawrhoij_symrhoij
 !!***
 
 !----------------------------------------------------------------------
