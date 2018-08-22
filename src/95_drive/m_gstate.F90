@@ -74,7 +74,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
- use m_paw_orbmag,       only : orbmag_type,destroy_orbmag
+ use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
@@ -97,6 +97,7 @@ module m_gstate
  use m_psolver,          only : psolver_kernel
  use m_wvl_rho,          only : wvl_initro, wvl_mkrho
  use m_paw2wvl,          only : paw2wvl, wvl_paw_free
+ use m_berryphase_new,   only : init_e_field_vars,prtefield
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -236,7 +237,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -719,7 +719,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  Create access arrays for wavefunctions and allocate wvl%wfs%psi (other arrays are left unallocated).
    call wvl_wfs_set(dtset%strprecon,dtset%spinmagntarget, dtset%kpt, mpi_enreg%me_wvl,&
 &   dtset%natom, sum(dtset%nband), &
-&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig, &
+&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, occ, &
 &   psps, rprimd, wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, &
 &   xred)
 !  We transfer wavelets information to the hdr structure.
@@ -1208,7 +1208,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
     call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                   rprimd,symrec,xred)
  end if
 
@@ -1266,7 +1266,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   if (dtset%ionmov==0) then
+   if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 

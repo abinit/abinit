@@ -55,7 +55,7 @@ upawu5  0.00   0.0  # Value of U parameter
 jpawu5  0.0000 0.0  # Value of J parameter
 
 usedmatpu 3         # An initial density matrix is given (below)
-                    # and kept constant during 5 SCF steps
+                    # and kept constant during 3 SCF steps
 
 dmatpuopt 2
 

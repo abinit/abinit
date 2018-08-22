@@ -831,6 +831,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0

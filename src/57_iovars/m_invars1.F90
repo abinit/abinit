@@ -518,6 +518,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%lpawu,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%mixalch_orig,(npsp,mxntypat,mxnimage))
+   ABI_ALLOCATE(dtsets(idtset)%mixesimgf,(mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%nucdipmom,(3,mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%pimass,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%ptcharge,(mxntypat))
@@ -791,7 +792,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    ABI_ALLOCATE(dtsets(idtset)%iatsph,(mxnatsph))
    ABI_ALLOCATE(dtsets(idtset)%istwfk,(mxnkpt))
    ABI_ALLOCATE(dtsets(idtset)%nband,(mxnkpt*mxnsppol))
-   ABI_ALLOCATE(dtsets(idtset)%occ_orig,(mxmband_upper*mxnkpt*mxnsppol))
+   ABI_ALLOCATE(dtsets(idtset)%occ_orig,(mxmband_upper*mxnkpt*mxnsppol,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%qmass,(mxnnos))
    ABI_ALLOCATE(dtsets(idtset)%qptdm,(3,mxnqptdm))
    ABI_ALLOCATE(dtsets(idtset)%symafm,(mxnsym))
@@ -2414,6 +2415,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%mffmem=1
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
+   dtsets(idtset)%mixesimgf(:)=zero
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0
@@ -2494,7 +2496,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end if
 !  O
    dtsets(idtset)%occopt=1
-   dtsets(idtset)%occ_orig(:)=zero
+   dtsets(idtset)%occ_orig(:,:)=zero
    dtsets(idtset)%omegasrdmax=1.0_dp/Ha_eV  ! = 1eV
    dtsets(idtset)%omegasimax=50/Ha_eV
    dtsets(idtset)%optcell=0

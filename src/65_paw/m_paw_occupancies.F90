@@ -645,6 +645,7 @@ end subroutine pawmkrhoij
  end if
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
+
  if (option==1) then
 
 !  ==================================================================
@@ -838,14 +839,14 @@ end subroutine pawmkrhoij
            ro12_re=zero;ro21_re=zero
            ro12_im=zero;ro21_im=zero
            do iplex=1,cplex
-             ro11_re=cpj0(iplex,1)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,1)
-             ro22_re=cpj0(iplex,2)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,2)
+             ro11_re=ro11_re+cpj0(iplex,1)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,1)
+             ro22_re=ro22_re+cpj0(iplex,2)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,2)
            end do
            pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight*(ro11_re+ro22_re)
            if (nspden_rhoij>1) then
              do iplex=1,cplex
-               ro12_re=cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
-               ro21_re=cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
+               ro12_re=ro12_re+cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
+               ro21_re=ro21_re+cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
              end do
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
@@ -938,8 +939,8 @@ end subroutine pawmkrhoij
              ro12_re=zero;ro21_re=zero
              ro12_im=zero;ro21_im=zero
              do iplex=1,cplex
-               ro11_re=dcpi0(iplex,1,1)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,1)
-               ro22_re=dcpi0(iplex,2,1)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,1)
+               ro11_re=ro11_re+dcpi0(iplex,1,1)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,1)
+               ro22_re=ro22_re+dcpi0(iplex,2,1)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,1)
              end do
              if (substract_diagonal) then
                do iplex=1,cplex
@@ -950,8 +951,8 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight*(ro11_re+ro22_re)
              if (nspden_rhoij>1) then
                do iplex=1,cplex
-                 ro12_re=dcpi0(iplex,2,1)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,1)
-                 ro21_re=dcpi0(iplex,1,1)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,1)
+                 ro12_re=ro12_re+dcpi0(iplex,2,1)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,1)
+                 ro21_re=ro21_re+dcpi0(iplex,1,1)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,1)
                end do
                if (substract_diagonal) then
                  do iplex=1,cplex
@@ -1058,8 +1059,8 @@ end subroutine pawmkrhoij
              ro12_re=zero;ro21_re=zero
              ro12_im=zero;ro21_im=zero
              do iplex=1,cplex
-               ro11_re=dcpi0(iplex,1,mu)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,mu)
-               ro22_re=dcpi0(iplex,2,mu)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,mu)
+               ro11_re=ro11_re+dcpi0(iplex,1,mu)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,mu)
+               ro22_re=ro22_re+dcpi0(iplex,2,mu)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,mu)
              end do
              pawrhoij(iatom)%grhoij(mu,klmn_re,1)=pawrhoij(iatom)%grhoij(mu,klmn_re,1)+weight*(ro11_re+ro22_re)
              if (nspden_rhoij>1) then

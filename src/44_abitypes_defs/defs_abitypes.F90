@@ -848,8 +848,9 @@ type dataset_type
  real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
+ real(dp), allocatable :: mixesimgf(:)        !SET2NULL  ! mixesimgf(nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
- real(dp), allocatable :: occ_orig(:)         !SET2NULL  ! occ_orig(mband*nkpt*nsppol)
+ real(dp), allocatable :: occ_orig(:,:)       !SET2NULL  ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           !SET2NULL  ! pimass(ntypat)
  real(dp), allocatable :: ptcharge(:)         !SET2NULL  ! ptcharge(ntypat)
  real(dp), allocatable :: qmass(:)            !SET2NULL  ! qmass(nnos)

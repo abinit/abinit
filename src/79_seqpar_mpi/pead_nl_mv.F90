@@ -271,7 +271,8 @@ spaceComm=mpi_enreg%comm_cell
        ! TODO: check if all these bands are occupied in nsppol = 2 case
        nband_occ = 0
        do iband = 1, dtset%nband(ikpt_rbz+nkpt2*(isppol-1))
-         if (dtset%occ_orig(bd_index(ikpt_rbz,isppol) + iband) > tol10) nband_occ = nband_occ + 1
+         !Note, only one image is allowed here (or occ_orig should be the same or all images)
+         if (dtset%occ_orig(bd_index(ikpt_rbz,isppol) + iband,1) > tol10) nband_occ = nband_occ + 1
        end do
        npw_k1 = npwarr(ikpt_rbz)
        dk_(:) = kpt3(:,ikpt2) - dtset%kptns(:,ikpt)

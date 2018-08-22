@@ -3017,13 +3017,13 @@ Variable(
     topics=['PIMD_expert', 'TransPath_expert'],
     dimensions=['[[nimage]]'],
     defaultval=MultipleValue(number=None, value=1),
-    mnemonics="DYNamics of the IMAGE",
+    mnemonics="list of DYNamic IMAGEs",
     commentdefault="if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.",
     text="""
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case the
+impose that the extremal configurations of the string are fixed. In case 
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -6307,9 +6307,9 @@ Variable(
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-
-consistent calculations for different geometries is managed, while with
-[[ionmov]], only one geometry for self-consistent calculation is managed.
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent 
+calculations for possibly different (evolving) geometries is managed, while with
+[[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
 [[ntimimage]], corresponding to the input variable [[ntime]] of the single
 geometry case. Also, the stopping criterion is governed by [[tolimg]],
@@ -6341,11 +6341,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     enddo
 ```
 
-  * = 0 --> simply **copy** images from previous timimage step.
+  * = 0 --> simply **copy** images from previous itimimage step.
   * = 1 --> move images according to **Steepest Descent** following the (scaled) forces,
     the scaling factor being [[fxcartfactor]].
-  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting to minima
-    (see [[cite:Weinan2002]]); the algorithm variant can be selected with the [[string_algo]] keyword
+  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting two minima
+    (see [[cite:Weinan2002]]), or even two configurations that are not local minima; the algorithm variant can be selected with the [[string_algo]] keyword
     (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE)
     can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.
   * = 3 --> (tentatively, not yet coded) **Metadynamics**.
@@ -6354,6 +6354,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
+  * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
+    and their total energies are combined linearly using the factors in [[mixesimgf]], giving the actual total energy of the ensemble
+    of constrained DFT images. The geometry is the same for all images, forces and stresses are computed, and all usual
+    algorithms for MD or geometry optimization are allowed, using [[ionmov]] (instead of [[imgmov]], this is the exception to the rule)
+    and related variables.
   * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [[cite:Marx1996]]).
     Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[vis]])
     and 13 for **Nose-Hoover thermostat chains** (associated input variables are the number of thermostats in the chains,
@@ -8849,6 +8854,22 @@ should be identical.
 ),
 
 Variable(
+    abivarname="mixesimgf",
+    varset="rlx",
+    vartype="real",
+    topics=['CrossingBarriers_useful'],
+    dimensions=['[[nimage]]'],
+    mnemonics="MIXing Electronic Structure IMAGE Factors",
+    text="""
+Used in the algorithm Linear Combination of Constrained DFT Energies, that is, when [[imgmov]]==6.
+
+This array gives, for each one of the [[nimage]] images, the factor
+by which the total energies for systems with same geometry but different electronic structures (occupation numbers) are linearly combined.
+The sum of these factors must equal 1.
+""",
+),
+
+Variable(
     abivarname="mpw",
     varset="internal",
     vartype="integer",
@@ -9463,6 +9484,7 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
+XG 20180813 : This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -11271,11 +11293,12 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points have the same number of bands and the same occupancies of bands.
-[[nband]] is given as a single number, and [[occ]]([[nband]]) is an array of
-[[nband]] elements, read in by the code.
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin 
+(but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
+[[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
+[[nband]] * [[nsppol]] elements, read in by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
-the code to add to 1.
+the code to add to 1. They cannot differ for differing spins.
 
   * [[occopt]] = 1:
 Same as [[occopt]] = 0, except that the array [[occ]] is automatically generated
@@ -11288,18 +11311,18 @@ equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 
   * [[occopt]] = 2:
 k points may optionally have different numbers of bands and different
-occupancies. [[nband]]([[nkpt]]*[[nsppol]]) is given explicitly as an array of
-[[nkpt]]*[[nsppol]] elements. [[occ]]() is given explicitly for all bands at
+occupancies. [[nband]]([[nkpt]] * [[nsppol]]) is given explicitly as an array of
+[[nkpt]] * [[nsppol]] elements. [[occ]]() is given explicitly for all bands at
 each k point, and eventually for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
-  * [[occopt]] = 3, 4, 5, 6 and 7
+  * [[occopt]] = 3, 4, 5, 6 and 7:
 Metallic occupation of levels, using different occupation schemes (see below).
 The corresponding thermal broadening, or cold smearing, is defined by the
 input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
 divided by [[tsmear]])
-Like for [[occopt]] = 1, the variable [[occ]] is not read
+Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
 number, read by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
@@ -15085,7 +15108,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [[help:respfn|the response function help file]]).
+or stress type (see [the DFPT help file](../guide/respfn)).
 """,
 ),
 
@@ -16062,19 +16085,19 @@ Gives the variant of the String Method method used.
 Possible values can be:
 
   * 0 -->  **Original String Method**.
-NOT YET IMPLEMENTED
+NOT YET IMPLEMENTED.
 See [[cite:Weinan2002]]
 
   * 1 --> **Simplified String Method** with parametrization by **equal arc length**.
-Instead of using the normal force (wr the band), the full force is used; the
+Instead of using the normal force (wrt the band), the full force is used; the
 reparametrization is enforced by keeping the points of the string equally
 spaced.
 See [[cite:Weinan2007]]
 
   * 2 --> **Simplified String Method** with parametrization by **energy-weighted arc length**.
-A variant of the Simplified String Method (like 2-); the reparametrization is
+A variant of the Simplified String Method (like 1-); the reparametrization is
 done by using energy-weight arc-lengths, giving a finer distribution near the
-saddle point..
+saddle point.
 See [[cite:Weinan2007]] and [[cite:Goodrow2009]]
 """,
 ),

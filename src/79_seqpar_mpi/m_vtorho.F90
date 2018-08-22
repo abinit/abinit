@@ -67,7 +67,7 @@ module m_vtorho
  use m_fock,               only : fock_type, fock_ACE_type, fock_updateikpt, fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
- use m_kg,                 only : mkkin, mkkpg
+ use m_kg,                 only : mkkin, mkkpg, mknucdipmom_k
  use m_suscep_stat,        only : suscep_stat
  use m_fft,                only : fftpac
  use m_spacepar,           only : symrhg
@@ -289,7 +289,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
