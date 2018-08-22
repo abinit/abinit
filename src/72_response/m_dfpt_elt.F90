@@ -48,6 +48,7 @@ module m_dfpt_elt
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
  use m_mpinfo,  only : ptabs_fourdp, proc_distrb_cycle
  use m_fftcore,      only : sphereboundary
+ use m_fft,             only : fourdp
 
  implicit none
 

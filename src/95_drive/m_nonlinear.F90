@@ -46,6 +46,7 @@ module m_nonlinear
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
+ use m_fft,      only : fourdp
  use m_kpts,     only : getkgrid
  use m_inwffil,  only : inwffil
  use m_spacepar, only : hartre, setsym

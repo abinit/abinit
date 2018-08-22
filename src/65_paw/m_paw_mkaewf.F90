@@ -56,6 +56,7 @@ module m_paw_mkaewf
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
  use m_paw_nhat,       only : nhatgrid
  use m_mpinfo,         only : proc_distrb_cycle
+ use m_fft,            only : fourwf
 
  implicit none
 

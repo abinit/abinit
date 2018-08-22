@@ -39,6 +39,8 @@ module m_hidecudarec
  use m_initcuda
 #endif
 
+ use m_fft,        only : fourdp
+
  implicit none
 
  private

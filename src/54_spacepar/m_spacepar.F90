@@ -38,7 +38,7 @@ module m_spacepar
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, symredcart
  use m_mpinfo,          only : ptabs_fourdp
- use m_fft,             only : zerosym
+ use m_fft,             only : zerosym, fourdp
 
  implicit none
 

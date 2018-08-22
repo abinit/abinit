@@ -46,6 +46,7 @@ module m_respfn_driver
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
@@ -4005,7 +4006,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
 
- use m_fft,           only : zerosym
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

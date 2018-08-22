@@ -61,6 +61,7 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
+ use m_fft,            only : fourwf
 
  implicit none
 

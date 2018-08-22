@@ -54,6 +54,7 @@ module m_sigma_driver
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
  use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr

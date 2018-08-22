@@ -39,6 +39,7 @@ module m_getghc
  use m_fock,        only : fock_common_type, fock_get_getghc_call
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
+ use m_fft,         only : fourwf
 
  implicit none
 

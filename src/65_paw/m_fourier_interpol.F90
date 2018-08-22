@@ -28,7 +28,7 @@ MODULE m_fourier_interpol
  use m_profiling_abi
  use m_errors
 
- use m_fft,    only : zerosym,indirect_parallel_Fourier
+ use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
 
  implicit none

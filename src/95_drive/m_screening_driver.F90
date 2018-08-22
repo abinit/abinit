@@ -66,6 +66,7 @@ module m_screening_driver
  use m_spectra,       only : spectra_t, spectra_write, spectra_repr, spectra_free, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
                              wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
  use m_wfk,           only : wfk_read_eigenvalues

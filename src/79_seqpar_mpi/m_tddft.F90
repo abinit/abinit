@@ -46,6 +46,7 @@ module m_tddft
  use m_fftcore,  only : sphereboundary
  use m_spacepar, only : hartre
  use m_mpinfo,   only : proc_distrb_cycle
+ use m_fft,      only : fourwf, fourdp
 
  implicit none
 

@@ -40,6 +40,7 @@ module m_vtorhorec
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
  use m_spacepar,         only : symrhg
  use m_fourier_interpol, only : transgrid
+ use m_fft,              only : fourdp
 
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,       only : cudap

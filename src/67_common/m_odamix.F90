@@ -49,6 +49,7 @@ module m_odamix
  use m_energies,   only : energies_type
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
+ use m_fft,        only : fourdp
 
  implicit none
 

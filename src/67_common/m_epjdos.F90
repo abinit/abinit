@@ -55,7 +55,7 @@ module m_epjdos
  use m_kg,             only : ph1d3d, getph
  use m_gsphere,        only : getkpgnorm
  use m_fftcore,        only : sphereboundary
- use m_fft,            only : fftpac
+ use m_fft,            only : fftpac, fourwf, fourdp
  use m_pawrad,         only : pawrad_type, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free

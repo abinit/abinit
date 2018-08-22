@@ -89,6 +89,7 @@ module m_scfcv_core
  use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_fft,              only : fourdp
  use m_vtorhorec,        only : first_rec, vtorhorec
  use m_vtorhotf,         only : vtorhotf
  use m_outscfcv,         only : outscfcv

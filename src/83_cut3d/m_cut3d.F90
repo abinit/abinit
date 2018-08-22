@@ -51,6 +51,7 @@ MODULE m_cut3d
  use m_kg,               only : kpgio, ph1d3d, getph
  use m_fftcore,          only : sphereboundary
  use m_initylmg,         only : initylmg
+ use m_fft,              only : fourwf
 
  implicit none
 

@@ -47,7 +47,7 @@ module m_prcref
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fftcore,  only : kgindex
- use m_fft,      only : zerosym, indirect_parallel_fourier
+ use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian

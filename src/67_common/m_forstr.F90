@@ -73,6 +73,7 @@ module m_forstr
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
+ use m_fft,              only : fourdp
 
  implicit none
 

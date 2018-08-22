@@ -50,6 +50,7 @@ module m_dfpt_scfcv
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar, proc_distrb_cycle
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac, fourdp
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
@@ -3676,7 +3677,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &                          pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
 &                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
  use m_paw_mkrho,   only : pawmkrho
- use m_fft,         only : fftpac
+
  use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
 

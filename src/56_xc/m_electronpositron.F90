@@ -43,6 +43,7 @@ MODULE m_electronpositron
  use m_xcpositron, only : xcpositron
  use m_drivexc,    only : mkdenpos
  use m_xctk,       only : xcden
+ use m_fft,        only : fourdp
 
  implicit none
 

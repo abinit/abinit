@@ -42,7 +42,7 @@ module m_forces
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft

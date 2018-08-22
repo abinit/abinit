@@ -28,12 +28,12 @@
 module m_nucprop
 
   use defs_basis
-  use defs_abitypes, only : MPI_type
   use m_profiling_abi
   use m_errors
+
+  use defs_abitypes, only : MPI_type
   use m_mpinfo,   only : ptabs_fourdp
   use m_xmpi, only : xmpi_comm_self, xmpi_sum
-  
   use m_geometry,       only : xred2xcart
   use m_linalg_interfaces, only: dsyev
   use m_paw_an,      only : paw_an_type
@@ -45,6 +45,7 @@ module m_nucprop
   use m_paral_atom, only : get_my_atmtab,free_my_atmtab
   use m_special_funcs,  only : abi_derfc
   use m_symtk,          only : matr3inv, matpointsym
+  use m_fft,           only : fourdp
 
   implicit none
 

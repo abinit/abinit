@@ -48,6 +48,7 @@ module m_vtowfk
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
+ use m_fft,         only : fourwf
 
  implicit none
 

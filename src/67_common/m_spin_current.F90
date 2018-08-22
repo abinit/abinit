@@ -37,6 +37,7 @@ module m_spin_current
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
  use m_special_funcs,   only : gamma_function
+ use m_fft,            only : fourwf
 
  implicit none
 

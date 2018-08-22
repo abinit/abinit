@@ -136,7 +136,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph
  use m_inwffil,     only : inwffil
-
+ use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type

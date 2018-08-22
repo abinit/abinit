@@ -60,6 +60,7 @@ module m_gstate
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
  use m_kg,               only : kpgio, getph
+ use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type

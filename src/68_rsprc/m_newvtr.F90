@@ -26,6 +26,8 @@
 
 module m_newvtr
 
+ use m_fft,     only : fourdp
+
  implicit none
 
  private

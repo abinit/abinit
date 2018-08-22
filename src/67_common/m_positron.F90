@@ -71,6 +71,7 @@ module m_positron
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
  use m_prep_kgb,        only : prep_fourwf
+ use m_fft,            only : fourwf, fourdp
 
  implicit none
 

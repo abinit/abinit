@@ -40,7 +40,7 @@ MODULE m_suscep_stat
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary
- use m_fft,     only : fftpac
+ use m_fft,     only : fftpac, fourwf
  use m_spacepar,     only : symrhg
  use m_paw_finegrid, only : pawgylmg
  use m_paw_nhat,     only : pawsushat

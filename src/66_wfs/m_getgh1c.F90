@@ -37,7 +37,7 @@ module m_getgh1c
  use m_kg,          only : kpgstr, mkkin, mkkpg
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
- use m_fft,         only : fftpac
+ use m_fft,         only : fftpac, fourwf
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian, load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian

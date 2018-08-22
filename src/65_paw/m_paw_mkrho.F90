@@ -27,8 +27,8 @@ MODULE m_paw_mkrho
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_time, only : timab
 
+ use m_time, only : timab
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type,pawrad_deducer0
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
@@ -46,6 +46,7 @@ MODULE m_paw_mkrho
  use m_io_tools,         only : open_file
  use m_geometry,         only : xred2xcart
  use m_pptools,          only : printxsf
+ use m_fft,              only : fourdp
 
  implicit none
 

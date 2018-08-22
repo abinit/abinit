@@ -39,6 +39,7 @@ module m_mklocl
  use m_mpinfo,   only : ptabs_fourdp
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
+ use m_fft,      only : fourdp
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY

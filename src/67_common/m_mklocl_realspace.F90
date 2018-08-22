@@ -47,6 +47,7 @@ module m_mklocl_realspace
  use m_psolver,     only : psolver_hartree, psolver_kernel
  use m_abi2big,     only : wvl_rhov_abi2big
  use m_wvl_wfs,     only : derf_ab
+ use m_fft,         only : fourdp
 
 
  implicit none

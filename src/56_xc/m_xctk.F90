@@ -34,6 +34,7 @@ module m_xctk
  use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft_mesh, only : phase
+ use m_fft,      only : fourdp
 
  implicit none
 

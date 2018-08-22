@@ -36,7 +36,7 @@ module m_dfpt_mkrho
  use m_time,            only : timab
  use m_io_tools,        only : get_unit, iomode_from_fname
  use m_fftcore,         only : sphereboundary
- use m_fft,             only : fftpac
+ use m_fft,             only : fftpac, fourwf
  use m_spacepar,        only : symrhg
  use m_dtfil,           only : status
  use m_hamiltonian,     only : gs_hamiltonian_type

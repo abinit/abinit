@@ -52,6 +52,7 @@ module m_bethe_salpeter
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
+ use m_fft,             only : fourdp
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
  use m_crystal_io,      only : crystal_ncwrite, crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh

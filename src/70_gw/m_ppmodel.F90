@@ -42,6 +42,7 @@ MODULE m_ppmodel
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t, cmod_qpg
  use m_fft_mesh,       only : g2ifft
+ use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
 
  implicit none

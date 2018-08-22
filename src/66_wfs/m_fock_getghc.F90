@@ -39,7 +39,7 @@ module m_fock_getghc
  use m_cgtools,      only : dotprod_g
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary
- use m_fft,          only : fftpac
+ use m_fft,          only : fftpac fourwf, fourdp
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian, &
                             init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian
  use m_pawdij,       only : pawdijhat

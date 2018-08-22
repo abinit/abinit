@@ -31,6 +31,7 @@ module m_newrho
  use m_profiling_abi
 
  use m_wvl_rho, only : wvl_prcref
+ use m_fft,     only : fourdp
 
  implicit none
 

@@ -35,7 +35,7 @@ module m_mkrho
 
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
- use m_fft,          only : fftpac, zerosym
+ use m_fft,          only : fftpac, zerosym, fourwf, fourdp
  use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type

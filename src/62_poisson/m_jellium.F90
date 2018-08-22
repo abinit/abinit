@@ -31,6 +31,8 @@ module m_jellium
  use m_errors
  use m_profiling_abi
 
+ use m_fft,      only : fourdp
+
  implicit none
 
  private

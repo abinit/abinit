@@ -140,6 +140,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_time,     only : timab
  use m_kg,       only : getph
  use m_cgtools,  only : dotprod_vn
+ use m_fft,      only : fourdp
  use m_ioarr,    only : read_rhor
  use m_pawrhoij, only : pawrhoij_type
  use m_inwffil,  only : inwffil
