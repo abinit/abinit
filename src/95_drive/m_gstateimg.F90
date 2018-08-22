@@ -44,6 +44,7 @@ module m_gstateimg
  use m_scf_history
  use m_io_redirect
  use m_m1geo
+ use m_abimover
 
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
@@ -56,6 +57,7 @@ module m_gstateimg
  use m_gstate,       only : gstate
  use m_predtk,       only : prtxvf
  use m_precpred_1geo, only : precpred_1geo
+ use m_pred_simple,  only : prec_simple
 
 #if defined  HAVE_BIGDFT
  use BigDFT_API, only: mpi_environment_set
@@ -741,7 +743,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !One should have a datastructure associated with the preconditioner...
  if (dtset%goprecon>0)then
    call abiforstr_ini(preconforstr,dtset%natom)
-   call prec_simple(m1geo_param%ab_mover,preconforstr,hist,1,1,1)
+   call prec_simple(m1geo_param%ab_mover,preconforstr,hist(1),1,1,1)
    call abiforstr_fin(preconforstr)
  end if
 
