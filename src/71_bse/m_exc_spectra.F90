@@ -52,6 +52,7 @@ MODULE m_exc_spectra
  use m_paw_hr,          only : pawhur_t
  use m_wfd,             only : wfd_t
  !use m_bse_io,          only : exc_amplitude
+ use m_wfd_optic,       only : calc_optical_mels
 
  implicit none
 

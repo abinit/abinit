@@ -1,16 +1,63 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wfd_optic
+!! NAME
+!!  m_wfd_optic
+!!
+!! FUNCTION
+!!  Functions to compute optical matrix elements using the wavefunction descriptor.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wfd_optic
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use m_hide_lapack,       only : matrginv
+ use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_crystal,           only : crystal_t
+ use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
+ use m_wfd,               only : wfd_t, wfd_get_cprj, wfd_distribute_bbp
+ use m_pawtab,            only : pawtab_type
+ use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_hr,            only : pawhur_t, paw_ihr
+
+ implicit none
+
+ private
+!!***
+
+ public :: calc_optical_mels
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/calc_optical_mels
 !! NAME
 !!  calc_optical_mels
 !!
 !! FUNCTION
 !!  Calculate all optical matrix elements in the BZ.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! lomo_spin(Wfd%nsppol)=Index of the lomo band for the different spins.
@@ -39,29 +86,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 &  inclvkb,lomo_spin,lomo_min,max_band,nkbz,qpoint,opt_cvk)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use defs_datatypes,      only : ebands_t, pseudopotential_type
- use m_hide_lapack,       only : matrginv
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
- use m_crystal,           only : crystal_t
- use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_wfd,               only : wfd_t, wfd_get_cprj, wfd_distribute_bbp
- use m_pawtab,            only : pawtab_type
- use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_hr,            only : pawhur_t, paw_ihr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -293,4 +319,7 @@ end function pdtqrc
 !!***
 
 end subroutine calc_optical_mels
+!!***
+
+end module m_wfd_optic
 !!***

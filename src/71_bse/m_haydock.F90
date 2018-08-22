@@ -62,6 +62,7 @@ MODULE m_haydock
 &                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
  use m_eprenorms,         only : eprenorms_t, renorm_bst
+ use m_wfd_optic,         only : calc_optical_mels
 
  implicit none
 
