@@ -1167,7 +1167,6 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_complete'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1506,7 +1505,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -4142,7 +4140,6 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

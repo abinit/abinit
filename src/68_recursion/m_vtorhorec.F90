@@ -2520,7 +2520,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 #undef ABI_FUNC
 #define ABI_FUNC 'green_kernel'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2706,7 +2705,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recursion'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2938,7 +2936,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 #undef ABI_FUNC
 #define ABI_FUNC 'recursion_nl'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

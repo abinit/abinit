@@ -299,7 +299,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_recipspace'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -823,7 +822,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vlocal'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1150,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vlocalstr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

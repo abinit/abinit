@@ -1298,7 +1298,6 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dens_in_sph'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

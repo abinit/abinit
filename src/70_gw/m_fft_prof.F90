@@ -861,7 +861,6 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fourdp'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1151,6 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fourwf'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

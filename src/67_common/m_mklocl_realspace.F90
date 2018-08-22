@@ -122,7 +122,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_realspace'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

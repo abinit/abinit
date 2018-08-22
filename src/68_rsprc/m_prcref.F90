@@ -205,7 +205,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -856,7 +855,6 @@ end subroutine prcref
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1385,7 +1383,6 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'moddiel'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2007,7 +2004,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

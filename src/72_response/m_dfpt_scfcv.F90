@@ -295,7 +295,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 #define ABI_FUNC 'dfpt_scfcv'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1963,7 +1962,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_newvtr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

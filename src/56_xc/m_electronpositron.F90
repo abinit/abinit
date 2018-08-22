@@ -518,7 +518,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exchange_electronpositron'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

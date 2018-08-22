@@ -210,7 +210,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newvtr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

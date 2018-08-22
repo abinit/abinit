@@ -107,7 +107,6 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'transgrid'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

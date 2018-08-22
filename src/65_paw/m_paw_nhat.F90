@@ -131,7 +131,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -691,7 +690,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat_psipsi'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1472,7 +1470,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawsushat'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

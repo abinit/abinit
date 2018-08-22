@@ -935,7 +935,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_fourwf'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
