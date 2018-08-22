@@ -742,9 +742,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !This call is needed to free an internal matrix in prec_simpl. However, this is really not optimal ... 
 !One should have a datastructure associated with the preconditioner...
  if (dtset%goprecon>0)then
+   ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
    call abiforstr_ini(preconforstr,dtset%natom)
-   call prec_simple(m1geo_param%ab_mover,preconforstr,hist(1),1,1,1)
+   call prec_simple(m1geo_param%ab_mover,preconforstr,hist_prev(1),1,1,1)
    call abiforstr_fin(preconforstr)
+   ABI_DATATYPE_DEALLOCATE(hist_prev)
  end if
 
  do itimimage=1,ntimimage_stored
