@@ -93,7 +93,7 @@ contains
 !! Move ion or change acell acording to forces and stresses
 !!
 !! INPUTS
-!!  amass(natom)=mass of each atom, in unit of electronic mass (=amu*1822...)
+!!  amu_curr(ntypat)=mass of each atom for the current image
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!   | mband=maximum number of bands
@@ -150,7 +150,7 @@ contains
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred, vel, amass,
+!! This subroutine uses the arguments natom, xred, vel, amu_curr,
 !! vis, and dtion (the last two contained in dtset) to make
 !! molecular dynamics updates.  The rest of the lengthy
 !! argument list supports the underlying lda computation
@@ -196,7 +196,7 @@ contains
 !!
 !! SOURCE
 
-subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
+subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
@@ -222,7 +222,7 @@ logical,optional,intent(in) :: writeHIST
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g95 on yquem_g95 A check of the dim has been added
+real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat) 
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
@@ -257,7 +257,7 @@ type(crystal_t) :: crystal
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
-real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
+real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -266,10 +266,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  if(present(writeHIST)) need_writeHIST = writeHIST
 
  call status(0,dtfil%filstat,iexit,level,'init          ')
-
- if ( size(amass) /= scfcv_args%dtset%natom ) then
-   MSG_BUG("amass does not have the proper size.")
- end if
 
  ! enable time limit handler if not done in callers.
  if (need_verbose .and. enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
@@ -303,7 +299,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !22. XML Output at the end
 !23. Deallocate hist and ab_mover datatypes
 !
- call abimover_ini(ab_mover,amass,dtfil,scfcv_args%dtset,specs)
+ call abimover_ini(ab_mover,amu_curr,dtfil,scfcv_args%dtset,specs)
 
  if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
    call delocint_ini(deloc)
@@ -430,18 +426,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !###########################################################
 !### 07. Fill the history of the first SCFCV
-
-!Compute atomic masses (in a.u.)
- ABI_ALLOCATE(amu,(scfcv_args%dtset%ntypat))
- do kk=1,ab_mover%ntypat
-   do jj=1,ab_mover%natom
-     if (kk==ab_mover%typat(jj)) then
-       amu(kk)=amass(jj)/amu_emass
-       exit
-     end if
-   end do
- end do
-
 
  if (ab_mover%ionmov==26)then
 !Tdep call need to merge with adewandre branch
@@ -737,7 +721,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
-&       ab_mover%ntypat,ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
+&       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 
@@ -790,7 +774,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
 
-     call precpred_1geo(ab_mover,ab_xfh,scfcv_args%dtset%amu_orig(:,1),deloc,&
+     call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
 &     scfcv_args%dtset%chkdilatmx,&
 &     scfcv_args%mpi_enreg%comm_cell,&
 &     scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
@@ -808,7 +792,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          if (jj>0) then
            option=3
            ihist_prev = abihist_findIndex(hist,-1)
-           call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
+           call wrt_moldyn_netcdf(ab_mover%amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
 &           hist%rprimd(:,:,ihist_prev),dtfil%unpos,hist%vel(:,:,hist%ihist),&
 &           hist%xred(:,:,ihist_prev))
@@ -964,7 +948,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    call delocint_fin(deloc)
  end if
 
- ABI_DEALLOCATE(amu)
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)

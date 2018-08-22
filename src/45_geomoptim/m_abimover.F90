@@ -139,7 +139,9 @@ integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
 real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
 real(dp),pointer :: ph_qshift(:,:)       ! 
-! Mass of each atom (NOT IN DTSET)
+! amu input var for the current image
+real(dp), pointer :: amu_curr(:)     ! amu_curr(ntypat)
+! Mass of each atom 
 real(dp),pointer :: amass(:)            ! amass(natom)
 ! Geometry Optimization Preconditioner PaRaMeters
 real(dp),pointer :: goprecprm(:)
@@ -424,7 +426,7 @@ contains  !=============================================================
 !!
 !! SOURCE
 
-subroutine abimover_ini(ab_mover,amass,dtfil,dtset,specs)
+subroutine abimover_ini(ab_mover,amu_curr,dtfil,dtset,specs)
 
 !Arguments ------------------------------------
 
@@ -434,7 +436,7 @@ subroutine abimover_ini(ab_mover,amass,dtfil,dtset,specs)
 #define ABI_FUNC 'abimover_ini'
 !End of the abilint section
 
-real(dp),target, intent(in) :: amass(:)            ! amass(natom)  (NOT IN DTSET)
+real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)  
 type(abimover),intent(out) :: ab_mover
 type(datafiles_type),target,intent(in) :: dtfil
 type(dataset_type),target,intent(in) :: dtset
@@ -442,7 +444,7 @@ type(abimover_specs),intent(out) :: specs
 
 !Local variables-------------------------------
 !scalars
- integer :: natom
+ integer :: iatom,natom
  character(len=500) :: msg
 !arrays
 
@@ -497,7 +499,11 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%qmass       =>dtset%qmass
  ab_mover%znucl       =>dtset%znucl
 
- ab_mover%amass=>amass
+ ab_mover%amu_curr    =>amu_curr
+ ABI_ALLOCATE(ab_mover%amass,(natom))
+ do iatom=1,natom
+   ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
+ end do
 
 !Filename for Hessian matrix (NOT IN DTSET)
  ab_mover%fnameabi_hes =>dtfil%fnameabi_hes
@@ -849,7 +855,8 @@ subroutine abimover_destroy(ab_mover)
  nullify(ab_mover%typat)
  nullify(ab_mover%znucl)
 
- nullify(ab_mover%amass)
+ nullify(ab_mover%amu_curr)
+ ABI_FREE(ab_mover%amass)
 
  nullify(ab_mover%fnameabi_hes)
  nullify(ab_mover%filnam_ds)

@@ -69,8 +69,7 @@ type, public :: m1geo_type
   logical  :: skipcycle      ! .TRUE. when the remaining of the cycle has to be skipped. .FALSE. otherwise.
 ! Arrays
   real(dp) :: rprimd_orig(3,3)   ! rprimd from dtset
-  real(dp),allocatable :: amu_orig1(:)   ! amu from dtset (first image) amu_orig1(ntypat)
-  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset (first image) amu_orig1(nimage)
+  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset 
 ! Character string
   character(len=fnlen) :: filnam_ds4
 ! Datatypes
@@ -119,6 +118,7 @@ contains  !=============================================================
 !Local variables
 !integer
  integer :: iatom,ionmov,natom,ncycle,nhisttot,nimage,ntimimage,ntypat
+ real(dp), allocatable :: amu_curr(:)
 
 !************************************************************************
 
@@ -146,8 +146,8 @@ contains  !=============================================================
  m1geo_param%ntime          =dtset%ntimimage  ! Beware ntime vs ntimimage
  m1geo_param%rprimd_orig    =dtset%rprimd_orig(:,:,1)
 
- ABI_MALLOC(m1geo_param%amu_orig1,(ntypat))
- m1geo_param%amu_orig1(:)=dtset%amu_orig(:,1)
+ ABI_MALLOC(amu_curr,(ntypat))
+ amu_curr(:)=dtset%amu_orig(:,1)
 
 !From dtfil
  m1geo_param%filnam_ds4     =dtfil%filnam_ds(4)
@@ -156,7 +156,7 @@ contains  !=============================================================
 !Init sub-datastructures
 
 !1) ab_mover
- call abimover_ini(m1geo_param%ab_mover,amu_emass*m1geo_param%amu_orig1(:),dtfil,dtset,m1geo_param%specs)
+ call abimover_ini(m1geo_param%ab_mover,amu_curr,dtfil,dtset,m1geo_param%specs)
 
 !2) deloc
  if(ionmov==10 .or. ionmov==11)then
@@ -244,10 +244,6 @@ contains  !=============================================================
 
  if(allocated(m1geo_param%mixesimgf))then
    ABI_FREE(m1geo_param%mixesimgf)
- endif
-
- if (allocated(m1geo_param%amu_orig1))then
-   ABI_FREE(m1geo_param%amu_orig1)
  endif
 
  if (allocated(m1geo_param%ab_xfh_1geo%xfhist))then

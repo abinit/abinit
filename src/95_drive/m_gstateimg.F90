@@ -1335,7 +1335,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Compute new atomic positions and cell characteristics in the single geometry
  call precpred_1geo(m1geo_param%ab_mover,&
 & m1geo_param%ab_xfh_1geo,&
-& m1geo_param%amu_orig1,&
+& m1geo_param%ab_mover%amu_curr,&
 & m1geo_param%deloc,&
 & m1geo_param%dt_chkdilatmx,&
 & mpi_enreg%comm_cell,&
