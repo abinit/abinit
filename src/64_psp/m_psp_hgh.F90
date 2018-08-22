@@ -123,7 +123,6 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 #undef ABI_FUNC
 #define ABI_FUNC 'psp2in'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -639,7 +638,6 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
 #undef ABI_FUNC
 #define ABI_FUNC 'psp3in'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1462,7 +1460,6 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 #undef ABI_FUNC
 #define ABI_FUNC 'psp10in'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

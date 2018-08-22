@@ -37,6 +37,7 @@ module m_wvl_wfs
  public :: wvl_wfs_set
  public :: derf_ab
  public :: wvl_wfs_free
+ public :: wvl_wfs_lr_copy
 !!***
 
 contains
@@ -256,13 +257,6 @@ end subroutine wvl_wfs_set
 !! FUNCTION
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -274,6 +268,7 @@ end subroutine wvl_wfs_set
 !! CHILDREN
 !!
 !! SOURCE
+
 subroutine derfcf(derfc_yy,yy)
 
  use m_special_funcs,  only : abi_derfc
@@ -304,13 +299,6 @@ end subroutine derfcf
 !!
 !! FUNCTION
 !! Some wrappers for BigDFT which uses different names for the same routines.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!
@@ -360,13 +348,6 @@ end subroutine derf_ab
 !! FUNCTION
 !! Freeing routine.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -383,11 +364,6 @@ end subroutine derf_ab
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_wfs_free(wfs)
 
@@ -463,12 +439,6 @@ end subroutine wvl_wfs_free
 !! CHILDREN
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine wvl_wfs_lr_copy(wfs, wvl)
 

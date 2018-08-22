@@ -112,7 +112,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #undef ABI_FUNC
 #define ABI_FUNC 'build_spectra'
  use interfaces_14_hidewrite
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

@@ -836,7 +836,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

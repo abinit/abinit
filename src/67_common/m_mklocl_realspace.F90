@@ -918,7 +918,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcVloc_mklocl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1253,7 +1252,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdVloc_mklocl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1907,7 +1905,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdVloc_wvl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

@@ -97,7 +97,7 @@ module m_gstate
  use m_psolver,          only : psolver_kernel
  use m_paw2wvl,          only : paw2wvl, wvl_paw_free
  use m_berryphase_new,   only : init_e_field_vars,prtefield
- use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free
+ use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free, wvl_wfs_lr_copy
  use m_wvl_rho,          only : wvl_initro, wvl_mkrho
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
@@ -239,7 +239,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
 !End of the abilint section
 

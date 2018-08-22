@@ -2639,7 +2639,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_memory'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
   implicit none
