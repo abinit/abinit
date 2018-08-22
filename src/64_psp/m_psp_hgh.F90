@@ -37,6 +37,7 @@ module m_psp_hgh
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
 #endif
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 

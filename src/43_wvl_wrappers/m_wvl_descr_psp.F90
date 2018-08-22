@@ -1,11 +1,56 @@
-!!****f* defs_wvltypes/wvl_descr_psp_set
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_descr_psp
+!! NAME
+!!  wvl_descr_psp
 !!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_descr_psp
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_descr_psp_set
+ public :: wvl_descr_psp_fill
+ public :: wvl_descr_free
+ public :: wvl_descr_atoms_set
+ public :: wvl_descr_atoms_set_sym
+!!***
+
+contains
+!!***
+
+!!****f* defs_wvltypes/wvl_descr_psp_set
 !! NAME
 !! wvl_descr_psp_set
 !!
 !! FUNCTION
-!! Defines the part of the wvl%atoms%-datastructure which
-!! depends on psps
+!! Defines the part of the wvl%atoms%-datastructure which depends on psps
 !!
 !! INPUTS
 !! psps <type(pseudopotential_type)>=variables related to pseudopotentials
@@ -29,18 +74,9 @@
 !!      atomic_info,psp_from_data,wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 
- use m_profiling_abi
- use m_errors
-
- use defs_basis
  use defs_datatypes
  use defs_wvltypes
 #if defined HAVE_BIGDFT
@@ -127,7 +163,6 @@ end subroutine wvl_descr_psp_set
 !!***
 
 !!****f* defs_wvltypes/wvl_descr_psp_fill
-!!
 !! NAME
 !! wvl_descr_psp_fill
 !!
@@ -145,10 +180,10 @@ end subroutine wvl_descr_psp_set
 !!      atomic_info,psp_from_data,wrtout
 !!
 !! SOURCE
+
 subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
   use defs_datatypes
-  use m_errors
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif
@@ -280,7 +315,6 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 end subroutine wvl_descr_psp_fill
 !!***
 
-
 !!****f* defs_wvltypes/wvl_descr_free
 !!
 !! NAME
@@ -302,15 +336,9 @@ end subroutine wvl_descr_psp_fill
 !!      deallocate_atoms_data,f_free_ptr
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_descr_free(wvl)
 
- use m_profiling_abi
  use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : deallocate_atoms_data
@@ -350,7 +378,6 @@ subroutine wvl_descr_free(wvl)
 end subroutine wvl_descr_free
 !!***
 
-
 !!****f* defs_wvltypes/wvl_descr_atoms_set
 !!
 !! NAME
@@ -358,13 +385,6 @@ end subroutine wvl_descr_free
 !!
 !! FUNCTION
 !! Defines wvl%atoms% data structure
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! acell(3)=unit cell length scales (bohr)
@@ -389,18 +409,9 @@ end subroutine wvl_descr_free
 !!      astruct_set_n_types,f_release_routine,f_routine
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 
- use m_profiling_abi
- use m_errors
-
- use defs_basis
  use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atoms_data_null,f_routine,f_release_routine,&
@@ -475,7 +486,6 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 end subroutine wvl_descr_atoms_set
 !!***
 
-
 !!****f* defs_wvltypes/wvl_descr_atoms_set_sym
 !!
 !! NAME
@@ -483,13 +493,6 @@ end subroutine wvl_descr_atoms_set
 !!
 !! FUNCTION
 !! Add symmetry information to  wvl%atoms data structure.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! acell(3)=unit cell length scales (bohr)
@@ -513,19 +516,10 @@ end subroutine wvl_descr_atoms_set
 !!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
            & symafm, symrel, tnons, tolsym)
 
- use m_profiling_abi
- use m_errors
-
- use defs_basis
  use defs_wvltypes
  use m_ab7_symmetry
 #if defined HAVE_BIGDFT
@@ -584,4 +578,7 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
 #endif
 
 end subroutine wvl_descr_atoms_set_sym
+!!***
+
+end module m_wvl_descr_psp
 !!***

@@ -24,7 +24,7 @@ sources = [
  "nullify_wvl_data.F90",
  "m_paw2wvl.F90",
  "wvl_denspot_set.F90",
- "wvl_descr_psp_set.F90",
+ "m_wvl_descr_psp.F90",
  "wvl_projectors_set.F90",
  "m_wvl_wfs.F90",
  ]

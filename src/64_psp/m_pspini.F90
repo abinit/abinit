@@ -55,6 +55,7 @@ module m_pspini
  use m_psp9,       only : psp9in
  use m_upf2abinit, only : upf2abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 
