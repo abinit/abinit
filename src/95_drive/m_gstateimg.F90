@@ -272,6 +272,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img_timimage(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
+ type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
 
 ! ***********************************************************************
 
@@ -723,14 +724,25 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    call specialmsg_mpisum(mpi_enreg%comm_img)
    call libpaw_spmsg_mpisum(mpi_enreg%comm_img)
  end if
+
+
 !Final deallocations
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(vel)
  ABI_DEALLOCATE(vel_cell)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(list_dynimage)
+
  if (allocated(amass)) then
    ABI_DEALLOCATE(amass)
+ end if
+
+!This call is needed to free an internal matrix in prec_simpl. However, this is really not optimal ... 
+!One should have a datastructure associated with the preconditioner...
+ if (dtset%goprecon>0)then
+   call abiforstr_ini(preconforstr,dtset%natom)
+   call prec_simple(m1geo_param%ab_mover,preconforstr,hist,1,1,1)
+   call abiforstr_fin(preconforstr)
  end if
 
  do itimimage=1,ntimimage_stored

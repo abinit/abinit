@@ -935,10 +935,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 23. Deallocate hist and ab_mover datatypes
 
-!This is useless
-! if (ab_mover%goprecon>0)then
-!   call prec_simple(ab_mover,preconforstr,hist,1,1,1)
-! end if
+!This call is needed to free an internal matrix. However, this is not optimal ... 
+!One should instead have a datastructure associated with the preconditioner...
+ if (ab_mover%goprecon>0)then
+   call prec_simple(ab_mover,preconforstr,hist,1,1,1)
+ end if
 
  if (ab_mover%ionmov==13)then
    call mttk_fin(mttk_vars)
