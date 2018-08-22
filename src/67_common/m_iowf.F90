@@ -365,7 +365,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
         end if
         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
-        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkb, start=[1, 1, 1, ikpt]))
+        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
       end do
       NCF_CHECK(nf90_close(ncid))
 
