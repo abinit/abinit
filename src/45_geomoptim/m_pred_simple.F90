@@ -210,7 +210,9 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !***************************************************************************
 
  if (iexit/=0)then
-   ABI_DEALLOCATE(matrix)
+   if(allocated(matrix))then
+     ABI_DEALLOCATE(matrix)
+   endif
    return
  end if
 
