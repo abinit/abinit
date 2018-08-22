@@ -270,8 +270,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  end if
 
  ! enable time limit handler if not done in callers.
- if (need_verbose .and. enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+ if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+   if (need_verbose)
+     write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+   end if
  end if
 
 !Table of contents
