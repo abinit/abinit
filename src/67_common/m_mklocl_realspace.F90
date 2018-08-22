@@ -46,6 +46,7 @@ module m_mklocl_realspace
  use m_paw_numeric, only : paw_splint, paw_splint_der
  use m_psolver,     only : psolver_hartree, psolver_kernel
  use m_abi2big,     only : wvl_rhov_abi2big
+ use m_wvl_wfs,     only : derf_ab
 
 
  implicit none

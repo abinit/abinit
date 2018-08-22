@@ -35,11 +35,13 @@ module m_wvl_wfsinp
  use m_errors
  use m_xmpi
 
+
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
  use m_psolver,   only : psolver_kernel
  use m_wvl_rwwf,  only : wvl_read
  use m_mklocl_realspace, only : mklocl_wavelets
+ use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free
 
  implicit none
 
