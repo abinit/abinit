@@ -23,7 +23,7 @@ sources = [
  "m_abi2big.F90",
  "nullify_wvl_data.F90",
  "m_paw2wvl.F90",
- "wvl_denspot_set.F90",
+ "m_wvl_denspot.F90",
  "m_wvl_descr_psp.F90",
  "wvl_projectors_set.F90",
  "m_wvl_wfs.F90",

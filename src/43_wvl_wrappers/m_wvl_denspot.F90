@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_denspot
+!! NAME
+!!  m_wvl_denspot
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_denspot
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ use m_geometry,   only : xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_denspot_set
+ public :: wvl_denspot_free
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wvl_denspot_set
 !! NAME
 !!  wvl_denspot_set
@@ -6,12 +52,6 @@
 !! FUNCTION
 !!  Fill in denspot datatype with information related
 !!  to density and potential data.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (DC)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  argin(sizein)=description
@@ -32,23 +72,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 &                          wvl_crmult,wvl_frmult,wvl_mpi_comm,xred)
 
- use defs_basis
  use defs_datatypes
  use defs_wvltypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
 
- use m_geometry,   only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API,only: initialize_DFT_local_fields,allocateRhoPot, &
 &                     input_variables,dpbox_set,density_descriptors
@@ -151,23 +180,10 @@ end subroutine wvl_denspot_set
 !!  wvl_denspot_free
 !!
 !! FUNCTION
-!!  FIXME: add description.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      gstate,wvl_wfsinp_reformat
@@ -178,18 +194,9 @@ end subroutine wvl_denspot_set
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_denspot_free(den)
 
- use defs_basis
  use defs_wvltypes
- use m_profiling_abi
- use m_errors
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: deallocate_rho_descriptors, &
       & deallocate_denspot_distribution, denspot_free_history
@@ -262,4 +269,7 @@ subroutine wvl_denspot_free(den)
 #endif
 
 end subroutine wvl_denspot_free
+!!***
+
+end module m_wvl_denspot
 !!***
