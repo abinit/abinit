@@ -23,6 +23,11 @@ phonon calculation, which will be reviewed succinctly.
 
 This tutorial should take about 1 hour.
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## 1 Calculation of the ground state and phonon structure of fcc Al
 
 *Before beginning, you might consider making a different subdirectory to work

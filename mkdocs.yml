@@ -54,6 +54,7 @@ pages:
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
+    - topics/CrossingBarriers.md
     - topics/CRPA.md
     - topics/crystal.md
     - topics/DFT+U.md
@@ -303,7 +304,7 @@ copyright: Copyright &copy; 2018 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 8.9.3
+    version: 8.9.4
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt

@@ -368,7 +368,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  call wvl_wfs_lr_copy(wvl%wfs, wvl%descr)
 !Reallocate them with new size.
  call wvl_wfs_set(dtset%strprecon,dtset%spinmagntarget, dtset%kpt, me, dtset%natom, sum(dtset%nband), dtset%nkpt, &
-& nproc, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig, psps, rprimd, &
+& nproc, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig(:,1), psps, rprimd, &
 & wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, xred)
 
 !Recopy old eval for precond.

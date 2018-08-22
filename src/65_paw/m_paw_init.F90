@@ -140,6 +140,7 @@ CONTAINS  !=====================================================================
 !!     === only if pawspnorb==1 ==
 !!     %ls_ylm(2,l_max**2,l_max**2,4)=LS operator in the real spherical harmonics basis
 !!     %use_ls_ylm=flag activated if ls_ylm is allocated
+!!     %usespnorb=flag activated for spin-orbit coupling
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated data read at start:
 !!     %lcut_size_=max. value of l+1 leading to non zero Gaunt coeffs modified by lcutdens
 !!     %lmnmix_sz=number of (lmn,lmn_prime) verifying l<=lmix and l_prime<=lmix
@@ -397,6 +398,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 !  ==================================================
 !  4- COMPUTE various FACTORS/SIZES (depending on (l,m,n))
 
+   pawtab(itypat)%usespnorb=pawspnorb
    pawtab(itypat)%lcut_size=min(l_size,lcutdens+1)
 
    if (allocated(pawtab(itypat)%dltij))  then

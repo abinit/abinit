@@ -491,7 +491,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !arrays
  real(dp),intent(in),target :: cg_jband(2,size_wf*debug_mode*nband_k,2)
- real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2)
+ real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq)
  real(dp),intent(in),optional :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: eig0(nband_k),eig1_k_jband(2*nband_k)
  real(dp),intent(inout) :: gvnl1(2,size_wf)
@@ -506,8 +506,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  integer :: opt_gvnl1,opt_gvnl2,optlocal,optnl,usevnl
  logical :: compute_conjugate,has_cprj_jband,has_cwaveprj,pert_phon_elfd
  real(dp) :: dotr,doti,dotr2,doti2,enlout(18*gs_hamkq%natom),tol_test
- real(dp), pointer :: enl_ptr(:,:,:)
- real(dp),allocatable,target :: enl_temp(:,:,:)
+ real(dp), pointer :: enl_ptr(:,:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:,:)
  character(len=500) :: msg
 
 !arrays
@@ -704,8 +704,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
          enl_ptr => rf_hamk_idir%e1kbfr
@@ -743,8 +743,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
          enl_ptr => rf_hamk_idir%e1kbfr

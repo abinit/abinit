@@ -1825,7 +1825,7 @@ The associated tensor(s) will therefore not be printed.
 - Writing phonon DOS to file: t57o_DS6_PHDOS
 
  Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:
- (+ for electrons, - for holes) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
+ (+ for occupied states, - for unoccupied states) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
  where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=      0.035862 Ha=      0.975842 eV
 
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8

@@ -674,7 +674,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+nband_k
+       ibg=ibg+dtset%nspinor*nband_k
        icg=icg+npw_k*dtset%nspinor*nband_k
        ikg=ikg+npw_k
      end if
@@ -683,7 +683,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        icgq=icgq+npw1_k*dtset%nspinor*nband_k
      end if
      if (mk1mem/=0) then
-       ibg1=ibg1+nband_k
+       ibg1=ibg1+dtset%nspinor*nband_k
        icg1=icg1+npw1_k*dtset%nspinor*nband_k
        ikg1=ikg1+npw1_k
      end if

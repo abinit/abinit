@@ -337,10 +337,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      vel_img     (:,:,iimage) = dtset%vel_orig(:,1:dtset%natom,ii)
      vel_cell_img(:,:,iimage) = dtset%vel_cell_orig(:,:,ii)
      xred_img (:,:,iimage) = dtset%xred_orig(:,1:dtset%natom,ii)
-!    Note that occ is not supposed to depend on the image in the input file.
-!    However, the results will depend on the image. And occ can be used
-!    to reinitialize the next dataset, or the next timimage.
-     occ_img  (:  ,iimage) = dtset%occ_orig(1:dtset%mband*dtset%nkpt*dtset%nsppol)
+     occ_img  (:  ,iimage) = dtset%occ_orig(1:dtset%mband*dtset%nkpt*dtset%nsppol,ii)
    end do
 
 !  ****************************************************************************
