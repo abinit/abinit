@@ -394,7 +394,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !scalars
  integer,parameter :: level=12,response=1
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
- integer :: has_dijfr,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
+ integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
@@ -548,13 +548,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call paw_ij_nullify(paw_ij1)
 
    has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
+   has_diju=0;if (dtset%usepawu==1) has_diju=1
    call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
    call paw_ij_init(paw_ij1,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
 &   dtset%ntypat,dtset%typat,pawtab,&
-&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,&
+&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,has_dijU=has_diju,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom)
  else
    ABI_ALLOCATE(nhat1,(0,0))
