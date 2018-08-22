@@ -37,8 +37,9 @@ module m_xc_vdw
  use netcdf
 #endif
 
- use m_io_tools, only : flush_unit, open_file
+ use m_io_tools,      only : flush_unit, open_file
  use m_numeric_tools, only : simpson_int, cspint
+ use m_integrals,     only : radsintr
 
  implicit none
 
