@@ -2477,11 +2477,11 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  paral_kgb,tim_fourwf,weight_r,weight_i, &
 &  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourwf'
- use interfaces_53_ffts, except_this_one => fourwf
 !End of the abilint section
 
  implicit none
@@ -3148,11 +3148,11 @@ end subroutine fourwf
 
 subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourdp'
- use interfaces_53_ffts, except_this_one => fourdp
 !End of the abilint section
 
  implicit none
@@ -3541,6 +3541,7 @@ end subroutine fourdp
 !! SOURCE
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4544,7 +4545,6 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourdp_6d'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

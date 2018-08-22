@@ -802,7 +802,6 @@ function dft_xc_energy(e)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dft_xc_energy'
- use interfaces_53_ffts
 !End of the abilint section
 
 implicit none
@@ -1455,7 +1454,6 @@ subroutine g_to_r(psi_out,psi_in)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'g_to_r'
- use interfaces_53_ffts
 !End of the abilint section
 
 implicit none
@@ -1536,7 +1534,6 @@ subroutine gr_to_g(psig_out,psir_in,psig_in)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gr_to_g'
- use interfaces_53_ffts
 !End of the abilint section
 
 implicit none

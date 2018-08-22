@@ -129,7 +129,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -625,7 +624,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

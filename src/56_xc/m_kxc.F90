@@ -421,7 +421,6 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_alda'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -911,7 +910,6 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_eok'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1079,7 +1077,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_driver'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1341,7 +1338,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_ADA'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -91,7 +91,6 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'jellium'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

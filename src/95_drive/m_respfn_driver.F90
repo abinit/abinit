@@ -218,7 +218,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
  use interfaces_72_response
 !End of the abilint section
 
@@ -4007,12 +4006,10 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 &  xcccrc,xccc1d,xccc3d,xred)
 
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyfro'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

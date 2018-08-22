@@ -1713,7 +1713,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

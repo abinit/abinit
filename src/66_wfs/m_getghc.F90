@@ -134,7 +134,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -801,7 +800,6 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc_mGGA'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

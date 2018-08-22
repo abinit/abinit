@@ -1815,7 +1815,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

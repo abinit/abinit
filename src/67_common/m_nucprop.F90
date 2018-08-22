@@ -811,7 +811,6 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_el'
- use interfaces_53_ffts
 !End of the abilint section
 
   implicit none

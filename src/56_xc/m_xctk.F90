@@ -100,7 +100,6 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcden'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -410,7 +409,6 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcpot'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

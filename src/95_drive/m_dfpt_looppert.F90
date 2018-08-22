@@ -239,7 +239,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_14_hidewrite
  use interfaces_29_kpoints
  use interfaces_32_util
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

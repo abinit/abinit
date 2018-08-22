@@ -111,7 +111,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartre'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -571,7 +570,6 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'laplacian'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -758,7 +756,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'redgr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -919,7 +916,6 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1125,7 +1121,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symrhg'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1990,7 +1985,6 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotate_rho'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

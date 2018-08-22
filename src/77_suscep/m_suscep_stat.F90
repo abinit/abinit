@@ -916,7 +916,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'susk'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1518,7 +1517,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suskmm'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

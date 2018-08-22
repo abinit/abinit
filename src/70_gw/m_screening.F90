@@ -2863,7 +2863,6 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_mdielf'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

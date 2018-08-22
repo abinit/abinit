@@ -97,7 +97,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pead_nl_resp'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -317,7 +317,6 @@ subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cudarec'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

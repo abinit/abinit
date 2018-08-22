@@ -164,7 +164,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
  use interfaces_95_drive
 !End of the abilint section
 
