@@ -812,6 +812,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
 
+     if (dt%eph_task /= 5 .and. any(dt%istwfk(1:nkpt) /= 1)) then
+       MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
+     end if
    end if
 
 !  exchmix

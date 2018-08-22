@@ -255,7 +255,7 @@ module m_sigmaph
 
   complex(dpc),allocatable :: dvals_de0ks(:,:)
    ! dvals_de0ks(ntemp, max_nbcalc) for fixed (kcalc, spin)
-   ! d Sigma_eph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
+   ! d Re Sigma_eph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
   !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
@@ -930,24 +930,24 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
                  end if
 
-                 ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
-                 !old derivative
-                 ! This to avoid numerical instability
-                 !cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) ** 2 &
-                 !        -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ** 2
-                 !sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
+                 ! Accumulate d(Re Sigma) / dw(w=eKS) for state ib_k
+                 gmod2 = (eig0nk - eig0mkq + wqnu) ** 2
+                 hmod2 = (eig0nk - eig0mkq - wqnu) ** 2
+                 rfact = (nqnu + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
+                         (nqnu - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
+                 sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * rfact
                  !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
                  !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
                  !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
-                 cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
-                 gmod2 = cfact * dconjg(cfact)
-                 cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
-                 hmod2 = cfact * dconjg(cfact)
 
-                 sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
-                   (nqnu + f_mkq)        * (gmod2 - two * (eig0nk - eig0mkq + wqnu) ** 2) / gmod2 ** 2 + &
-                   (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
-                 )
+                 !cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
+                 !gmod2 = cfact * dconjg(cfact)
+                 !cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                 !hmod2 = cfact * dconjg(cfact)
+                 !sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
+                 !  (nqnu + f_mkq)        * (gmod2 - two * (eig0nk - eig0mkq + wqnu) ** 2) / gmod2 ** 2 + &
+                 !  (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
+                 !)
 
                  ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
                  ! TODO: weigths
@@ -2210,12 +2210,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  character(len=500) :: msg
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
- real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
+ real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
  real(dp) :: qp_gaps(self%ntemp),qpadb_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:)
- complex(dpc),target :: qpadb_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
  real(dp) :: ks_enes(self%max_nbcalc),ze0_vals(self%ntemp, self%max_nbcalc)
+ complex(dpc),target :: qpadb_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
 
 ! *************************************************************************
 
@@ -2310,8 +2310,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    write(ab_out,"(a)")" "
  end if
 
- ! FIXME
- !do it=1,1
  do it=1,self%ntemp
    if (it == 1) then
      if (self%nsppol == 1) then
@@ -2344,6 +2342,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      if (band == ib_cond) then
        kse_cond = kse; qpe_cond = qpe; qpe_adb_cond = qpe_adb
      end if
+     ! FIXME
      if (it == 1) then
        !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
        write(ab_out, "(i4,10(f8.3,1x))") &
@@ -2376,8 +2375,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end if
  end do ! it
 
- ! Write data to netcdf file **Only master writes**
 #ifdef HAVE_NETCDF
+ ! **Only master writes**
  ! Write self-energy matrix elements for this (kpt, spin)
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
  ! Well, cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
@@ -2485,9 +2484,9 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
- !write(unt, "(2a)")sjoin("Method for q-space integration:", itoa(self%qint_method))
- !if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma) will be computed."
- !if (.not. self%imag_only) write(unt, "(a)")"Both the Real and the Imag part of Sigma will be computed."
+ write(unt, "(2a)")sjoin("Method for q-space integration:", itoa(self%qint_method))
+ if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma will be computed."
+ if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imag part of Sigma will be computed."
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
