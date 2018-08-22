@@ -25,7 +25,7 @@ sources = [
  "m_paw2wvl.F90",
  "m_wvl_denspot.F90",
  "m_wvl_descr_psp.F90",
- "wvl_projectors_set.F90",
+ "m_wvl_projectors.F90",
  "m_wvl_wfs.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

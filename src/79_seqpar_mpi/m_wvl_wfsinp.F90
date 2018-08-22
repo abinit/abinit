@@ -43,6 +43,7 @@ module m_wvl_wfsinp
  use m_mklocl_realspace, only : mklocl_wavelets
  use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
+ use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
 
  implicit none
 

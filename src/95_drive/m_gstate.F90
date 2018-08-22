@@ -101,6 +101,7 @@ module m_gstate
  use m_wvl_rho,          only : wvl_initro, wvl_mkrho
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
+ use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu

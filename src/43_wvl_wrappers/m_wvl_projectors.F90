@@ -1,4 +1,52 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_projectors
+!! NAME
+!!  m_wvl_projectors
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_projectors
+
+ use defs_basis
+ use defs_datatypes
+ use defs_wvltypes
+ use m_errors
+ use m_profiling_abi
+ use m_atomdata
+
+ use m_geometry,     only : xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_projectors_set
+ public :: wvl_projectors_free
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wvl_projectors_set
 !!
 !! NAME
@@ -8,13 +56,6 @@
 !! Allocate and compute the access keys for the projectors when the positions
 !! of the atoms are given. The array to store projectors
 !! is also allocated, use wvl_projectors_free() to free them after use.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
@@ -39,21 +80,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmult, xred)
 
- use defs_basis
- use defs_datatypes
- use defs_wvltypes
- use m_errors
- use m_profiling_abi
- use m_atomdata
- use m_geometry,     only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createProjectorsArrays, wvl_timing => timing
 #endif
@@ -148,13 +176,6 @@ end subroutine wvl_projectors_set
 !! FUNCTION
 !! Freeing routine.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -170,18 +191,8 @@ end subroutine wvl_projectors_set
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_projectors_free(proj)
 
- use defs_basis
- use defs_wvltypes
- use m_profiling_abi
- use m_errors
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : free_DFT_PSP_projectors,deallocate_gwf
 #endif
@@ -240,4 +251,7 @@ subroutine wvl_projectors_free(proj)
 #endif
 
 end subroutine wvl_projectors_free
+!!***
+
+end module m_wvl_projectors
 !!***
