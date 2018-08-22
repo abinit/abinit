@@ -6,7 +6,7 @@ authors: XG, DCA
 
 This page complements the main [[help:abinit]], for matters related
 to responses to perturbations computed with DFPT.
-It will be easier to discover the present file with the help of the [[lesson:rf1]].  
+It will be easier to discover the present file with the help of the [[tutorial:rf1|DFPT1 tutorial]].  
 
 <a id="intro"></a> 
 ## 0 Introducing the computation of responses
@@ -538,8 +538,6 @@ the real and imaginary parts of the 2DTE. Sometimes, the code uses spatial
 symmetries, the time-reversal symmetry, or even the permutation of first and
 second perturbations to deduce the value of non-computed matrix elements. This
 behaviour might be improved, as it is sometimes confusing ...
-
-_If you follow the tutorial, you should go back to the tutorial window now._
 
 <a id="numerical-quality"></a>
 ## 7 Numerical quality of the calculations

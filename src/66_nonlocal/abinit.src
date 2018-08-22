@@ -18,25 +18,24 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_cgprj.F90",
  "m_contract.F90",
- "ctocprj.F90",
- "m_mkffkg.F90",
- "getcprj.F90",
- "m_metstr.F90",
- "m_mkffnl.F90",
- "m_vkbr.F90",
  "m_fock.F90",
  "m_gemm_nonlop.F90",
  "m_hamiltonian.F90",
+ "m_metstr.F90",
+ "m_mkffkg.F90",
+ "m_mkffnl.F90",
  "m_nonlop.F90",
  "m_nonlop_pl.F90",
  "m_nonlop_test.F90",
  "m_nonlop_ylm.F90",
  "m_opernl.F90",
- "opernla_ylm.F90",
- "opernlb_ylm.F90",
- "opernlc_ylm.F90",
- "opernld_ylm.F90",
+ "m_vkbr.F90",
+ "m_opernla_ylm.F90",
+ "m_opernlb_ylm.F90",
+ "m_opernlc_ylm.F90",
+ "m_opernld_ylm.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

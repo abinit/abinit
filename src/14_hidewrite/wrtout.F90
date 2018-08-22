@@ -40,12 +40,12 @@
 !!      calc_ubare,calc_ucrpa,calc_vhxc_me,calcdensph,cchi0,cchi0q0
 !!      cchi0q0_intraband,cgwf,chebfi,chern_number,chiscwrt,chkdpr,chkinp
 !!      chkint_prt,chkpawovlp,clnup1,clnup2,cohsex_me,compute_anharmonics
-!!      compute_kgb_indicator,compute_levels,constrf,cut3d,d2frnl,datafordmft
+!!      compute_kgb_indicator,compute_levels,constrf,cut3d,d2frnl,m_datafordmft
 !!      ddb_diel,ddb_elast,ddb_internalstr,ddb_interpolate,ddb_io_out,ddb_piezo
 !!      debug_tools,deloc2xcart,denfgr,dfpt_cgwf,dfpt_looppert,dfpt_mkrho
 !!      dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_prtene,dfpt_prtph,dfpt_scfcv
 !!      dfpt_symph,dfpt_vtowfk,dfpt_wfkfermi,dfptff_initberry,dfptnl_doutput
-!!      dfptnl_loop,dfptnl_mv,dielmt,dieltcel,dmft_solve,dos_hdr_write,driver
+!!      dfptnl_loop,dfptnl_mv,dielmt,dieltcel,m_dmft,dos_hdr_write,driver
 !!      dyson,echo_xc_name,eig2stern,eliashberg_1d,elph2_fanddw,elphon
 !!      elpolariz,elt_ewald,entropyrec,ep_fs_weights,ep_setupqpt,eph,erlxconv
 !!      evdw_wannier,exc_build_block,exc_build_ham,exc_den,exc_plot,extraprho
@@ -99,7 +99,7 @@
 !!      pspnl_operat_rec,qmc_prep_ctqmc,randac,random_stopping_power
 !!      rayleigh_ritz,read_gkk,read_plowannier,recursion_nl,remove_inversion
 !!      respfn,rf2_init,rotmat,scfcge,scfcv,scfeig,scfopt,scprqt,screening
-!!      setnoccmmp,setrhoijpbe0,setsymrhoij,setup1,setup_bse,setup_bse_interp
+!!      setnoccmmp,setrhoijpbe0,setsym_ylm,setup1,setup_bse,setup_bse_interp
 !!      setup_positron,setup_screening,setup_sigma,shellstruct,sigma,smpbz
 !!      spectral_function,stress,sumrule,symanal,symatm,symaxes,symcharac
 !!      symfind,symkchk,symkpt,symlatt,symplanes,symspgr,tddft,testkgrid,thmeig

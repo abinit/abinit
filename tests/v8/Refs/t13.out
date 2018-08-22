@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -34,18 +34,18 @@
    prt_model         2
      strcpli        -1
  Fit the coefficients :
-        fit_coeff  1
- fit_generateTerm  1
-       fit_cutoff  7.00000000E+00
-       fit_option  0
-       fit_ncoeff  10
-         fit_grid  1  1  1
-    fit_ts_option  0
-   fit_rangePower  3  4
-   fit_anhaStrain  0
-   fit_SPCoupling  1
-    fit_nfixcoeff  2
-     fit_fixcoeff        48    50
+         fit_coeff  1
+ fit_generateCoeff  1
+        fit_cutoff  7.00000000E+00
+        fit_option  0
+        fit_ncoeff  10
+          fit_grid  1  1  1
+         ts_option  0
+    fit_rangePower  3  4
+    fit_anhaStrain  0
+    fit_SPCoupling  1
+     fit_nfixcoeff  2
+      fit_fixcoeff         48     50
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -200,7 +200,7 @@
 
 --------------------------------------------------------------------------------
 
- The coefficients for the fit must  will be generate
+ The coefficients for the fit will be generated
  825 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/atm):

@@ -48,12 +48,14 @@ module m_dfpt_vtorho
 &                       pawrhoij_mpisum_unpacked
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
  use m_fft,      only : fftpac
  use m_spacepar, only : symrhg
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
- use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
-use m_mpinfo,         only : proc_distrb_cycle
+ use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
+ use m_mpinfo,      only : proc_distrb_cycle
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -228,7 +230,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtorho'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -673,7 +674,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+nband_k
+       ibg=ibg+dtset%nspinor*nband_k
        icg=icg+npw_k*dtset%nspinor*nband_k
        ikg=ikg+npw_k
      end if
@@ -682,7 +683,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        icgq=icgq+npw1_k*dtset%nspinor*nband_k
      end if
      if (mk1mem/=0) then
-       ibg1=ibg1+nband_k
+       ibg1=ibg1+dtset%nspinor*nband_k
        icg1=icg1+npw1_k*dtset%nspinor*nband_k
        ikg1=ikg1+npw1_k
      end if

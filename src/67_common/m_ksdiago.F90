@@ -36,7 +36,7 @@ module m_ksdiago
 
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
  use m_fft,               only : fftpac
@@ -50,6 +50,8 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc
+ use m_fourier_interpol,  only : transgrid
+ use m_cgprj,             only : getcprj
 
  implicit none
 
@@ -260,8 +262,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ksdiago'
  use interfaces_14_hidewrite
- use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

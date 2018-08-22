@@ -37,8 +37,7 @@ MODULE m_paw_slater
  use m_splines
 
  use m_fstrings,     only : basename
- use m_lmn_indices,  only : make_kln2ln, make_klm2lm, make_indln, klmn2ijlmn 
- use m_atom,         only : atom_type, init_atom, print_atom, get_overlap, destroy_atom
+ use m_paw_atomorb,  only : atomorb_type, init_atomorb, print_atomorb, destroy_atomorb, get_overlap
  use m_crystal,      only : crystal_t
  use m_paw_io,       only : pawio_print_ij
  use m_pawang,       only : pawang_type, realgaunt
@@ -46,6 +45,7 @@ MODULE m_paw_slater
 &                           pawrad_deducer0, simp_gen, calc_slatradl
  use m_pawtab,       only : pawtab_type
  use m_pawrhoij,     only : pawrhoij_type
+ use m_paw_lmn,      only : make_kln2ln, make_klm2lm, make_indln, klmn2ijlmn
 
  implicit none
 
@@ -519,7 +519,7 @@ end subroutine slatrad_cshell_free
 !!  ln2_size=Number of symmetrical (l,n) channels
 !!  Pawrad<pawrad_type>=paw radial mesh and related data
 !!  Pawtab<pawtab_type>=paw tabulated starting data
-!!  Atm<atom_type>=Object containing core orbitals.
+!!  Atm<atomorb_type>=Object containing core orbitals.
 !!  Atmrad<pawrad_type>=paw radial mesh and related data for the atom.
 !!  kln_mask
 !!
@@ -550,7 +550,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
  integer,intent(in) :: ln2_size
 !arrays
  integer,optional,intent(in) :: kln_mask(ln2_size)
- type(atom_type),intent(in) :: Atm
+ type(atomorb_type),intent(in) :: Atm
  type(pawrad_type),target,intent(in) :: Atmrad,Pawrad
  type(pawtab_type),target,intent(in) :: Pawtab
  type(slatrad_cshell_t),intent(out) :: Slatrad3l(ln2_size)
@@ -565,7 +565,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
  logical :: hasameq
 !arrays
  integer,allocatable :: kln2ln(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  real(dp),allocatable :: ff1(:),ff2(:),tmp_integrals(:)
  real(dp),ABI_CONTIGUOUS pointer :: phi_i(:),phi_j(:)
  real(dp),allocatable,target :: phi_spl(:,:)
@@ -734,7 +734,7 @@ end subroutine slatrad_cshell_init
 !!  lmn2_size=Number of (klmn) channels
 !!  ndij=Usually ndij=nspden, except for spin-orbit (where ndij=nspinor**2)
 !!  Pawtab<pawtab_type>=paw tabulated starting data
-!!  Atm<atom_type>=Structure containing core orbitals
+!!  Atm<atomorb_type>=Structure containing core orbitals
 !!  Atmrad<pawrad_type>=The radial mesh for core orbitals
 !!
 !! OUTPUT
@@ -765,7 +765,7 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
  integer,intent(in) :: lmn2_size,cplex_dij,ndij
 !arrays
  real(dp),intent(out) :: dijexc_core(cplex_dij*lmn2_size,ndij)
- type(atom_type),intent(in) :: Atm
+ type(atomorb_type),intent(in) :: Atm
  type(pawrad_type),intent(in) :: Atmrad
  type(pawrad_type),intent(in) :: Pawrad
  type(pawtab_type),target,intent(in) :: Pawtab
@@ -781,7 +781,7 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
 !arrays
  integer :: opt_l_index(0,0),pack2ij(0)
  integer,allocatable :: kln2ln(:,:),klm2lm(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  type(slatang_cshell_t),allocatable :: Slatang3l(:)
  type(slatrad_cshell_t),allocatable :: Slatrad3l(:)
 
@@ -931,7 +931,7 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
  integer,allocatable :: phi_indln(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: phi(:,:)
  real(dp),allocatable :: overlap(:,:)
- type(Atom_type),allocatable :: Atm(:)
+ type(atomorb_type),allocatable :: Atm(:)
  type(Pawrad_type),allocatable :: Radatm(:)
 
 ! *************************************************************************
@@ -955,14 +955,14 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
    if (ic>0 .and. ic<LEN_TRIM(string)) fcore = filpsp(itypat)(1:ic)//TRIM(fcore)
 
    rcut=Pawtab(itypat)%rpaw
-   call init_atom(Atm(itypat),Radatm(itypat),rcut,fcore,pawprtvol,ierr)
+   call init_atomorb(Atm(itypat),Radatm(itypat),rcut,fcore,pawprtvol,ierr)
 
    if (ierr/=0) then
      msg = " Error reading core orbitals from file: "//TRIM(fcore)
      MSG_ERROR(msg)
    end if
    write(header,'(a,i4,a)')" === Atom type = ",itypat," === "
-   call print_atom(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
+   call print_atomorb(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
    !
    ! * Calculate $ \<\phi_i|Sigma_x^\core|\phi_j\> $ for this atom type.
    lmn_size  = Pawtab(itypat)%lmn_size
@@ -988,7 +988,7 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
  ! Free memory
  call pawrad_free(Radatm)
  do itypat=1,Cryst%ntypat
-   call destroy_atom(Atm(itypat))
+   call destroy_atomorb(Atm(itypat))
  end do
 
  ABI_DATATYPE_DEALLOCATE(Atm)
@@ -1159,7 +1159,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kln2ln(:,:)
- integer,ABI_CONTIGUOUS pointer :: indklmn(:,:),indlmn(:,:)
+ integer, pointer :: indklmn(:,:),indlmn(:,:)
  real(dp),allocatable :: uiuj(:),ukul(:),tuituj(:),tuktul(:),tuituj_tqgl(:),tuktul_tqgl(:)
  real(dp),allocatable :: tmp_integrals(:),ff(:)
  real(dp),ABI_CONTIGUOUS pointer :: phi_i(:),phi_j(:),phi_k(:),phi_l(:)

@@ -128,10 +128,12 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
  use m_kg,       only : mkkin, mkkpg
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
  use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -139,7 +141,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 #define ABI_FUNC 'd2frnl'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -182,8 +183,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig1=1,usecprj=0
- integer :: bdtot_index,bufdim,choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
- integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase
+ integer :: bandmin,bandmax,bdtot_index,bufdim
+ integer :: choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
+ integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase,deg_dim
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
  integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
  integer :: ispinor,isppol,istwf_k,isub,itypat,jj,jsub,klmn,master,me,mu
@@ -201,7 +203,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
- real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:),cg_left(:,:)
+ real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
  real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
  real(dp),allocatable :: enlout_piez1(:),enlout_piez2(:),enlout_phon(:),enlout_strs(:)
@@ -353,7 +355,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  if(need_efmas) then
    ABI_MALLOC(enlout_efmas,(0))
    ABI_DATATYPE_ALLOCATE(efmasdeg,(dtset%nkpt))
-   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%nkpt,dtset%mband))
+   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%mband,dtset%nkpt))
  end if
 
 !Initialize Hamiltonian (k-independent terms)
@@ -384,7 +386,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,1,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
@@ -398,12 +400,12 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DEALLOCATE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,psps%ntypat,&
+       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
 &       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,&
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
-         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,ii),mpi_atmtab=my_atmtab)
+         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,:,ii),mpi_atmtab=my_atmtab)
        end do
      end do
      call paw_ij_free(paw_ij_tmp)
@@ -601,14 +603,15 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        call check_degeneracies(efmasdeg(ikpt),dtset%efmas_bands(:,ikpt),nband_k,eigen(bdtot_index+1:bdtot_index+nband_k), &
 &       dtset%efmas_deg_tol)
        do ideg=1,efmasdeg(ikpt)%ndegs
-         if(efmasdeg(ikpt)%treated(ideg)) then
-           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(efmasdeg(ikpt)%deg_dim(ideg),efmasdeg(ikpt)%deg_dim(ideg),3,3))
-           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(efmasdeg(ikpt)%deg_dim(ideg),efmasdeg(ikpt)%deg_dim(ideg),3,3))
-           efmasval(ikpt,ideg)%ch2c=zero
-           efmasval(ikpt,ideg)%eig2_diag=zero
+         if( efmasdeg(ikpt)%deg_range(1) <= ideg .and. ideg <= efmasdeg(ikpt)%deg_range(2) ) then
+           deg_dim=efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
+           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(3,3,deg_dim,deg_dim))
+           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(3,3,deg_dim,deg_dim))
+           efmasval(ideg,ikpt)%ch2c=zero
+           efmasval(ideg,ikpt)%eig2_diag=zero
          else
-           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(0,0,0,0))
-           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(0,0,0,0))
+           ABI_MALLOC(efmasval(ideg,ikpt)%ch2c,(0,0,0,0))
+           ABI_MALLOC(efmasval(ideg,ikpt)%eig2_diag,(0,0,0,0))
          end if
        end do
      end if
@@ -653,7 +656,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_piezofr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
            piezofrnlk(:,ii)=piezofrnlk(:,ii)+occ_k*enlout_piez1(:)
          end do !end do ii
        end if
@@ -662,7 +665,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_becfr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_bec2,cpopt,cwaveprj,enlout_bec1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
            becfrnlk(:,:,ii)=becfrnlk(:,:,ii)+occ_k*reshape(enlout_bec1(:),(/3,natom/))
          end do !end do ii
        end if
@@ -746,7 +749,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        end if
 
        if(need_efmas) then
-         if(iband>=efmasdeg(ikpt)%band_range(1) .and. iband<=(efmasdeg(ikpt)%band_range(2))) then
+         bandmin=efmasdeg(ikpt)%degs_bounds(1, efmasdeg(ikpt)%deg_range(1) )
+         bandmax=efmasdeg(ikpt)%degs_bounds(2, efmasdeg(ikpt)%deg_range(2) )
+         if ( iband>=bandmin .and. iband<=bandmax ) then
            choice_efmas=8; signs=2
            cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
            paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
@@ -771,9 +776,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  dotprod=0
                  call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
 &                 mpi_enreg%comm_spinorfft)
-                 isub = iband-efmasdeg(ikpt)%degl(ideg)
-                 jsub = jband-efmasdeg(ikpt)%degl(ideg)
-                 efmasval(ikpt,ideg)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                 isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
+                 jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
+                 efmasval(ideg,ikpt)%ch2c(mu,nu,jsub,isub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
                end do
              end do
            end do

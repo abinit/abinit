@@ -25,6 +25,7 @@ variables/vdw.md
 variables/w90.md
 variables/aim.md
 variables/anaddb.md
+variables/multibinit.md
 variables/optic.md
 variables/varset_stats.md
 topics/Abipy.md
@@ -36,10 +37,12 @@ topics/Bader.md
 topics/Band2eps.md
 topics/Berry.md
 topics/BandOcc.md
+topics/BoundProcess.md
 topics/BSE.md
 topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
+topics/CrossingBarriers.md
 topics/CRPA.md
 topics/crystal.md
 topics/DFT+U.md
@@ -48,7 +51,8 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffMass.md
+topics/EffectiveMass.md
+topics/DynamicsMultibinit.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md
@@ -56,6 +60,7 @@ topics/ElPhonTransport.md
 topics/ElecDOS.md
 topics/ElecBandStructure.md
 topics/FileFormats.md
+topics/FitProcess.md
 topics/ForcesStresses.md
 topics/FrequencyMeshMBPT.md
 topics/GeoConstraints.md
@@ -66,11 +71,13 @@ topics/GW.md
 topics/GWls.md
 topics/Hybrids.md
 topics/k-points.md
+topics/LatticeModel.md
 topics/LDAminushalf.md
 topics/LOTF.md
 topics/MagField.md
 topics/MagMom.md
 topics/MolecularDynamics.md
+topics/Macroave.md
 topics/multidtset.md
 topics/nonlinear.md
 topics/Optic.md

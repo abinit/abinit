@@ -49,5 +49,5 @@ chksymbreak 0  # The k point grid is not symmetric, but the calculations being f
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = LDAU
-#%% description =  first lesson of the LDA+U tutorial
+#%% description =  first run of the DFT+U tutorial
 #%%<END TEST_INFO>

@@ -59,7 +59,8 @@ module m_gkk
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
  use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_fourier_interpol, only : transgrid
 ! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init

@@ -8,11 +8,10 @@
 for file in "$@"
 do
  echo "working on $file"
- rm -f tmp.file  tmp.file2
- sed -e 's!53_spacepar!54_spacepar!' $file > tmp.file
- sed -e 's!54_abiutil!55_abiutil!' tmp.file > tmp.file2
+ rm -f tmp.file 
+ sed -e 's!ingeo_img!intagm_img!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
- mv tmp.file2 $file
+ mv tmp.file $file
  echo "file $file written "
 done

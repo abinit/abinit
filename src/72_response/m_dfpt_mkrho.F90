@@ -33,17 +33,19 @@ module m_dfpt_mkrho
  use m_cgtools
  use m_xmpi
 
- use m_time,      only : timab
- use m_io_tools,  only : get_unit, iomode_from_fname
- use m_fftcore,   only : sphereboundary
- use m_fft,       only : fftpac
- use m_spacepar,  only : symrhg
- use m_dtfil,         only : status
- use m_hamiltonian,   only : gs_hamiltonian_type
- use m_pawrhoij,      only : pawrhoij_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paral_atom,    only : get_my_atmtab
-use m_mpinfo,         only : proc_distrb_cycle
+ use m_time,            only : timab
+ use m_io_tools,        only : get_unit, iomode_from_fname
+ use m_fftcore,         only : sphereboundary
+ use m_fft,             only : fftpac
+ use m_spacepar,        only : symrhg
+ use m_dtfil,           only : status
+ use m_hamiltonian,     only : gs_hamiltonian_type
+ use m_pawrhoij,        only : pawrhoij_type
+ use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_occupancies, only : pawaccrhoij
+ use m_paral_atom,      only : get_my_atmtab
+ use m_mpinfo,          only : proc_distrb_cycle
+ use m_cgprj,           only : getcprj
 
  implicit none
 
@@ -269,7 +271,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 &             paral_kgb,tim_fourwf7,weight,weight)
 
 !          Compute the weight, note that the factor 2 is
-!          not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!          not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
              weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 
 !          Accumulate density
@@ -411,7 +413,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !        cwave1_up => cwavef1(:,1:npw_k)
 !        cwave1_down => cwavef1(:,1+npw_k:2*npw_k)
 
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997)??)
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) ?? [[cite:Gonze1997]])
          weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 !density components
 !GS wfk Fourrier Tranform
@@ -624,8 +626,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
  use interfaces_53_ffts
- use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -667,7 +667,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),pointer :: cwave0_up(:,:),cwave0_down(:,:),cwave1_up(:,:),cwave1_down(:,:)
  real(dp),pointer :: vlocal(:,:,:,:)=>null()
  type(pawcprj_type),allocatable :: cwaveprj_tmp(:,:)
-
+!TEST
+!  real(dp),save :: v1,v2
+!  real(dp) :: r1,r2
 ! *********************************************************************
  DBG_ENTER("COLL")
 
@@ -759,7 +761,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwavef_sp)
 
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
        weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
 !    Accumulate 1st-order density
        if (cplex==2) then
@@ -826,7 +828,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      valuer=zero
      diag=zero
      offdiag=zero
-   ! EB FR 2nd term in Eq. 91 PRB52,1096 for non-collinear magnetism
+   ! EB FR 2nd term in Eq. 91 PRB52,1096 [[cite:Gonze1995]] for non-collinear magnetism
      do i3=1,n3
        do i2=1,n2
          do i1=1,n1
@@ -898,7 +900,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
      re1_down=zero;im1_down=zero
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
 !    SPr: the following treatment with factor=2 is ok for perturbations not breaking the
 !         time reversal symmetry of the Hamiltonian (due to Kramer's degeneracy) hence
 !         not applicable for magnetic field perturbation (for phonons with SOC, H^(0) has
@@ -985,9 +987,113 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    option_rhoij=2;usetimerev=(kptopt>0.and.kptopt<3)
 
    if (gs_hamkq%usecprj==1) then
+!TEST
+! if (iband==1) then
+!  if (nspinor==1) then
+!   if (iband==1) write(100+iband,*) "===================================="
+!   if (iband==1) write(200+iband,*) "===================================="
+!   if (iband==1) write(300+iband,*) "===================================="
+!   if (iband==1) write(400+iband,*) "===================================="
+!   write(100+iband,*) cwaveprj0(1,1)%cp(1,1)**2+cwaveprj0(1,1)%cp(2,1)**2,&
+! &                    cwaveprj0(1,1)%cp(1,2)**2+cwaveprj0(1,1)%cp(2,2)**2,&
+! &                    cwaveprj0(1,1)%cp(1,3)**2+cwaveprj0(1,1)%cp(2,3)**2,&
+! &                    cwaveprj0(1,1)%cp(1,4)**2+cwaveprj0(1,1)%cp(2,4)**2,&
+! &                    cwaveprj0(1,1)%cp(1,5)**2+cwaveprj0(1,1)%cp(2,5)**2,&
+! &                    cwaveprj0(1,1)%cp(1,6)**2+cwaveprj0(1,1)%cp(2,6)**2,&
+! &                    cwaveprj0(1,1)%cp(1,7)**2+cwaveprj0(1,1)%cp(2,7)**2,&
+! &                    cwaveprj0(1,1)%cp(1,8)**2+cwaveprj0(1,1)%cp(2,8)**2
+!   write(200+iband,*) cwaveprj1(1,1)%cp(1,1)**2+cwaveprj1(1,1)%cp(2,1)**2,&
+! &                    cwaveprj1(1,1)%cp(1,2)**2+cwaveprj1(1,1)%cp(2,2)**2,&
+! &                    cwaveprj1(1,1)%cp(1,3)**2+cwaveprj1(1,1)%cp(2,3)**2,&
+! &                    cwaveprj1(1,1)%cp(1,4)**2+cwaveprj1(1,1)%cp(2,4)**2,&
+! &                    cwaveprj1(1,1)%cp(1,5)**2+cwaveprj1(1,1)%cp(2,5)**2,&
+! &                    cwaveprj1(1,1)%cp(1,6)**2+cwaveprj1(1,1)%cp(2,6)**2,&
+! &                    cwaveprj1(1,1)%cp(1,7)**2+cwaveprj1(1,1)%cp(2,7)**2,&
+! &                    cwaveprj1(1,1)%cp(1,8)**2+cwaveprj1(1,1)%cp(2,8)**2
+!   write(300+iband,*) cwave0(1,1)**2+cwave0(2,1)**2,&
+!                      cwave0(1,5)**2+cwave0(2,5)**2,&
+!                      cwave0(1,9)**2+cwave0(2,9)**2
+!   write(400+iband,*) cwave1(1,1)**2+cwave1(2,1)**2,&
+!                      cwave1(1,5)**2+cwave1(2,5)**2,&
+!                      cwave1(1,9)**2+cwave1(2,9)**2
+!  end if
+!  if (nspinor==2) then
+!   if (iband==1) write(100+iband,*) "===================================="
+!   if (iband==1) write(200+iband,*) "===================================="
+!   if (iband==1) write(300+iband,*) "===================================="
+!   if (iband==1) write(400+iband,*) "===================================="
+!   write(100+iband,*) cwaveprj0(1,1)%cp(1,1)**2+cwaveprj0(1,1)%cp(2,1)**2 + cwaveprj0(1,2)%cp(1,1)**2+cwaveprj0(1,2)%cp(2,1)**2,&
+! &                    cwaveprj0(1,1)%cp(1,2)**2+cwaveprj0(1,1)%cp(2,2)**2 + cwaveprj0(1,2)%cp(1,2)**2+cwaveprj0(1,2)%cp(2,2)**2,&
+! &                    cwaveprj0(1,1)%cp(1,3)**2+cwaveprj0(1,1)%cp(2,3)**2 + cwaveprj0(1,2)%cp(1,3)**2+cwaveprj0(1,2)%cp(2,3)**2,&
+! &                    cwaveprj0(1,1)%cp(1,4)**2+cwaveprj0(1,1)%cp(2,4)**2 + cwaveprj0(1,2)%cp(1,4)**2+cwaveprj0(1,2)%cp(2,4)**2,&
+! &                    cwaveprj0(1,1)%cp(1,5)**2+cwaveprj0(1,1)%cp(2,5)**2 + cwaveprj0(1,2)%cp(1,5)**2+cwaveprj0(1,2)%cp(2,5)**2,&
+! &                    cwaveprj0(1,1)%cp(1,6)**2+cwaveprj0(1,1)%cp(2,6)**2 + cwaveprj0(1,2)%cp(1,6)**2+cwaveprj0(1,2)%cp(2,6)**2,&
+! &                    cwaveprj0(1,1)%cp(1,7)**2+cwaveprj0(1,1)%cp(2,7)**2 + cwaveprj0(1,2)%cp(1,7)**2+cwaveprj0(1,2)%cp(2,7)**2,&
+! &                    cwaveprj0(1,1)%cp(1,8)**2+cwaveprj0(1,1)%cp(2,8)**2 + cwaveprj0(1,2)%cp(1,8)**2+cwaveprj0(1,2)%cp(2,8)**2
+!   write(200+iband,*) cwaveprj1(1,1)%cp(1,1)**2+cwaveprj1(1,1)%cp(2,1)**2 + cwaveprj1(1,2)%cp(1,1)**2+cwaveprj1(1,2)%cp(2,1)**2,&
+! &                    cwaveprj1(1,1)%cp(1,2)**2+cwaveprj1(1,1)%cp(2,2)**2 + cwaveprj1(1,2)%cp(1,2)**2+cwaveprj1(1,2)%cp(2,2)**2,&
+! &                    cwaveprj1(1,1)%cp(1,3)**2+cwaveprj1(1,1)%cp(2,3)**2 + cwaveprj1(1,2)%cp(1,3)**2+cwaveprj1(1,2)%cp(2,3)**2,&
+! &                    cwaveprj1(1,1)%cp(1,4)**2+cwaveprj1(1,1)%cp(2,4)**2 + cwaveprj1(1,2)%cp(1,4)**2+cwaveprj1(1,2)%cp(2,4)**2,&
+! &                    cwaveprj1(1,1)%cp(1,5)**2+cwaveprj1(1,1)%cp(2,5)**2 + cwaveprj1(1,2)%cp(1,5)**2+cwaveprj1(1,2)%cp(2,5)**2,&
+! &                    cwaveprj1(1,1)%cp(1,6)**2+cwaveprj1(1,1)%cp(2,6)**2 + cwaveprj1(1,2)%cp(1,6)**2+cwaveprj1(1,2)%cp(2,6)**2,&
+! &                    cwaveprj1(1,1)%cp(1,7)**2+cwaveprj1(1,1)%cp(2,7)**2 + cwaveprj1(1,2)%cp(1,7)**2+cwaveprj1(1,2)%cp(2,7)**2,&
+! &                    cwaveprj1(1,1)%cp(1,8)**2+cwaveprj1(1,1)%cp(2,8)**2 + cwaveprj1(1,2)%cp(1,8)**2+cwaveprj1(1,2)%cp(2,8)**2
+!   write(300+iband,*) cwave0(1,1)**2+cwave0(2,1)**2 + cwave0(1,npw_k+1)**2+cwave0(2,npw_k+1)**2,&
+!                      cwave0(1,5)**2+cwave0(2,5)**2 + cwave0(1,npw_k+5)**2+cwave0(2,npw_k+5)**2,&
+!                      cwave0(1,9)**2+cwave0(2,9)**2 + cwave0(1,npw_k+9)**2+cwave0(2,npw_k+9)**2
+!   write(400+iband,*) cwave1(1,1)**2+cwave1(2,1)**2 + cwave1(1,npw_k+1)**2+cwave1(2,npw_k+1)**2,&
+! &                    cwave1(1,5)**2+cwave1(2,5)**2 + cwave1(1,npw_k+5)**2+cwave1(2,npw_k+5)**2,&
+! &                    cwave1(1,9)**2+cwave1(2,9)**2 + cwave1(1,npw_k+9)**2+cwave1(2,npw_k+9)**2
+!  end if
+! end if
      call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0,cwaveprj1,ipert,isppol,&
 &     my_natom,natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k,&
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+!TEST
+!if (iband==1) then
+!  if (nspinor==1) then
+!   if (iband==1) v1=zero
+!   if (iband==1) v2=zero
+!   i1=1;i2=1
+!   v1=v1+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
+! &      +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1))&
+! &     *occ_k(iband)*wtk_k
+!   i1=1;i2=3
+!   v2=v2+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
+! &     +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1))&
+! &     *occ_k(iband)*wtk_k
+!   write(500,*) "A: ",v1,v2
+!   write(500,*) "B: ",pawrhoij1(1)%rhoij_(1,1),pawrhoij1(1)%rhoij_(4,1)
+!  end if
+!  if (nspinor==2) then
+!   if (iband==1) v1=zero
+!   if (iband==1) v2=zero
+!   i1=1;i2=1
+!   v1=v1+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
+! &       +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1) &
+! &       +cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
+! &       +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1))&
+! &     *occ_k(iband)*wtk_k
+!   i1=1;i2=3
+!   r1=cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
+! &   +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1)
+!   r2=cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
+! &   +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1)
+!  v2=v2+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
+! &       +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1) &
+! &       +cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
+! &       +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1))&
+! &       *occ_k(iband)*wtk_k
+!
+! i1=1;i2=3
+!   write(500,*) "A: ",v2,r1,r2,&
+! & cwaveprj0(1,1)%cp(1:2,i1),cwaveprj0(1,1)%cp(1:2,i2),&
+! & cwaveprj0(1,2)%cp(1:2,i1),cwaveprj0(1,2)%cp(1:2,i2),&
+! & cwaveprj1(1,1)%cp(1:2,i1),cwaveprj1(1,1)%cp(1:2,i2),&
+! & cwaveprj1(1,2)%cp(1:2,i1),cwaveprj1(1,2)%cp(1:2,i2)
+!   write(500,*) "B: ",pawrhoij1(1)%rhoij_(4,1)
+!  end if
+!end if
    else
      ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,nspinor))
      call pawcprj_alloc(cwaveprj_tmp,ncpgr,gs_hamkq%dimcprj)

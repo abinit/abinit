@@ -48,7 +48,7 @@ E.1 Collect the stats, complete doc/main*/statistics.txt and doc/dev*/statistics
 F. For the first release and other merges of a production version
 -----------------------------------------------
 Prepare the release, which means (send a letter to JMB) :
-F.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
+F.1 Make available the files tar.gz and robodoc (from abiref*debug)
 F.2 Also update install notes for most noticeable achievements.
 
 *******************************************************************

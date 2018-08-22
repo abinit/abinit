@@ -174,6 +174,7 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
+ 
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure

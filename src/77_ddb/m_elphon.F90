@@ -159,7 +159,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -1151,7 +1151,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !  bxu, no need for complete sets of ie1 and ie2
 !  Only save those within the range of omega_max from Ef
    ABI_ALLOCATE(pair2red,(tmp_nenergy,tmp_nenergy))
-   pair2red = zero
+   pair2red = 0
 
    elph_ds%n_pair = 0
    do ie1=1,tmp_nenergy
@@ -1203,7 +1203,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call wrtout(std_out,message,'COLL')
 
    ABI_ALLOCATE(red2pair,(2,elph_ds%n_pair))
-   red2pair = zero
+   red2pair = 0
    elph_ds%n_pair = 0
    do ie1 = 1, tmp_nenergy
      do ie2 = 1, tmp_nenergy
@@ -2475,9 +2475,9 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
        a2f3mom(iomega)  =     a2f2mom(iomega)*abs(omega)  ! third positive moment of alpha2F
        a2f4mom(iomega)  =     a2f3mom(iomega)*abs(omega)  ! fourth positive moment of alpha2F
 !
-!  electron lifetimes eq 4.48 in Grimvall electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
-!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 (T=0)
-!  a first T dependent expression in Allen PRB 6 2577 eq 10. Not sure about the units though
+!  electron lifetimes eq 4.48 in [[cite:Grimvall1981]] electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
+!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 [[cite:Savrasov1996]] (T=0)
+!  a first T dependent expression in Allen PRB 6 2577 [[cite:Allen1972]] eq 10. Not sure about the units though
 !
        do itemp = 1, ntemp
          temp = (itemp-1)*10._dp*kb_HaK
@@ -2487,7 +2487,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
      omega=omega + domega
    end do
 !
-!  From Allen PRL 59 1460
+!  From Allen PRL 59 1460 [[cite:Allen1987]]
 !  \lambda <\omega^n> = 2 \int_0^{\infty} d\omega [\alpha^2F / \omega] \omega^n
 !
    lambda_iso(isppol) = simpson(domega,a2f_1mom)
@@ -2959,7 +2959,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_setupqpt'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -3543,7 +3543,7 @@ subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband
  nband = hdr%nband(1)
 
 !gausstol = minimum weight value for integration weights on FS
-!should be set to reproduce DOS at Ef (Ref. PRB 34, 5065 p. 5067)
+!should be set to reproduce DOS at Ef (Ref. PRB 34, 5065 [[cite:Lam1986]] p. 5067)
  gausstol = 1.0d-10
 
 !use same band indices in both spin channels
@@ -5366,7 +5366,7 @@ subroutine get_veloc_tr(elph_ds,elph_tr_ds)
      end do
    end do
    elph_tr_ds%FSelecveloc_sq(:,isppol) = elph_tr_ds%FSelecveloc_sq(:,isppol)/elph_ds%k_fine%nkpt/elph_ds%n0(isppol)
-!  for factor 1/elph_ds%n0(isppol) see eq 12 of Allen prb 17 3725: sum of v**2 over all k gives n0 times FSelecveloc_sq
+!  for factor 1/elph_ds%n0(isppol) see eq 12 of Allen prb 17 3725 [[cite:Allen1978]] : sum of v**2 over all k gives n0 times FSelecveloc_sq
  end do ! end isppol
  write (std_out,*) '  get_veloc_tr: FSelecveloc_sq ', elph_tr_ds%FSelecveloc_sq
 
@@ -5630,8 +5630,8 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
            vvelocwtkpq(:,:)=elph_tr_ds%tmp_vvelocwtk2(ib2,ikpt_phonq,:,:,isppol)
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
-!          see also Allen PRB 17 3725
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]],
+!          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
            do icomp = 1, 3
@@ -5803,8 +5803,8 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
-!          see also Allen PRB 17 3725
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]]
+!          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
            do icomp = 1, 3

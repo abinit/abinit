@@ -3134,7 +3134,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        do ikpt=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
-         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
@@ -4712,7 +4712,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
          do ik_ibz=1,ebands%nkpt
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
-           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
            call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
            jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
          end do
@@ -4814,7 +4814,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 ! *************************************************************************
 
  !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
- ! See http://forum.abinit.org/viewtopic.php?f=19&t=3339
+ ! See https://forum.abinit.org/viewtopic.php?f=19&t=3339
 
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol

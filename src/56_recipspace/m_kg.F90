@@ -26,6 +26,7 @@
 
 MODULE m_kg
 
+ use defs_abitypes, only : dataset_type
  use defs_basis
  use m_errors
  use m_profiling_abi
@@ -36,6 +37,7 @@ MODULE m_kg
  use defs_abitypes, only : MPI_type
  use m_mpinfo,      only : proc_distrb_cycle
 
+
  implicit none
 
  private
@@ -44,11 +46,13 @@ MODULE m_kg
  public :: getcut       ! Compute cutoff G^2
  public :: getmpw       ! Compute recommended npw from ecut, ucvol and gmet
  public :: mkkin        ! Compute elements of kinetic energy operator in reciprocal space at a given k point
+ public :: mknucdipmom_k ! Compute elements of magnetic nuclear dipole moment array in reciprocal space at a given k point
  public :: kpgio        ! Do initialization of kg data.
  public :: ph1d3d       ! Compute the three-dimensional phase factor $e^{i 2 \pi (k+G) cdot xred}$
  public :: getph        ! Compute three factors of one-dimensional structure factor phase
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
+ public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
 
 contains
 !!***
@@ -1094,6 +1098,327 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
  DBG_EXIT("COLL")
 
 end subroutine mkkpg
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkpwind_k
+!! NAME
+!! mkpwind_k
+!!
+!! FUNCTION
+!! Make plane wave index at k point for basis at second k point,
+!! needed to compute overlaps $\langle u_{k,n}|u_{k+b,n}\rangle$
+!! as appear in Berry phase derived quantities
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! dk(3)=real vector difference of ket kpt - bra kpt
+!! dtset <type(dataset_type)>=all input variables in this dataset
+!! fnkpt=number of kpts in full BZ
+!! fkptns=kpts in full BZ
+!! gmet(3,3)=metric in reciprocal space
+!! indkk_f2ibz(fnkpt,6)=information on folding from FBZ to IBZ (see initberry or initorbmag)
+!! ikpt=index of bra k pt
+!! ikpt1=index of neighbour ket k pt
+!! kg(3,dtset%mpw*dtset%mkmem)=planewave basis data
+!! kgindex(dtset%nkpt)= index of kg per kpt
+!! mpi_enreg=information about MPI parallelization
+!! npw_k=number of planewaves at k
+!! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
+!!   reciprocal space primitive translations
+!!
+!! OUTPUT
+!! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      chern_number
+!!
+!! CHILDREN
+!!      kpgsph
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
+& kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkpwind_k'
+!End of the abilint section
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: fnkpt,ikpt,ikpt1,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: indkk_f2ibz(fnkpt,6),kg(3,dtset%mpw*dtset%mkmem),kgindex(dtset%nkpt)
+  integer,intent(in) :: symrec(3,3,dtset%nsym)
+  integer,intent(out) :: pwind_k1(dtset%mpw)
+  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
+  
+  !Local variables -------------------------
+  !scalars
+  integer :: exchn2n3d,idum1,ikg1,ipw,istwf_k,isym,isym1,jpw,npw_k1
+  real(dp) :: ecut_eff
+ 
+  !arrays
+  integer,allocatable :: kg1_k(:,:)
+  real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
+
+  ! ***********************************************************************
+
+  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+ 
+  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+  exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
+
+  ! Build basis sphere of plane waves for the nearest neighbour of the k-point 
+
+  kg1_k(:,:) = 0
+  kpt1(:) = dtset%kptns(:,ikpt1)
+  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt1,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+
+  !        
+  !        Deal with symmetry transformations
+  !        
+  
+  !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
+  !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
+  !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
+  !        
+  !        For the ket k-point:
+  !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
+  !        where GBZ(k) takes k(k) to the BZ
+  !        
+  
+  isym  = indkk_f2ibz(ikpt,2)
+  isym1 = indkk_f2ibz(ikpt1,2)
+
+  !        Construct transformed G vector that enters the matching condition:
+  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
+
+  dg(:) = -indkk_f2ibz(ikpt,3:5) &
+       & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
+       & + indkk_f2ibz(ikpt1,3:5)
+
+  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
+
+  dg(:) = iadum(:)
+ 
+  !        Construct S(k)^{t,-1} S(b)^{t}
+
+  dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
+
+  !        Construct alpha(k) alpha(b)
+ 
+  pwind_k1(:) = 0
+  do ipw = 1, npw_k
+
+     !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
+     !          not for the FBZ k point
+     iadum(:) = kg(:,kgindex(ikpt) + ipw)
+   
+     !          to determine r.l.v. matchings, we transformed the bra vector
+     !          Rotation
+     iadum1(:)=0
+     do idum1=1,3
+        iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+     end do
+     iadum(:)=iadum1(:)
+     iadum(:) = iadum(:) + dg(:)
+
+     do jpw = 1, npw_k1
+        iadum1(1:3) = kg1_k(1:3,jpw)
+        if ( (iadum(1) == iadum1(1)).and. &
+             &     (iadum(2) == iadum1(2)).and. &
+             &     (iadum(3) == iadum1(3)) ) then
+           pwind_k1(ipw) = jpw
+           ! write(std_out,'(a,2i4)')'JWZ debug : bg ipw == jpw ',ipw,jpw
+           exit
+        end if
+     end do
+  end do
+
+  ABI_DEALLOCATE(kg1_k)
+
+end subroutine mkpwind_k
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mknucdipmom_k
+!! NAME
+!! mknucdipmom_k
+!!
+!! FUNCTION
+!! compute Hamiltonian in reciprocal space due to array of nuclear
+!! dipole moments, at a given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric for reciprocal space vectors
+!! kg(3,npw)=reduced planewave coordinates at current k point
+!! kpt(3)=current k point, reduced coordinates
+!! natom=number of atoms in cell
+!! nucdipmom(3,natom)=nuclear dipole moment vectors, at each atom
+!! npw=number of planewaves
+!! rprimd(3,3)=real space translation vectors
+!! ucvol=unit cell volume
+!! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
+!!
+!! OUTPUT
+!!  nucdipmom_k(npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
+!!                                 lower diagonal Hermitian packed storage, at current k point
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mknucdipmom_k'
+!End of the abilint section
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: natom,npw
+  real(dp),intent(in) :: ucvol
+  
+  !arrays
+  integer,intent(in) :: kg(3,npw)
+  real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+  complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
+ 
+  !Local variables-------------------------------
+  !scalars
+  integer :: atom_nd_tot,col,iatom,ndp_index,row
+  real(dp) :: crossfac,dg2,permeability,phasefac
+  complex(dpc) :: cpermfac,cphasefac
+  !arrays
+  integer :: atom_nd(natom)
+  real(dp) :: cprod(3),cprod_cart(3),dgp_red(3), gpk_red(3)
+
+  ! *************************************************************************
+  !
+
+  ! magnetic permeability mu_0/four_pi in atomic units
+  ! this constant is also used in m_pawdij.F90/pawdijnd, if you change it here,
+  ! change it there also for consistency
+  permeability=5.325135453D-5
+  ! will need 4*pi*i*(\mu_0/four\pi)
+  cpermfac = CMPLX(zero,four_pi*permeability)
+  
+  ! make list of atoms with non-zero nuclear magnetic dipoles
+  atom_nd_tot = 0
+  do iatom = 1, natom
+     if(any(abs(nucdipmom(:,iatom))>tol12)) then
+        atom_nd_tot = atom_nd_tot + 1
+        atom_nd(atom_nd_tot) = iatom
+     end if
+  end do
+
+  ndp_index = 0
+  do col=1,npw ! enumerate plane waves G
+     ! form k + G at this k point for current plane wave (this is the ket |k+G> )
+     ! in reduced coordinates
+     gpk_red(1)=dble(kg(1,col))+kpt(1)
+     gpk_red(2)=dble(kg(2,col))+kpt(2)
+     gpk_red(3)=dble(kg(3,col))+kpt(3)
+     
+     do row=col,npw ! enumerate lower diagonal from 1 to G
+        ! index of the current matrix element, in lower triangular packed storage
+        ! "packed sequentially, column by column"
+        ndp_index = ndp_index + 1
+        nucdipmom_k(ndp_index) = czero
+     
+        ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
+        ! in reduced coordinates
+        dgp_red(1)=dble(kg(1,col)-kg(1,row))
+        dgp_red(2)=dble(kg(2,col)-kg(2,row))
+        dgp_red(3)=dble(kg(3,col)-kg(3,row))
+        
+        ! compute |\Delta G|^2
+        ! must use gmet metric because G's are in reduced coords in reciprocal space
+        dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
+        ! if \Delta G = 0, Hamiltonian term is zero and move on to next one
+        if (abs(dg2)<tol8) then
+           nucdipmom_k(ndp_index)=czero
+           cycle
+        end if
+
+        ! compute cross product \Delta G \times (k + G)
+        ! notice that \Delta G and (k + G) are in reduced coords in reciprocal space
+        cprod(1) = dgp_red(2)*gpk_red(3) - dgp_red(3)*gpk_red(2)
+        cprod(2) = dgp_red(3)*gpk_red(1) - dgp_red(1)*gpk_red(3)
+        cprod(3) = dgp_red(1)*gpk_red(2) - dgp_red(2)*gpk_red(1)
+        
+        ! proper cross product must account for reduced coords as follows:
+        ! gprimd*dgp \times gprimd*gpk = (det gprimd)*(gprimd^{-1,T})*(dgp \times gpk)
+        ! = rprimd * (dgp \times gpk)/ucvol
+        ! final vector also includes the division by |\Delta G|^2
+        cprod_cart = MATMUL(rprimd,cprod)/(ucvol*dg2)
+        
+        ! loop over the atoms with non-zero nuclear dipoles
+        ! phase factors exp(i*\Delta G*I) where I is ion position,
+        ! might be retrievable from ph1d, need to check
+        do iatom = 1, atom_nd_tot
+           phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
+           cphasefac = CMPLX(cos(phasefac),sin(phasefac))
+           crossfac = DOT_PRODUCT(nucdipmom(:,iatom),cprod_cart)
+           nucdipmom_k(ndp_index) = nucdipmom_k(ndp_index) + cpermfac*cphasefac*crossfac
+        end do ! end loop over atoms with nonzero dipoles
+
+     end do ! end loop over G' = G to npw
+     
+  end do ! end loop over G = 1 to npw
+
+end subroutine mknucdipmom_k
 !!***
 
 end module m_kg

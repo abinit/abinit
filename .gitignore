@@ -46,6 +46,7 @@ topology.so
 *.abiauty
 *.abirules
 *.fdb_latexmk
+*.synctex.gz
 *.fls
 *.la
 *.lo
@@ -78,7 +79,6 @@ tests/TestBot_MPI*/*
 /stamp-h1
 /abinit-*.tar.gz
 /confstat.*
-/infos_html*
 /robodoc-html*
 /bindings/abinit-bindings-*.tar.gz
 /bindings/aclocal.m4

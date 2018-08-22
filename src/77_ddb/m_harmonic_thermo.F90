@@ -99,7 +99,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -571,7 +571,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              factor=dble(3*natom)*phon_dos(iomega)
              factorw=3*natom*gw(iomega,iwchan)
 
-!            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+!            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
              free(itemper)=free(itemper) +factor*kb_HaK*tmp*ln2shx
              energy(itemper)=energy(itemper) + factor*kb_HaK*tmp*wovert*cothx
              entropy(itemper)=entropy(itemper) + factor*kb_HaK*(wovert*cothx - ln2shx)

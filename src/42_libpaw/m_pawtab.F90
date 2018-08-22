@@ -47,7 +47,7 @@ MODULE m_pawtab
 
  type,public :: wvlpaw_rholoc_type
 
-  integer :: msz             
+  integer :: msz
 ! mesh size 
 
   real(dp),allocatable :: d(:,:)
@@ -244,6 +244,10 @@ MODULE m_pawtab
   integer :: mqgrid_shp
    ! Number of points in the reciprocal space grid on which
    ! the radial shape functions (shapefncg) are given
+
+  integer :: usespnorb
+   ! usespnorb=0 ; no spin-orbit coupling
+   ! usespnorb=1 ; spin-orbit coupling
 
   integer :: shape_lambda
    ! Lambda parameter in gaussian shapefunction (shape_type=2)
@@ -625,6 +629,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%useexexch=0
  Pawtab%usepawu=0
  Pawtab%usepotzero=0
+ Pawtab%usespnorb=0
  Pawtab%mqgrid=0
  Pawtab%mqgrid_shp=0
 
@@ -887,6 +892,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%useexexch=0
  Pawtab%usepawu=0
  Pawtab%usepotzero=0
+ Pawtab%usespnorb=0
  Pawtab%mqgrid=0
  Pawtab%mqgrid_shp=0
 
@@ -1211,6 +1217,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Use spin-orbit coupling ........................ ',Pawtab(ityp)%usespnorb
+  call wrtout(my_unt,msg,my_mode)
 
   ! "Has" flags
   if (Pawtab(ityp)%has_fock/=0) then
@@ -1466,8 +1474,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero
-   if (full_broadcast) nn_int=nn_int+10
+!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,usespnorb
+   if (full_broadcast) nn_int=nn_int+11
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
@@ -1925,6 +1933,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%useexexch  ;ii=ii+1
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
+     list_int(ii)=pawtab%usespnorb ;ii=ii+1
 !Integer arrays
      if (siz_indklmn>0) then
        list_int(ii:ii+siz_indklmn-1)=reshape(pawtab%indklmn,(/siz_indklmn/))
@@ -2090,6 +2099,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%useexexch=list_int(ii)  ;ii=ii+1
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
+     pawtab%usespnorb=list_int(ii) ;ii=ii+1
 !Integer arrays
      if (allocated(pawtab%indklmn)) then
        LIBPAW_DEALLOCATE(pawtab%indklmn)

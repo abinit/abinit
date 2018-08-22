@@ -35,6 +35,16 @@ MODULE m_energy
  use m_profiling_abi
 
  use m_pawtab, only : pawtab_type
+ use m_paw_correlations, only : pawuenergy
+
+ use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
+ use m_paw_dmft, only : paw_dmft_type
+
+ use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
+& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
+ use m_oper, only : trace_oper
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -112,7 +122,7 @@ CONTAINS  !=====================================================================
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -121,8 +131,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -175,7 +183,7 @@ end subroutine init_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -184,8 +192,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -244,8 +250,6 @@ end subroutine destroy_energy
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
 
- use defs_basis
- use m_crystal, only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -331,7 +335,7 @@ end subroutine print_energy
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -340,13 +344,6 @@ end subroutine print_energy
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -404,7 +401,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! == Compute Band Energy Alternative version: two steps
 !                 == Compute Tr[ln G^{-1}] and -Tr[(Self-hdc)G_dmft]
 ! -----------------------------------------------------------------------
-   if(part=='band') then ! ie if thdyn="fcalc" in dmft_solve.F90
+   if(part=='band') then ! ie if thdyn="fcalc" in m_dmft.F90
 !     call compute_B3(cryst_struc,energies_dmft,eband2,green,mpi_enreg,paw_dmft,2,pawang,self,occ_type,0)
 !     write(message,'(2a,f10.6)') ch10,"Compute Band energy test KS           ",eband2
 !     call wrtout(std_out,message,'COLL')
@@ -528,11 +525,6 @@ end subroutine compute_energy
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -689,12 +681,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 !DEC$ NOOPTIMIZE
 #endif
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -837,27 +823,21 @@ end subroutine compute_migdal_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,m_energy
+!!      m_dmft,m_energy
 !!
 !! CHILDREN
-!!      wrtout
+!!      pawpuenergy,wrtout
 !!
 !! SOURCE
 
 subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_paw_dmft, only : paw_dmft_type
- use m_paw_ij, only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_ldau_energy'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -868,31 +848,28 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  type(crystal_t),intent(in) :: cryst_struc
  type(green_type),intent(in) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(pawtab_type),intent(in)  :: pawtab(cryst_struc%ntypat)
+ type(pawtab_type),target,intent(in)  :: pawtab(cryst_struc%ntypat)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 
 !Local variables-------------------------------
  integer :: iatom,idijeff,im,im1,ispinor,ispinor1,isppol,ldim,lpawu
- integer :: nsploop
- character(len=500) :: message
+ integer :: nocc,nsploop,prt_pawuenergy
+ real(dp) :: upawu,jpawu
  real(dp) :: eldaumdcdc,eldaumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ character(len=500) :: message
 ! arrays
- real(dp) :: upawu
- real(dp) :: jpawu
- type(paw_ij_type), allocatable :: paw_ij(:)
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
- integer :: prt_pawuenergy
+ real(dp),allocatable :: noccmmp(:,:,:,:),nocctot(:)
+ type(pawtab_type),pointer :: pawtab_
+
 ! *********************************************************************
 
 ! - allocations
 ! -----------------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(paw_ij,(cryst_struc%natom))
- call paw_ij_nullify(paw_ij)
-!Should be contained in one of the arguments
- call paw_ij_init(paw_ij,2,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%nspden, &
-&      1,paw_dmft%natom,cryst_struc%ntypat,cryst_struc%typat,pawtab,has_pawu_occ=1)
+
  nsploop=max(paw_dmft%nsppol,paw_dmft%nspinor**2)
+ nocc=nsploop
  e_ee=zero
  e_dc=zero
  e_dcdc=zero
@@ -905,12 +882,18 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! - Loop and call to pawuenergy
 ! -----------------------------------------------------------------------
  do iatom=1,cryst_struc%natom
+   pawtab_ => pawtab(cryst_struc%typat(iatom))
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
+     
+     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_ALLOCATE(nocctot,(nocc))
+     noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
+
 ! - Setup nocctot and noccmmp
 ! -----------------------------------------------------------------------
-     paw_ij(iatom)%nocctot(:)=zero ! contains nmmp in the n m representation
+     nocctot(:)=zero ! contains nmmp in the n m representation
 ! Begin loop over spin/spinors to initialize noccmmp
      do idijeff=1,nsploop
        if(nsploop==2) then
@@ -932,10 +915,10 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! Initialize noccmmp
        do im1 = 1 , ldim
          do im = 1 ,  ldim
-            paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-            paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
-!            paw_ij(iatom)%noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
-!            paw_ij(iatom)%noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+            noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+            noccmmp(2,im,im1,idijeff)=aimag(green%occup%matlu(iatom)%mat(im1,im,isppol,ispinor,ispinor1))
+!            noccmmp(1,im,im1,idijeff)=real(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+!            noccmmp(2,im,im1,idijeff)=imag(green%occup%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
          enddo
        enddo
 ! Compute nocctot
@@ -943,32 +926,32 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
          do im1=1,ldim
            if(nsploop==4) then
              if(idijeff<=2) then
-               paw_ij(iatom)%nocctot(1)=paw_ij(iatom)%nocctot(1)+&
-&                paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+               nocctot(1)=nocctot(1)+&
+&                noccmmp(1,im1,im1,idijeff)
              endif
            else if (nsploop==2.or.nsploop==1) then
-             paw_ij(iatom)%nocctot(idijeff)=paw_ij(iatom)%nocctot(idijeff)+&
-&              paw_ij(iatom)%noccmmp(1,im1,im1,idijeff)
+             nocctot(idijeff)=nocctot(idijeff)+&
+&              noccmmp(1,im1,im1,idijeff)
            end if
          enddo
        else
          if(nsploop==4) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,2) !  total nb of elec for nspinor=2 is (iatom,2) !!
-           paw_ij(iatom)%nocctot(2)=zero
-           paw_ij(iatom)%nocctot(3)=zero
-           paw_ij(iatom)%nocctot(4)=zero
+           nocctot(1)=green%charge_matlu_solver(iatom,2) !  total nb of elec for nspinor=2 is (iatom,2) !!
+           nocctot(2)=zero
+           nocctot(3)=zero
+           nocctot(4)=zero
           else if (nsploop==2) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,1) !  first spin
-           paw_ij(iatom)%nocctot(2)=green%charge_matlu_solver(iatom,2) !  second one
+           nocctot(1)=green%charge_matlu_solver(iatom,1) !  first spin
+           nocctot(2)=green%charge_matlu_solver(iatom,2) !  second one
           else if (nsploop==1) then
-           paw_ij(iatom)%nocctot(1)=green%charge_matlu_solver(iatom,1)
+           nocctot(1)=green%charge_matlu_solver(iatom,1)
          end if
        endif
      enddo
-     paw_ij(iatom)%has_pawu_occ=2
+
      xe1=e_dc
      xe2=e_ee
-    ! write(std_out,*)" nocctot(1)",paw_ij(iatom)%nocctot(1),green%charge_matlu_solver(iatom,1)
+    ! write(std_out,*)" nocctot(1)",nocctot(1),green%charge_matlu_solver(iatom,1)
      eldaumdc = zero
      eldaumdcdc = zero
      if ( present(renorm) ) then
@@ -976,16 +959,20 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        jpawu = renorm(iatom)
        prt_pawuenergy=0
      else
-       upawu = pawtab(cryst_struc%typat(iatom))%upawu
-       jpawu = pawtab(cryst_struc%typat(iatom))%jpawu
+       upawu = pawtab_%upawu
+       jpawu = pawtab_%jpawu
        prt_pawuenergy=3
      end if
 
-     call pawuenergy(iatom,eldaumdc,eldaumdcdc,prt_pawuenergy,pawtab(cryst_struc%typat(iatom)),paw_ij(iatom),&
-&                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,u_dmft=upawu,j_dmft=jpawu)
+     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+&                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
+&                    u_dmft=upawu,j_dmft=jpawu)
 
      energies_dmft%e_dc(iatom)=e_dc-xe1
      energies_dmft%e_hu_ldau(iatom)=e_ee-xe2
+
+     ABI_DEALLOCATE(noccmmp)
+     ABI_DEALLOCATE(nocctot)
    endif ! lpawu/=-1
  enddo
 
@@ -993,12 +980,6 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 ! -----------------------------------------------------------------------
  energies_dmft%e_dc_tot=e_dc ! todo_ab: here or not ?
  energies_dmft%e_hu_ldau_tot=e_ee
-
-! - dealloc
-! -----------------------------------------------------------------------
- call paw_ij_free(paw_ij)
- ABI_DATATYPE_DEALLOCATE(paw_ij)
-
 
 end subroutine compute_ldau_energy
 !!***
@@ -1027,14 +1008,6 @@ end subroutine compute_ldau_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
- use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
- use m_oper, only : trace_oper
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1148,7 +1121,6 @@ end subroutine compute_noninterentropy
 
  function occup_fd(eig,fermie,temp)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

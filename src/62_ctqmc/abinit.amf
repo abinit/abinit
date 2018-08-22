@@ -1,8 +1,9 @@
 noinst_HEADERS = \
                  defs.h  \
                  BathOperator_hybrid.h \
-                 ListCdagC_firstHigher.h
+                 BathOperatoroffdiag_hybrid.h \
+                 ListCdagC_firstHigher.h 
 
-EXTRA_DIST += BathOperator_hybrid ListCdagC_firstHigher
+EXTRA_DIST += BathOperator_hybrid BathOperatoroffdiag_hybrid ListCdagC_firstHigher 
 
 

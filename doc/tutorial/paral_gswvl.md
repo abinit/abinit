@@ -6,13 +6,13 @@ authors: DC
 
 ## Boron cluster, alkane molecule...  
 
-This lesson explains how to run the calculation of an isolated system using a
+This tutorial explains how to run the calculation of an isolated system using a
 wavelet basis-set on a parallel computer using MPI. You will learn the
 different characteristics of a parallel run using the wavelet basis-set and
 test the speed-up on a small boron cluster of 14 atoms followed by a test on a
 bigger alkane molecule.
 
-This lesson should take about 90 minutes and requires you have several CPU
+This tutorial should take about 90 minutes and requires you have several CPU
 cores (up to 64).
 
 You are supposed to know already some basics of parallelism in ABINIT,
@@ -41,10 +41,7 @@ implementation) such as:
     mpirun -np Nproc abinit < infile > logfile
 
 For further understanding of the wavelet mode, or for citation purposes, one
-may read " _Daubechies wavelets as a basis set for density functional
-pseudopotential calculations_ ", L. Genovese, A. Neelov, S. Goedecker, T.
-Deutsch, S.A. Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A.
-Bergman et R. Schneider, J. Chem. Phys. **129** , 014109 (2008).  
+may read [[cite:Genovese2008]]
 
 ## 2 Speed-up calculation for a boron cluster
   
@@ -196,8 +193,7 @@ the time is short, one can reduce [[wvl_hgrid]] in the input file to 0.45.
 ![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png) 
 ![Efficiency for the C21H44 alkane chain](paral_gswvl_assets/efficiency-C21.png)
 ![Time repartition for the C21H44 alkane chain](paral_gswvl_assets/time-C21.png)
-
-_Time measurements for a run over several processors of a C 21H44 alkane chain._
+_Time measurements for a run over several processors of a C 21H44 alkane chain_
 
 As we obtained previously, the efficiency is generally lowered when the number
 of processors is not a divisor of the number of orbitals (namely here 24 and 48).

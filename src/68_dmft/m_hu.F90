@@ -113,7 +113,7 @@ CONTAINS  !=====================================================================
 !!  hu <type(hu_type)>= U interaction
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -320,7 +320,7 @@ end subroutine init_hu
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout

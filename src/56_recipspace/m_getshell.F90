@@ -52,7 +52,7 @@ contains
 !! FUNCTION
 !! For each k-point, set up the shells of first neighbours and find
 !! the weigths required for the finite difference expression
-!! of Marzari and Vanderbilt (see PRB 56, 12847 (1997)).
+!! of Marzari and Vanderbilt (see PRB 56, 12847 (1997) [[cite:Marzari1997]]).
 !!
 !! INPUTS
 !! gmet(3,3) = metric tensor of reciprocal space
@@ -659,7 +659,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
    write(message,'(a,a,a,a,a,a,a,i3,a,a,f16.7)') ch10,&
 &   ' getshell : finite difference formula of Marzari and Vanderbilt',ch10,&
-&   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',&
+&   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',& ! [[cite:Marzari1997]]
 &   ch10,ch10,&
 &   '            number of first neighbours  : ', neigh(1,1),ch10,&
 &   '            weight : ',mvwtk(1,1)

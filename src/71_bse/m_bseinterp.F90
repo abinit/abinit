@@ -39,7 +39,7 @@ MODULE m_bseinterp
 
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : pseudopotential_type
- use m_blas,              only : xdotc
+ use m_hide_blas,         only : xdotc
  use m_fft_mesh,          only : calc_ceigr
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t

@@ -49,7 +49,10 @@ module m_gemm_nonlop
  use m_profiling_abi
  use m_xmpi
 
+ use m_opernlc_ylm,    only :  opernlc_ylm
+
  implicit none
+
  private
 
  ! Use these routines in order : first call init, then call make_gemm_nonlop for each k point,
@@ -335,7 +338,7 @@ contains
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
 !!
 !! SOURCE
- subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
+ subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
@@ -351,14 +354,13 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gemm_nonlop'
- use interfaces_66_nonlocal
 !End of the abilint section
 
   implicit none
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimffnlin,dimffnlout,idir
+  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
@@ -368,7 +370,7 @@ contains
   !arrays
   integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
-  real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2)
+  real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
   real(dp),intent(in) :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in) :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin*useylm)
@@ -406,7 +408,8 @@ contains
 
   cplex=2;if (istwf_k>1) cplex=1
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
-  cplex_fac=cplex;if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0) cplex_fac=2 ! is vnl_projections complex?
+  cplex_fac=max(cplex,dimekbq)
+  if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
   nprojs = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
 
@@ -512,7 +515,7 @@ contains
 
         do idat = 1,ndat
           call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt_dum_in,dgxdt_dum_out,dgxdt_dum_out2,&
-&         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,enl,projections(:, ibeg:iend, idat),&
+&         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,projections(:, ibeg:iend, idat),&
 &         vnl_projections(:, ibeg:iend, idat),s_projections(:, ibeg:iend, idat),&
 &         iatm,indlmn(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
 &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)

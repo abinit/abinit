@@ -270,6 +270,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 &   (psps%pspso(ipsp)==1.and.pspso_old(ipsp)==pspso_zero(ipsp))) then
      new_pspso(ipsp)=0
    end if
+!  No new characteristics if PAW
+   if (psps%usepaw==1) new_pspso(ipsp)=0
 !  Prepare the saving of the intrinsic pseudopotential characteristics
    if(psps%pspso(ipsp)==1) pspso_zero(ipsp)=0
  end do
@@ -1036,8 +1038,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !  TODO: in case of pspcod 5 (phoney) and 8 (oncvpsp) this is not specific enough.
 !  they can be non-SOC as well.
 !  HGH is ok - can always turn SOC on or off.
+!  PAW is ok - can be used with or without SOC
 !  write(std_out,*) pspso
-   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10))then
+   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. &
+&     (pspcod/=7).and.(pspcod/=17))then
 !    If pspso requires internal characteristics, set it to 1 for non-HGH psps
      if(psps%pspso(ipsp)==1) psps%pspso(ipsp)=0
      if(psps%pspso(ipsp)/=0)then
@@ -1240,7 +1244,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     ' pspatm : COMMENT -',ch10,&
 &     '  the projectors are not normalized,',ch10,&
 &     '  so that the KB energies are not consistent with ',ch10,&
-&     '  definition in PRB44, 8503 (1991). ',ch10,&
+&     '  definition in PRB44, 8503 (1991). ',ch10,& ! [[cite:Gonze1991]]
 &     '  However, this does not influence the results obtained hereafter.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
