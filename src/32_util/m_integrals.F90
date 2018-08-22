@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_foo
+module m_integrals
 
  use defs_basis
  use m_errors
