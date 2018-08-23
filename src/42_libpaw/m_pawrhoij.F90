@@ -3052,7 +3052,7 @@ end subroutine pawrhoij_inquire_dim
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawdij/pawrhoij_print_ij
+!!****f* m_pawdij/pawrhoij_print_rhoij
 !! NAME
 !! pawrhoij_print_rhoij
 !!
@@ -3113,7 +3113,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
 !Local variables-------------------------------
 !scalars
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
- integer :: irhoij,my_lmn_size,my_opt_pack,my_opt_sym,my_prtvol,my_unt,rhoij_size
+ integer :: irhoij,my_lmn_size,my_lmn2_size,my_opt_pack,my_opt_sym,my_prtvol,my_unt,nrhoijsel,rhoij_size
  real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
  character(len=2000) :: msg
@@ -3129,8 +3129,6 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
  my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
  my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
  my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
- my_rhoijselect => idum ; if (PRESENT(rhoijselect)) my_rhoijselect => rhoijselect
-
 
 !Title
  if (present(title_msg)) then
@@ -3141,10 +3139,23 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
  end if
 
 !Inits
- rhoij_size=size(rhoij,1)/cplex
- my_lmn_size=int(dsqrt(two*dble(rhoij_size)))
- my_opt_pack=0 ; if (size(my_rhoijselect)>0) my_opt_pack=1
+ my_lmn2_size=size(rhoij,1)/cplex
+ my_lmn_size=int(dsqrt(two*dble(my_lmn2_size)))
  my_opt_sym=merge(1,2,qphase==2)
+ my_opt_pack=0
+
+!Packed storage
+ my_opt_pack=0
+ rhoij_size=my_lmn2_size
+ my_rhoijselect => idum
+ if (PRESENT(rhoijselect)) then
+   nrhoijsel=count(rhoijselect(:)>0)
+   if (nrhoijsel>0) then
+     my_opt_pack=1
+     rhoij_size=nrhoijsel
+     my_rhoijselect => rhoijselect(1:nrhoijsel)
+   end if
+ end if
 
 ! === Loop over Rho_ij components ===
  do irhoij=1,nspden
