@@ -78,7 +78,7 @@ module m_bethe_salpeter
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, pawrhoij_get_nspden, pawrhoij_symrhoij
+&                              pawrhoij_free, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
@@ -215,11 +215,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp0=0,level=40,ipert0=0,idir0=0,cplex1=1,master=0,option1=1
- integer :: band,spin,ik_ibz,mqmem,iwarn !ii,
+ integer :: band,cplex_rhoij,spin,ik_ibz,mqmem,iwarn
  integer :: has_dijU,has_dijso,gnt_option,iomode
  integer :: ik_bz,mband
  integer :: choice
- integer :: ider !,ierr
+ integer :: ider
  integer :: usexcnhat,nfft_osc,mgfft_osc
  integer :: isym,izero
  integer :: optcut,optgr0,optgr1,optgr2,option,optrad,optrhoij,psp_gencond
@@ -382,8 +382,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2

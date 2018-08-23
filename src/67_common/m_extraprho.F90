@@ -41,7 +41,7 @@ module m_extraprho
  use m_jellium,  only : jellium
  use m_atm2fft,  only : atm2fft
  use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
@@ -159,7 +159,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,irhoij,ispden,itypat,jrhoij,klmn
+ integer :: cplex,cplex_rhoij,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,irhoij,ispden,itypat,jrhoij,klmn
  integer :: lmn2_size,nselect,nspden_rhoij,optatm,optdyfr,opteltfr,optgr,option,optn,optn2
  integer :: optstr,optv
  real(dp) :: a11,a12,a22,a33,alpha,b1,b2,beta,detA,fact,ratio1,ratio2
@@ -376,8 +376,9 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
  if (usepaw==1) then
 
    if (ind2==0) then
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
-     call pawrhoij_alloc(scf_history%pawrhoij(:,ind1new),dtset%pawcpxocc,nspden_rhoij,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(scf_history%pawrhoij(:,ind1new),cplex_rhoij,nspden_rhoij,&
 &     dtset%nspinor,dtset%nsppol,dtset%typat,pawtab=pawtab,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if

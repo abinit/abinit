@@ -83,7 +83,7 @@ module m_sigma_driver
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
-&                            pawrhoij_get_nspden, pawrhoij_symrhoij, pawrhoij_unpack
+&                            pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, paw_overlap
  use m_pawdij,        only : pawdij, symdij_all
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
@@ -226,7 +226,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp5=5,master=0,cplex1=1
- integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,band
+ integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
  integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus
@@ -471,8 +471,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    cplex_dij=Dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -3878,7 +3879,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 
 !Local variables ------------------------------
 !scalars
- integer :: choice,cplex,has_dijU,has_dijso,iat,ider,idir,ipert
+ integer :: choice,cplex,cplex_rhoij,has_dijU,has_dijso,iat,ider,idir,ipert
  integer :: izero,nkxc1,nspden_rhoij,nzlmopt
  integer :: option,optrhoij,usexcnhat
  character(len=500) :: msg
@@ -3894,10 +3895,10 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  usexcnhat=MAXVAL(Pawtab(:)%usexcnhat)
  !
  ! Calculate new rhoij_qp from updated Cprj_ibz, note use_rhoij_=1.
- nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-
- call pawrhoij_alloc(QP_pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,&
-&                 pawtab=Pawtab,use_rhoij_=1,use_rhoijres=1)
+ call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                  nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+ call pawrhoij_alloc(QP_pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,&
+&                    pawtab=Pawtab,use_rhoij_=1,use_rhoijres=1)
 
  ! FIXME kptop should be passed via Kmesh, in GW time reversal is always assumed.
  call wfd_pawrhoij(Wfd,Cryst,QP_Bst,Dtset%kptopt,QP_pawrhoij,Dtset%pawprtvol)

@@ -72,7 +72,7 @@ module m_dfpt_loopert
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
-                          pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
+                          pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_inquire_dim
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
  use m_paw_sphharm,only : setsym_ylm
@@ -310,7 +310,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
- integer :: rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
+ integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
@@ -1420,15 +1420,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij1,(my_natom))
      call pawrhoij_nullify(pawrhoij1)
-     cplex_rhoij=max(cplex,dtset%pawcpxocc)
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&     dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     if (cplex_rhoij/=hdr%pawrhoij(1)%cplex) then
+&                        dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&                        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     if (cplex_rhoij/=hdr%pawrhoij(1)%cplex.or.qphase_rhoij/=hdr%pawrhoij(1)%qphase) then
 !      Eventually reallocate hdr%pawrhoij
        call pawrhoij_free(hdr%pawrhoij)
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&       dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&                          dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&                          comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if
    else
      ABI_DATATYPE_ALLOCATE(pawrhoij1,(0))

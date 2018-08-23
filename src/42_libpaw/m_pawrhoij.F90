@@ -55,8 +55,8 @@ MODULE m_pawrhoij
  public :: pawrhoij_unpack
  public :: pawrhoij_init_unpacked
  public :: pawrhoij_free_unpacked
- public :: pawrhoij_get_nspden
- public :: pawrhoij_print_dij
+ public :: pawrhoij_inquire_dim
+ public :: pawrhoij_print_rhoij
  public :: pawrhoij_symrhoij
 
  public :: pawrhoij_mpisum_unpacked
@@ -119,6 +119,10 @@ MODULE m_pawrhoij
 
   integer :: nsppol
    ! Number of independent spin-components
+
+  integer :: qphase
+   ! qphase=2 if rhoij has a exp(iqR) phase, 1 if not
+   ! (this may change the ij symmetry)
 
   integer :: use_rhoij_=0
    ! 1 if pawrhoij%rhoij_ is allocated
@@ -190,6 +194,8 @@ CONTAINS
 !! [nlmnmix]=number of rhoij elements to be mixed during SCF cycle (OPTIONAL, default=0)
 !! [pawtab(:)] <type(pawtab_type)>=paw tabulated starting data (OPTIONAL)
 !!             must be present if [lmnsize(:)] argument is not passed
+!! [qphase]=2 if the rhoij contain a exp(iqR) phase, 1 otherwise (OPTIONAL, default=1)
+!!          Typical use: 1st-order rhoij at q<>0
 !! [use_rhoij_]=1 if pawrhoij(:)%rhoij_ has to be allocated (OPTIONAL, default=0)
 !! [use_rhoijp]=1 if pawrhoij(:)%rhoijp has to be allocated (OPTIONAL, default=1)
 !!              (in that case, pawrhoij%rhoijselect is also allocated)
@@ -214,8 +220,8 @@ CONTAINS
 !! SOURCE
 
 subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&  
-&  lmnsize,ngrhoij,nlmnmix,pawtab,use_rhoij_,use_rhoijp,& ! Optional 
-&  use_rhoijres,comm_atom,mpi_atmtab)                     ! Optional 
+&  lmnsize,ngrhoij,nlmnmix,pawtab,qphase,use_rhoij_,use_rhoijp,& ! Optional
+&  use_rhoijres,comm_atom,mpi_atmtab) ! Optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -229,7 +235,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,nspinor,nsppol
- integer,optional,intent(in):: comm_atom,ngrhoij,nlmnmix,use_rhoij_,use_rhoijp,use_rhoijres
+ integer,optional,intent(in):: comm_atom,ngrhoij,nlmnmix,qphase,use_rhoij_,use_rhoijp,use_rhoijres
  integer,optional,target,intent(in)  :: mpi_atmtab(:)
 !arrays
  integer,intent(in) :: typat(:)
@@ -239,13 +245,15 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: irhoij,irhoij_,itypat,lmn2_size,my_comm_atom,nn1,natom,nrhoij
+ integer :: irhoij,irhoij_,itypat,lmn2_size,my_comm_atom,nn1,natom,nrhoij,qphase_
  logical :: has_rhoijp,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !array
  integer,pointer :: lmn_size(:),my_atmtab(:)
 
 ! *************************************************************************
+
+ qphase_=1;if (present(qphase)) qphase_=qphase
 
  nrhoij=size(pawrhoij);natom=size(typat)
  if (nrhoij>natom) then
@@ -291,6 +299,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
 
 !    Scalars initializations
      pawrhoij(irhoij)%cplex=cplex
+     pawrhoij(irhoij)%qphase=qphase_
      pawrhoij(irhoij)%itypat=itypat
      pawrhoij(irhoij)%lmn_size=lmn_size(itypat)
      pawrhoij(irhoij)%lmn2_size=lmn2_size
@@ -403,6 +412,8 @@ subroutine pawrhoij_free(pawrhoij)
 
  if (nrhoij>0) then
    do irhoij=1,nrhoij
+     pawrhoij(irhoij)%cplex=1
+     pawrhoij(irhoij)%qphase=1
      pawrhoij(irhoij)%nrhoijsel=0
      pawrhoij(irhoij)%ngrhoij=0
      pawrhoij(irhoij)%lmnmix_sz=0
@@ -482,6 +493,8 @@ subroutine pawrhoij_nullify(pawrhoij)
 
  if (nrhoij>0) then
    do irhoij=1,nrhoij
+     pawrhoij(irhoij)%cplex=1
+     pawrhoij(irhoij)%qphase=1
      pawrhoij(irhoij)%nrhoijsel=0
      pawrhoij(irhoij)%ngrhoij=0
      pawrhoij(irhoij)%lmnmix_sz=0
@@ -509,6 +522,9 @@ end subroutine pawrhoij_nullify
 !!  keep_cplex= optional argument (logical, default=.TRUE.)
 !!              if .TRUE. pawrhoij_out(:)%cplex is NOT MODIFIED,
 !!              even if different from pawrhoij_in(:)%cplex
+!!  keep_qphase= optional argument (logical, default=.TRUE.)
+!!              if .TRUE. pawrhoij_out(:)%cplex is NOT MODIFIED,
+!!              even if different from pawrhoij_in(:)%qphase
 !!  keep_itypat= optional argument (logical, default=.FALSE.)
 !!               if .TRUE. pawrhoij_out(:)%ityp is NOT MODIFIED,
 !!               even if different from pawrhoij_in(:)%ityp
@@ -535,8 +551,8 @@ end subroutine pawrhoij_nullify
 !! SOURCE
 
 subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
-&          keep_cplex,keep_itypat,keep_nspden,& ! optional arguments
-&          mpi_atmtab,comm_atom)            ! optional arguments (parallelism)
+&          keep_cplex,keep_qphase,keep_itypat,keep_nspden,& ! optional arguments
+&          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -550,7 +566,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: comm_atom
- logical,intent(in),optional :: keep_cplex,keep_itypat,keep_nspden
+ logical,intent(in),optional :: keep_cplex,keep_qphase,keep_itypat,keep_nspden
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  type(pawrhoij_type),intent(in) :: pawrhoij_in(:)
@@ -561,8 +577,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
  integer :: cplex_in,cplex_out,dplex,dplex_in,dplex_out,i_in,i_out,ilmn
  integer :: irhoij,ispden,jrhoij,lmn2_size_out,lmnmix,my_comm_atom,my_nrhoij
  integer :: ngrhoij,nrhoij_in,nrhoij_max,nrhoij_out,nselect,nselect_out
- integer :: nspden_in,nspden_out,paral_case,use_rhoij_,use_rhoijp,use_rhoijres
- logical :: change_dim,keep_cplex_,keep_itypat_,keep_nspden_,my_atmtab_allocated,paral_atom
+ integer :: nspden_in,nspden_out,paral_case,qphase_in,qphase_out,use_rhoij_,use_rhoijp,use_rhoijres
+ logical :: change_dim,keep_cplex_,keep_qphase_,keep_itypat_,keep_nspden_,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -577,6 +593,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 !Init flags
  keep_cplex_=.true.
  if (present(keep_cplex)) keep_cplex_=keep_cplex
+ keep_qphase_=.true.
+ if (present(keep_qphase)) keep_qphase_=keep_qphase
  keep_itypat_=.false.
  if (present(keep_itypat)) keep_itypat_=keep_itypat
  keep_nspden_=.true.
@@ -615,9 +633,10 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          do irhoij=1,nrhoij_in
            typat(irhoij)=irhoij;nlmn(irhoij)=pawrhoij_in(irhoij)%lmn_size
          end do
-         call pawrhoij_alloc(pawrhoij_out,pawrhoij_cpy(1)%cplex,pawrhoij_cpy(1)%nspden,&
-&         pawrhoij_cpy(1)%nspinor,pawrhoij_cpy(1)%nsppol,typat,&
+         call pawrhoij_alloc(pawrhoij_out,pawrhoij_cpy(1)%cplex,&
+&         pawrhoij_cpy(1)%nspden,pawrhoij_cpy(1)%nspinor,pawrhoij_cpy(1)%nsppol,typat,&
 &         lmnsize=nlmn,ngrhoij=pawrhoij_cpy(1)%ngrhoij,nlmnmix=pawrhoij_cpy(1)%lmnmix_sz,&
+&         qphase=pawrhoij_cpy(1)%qphase,&
 &         use_rhoij_=pawrhoij_cpy(1)%use_rhoij_,&
 &         use_rhoijp=pawrhoij_cpy(1)%use_rhoijp,&
 &         use_rhoijres=pawrhoij_cpy(1)%use_rhoijres)
@@ -625,7 +644,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(nlmn)
        end if
      else
-       msg=' nrhoij_in should be equal to my_natom !'
+       msg=' nrhoij_in should be equal to my_natom!'
        MSG_BUG(msg)
      end if
    end if
@@ -639,6 +658,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
      lmn2_size_out=pawrhoij_in(jrhoij)%lmn2_size
      cplex_in=pawrhoij_in(jrhoij)%cplex
      cplex_out=cplex_in;if(keep_cplex_)cplex_out=pawrhoij_out(irhoij)%cplex
+     qphase_in=pawrhoij_in(jrhoij)%qphase
+     qphase_out=qphase_in;if(keep_qphase_)qphase_out=pawrhoij_out(irhoij)%qphase
      nspden_in=pawrhoij_in(jrhoij)%nspden
      nselect=pawrhoij_in(jrhoij)%nrhoijsel
      nselect_out=pawrhoij_out(irhoij)%nrhoijsel
@@ -1895,7 +1916,7 @@ end subroutine pawrhoij_bcast
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij_out,(my_natom_in))
      call pawrhoij_nullify(pawrhoij_out)
      call pawrhoij_copy(pawrhoij,pawrhoij_out,&
-&                    keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    end if
    return
  end if
@@ -1940,19 +1961,19 @@ end subroutine pawrhoij_bcast
    LIBPAW_DATATYPE_ALLOCATE(pawrhoij_all,(natom_tot))
    call pawrhoij_nullify(pawrhoij_all)
    call pawrhoij_copy(pawrhoij,pawrhoij_all,comm_atom=mpi_comm_in,mpi_atmtab=my_atmtab_in,&
-&                  keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&       keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    if (in_place) then
      call pawrhoij_free(pawrhoij)
      LIBPAW_DATATYPE_DEALLOCATE(pawrhoij)
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij,(my_natom_out))
      call pawrhoij_nullify(pawrhoij)
      call pawrhoij_copy(pawrhoij_all,pawrhoij,comm_atom=mpi_comm_out,mpi_atmtab=my_atmtab_out,&
-&                       keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    else
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij_out,(my_natom_out))
      call pawrhoij_nullify(pawrhoij_out)
      call pawrhoij_copy(pawrhoij_all,pawrhoij_out,comm_atom=mpi_comm_out,mpi_atmtab=my_atmtab_out,&
-&                       keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    end if
    call pawrhoij_free(pawrhoij_all)
    LIBPAW_DATATYPE_DEALLOCATE(pawrhoij_all)
@@ -2063,7 +2084,7 @@ end subroutine pawrhoij_bcast
        iat_in=atm_indx_in(SendAtomList(iisend))
        iat_out=atm_indx_out(my_atmtab_in(iat_in))
        call pawrhoij_copy(pawrhoij(iat_in:iat_in),pawrhoij_out1(iat_out:iat_out), &
-&                         keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&           keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
        nbsent=0
      end if
    end do
@@ -2120,7 +2141,7 @@ end subroutine pawrhoij_bcast
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij,(my_natom_out))
      call pawrhoij_nullify(pawrhoij)
      call pawrhoij_copy(pawrhoij_out1,pawrhoij, &
-&         keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
      call pawrhoij_free(pawrhoij_out1)
      LIBPAW_DATATYPE_DEALLOCATE(pawrhoij_out1)
    end if
@@ -2224,10 +2245,10 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: fort_formatted=1,fort_binary=2,netcdf_io=3
- integer :: cplex,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
- integer :: nselect,my_cplex,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
- integer :: iomode,ncid,natom_id,cplex_id,nspden_id,nsel56_id,buffer_id,ibuffer_id,ncerr
- integer :: bsize_id,bufsize_id
+ integer :: cplex,qphase,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
+ integer :: nselect,my_cplex,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
+ integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id,optsym
+ integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
  logical :: paral_atom
  character(len=500) :: msg
 !arrays
@@ -2312,11 +2333,12 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        LIBPAW_DEALLOCATE(nsel44)
      else if (headform>=56) then
        LIBPAW_ALLOCATE(nsel56,(natom))
+       my_cplex=1;my_nspden=1;my_qphase=1
        if (headform==56) then
          if (iomode == fort_binary) then
-           read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex
+          read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex
          else if (iomode == fort_formatted) then
-           read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex
+          read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
           NCF_CHECK(nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id))
@@ -2328,9 +2350,11 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          end if
        else
          if (iomode == fort_binary) then
-           read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+           read(unitfi,err=10,end=10) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
+   10      continue
          else if (iomode == fort_formatted) then
-           read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+           read(unitfi,fmt=*,err=11,end=11) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
+   11      continue
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
            NCF_CHECK(nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id))
@@ -2339,10 +2363,15 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
            NCF_CHECK(nf90_inquire_dimension(ncid, nspden_id, len=my_nspden))
            NCF_CHECK(nf90_inq_varid(ncid, "nrhoijsel_atoms", nsel56_id))
            NCF_CHECK(nf90_get_var(ncid, nsel56_id, nsel56))
+           if (nf90_inq_dimid(ncid, "pawrhoij_qphase", qphase_id)==NF90_NOERR) then
+             NCF_CHECK(nf90_inquire_dimension(ncid, qphase_id, len=my_qphase))
+           else
+             my_qphase=1
+           end if
 #endif
          end if
        end if
-       call pawrhoij_alloc(pawrhoij,my_cplex,my_nspden,nspinor_in,nsppol_in,typat,lmnsize=nlmn_type)
+       call pawrhoij_alloc(pawrhoij,my_cplex,my_nspden,nspinor_in,nsppol_in,typat,lmnsize=nlmn_type,qphase=my_qphase)
        do iatom=1,natom
          pawrhoij(iatom)%nrhoijsel=nsel56(iatom)
        end do
@@ -2383,15 +2412,16 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      LIBPAW_ALLOCATE(nsel56,(natom))
      my_cplex =pawrhoij(1)%cplex
      my_nspden=pawrhoij(1)%nspden
+     my_qphase=pawrhoij(1)%qphase
      do iatom=1,natom
        nsel56(iatom)=pawrhoij(iatom)%nrhoijsel
      end do
      bsize=sum(nsel56)
 
      if (iomode == fort_binary) then
-       write(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+       write(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
      else if (iomode == fort_formatted) then
-       write(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+       write(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
 #ifdef LIBPAW_HAVE_NETCDF
      else if (iomode == netcdf_io) then
        ncerr = nf90_redef(ncid)
@@ -2405,7 +2435,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 
        NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
        NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
-       !write(std_out,*)"bsize,my_nspden,my_cplex",bsize, my_nspden, my_cplex
+       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
        if (bsize > 0) then
          NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
          NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_cplex, bufsize_id))
@@ -2458,13 +2488,15 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      LIBPAW_ALLOCATE(ibuffer,(0))
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
+       optsym=merge(1,2,pawrhoij(iatom)%qphase==2)
        do ispden=1,pawrhoij(iatom)%nspden
          write(unitfi, '(a,i4,a,i1,a)' ) ' rhoij(',iatom_tot,',',ispden,')=  (max 12 non-zero components will be written)'
          call pawio_print_ij(unitfi,pawrhoij(iatom)%rhoijp(:,ispden),&
 &         pawrhoij(iatom)%nrhoijsel,&
 &         pawrhoij(iatom)%cplex,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
-&         pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='PERS')
+&         pawrhoij(iatom)%rhoijselect(:),-1.d0,1,&
+&         opt_sym=optsym,mode_paral='PERS')
        end do
      end do
      LIBPAW_DEALLOCATE(ibuffer)
@@ -2486,6 +2518,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 &                                   'use_rhoij_=',pawrhoij(iatom)%use_rhoij_
        write(unitfi,'(a,i4,a,i4)' ) 'itypat=',pawrhoij(iatom)%itypat, ' lmn_size=',pawrhoij(iatom)%lmn_size
        write(unitfi,'(a,i4,a,i4)' ) 'nsppol=',pawrhoij(iatom)%nsppol, ' nspinor=',pawrhoij(iatom)%nspinor
+       write(unitfi,'(a,i4)' )      'qphase=',pawrhoij(iatom)%qphase
        cplex=pawrhoij(iatom)%cplex
        lmn2_size=pawrhoij(iatom)%lmn2_size
        do i2=1,pawrhoij(iatom)%nrhoijsel
@@ -2586,12 +2619,12 @@ subroutine pawrhoij_unpack(rhoij)
  type(pawrhoij_type),intent(inout) :: rhoij(:)
 
 !Local variables-------------------------------
- integer :: natom,iat,lmn2_size,isel,klmn,nspden,cplex
+ integer :: natom,iat,lmn2_size,isel,isppol,klmn,nsp2,cplex
 
 ! *************************************************************************
 
  natom  = SIZE(rhoij) ; if (natom==0) return
- nspden = rhoij(1)%nspden    ! MT jan-2010: this should not be nspden but nsppol or 4 if nspden=4
+ nsp2   = rhoij(1)%nsppol;if (rhoij(1)%nspden==4) nsp2=4
  cplex  = rhoij(1)%cplex
 
  do iat=1,natom
@@ -2599,15 +2632,17 @@ subroutine pawrhoij_unpack(rhoij)
    lmn2_size =rhoij(iat)%lmn2_size
 
    if (rhoij(iat)%use_rhoij_/=1) then ! Have to allocate rhoij
-     LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(cplex*lmn2_size,nsp2))
      rhoij(iat)%use_rhoij_=1
    end if
    rhoij(iat)%rhoij_ = zero
 
-   do isel=1,rhoij(iat)%nrhoijsel ! Looping over non-zero ij elements.
-     klmn = rhoij(iat)%rhoijselect(isel)
-     rhoij(iat)%rhoij_(klmn,:) = rhoij(iat)%rhoijp(isel,:)
+   do isppol=1,nsp2
+     do isel=1,rhoij(iat)%nrhoijsel ! Looping over non-zero ij elements.
+       klmn = rhoij(iat)%rhoijselect(isel)
+       rhoij(iat)%rhoij_(klmn,isppol) = rhoij(iat)%rhoijp(isel,isppol)
    end do
+ end do
 
  end do ! natom
 
@@ -2928,22 +2963,25 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawrhoij/pawrhoij_get_nspden
+!!****f* m_pawrhoij/pawrhoij_inquire_dim
 !! NAME
-!! pawrhoij_get_nspden
+!! pawrhoij_inquire_dim
 !!
 !! FUNCTION
-!! Compute the value of nspden (number of spin component) for a pawrhoij datastructure.
-!! This one depends on the number of spinorial components, the number of components
-!! of the density and use of the spin-orbit coupling.
+!! Compute the values f the dimensions (cplex, nspden, qphase) for a pawrhoij datastructure.
+!! These ones depend on the parameters of the calculation
 !!
 !! INPUTS
-!!  nspden= number of spin-density components
-!!  nspinor= number of spinorial components
-!!  spnorb= flag: 1 if spin-orbit coupling is activated
+!!  [cplex]= flag controlling the use of a exp(iqR) phase. 1=no phase, 2=phase
+!!  [cpxocc]= 2 if rhoij is required to be imaginary
+!!  [nspden]= number of spin-density components
+!!  [qpt(3)]= q-vector, if any
+!!  [spnorb]= flag: 1 if spin-orbit coupling is activated
 !!
 !! OUTPUT
-!!  pawrhoij_get_nspden= value of nspden associated to pawrhoij
+!!  [cplex_rhoij]= value of cplex associated to pawrhoij
+!!  [qphase_rhoij]= value of qphase associated to pawrhoij
+!!  [nspden_rhoij]= value of nspden associated to pawrhoij
 !!
 !! PARENTS
 !!
@@ -2951,31 +2989,185 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!
 !! SOURCE
 
-function pawrhoij_get_nspden(nspden,nspinor,spnorb)
+subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
+&                               cplex_rhoij,qphase_rhoij,nspden_rhoij)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_get_nspden'
+#define ABI_FUNC 'pawrhoij_inquire_dim'
 !End of the abilint section
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: nspden,nspinor,spnorb
- integer :: pawrhoij_get_nspden
+ integer,optional,intent(in) :: cplex,cpxocc,nspden,spnorb
+ integer,optional,intent(out) :: cplex_rhoij,qphase_rhoij,nspden_rhoij
 !arrays
+ real(dp),optional,intent(in) :: qpt(3)
 
 !Local variables ---------------------------------------
+ character(len=100) :: msg
 
 !************************************************************************
 
- pawrhoij_get_nspden=nspden
- if (nspinor==2.and.spnorb>0) pawrhoij_get_nspden=4
+!cplex_rhoij
+ if (present(cplex_rhoij)) then
+   cplex_rhoij=1
+   if (present(cplex).and.present(qpt)) then
+     msg='only one argument cplex or qpt should be passed!'
+     MSG_BUG(msg)
+   end if
+   if (present(cplex)) cplex_rhoij=cplex
+   if (present(qpt)) then
+     if (any(abs(qpt(:))>tol8)) cplex_rhoij=2
+   end if
+   if (present(cpxocc)) cplex_rhoij=max(cplex_rhoij,cpxocc)
+ end if
 
-end function pawrhoij_get_nspden
+!qphase_rhoij
+ if (present(qphase_rhoij)) then
+   qphase_rhoij=1
+   if (present(cplex).and.present(qpt)) then
+     msg='only one argument cplex or qpt should be passed!'
+     MSG_BUG(msg)
+   end if
+   if (present(cplex)) qphase_rhoij=merge(1,2,cplex==1)
+   if (present(qpt)) then
+     if (any(abs(qpt(:))>tol8)) qphase_rhoij=2
+   end if
+ end if
+
+!nspden_rhoij
+ if (present(nspden_rhoij)) then
+   nspden_rhoij=1
+   if (present(nspden)) nspden_rhoij=nspden
+   if (present(spnorb)) nspden_rhoij=merge(nspden_rhoij,4,spnorb<=0)
+ end if
+
+end subroutine pawrhoij_inquire_dim
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawrhoij_print_ij
+!! NAME
+!! pawrhoij_print_rhoij
+!!
+!! FUNCTION
+!!  Print out the content of a Rho_ij matrix (occupation matrix) in a suitable format
+!!
+!! INPUTS
+!!  rhoij(cplex*lmn2_size,nspden)= input matrix to be printed
+!!  cplex=1 if Rhoij is real, 2 if Rhoij is complex
+!!  qphase=2 if rhoij has a exp(iqR) phase, 1 if not
+!!  iatom=current atom
+!!  natom=total number of atoms in the system
+!!  nspden=number of spin density components
+!!  [opt_prtvol]= >=0 if up to 12 components of _ij matrix have to be printed
+!!                 <0 if all components of ij_ matrix have to be printed (optional)
+!!  [mode_paral]= parallel printing mode (optional, default='COLL')
+!   [rhoijselect(lmn2_size)]=Indirect array selecting the non-zero elements of rhoij
+!!  [test_value]=(real number) if positive, print a warning when the magnitude of Dij is greater (optional)
+!!  [title_msg]=message to print as title (optional)
+!!  [unit]=the unit number for output (optional)
+!!
+!! OUTPUT
+!! (Only writing)
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_pawrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
+&          rhoijselect,test_value,title_msg,unit,opt_prtvol,mode_paral) ! Optional arguments
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawrhoij_print_rhoij'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,qphase,iatom,natom,nspden
+ integer,optional,intent(in) :: opt_prtvol,unit
+ real(dp),intent(in),optional :: test_value
+ character(len=4),optional,intent(in) :: mode_paral
+ character(len=100),optional,intent(in) :: title_msg
+!arrays
+ integer,optional,intent(in),target :: rhoijselect(:)
+ real(dp),intent(in),target :: rhoij(:,:)
+
+!Local variables-------------------------------
+!scalars
+ character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
+ integer :: irhoij,my_lmn_size,my_opt_pack,my_opt_sym,my_prtvol,my_unt,rhoij_size
+ real(dp) :: my_test_value,test_value_eff
+ character(len=4) :: my_mode
+ character(len=2000) :: msg
+!arrays
+ integer,target :: idum(0)
+ integer,pointer :: my_rhoijselect(:)
+ real(dp),pointer :: rhoij_(:)
+
+! *************************************************************************
+
+!Optional arguments
+ my_unt   =std_out ; if (PRESENT(unit      )) my_unt   =unit
+ my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
+ my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
+ my_rhoijselect => idum ; if (PRESENT(rhoijselect)) my_rhoijselect => rhoijselect
+
+
+!Title
+ if (present(title_msg)) then
+   if (trim(title_msg)/='') then
+     write(msg, '(2a)') ch10,trim(title_msg)
+     call wrtout(my_unt,msg,my_mode)
+   end if
+ end if
+
+!Inits
+ rhoij_size=size(rhoij,1)/cplex
+ my_lmn_size=int(dsqrt(two*dble(rhoij_size)))
+ my_opt_pack=0 ; if (size(my_rhoijselect)>0) my_opt_pack=1
+ my_opt_sym=merge(1,2,qphase==2)
+
+! === Loop over Rho_ij components ===
+ do irhoij=1,nspden
+
+   rhoij_  => rhoij(1:cplex*rhoij_size,irhoij)
+   test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
+
+   !Subtitle
+   if (natom>1.or.nspden>1) then
+     if (nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
+     if (nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
+     if (nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(nspden/4)))
+     call wrtout(my_unt,msg,my_mode)
+   end if
+
+   !Printing
+    call pawio_print_ij(my_unt,rhoij_,rhoij_size,cplex,my_lmn_size,-1,idum,my_opt_pack,&
+&                       my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
+&                       mode_paral=my_mode)
+
+  end do !irhoij
+
+end subroutine pawrhoij_print_rhoij
 !!***
 
 !----------------------------------------------------------------------
@@ -3075,16 +3267,15 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  type(pawtab_type),target,intent(in) :: pawtab(ntypat)
 
 !Local variables ---------------------------------------
- character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
 !scalars
- integer :: at_indx,cplex,cplex_eff,iafm,iatm,iatom,idum1,il,il0,ilmn,iln,iln0,ilpm,indexi
+ integer :: at_indx,cplex,cplex_eff,iafm,iatm,iatom,il,il0,ilmn,iln,iln0,ilpm,indexi
  integer :: indexii,indexj,indexjj,indexjj0,indexk,indexk1,iplex,irhoij,irot,ishift2,ishift3
  integer :: ishift4,ispden,itypat,j0lmn,jj,jl,jl0,jlmn,jln,jln0,jlpm,jrhoij,jspden,klmn,klmn1,kspden
  integer :: lmn_size,mi,mj,my_comm_atom,mu,mua,mub,mushift,natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
  integer :: nselect,nselect1,nspinor,nu,nushift,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  real(dp) :: arg,factafm,syma,zarot2
- logical :: antiferro,have_phase,my_atmtab_allocated,noncoll,paral_atom,paral_atom_unsym,use_afm,use_res
+ logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll,paral_atom,paral_atom_unsym,use_afm,use_res
  character(len=8) :: pertstrg,wrt_mode
  character(len=500) :: msg
 !arrays
@@ -3140,13 +3331,33 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex
 
 !Do we have a phase due to q-vector (phonons only) ?
- have_phase=.false.
- if (ipert>0.and.present(qphon).and.nrhoij>0) then
-   have_phase=(abs(qphon(1))>tol8.or.abs(qphon(2))>tol8.or.abs(qphon(3))>tol8)
-   if (have_phase.and.cplex_eff==1) then
-     msg='Should have cplex_rhoij=2 for a non-zero q!'
-     MSG_BUG(msg)
+ has_qphase=.false.
+ if (nrhoij>0) then
+   has_qphase=(pawrhoij(1)%qphase==2)
+   if (ipert>0.and.present(qphon)) then
+     if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
+       msg='Should have qphase=2 for a non-zero q!'
+       MSG_BUG(msg)
+     end if
    end if
+ end if
+
+!Printing of unsymetrized Rhoij
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+   wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
+   pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
+   natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of ',trim(pertstrg),' before symetrization =========',ch10
+   call wrtout(std_out,msg,wrt_mode)
+   do iatm=1,nrhoij,natinc
+     iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
+     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
+     call pawrhoij_print_rhoij(pawrhoij(iatm)%rhoij_,pawrhoij(iatm)%cplex,&
+&                  pawrhoij(iatm)%qphase,iatom,natom,pawrhoij(iatm)%nspden,&
+&                  unit=std_out,opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+   end do
+   call wrtout(std_out,"",wrt_mode)
  end if
 
 !Symetrization occurs only when nsym>1
@@ -3166,7 +3377,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      MSG_BUG(msg)
    end if
 
-   if (have_phase.and.choice>1) then
+   if (has_qphase.and.choice>1) then
      msg='choice>1 not compatible with q-phase !'
      MSG_BUG(msg)
    end if
@@ -3324,7 +3535,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
              nsym_used(iafm)=nsym_used(iafm)+1
              at_indx=min(indsym(4,irot,iatom),nrhoij1)
 
-             if (have_phase) then
+             if (has_qphase) then
                arg=two_pi*(qphon(1)*indsym(1,irot,iatom)+qphon(2)*indsym(2,irot,iatom) &
 &                         +qphon(3)*indsym(3,irot,iatom))
                phase(1)=cos(arg);phase(2)=sin(arg)
@@ -3343,11 +3554,11 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  indexii=indexi+mi
                  if (indexii<=indexjj) then
                    indexk=indexjj0+indexii
-                   if(.not.have_phase) factsym(2)=one
+                   if(.not.has_qphase) factsym(2)=one
                    !if(cplex_eff==2.and.nspinor==2) factsym(2)=one
                  else
                    indexk=indexii*(indexii-1)/2+indexjj
-                   if(.not.have_phase) factsym(2)=-one
+                   if(.not.has_qphase) factsym(2)=-one
                    !if(cplex_eff==2.and.nspinor==2) factsym(2)=-one
                  end if
 !                Be careful: use here R_rel^-1 in term of spherical harmonics
@@ -3424,7 +3635,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
              end do
 
 !            Apply phase for phonons
-             if (have_phase) then
+             if (has_qphase) then
                if(optrhoij==1) then
                  rhoijc(1:2)=sumrho(1:2,iafm)
                  sumrho(1,iafm)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
@@ -3802,45 +4013,23 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  end if
 
 !*********************************************************************
-!Printing of Rhoij
- if (optrhoij==1.and.pawprtvol/=-10001) then
+!Printing of symetrized Rhoij
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
-   do iatm=1,nrhoij,natinc
-     iatom=iatm;if (paral_atom) iatom=my_atmtab(iatm)
-     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
-     idum1=2;if (have_phase) idum1=1
-     if (abs(pawprtvol)>=1) then
-       write(msg, '(6a,i3,a)') ch10," PAW TEST:",ch10,&
-&       ' ====== Values of ',trim(pertstrg),' in symrhoij (iatom=',iatom,') ======'
-       call wrtout(std_out,msg,wrt_mode)
-     end if
-     do ispden=1,pawrhoij(iatm)%nspden
-       if (abs(pawprtvol)>=1.and.pawrhoij(iatm)%nspden/=1) then
-         write(msg, '(3a)') '   Component ',trim(dspin(ispden+2*(pawrhoij(iatm)%nspden/4))),':'
-       else if (pawrhoij(iatm)%nspden/=1) then
-         if (pawrhoij(iatm)%nspden/=4) write(msg, '(4a,i3,a,i1,a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,', ispden=',ispden,') **********'
-         if (pawrhoij(iatm)%nspden==4) write(msg, '(4a,i3,3a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,' - ',&
-&         trim(dspin(ispden+2*(pawrhoij(iatm)%nspden/4))),') **********'
-       else
-         write(msg, '(4a,i3,a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,') **********'
-       end if
-       call wrtout(std_out,msg,wrt_mode)
-       call pawio_print_ij(std_out,pawrhoij(iatm)%rhoijp(:,ispden),&
-&       pawrhoij(iatm)%nrhoijsel,&
-&       pawrhoij(iatm)%cplex,&
-&       pawrhoij(iatm)%lmn_size,-1,idum,1,pawprtvol,&
-&       pawrhoij(iatm)%rhoijselect(:),&
-&       10.d0*dble(3-2*(ispden+ipert)),1,&
-&       opt_sym=idum1,mode_paral=wrt_mode)
-     end do
-   end do
-   msg=''
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of ',trim(pertstrg),' after symetrization =========',ch10
    call wrtout(std_out,msg,wrt_mode)
+   do iatm=1,nrhoij,natinc
+     iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
+     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
+     call pawrhoij_print_rhoij(pawrhoij(iatm)%rhoijp,pawrhoij(iatm)%cplex,&
+&                  pawrhoij(iatm)%qphase,iatom,natom,pawrhoij(iatm)%nspden,&
+&                  rhoijselect=pawrhoij(iatm)%rhoijselect,unit=std_out,&
+&                  opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+   end do
+   call wrtout(std_out,"",wrt_mode)
  end if
 
 !Destroy atom table used for parallelism

@@ -47,7 +47,7 @@ module m_positron
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
-                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_get_nspden, pawrhoij_symrhoij
+                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
  use m_pawfgr,   only : pawfgr_type
@@ -453,7 +453,7 @@ type(fock_type),pointer, intent(inout) :: fock
            call initrhoij(electronpositron%pawrhoij_ep(1)%cplex,dtset%lexexch,&
 &           dtset%lpawu,my_natom,dtset%natom,dtset%nspden,&
 &           electronpositron%pawrhoij_ep(1)%nspinor,dtset%nsppol,&
-&           dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,dtset%spinat,dtset%typat,&
+&           dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,dtset%typat,&
 &           ngrhoij=electronpositron%pawrhoij_ep(1)%ngrhoij,&
 &           nlmnmix=electronpositron%pawrhoij_ep(1)%lmnmix_sz,&
 &           use_rhoij_=electronpositron%pawrhoij_ep(1)%use_rhoij_,&
@@ -534,7 +534,7 @@ type(fock_type),pointer, intent(inout) :: fock
              ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
              call initrhoij(pawrhoij(1)%cplex,dtset%lexexch,dtset%lpawu,&
 &             my_natom,dtset%natom,dtset%nspden,pawrhoij(1)%nspinor,dtset%nsppol,&
-&             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,dtset%spinat,&
+&             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,pawrhoij(1)%qphase,dtset%spinat,&
 &             dtset%typat,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &             use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres,&
 &             comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -2386,10 +2386,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    ABI_ALLOCATE(rhor_dop_el,(nfft))
    if (dtset%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_dop_el,(dtset%natom))
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-     call pawrhoij_alloc(pawrhoij_dop_el,dtset%pawcpxocc,nspden_rhoij,&
-     dtset%nspinor,dtset%nsppol,dtset%typat,&
-     pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(pawrhoij_dop_el,cplex_rhoij,nspden_rhoij,&
+                         dtset%nspinor,dtset%nsppol,dtset%typat,&
+                         pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
 !    Cancel distribution of PAW data over atomic sites
 !    We use here pawrhoij because polifetime routine
 !    detects by itself the particle described by pawrhoij

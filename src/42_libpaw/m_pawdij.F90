@@ -4402,8 +4402,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
- character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ", &
-&                                         "dwn-dwn","up-dwn ","dwn-up "/)
  type(coeff2_type),target, allocatable :: my_tmp_dij(:)
  type(coeff2_type),pointer :: tmp_dij(:)
 
@@ -5004,7 +5002,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    do iatom=1,my_natom,natinc
      iatom_tot=iatom; if (paral_atom) iatom_tot=my_atmtab(iatom)
      call pawdij_print_dij(paw_ij(iatom)%dij,paw_ij(iatom)%cplex_dij,paw_ij(iatom)%cplex_rf,&
-&                iatom_tot,natom,paw_ij(iatom)%nspden,paw_ij(iatom)%nsppol,opt_prtvol=pawprtvol)
+&                iatom_tot,natom,paw_ij(iatom)%nspden,paw_ij(iatom)%nsppol,&
+&                opt_prtvol=pawprtvol,mode_paral=wrt_mode)
    end do
    call wrtout(std_out,"",wrt_mode)
  end if

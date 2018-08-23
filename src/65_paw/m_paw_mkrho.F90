@@ -227,7 +227,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    call pawrhoij_nullify(pawrhoij_ptr)
    call pawrhoij_copy(pawrhoij,pawrhoij_ptr,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom, &
-&   keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)       
+&   keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
  else
    pawrhoij_ptr=>pawrhoij
  end if

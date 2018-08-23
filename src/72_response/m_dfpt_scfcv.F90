@@ -57,7 +57,7 @@ module m_dfpt_scfcv
  use m_paw_an,   only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
@@ -398,7 +398,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
- integer :: optene,optfr,option,optres,prtfor,quit,quit_sum,qzero
+ integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
@@ -808,8 +808,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
        ABI_DATATYPE_ALLOCATE(pawrhoijfermi,(my_natom*psps%usepaw))
        if (psps%usepaw==1) then
-         cplex_rhoij=max(cplex,dtset%pawcpxocc)
-         nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+         !Q phase should be 1 because Q=0
+         call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
          call pawrhoij_alloc(pawrhoijfermi,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
@@ -3674,7 +3675,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_occ,         only : occeig
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, &
 &                          pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
-&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
+&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_paw_mkrho,   only : pawmkrho
  use m_fft,         only : fftpac
  use m_spacepar,    only : symrhg
@@ -3742,7 +3743,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,npw1_k,npw_k,nspden_rhoij
- integer :: optfr,spaceworld
+ integer :: optfr,qphase_rhoij,spaceworld
  logical :: paral_atom,qne0
  real(dp) :: arg,fe1norm,invfe1norm,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3841,10 +3842,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  if (psps%usepaw==1) then
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoijfermi_unsym,(natom))
-     cplex_rhoij=max(cplex,dtset%pawcpxocc)
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+     !Q phase should be 1 because Q=0
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoijfermi_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
      call pawrhoij_init_unpacked(pawrhoijfermi_unsym)
    end if

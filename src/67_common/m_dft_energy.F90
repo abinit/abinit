@@ -50,7 +50,7 @@ module m_dft_energy
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_init_unpacked, &
-                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_get_nspden, &
+                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_inquire_dim, &
 &                               pawrhoij_symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
@@ -281,7 +281,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bdtot_index,blocksize,choice,cplex,cplex_rf,cpopt,dimffnl
+ integer :: bdtot_index,blocksize,choice,cplex,cplex_rf,cplex_rhoij,cpopt,dimffnl
  integer :: iband,iband_last,iblock,iblocksize,icg,ider,idir,ierr,ifft,ikg,ikpt,ilm
  integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
@@ -539,8 +539,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-     call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij_unsym => pawrhoij

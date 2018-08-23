@@ -58,8 +58,7 @@ MODULE m_wfd
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
- use m_paw_io,         only : pawio_print_ij
+ use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked, pawrhoij_print_rhoij
  use m_paw_nhat,       only : nhatgrid
  use m_paw_occupancies,only : pawaccrhoij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
@@ -7206,8 +7205,8 @@ end subroutine test_charge
 !!      paw_qpscgw
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawio_print_ij
-!!      pawrhoij_mpisum_unpacked,wfd_bks_distrb,wfd_get_cprj,wrtout
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free
+!!      pawrhoij_mpisum_unpacked,pawrhoij_print_rhoij,wfd_bks_distrb,wfd_get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -7235,7 +7234,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex,iatom,band,ik_ibz
- integer :: spin,natinc,nband_k,nsp2,option,rhoij_cplex,lmn2_size,nspden
+ integer :: spin,natinc,nband_k,option,rhoij_cplex,lmn2_size,nspden
  logical :: usetimerev
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
@@ -7320,21 +7319,13 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  ! Print info.
  if (abs(pawprtvol)>=1) then
    natinc=1; if(Wfd%natom>1.and.pawprtvol>=0) natinc=Wfd%natom-1
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of RHOIJ in wfd_pawrhoij =========',ch10
+   call wrtout(std_out,msg,'COLL')
    do iatom=1,Cryst%natom,natinc
-     nsp2=pawrhoij(iatom)%nsppol;if (pawrhoij(iatom)%nspden==4) nsp2=4
-     write(msg, '(4a,i3,a)') ch10," PAW TEST:",ch10,&
-&     ' ====== Values of RHOIJ in wfd_pawrhoij (iatom=',iatom,') ======'
-     if (pawrhoij(iatom)%nspden==2.and.pawrhoij(iatom)%nsppol==1) write(msg,'(3a)') trim(msg),ch10,&
-&     '      (antiferromagnetism case: only one spin component)'
-     call wrtout(std_out,msg,'COLL')
-     do spin=1,nsp2
-       if (pawrhoij(iatom)%nspden/=1) then
-         write(msg, '(3a)') '   Component ',trim(dspin(spin+2*(pawrhoij(iatom)%nspden/4))),':'
-         call wrtout(std_out,msg,'COLL')
-       end if
-       call pawio_print_ij(std_out,pawrhoij(iatom)%rhoij_(:,spin),pawrhoij(iatom)%lmn2_size,&
-&       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,-1,idum,0,pawprtvol,idum,-1.d0,1)
-     end do
+     call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex,&
+&                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,pawrhoij(iatom)%nspden,&
+&                  unit=std_out,opt_prtvol=pawprtvol)
    end do
  end if
 

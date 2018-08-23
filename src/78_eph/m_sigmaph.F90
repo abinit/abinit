@@ -487,9 +487,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! if (psps%usepaw==1.and.iscf_mod>0) then
  !   if (paral_atom) then
  !     ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
- !     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=nspden
+ !     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+ !&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
  !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,nspinor,&
- !       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+ !       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
  !   else
  !     pawrhoij1_unsym => pawrhoij1
  !     call pawrhoij_init_unpacked(pawrhoij1_unsym)

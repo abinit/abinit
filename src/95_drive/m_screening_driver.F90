@@ -78,7 +78,7 @@ module m_screening_driver
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                            pawrhoij_free, pawrhoij_symrhoij, pawrhoij_get_nspden
+&                            pawrhoij_free, pawrhoij_symrhoij, pawrhoij_inquire_dim
  use m_pawdij,        only : pawdij, symdij_all
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
@@ -207,7 +207,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !scalars
  integer,parameter :: tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
  integer :: spin,ik_ibz,my_nbks
- integer :: choice,cplex,dim_kxcg,dim_wing,ount,omp_ncpus
+ integer :: choice,cplex,cplex_rhoij,dim_kxcg,dim_wing,ount,omp_ncpus
  integer :: fform_chi0,fform_em1,gnt_option,iat,ider,idir,ierr,band
  integer :: ifft,ii,ikbz,ikxc,initialized,iomega,ios,ipert
  integer :: iqibz,iqcalc,is_qeq0,isym,izero,ifirst,ilast
@@ -373,9 +373,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,Cryst%xred)
 
    ABI_DT_MALLOC(Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
-&   Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
+&                      Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays stored in Pawinit
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2

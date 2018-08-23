@@ -34,7 +34,8 @@ MODULE m_paw_tools
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_free, paw_ij_nullify, paw_ij_gather
  use m_pawdij,           only : pawdij_print_dij
- use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, &
+&                               pawrhoij_print_rhoij
  use m_paw_io,           only : pawio_print_ij
  use m_paw_sphharm,      only : mat_mlms2jmj, mat_slm2ylm
  use m_paw_correlations, only : setnoccmmp
@@ -512,23 +513,13 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &       '       has been computed; they could have an imaginary part (not printed here).'
        call wrtout(unitfi,msg,'COLL')
      end if
+     valmx=25._dp;if (ipositron>0) valmx=-1._dp
      do iat=1,natprt
        iatom=jatom(iat);nspden=pawrhoij_all(iatom)%nspden
-       optsym=2;if (pawrhoij_all(iatom)%cplex==2.and.dtset%nspinor==1) optsym=1
-       do ispden=1,nspden
-         valmx=-1._dp;if (ispden==1) valmx=25._dp
-         msg='' ; msg0=''
-         if (dtset%natom>1.or.nspden>1) write(msg0, '(a,i3)' ) ' Atom #',iatom
-         if (nspden==1) write(msg,'(a)')     trim(msg0)
-         if (nspden==2) write(msg,'(2a,i1)') trim(msg0),' - Spin component ',ispden
-         if (nspden==4) write(msg,'(3a)')    trim(msg0),' - Component ',dspin2(ispden+2*(nspden/4))
-         if (dtset%natom>1.or.nspden>1) then
-           call wrtout(unitfi,msg,'COLL')
-         end if
-         call pawio_print_ij(unitfi,pawrhoij_all(iatom)%rhoijp(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&         pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,-1,idum,1,dtset%pawprtvol,&
-&         pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
-       end do
+       call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex,&
+&                    pawrhoij_all(iatom)%qphase,iatom,dtset%natom,&
+&                    pawrhoij_all(iatom)%nspden,rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
+&                    test_value=valmx,unit=unitfi,opt_prtvol=dtset%pawprtvol)
      end do
      msg=' '
      call wrtout(unitfi,msg,'COLL')
@@ -558,7 +549,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        ABI_ALLOCATE(opt_l_index, (pawtab(itypat)%lmn_size))
        ll=max(ll,llp)
        if (ll>=0) then
-         optsym=2;if (pawrhoij_all(iatom)%cplex==2.and.dtset%nspinor==1) optsym=1
+         optsym=merge(1,2,pawrhoij_all(iatom)%qphase==2)
          do ispden=1,nspden
            msg='' ; msg0=''
            write(msg0,'(a,i3,a,i1,a)') ' Atom #',iatom,' - L=',ll,' ONLY'
