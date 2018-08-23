@@ -28,7 +28,7 @@ sources = [
  "m_dfpt_scfcv.F90",
  "m_dfpt_vtorho.F90",
  "m_dfpt_vtowfk.F90",
- "d2frnl.F90",
+ "m_d2frnl.F90",
  "m_ddb.F90",
  "m_ddb_hdr.F90",
  "m_ddk.F90",

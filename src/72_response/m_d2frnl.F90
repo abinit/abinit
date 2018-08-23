@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_d2frnl
+!! NAME
+!!  m_d2frnl
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_d2frnl
+
+ implicit none
+
+ private
+!!***
+
+ public :: d2frnl
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/d2frnl
 !! NAME
 !! d2frnl
@@ -6,13 +44,6 @@
 !! FUNCTION
 !! Compute the frozen-wavefunction non-local contribution for response functions
 !! (strain and/or phonon)
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnuC.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of WF
@@ -91,12 +122,6 @@
 !!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
@@ -1067,4 +1092,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  DBG_EXIT("COLL")
 
 end subroutine d2frnl
+!!***
+
+end module m_d2frnl
 !!***
