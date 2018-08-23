@@ -28,7 +28,7 @@ module m_dfpt_mkrho
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -128,7 +128,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

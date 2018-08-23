@@ -24,7 +24,7 @@ MODULE m_paw_init
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use defs_abitypes,  only : dataset_type

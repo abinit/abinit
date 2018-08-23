@@ -25,6 +25,7 @@ MODULE m_exit
 
  use defs_basis
  use m_xmpi
+ use m_abicore
  use m_errors
 
  use m_time,      only : abi_wtime, sec2str, timein
@@ -398,7 +399,6 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exit_check'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

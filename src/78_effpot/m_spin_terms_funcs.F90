@@ -34,7 +34,7 @@
 module m_spin_terms_funcs
   use defs_basis
    use m_errors
-    use m_profiling_abi
+    use m_abicore
   use m_mathfuncs, only: cross, outer_product 
   implicit none
   real(dp), parameter :: boltzmann=1.38064852d-23 ! TODO where is it in abinit.

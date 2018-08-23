@@ -29,7 +29,7 @@ module m_invars2
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
  use m_sort
@@ -254,7 +254,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

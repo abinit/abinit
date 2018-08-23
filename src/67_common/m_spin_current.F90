@@ -29,7 +29,7 @@ module m_spin_current
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use m_io_tools,   only : open_file

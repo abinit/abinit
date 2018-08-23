@@ -98,7 +98,7 @@ program abinit
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
- use m_profiling_abi
+ use m_abicore
  use m_results_out
  use m_xmpi
  use m_xomp
@@ -142,7 +142,6 @@ program abinit
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

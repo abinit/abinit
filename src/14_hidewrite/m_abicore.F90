@@ -25,15 +25,17 @@
 
 module m_abicore
 
+ !public
+
  !use defs_basis
  !use m_build_info
- use m_specialmsg
  use m_profiling_abi
+ use m_specialmsg,  only : herald, specialmsg_setcount, specialmsg_getcount, specialmsg_mpisum, wrtout
+ !use m_errors
 
- implicit none
-
- private
+ !implicit none
+ !private
 !!***
 
-END MODULE m_specialmsg
+end module m_abicore
 !!***

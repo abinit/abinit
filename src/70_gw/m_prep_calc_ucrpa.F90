@@ -145,7 +145,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
  use m_xmpi
  use m_defs_ptgroups
@@ -177,7 +177,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

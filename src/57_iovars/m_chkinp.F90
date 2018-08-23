@@ -30,7 +30,7 @@ module m_chkinp
  use defs_datatypes
  use defs_abitypes
  use m_gwdefs
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
@@ -94,7 +94,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkinp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

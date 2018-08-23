@@ -30,7 +30,7 @@
 MODULE m_dvdb
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_distribfft
@@ -722,7 +722,6 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1857,7 +1856,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3197,7 +3195,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_list_perts'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4292,7 +4289,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_interpolate_and_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

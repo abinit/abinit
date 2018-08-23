@@ -28,7 +28,7 @@ module m_wfd_optic
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
@@ -94,7 +94,6 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_optical_mels'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

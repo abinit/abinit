@@ -28,7 +28,7 @@
 MODULE m_fft
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xomp
  use m_xmpi
@@ -1301,7 +1301,6 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftbox_utests'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1555,7 +1554,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1811,7 +1809,6 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftbox_mpi_utests'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1994,7 +1991,6 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_mpi_utests'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3805,7 +3801,6 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourwf_mpi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

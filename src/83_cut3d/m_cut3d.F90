@@ -24,7 +24,7 @@ MODULE m_cut3d
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
  use m_hdr

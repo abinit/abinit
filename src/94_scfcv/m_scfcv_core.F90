@@ -32,7 +32,7 @@ module m_scfcv_core
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_wffile
  use m_rec
  use m_ab7_mixing
@@ -286,7 +286,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

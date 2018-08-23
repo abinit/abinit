@@ -31,7 +31,7 @@ module m_dfpt_loopert
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -237,8 +237,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
  use interfaces_32_util
 !End of the abilint section
 
@@ -2561,7 +2559,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2782,7 +2779,6 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtene'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -26,7 +26,7 @@ module m_epjdos
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_tetrahedron
@@ -374,7 +374,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_calcnwrite'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -941,7 +940,6 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recip_ylm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1578,7 +1576,6 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtfatbands'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1822,7 +1819,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fatbands_ncwrite'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2031,7 +2027,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

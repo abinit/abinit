@@ -32,7 +32,7 @@ module m_vtorhorec
  use m_xmpi
  use m_pretty_rec
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_per_cond
 
  use m_time,             only : timein, timab
@@ -127,7 +127,6 @@ subroutine vtorhorec(dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorhorec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -982,7 +981,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyrec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1323,7 +1321,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fermisolverec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1749,7 +1746,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gran_potrec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2054,7 +2050,6 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nlenergyrec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2275,7 +2270,6 @@ subroutine first_rec(dtset,psps,rset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'first_rec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2519,7 +2513,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'green_kernel'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2935,7 +2928,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recursion_nl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

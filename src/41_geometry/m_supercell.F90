@@ -28,7 +28,7 @@ module m_supercell
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_symtk,    only : matr3inv
  use m_copy,     only : alloc_copy

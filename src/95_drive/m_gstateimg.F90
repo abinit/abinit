@@ -30,7 +30,7 @@ module m_gstateimg
  use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
- use m_profiling_abi
+ use m_abicore
  use m_abihist
  use m_mep
  use m_ga
@@ -197,7 +197,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gstateimg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -827,7 +826,6 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtimg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1041,7 +1039,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predictimg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

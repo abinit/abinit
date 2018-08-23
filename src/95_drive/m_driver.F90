@@ -121,7 +121,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_xmpi
  use m_xomp
  use m_abi_linalg
- use m_profiling_abi
+ use m_abicore
  use m_exit
  use libxc_functionals
 #if defined DEV_YP_VDWXC
@@ -161,7 +161,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

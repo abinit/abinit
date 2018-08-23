@@ -27,7 +27,7 @@
 MODULE m_crystal_io
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_crystal

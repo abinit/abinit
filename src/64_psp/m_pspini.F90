@@ -30,7 +30,7 @@ module m_pspini
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_psxml2ab
  !use m_psps
@@ -138,7 +138,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -835,7 +834,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

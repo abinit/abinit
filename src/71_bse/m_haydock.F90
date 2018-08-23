@@ -26,7 +26,7 @@
 MODULE m_haydock
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -113,7 +113,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_haydock_driver'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -645,7 +644,6 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_herm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -937,7 +935,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_herm_algo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1121,7 +1118,6 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_restart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1382,7 +1378,6 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_psherm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1647,7 +1642,6 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_psherm_optalgo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1951,7 +1945,6 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_bilanczos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2269,7 +2262,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_bilanczos_optalgo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

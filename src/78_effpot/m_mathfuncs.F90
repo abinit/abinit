@@ -6,7 +6,7 @@
 module m_mathfuncs
   use defs_basis, only: dp, PI
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   !use ziggurat
   use m_random_xoroshiro128plus
   implicit none

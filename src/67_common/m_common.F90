@@ -30,7 +30,7 @@ module m_common
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_exit
  use m_fock
  use m_io_tools
@@ -159,7 +159,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scprqt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -949,7 +948,6 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1107,7 +1105,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prteigrs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1412,7 +1409,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtene'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

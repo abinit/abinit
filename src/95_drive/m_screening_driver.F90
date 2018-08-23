@@ -30,7 +30,7 @@ module m_screening_driver
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
  use m_errors
@@ -185,7 +185,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screening'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1615,7 +1614,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_screening'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2395,7 +2393,6 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'random_stopping_power'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit  none
@@ -2623,7 +2620,6 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_rpa_functional'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

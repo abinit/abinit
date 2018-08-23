@@ -28,7 +28,7 @@ MODULE m_ga
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  !use m_results_img, only : results_img_type, gather_array_img
 

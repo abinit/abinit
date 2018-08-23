@@ -99,7 +99,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_data4entropyDMFT
 
  use m_time,           only : timab
@@ -122,7 +122,6 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dmft_solve'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -608,7 +607,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,    only : timab
  use m_crystal, only : crystal_t
@@ -631,7 +630,6 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'impurity_solve'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -914,7 +912,7 @@ end subroutine impurity_solve
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,         only : timab
@@ -929,7 +927,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dyson'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1072,7 +1069,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_crystal, only : crystal_t
  use m_green, only : init_green,green_type,print_green,copy_green,compute_green,destroy_green
@@ -1090,7 +1087,6 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spectral_function'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

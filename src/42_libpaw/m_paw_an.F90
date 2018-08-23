@@ -772,7 +772,6 @@ subroutine paw_an_print(Paw_an,unit,mode_paral, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_an_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

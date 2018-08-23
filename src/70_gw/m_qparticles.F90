@@ -31,7 +31,7 @@ MODULE m_qparticles
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_hdr
  use m_errors
  use m_nctk
@@ -123,7 +123,6 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrqps'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -289,7 +288,6 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rdqps'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -743,7 +741,6 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rdgw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

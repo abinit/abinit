@@ -29,6 +29,7 @@ MODULE m_errors
  use defs_basis
  use m_profiling_abi
  use m_xmpi
+ use m_specialmsg, only : wrtout
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -683,7 +684,6 @@ subroutine sentinel(level,mode_paral,file,func,line)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sentinel'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -777,7 +777,6 @@ subroutine die(message,file,line)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'die'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -855,7 +854,6 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'msg_hndl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1660,7 +1658,6 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit_doctor'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1795,7 +1792,6 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abi_abort'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

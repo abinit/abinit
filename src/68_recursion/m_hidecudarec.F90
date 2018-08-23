@@ -34,7 +34,7 @@ module m_hidecudarec
 
  use defs_basis
  use defs_rectypes
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_GPU_CUDA
  use m_initcuda
 #endif
@@ -86,7 +86,6 @@ subroutine prt_mem_usage(nptrec,nfft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prt_mem_usage'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -210,7 +209,6 @@ subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'InitRecGPU'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

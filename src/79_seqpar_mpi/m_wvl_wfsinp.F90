@@ -31,7 +31,7 @@ module m_wvl_wfsinp
  use defs_datatypes
  use defs_wvltypes
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -105,7 +105,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_disk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -269,7 +268,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_reformat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -483,7 +481,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_scratch'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

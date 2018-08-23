@@ -23,7 +23,7 @@
 module m_parser
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
@@ -386,7 +386,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'instrng'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -962,7 +961,6 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'intagm'
- use interfaces_14_hidewrite
  use interfaces_32_util
 !End of the abilint section
 
@@ -1573,7 +1571,6 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inarray'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1788,7 +1785,6 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'importxyz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1921,7 +1917,6 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'append_xyz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2110,7 +2105,6 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkdpr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2781,7 +2775,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_prt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3355,7 +3348,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 
 ! *************************************************************************
 
-!Test whether for this variable, the content of different images differ. 
+!Test whether for this variable, the content of different images differ.
 !test_multiimages=.false. if, for all datasets, the content is identical.
  test_multiimages=.false.
  do idtset=1,ndtset_alloc

@@ -109,7 +109,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -129,7 +129,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'datafordmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -758,14 +757,13 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 &nsppol,paw_dmft,pawtab,psps,t2g)
 
- use m_profiling_abi
+ use m_abicore
  use m_io_tools,  only : open_file
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psichi_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -926,7 +924,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
 & nsppol,ntypat,paw_dmft,pawtab,psps,xocc_check,xnorm_check)
 
- use m_profiling_abi
+ use m_abicore
 
  use m_matlu, only: matlu_type,init_matlu,sym_matlu
 
@@ -1070,7 +1068,7 @@ end subroutine datafordmft
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
@@ -1082,7 +1080,6 @@ end subroutine datafordmft
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_levels'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1198,7 +1195,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_paw_dmft, only: paw_dmft_type
@@ -1210,7 +1207,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psichi_renormalization'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1383,7 +1379,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
 subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use m_errors
@@ -1398,7 +1394,6 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'normalizepsichi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1646,7 +1641,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal, only : crystal_t
  use m_oper, only : oper_type,init_oper,upfold_oper,copy_oper,prod_oper,destroy_oper,loc_oper
  use m_matlu, only : matlu_type,init_matlu,add_matlu,destroy_matlu,print_matlu,sym_matlu

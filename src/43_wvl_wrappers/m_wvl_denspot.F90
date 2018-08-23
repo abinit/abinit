@@ -28,7 +28,7 @@ module m_wvl_denspot
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_geometry,   only : xred2xcart
@@ -87,7 +87,6 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_denspot_set'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

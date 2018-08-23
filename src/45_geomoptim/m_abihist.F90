@@ -38,7 +38,7 @@
 module m_abihist
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_nctk
@@ -1132,7 +1132,6 @@ subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,sto
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abihist_compare_and_copy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

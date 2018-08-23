@@ -28,7 +28,7 @@ module m_dfpt_rhotov
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_cgtools
 

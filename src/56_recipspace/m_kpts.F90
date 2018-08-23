@@ -27,7 +27,7 @@ module m_kpts
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal
  use m_sort
  use m_kptrank
@@ -406,7 +406,6 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symkchk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -975,7 +974,6 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkgrid'
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -1721,7 +1719,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smpbz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2307,7 +2304,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'testkgrid'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3011,7 +3007,6 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mknormpath'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

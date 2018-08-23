@@ -30,7 +30,7 @@ module m_mklocl
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -298,7 +298,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_recipspace'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

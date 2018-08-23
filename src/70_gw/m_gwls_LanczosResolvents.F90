@@ -44,7 +44,7 @@ use m_gwls_lineqsolver
 use m_gwls_GWlanczos
 
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 use m_io_tools,  only : get_unit
 

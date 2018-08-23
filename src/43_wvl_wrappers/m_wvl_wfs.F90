@@ -27,7 +27,7 @@ module m_wvl_wfs
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -94,7 +94,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfs_set'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

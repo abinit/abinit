@@ -27,7 +27,7 @@
 module m_getgh1c
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_abitypes, only : MPI_type, dataset_type

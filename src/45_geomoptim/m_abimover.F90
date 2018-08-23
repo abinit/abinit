@@ -24,7 +24,7 @@
 module m_abimover
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_atomdata
  use m_errors
  use defs_abitypes

@@ -89,7 +89,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
@@ -105,7 +105,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hubbard_one'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -412,7 +411,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal, only : crystal_t
  use m_special_funcs,  only : factorial, permutations
  use m_green, only : green_type,init_green,destroy_green
@@ -423,7 +422,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'green_atomic_hubbard'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -825,7 +823,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'combin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

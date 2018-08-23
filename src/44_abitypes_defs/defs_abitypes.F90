@@ -47,7 +47,7 @@
 module defs_abitypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
 
  use m_pawrhoij, only : pawrhoij_type

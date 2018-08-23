@@ -24,7 +24,7 @@
 MODULE m_paw_nhat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use defs_abitypes
  use m_errors
  use m_xmpi

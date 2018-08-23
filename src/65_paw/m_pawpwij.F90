@@ -29,7 +29,7 @@ MODULE m_pawpwij
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fft
 
  use m_numeric_tools,  only : arth
@@ -608,7 +608,6 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_mkrhox_spl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

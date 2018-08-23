@@ -28,7 +28,7 @@ module m_wvl_descr_psp
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -192,7 +192,6 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_descr_psp_fill'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -530,7 +529,6 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_descr_atoms_set_sym'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

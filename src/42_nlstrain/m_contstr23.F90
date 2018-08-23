@@ -62,7 +62,7 @@ subroutine contstr23(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
 
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

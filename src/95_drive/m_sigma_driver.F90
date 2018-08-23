@@ -34,7 +34,7 @@ module m_sigma_driver
  use m_xmpi
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_nctk
  use m_kxc
@@ -205,7 +205,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2514,7 +2513,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3847,7 +3845,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

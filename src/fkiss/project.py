@@ -600,7 +600,7 @@ class AbinitProject(object):
         for fort_file in self.fort_files.values():
             for child in fort_file.usedby_mods:
                 if child.dirlevel < fort_file.dirlevel:
-                    errors.append("%s should be below level: %s" % (repr(m), fort_file.dirlevel))
+                    errors.append("%s should be below level: %s" % (repr(child), fort_file.dirlevel))
         return "\n".join(errors)
 
     def find_allmods(self, head_path):

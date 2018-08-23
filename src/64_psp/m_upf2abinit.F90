@@ -28,7 +28,7 @@ module m_upf2abinit
 
  use defs_basis
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use pseudo_pwscf ! pwscf module with all data explicit!

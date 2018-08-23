@@ -29,7 +29,7 @@ module m_getghc
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_time,        only : timab
@@ -133,7 +133,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

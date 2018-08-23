@@ -193,7 +193,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_ab7_mixing

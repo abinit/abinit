@@ -40,7 +40,7 @@ MODULE m_hdr
  use defs_basis
  use m_build_info
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_wffile
  use m_sort
@@ -3869,7 +3869,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hdr_check'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4754,7 +4753,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hdr_vs_dtset'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4973,7 +4971,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compare_int'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

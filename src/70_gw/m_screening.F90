@@ -33,7 +33,7 @@ MODULE m_screening
  use m_errors
  use m_copy
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_lebedev
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -357,7 +357,6 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'em1results_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -788,7 +787,6 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_Er_from_file'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -933,7 +931,6 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkdump_Er'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1488,7 +1485,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_epsm1_driver'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2013,7 +2009,6 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rpa_symepsm1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2178,7 +2173,6 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'atddft_symepsm1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2406,7 +2400,6 @@ subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_u
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkem1_q0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3144,7 +3137,6 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lwl_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

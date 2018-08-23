@@ -49,6 +49,8 @@ MODULE m_specialmsg
  public :: specialmsg_getcount ! Get number of special messages (WARNING/COMMENT) present in log file
  public :: specialmsg_mpisum   ! Reduce number of special messages (WARNING/COMMENT) over MPI comm
 
+ public :: wrtout
+
 CONTAINS  !===========================================================
 !!***
 
@@ -243,7 +245,6 @@ subroutine herald(code_name,code_version,iout)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'herald'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -472,15 +473,7 @@ end subroutine herald
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wrtout(unit,msg,mode_paral,do_flush)
-
- use defs_basis
 
  use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
  use m_io_tools,  only : flush_unit, write_lines
@@ -489,7 +482,6 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrtout'
- use interfaces_14_hidewrite, except_this_one => wrtout
 !End of the abilint section
 
  implicit none
@@ -589,10 +581,10 @@ end subroutine wrtout
 subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 
  use defs_basis
- use m_profiling_abi
+ !use m_abicore
 
  use m_xmpi,       only : xmpi_sum
- use m_specialmsg, only : specialmsg_setcount
+ !use m_specialmsg, only : specialmsg_setcount
  use m_io_tools,   only : flush_unit, write_lines
 
 !This section has been created automatically by the script Abilint (TD).

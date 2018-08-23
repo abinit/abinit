@@ -30,7 +30,7 @@ module m_wvl_projectors
  use defs_datatypes
  use defs_wvltypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_atomdata
 
  use m_geometry,     only : xred2xcart
@@ -90,7 +90,6 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_projectors_set'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

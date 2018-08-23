@@ -30,7 +30,7 @@ module m_forces
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_efield
  use m_errors
  use m_atomdata
@@ -744,7 +744,6 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fresidrsp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1525,7 +1524,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'constrf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

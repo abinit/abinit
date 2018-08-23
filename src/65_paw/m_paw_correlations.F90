@@ -26,7 +26,7 @@ MODULE m_paw_correlations
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_linalg_interfaces
@@ -126,7 +126,6 @@ CONTAINS  !=====================================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpuxinit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -892,7 +891,6 @@ CONTAINS  !=====================================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuenergy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1253,7 +1251,6 @@ CONTAINS  !=====================================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxenergy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1420,7 +1417,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setnoccmmp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2304,7 +2300,6 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setrhoijpbe0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2646,7 +2641,6 @@ end subroutine setrhoijpbe0
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_ubare'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -32,7 +32,7 @@ module m_pred_isothermal
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_linalg_interfaces
@@ -100,7 +100,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isothermal'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

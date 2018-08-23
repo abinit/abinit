@@ -125,7 +125,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use defs_wvltypes
 
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hdr
  use m_nctk
  use m_wffile
@@ -163,7 +163,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_loop'
- use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_72_response
 !End of the abilint section

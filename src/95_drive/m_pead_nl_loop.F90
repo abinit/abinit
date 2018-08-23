@@ -31,7 +31,7 @@ module m_pead_nl_loop
  use defs_abitypes
  use defs_wvltypes
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_hdr
 #if defined HAVE_MPI2
@@ -163,7 +163,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pead_nl_loop'
- use interfaces_14_hidewrite
  use interfaces_32_util
 !End of the abilint section
 
@@ -1122,7 +1121,6 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pead_nl_mv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

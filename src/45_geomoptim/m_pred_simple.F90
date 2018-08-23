@@ -27,7 +27,7 @@
 module m_pred_simple
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
 

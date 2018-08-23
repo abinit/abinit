@@ -46,7 +46,7 @@ use m_gwls_TimingLog
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 
 implicit none
 save

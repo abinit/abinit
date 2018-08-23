@@ -32,7 +32,7 @@ module m_dfpt_scfcv
  use m_ab7_mixing
  use m_efield
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_wfk
  use m_xmpi
  use m_nctk
@@ -293,7 +293,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_scfcv'
- use interfaces_14_hidewrite
  use interfaces_32_util
 !End of the abilint section
 
@@ -1756,7 +1755,6 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newfermie1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2393,7 +2391,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3083,7 +3080,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstdy'
- use interfaces_14_hidewrite
  use interfaces_32_util
 !End of the abilint section
 
@@ -4386,7 +4382,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_wfkfermi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

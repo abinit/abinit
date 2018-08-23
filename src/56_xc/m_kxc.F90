@@ -43,7 +43,7 @@
 MODULE m_kxc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_crystal
@@ -1076,7 +1076,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_driver'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1337,7 +1336,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_ADA'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -76,7 +76,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_io_tools
@@ -90,7 +90,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_hmc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

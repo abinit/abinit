@@ -30,7 +30,7 @@ MODULE m_ppmodel
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_array
  use m_linalg_interfaces
 
@@ -1190,7 +1190,6 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_ppm_eigenvalues'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1344,7 +1343,6 @@ subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm1par'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1485,7 +1483,6 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm2par'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1710,7 +1707,6 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm3par'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1984,7 +1980,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm4par'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

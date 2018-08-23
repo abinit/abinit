@@ -29,7 +29,7 @@ module m_mkrho
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
@@ -143,7 +143,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -790,7 +789,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initro'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1289,7 +1287,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtrhomxmn'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2199,7 +2196,6 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'atomden'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

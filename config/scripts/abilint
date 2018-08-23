@@ -1556,7 +1556,8 @@ class File_F90(File):
             for mac in project.macro_dict.keys():
                 # This to prevent abinit from expanding LIBPAW macros
                 #print(mac)
-                if mac in ("USE_DEFS", "USE_MSG_HANDLING", "USE_MEMORY_PROFILING"): continue
+                if mac in ("USE_DEFS", "USE_MPI_WRAPPERS", "USE_MSG_HANDLING", "USE_MEMORY_PROFILING", "LIBPAW_HAVE_LIBXC"): 
+                    continue
                 self.code = self.code.replace(mac,project.macro_dict[mac])
 
 class File_F90_Library(File_F90):

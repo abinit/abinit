@@ -29,7 +29,7 @@
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_lib_four
 
@@ -633,7 +633,6 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printocc_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -753,7 +752,6 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1052,7 +1050,6 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1442,7 +1439,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1920,7 +1916,6 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'icip_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2032,7 +2027,6 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2331,7 +2325,6 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'check_fourier_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2416,7 +2409,6 @@ subroutine compa_occup_ks(green,paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compa_occup_ks'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2751,7 +2743,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_fct'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3220,7 +3211,7 @@ end subroutine occup_green_tau
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
@@ -3232,7 +3223,6 @@ end subroutine occup_green_tau
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'greenldacompute_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3344,7 +3334,7 @@ end subroutine occup_green_tau
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use defs_abitypes
@@ -3357,7 +3347,6 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fermi_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3519,7 +3508,7 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_pawang,    only : pawang_type
@@ -3531,7 +3520,6 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newton'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3740,7 +3728,7 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use defs_abitypes
@@ -3753,7 +3741,6 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'function_and_deriv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3851,7 +3838,7 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
 &  Fx,opt_noninter,nb_elec_x,fermie)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use defs_abitypes
@@ -3942,7 +3929,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
@@ -3951,7 +3938,6 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'local_ks_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

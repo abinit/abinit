@@ -36,7 +36,7 @@ use m_gwls_lineqsolver
 ! abinit modules
 use defs_basis
 use m_errors
-use m_profiling_abi
+use m_abicore
 use m_bandfft_kpt
 
 use m_time,      only : timab
@@ -107,7 +107,6 @@ subroutine Pk(psi_inout,omega)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Pk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none

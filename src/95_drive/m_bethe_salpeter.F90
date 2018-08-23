@@ -33,7 +33,7 @@ module m_bethe_salpeter
  use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_screen
@@ -195,7 +195,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bethe_salpeter'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1125,7 +1124,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2086,7 +2084,6 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse_interp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

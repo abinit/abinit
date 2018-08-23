@@ -29,7 +29,7 @@ module m_stress
  use defs_basis
  use defs_abitypes
  use m_efield
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -184,7 +184,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'stress'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

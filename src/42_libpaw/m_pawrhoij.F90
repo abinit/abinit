@@ -221,9 +221,9 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&  
-&  lmnsize,ngrhoij,nlmnmix,pawtab,use_rhoij_,use_rhoijp,& ! Optional 
-&  use_rhoijres,use_rhoijim,comm_atom,mpi_atmtab)         ! Optional 
+subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
+&  lmnsize,ngrhoij,nlmnmix,pawtab,use_rhoij_,use_rhoijp,& ! Optional
+&  use_rhoijres,use_rhoijim,comm_atom,mpi_atmtab)         ! Optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -494,7 +494,7 @@ subroutine pawrhoij_nullify(pawrhoij)
 
 ! *************************************************************************
 
- ! MGPAW: This one could be removed/renamed, 
+ ! MGPAW: This one could be removed/renamed,
  ! variables can be initialized in the datatype declaration
  ! Do we need to expose this in the public API?
 
@@ -2152,7 +2152,7 @@ end subroutine pawrhoij_bcast
 !  A send buffer in an asynchrone communication couldn't be deallocate before it has been receive
    nbsent=0 ; ireq=0 ; iisend=0 ; nbsendreq=0 ; nb_msg=0
    do iisend=1,nbsend
-     iproc_rcv=SendAtomProc(iisend) 
+     iproc_rcv=SendAtomProc(iisend)
      next=-1
      if (iisend < nbsend) next=SendAtomProc(iisend+1)
      if (iproc_rcv /= me_exch) then
@@ -2403,7 +2403,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  iomode = fort_binary
  if (PRESENT(form)) then
    select case (libpaw_to_upper(form))
-   case ("FORMATTED") 
+   case ("FORMATTED")
      iomode = fort_formatted
    case ("NETCDF")
      iomode = netcdf_io
@@ -3212,7 +3212,6 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symrhoij'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

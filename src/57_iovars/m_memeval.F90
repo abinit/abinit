@@ -29,7 +29,7 @@ MODULE m_memeval
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
@@ -510,7 +510,6 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1400,7 +1399,6 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memana'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1983,7 +1981,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memorf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2356,7 +2353,6 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getdim_nloc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2638,7 +2634,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_memory'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

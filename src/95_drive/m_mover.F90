@@ -205,7 +205,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1022,7 +1021,6 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1150,6 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'erlxconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1260,7 +1257,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxfase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1602,7 +1598,6 @@ subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtnatom'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1693,7 +1688,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use defs_basis
  use defs_abitypes
  use m_results_gs
- use m_profiling_abi
+ use m_abicore
  use m_errors
 #if defined HAVE_NETCDF
  use netcdf
@@ -1706,7 +1701,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrt_moldyn_netcdf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

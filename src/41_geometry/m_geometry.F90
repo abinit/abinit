@@ -23,7 +23,7 @@
 MODULE m_geometry
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
@@ -546,7 +546,6 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wigner_seitz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1051,7 +1050,6 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotmat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1258,7 +1256,6 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'metric'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2008,7 +2005,6 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bonds_lgth_angles'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2593,7 +2589,6 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shellstruct'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2742,7 +2737,6 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioniondist'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3004,7 +2998,6 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'remove_inversion'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3531,7 +3524,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_pert'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

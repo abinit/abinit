@@ -29,7 +29,7 @@ module m_dfpt_cgwf
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_cgtools
@@ -159,7 +159,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_cgwf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

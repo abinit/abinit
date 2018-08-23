@@ -51,7 +51,7 @@ program dummy_tests
 
  use defs_basis
  use m_build_info
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_dummy_tests

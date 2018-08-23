@@ -23,7 +23,7 @@
 MODULE m_dtset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_copy
  use m_errors
  use m_xmpi
@@ -108,7 +108,6 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtset_chkneu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1531,7 +1530,6 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'find_getdtset'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1628,8 +1626,6 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none

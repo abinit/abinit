@@ -31,7 +31,7 @@ module m_gstate
  use defs_rectypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use libxc_functionals
  use m_exit
  use m_crystal
@@ -239,7 +239,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1739,7 +1738,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1886,7 +1884,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2084,7 +2081,6 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2261,7 +2257,6 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2664,7 +2659,7 @@ end subroutine pawuj_drive
 subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_xmpi
  use m_wffile

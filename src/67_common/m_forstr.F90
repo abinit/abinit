@@ -30,7 +30,7 @@ module m_forstr
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_efield
  use m_errors
  use m_xmpi

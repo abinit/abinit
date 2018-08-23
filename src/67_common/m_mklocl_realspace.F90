@@ -35,7 +35,7 @@ module m_mklocl_realspace
  use defs_abitypes
  use defs_wvltypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,        only : timab
@@ -1457,7 +1457,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_wavelets'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

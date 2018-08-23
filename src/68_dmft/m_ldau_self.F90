@@ -84,7 +84,7 @@ contains
 
 subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use defs_datatypes
@@ -104,7 +104,6 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ldau_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

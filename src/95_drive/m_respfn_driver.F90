@@ -31,7 +31,7 @@ module m_respfn_driver
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_exit
  use m_wffile
@@ -218,7 +218,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1908,7 +1907,6 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrtloctens'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
