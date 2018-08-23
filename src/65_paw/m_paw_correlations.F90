@@ -93,6 +93,7 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  pawtab <type(pawtab_type)>=paw tabulated data read at start:
+!!     %euijkl=(2,2,lmn2_size,lmn2_size) array for computing LDA+U terms without occupancies
 !!     %ij_proj=nproj*(nproju+1)/2
 !!     %klmntomn(4,lmn2_size) = Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
 !!     %lnproju(nproj)= value of ln for projectors on which paw+u/local exact-exchange acts.
@@ -117,7 +118,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,jpawu,llexexch,llpawu,&
-&           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,ucrpa)
+&           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
+&           ucrpa) ! optional argument
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -144,15 +146,17 @@ CONTAINS  !=====================================================================
 
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,il,ilmn,isela,iselb,itemp,itypat,iu,j0lmn,jl,jlmn,ju,klm0u
- integer :: klm0x,klma,klmb,klmn,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
+ integer :: icount,icountp,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
+ integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,klmn0,klmn0p,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: mesh_size,int_meshsz,mkyc,sz1
- real(dp) :: ak,f4of2,f6of2,int1,intg
+ integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
+ logical :: compute_euijkl,compute_euij_fll
+ real(dp) :: ak,fact,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ real(dp) :: euijkl_temp(2,2),euijkl_temp2(2,2),euijkl_dc(2,2)
  real(dp),allocatable :: ff(:),fk(:),gg(:)
 
 ! *************************************************************************
@@ -176,7 +180,7 @@ CONTAINS  !=====================================================================
  end if
 
 !Print title
- if((usepawu>=1.and.usepawu<=4).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
+ if((usepawu>=1.and.usepawu<=6).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL"
  else if(usepawu==2) then
@@ -185,9 +189,13 @@ CONTAINS  !=====================================================================
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (alternative)"
  else if(usepawu==4) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL with no spin polarization in the xc functional"
+ else if(usepawu==5) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL (no use of occupation matrix)"
+ else if(usepawu==6) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (no use of occupation matrix)"
  end if
  if(useexexch>0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((usepawu>=1.and.usepawu<=4).or.useexexch>0) &
+ if((usepawu>=1.and.usepawu<=6).or.useexexch>0) &
  write(message, '(3a)' ) trim(message),ch10," ******************************************"
  if(use_dmft==0) then
    call wrtout(ab_out,message,'COLL')
@@ -268,11 +276,11 @@ CONTAINS  !=====================================================================
      icount=0
      do ilmn=1,lmn_size
        if(indlmn(1,ilmn)==lcur) then
-         icount=icount+1
-         itemp=(icount-1)/(2*lcur+1)
-         if (itemp*(2*lcur+1)==icount-1) then
+         itemp=icount/(2*lcur+1)
+         if (itemp*(2*lcur+1)==icount) then
            pawtab(itypat)%lnproju(itemp+1)=indlmn(5,ilmn)
          end if
+         icount=icount+1
        end if
      end do
 
@@ -519,13 +527,12 @@ CONTAINS  !=====================================================================
                pawtab(itypat)%vee(m21,m31,m11,m41)=pawtab(itypat)%vee(m11,m31,m21,m41)
                pawtab(itypat)%vee(m11,m41,m21,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
                pawtab(itypat)%vee(m21,m41,m11,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
-
-!!!!  pawtab(itypat)%vee(m11,m31,m21,m41)= <m11 m31| vee| m21 m41 >
              end do
            end do
          end do
        end do
        ABI_DEALLOCATE(fk)
+
      !  testu=0
      !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
      !  do m1=1,2*lpawu+1
@@ -552,6 +559,140 @@ CONTAINS  !=====================================================================
      !  write(std_out,*) "------------------------"
      !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
      !  write(std_out,*) "------------------------"
+
+!      c. For usepawu == 5 or 6, compute euijkl
+!      ---------------------------------------------
+       compute_euijkl=(usepawu==5.or.usepawu==6)
+       if (compute_euijkl) then
+         if (allocated(pawtab(itypat)%euijkl)) then
+           ABI_DEALLOCATE(pawtab(itypat)%euijkl)
+         end if
+         ABI_ALLOCATE(pawtab(itypat)%euijkl,(2,2,lmn_size,lmn_size,lmn_size,lmn_size))
+         pawtab(itypat)%euijkl = zero
+         compute_euij_fll = .false.
+         euijkl_temp2=zero
+         if (usepawu==5) then ! Only for FLL
+           if (allocated(pawtab(itypat)%euij_fll)) then ! allocate euij_fll for FLL
+             ABI_DEALLOCATE(pawtab(itypat)%euij_fll)
+           end if
+           ABI_ALLOCATE(pawtab(itypat)%euij_fll,(lmn2_size))
+           pawtab(itypat)%euij_fll = zero
+           compute_euij_fll = .true.
+         end if
+
+!        loop on i,j
+         do klmna=1,lmn2_size
+           ilmn=pawtab(itypat)%indklmn(7,klmna) ! i
+           jlmn=pawtab(itypat)%indklmn(8,klmna) ! j
+           if (pawtab(itypat)%indlmn(1,ilmn)==lpawu.and.pawtab(itypat)%indlmn(1,jlmn)==lpawu) then ! only correlated orbitals
+             iu = pawtab(itypat)%indlmn(3,ilmn) ! ni
+             ju = pawtab(itypat)%indlmn(3,jlmn) ! nj
+             phiint_ij = pawtab(itypat)%phiphjint(iu+(ju*(ju-1))/2) ! iu <= ju by construction (ilmn<=jlmn)
+             m2 = pawtab(itypat)%indlmn(2,ilmn) ! mi
+             m21=m2+lpawu+1
+             m1 = pawtab(itypat)%indlmn(2,jlmn) ! mj
+             m11=m1+lpawu+1
+
+             if (compute_euij_fll.and.m1==m2) then ! FLL
+               pawtab(itypat)%euij_fll(klmna) = - half * phiint_ij * ( pawtab(itypat)%jpawu - pawtab(itypat)%upawu )
+             end if
+
+!            loop on ip,jp (=k,l)
+             do klmnb=1,lmn2_size
+               ilmnp=pawtab(itypat)%indklmn(7,klmnb) ! ip (=k)
+               jlmnp=pawtab(itypat)%indklmn(8,klmnb) ! jp (=l)
+               if (pawtab(itypat)%indlmn(1,ilmnp)==lpawu.and.pawtab(itypat)%indlmn(1,jlmnp)==lpawu) then ! correlated orbitals
+                 iup = pawtab(itypat)%indlmn(3,ilmnp) ! nip
+                 jup = pawtab(itypat)%indlmn(3,jlmnp) ! njp
+                 phiint_ipjp = pawtab(itypat)%phiphjint(iup+(jup*(jup-1))/2) ! iup <= jup by construction (ilmnp<=jlmnp)
+                 m4 = pawtab(itypat)%indlmn(2,ilmnp) ! mip
+                 m41=m4+lpawu+1
+                 m3 = pawtab(itypat)%indlmn(2,jlmnp) ! mjp
+                 m31=m3+lpawu+1
+
+                 euijkl_dc = zero
+!                Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
+                 if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
+
+                     do sig=1,2
+                       do sigp=1,2
+
+                         if (usepawu==1.or.usepawu==5) then ! FLL
+
+                           if (sig==sigp) then
+                             euijkl_dc(sig,sigp) = &
+&                             phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                           else
+                             euijkl_dc(sig,sigp) = &
+&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
+                           end if
+
+                         else if (usepawu==2.or.usepawu==6) then ! AMF
+
+                           if (sig==sigp) then
+                             euijkl_dc(sig,sigp) = &
+&                             two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                           else
+                             euijkl_dc(sig,sigp) = &
+&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
+                           end if
+
+                         end if
+
+                       end do ! sigp
+                     end do ! sig
+
+                 end if ! double-counting term
+
+                 vee1 = pawtab(itypat)%vee(m11,m31,m21,m41)
+!                Note : vee(13|24) = vee(23|14) ( so : i    <--> j     )
+!                       vee(13|24) = vee(14|23) ( so : ip   <--> jp    )
+!                       vee(13|24) = vee(24|13) ( so : i,ip <--> j,jp  )
+!                Also : vee(13|24) = vee(31|42) ( so : i,j  <--> ip,jp )
+!                ==> vee1 is invariant with respect to the permutations i <--> j , ip <--> jp and i,ip <--> j,jp
+!                ( The term 'phiint_ij * phiint_ipjp' has the same properties)
+                 do sig=1,2
+                   do sigp=1,2
+                     euijkl_temp(sig,sigp) = phiint_ij * phiint_ipjp * vee1
+                   end do
+                 end do
+
+                 vee2 = pawtab(itypat)%vee(m11,m31,m41,m21)
+!                Note : vee(13|42) = vee(43|12) ( so : ip   <--> j     )
+!                       vee(13|42) = vee(12|43) ( so : i    <--> jp    )
+!                       vee(13|42) = vee(42|13) ( so : i,ip <--> jp,j  )
+!                Also : vee(13|42) = vee(31|24) ( so : i,j  <--> ip,jp )
+!                Combining the third and fourth rule we get:
+!                       vee(13|42) = vee(42|13) = vee(24|31) ( so : i,ip  <--> j,jp )
+!                ==> vee2 is invariant only with respect to the permutation i,ip <--> j,jp
+
+!                Terms i,j,ip,jp (m2,m1,m4,m3) and j,i,jp,ip (m1,m2,m3,m4)
+                 do sig=1,2
+                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
+                 end do
+                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,jlmnp,ilmnp) = pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp)
+
+!                Term j,i,ip,jp (m1,m2,m4,m3)
+                 vee2 = pawtab(itypat)%vee(m21,m31,m41,m11)
+                 do sig=1,2
+                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
+                 end do
+                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+
+!                Term i,j,jp,ip (m2,m1,m3,m4)
+                 vee2 = pawtab(itypat)%vee(m11,m41,m31,m21)
+                 do sig=1,2
+                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
+                 end do
+                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,jlmnp,ilmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+
+               end if ! correlated orbitals
+             end do ! klmnb
+           end if ! correlated orbitals
+         end do ! klmna
+
+       end if ! compute_euijkl
      end if ! usepawu
 
 !    ======================================================================
@@ -815,98 +956,106 @@ CONTAINS  !=====================================================================
  eldautemp=zero
  edcdc_opt3=zero
  eks_opt3=zero
- ABI_ALLOCATE(n12_sig,(cplex_occ))
- ABI_ALLOCATE(n34_msig,(cplex_occ))
- ABI_ALLOCATE(n34_sig,(cplex_occ))
- do ispden=1,min(nspden,2)
-   jspden=min(nspden,2)-ispden+1
-!  compute n_sigs and n_msigs for pawtab%usepawu=3
-   if (nspden<=2) then
-     n_sig =nocctot(ispden)
-     n_msig=nocctot(jspden)
-     n_tot=n_sig+n_msig
-   else
-     n_tot=nocctot(1)
-     mx=nocctot(2)
-     my=nocctot(3)
-     mz=nocctot(4)
-     mnorm=sqrt(mx*mx+my*my+mz*mz)
-     if (ispden==1) then
-!      n_sig =half*(n_tot+mnorm)
-!      n_msig=half*(n_tot-mnorm)
-       n_sig =half*(n_tot+sign(mnorm,mz))
-       n_msig=half*(n_tot-sign(mnorm,mz))
+
+ if (pawtab%usepawu/=5.and.pawtab%usepawu/=6) then
+
+   ABI_ALLOCATE(n12_sig,(cplex_occ))
+   ABI_ALLOCATE(n34_msig,(cplex_occ))
+   ABI_ALLOCATE(n34_sig,(cplex_occ))
+   do ispden=1,min(nspden,2)
+     jspden=min(nspden,2)-ispden+1
+
+!    Compute n_sigs and n_msigs for pawtab%usepawu=3
+     if (nspden<=2) then
+       n_sig =nocctot(ispden)
+       n_msig=nocctot(jspden)
+       n_tot=n_sig+n_msig
      else
-!      n_sig =half*(n_tot-mnorm)
-!      n_msig=half*(n_tot+mnorm)
-       n_sig =half*(n_tot-sign(mnorm,mz))
-       n_msig=half*(n_tot+sign(mnorm,mz))
+       n_tot=nocctot(1)
+       mx=nocctot(2)
+       my=nocctot(3)
+       mz=nocctot(4)
+       mnorm=sqrt(mx*mx+my*my+mz*mz)
+       if (ispden==1) then
+!        n_sig =half*(n_tot+mnorm)
+!        n_msig=half*(n_tot-mnorm)
+         n_sig =half*(n_tot+sign(mnorm,mz))
+         n_msig=half*(n_tot-sign(mnorm,mz))
+       else
+!        n_sig =half*(n_tot-mnorm)
+!        n_msig=half*(n_tot+mnorm)
+         n_sig =half*(n_tot-sign(mnorm,mz))
+         n_msig=half*(n_tot+sign(mnorm,mz))
+       end if
      end if
-   end if
-   n_sigs =n_sig/(float(2*lpawu+1))
-   n_msigs =n_msig/(float(2*lpawu+1))
-!  if(pawtab%usepawu==3) then
-!  write(message,fmt=12) "noccmmp11 ",ispden,noccmmp(1,1,1,ispden)
-!  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "noccmmp11 ",jspden,noccmmp(1,1,1,jspden)
-!  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "n_sig      ",ispden,n_sig
-!  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "n_msig     ",jspden,n_msig
-!  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "n_sigs     ",ispden,n_sigs
-!  call wrtout(std_out,message,'COLL')
-!  write(message,fmt=12) "n_msigs    ",jspden,n_msigs
-!  call wrtout(std_out,message,'COLL')
-!  endif
-!  12 format(a,i4,e20.10)
-!  compute interaction energy E_{ee}
-   do m1=-lpawu,lpawu
-     m11=m1+lpawu+1
-     do m2=-lpawu,lpawu
-       m21=m2+lpawu+1
-       n12_sig(:)=noccmmp(:,m11,m21,ispden)
-       if(m21==m11.and.(pawtab%usepawu==3.or.dmftdc==3)) n12_sig(1)=n12_sig(1)-n_sigs
-       do m3=-lpawu,lpawu
-         m31=m3+lpawu+1
-         do m4=-lpawu,lpawu
-           m41=m4+lpawu+1
-           n34_sig(:) =noccmmp(:,m31,m41,ispden)
-           n34_msig(:)=noccmmp(:,m31,m41,jspden)
-           if(m31==m41.and.(pawtab%usepawu==3.or.dmftdc==3)) then
-             n34_sig(1)= n34_sig(1) - n_sigs
-             n34_msig(1)= n34_msig(1) - n_msigs
-           end if
-           eldautemp=eldautemp &
-&           + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&           + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-           if(cplex_occ==2) then
-             eldautemp=eldautemp &
-&             - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
-&             - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-           end if
-           if (pawtab%usepawu==3.or.dmftdc==3) then
-             edcdc_opt3=edcdc_opt3 &
-&             + n_sigs*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&             + n_sigs*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-             eks_opt3=eks_opt3 &
-&             + noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&             + noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-             if(cplex_occ==2) then
-               eks_opt3=eks_opt3 &
-&               - noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
-&               - noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+     n_sigs =n_sig/(float(2*lpawu+1))
+     n_msigs =n_msig/(float(2*lpawu+1))
+!    if(pawtab%usepawu==3) then
+!    write(message,fmt=12) "noccmmp11 ",ispden,noccmmp(1,1,1,ispden)
+!    call wrtout(std_out,message,'COLL')
+!    write(message,fmt=12) "noccmmp11 ",jspden,noccmmp(1,1,1,jspden)
+!    call wrtout(std_out,message,'COLL')
+!    write(message,fmt=12) "n_sig      ",ispden,n_sig
+!    call wrtout(std_out,message,'COLL')
+!    write(message,fmt=12) "n_msig     ",jspden,n_msig
+!    call wrtout(std_out,message,'COLL')
+!    write(message,fmt=12) "n_sigs     ",ispden,n_sigs
+!    call wrtout(std_out,message,'COLL')
+!    write(message,fmt=12) "n_msigs    ",jspden,n_msigs
+!    call wrtout(std_out,message,'COLL')
+!    endif
+!    12 format(a,i4,e20.10)
+
+!    Compute interaction energy E_{ee}
+     do m1=-lpawu,lpawu
+       m11=m1+lpawu+1
+       do m2=-lpawu,lpawu
+         m21=m2+lpawu+1
+         n12_sig(:)=noccmmp(:,m11,m21,ispden)
+         if(m21==m11.and.(pawtab%usepawu==3.or.dmftdc==3)) n12_sig(1)=n12_sig(1)-n_sigs
+         do m3=-lpawu,lpawu
+           m31=m3+lpawu+1
+           do m4=-lpawu,lpawu
+             m41=m4+lpawu+1
+             n34_sig(:) =noccmmp(:,m31,m41,ispden)
+             n34_msig(:)=noccmmp(:,m31,m41,jspden)
+             if(m31==m41.and.(pawtab%usepawu==3.or.dmftdc==3)) then
+               n34_sig(1)= n34_sig(1) - n_sigs
+               n34_msig(1)= n34_msig(1) - n_msigs
              end if
-           end if
-         end do ! m4
-       end do ! m3
-     end do ! m2
-   end do ! m1
- end do ! ispden
- if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
- ABI_DEALLOCATE(n12_sig)
- ABI_DEALLOCATE(n34_msig)
- ABI_DEALLOCATE(n34_sig)
+             eldautemp=eldautemp &
+&             + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&             + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+             if(cplex_occ==2) then
+               eldautemp=eldautemp &
+&               - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
+&               - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+             end if
+             if (pawtab%usepawu==3.or.dmftdc==3) then
+               edcdc_opt3=edcdc_opt3 &
+&               + n_sigs*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&               + n_sigs*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+               eks_opt3=eks_opt3 &
+&               + noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&               + noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+               if(cplex_occ==2) then
+                 eks_opt3=eks_opt3 &
+&                 - noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
+&                 - noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+               end if
+             end if
+           end do ! m4
+         end do ! m3
+       end do ! m2
+     end do ! m1
+
+   end do ! ispden
+   if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
+   ABI_DEALLOCATE(n12_sig)
+   ABI_DEALLOCATE(n34_msig)
+   ABI_DEALLOCATE(n34_sig)
+
+ end if ! usepawu/=5 or 6
 
 !Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
  if (nspden==4) then
