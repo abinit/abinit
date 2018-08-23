@@ -35,6 +35,7 @@ module m_dfpt_vtowfk
  use m_cgtools
  use m_wfk
  use m_rf2
+ use m_rf2_init,         only : rf2_init
 
  use m_dtfil,        only : status
  use m_time,         only : timab

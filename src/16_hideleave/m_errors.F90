@@ -1834,7 +1834,7 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 end subroutine abi_abort
 !!***
 
-!!****f* m_errors/abi_abort
+!!****f* m_errors/abi_cabort
 !! NAME
 !!  abi_cabort
 !!
