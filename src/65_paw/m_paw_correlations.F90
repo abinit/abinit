@@ -2275,7 +2275,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        ABI_DEALLOCATE(rhoijtmp1)
 
 !      Compress rhoij
-       nselect=0
+       nselect=0 ; pawrhoij(iatom)%rhoijselect=0
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
            nselect=nselect+1
@@ -2410,7 +2410,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        end do
 
 !      Compress rhoij
-       nselect=0
+       nselect=0 ; pawrhoij(iatom)%rhoijselect=0
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
            nselect=nselect+1

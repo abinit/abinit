@@ -696,6 +696,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        if (use_rhoijp>0)  then
          LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex_out*lmn2_size_out,nspden_out))
          LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijselect,(lmn2_size_out))
+         pawrhoij_out(irhoij)%rhoijselect=0
        end if
        pawrhoij_out(irhoij)%use_rhoijp=use_rhoijp
      end if
@@ -1389,7 +1390,7 @@ end subroutine pawrhoij_copy
      if (use_rhoijp>0) then
        LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijselect,(lmn2_size))
        pawrhoij_gathered(jrhoij)%rhoijselect(1:nselect)=buf_int_all(indx_int:indx_int+nselect-1)
-       if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijselect(nselect+1:lmn2_size)=zero
+       if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijselect(nselect+1:lmn2_size)=0
        indx_int=indx_int+nselect
        LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijp,(cplex*lmn2_size,nspden))
        do isp=1,nspden
@@ -1747,6 +1748,7 @@ end subroutine pawrhoij_gather
    pawrhoij_out(irhoij)%use_rhoij_=use_rhoij_
    if (use_rhoijp>0) then
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijselect,(nselect))
+     pawrhoij_out(irhoij)%rhoijselect=0
      pawrhoij_out(irhoij)%rhoijselect(1:nselect)=buf_int(indx_int:indx_int+nselect-1)
      indx_int=indx_int+nselect
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex*nselect,nspden))
@@ -2322,6 +2324,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ii=0
        do iatom=1,natom
          nselect=nsel44(1,iatom)
+         pawrhoij(iatom)%rhoijselect(:)=0
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          do ispden=1,nspden_in
            pawrhoij(iatom)%rhoijp(1:nselect,ispden)=buffer(ii+1:ii+nselect)
@@ -2395,6 +2398,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ii=0;jj=0
        do iatom=1,natom
          nselect=nsel56(iatom)
+         pawrhoij(iatom)%rhoijselect(:)=0
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
          do ispden=1,my_nspden
@@ -2495,7 +2499,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 &         pawrhoij(iatom)%nrhoijsel,&
 &         pawrhoij(iatom)%cplex,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
-&         pawrhoij(iatom)%rhoijselect(:),-1.d0,1,&
+&         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
 &         opt_sym=optsym,mode_paral='PERS')
        end do
      end do
@@ -3915,7 +3919,11 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      end do  ! End loop over ispden
 
 !    Store number of non-zero values of rhoij
-     if (optrhoij==1) pawrhoij(iatm)%nrhoijsel=nselect
+     if (optrhoij==1) then
+       pawrhoij(iatm)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatm)%lmn2_size) &
+&        pawrhoij(iatm)%rhoijselect(nselect+1:pawrhoij(iatm)%lmn2_size)=0
+     end if
 
    end do ! End loop over iatm
 
@@ -4018,6 +4026,8 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
          end do
        end if
        pawrhoij(iatm)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatm)%lmn2_size) &
+&        pawrhoij(iatm)%rhoijselect(nselect+1:pawrhoij(iatm)%lmn2_size)=0
      end do
    end if
 

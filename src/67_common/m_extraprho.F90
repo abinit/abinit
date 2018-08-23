@@ -436,6 +436,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 !    (cannot use pawrhoij_copy here because update for single atom)
      nselect=pawrhoij(iatom)%nrhoijsel
      scf_history%pawrhoij(iatom,ind1new)%nrhoijsel=nselect
+     scf_history%pawrhoij(iatom,ind1new)%rhoijselect(:)=0
      scf_history%pawrhoij(iatom,ind1new)%rhoijselect(1:nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
      scf_history%pawrhoij(iatom,ind1new)%rhoijp(1:cplex*nselect,1:nspden_rhoij)= &
 &     pawrhoij(iatom)%rhoijp(1:cplex*nselect,1:nspden_rhoij)
@@ -465,6 +466,8 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
          end do
        end if
        pawrhoij(iatom)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatom)%lmn2_size) &
+&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
        ABI_DEALLOCATE(rhoijtmp)
      end if
 

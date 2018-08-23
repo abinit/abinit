@@ -557,6 +557,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
          end if
        end do
        pawrhoij(iatom)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatom)%lmn2_size) &
+&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
        ABI_DEALLOCATE(rhoijtmp)
      end do
    end if
@@ -621,6 +623,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
        end do
      end if
      pawrhoij(iatom)%nrhoijsel=nselect
+     if (nselect<pawrhoij(iatom)%lmn2_size) &
+&      pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
      ABI_DEALLOCATE(rhoijtmp)
    end do
  end if   ! usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16

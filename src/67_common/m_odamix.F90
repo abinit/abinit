@@ -608,6 +608,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
          end if
        end do
        pawrhoij(iatom)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatom)%lmn2_size) &
+&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
        ABI_DEALLOCATE(rhoijtmp)
      end if
 

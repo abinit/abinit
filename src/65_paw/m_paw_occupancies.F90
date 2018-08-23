@@ -1212,6 +1212,8 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 
    end do
    pawrhoij(iatom_rhoij)%nrhoijsel=nselect
+   if (nselect<pawrhoij(iatom_rhoij)%lmn2_size) &
+&    pawrhoij(iatom_rhoij)%rhoijselect(nselect+1:pawrhoij(iatom_rhoij)%lmn2_size)=0
 
 !  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
 !    Add a small real to the magnetization ; not yet activated => must be tested.
