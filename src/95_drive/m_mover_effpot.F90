@@ -184,7 +184,7 @@ implicit none
 !integer,allocatable :: npwtot(:)
  real(dp) :: acell(3)
 !real(dp) :: ecut_tmp(3,2,10)
- real(dp),allocatable :: amass(:) ,coeff_values(:,:)
+ real(dp),allocatable :: coeff_values(:,:)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
@@ -256,7 +256,7 @@ implicit none
 !NOTE:ARGUMENTS OF MOVER SHOULD BE CLEAN
 !     We may just need to provide AB_MOVER wich is the main object
 !     for mover and set  scfcv_args as an optional and depending on
-!     the king of calculation (abinit or multibinit), we provide
+!     the kind of calculation (abinit or multibinit), we provide
 !     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
@@ -271,16 +271,17 @@ implicit none
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1.0  ! DILATation : MaXimal value
+   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
-   dtset%friction = 0.0001 ! internal FRICTION coefficient
+   dtset%friction = 0.0001d0 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
    dtset%istatr = 0     ! Integer for STATus file SHiFT
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mqgrid = 0     ! Maximum number of Q-space GRID points for pseudopotentials
    dtset%mqgriddg = 0   ! Maximum number of Q-wavevectors for the 1-dimensional GRID
                         ! for the Double Grid in PAW
-   dtset%mdwall = 10000 ! Molecular Dynamics WALL location
+   dtset%mdwall = 10000d0 ! Molecular Dynamics WALL location
    dtset%ntypalch = 0   ! Number of TYPe of atoms that are "ALCHemical"
    dtset%natom = effective_potential%supercell%natom
    dtset%ntypat = effective_potential%crystal%ntypat
@@ -499,12 +500,6 @@ implicit none
    scfcv_args%psps => psps
 !  Set other arguments of the mover.F90 routines
 
-   ABI_ALLOCATE(amass,(dtset%natom))
-!  Assign masses to each atom (for MD)
-   do jj = 1,dtset%natom
-     amass(jj)=amu_emass*&
-&     effective_potential%crystal%amu(effective_potential%supercell%typat(jj))
-   end do
 !  Set the dffil structure
    dtfil%filnam_ds(1:2)=filnam(1:2)
    dtfil%filnam_ds(3)=""
@@ -563,7 +558,7 @@ implicit none
 &     '-Monte Carlo / Molecular Dynamics ',ch10
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+     call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
 &     verbose=verbose,writeHIST=writeHIST)
@@ -578,7 +573,7 @@ implicit none
      call wrtout(std_out,message,'COLL')
 
 !    Try the model
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+     call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
@@ -669,7 +664,7 @@ implicit none
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
-           call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+           call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &           rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &           effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
            if(.not.effective_potential%anharmonics_terms%bounded)then
@@ -854,7 +849,7 @@ implicit none
                  fcart(:,:)    = zero
 
 !              Run mover
-                 call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+                 call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &                 rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &                 effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
@@ -973,7 +968,6 @@ implicit none
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_DEALLOCATE(amass)
    ABI_DEALLOCATE(fred)
    ABI_DEALLOCATE(fcart)
    ABI_DEALLOCATE(indsym)

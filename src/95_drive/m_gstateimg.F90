@@ -43,6 +43,8 @@ module m_gstateimg
  use m_results_img
  use m_scf_history
  use m_io_redirect
+ use m_m1geo
+ use m_abimover
 
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
@@ -54,6 +56,8 @@ module m_gstateimg
  use m_dtfil,        only : dtfil_init, status
  use m_gstate,       only : gstate
  use m_predtk,       only : prtxvf
+ use m_precpred_1geo, only : precpred_1geo
+ use m_pred_simple,  only : prec_simple
 
 #if defined  HAVE_BIGDFT
  use BigDFT_API, only: mpi_environment_set
@@ -246,6 +250,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  type(args_gs_type) :: args_gs
  type(mep_type) :: mep_param
  type(ga_type) :: ga_param
+ type(m1geo_type) :: m1geo_param
  type(pimd_type) :: pimd_param
 !arrays
  integer,allocatable :: list_dynimage(:),scf_initialized(:)
@@ -269,6 +274,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img_timimage(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
+ type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
 
 ! ***********************************************************************
 
@@ -385,16 +391,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    scf_history(iimage)%history_size=history_size
  end do
 
-!MEP search: fill in eventually the data structure mep_param
- call mep_init(dtset,mep_param)
-
-!GA search: fill in eventually the data structure ga_param
- call ga_init(dtset,ga_param)
-
-!PIMD: fill in eventually the data structure pimd_param
- call pimd_init(dtset,pimd_param,is_master)
- dtion=one;if (is_pimd) dtion=pimd_param%dtion
-
 !In some cases, need amass variable
  if (use_hist) then
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
@@ -414,6 +410,19 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ntimimage_max=4*(ntimimage_max/4)
    idelta=4
  end if
+
+!MEP search: fill in eventually the data structure mep_param
+ call mep_init(dtset,mep_param)
+
+!GA search: fill in eventually the data structure ga_param
+ call ga_init(dtset,ga_param)
+
+!Move 1GEO approach: fill the data structure m1geo_param
+ call m1geo_init(dtfil,dtset,m1geo_param)
+
+!PIMD: fill in eventually the data structure pimd_param
+ call pimd_init(dtset,pimd_param,is_master)
+ dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
  call timab(703,2,tsec)
 
@@ -668,7 +677,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !  Predict the next value of the images
    if (call_predictor) then
      call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
-&     itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,dtset%natom,ndynimage,&
+&     itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,m1geo_param,dtset%natom,ndynimage,&
 &     nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
    end if
 
@@ -717,14 +726,27 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    call specialmsg_mpisum(mpi_enreg%comm_img)
    call libpaw_spmsg_mpisum(mpi_enreg%comm_img)
  end if
+
+
 !Final deallocations
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(vel)
  ABI_DEALLOCATE(vel_cell)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(list_dynimage)
+
  if (allocated(amass)) then
    ABI_DEALLOCATE(amass)
+ end if
+
+!This call is needed to free an internal matrix in prec_simpl. However, this is really not optimal ... 
+!One should have a datastructure associated with the preconditioner...
+ if (dtset%goprecon>0)then
+   ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
+   call abiforstr_ini(preconforstr,dtset%natom)
+   call prec_simple(m1geo_param%ab_mover,preconforstr,hist_prev(1),1,1,1)
+   call abiforstr_fin(preconforstr)
+   ABI_DATATYPE_DEALLOCATE(hist_prev)
  end if
 
  do itimimage=1,ntimimage_stored
@@ -747,6 +769,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
  call mep_destroy(mep_param)
  call ga_destroy(ga_param)
+ call m1geo_destroy(m1geo_param)
  call pimd_destroy(pimd_param)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
@@ -1005,7 +1028,7 @@ end subroutine prtimg
 !! SOURCE
 
 subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_dynimage,&
-&                     ga_param,mep_param,mpi_enreg,natom,ndynimage,nimage,nimage_tot,&
+&                     ga_param,mep_param,mpi_enreg,m1geo_param,natom,ndynimage,nimage,nimage_tot,&
 &                     ntimimage_stored,pimd_param,prtvolimg,results_img)
 
  use m_results_gs , only : results_gs_type
@@ -1030,6 +1053,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  character(len=60),intent(in) :: imagealgo_str
  real(dp),intent(in) :: deltae
  type(mep_type),intent(inout) :: mep_param
+ type(m1geo_type),intent(inout) :: m1geo_param
  type(ga_type),intent(inout) :: ga_param
  type(pimd_type),intent(inout) :: pimd_param
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1105,6 +1129,9 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
    call predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
+ case(6)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
    call predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
@@ -1114,7 +1141,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end select
 
-contains
+end subroutine predictimg
 !!***
 
 !!****f* ABINIT/predict_copy
@@ -1205,7 +1232,170 @@ subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 end subroutine predict_copy
 !!***
 
-end subroutine predictimg
+!!****f* ABINIT/move_1geo
+!! NAME
+!! move_1geo
+!!
+!! FUNCTION
+!! This subroutine uses the forces, stresses and other results obtained for several images with one, common, geometry, 
+!! weight them to deliver averaged forces, stresses, etc, and uses these to predict the next common geometry.
+!! All images must be dynamical.
+!! WARNING : at present, only forces are used, to change atomic positions. No change of cell geometry.
+!! Since this is not the PIMD algorithm, suppose ntimimage_stored=ntimimage, and itimimage=itimimage_eff.
+!!
+!! INPUTS
+!! itimimage_eff=time index in the history
+!! nimage=number of images
+!! ntimimage_stored=number of time steps stored in the history
+!!  mpi_enreg=MPI-parallelisation information
+!! m1geo_param=parameters for the 1geo algorithms
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! results_img(ntimimage_stored,nimage)=datastructure that holds the history of previous computations.
+!!   results_img(:,:)%acell(3)
+!!    at input, history of the values of acell for all images
+!!    at output, the predicted values of acell for all images
+!!   results_img(:,:)%results_gs
+!!    at input, history of the values of energies and forces for all images
+!!   results_img(:,:)%rprim(3,3)
+!!    at input, history of the values of rprim for all images
+!!    at output, the predicted values of rprim for all images
+!!   results_img(:,:)%vel(3,natom)
+!!    at input, history of the values of vel for all images
+!!    at output, the predicted values of vel for all images
+!!   results_img(:,:)%vel_cell(3,3)
+!!    at input, history of the values of vel_cell for all images
+!!    at output, the predicted values of vel_cell for all images
+!!   results_img(:,:)%xred(3,natom)
+!!    at input, history of the values of xred for all images
+!!    at output, the predicted values of xred for all images
+!!
+!! PARENTS
+!!      predictimg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'move_1geo'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: itimimage_eff,nimage,ntimimage_stored
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(m1geo_type),intent(inout) :: m1geo_param
+!arrays
+ type(results_img_type),intent(inout) :: results_img(nimage,ntimimage_stored)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ihist,iimage,natom,next_itimimage
+ real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6)
+ real(dp),allocatable :: fcart(:,:),vel(:,:),vel_cell(:,:),xred(:,:)
+ logical :: DEBUG=.FALSE.
+
+! *************************************************************************
+
+ natom=m1geo_param%ab_mover%natom
+ ihist=m1geo_param%hist_1geo%ihist
+
+ ABI_ALLOCATE(fcart,(3,natom))
+ ABI_ALLOCATE(vel,(3,natom))
+ ABI_ALLOCATE(vel_cell,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+ 
+ xred(:,:)    =results_img(iimage,itimimage_eff)%xred(:,:)
+ acell(:)     =results_img(iimage,itimimage_eff)%acell(:)
+ rprim(:,:)   =results_img(iimage,itimimage_eff)%rprim(:,:)
+ vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
+ vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
+
+ call mkrdim(acell,rprim,rprimd)
+
+!Fill history with the values of xred, acell and rprimd
+ call var2hist(acell,m1geo_param%hist_1geo,natom,rprimd,xred,DEBUG)
+
+!Fill history with velocities and ionic kinetic energy
+ call vel2hist(m1geo_param%ab_mover%amass,m1geo_param%hist_1geo,vel,vel_cell)
+ m1geo_param%hist_1geo%time(ihist)=zero
+
+!Compute forces and stresses for the 1geo
+ ABI_ALLOCATE(fcart,(3,natom))
+
+ fcart(:,:)=zero
+ strten(:)=zero
+
+ do iimage=1,nimage
+   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage) 
+   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage) 
+ enddo
+
+!Store them in hist_1geo 
+ m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)
+ m1geo_param%hist_1geo%strten(:,ihist) =strten(:)
+
+!Store them in ab_xfh
+!THIS IS TO BE DONE !
+
+!Compute new atomic positions and cell characteristics in the single geometry
+ call precpred_1geo(m1geo_param%ab_mover,&
+& m1geo_param%ab_xfh_1geo,&
+& m1geo_param%ab_mover%amu_curr,&
+& m1geo_param%deloc,&
+& m1geo_param%dt_chkdilatmx,&
+& mpi_enreg%comm_cell,&
+& m1geo_param%dilatmx,&
+& m1geo_param%filnam_ds4,&
+& m1geo_param%hist_1geo,&
+& m1geo_param%hmctt,&
+& m1geo_param%icycle,&
+& m1geo_param%iexit,&
+& m1geo_param%itime,&
+& m1geo_param%mttk_vars,&
+& m1geo_param%nctime,&
+& m1geo_param%ncycle,&
+& m1geo_param%nerr_dilatmx,&
+& m1geo_param%npsp,&
+& m1geo_param%ntime,&
+& m1geo_param%rprimd_orig,&
+& m1geo_param%skipcycle,&
+& m1geo_param%usewvl)
+
+!Retrieve the new positions, cell parameters [and velocities ?!]
+ call hist2var(acell,m1geo_param%hist_1geo,natom,rprimd,xred,DEBUG)
+
+!Store acell, rprim, xred and vel for the new iteration
+ next_itimimage=itimimage_eff+1
+ if (next_itimimage>ntimimage_stored)then
+   MSG_ERROR('next_itimimage>ntimimage_stored')
+ endif
+
+ do iimage=1,nimage
+   results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
+   results_img(iimage,next_itimimage)%acell(:)     =acell(:)
+   results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
+!  WARNING : Should also store vel and vel_cell of course ... 
+!  results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
+!  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
+ end do
+
+ ABI_DEALLOCATE(fcart)
+ ABI_DEALLOCATE(vel)
+ ABI_DEALLOCATE(vel_cell)
+ ABI_DEALLOCATE(xred)
+
+end subroutine move_1geo
 !!***
 
 end module m_gstateimg

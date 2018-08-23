@@ -315,7 +315,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,pointer :: npwarr_(:),pwind(:,:,:)
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
- real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
+ real(dp),allocatable :: cg(:,:),doccde(:)
  real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
@@ -407,8 +407,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call energies_init(results_gs%energies)
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(dtset%natom))
- call setup1(acell,amass,args_gs%amu,bantot,dtset,&
+ call setup1(acell,bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,rprim,rprimd,ucvol,psps%usepaw)
@@ -1290,7 +1289,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if (dtset%ionmov>50.or.dtset%ionmov<=27) then
 
      ! TODO: return conv_retcode
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
+     call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
 &     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
 
 !    Compute rprim from rprimd and acell
@@ -1559,7 +1558,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Deallocate arrays
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(cg)
