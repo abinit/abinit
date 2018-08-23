@@ -162,7 +162,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
  use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

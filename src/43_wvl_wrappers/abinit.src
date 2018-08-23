@@ -21,7 +21,6 @@ sources = [
  "defs_wvltypes.F90",
  "defs_PSolver.F90",
  "m_abi2big.F90",
- "nullify_wvl_data.F90",
  "m_paw2wvl.F90",
  "m_wvl_denspot.F90",
  "m_wvl_descr_psp.F90",
