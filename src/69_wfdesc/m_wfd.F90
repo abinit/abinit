@@ -7324,7 +7324,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
    call wrtout(std_out,msg,'COLL')
    do iatom=1,Cryst%natom,natinc
      call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex,&
-&                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,pawrhoij(iatom)%nspden,&
+&                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,&
 &                  unit=std_out,opt_prtvol=pawprtvol)
    end do
  end if
