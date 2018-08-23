@@ -39,7 +39,7 @@ MODULE m_oper
 
  implicit none
 
- private 
+ private
 
  public :: init_oper
  public :: diff_oper
@@ -65,11 +65,11 @@ MODULE m_oper
 
  type, public :: oper_type ! for each atom
 
-!  integer :: maxlpawu         ! Number of correlated atoms 
+!  integer :: maxlpawu         ! Number of correlated atoms
 !
 !  integer :: mband
 !  ! Number of bands
-!      
+!
 !
   integer :: nkpt
   ! Number of k-point in the IBZ.
@@ -90,7 +90,7 @@ MODULE m_oper
   character(len=12) :: whichoper
   ! describe the type of operator computed (LDA, DMFT, KS..)
 
-!  ! Polarisation 
+!  ! Polarisation
   type(matlu_type), allocatable :: matlu(:)
 !   Local projection on correlated orbitals
 
@@ -98,7 +98,7 @@ MODULE m_oper
 !   In the KS basis  (nsppol,nkpt,nband,nband)
 
   real(dp), pointer :: wtk(:) => null()
-      
+
  end type oper_type
 !!***
 
@@ -161,9 +161,9 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  if(present(opt_ksloc)) then
    optksloc=opt_ksloc
  else
-   optksloc=3 
+   optksloc=3
  endif
- 
+
  if(optksloc/=3) then
     ! FIXME: empty line!
  endif
@@ -503,7 +503,7 @@ end subroutine print_oper
 !! inverse_oper
 !!
 !! FUNCTION
-!!  Compute the inverse of the operator either in the KS space or in the 
+!!  Compute the inverse of the operator either in the KS space or in the
 !!  correlated subspace.
 !!
 !! INPUTS
@@ -548,7 +548,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
 !oper variables-------------------------------
  integer :: ikpt,isppol
  complex(dpc), allocatable :: matrix(:,:)
- character(len=500) :: message 
+ character(len=500) :: message
  integer :: paral
  integer, allocatable :: procb2(:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
@@ -715,7 +715,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  ABI_DEALLOCATE(procb2)
 
 
- 
+
 
  DBG_EXIT("COLL")
 end subroutine loc_oper
@@ -779,7 +779,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  else
    paral=0
  endif
- 
+
 
 
  DBG_ENTER("COLL")
@@ -939,11 +939,11 @@ end subroutine identity_oper
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  occup1 <type(oper_type)>= occupations 
-!!  occup2 <type(oper_type)>= occupations 
+!!  occup1 <type(oper_type)>= occupations
+!!  occup2 <type(oper_type)>= occupations
 !!  option : option for printing (if 1 assume data are related to lda only)
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!! 
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -1007,12 +1007,11 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
 !&   '   Error: Differences between ',trim(char1),' and ',trim(char2),' is too large:',&
 !&   matludiff,'is large than',toldiff
 !   call wrtout(std_out,message,'COLL')
-!   call leave_new('COLL')
+!   call abi_abort('COLL')
 !  endif
 ! endif
-! call flush(std_out)
-! call leave_new('COLL')
- 
+! call abi_abort('COLL')
+
  DBG_EXIT("COLL")
 end subroutine diff_oper
 !!***

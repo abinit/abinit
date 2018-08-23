@@ -3802,7 +3802,7 @@ end subroutine hdr_get_occ3d
 !! INPUTS
 !!  fform=integer specification of data type (expected)
 !!  fform0=integer specification of data type (from disk file)
-!!  mode_paral : COLL or PERS, for all leave_new and wrtout calls
+!!  mode_paral: COLL or PERS, for all wrtout calls
 !!  hdr <type(hdr_type)>=the header structured variable from dtset and psps
 !!  hdr0<type(hdr_type)>=the header structured variable from the disk file
 !!

@@ -183,7 +183,7 @@ contains
 !!
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
-!!      abihist_free,abihist_init,abimover_fin,abimover_ini 
+!!      abihist_free,abihist_init,abimover_fin,abimover_ini
 !!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
 !!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
@@ -222,7 +222,7 @@ logical,optional,intent(in) :: writeHIST
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat) 
+real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
@@ -269,7 +269,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   if (need_verbose)
+   if (need_verbose) then
      write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
    end if
  end if
@@ -784,7 +784,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &     icycle,iexit,itime,mttk_vars,&
 &     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
 &     scfcv_args%dtset%rprimd_orig,skipcycle,&
-&     scfcv_args%dtset%usewvl) 
+&     scfcv_args%dtset%usewvl)
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
@@ -937,7 +937,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 23. Deallocate hist and ab_mover datatypes
 
-!This call is needed to free an internal matrix. However, this is not optimal ... 
+!This call is needed to free an internal matrix. However, this is not optimal ...
 !One should instead have a datastructure associated with the preconditioner...
  if (ab_mover%goprecon>0)then
    call prec_simple(ab_mover,preconforstr,hist,1,1,1)

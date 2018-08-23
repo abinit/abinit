@@ -30,12 +30,11 @@
 
 MODULE m_datafordmft
 
-
  use defs_basis
 
  implicit none
 
- private 
+ private
 
  public :: datafordmft
  public :: compute_levels
@@ -220,7 +219,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  iorder_cprj=0
  ABI_CHECK(dtset%mkmem/=0,"mkmem==0 not supported anymore!")
 !todo_ab: extract cprj from file unpaw in the following..
-!call leave_new('COLL')
+!call abi_abort('COLL')
 
 !----------------------------------- MPI-------------------------------------
 
@@ -490,7 +489,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !enddo
 !enddo
 !enddo
-!call leave_new('COLL')
+!call abi_abort('COLL')
  if(abs(dtset%pawprtvol)>=3) then
    write(message,*) "chinorm used here =",chinorm
    call wrtout(std_out,  message,'COLL')
@@ -854,7 +853,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 !                      &                         'BUG: jj1 is not correct in datafordmft psichi_print',ch10,&
 !                      &                         'Action: CONTACT Abinit group'
 !                      call wrtout(std_out,  message,'COLL')
-!                      call leave_new('COLL')
+!                      call abi_abort('COLL')
 !                      end if ! jj1
                        m1=psps%indlmn(2,ilmn,itypat)+psps%indlmn(1,ilmn,itypat)+1
 !                      ----- Print only when the sum over projectors is done
@@ -1046,8 +1045,8 @@ end subroutine datafordmft
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  
-!! 
+!!
+!!
 !! OUTPUT
 !!
 !! NOTES
@@ -1141,7 +1140,7 @@ end subroutine datafordmft
          do im1=1,2*lpawu+1
            energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)= &
 &           energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)&
-&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie 
+&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie
          end do
        end do
      end do
@@ -1301,7 +1300,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !  ====================================
 !  == renormalize the sum over k-points
 !  ====================================
-!  allocate(temp_wtk(nkpt)) 
+!  allocate(temp_wtk(nkpt))
    temp_wtk=>paw_dmft%wtk
    write(message,'(6a)') ch10,'  ====================================== '&
 &   ,ch10,'  == Renormalization for all K-points == '&
@@ -1310,9 +1309,9 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
    call normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk)
 !  deallocate(temp_wtk)
 
- end if 
- 
-!== Change back repr for norm 
+ end if
+
+!== Change back repr for norm
 
 !===============================================
 !==  Compute norm with new psichi
@@ -1322,7 +1321,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
  call identity_oper(norm,1)
 
 !== Deduce norm%matlu from norm%ks with new psichi
- call loc_oper(norm,paw_dmft,1) 
+ call loc_oper(norm,paw_dmft,1)
 
 !== Print norm%matlu unsymetrized with new psichi
  if(pawprtvol>2) then
@@ -1440,12 +1439,12 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
 !  *********************************************************************
    call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
-   
+
 !  == Build identity for norm1%ks (option=1)
    call identity_oper(norm1,1)
-   
+
    if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt) 
+     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
    end if
    if(.not.present(jkpt)) then
      call loc_oper(norm1,paw_dmft,1)
@@ -1471,7 +1470,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
      end if
    end do
 !  ==-------------------------------------
-   
+
 !  built large overlap matrix
    write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
    call wrtout(std_out,message,'COLL')
@@ -1479,13 +1478,13 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call destroy_oper(norm1)
 
 
-   
+
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom).ne.-1) then
        ndim=2*paw_dmft%lpawu(iatom)+1
        tndim=nsppol*nspinor*ndim
        ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
-       
+
 !      == Compute Inverse Square root of overlap : O^{-0.5}
        !!write(message,'(a,1x,a,e21.14,a,e21.14,a)') "overlap", &
        !!"(",real(overlap(1)%value),",",aimag(overlap(1)%value),")"
@@ -1499,14 +1498,14 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
            sqrtmatinv(ib,ib)=cone/(sqrt(overlap(iatom)%value(ib,ib)))
          end do
        end if
-       
-!      == Apply O^{-0.5} on psichi 
+
+!      == Apply O^{-0.5} on psichi
        ABI_ALLOCATE(wan,(nsppol,nspinor,ndim))
 !      write(std_out,*) mbandc,nsppol,nspinor,ndim
 !      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
        do ikpt=1,nkpt
          do ib=1,mbandc
-           if(present(jkpt)) then 
+           if(present(jkpt)) then
              ikpt1=jkpt
            else
              ikpt1=ikpt
@@ -1544,7 +1543,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
        ABI_DEALLOCATE(wan)
        ABI_DEALLOCATE(sqrtmatinv)
 !      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
-       
+
 !      ==-------------------------------------
      end if ! lpawu.ne.-1
    end do ! iatom
@@ -1566,10 +1565,10 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call identity_oper(norm1,1)
 
    if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt) 
+     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
    end if
    if(.not.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1) 
+     call loc_oper(norm1,paw_dmft,1)
    end if
 
    if (nkpt>1) then
@@ -1598,7 +1597,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call destroy_oper(norm3)
 
    call destroy_oper(norm1)
-!  call flush(std_out)           ! debug debug  debug   debug 
+!  call flush(std_out)           ! debug debug  debug   debug
 !  MSG_ERROR("Stop for debugging")
 
  end subroutine normalizepsichi
@@ -1706,8 +1705,8 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
        do isppol=1,paw_dmft%nsppol
          if(iband1==iband2) then
            ham_a%ks(isppol,ikpt,iband1,iband2) = cmplx(paw_dmft%eigen_lda(isppol,ikpt,iband1),0.d0,kind=dp)
-         else 
-           ham_a%ks(isppol,ikpt,iband1,iband2) = czero 
+         else
+           ham_a%ks(isppol,ikpt,iband1,iband2) = czero
          end if
        end do
      end do
@@ -1730,11 +1729,11 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
 !------------------------------------------------------------------
  call prod_oper(ham_a,ham_b,ham_squareks,1)
 
-! Compute ham_squareks%matlu 
+! Compute ham_squareks%matlu
 !---------------------------
  call loc_oper(ham_squareks,paw_dmft,1)
 
-! Symetrise ham_squareks%matlu 
+! Symetrise ham_squareks%matlu
 !------------------------------
  call sym_matlu(cryst_struc,ham_squareks%matlu,pawang)
 
@@ -1743,7 +1742,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
 !   call print_matlu(ham_squareks%matlu,paw_dmft%natom,1,opt_exp=1)
 
 
-! Compute ham_squarelocal%matlu  
+! Compute ham_squarelocal%matlu
 !-------------------------------
  call prod_oper(ham_a,ham_b,ham_squarelocal,2)
 
@@ -1764,7 +1763,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  !  call wrtout(std_out,message,'COLL')
  !  call print_matlu(hybri_coeff,paw_dmft%natom,1,opt_exp=1)
 
-! Symetrise the local quantity 
+! Symetrise the local quantity
 !------------------------------
  call sym_matlu(cryst_struc,hybri_coeff,pawang)
 

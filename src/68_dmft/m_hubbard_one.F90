@@ -3,7 +3,7 @@
 !!  m_hubbard_one
 !!
 !! FUNCTION
-!! 
+!!
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
@@ -36,7 +36,7 @@ MODULE m_hubbard_one
 
  implicit none
 
- private 
+ private
 
  public :: hubbard_one
 !!***
@@ -151,7 +151,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  nsppol=paw_dmft%nsppol
  natom=paw_dmft%natom
  nspinor=paw_dmft%nspinor
- 
+
 
 !Initialise for compiler
  omega_current=czero
@@ -207,7 +207,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !         do im1=1,2*lpawu+1
 !           energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)=&
 !&           energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)&
-!&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie 
+!&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie
 !         end do
 !       end do
 !     end do
@@ -215,14 +215,14 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !   end if
 ! end do ! natom
 ! call sym_matlu(cryst_struc,energy_level%matlu,pawang)
-! 
+!
 ! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels for Fermi Level=",paw_dmft%fermie
 ! call wrtout(std_out,message,'COLL')
 !!call print_oper(energy_level,1,paw_dmft,1)
 ! call print_matlu(energy_level%matlu,natom,1)
 
 !========================
-!Compute Weiss function 
+!Compute Weiss function
 !========================
  ABI_ALLOCATE(Id,(20,20,nspinor,nspinor))
  do iatom = 1 , natom
@@ -291,7 +291,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  end if
 
 !========================
-!Compute Green function 
+!Compute Green function
 !========================
  call init_green(green_hubbard,paw_dmft,opt_oper_ksloc=2,wtype=green%w_type) ! initialize only matlu
 !write(std_out,*)"udens", udens_atoms(1)%value
@@ -343,7 +343,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 
 !! voir si en faisant GG0/(G-G0) cela reduit l'erreur
 !enddo
-!call leave_new('COLL')
+!call abi_abort('COLL')
 
 
 !write(message,'(2a,f13.5)') ch10," == Print Energy levels after diagonalisation"
@@ -377,7 +377,7 @@ contains
 !! green_atomic_hubbard
 !!
 !! FUNCTION
-!! 
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (BAmadon)
@@ -483,7 +483,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
        ABI_ALLOCATE(minener,(0:nlevels))
        ABI_ALLOCATE(elevels,(nlevels))
        ABI_DATATYPE_ALLOCATE(e_nelec,(0:nlevels))
-       do nelec=0,nlevels ! number of electrons 
+       do nelec=0,nlevels ! number of electrons
          cnk=nint(permutations(nlevels,nelec)/factorial(nelec))
          ABI_ALLOCATE(occ_level(nelec)%repart      ,(cnk,nelec))
          ABI_ALLOCATE(occ_level(nelec)%ocp         ,(cnk,nlevels))
@@ -536,8 +536,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      Value for nelec=0:
        nconfig_nelec(0)=1
        occ_level(0)%ocp(1,:)=0
-!      Loop on possible occupation of levels with nelec 
-       do nelec=1,nlevels ! number of electrons 
+!      Loop on possible occupation of levels with nelec
+       do nelec=1,nlevels ! number of electrons
 !        write(message,'(2a,i3,a)') ch10," For number of electrons",  &
 !        &       nelec," positions of electrons are:"
 !        call wrtout(std_out,message,'COLL')
@@ -578,7 +578,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      ============================================
 !      Compute energy for each of the occupations
 !      ============================================
-       do nelec=0,nlevels !  
+       do nelec=0,nlevels !
          e_nelec(nelec)%config=zero
          do iconfig=1,nconfig_nelec(nelec)
 !          First compute energy level contribution
@@ -599,11 +599,11 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
                e_nelec(nelec)%config(iconfig)= e_nelec(nelec)%config(iconfig)   &
 !              &               + hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
 &               + udens_atoms(iatom)%value(occ_level(nelec)%repart(iconfig,ielec), &
-&               occ_level(nelec)%repart(iconfig,jelec))/2.d0 ! udens(i,i)=0 
+&               occ_level(nelec)%repart(iconfig,jelec))/2.d0 ! udens(i,i)=0
 !              write(std_out,*) ielec,occ_level(nelec)%repart(iconfig,ielec)
 !              write(std_out,*) jelec,occ_level(nelec)%repart(iconfig,jelec)
 !              write(std_out,*)hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
-!              &                occ_level(nelec)%repart(iconfig,jelec))/2.d0 
+!              &                occ_level(nelec)%repart(iconfig,jelec))/2.d0
              end do ! jelec
            end do ! ielec
 !          write(std_out,*) "Nelec",nelec,"iconfig",iconfig,"ecorr",e_nelec(nelec)%config(iconfig)
@@ -636,7 +636,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      Print possibles occupations
 !      ===================================
        if(prtopt>3) then
-         do nelec=0,nlevels ! number of electrons 
+         do nelec=0,nlevels ! number of electrons
            write(message,'(2a,i3,2a,i5,3a)') ch10," For",nelec," electrons, ", &
 &           "there are ",nconfig_nelec(nelec)," repartitions which are :", &
 &           ch10,"Energy and Occupations"
@@ -677,8 +677,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
                  write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
                  call wrtout(std_out,message,'COLL')
                end if
-               occ_level(nelec)%transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition 
-               occ_level(nelec)%transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition 
+               occ_level(nelec)%transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
+               occ_level(nelec)%transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
              end if
            end do ! jconfig
            if(prtopt>3) then
@@ -767,9 +767,9 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
        ABI_DEALLOCATE(green_temp_realw)
 
 !      ===================================
-!      Deallocations 
+!      Deallocations
 !      ===================================
-       do nelec=0,nlevels 
+       do nelec=0,nlevels
          ABI_DEALLOCATE(occ_level(nelec)%repart)
          ABI_DEALLOCATE(occ_level(nelec)%ocp)
          ABI_DEALLOCATE(occ_level(nelec)%transition)
@@ -795,7 +795,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! combin
 !!
 !! FUNCTION
-!! 
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (BAmadon)
@@ -805,8 +805,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  
-!! 
+!!
+!!
 !! OUTPUT
 !!
 !! NOTES
@@ -814,7 +814,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! PARENTS
 !!
 !! CHILDREN
-!!      
+!!
 !! SOURCE
 
  recursive subroutine combin(ielec,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
@@ -838,7 +838,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  integer, intent(inout) :: occup(0:nlevels,nlevels)
 ! type  :: level2_type
 !  integer, pointer :: repart(:,:)
-! end type 
+! end type
  type(level2_type), intent(inout) :: occ_level(0:nlevels)
 ! integer, intent(in) :: prtopt
 
@@ -851,7 +851,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    prtopt=1
    max_ielec=nlevels-nelec+ielec
 !  write(std_out,*) "call to combin ielec,nelec,nlevels",ielec,nelec,nlevels
-   select case (ielec)  
+   select case (ielec)
    case (1)
      min_ielec=1
    case default
@@ -875,10 +875,10 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
          write(message,'(a,i3,a,30i5)') "For ielec",ielec," Occupf are", (occup(nelec,jelec),jelec=1,nelec)
          call wrtout(std_out,message,'COLL')
        end if
-     else 
+     else
        occup(nelec,ielec)=pos
 !      write(std_out,*) "For ielec", ielec, "case 1 and default"
-       call combin(ielec+1,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup) 
+       call combin(ielec+1,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
        if(prtopt>=3) then
          write(message,'(a,i3,a,30i5)') "For ielec",ielec," Occup are", (occup(nelec,jelec),jelec=1,nelec)
          call wrtout(std_out,message,'COLL')
