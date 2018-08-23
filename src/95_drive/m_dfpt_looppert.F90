@@ -92,6 +92,7 @@ module m_dfpt_loopert
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
+ use m_symkpt,     only : symkpt
 
  implicit none
 

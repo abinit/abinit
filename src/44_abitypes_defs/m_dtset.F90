@@ -1622,6 +1622,7 @@ end subroutine find_getdtset
 
 subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
+ use m_symkpt,     only : symkpt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

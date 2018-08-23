@@ -58,6 +58,7 @@ MODULE m_bz_mesh
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
+ use m_symkpt,     only : symkpt
 
  implicit none
 

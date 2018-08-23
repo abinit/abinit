@@ -39,6 +39,7 @@ module m_kpts
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
+ use m_symkpt,     only : symkpt
 
  implicit none
 

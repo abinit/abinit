@@ -41,6 +41,7 @@ module m_harmonic_thermo
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_ifc,            only : ifc_type, ifc_fourq
  use m_kpts,           only : smpbz
+ use m_symkpt,     only : symkpt
 
  implicit none
 
