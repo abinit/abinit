@@ -518,7 +518,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        iatom=jatom(iat);nspden=pawrhoij_all(iatom)%nspden
        call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex,&
 &                    pawrhoij_all(iatom)%qphase,iatom,dtset%natom,&
-&                    pawrhoij_all(iatom)%nspden,rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
+&                    rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
 &                    test_value=valmx,unit=unitfi,opt_prtvol=dtset%pawprtvol)
      end do
      msg=' '

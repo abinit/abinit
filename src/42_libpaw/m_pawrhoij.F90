@@ -3069,7 +3069,6 @@ end subroutine pawrhoij_inquire_dim
 !!  qphase=2 if rhoij has a exp(iqR) phase, 1 if not
 !!  iatom=current atom
 !!  natom=total number of atoms in the system
-!!  nspden=number of spin density components
 !!  [opt_prtvol]= >=0 if up to 12 components of _ij matrix have to be printed
 !!                 <0 if all components of ij_ matrix have to be printed (optional)
 !!  [mode_paral]= parallel printing mode (optional, default='COLL')
@@ -3090,7 +3089,7 @@ end subroutine pawrhoij_inquire_dim
 !!
 !! SOURCE
 
-subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
+subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 &          rhoijselect,test_value,title_msg,unit,opt_prtvol,mode_paral) ! Optional arguments
 
 
@@ -3105,7 +3104,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,qphase,iatom,natom,nspden
+ integer,intent(in) :: cplex,qphase,iatom,natom
  integer,optional,intent(in) :: opt_prtvol,unit
  real(dp),intent(in),optional :: test_value
  character(len=4),optional,intent(in) :: mode_paral
@@ -3116,8 +3115,9 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
 
 !Local variables-------------------------------
 !scalars
- character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
- integer :: irhoij,my_lmn_size,my_lmn2_size,my_opt_pack,my_opt_sym,my_prtvol,my_unt,nrhoijsel,rhoij_size
+ character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
+ integer :: irhoij,my_lmn_size,my_lmn2_size,my_nspden,my_opt_pack,my_opt_sym,my_prtvol
+ integer :: my_unt,nrhoijsel,rhoij_size
  real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
  character(len=2000) :: msg
@@ -3143,6 +3143,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
  end if
 
 !Inits
+ my_nspden=size(rhoij,2)
  my_lmn2_size=size(rhoij,1)/cplex
  my_lmn_size=int(dsqrt(two*dble(my_lmn2_size)))
  my_opt_sym=merge(1,2,qphase==2)
@@ -3162,16 +3163,16 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,nspden,&
  end if
 
 ! === Loop over Rho_ij components ===
- do irhoij=1,nspden
+ do irhoij=1,my_nspden
 
    rhoij_  => rhoij(1:cplex*rhoij_size,irhoij)
    test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
 
    !Subtitle
-   if (natom>1.or.nspden>1) then
-     if (nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
-     if (nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
-     if (nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(nspden/4)))
+   if (natom>1.or.my_nspden>1) then
+     if (my_nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
+     if (my_nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
+     if (my_nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
      call wrtout(my_unt,msg,my_mode)
    end if
 
@@ -3368,8 +3369,8 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
    do iatm=1,nrhoij,natinc
      iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
      if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
-     call pawrhoij_print_rhoij(pawrhoij(iatm)%rhoij_,pawrhoij(iatm)%cplex,&
-&                  pawrhoij(iatm)%qphase,iatom,natom,pawrhoij(iatm)%nspden,&
+     call pawrhoij_print_rhoij(pawrhoij_unsym(iatm)%rhoij_,pawrhoij_unsym(iatm)%cplex,&
+&                  pawrhoij_unsym(iatm)%qphase,iatom,natom,&
 &                  unit=std_out,opt_prtvol=pawprtvol,mode_paral=wrt_mode)
    end do
    call wrtout(std_out,"",wrt_mode)
@@ -4046,7 +4047,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
      if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
      call pawrhoij_print_rhoij(pawrhoij(iatm)%rhoijp,pawrhoij(iatm)%cplex,&
-&                  pawrhoij(iatm)%qphase,iatom,natom,pawrhoij(iatm)%nspden,&
+&                  pawrhoij(iatm)%qphase,iatom,natom,&
 &                  rhoijselect=pawrhoij(iatm)%rhoijselect,unit=std_out,&
 &                  opt_prtvol=pawprtvol,mode_paral=wrt_mode)
    end do
