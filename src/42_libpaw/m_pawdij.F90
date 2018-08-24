@@ -4699,6 +4699,17 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
+!Determine sizes of dij array according to options
+ my_qphase=1;my_cplex_dij=1;my_ndij=1
+ if (my_natom>0) then
+   my_qphase=paw_ij(1)%qphase
+   my_cplex_dij=paw_ij(1)%cplex_dij
+   my_ndij=paw_ij(1)%ndij
+   if (option_dij==4.or.option_dij==5.or.option_dij==9) my_qphase=1
+   if (option_dij==10) my_cplex_dij=1
+   if (option_dij==10) my_ndij=1
+ end if
+
 !Antiferro case ?
  antiferro=.false.;if (my_natom>0) antiferro=(paw_ij(1)%nspden==2.and.paw_ij(1)%nsppol==1.and.my_ndij/=4)
 ! Non-collinear case
@@ -4736,7 +4747,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    pertstrg="DIJ";if (ipert>0) pertstrg="DIJ(1)"
    natinc=1;if(my_natom>1.and.pawprtvol>=0) natinc=my_natom-1
    write(msg, '(7a)') ch10," PAW TEST:",ch10,&
-&     ' ========= Values of ',trim(pertstrg),' after symetrization =========',ch10
+&     ' ========= Values of ',trim(pertstrg),' before symetrization =========',ch10
    call wrtout(std_out,msg,wrt_mode)
    do iatom=1,my_natom,natinc
      iatom_tot=iatom; if (paral_atom) iatom_tot=my_atmtab(iatom)
@@ -4757,14 +4768,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
 !  Have to make a temporary copy of dij
    LIBPAW_DATATYPE_ALLOCATE(my_tmp_dij,(my_natom))
-   my_qphase=1;my_cplex_dij=1;my_ndij=1
    if (my_natom>0) then
-     my_qphase=paw_ij(1)%qphase
-     my_cplex_dij=paw_ij(1)%cplex_dij
-     my_ndij=paw_ij(1)%ndij
-     if (option_dij==4.or.option_dij==5.or.option_dij==9) my_qphase=1
-     if (option_dij==10) my_cplex_dij=1
-     if (option_dij==10) my_ndij=1
      do iatom=1,my_natom
        lmn2_size=paw_ij(iatom)%lmn2_size
        sz1=my_qphase*my_cplex_dij*lmn2_size;sz2=my_ndij
@@ -5210,7 +5214,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
      end if
    end if
    do iatom=1,my_natom
-     do ispden=1,paw_ij(iatom)%ndij
+     do ispden=1,my_ndij
        qphase=paw_ij(iatom)%qphase
        cplex_dij=paw_ij(iatom)%cplex_dij
        lmn2_size=paw_ij(iatom)%lmn2_size
