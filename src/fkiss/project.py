@@ -223,7 +223,7 @@ class FortranFile(object):
 
         if not as_dataframe: return d
         import pandas as pd
-        return pd.DataFrame([d], index=[self.basename], columns=d.keys())
+        return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
     #def write_notebook(self, nbpath=None):
     #    """
@@ -630,11 +630,14 @@ class AbinitProject(object):
         # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
         # that I can map these names to external libraries.
+        # This means that I **cannot generate** the entire file in a programmatic way
+        # but only the libraries entries.
         import configparser
         config = configparser.ConfigParser()
         binconf_path = os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf")
         config.read(binconf_path)
-        # Read header with comments
+        # Read header with comments to be added to the new conf file.
+        # NB: use [DEFAULT] as sentinel.
         header = []
         with open(binconf_path, "rt") as fh:
             for line in fh:
@@ -644,7 +647,7 @@ class AbinitProject(object):
                 else:
                     header.append(line)
             else:
-                raise ValueError("Cannot find `[DEFAULT]` in %s" % binconf_path)
+                raise ValueError("Cannot find `[DEFAULT]` string in %s" % binconf_path)
         header.append("")
         header = "\n".join(header)
 
@@ -687,7 +690,7 @@ class AbinitProject(object):
 
     def write_buildsys_files(self, verbose=0):
         """
-        Write
+        Write files require by buildsys:
 
             abinit.dep --> Dependencies inside the directory
             abinit.dir --> Dependencies outside the directory
@@ -837,7 +840,7 @@ class AbinitProject(object):
             rows.append(fort_file.get_stats())
 
         import pandas as pd
-        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys() if rows else None))
 
     def get_stats(self):
         df_list = []
