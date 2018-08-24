@@ -634,11 +634,10 @@ class AbinitProject(object):
 
         return allmods
 
-    def write_binaries_conf(self, verbose=0):
+    def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
         """
-        dryrun = True
         # Read binaries.conf and add new list of libraries.
         # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
@@ -704,7 +703,7 @@ class AbinitProject(object):
 
         return 0
 
-    def write_buildsys_files(self, verbose=0):
+    def write_buildsys_files(self, dryrun=False, verbose=0):
         """
         Write files require by buildsys:
 
@@ -712,7 +711,6 @@ class AbinitProject(object):
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
         """
-        dryrun = True
         dir2files = self.groupby_dirname()
         # Sort...
 
