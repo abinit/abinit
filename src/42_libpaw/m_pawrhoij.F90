@@ -1370,7 +1370,7 @@ end subroutine pawrhoij_copy
  use_rhoijp=0;use_rhoijres=0;use_rhoijim=0;use_rhoij_=0
  do irhoij=1,nrhoij_in
    cplex    =pawrhoij_in(irhoij)%cplex
-   qphase   =pawrhoij_in(irhoij)qphase
+   qphase   =pawrhoij_in(irhoij)%qphase
    lmn2_size=pawrhoij_in(irhoij)%lmn2_size
    nspden   =pawrhoij_in(irhoij)%nspden
    if (with_lmnmix_) lmnmix=pawrhoij_in(irhoij)%lmnmix_sz
