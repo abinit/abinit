@@ -428,7 +428,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,dtset%nspinor))
    call pawcprj_alloc(cwaveprj,ncpgr,gs_ham%dimcprj)
    do iatom=1,natom
-     sz2=pawrhoij_tot(iatom)%cplex*pawrhoij_tot(iatom)%lmn2_size
+     sz2=pawrhoij_tot(iatom)%cplex_rhoij*pawrhoij_tot(iatom)%lmn2_size
      sz3=pawrhoij_tot(iatom)%nspden
      ABI_ALLOCATE(pawrhoij_tot(iatom)%grhoij,(ngrhoij,sz2,sz3))
      pawrhoij_tot(iatom)%ngrhoij=ngrhoij
@@ -907,7 +907,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  PAW: accumulate gradients of rhoij
    if (psps%usepaw==1) then
      ABI_ALLOCATE(dimlmn,(natom))
-     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex*pawrhoij_tot(1:natom)%lmn2_size
+     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex_rhoij*pawrhoij_tot(1:natom)%lmn2_size
      bufdim=ncpgr*sum(dimlmn)*nsploop
      ABI_ALLOCATE(mpibuf,(bufdim))
      ii=0;mpibuf=zero
@@ -954,7 +954,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !  Translate coordinates
    do iatom=1,natom
-     cplx=pawrhoij_tot(iatom)%cplex
+     cplx=pawrhoij_tot(iatom)%cplex_rhoij
      do isppol=1,nsploop
        do klmn=1,pawrhoij_tot(iatom)%lmn2_size
          do ii=1,cplx
@@ -978,7 +978,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !     -delta_{alphabeta} rhoi_{ij} to drhoij/d_eps
    if(rfstrs/=0)then
      do iatom=1,natom
-       cplx=pawrhoij_tot(iatom)%cplex
+       cplx=pawrhoij_tot(iatom)%cplex_rhoij
        do isppol=1,nsploop
          do nu=1,pawrhoij_tot(iatom)%nrhoijsel
            klmn=pawrhoij_tot(iatom)%rhoijselect(nu)

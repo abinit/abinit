@@ -134,7 +134,7 @@ contains
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!  ==== if usepaw==1
 !!    pawrhoij(natom)%nrhoijsel=number of non-zero values of rhoij
-!!    pawrhoij(natom)%rhoijp(cplex*lmn2_size,nspden)= new (mixed) value of rhoij quantities in PACKED STORAGE
+!!    pawrhoij(natom)%rhoijp(cplex_rhoij*lmn2_size,nspden)= new (mixed) value of rhoij quantities in PACKED STORAGE
 !!    pawrhoij(natom)%rhoijselect(lmn2_size)=select the non-zero values of rhoij
 !!  taug(2,nfft*dtset%usekden)=array for Fourier transform of kinetic
 !!     energy density
@@ -283,7 +283,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  end if
 
  if (usepaw==1.and.my_natom>0) then
-   cplex=pawrhoij(1)%cplex;dplex=cplex-1
+   cplex=pawrhoij(1)%cplex_rhoij;dplex=cplex-1
  else
    cplex = 0;dplex = 0
  end if

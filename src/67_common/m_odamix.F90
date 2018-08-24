@@ -306,13 +306,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,ispden)-paw_ij(iatom)%dijhat(klmn,ispden))
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
        klmn1=1
        do klmn=1,pawrhoij(iatom)%lmn2_size
          ro_dlt=-pawrhoij(iatom)%rhoijres(klmn1,ispden)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,ispden)-paw_ij(iatom)%dijhat(klmn,ispden))
-         klmn1=klmn1+pawrhoij(iatom)%cplex
+         klmn1=klmn1+pawrhoij(iatom)%cplex_rhoij
        end do
      end do
      if (paw_ij(iatom)%ndij>=2.and.pawrhoij(iatom)%nspden==1) then
@@ -321,13 +321,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,1)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,2)-paw_ij(iatom)%dijhat(klmn,2))
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
        klmn1=1
        do klmn=1,pawrhoij(iatom)%lmn2_size
          ro_dlt=-pawrhoij(iatom)%rhoijres(klmn1,1)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,2)-paw_ij(iatom)%dijhat(klmn,2))
-         klmn1=klmn1+pawrhoij(iatom)%cplex
+         klmn1=klmn1+pawrhoij(iatom)%cplex_rhoij
        end do
        e1t10=half*e1t10
      end if
@@ -550,9 +550,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  if (usepaw==1) then
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+     ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%cplex_rhoij*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
-     if (pawrhoij(iatom)%cplex==1) then
+     if (pawrhoij(iatom)%cplex_rhoij==1) then
        if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
          do ispden=1,pawrhoij(iatom)%nspden
            do irhoij=1,pawrhoij(iatom)%nrhoijsel

@@ -587,7 +587,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 
  if (usepaw==1.and.my_natom>0) then
 !  mixfac=dielar(4);mixfacmag=abs(dielar(7))
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden

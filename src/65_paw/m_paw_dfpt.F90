@@ -1479,7 +1479,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij_iatom%cplex
+         jrhoij=jrhoij+pawrhoij_iatom%cplex_rhoij
        end do
 
 !      ---- Add additional (diagonal) terms for dynamical matrix
@@ -1504,7 +1504,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                end if
              end do
            end do
-           klmn1=klmn1+pawrhoij_iatom%cplex
+           klmn1=klmn1+pawrhoij_iatom%cplex_rhoij
          end do ! klmn
        end if ! optgr2
 
@@ -1542,7 +1542,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                end if
              end do
            end do
-           klmn1=klmn1+pawrhoij_iatom%cplex
+           klmn1=klmn1+pawrhoij_iatom%cplex_rhoij
          end do
        end if ! optstr2
 
@@ -1577,7 +1577,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 jrhoij=jrhoij+pawrhoij_jatom%cplex
+                 jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
                end do
              else
                jrhoij=1;mushift=ishift_gr2+9
@@ -1602,7 +1602,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 jrhoij=jrhoij+pawrhoij_jatom%cplex
+                 jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
                end do
              end if
 
@@ -1628,7 +1628,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 klmn1=klmn1+pawrhoij_jatom%cplex
+                 klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
                end do ! klmn
              else ! ngradp_nondiag>=6
                klmn1=1;mushift=ishift_gr2+9
@@ -1654,7 +1654,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 klmn1=klmn1+pawrhoij_jatom%cplex
+                 klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
                end do
              end if
            end if ! optgr2
@@ -1683,7 +1683,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                    end if
                  end do
                end do
-               jrhoij=jrhoij+pawrhoij_jatom%cplex
+               jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
              end do
 !            Off-diagonal term including rhoij derivative
              klmn1=1
@@ -1708,7 +1708,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                    end if
                  end do
                end do
-               klmn1=klmn1+pawrhoij_jatom%cplex
+               klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
              end do
            end if ! optstr2
 

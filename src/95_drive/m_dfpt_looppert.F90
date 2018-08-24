@@ -1427,7 +1427,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
 &                        dtset%typat,qphase=qphase_rhoij,use_rhoijim=use_rhoijim,pawtab=pawtab,&
 &                        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     if (cplex_rhoij/=hdr%pawrhoij(1)%cplex.or.qphase_rhoij/=hdr%pawrhoij(1)%qphase) then
+     if (cplex_rhoij/=hdr%pawrhoij(1)%cplex_rhoij.or.qphase_rhoij/=hdr%pawrhoij(1)%qphase) then
 !      Eventually reallocate hdr%pawrhoij
        call pawrhoij_free(hdr%pawrhoij)
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&

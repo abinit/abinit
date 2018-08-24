@@ -795,7 +795,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
      do iatom=1,my_natom
        itypat=pawrhoij(iatom)%itypat
        pawrhoij(iatom)%use_rhoijres=1
-       sz1=pawrhoij(iatom)%cplex*pawtab(itypat)%lmn2_size
+       sz1=pawrhoij(iatom)%cplex_rhoij*pawtab(itypat)%lmn2_size
        sz2=pawrhoij(iatom)%nspden
        ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
        do ispden=1,pawrhoij(iatom)%nspden
@@ -804,7 +804,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
        ABI_ALLOCATE(pawrhoij(iatom)%kpawmix,(pawtab(itypat)%lmnmix_sz))
        pawrhoij(iatom)%lmnmix_sz=pawtab(itypat)%lmnmix_sz
        pawrhoij(iatom)%kpawmix=pawtab(itypat)%kmix
-       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz*pawrhoij(iatom)%cplex
+       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz*pawrhoij(iatom)%cplex_rhoij
      end do
    end if
    if (dtset%iscf > 0) then

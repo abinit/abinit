@@ -491,7 +491,7 @@ subroutine prcref(atindx,dielar,dielinv,&
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden
@@ -1136,7 +1136,7 @@ end subroutine prcref
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden

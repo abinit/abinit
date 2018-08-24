@@ -387,7 +387,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
      nspden_rhoij=pawrhoij(iatom)%nspden
      lmn2_size=pawrhoij(iatom)%lmn2_size
-     cplex=pawrhoij(iatom)%cplex;dplex=cplex-1
+     cplex=pawrhoij(iatom)%cplex_rhoij;dplex=cplex-1
 
      if (hasmoved) then
        ABI_ALLOCATE(rhoijtmp,(cplex*lmn2_size,nspden_rhoij))

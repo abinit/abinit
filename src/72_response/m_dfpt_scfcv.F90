@@ -610,7 +610,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        itypat=pawrhoij1(iatom)%itypat
        lmn2_size=pawtab(itypat)%lmn2_size
        pawrhoij1(iatom)%use_rhoijres=1
-       sz1=pawrhoij1(iatom)%cplex*lmn2_size;sz2=pawrhoij1(iatom)%nspden
+       sz1=pawrhoij1(iatom)%cplex_rhoij*lmn2_size;sz2=pawrhoij1(iatom)%nspden
        ABI_ALLOCATE(pawrhoij1(iatom)%rhoijres,(sz1,sz2))
        do ispden=1,pawrhoij1(iatom)%nspden
          pawrhoij1(iatom)%rhoijres(:,ispden)=zero
@@ -618,7 +618,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        ABI_ALLOCATE(pawrhoij1(iatom)%kpawmix,(pawtab(itypat)%lmnmix_sz))
        pawrhoij1(iatom)%lmnmix_sz=pawtab(itypat)%lmnmix_sz
        pawrhoij1(iatom)%kpawmix=pawtab(itypat)%kmix
-       npawmix=npawmix+pawrhoij1(iatom)%nspden*pawtab(itypat)%lmnmix_sz*pawrhoij1(iatom)%cplex
+       npawmix=npawmix+pawrhoij1(iatom)%nspden*pawtab(itypat)%lmnmix_sz &
+&                     *pawrhoij1(iatom)%cplex_rhoij
      end do
    end if
    denpot = AB7_MIXING_POTENTIAL
@@ -2015,15 +2016,15 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
      MSG_ERROR('pawoptmix=1 is not compatible with nspden=4 !')
    end if
    if (my_natom>0) then
-     if (pawrhoij(1)%cplex<cplex) then
-       MSG_ERROR('pawrhoij()%cplex must be >=cplex !')
+     if (pawrhoij(1)%cplex_rhoij<cplex) then
+       MSG_ERROR('pawrhoij()%cplex_rhoij must be >=cplex !')
      end if
    end if
  end if
 
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  cplex_mix=max(cplex,ispmix)
- if (usepaw==1.and.my_natom>0) cplex_rhoij=pawrhoij(1)%cplex
+ if (usepaw==1.and.my_natom>0) cplex_rhoij=pawrhoij(1)%cplex_rhoij
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -2244,6 +2245,8 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
          end if
        end do
        pawrhoij(iatom)%nrhoijsel=nselect
+       if (nselect<pawrhoij(iatom)%lmn2_size) &
+&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
        ABI_DEALLOCATE(rhoijtmp)
      end do
    end if

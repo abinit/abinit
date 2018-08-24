@@ -7233,8 +7233,8 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex,iatom,band,ik_ibz
- integer :: spin,natinc,nband_k,option,rhoij_cplex,lmn2_size,nspden
+ integer :: cplex,cplex_rhoij,iatom,band,ik_ibz
+ integer :: spin,natinc,nband_k,option,lmn2_size,nspden
  logical :: usetimerev
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
@@ -7258,10 +7258,10 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  ! Initialize output quantities if not already done.
  do iatom=1,Wfd%natom
    if (pawrhoij(iatom)%use_rhoij_==0) then
-     rhoij_cplex     = pawrhoij(iatom)%cplex
-     lmn2_size = pawrhoij(iatom)%lmn2_size
-     nspden    = pawrhoij(iatom)%nspden
-     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(rhoij_cplex*lmn2_size,nspden))
+     cplex_rhoij= pawrhoij(iatom)%cplex_rhoij
+     lmn2_size  = pawrhoij(iatom)%lmn2_size
+     nspden     = pawrhoij(iatom)%nspden
+     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(cplex_rhoij*lmn2_size,nspden))
      pawrhoij(iatom)%use_rhoij_=1
    end if
    pawrhoij(iatom)%rhoij_=zero
@@ -7323,7 +7323,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 &     ' ========= Values of RHOIJ in wfd_pawrhoij =========',ch10
    call wrtout(std_out,msg,'COLL')
    do iatom=1,Cryst%natom,natinc
-     call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex,&
+     call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex_rhoij,&
 &                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,&
 &                  unit=std_out,opt_prtvol=pawprtvol)
    end do

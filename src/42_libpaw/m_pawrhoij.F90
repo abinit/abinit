@@ -2429,7 +2429,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: fort_formatted=1,fort_binary=2,netcdf_io=3
- integer :: rhoij,qphase,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
+ integer :: cplex,qphase,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
  integer :: nselect,my_cplex,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
  integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id,optsym
  integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
@@ -2697,7 +2697,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        iatom_tot=iatom;if(paral_atom) iatom_tot=my_atmtab(iatom)
        if (iatom_tot/=1) cycle
        write(unitfi,'(a,i4,a)' ) ' *******  rhoij (Atom # ',iatom_tot,' ********)'
-       write(unitfi,'(a,i4,a,i4)' ) 'cplx=',pawrhoij(iatom)%cplex, ' nselect=', pawrhoij(iatom)%nrhoijsel
+       write(unitfi,'(a,i4,a,i4)' ) 'cplex_rhoij=',pawrhoij(iatom)%cplex_rhoij, ' nselect=', pawrhoij(iatom)%nrhoijsel
        write(unitfi,'(a,i4,a,i4)' ) 'nspden=',pawrhoij(iatom)%nspden, ' lmn2size=',pawrhoij(iatom)%lmn2_size
        write(unitfi,'(a,i4,a,i4)' ) 'lmnmix=',pawrhoij(iatom)%lmnmix_sz, ' ngrhoij=',pawrhoij(iatom)%ngrhoij
        write(unitfi,'(a,i4,a,i4)' ) 'use_rhoijres=',pawrhoij(iatom)%use_rhoijres, &

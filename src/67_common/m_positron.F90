@@ -450,7 +450,7 @@ type(fock_type),pointer, intent(inout) :: fock
        if (dtset%usepaw==1) then
          if (size(electronpositron%pawrhoij_ep)>0) then
            ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-           call initrhoij(electronpositron%pawrhoij_ep(1)%cplex,dtset%lexexch,&
+           call initrhoij(electronpositron%pawrhoij_ep(1)%cplex_rhoij,dtset%lexexch,&
 &           dtset%lpawu,my_natom,dtset%natom,dtset%nspden,&
 &           electronpositron%pawrhoij_ep(1)%nspinor,dtset%nsppol,&
 &           dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,dtset%typat,&
@@ -532,7 +532,7 @@ type(fock_type),pointer, intent(inout) :: fock
          if (dtset%usepaw==1) then
            if (size(pawrhoij)>0) then
              ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-             call initrhoij(pawrhoij(1)%cplex,dtset%lexexch,dtset%lpawu,&
+             call initrhoij(pawrhoij(1)%cplex_rhoij,dtset%lexexch,dtset%lpawu,&
 &             my_natom,dtset%natom,dtset%nspden,pawrhoij(1)%nspinor,dtset%nsppol,&
 &             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,pawrhoij(1)%qphase,dtset%spinat,&
 &             dtset%typat,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
@@ -572,7 +572,7 @@ type(fock_type),pointer, intent(inout) :: fock
      if (dtset%usepaw==1) then
        if (size(pawrhoij)>0.and.size(electronpositron%pawrhoij_ep)>0) then
          ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-         call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+         call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &         pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &         pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &         use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres, &

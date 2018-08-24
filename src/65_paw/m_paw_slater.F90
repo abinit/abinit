@@ -1442,7 +1442,7 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
 
  if (my_natom>0) then
    if (pawrhoij(1)%cplex_rhoij<cplex) then
-     MSG_BUG('Must have pawrhoij()%cplex >= cplex !')
+     MSG_BUG('Must have pawrhoij()%cplex_rhoij >= cplex !')
    end if
  end if
 
@@ -1517,7 +1517,7 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
          sigx_atm(klmn,ispden) = sigx_atm(klmn,ispden) + ro(1) * (slt_ikjl + slt_iljk)
        end do ! klmn
 
-       jrhoij=jrhoij+pawrhoij(iatom)%cplex
+       jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
      end do ! irhoij
    end do ! ispden
 

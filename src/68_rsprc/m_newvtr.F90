@@ -316,7 +316,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  n2=ngfft(2)
  n3=ngfft(3)
  if (usepaw==1.and.my_natom>0) then
-   cplex=pawrhoij(1)%cplex;dplex=cplex-1
+   cplex=pawrhoij(1)%cplex_rhoij;dplex=cplex-1
  else
    cplex=0;dplex=0
  end if
