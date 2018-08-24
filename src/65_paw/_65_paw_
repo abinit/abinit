@@ -14,6 +14,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
+!! interfaces_65_paw.F90
 !! m_fourier_interpol.F90
 !! m_paw_atomorb.F90
 !! m_paw_correlations.F90
@@ -31,7 +32,6 @@
 !! m_paw_nmr.F90
 !! m_paw_occupancies.F90
 !! m_paw_optics.F90
-!! m_paw_orbmag.F90
 !! m_paw_overlap.F90
 !! m_paw_pwaves_lmn.F90
 !! m_paw_slater.F90

@@ -137,7 +137,9 @@ def mkrobodoc_files(top):
     wrong_dirpaths = []
 
     for dirpath, dirnames, filenames in os.walk(top):
-        robo_dfile = "_" + os.path.basename(dirpath)  + "_"
+        dirname = os.path.basename(dirpath)
+        if "dirname" in ("__pycache__", ): continue
+        robo_dfile = "_" + dirname  + "_"
 
         if robo_dfile not in filenames:
             # Not an abinit dir.
