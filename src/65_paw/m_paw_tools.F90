@@ -507,7 +507,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        end if
        call wrtout(unitfi,msg,'COLL')
      end if
-     if (dtset%pawspnorb>0.and.pawrhoij_all(1)%cplex==1.and.dtset%kptopt/=1.and.dtset%kptopt/=2) then
+     if (dtset%pawspnorb>0.and.pawrhoij_all(1)%cplex_rhoij==1.and.dtset%kptopt/=1.and.dtset%kptopt/=2) then
        write(msg,'(6a)') ' pawprt: - WARNING:',ch10,&
 &       '       Spin-orbit coupling is activated but only real part of Rhoij occupancies',ch10,&
 &       '       has been computed; they could have an imaginary part (not printed here).'
@@ -516,7 +516,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      valmx=25._dp;if (ipositron>0) valmx=-1._dp
      do iat=1,natprt
        iatom=jatom(iat);nspden=pawrhoij_all(iatom)%nspden
-       call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex,&
+       call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex_rhoij,&
 &                    pawrhoij_all(iatom)%qphase,iatom,dtset%natom,&
 &                    rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
 &                    test_value=valmx,unit=unitfi,opt_prtvol=dtset%pawprtvol)
@@ -560,7 +560,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 
            opt_l_index = pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size)
            call pawio_print_ij(unitfi,pawrhoij_all(iatom)%rhoijp(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&           pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,ll,&
+&           pawrhoij_all(iatom)%cplex_rhoij,pawrhoij_all(iatom)%lmn_size,ll,&
 &           opt_l_index,1,dtset%pawprtvol,&
 &           pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
 
@@ -585,7 +585,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
              opt_l_index = pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size)
 
              call pawio_print_ij(unitfi,rhoijs(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&             pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,ll,&
+&             pawrhoij_all(iatom)%cplex_rhoij,pawrhoij_all(iatom)%lmn_size,ll,&
 &             opt_l_index,1,dtset%pawprtvol,&
 &             pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
 

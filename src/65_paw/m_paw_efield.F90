@@ -137,7 +137,7 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          pelev(idir)=pelev(idir)+ro_dlt*c1*pawtab(itypat)%qijl(idirindx(idir),klmn)
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
      end do
    end do

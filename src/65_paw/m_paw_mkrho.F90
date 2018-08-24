@@ -425,11 +425,11 @@ end subroutine pawmkrho
  if (my_natom>0) then
    if (paral_atom) then
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat,mpi_atmtab=my_atmtab)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat,&
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex_rhoij,l_size_atm,nspden,typat,&
 &     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    else
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat)
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex_rhoij,l_size_atm,nspden,typat)
    end if
    ABI_DEALLOCATE(l_size_atm)
  end if
@@ -648,7 +648,7 @@ end subroutine pawmkrho
              end if ! check if |r-R| = 0
 
              do ispden=1,nspden
-               if (pawrhoij(iatom)%cplex == 1) then
+               if (pawrhoij(iatom)%cplex_rhoij == 1) then
                  rhor_paw(ifftsph,ispden) = rhor_paw(ifftsph,ispden) + &
 &                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*(phj*phi - tphj*tphi)
 

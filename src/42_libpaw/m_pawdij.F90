@@ -1127,7 +1127,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
 !Useful data
  lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex
+ cplex_rhoij=pawrhoij%cplex_rhoij
  nspdiag=1;if (nspden==2) nspdiag=2
 
 !Check data consistency
@@ -1563,7 +1563,7 @@ subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixi
 
 !Useful data
  lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex
+ cplex_rhoij=pawrhoij%cplex_rhoij
 
 !Check data consistency
  if (qphase==2) then
@@ -3043,7 +3043,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
 !Useful data
  lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex
+ cplex_rhoij=pawrhoij%cplex_rhoij
  compute_diju_im=(qphase==2.and.present(diju_im))
 
 !Check data consistency
@@ -4469,7 +4469,7 @@ end subroutine pawdijfr
 
 !Local variables ---------------------------------------
 !scalars
- integer :: irhoij,irhoij1,ispden,jrhoij,jrhoij1,klmn,klmn1,lexexch,ll,lmn2_size
+ integer :: cplex_rhoij,irhoij,irhoij1,ispden,jrhoij,jrhoij1,klmn,klmn1,lexexch,ll,lmn2_size
  integer :: m11,m21,m31,m41,n1,n2,n3,n4,nk,nn1,nn2,nspden_eff
  real(dp) :: tot
  character(len=500) :: msg
@@ -4481,6 +4481,7 @@ end subroutine pawdijfr
 
 !Useful data
  lexexch=pawtab%lexexch
+ cplex_rhoij=pawrhoij%cplex_rhoij
  lmn2_size=pawtab%lmn2_size
  if (pawtab%nproju==1) nk=1
  if (pawtab%nproju==2) nk=6
@@ -4525,10 +4526,10 @@ end subroutine pawdijfr
            end do
 
          end if
-         jrhoij1=jrhoij1+pawrhoij%cplex
+         jrhoij1=jrhoij1+cplex_rhoij
        end do !irhoij1
      end if
-     jrhoij=jrhoij+pawrhoij%cplex
+     jrhoij=jrhoij+cplex_rhoij
    end do !irhoij
  end do !ispden
 
@@ -4540,7 +4541,7 @@ end subroutine pawdijfr
      do irhoij=1,pawrhoij%nrhoijsel
        klmn=pawrhoij%rhoijselect(irhoij)
        tot=tot+vpawx(1,klmn,ispden)*pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn)
-       jrhoij=jrhoij+pawrhoij%cplex
+       jrhoij=jrhoij+cplex_rhoij
      end do
    end do
    write(msg, '(a,es22.15)' )" Vpawx: tot=",tot*half

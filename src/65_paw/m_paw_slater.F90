@@ -1441,7 +1441,7 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
  ABI_CHECK(lmn2_size_max==MAXVAL(Pawtab(:)%lmn2_size),"Wrong lmn2_size_max")
 
  if (my_natom>0) then
-   if (pawrhoij(1)%cplex<cplex) then
+   if (pawrhoij(1)%cplex_rhoij<cplex) then
      MSG_BUG('Must have pawrhoij()%cplex >= cplex !')
    end if
  end if

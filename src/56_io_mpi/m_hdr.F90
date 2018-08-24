@@ -1152,7 +1152,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 ! For PAW have to copy Pawrhoij ====
 ! NOTE alchemy requires a different treatment but for the moment it is not available within PAW.
  if (Hdr_in%usepaw==1) then
-   cplex_rhoij = Hdr_in%Pawrhoij(1)%cplex
+   cplex_rhoij = Hdr_in%Pawrhoij(1)%cplex_rhoij
    qphase_rhoij = Hdr_in%Pawrhoij(1)%qphase
    nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
    ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
@@ -2592,7 +2592,7 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,cplex,iatom,ierr,index,index2,ipsp,ispden,list_size,list_size2,natom,nkpt
+ integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,ispden,list_size,list_size2,natom,nkpt
  integer :: npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
  character(len=fnlen) :: list_tmp
 !arrays
@@ -2817,7 +2817,7 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
    nrhoij=0
    if (master==me)then
-     cplex=hdr%pawrhoij(1)%cplex
+     cplex_rhoij=hdr%pawrhoij(1)%cplex_rhoij
      qphase=hdr%pawrhoij(1)%qphase
      nspden=hdr%pawrhoij(1)%nspden
      do iatom=1,natom
@@ -2826,11 +2826,11 @@ subroutine hdr_bcast(hdr,master,me,comm)
    end if
 
    call xmpi_bcast(nrhoij,master,comm,ierr)
-   call xmpi_bcast(cplex ,master,comm,ierr)
+   call xmpi_bcast(cplex_rhoij,master,comm,ierr)
    call xmpi_bcast(qphase,master,comm,ierr)
    call xmpi_bcast(nspden,master,comm,ierr)
 
-   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex
+   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex_rhoij
    ABI_MALLOC(list_int,(list_size))
    ABI_MALLOC(list_dpr,(list_size2))
    if (master==me)then
@@ -2841,8 +2841,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
        list_int(2+index:1+nsel+index)=hdr%pawrhoij(iatom)%rhoijselect(1:nsel)
        index=index+1+nsel
        do ispden=1,nspden
-         list_dpr(1+index2:nsel*cplex+index2)=hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)
-         index2=index2+nsel*cplex
+         list_dpr(1+index2:nsel*cplex_rhoij+index2)=hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex_rhoij,ispden)
+         index2=index2+nsel*cplex_rhoij
        end do
      end do
    end if
@@ -2853,7 +2853,7 @@ subroutine hdr_bcast(hdr,master,me,comm)
    if(master/=me)then
      index=0;index2=0
      ABI_DT_MALLOC(hdr%pawrhoij,(natom))
-     call pawrhoij_alloc(hdr%pawrhoij,cplex,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
+     call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
 &                        lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
@@ -2861,8 +2861,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
        hdr%pawrhoij(iatom)%rhoijselect(1:nsel)=list_int(2+index:1+nsel+index)
        index=index+1+nsel
        do ispden=1,nspden
-         hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)=list_dpr(1+index2:nsel*cplex+index2)
-         index2=index2+nsel*cplex
+         hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex_rhoij,ispden)=list_dpr(1+index2:nsel*cplex_rhoij+index2)
+         index2=index2+nsel*cplex_rhoij
        end do
      end do
    end if

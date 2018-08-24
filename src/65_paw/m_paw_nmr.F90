@@ -170,7 +170,7 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    mesh_size=pawtab(itypat)%mesh_size
    ABI_ALLOCATE(ff,(mesh_size))
 
-   cplex = pawrhoij(iatom)%cplex
+   cplex = pawrhoij(iatom)%cplex_rhoij
    nspden = pawrhoij(iatom)%nspden
    ABI_ALLOCATE(lmselectin,(lm_size))
    ABI_ALLOCATE(lmselectout,(lm_size))
@@ -426,7 +426,7 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
                mi = xysumi/xxsum
                mj = xysumj/xxsum
 !              accumulate the rho_ij contribution to the fermi contact for this spin density:
-               if (pawrhoij(iatom)%cplex == 1) then
+               if (pawrhoij(iatom)%cplex_rhoij == 1) then
                  fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
 &                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*mi*mj/four_pi
                else

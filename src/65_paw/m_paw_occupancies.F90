@@ -540,10 +540,10 @@ end subroutine pawmkrhoij
 !  ==================================================================
 !  === OPTION 1: Accumulate (n,k) contribution to rhoij =============
 !  ==================================================================
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex==2))
+   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
-     cplex_rhoij=pawrhoij(1)%cplex
+     cplex_rhoij=pawrhoij(1)%cplex_rhoij
      if (cplex_rhoij==1) then
        do iatom=1,my_natom
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
@@ -591,7 +591,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -657,8 +657,8 @@ end subroutine pawmkrhoij
 !  === OPTION 2: Accumulate (n,k) contribution to 1st-order rhoij ===
 !  ==================================================================
 
-   compute_impart=(pawrhoij(1)%cplex==2)
-   compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
+   compute_impart=(pawrhoij(1)%cplex_rhoij==2)
+   compute_impart_cplex=((pawrhoij(1)%cplex_rhoij==2).and.(cplex==2))
    substract_diagonal=(ipert==natom+3)
 
    if (compute_impart_cplex) then
@@ -673,7 +673,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:2,1)=cwaveprj (iatm,1)%cp(1:2,jlmn)
@@ -700,7 +700,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -762,7 +762,7 @@ end subroutine pawmkrhoij
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
          iatm=atindx(iatom1)
          if (ipert<=natom.and.iatom/=ipert) cycle
-         cplex_rhoij=pawrhoij(iatom)%cplex
+         cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
          do jlmn=1,pawrhoij(iatom)%lmn_size
            j0lmn=jlmn*(jlmn-1)/2
            cpj0 (1:2,1)  =cwaveprj(iatm,1)%cp (1:2  ,jlmn)
@@ -801,7 +801,7 @@ end subroutine pawmkrhoij
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
          iatm=atindx(iatom1)
          if (ipert<=natom.and.iatom/=ipert) cycle
-         cplex_rhoij=pawrhoij(iatom)%cplex
+         cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
          nspden_rhoij=pawrhoij(iatom)%nspden
          do jlmn=1,pawrhoij(iatom)%lmn_size
            j0lmn=jlmn*(jlmn-1)/2
@@ -882,13 +882,13 @@ end subroutine pawmkrhoij
 !  === OPTION 3: Accumulate (n,k) contribution to drhoij/dr =========
 !  ==================================================================
 
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex==2))
+   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:cplex,1)         =cwaveprj(iatm,1)%cp (1:cplex,jlmn)
@@ -919,7 +919,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2

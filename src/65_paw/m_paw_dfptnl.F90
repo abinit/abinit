@@ -175,9 +175,9 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    itypat=pawrhoij_1(iatom)%itypat
    mesh_size=pawtab(itypat)%mesh_size
    nspden=pawrhoij_1(iatom)%nspden
-   cplex_1=pawrhoij_1(iatom)%cplex
-   cplex_2=pawrhoij_2(iatom)%cplex
-   cplex_3=pawrhoij_3(iatom)%cplex
+   cplex_1=pawrhoij_1(iatom)%cplex_rhoij
+   cplex_2=pawrhoij_2(iatom)%cplex_rhoij
+   cplex_3=pawrhoij_3(iatom)%cplex_rhoij
    lm_size_all=paw_an0(iatom)%lm_size
 
    ABI_ALLOCATE(lmselect_tmp,(lm_size_all))
@@ -602,8 +602,8 @@ end subroutine paw_dfptnl_xc
 !!  === Accumulate (n,k) contribution to partial 2nd-order rhoij   ===
 !!  ==================================================================
 
- compute_impart=(pawrhoij(1)%cplex==2)
- compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
+ compute_impart=(pawrhoij(1)%cplex_rhoij==2)
+ compute_impart_cplex=((pawrhoij(1)%cplex_rhoij==2).and.(cplex==2))
 
 ! NOT USED FOR PAWRHO21! => only for PAWRHO2 (full second derivative)
 !!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >
@@ -612,7 +612,7 @@ end subroutine paw_dfptnl_xc
 !   do iatom=1,my_natom
 !     iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
 !     iatm=atindx(iatom1)
-!     cplex_rhoij=pawrhoij(iatom)%cplex
+!     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 !     do jlmn=1,pawrhoij(iatom)%lmn_size
 !       j0lmn=jlmn*(jlmn-1)/2
 !       cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert1) >
@@ -650,7 +650,7 @@ end subroutine paw_dfptnl_xc
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
        if (iatom/=ipert2) cycle ! To move atom "ipert2" does not change projectors of other atoms
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:2,1)  =cwaveprj0_pert2 (iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(0)     >
@@ -697,7 +697,7 @@ end subroutine paw_dfptnl_xc
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        if (iatom/=ipert1) cycle ! To move atom "ipert1" does not change projectors of other atoms
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -745,7 +745,7 @@ end subroutine paw_dfptnl_xc
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
        if (iatom/=ipert1.or.iatom/=ipert2) cycle ! To move atom "ipert" does not change projectors of other atoms
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          d1cpj0(1:2,1)=cwaveprj0_pert1(iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert1) | Psi^(0) >

@@ -1315,10 +1315,10 @@ CONTAINS  !=====================================================================
 &             *pawtab%dltij(klmn1)*pawrhoij%rhoijp(jrhoij,ispden)*pawrhoij%rhoijp(jrhoij1,ispden)
            end do
          end if
-         jrhoij1=jrhoij1+pawrhoij%cplex
+         jrhoij1=jrhoij1+pawrhoij%cplex_rhoij
        end do !irhoij1
      end if
-     jrhoij=jrhoij+pawrhoij%cplex
+     jrhoij=jrhoij+pawrhoij%cplex_rhoij
    end do !irhoij
  end do ! ispden
  eexextemp=eexextemp/two
@@ -1480,7 +1480,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
    end if
    if (compute_dmat>0) then
      if (pawrhoij(1)%nspden/=paw_ij(1)%nspden.and.&
-&     pawrhoij(1)%nspden/=4.and.paw_ij(1)%nspden/=1) then
+&        pawrhoij(1)%nspden/=4.and.paw_ij(1)%nspden/=1) then
        message=' inconsistent values for nspden !'
        MSG_BUG(message)
      end if
@@ -1702,7 +1702,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &               +ro(:)*pawtab(itypat)%phiphjint(icount)
              end if
            end if
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex
+           jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
            ABI_DEALLOCATE(ro)
          end do ! irhoij
          do im2=1,2*lcur+1
@@ -2447,7 +2447,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &         trim(dspin(ispden+2*(pawrhoij(iatom)%nspden/4)))," =="
          call wrtout(std_out,message,'COLL')
          call pawio_print_ij(std_out,pawrhoij(iatom)%rhoijp(:,ispden),pawrhoij(iatom)%nrhoijsel,&
-&         pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,ll,&
+&         pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%lmn_size,ll,&
 &         pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size),&
 &         1,-1,pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='COLL')
        end do
@@ -2583,7 +2583,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &       trim(dspin(ispden+2*(pawrhoij(iatom)%nspden/4)))," =="
        call wrtout(std_out,message,'PERS')
        call pawio_print_ij(std_out,pawrhoij(iatom)%rhoijp(:,ispden),pawrhoij(iatom)%nrhoijsel,&
-&       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,ll,&
+&       pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%lmn_size,ll,&
 &       pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size),&
 &       1,-1,pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='PERS')
      end do

@@ -105,7 +105,7 @@ CONTAINS  !=====================================================================
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!
 !! OUTPUT
-!!  paw_ij(my_natom)%dijhartree(cplex*lmn2_size)=Hartree contribution to dij;
+!!  paw_ij(my_natom)%dijhartree(qphase*lmn2_size)=Hartree contribution to dij;
 !!                                      Enters into calculation of hartree energy
 !!  ==== if option=0 or 2
 !!    epaw=contribution to total energy from the PAW "on-site" part
@@ -123,7 +123,7 @@ CONTAINS  !=====================================================================
 !!  ==== if paw_an(:)%has_vhartree=1
 !!    paw_an(my_natom)%vh1(cplex*mesh_size,1,1)=Hartree total potential calculated from "on-site" density
 !!  ==== if pawspnorb>0
-!!    paw_ij(my_natom)%dijso(cplex*cplex_dij*lmn2_size,nspden)=spin-orbit contribution to dij
+!!    paw_ij(my_natom)%dijso(qphase*cplex_dij*lmn2_size,nspden)=spin-orbit contribution to dij
 !!
 !! NOTES
 !!  Response function calculations:
@@ -228,8 +228,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      msg='paw_ij()%qphase and paw_an()%cplex must be equal !'
      MSG_BUG(msg)
    end if
-   if (pawrhoij(1)%cplex<paw_an(1)%cplex) then
-     msg='pawrhoij()%cplex must be >=paw_an()%cplex  !'
+   if (pawrhoij(1)%cplex_rhoij<paw_an(1)%cplex) then
+     msg='pawrhoij()%cplex_rhoij must be >=paw_an()%cplex  !'
      MSG_BUG(msg)
    end if
    if (ipert>0.and.(ipert<=natom.or.ipert==natom+2).and.paw_an0(1)%has_kxc/=2) then
@@ -357,7 +357,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    has_k3xc=paw_an(iatom)%has_k3xc;need_k3xc=(has_k3xc==1)
    cplex=paw_an(iatom)%cplex
    cplex_dij=paw_ij(iatom)%cplex_dij
-   cplex_rhoij=pawrhoij(iatom)%cplex
+   cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
    ndij=paw_ij(iatom)%ndij
 
 !  Allocations of "on-site" densities
@@ -716,7 +716,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            electronpositron%e_paw  =electronpositron%e_paw  -ro(1)*dij_ep(kklmn)
            electronpositron%e_pawdc=electronpositron%e_pawdc-ro(1)*dij_ep(kklmn)
            if (ipositron==1) e1t10=e1t10+ro(1)*two*(pawtab(itypat)%kij(klmn)-pawtab(itypat)%dij0(klmn))
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex
+           jrhoij=jrhoij+cplex_rhoij
          end do
        end do
      end if
@@ -740,7 +740,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
            eh2=eh2    +ro(1)*paw_ij(iatom)%dijhartree(klmn)
            e1t10=e1t10+ro(1)*pawtab(itypat)%dij0(klmn)
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex
+           jrhoij=jrhoij+cplex_rhoij
          end do
        end do
      else
@@ -752,7 +752,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            eh2=eh2+ro(1)*paw_ij(iatom)%dijhartree(klmn)+ro(2)*paw_ij(iatom)%dijhartree(kklmn)
 !          Imaginary part (not used)
 !          eh2=eh2+ro(2)*paw_ij(iatom)%dijhartree(klmn)-ro(1)*paw_ij(iatom)%dijhartree(kklmn)
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex
+           jrhoij=jrhoij+cplex_rhoij
          end do
        end do
      end if
@@ -876,7 +876,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
              do irhoij=1,pawrhoij(iatom)%nrhoijsel
                klmn=pawrhoij(iatom)%rhoijselect(irhoij)
                eldaumdc=eldaumdc+ro(1)*pawtab(itypat)%euij_fll(klmn)
-               jrhoij=jrhoij+pawrhoij(iatom)%cplex
+               jrhoij=jrhoij+cplex_rhoij
              end do
            end do
          end if
@@ -897,7 +897,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Compute contribution to on-site energy
    if (any(abs(nucdipmom(:,iatom))>tol8).and.ipert==0.and.ipositron/=1.and.option/=1) then
-     ABI_CHECK(cplex==1,'BUG in pawdenpot: pawrhoij must be complex for ND moments!')
+     ABI_CHECK(cplex_rhoij==1,'BUG in pawdenpot: rhoij must be complex for ND moments!')
      jrhoij=2 !Select imaginary part of rhoij
      do irhoij=1,pawrhoij(iatom)%nrhoijsel
        klmn=pawrhoij(iatom)%rhoijselect(irhoij)
@@ -1231,8 +1231,8 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
    msg='  nspden must be <= pawrhoij%nspden !'
    MSG_BUG(msg)
  end if
- if (cplex>pawrhoij%cplex) then
-   msg='  cplex must be <= pawrhoij%cplex !'
+ if (cplex>pawrhoij%cplex_rhoij) then
+   msg='  cplex must be <= pawrhoij%cplex_rhoij !'
    MSG_BUG(msg)
  end if
  if (nzlmopt/=1) then
@@ -1359,7 +1359,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      end if
 
 !    -- End loop over ij channels
-     jrhoij=jrhoij+pawrhoij%cplex
+     jrhoij=jrhoij+pawrhoij%cplex_rhoij
    end do
 
 !  Scale densities with 1/r**2 and compute rho1(r=0) and trho1(r=0)

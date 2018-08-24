@@ -195,8 +195,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    if(nspden>1.and.nspden/=pawfgrtab(1)%nspden) then
      MSG_BUG(' Wrong values for nspden and pawfgrtab%nspden !')
    end if
-   if(pawrhoij(1)%cplex<cplex) then
-     MSG_BUG('  Must have pawrhoij()%cplex >= cplex !')
+   if(pawrhoij(1)%cplex_rhoij<cplex) then
+     MSG_BUG('  Must have pawrhoij()%cplex_rhoij >= cplex !')
    end if
    if (compute_phonons.and.(.not.qeq0)) then
      if (pawfgrtab(1)%rfgd_allocated==0) then
@@ -411,7 +411,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !      ------------------------------------------------------------------------
 !      ----- End loop over ij channels
 !      ------------------------------------------------------------------------
-       jrhoij=jrhoij+pawrhoij(iatom)%cplex
+       jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
      end do
 
 !    If RF calculation, add frozen part of 1st-order compensation density
@@ -1285,7 +1285,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
 
 !      Convert from cartesian to reduced coordinates
@@ -1369,7 +1369,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
      end do ! ispden
    end if
