@@ -565,14 +565,6 @@ end subroutine scfcv_run
 !!subroutine scfcv_reformatWFK(this,rhog, rhor, rprimd, xred, xred_old)
 !!
 !!
-!!!This section has been created automatically by the script Abilint (TD).
-!!!Do not modify the following lines by hand.
-!!#undef ABI_FUNC
-!!#define ABI_FUNC 'scfcv_reformatWFK'
-!! use interfaces_67_common
-!! use interfaces_79_seqpar_mpi
-!!!End of the abilint section
-!!
 !! type(scfcv_t), intent(inout) :: this
 !! real(dp), intent(inout) :: xred(3,this%dtset%natom)
 !! real(dp), intent(inout) :: xred_old(3,this%dtset%natom)
