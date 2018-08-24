@@ -460,8 +460,8 @@ if ( opts.run_source ):
       (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
     print_message(my_name, "Updating Fortran interfaces")
     print_message(my_name, "---> running %s" % (abilint_cmdline))
-    abilint_exitcode  = 0
-    #abilint_exitcode = os.system(abilint_cmdline)
+    #abilint_exitcode  = 0
+    abilint_exitcode = os.system(abilint_cmdline)
 
     if ( abilint_exitcode != 0 ):
       sys.stderr.write("""

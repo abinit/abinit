@@ -644,8 +644,11 @@ class AbinitProject(object):
         # that I can map these names to external libraries.
         # This means that I **cannot generate** the entire file in a programmatic way
         # but only the libraries entries.
-        import configparser
-        config = configparser.ConfigParser()
+        try:
+            from ConfigParser import ConfigParser
+        except ImportError:
+            from configparser import ConfigParser
+        config = ConfigParser()
         binconf_path = os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf")
         config.read(binconf_path)
         # Read header with comments to be added to the new conf file.
@@ -680,14 +683,15 @@ class AbinitProject(object):
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
-            config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
+            #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
+            config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
 
         print("Analysis completed in %.2f [s]" % (time.time() - start))
 
         try:
-            from io import StringIO
-        except ImportError:
             from StringIO import StringIO
+        except ImportError:
+            from io import StringIO
 
         fobj = StringIO()
         fobj.write(header)
