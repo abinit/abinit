@@ -133,7 +133,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
     if(rank==0 && verbo>0) std::cout <<"   == Green Function Structure Initialized ==	"<< endl << endl;
 
     // Construct CTQMC solver with mesh parameters
-    solver_core solver(beta, gf_struct, Nfreq, Ntau, Nl);
+    solver_core solver({beta, gf_struct, Nfreq, Ntau, Nl});
     if(rank==0 && verbo>0) std::cout <<"   == Solver Core Initialized ==	"<< endl << endl;
 
     //Fill in "hybridation+eps"=F(iw)~Delta(iw) coming from fortran inside delta_iw term RHS
