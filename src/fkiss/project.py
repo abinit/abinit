@@ -692,14 +692,13 @@ class AbinitProject(object):
         fobj = StringIO()
         fobj.write(header)
         config.write(fobj)
-        s = fobj.getvalue()
-        fobj.close()
         if dryrun:
-            print(s)
+            print(fobj.getvalue())
         else:
-            shutil.copyfile(binconf_path, binconf_path + ".bkp")
+            #shutil.copyfile(binconf_path, binconf_path + ".bkp")
             with open(binconf_path, "wt") as fh:
-                fh.write(s)
+                fh.write(fobj.getvalue())
+        fobj.close()
 
         return 0
 
@@ -731,6 +730,7 @@ class AbinitProject(object):
             for this in fort_files:
                 dlist = [f.name for f in fort_files if any(m in this.used_mods for m in f.modules)]
                 inside_deps[this.name] = sorted(set(d.replace(".F90", "") for d in dlist))
+            inside_deps = OrderedDict([(k, inside_deps[k]) for k in sorted(inside_deps.keys())])
 
             lines = []
             cleanfiles = ["CLEANFILES += \\"]
@@ -740,7 +740,7 @@ class AbinitProject(object):
                 end = " " if i == n - 1 else " \\"
                 cleanfiles.append("\t%s.$(MODEXT)%s" % (k, end))
                 if not dlist: continue
-                lines.append("%s.$(OBJEXT): %s" % (k, " ".join("%s.$(OBJEXT)" % v for v in dlist)))
+                lines.append("%s.$(OBJEXT): %s " % (k, " ".join("%s.$(OBJEXT)" % v for v in dlist)))
             cleanfiles.append("\n")
 
             # Write abinit.dep
@@ -753,7 +753,7 @@ class AbinitProject(object):
                 print("# For dirpath:", dirpath)
                 print(s, end=2 * "\n")
             else:
-                shutil.copyfile(abinitdep_path, abinitdep_path + ".bkp")
+                #shutil.copyfile(abinitdep_path, abinitdep_path + ".bkp")
                 with open(abinitdep_path, "wt") as fh:
                     fh.write(s)
 
@@ -769,7 +769,8 @@ class AbinitProject(object):
             if dryrun:
                 print(s, end=2 * "\n")
             else:
-                shutil.copyfile(abinitdir_path, abinitdir_path + ".bkp")
+                #if os.path.exists(abinitdir_path):
+                #    shutil.copyfile(abinitdir_path, abinitdir_path + ".bkp")
                 with open(abinitdir_path, "wt") as fh:
                     fh.write(s)
 
