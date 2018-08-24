@@ -193,8 +193,8 @@ def main():
     if options.command == "makemake":
         retcode = proj.validate(verbose=options.verbose)
         if retcode != 0: return retcode
-        #proj.write_binaries_conf()
-        #proj.write_buildsys_files()
+        #proj.write_binaries_conf(verbose=options.verbose)
+        #proj.write_buildsys_files(verbose=options.verbose)
 
     elif options.command == "print":
         if options.what is None:

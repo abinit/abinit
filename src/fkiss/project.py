@@ -622,7 +622,7 @@ class AbinitProject(object):
 
         return allmods
 
-    def write_binaries_conf(self):
+    def write_binaries_conf(self, verbose=0):
         """
         Write new binaries.conf file
         """
@@ -632,7 +632,21 @@ class AbinitProject(object):
         # that I can map these names to external libraries.
         import configparser
         config = configparser.ConfigParser()
-        config.read(os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf"))
+        binconf_path = os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf")
+        config.read(binconf_path)
+        # Read header with comments
+        header = []
+        with open(binconf_path, "rt") as fh:
+            for line in fh:
+                line = line.strip()
+                if line == "[DEFAULT]":
+                    break
+                else:
+                    header.append(line)
+            else:
+                raise ValueError("Cannot find `[DEFAULT]` in %s" % binconf_path)
+        header.append("")
+        header = "\n".join(header)
 
         print("Finding all binary dependencies...")
         start = time.time()
@@ -645,8 +659,9 @@ class AbinitProject(object):
         for prog_file, path in program_paths:
             allmods = self.find_allmods(path)
             dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            #print("For program:", prog_file.name)
-            pprint(dirnames)
+            if verbose:
+                print("For program:", prog_file.name)
+                pprint(dirnames)
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
@@ -660,13 +675,17 @@ class AbinitProject(object):
             from StringIO import StringIO
 
         fobj = StringIO()
+        fobj.write(header)
         config.write(fobj)
-        print(fobj.getvalue())
+        s = fobj.getvalue()
         fobj.close()
+        print(s)
+        #with open(binconf_path, "wt") as fh:
+        #    fh.write(s)
 
         return 0
 
-    def write_buildsys_files(self):
+    def write_buildsys_files(self, verbose=0):
         """
         Write
 
@@ -726,7 +745,6 @@ class AbinitProject(object):
         """
         def touch(fname, times=None):
             """Emulate Unix touch."""
-            import os
             with open(fname, 'a'):
                 os.utime(fname, times)
 
