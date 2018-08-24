@@ -73,6 +73,7 @@ class FortranFile(object):
 
     @classmethod
     def from_path(cls, path, macros=None, verbose=0):
+        if macros == "abinit": macros = AbinitProject.MACROS
         p = FortranKissParser(macros=macros, verbose=verbose).parse_file(path)
 
         new = cls(path)
@@ -438,14 +439,14 @@ class AbinitProject(object):
                 key = os.path.basename(used_mod.path)
                 self.fort_files[key].usedby_mods.append(fort_file)
 
-        d = self.all_public_procedures()
-        #assert "gstate" in d
+        pub_procs = self.all_public_procedures()
+        #assert "gstate" in pub_procs
         miss = []
         for fort_file in self.fort_files.values():
             for p in fort_file.iter_procedures():
                 for child_name in p.children:
                     try:
-                        d[child_name].parents.append(p)
+                        pub_procs[child_name].parents.append(p)
                     except KeyError:
                         miss.append(child_name)
 
@@ -892,6 +893,35 @@ class AbinitProject(object):
 
         import pandas as pd
         return pd.concat(df_list)
+
+    def print_orphans(self, verbose=0):
+        """Print orphan procedures and modules."""
+        # FIXME: this does not work as expected.
+
+        def find_orphans(fort_file):
+            """List with orphan procedures."""
+            orphans = []
+            for mod in fort_file.modules:
+                if all(mod.name not in ffile.all_uses for ffile in self.fort_files.values()):
+                    orphans.append(mod)
+
+            for p in fort_file.iter_procedures(visibility="public"):
+                # programs are orphan by definition
+                if p.is_program: continue
+                if p.is_function: continue
+                if not p.parents:
+                    orphans.append(p)
+
+            return orphans
+
+        dir2files = self.groupby_dirname()
+        for dirname, fort_files in dir2files.items():
+            for fort_file in fort_files:
+                orphans = find_orphans(fort_file)
+                if orphans:
+                    print("Found %d orphans in %s" % (len(orphans), fort_file.basename))
+                    for o in orphans:
+                        print(repr(o))
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """

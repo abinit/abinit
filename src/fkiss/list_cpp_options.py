@@ -9,7 +9,7 @@ fortran = re.compile("\.([Ff]|[Ff]90)$")
 cppline = re.compile("^#")
 cppkeys = ("define .*","include.*","ifdef","ifndef","elif","^if ","else","endif","defined","undef","!","&&","\|\|","\(","\)")
 
-def main(top):
+def list_cpp_options(top):
   cppopts = dict()
   for root,dirs,files in os.walk(top):
     for src in files:
@@ -41,10 +41,10 @@ def main(top):
 
 if __name__ == "__main__":
 
-  if len(sys.argv) == 1: 
+  if len(sys.argv) == 1:
     top = "src"
   else:
-    top = sys.argv[1] 
+    top = sys.argv[1]
 
   exit_status = main(top)
   sys.exit(exit_status)

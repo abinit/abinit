@@ -89,9 +89,9 @@ class TestFortranKissParser(TestCase):
         m = p.RE_INTERFACE_START.match("abstract interface foo")
         assert m #and m.group("name") == "foo"
         m = p.RE_INTERFACE_END.match("end interface")
-        assert m and not m.group("name")
+        assert m # and not m.group("name")
         m = p.RE_INTERFACE_END.match("end  interface  foo")
-        assert m and m.group("name").strip() == "foo"
+        assert m # and m.group("name").strip() == "foo"
 
     def test_simple_program(self):
         """Parsing Fortran program written following good programming standards."""
@@ -125,8 +125,9 @@ end program
         prog = p.programs[0]
         assert prog.name == "hello_world" and prog.ancestor is None
         assert prog.is_program and not prog.is_subroutine
-        assert len(prog.preamble) == 2
-        assert prog.preamble[0] == "! a very simple example"
+        preamble = prog.preamble.splitlines()
+        assert len(preamble) == 2
+        assert preamble[0] == "! a very simple example"
         assert "foo" in prog.children
         assert prog.to_string(verbose=2)
 
@@ -204,8 +205,9 @@ end module m_crystal
         mod = p.modules[0]
         assert mod.name == "m_crystal" and mod.ancestor is None
         assert mod.is_module and not mod.is_subroutine
-        assert len(mod.preamble) == 2
-        assert mod.preamble[0] == "! a very simple example"
+        preamble = mod.preamble.splitlines()
+        assert len(preamble) == 2
+        assert preamble[0] == "! a very simple example"
         assert not mod.children
         assert mod.to_string(verbose=2)
 

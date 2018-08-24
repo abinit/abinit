@@ -31,22 +31,26 @@ Usage example:
 # Graphviz graphs
 #################
 
-  abisrc.py graph 41_geometry/m_crystal.F90   => Plot dependency graph for module.
-  abisrc.py graph 41_geometry                 => Plot dependency graph for directory.
-  abisrc.py graph fourdp                      => Plot dependency graph for public procedure.
+  abisrc.py graph 41_geometry/m_crystal.F90   ==> Plot dependency graph for module.
+  abisrc.py graph 41_geometry                 ==> Plot dependency graph for directory.
+  abisrc.py graph fourdp                      ==> Plot dependency graph for public procedure.
 
 #############
 # Developers
 #############
 
-  abisrc.py makemake           => Generate files required by the build system.
-  abisrc.py touch              => Touch all files that have been changed + parents.
-                                  so that make can recompile all the relevant files.
-                                  Useful when changing API/ABI.
-  abisrc.py pedit fourdp       => Call $EDITOR to edit all the parents of the fourdp routine.
-  abisrc.py stats              =>
-  abisrc.py abirules           =>
-  abisrc.py master             => Master the Abinit source tree.
+  abisrc.py makemake           ==> Generate files required by the build system.
+  abisrc.py touch              ==> Touch all files that have been changed + parents.
+                                   so that make can recompile all the relevant files.
+                                   Useful when changing API/ABI.
+  abisrc.py pedit fourdp       ==> Call $EDITOR to edit all the parents of the fourdp routine.
+  abisrc.py stats              ==>
+  abisrc.py abirules           ==>
+  abisrc.py orphans            ==> Show orphans.
+  abisrc.py ipython            ==> Open project in ipython terminal.
+  abisrc.py cpp                ==> List CPP options.
+  abisrc.py robodoc            ==> Generate robodoc files.
+  abisrc.py master             ==> Master the Abinit source tree.
 """
 
 def get_parser():
@@ -58,15 +62,12 @@ def get_parser():
         help='verbose, can be supplied multiple times to increase verbosity.')
     copts_parser.add_argument('-r', '--regenerate', default=False, action="store_true",
         help='Parse files, generate new pickle file.')
-    #copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors.')
-    #copts_parser.add_argument('--no-logo', default=False, action="store_true", help='Disable AbiPy logo.')
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
 
     # Build the main parser.
     parser = argparse.ArgumentParser(epilog=get_epilog(),
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    #parser.add_argument('-V', '--version', action='version', version=abilab.__version__)
 
     # Create the parsers for the sub-commands
     subparsers = parser.add_subparsers(dest='command', help='sub-command help.', description="Valid subcommands")
@@ -94,7 +95,7 @@ def get_parser():
         help="Edit parents of public procedure or module.")
     p_edit.add_argument("what", help="File or procedure name.")
 
-    # Subparser for canimode.
+    # Subparser for canimove.
     #p_canimove = subparsers.add_parser("canimove", parents=[copts_parser],
     #    help="Check whether file or directory can be moved ")
     #p_canimove.add_argument("what", help="File or procedure name.")
@@ -126,7 +127,12 @@ def get_parser():
     p_validate = subparsers.add_parser('validate', parents=[copts_parser],
         help="Validate source tree.")
 
+    p_orphans = subparsers.add_parser('orphans', parents=[copts_parser], help="Print orphans.")
+    p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help="Open project in ipython terminal.")
+
     p_master = subparsers.add_parser('master', parents=[copts_parser], help="How to become a great programmer.")
+    p_robodoc = subparsers.add_parser('robodoc', parents=[copts_parser], help="Generate robodoc files.")
+    p_cpp = subparsers.add_parser('cpp', parents=[copts_parser], help="List CPP options.")
 
     return parser
 
@@ -155,8 +161,16 @@ def main():
 
     os.chdir(os.path.dirname(__file__))
 
+    if options.command == "robodoc":
+        from fkiss.mkrobodoc_dirs import mkrobodoc_files
+        return mkrobodoc_files(".")
+
+    if options.command == "cpp":
+        from fkiss.list_cpp_options import list_cpp_options
+        return list_cpp_options(".")
+
     if options.command == "parse":
-        fort_file = FortranFile.from_path(options.what, options.verbose)
+        fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
         print(fort_file.to_string(verbose=options.verbose))
         return 0
 
@@ -192,7 +206,9 @@ def main():
 
     if options.command == "makemake":
         retcode = proj.validate(verbose=options.verbose)
-        if retcode != 0: return retcode
+        if retcode != 0:
+            print("validate returned retcode:", retcodea, "Aborting now")
+            return retcode
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
 
@@ -282,6 +298,15 @@ def main():
     #    else:
     #        for typ in options.types:
     #            proj.show_graph_type(typ)
+
+    elif options.command == "orphans":
+        proj.print_orphans(verbose=options.verbose)
+
+    elif options.command == "ipython":
+        import IPython
+        IPython.embed(header="The Abinit project is bound to the `proj` variable.\n")
+
+
 
     elif options.command == "master":
         print(proj.master())

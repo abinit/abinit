@@ -11,6 +11,17 @@ from collections import OrderedDict, defaultdict
 from .tools import lazy_property
 
 
+class Interface(object):
+    def __init__(self, lines):
+        self.lines = lines
+        #self.name =
+
+class Datatype(object):
+    def __init__(self, lines):
+        self.lines = lines
+        #self.name =
+
+
 class Procedure(object):
     """
     Base class
@@ -30,9 +41,12 @@ class Procedure(object):
         self.basename = os.path.basename(self.path)
 
         self.num_f90lines, self.num_doclines = 0, 0
+        #self.num_omp_statements = 0
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
-        #self.datatypes = []
+        self.datatypes = []
+        self.interfaces = []
+
         # TODO
         self.visibility = "public"
         #self.has_implicit_none = False
@@ -304,6 +318,15 @@ re.I | re.VERBOSE)
     #RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)\s*(?:\(\s*(.*?)\s*\))?\Z", re.I)
     RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)", re.I)
 
+    # TYPE [ [ , access-spec ] :: ] type-name
+    # [ PRIVATE ]
+    # [ SEQUENCE ]
+    # component-declaration
+    # [ component-declaration ]...
+    # END TYPE [ type-name ]
+    RE_TYPE_START = re.compile(r'type\s+::\s*(?P<name>\w+)', re.I)
+    RE_TYPE_END = re.compile(r'^end\s+type', re.I)
+
     def __init__(self, macros=None, verbose=0):
         self.verbose = verbose
         self.macros = {} if macros is None else macros
@@ -315,23 +338,41 @@ re.I | re.VERBOSE)
 
     def parse_file(self, path):
         with open(path, "rt") as fh:
-            return self.parse_string(fh.read(), path=path)
+            string = fh.read()
+
+            # TODO: Include Fortran files?
+            #lines = []
+            #for line in string.splitlines():
+            #    l =  line.strip().replace("'", "").replace('"', "")
+            #    if l.startswith("#include") and (l.endswith(".finc") or l.endswith(".F90")):
+            #        basename = l.split()[-1]
+            #        with open(os.path.join(os.path.dirname(path), basename), "rt") as incfh:
+            #            lines.extend(incfh.readlines())
+            #    else:
+            #        lines.append(line)
+            #string = "\n".join(lines)
+
+            return self.parse_string(string, path=path)
 
     def parse_string(self, string, path=None):
+        if path is None: path = "UknownFile"
+
         # Replace macros. Need e.g. to treat USE_DEFS macros in libpaw and tetralib.
         for macro, value in self.macros.items():
             string = re.sub(macro, value, string)
 
         # Get list of lower-case string.
-        lines = [l.strip().lower() for l in string.splitlines()]
+        self.lines = [l.strip().lower() for l in string.splitlines()]
+        #self.warnings = []
 
-        num_doclines, num_f90lines = 0, 0
-        preamble, stack, includes  = [], [], []
+        self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
+        preamble, self.stack, includes, uses  = [], [], [], []
         ancestor = None
-        inblock = None
 
-        while lines:
-            line = lines.pop(0)
+        stack = self.stack
+
+        while self.lines:
+            line = self.lines.pop(0)
             if not line: continue
             #print(line)
 
@@ -340,28 +381,25 @@ re.I | re.VERBOSE)
             if line.startswith("!"):
                 if not stack or (stack and stack[-1][1] != "open"):
                     preamble.append(line)
-                if line.replace("!", ""): num_doclines += 1
+                if line.replace("!", ""): self.num_doclines += 1
                 continue
             else:
-                num_f90lines += 1
+                self.num_f90lines += 1
+
+            if line.startswith("!$omp"):
+                self.num_omp_statements += 1
 
             # Interface declaration.
             m = self.RE_INTERFACE_START.match(line)
             if m:
-                if self.verbose > 1: print("begin interface", line)
-                inblock = "interface"
-                #self.consume_interface_block(m)
+                self.consume_interface(m)
                 continue
 
-            if inblock == "interface":
-                if self.verbose > 1: print("in interface", line)
-                if self.RE_INTERFACE_END.match(line):
-                    inblock = None
-                continue
-
-            #m = self.RE_TYPE_DECLARATION_START.match(line):
+            # Datatype declaration.
+            #m = self.RE_TYPE_START.match(line)
             #if m:
-                #self.consume_type_declaration(m)
+            #    self.consume_datatype(m)
+            #    continue
 
             # Handle include statement (CPP or Fortran version).
             if line.startswith("#include ") or line.startswith("include "):
@@ -376,7 +414,7 @@ re.I | re.VERBOSE)
             # TODO in principle one could have `use A; use B`
             if line.startswith("use "):
                 smod = line.split()[1].split(",")[0].lower()
-                if smod.startswith("interfaces_"): continue
+                #if smod.startswith("interfaces_"): continue
                 # Remove comment at the end of the line if present.
                 i = smod.find("!")
                 if i != -1: smod = smod[:i]
@@ -384,8 +422,7 @@ re.I | re.VERBOSE)
                 # TODO
                 #if stack:
                 stack[-1][0].local_uses.append(smod)
-                #uses.append(smod)
-                #else:
+                uses.append(smod)
                 continue
 
             if self.simple_match(line, "contains"):
@@ -410,7 +447,7 @@ re.I | re.VERBOSE)
                 name = m.group("name")
                 if self.verbose > 1: print("Entering module:", name)
                 # Ignore module procedure
-                #if name == "procedure": continue
+                #assert name != "procedure"
                 # TODO
                 #assert ancestor is None
                 stack.append([Module(name, ancestor, preamble, path=path), "open"])
@@ -419,7 +456,6 @@ re.I | re.VERBOSE)
 
             # Subroutine declaration.
             m = self.RE_SUB_START.match(line)
-            #if not m: m = self.RE_FUNC_START.match(line)
             if m:
                 subname = m.group("name")
                 if not subname:
@@ -455,7 +491,10 @@ re.I | re.VERBOSE)
             if line.startswith("end "):
                 tokens = line.split()
                 end_ftype = None if len(tokens) == 1 else tokens[1]
-                if end_ftype not in {"program", "function", "subroutine", "module", None}: continue
+                if end_ftype not in {"program", "function", "subroutine", "module", None}:
+                    #print("end ftype:", end_ftype)
+                    continue
+
                 try:
                     end_name = tokens[2]
                 except IndexError:
@@ -498,7 +537,7 @@ re.I | re.VERBOSE)
                     ancestor = ancestor.ancestor
 
         self.includes = sorted(set(includes))
-        #self.uses = sorted(set(uses))
+        self.uses = sorted(set(uses))
 
         # Extract data from stack.
         self.programs, self.modules, self.subroutines, self.functions = [], [], [], []
@@ -530,17 +569,31 @@ re.I | re.VERBOSE)
         if i != -1: s = s[:i]
         return s.strip() == token
 
-    def consume_interface_block(self, start_match):
-        if self.verbose > 1: print("begin interface", line)
+    def consume_interface(self, start_match):
         buf = [start_match.string]
         while self.lines:
-            line = lines.pop(0)
+            line = self.lines.pop(0)
+            if self.verbose > 1: print("begin interface", line)
             buf.append(line)
             end_match = self.RE_INTERFACE_END.match(line)
             if end_match:
                 #end_name = end_match
+                if self.verbose > 1: print("end interface", line)
                 break
-        self.stack[-1][0].interfaces.append("\n".join(buf))
+        self.stack[-1][0].interfaces.append(Interface(buf))
+
+    def consume_datatype(self, start_match):
+        buf = [start_match.string]
+        while self.lines:
+            line = self.lines.pop(0)
+            if self.verbose > 1: print("begin datatype", line)
+            buf.append(line)
+            end_match = self.RE_TYPE_END.match(line)
+            if end_match:
+                #end_name = end_match
+                if self.verbose > 1: print("end datatype", line)
+                break
+        self.stack[-1][0].datatypes.append(Datatype(buf))
 
     #@staticmethod
     #def maybe_end_procedure(s):
