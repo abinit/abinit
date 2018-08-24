@@ -149,7 +149,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Local variables-------------------------------
  integer,parameter :: nkpt_max=50
- integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg
+ integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg,iat,iproj
  integer :: ierr,ii,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
  integer :: nband_k,nkpt_eff,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
@@ -251,7 +251,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    end do
  end do
 
- write(msg,'(a,1p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
+ write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
@@ -363,6 +363,22 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
         call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, kg_disk, vkbsign, vkb(:npwk_disk,:,:), vkbd(:npwk_disk,:,:))
         if (ikpt == 1) then
           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
+          if(dtset%prtvol>=2)then
+            write(msg,'(a)') 'prtkbff: writting first and last G-components of the KB form factors'
+            call wrtout(ab_out,msg,'COLL')
+            do iat=1,psps%ntypat
+              write(msg,'(a10,i5)') 'atype ',iat
+              call wrtout(ab_out,msg,'COLL')
+              do iproj=1,psps%lnmax
+                write(msg,'(a10,i5,a,a10,e12.4,a,3(a10,2e12.4,a))') &
+                       'projector ', iproj,ch10, & 
+                       'vkbsign   ', vkbsign(iproj,iat), ch10, &
+                       'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,:,iat), ch10, &
+                       'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,:,iat), ''
+                call wrtout(ab_out,msg,'COLL')
+              end do
+            end do
+          end if
         end if
         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
