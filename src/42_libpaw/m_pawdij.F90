@@ -56,6 +56,7 @@ MODULE m_pawdij
  public :: pawdijnd         ! Dij nuclear dipole
  public :: pawdijso         ! Dij spin-orbit
  public :: pawdiju          ! Dij LDA+U
+ public :: pawdiju_euijkl   ! Dij LDA+U, using pawrhoij instead of occupancies
  public :: pawdijexxc       ! Dij local exact-exchange
  public :: pawdijfr         ! 1st-order frozen Dij
  public :: pawpupot         ! On-site LDA+U potential
@@ -222,7 +223,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated
- logical :: need_to_print,paral_atom,v_dijhat_allocated
+ logical :: need_to_print,paral_atom,pawu_new_algo,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -366,6 +367,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    ndij=paw_ij(iatom)%ndij
    need_to_print=((abs(pawprtvol)>=1).and. &
 &   (iatom_tot==1.or.iatom_tot==natom.or.pawprtvol<0))
+   pawu_new_algo=(pawtab(itypat)%usepawu==5.or.pawtab(itypat)%usepawu==6)
 
 !  === Determine which conditions and prerequisites are fulfilled for Dij ===
 
@@ -393,9 +395,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
-!  DijU: not available for RF, positron; only for LDA+U
-   dijU_available=(pawtab(itypat)%usepawu>0.and.ipert<=0.and.ipositron/=1)
-   dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0)
+!  DijU: not available for positron; only for LDA+U
+   dijU_available=(pawtab(itypat)%usepawu>0.and.ipositron/=1.and. &
+&                 (ipert<=0.or.pawu_new_algo))
+   dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
+&               (pawu_new_algo.and.paw_ij(iatom)%has_dijU>0))
 !  DijExxc: not available for RF, positron; only for local exact exch. ; Vxc_ex needed
    dijexxc_available=(pawtab(itypat)%useexexch>0.and.ipert<=0.and.ipositron/=1)
    dijexxc_prereq=(paw_ij(iatom)%has_dijexxc==2.or.paw_ij(iatom)%has_exexch_pot>0)
@@ -628,6 +632,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute Dij0
        dij0(:)=pawtab(itypat)%dij0(:)
        if (ipositron==1) dij0(:)=two*pawtab(itypat)%kij(:)-dij0(:)
+       if (pawtab(itypat)%usepawu==5) dij0(:)=dij0(:)+pawtab(itypat)%euij_fll(:)
        if (dij0_need) paw_ij(iatom)%dij0(:)=dij0(:)
      end if
 
@@ -841,22 +846,26 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      else
 
 !    ===== Need to compute DijU
-       lpawu=pawtab(itypat)%lpawu
        LIBPAW_ALLOCATE(dijpawu,(cplex_rf*cplex_dij*lmn2_size,ndij))
-       LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
-       if (pawtab(itypat)%usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
-       if (pawtab(itypat)%usepawu< 10) then
-         call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
-&                      pawprtvol,pawtab(itypat),vpawu)
-       end if
-       if (natvshift_==0) then
-         call pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu)
+       if (pawu_new_algo) then
+         call pawdiju_euijkl(cplex_rf,cplex_dij,dijpawu,ndij,pawrhoij(iatom),pawtab(itypat))
        else
-         call pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu,&
-&                     natvshift=natvshift_,atvshift=atvshift(:,:,iatom_tot),&
-&                     fatvshift=fatvshift)
+         lpawu=pawtab(itypat)%lpawu
+         LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
+         if (pawtab(itypat)%usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
+         if (pawtab(itypat)%usepawu< 10) then
+           call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
+&                        pawprtvol,pawtab(itypat),vpawu)
+         end if
+         if (natvshift_==0) then
+           call pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu)
+         else
+           call pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu,&
+&                       natvshift=natvshift_,atvshift=atvshift(:,:,iatom_tot),&
+&                       fatvshift=fatvshift)
+         end if
+         LIBPAW_POINTER_DEALLOCATE(vpawu)
        end if
-       LIBPAW_POINTER_DEALLOCATE(vpawu)
        if (dijU_need) paw_ij(iatom)%dijU(:,:)=dijpawu(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijpawu(:,:)
        LIBPAW_DEALLOCATE(dijpawu)
@@ -2899,6 +2908,218 @@ subroutine pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab,vpawu,&
  end if
 
 end subroutine pawdiju
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawdiju_euijkl
+!! NAME
+!! pawdiju_euijkl
+!!
+!! FUNCTION
+!! Compute the LDA+U contribution to the PAW pseudopotential strength Dij (for one atom only).
+!! Alternative to pawdiju using the following property:
+!!     D_ij^pawu^{\sigma}_{mi,ni,mj,nj}=\sum_{k,l} [rho^{\sigma}_kl*e^U_ijkl]
+!! The routine structure is very similar to the one of pawdijhartree.
+!!
+!! INPUTS
+!!  cplex_rf=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
+!!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
+!!  nspden=number of spin density components
+!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies (and related data) for current atom
+!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
+!!
+!! OUTPUT
+!!  diju(cplex_rf*cplex_dij*lmn2_size,ndij)=  D_ij^U terms
+!!  diju_im(cplex_rf*cplex_dij*lmn2_size,ndij)=
+!!
+!! NOTES
+!! There are some subtleties :
+!!   Contrary to eijkl, eu_ijkl is not invariant with respect to the permutation of i <--> j or k <--> l.
+!!   So the correct expression of Dij is:
+!!
+!!     D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ji eu_jikl )
+!!
+!!   In the following, we will use that: (according to the rules in pawpuxinit.F90)
+!!    (a) eu_ijkl + eu_jikl =   eu_ijlk + eu_jilk (invariant      when exchanging k <--> l)
+!!    (b) eu_ijkl - eu_jikl = - eu_ijlk + eu_jilk (change of sign when exchanging k <--> l)
+!!   and :
+!!    (c) eu_iikl = eu_iilk (if i=j, invariant when exchanging k <--> l)
+!!    (d) eu_ijkk = eu_jikk (if k=l, invariant when exchanging i <--> j)
+!!
+!!   1) If cplex=1 (ipert=0 or q=0) we have simply:
+!!        rho_ji = rho_ij^*
+!!      So:
+!!           D_kl  = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ij^* eu_jikl )
+!!      As eu_ijkl is real:
+!! [I] :  Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!      So:
+!!        Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)  ( using (a) and (c) )
+!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)  ( using (b) and (c) )
+!!
+!!   2) If cplex=2 (so ipert>0 and q/=0), we have:
+!!        rho_ji = rhoA_ji + rhoB_ji
+!!      where:
+!!        rhoA_ji = rhoA_ij^*
+!!        rhoB_ji = rhoB_ij
+!!      So:
+!!           D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) (rhoA_ij^* + rhoB_ij) eu_jikl )
+!!      As eu_ijkl is real:
+!! [Ib] : Re(D_kl) = sum_i<=j Re(rho_ij)  ( eu_ijkl + (1-delta_ij) eu_jikl )  (same as [I])
+!! [II] : Im(D_kl) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!                 + sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!      where:
+!!        Im(rhoB_ij) is stored in the imaginary part of "pawrhoij%rhoijp(:)"
+!!        Im(rhoA_ij) is stored in the array "pawrhoij%rhoijim(:)"
+!!      We note:
+!!        Im(D_kl^A) = sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
+!!        Im(D_kl^B) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!      We still have:
+!!        Re(D_kl)  =  Re(D_lk)
+!!      but:
+!!        Im(D_kl^A) = -Im(D_lk^A)  ( using (b) and (c) )
+!!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
+!!
+!! PARENTS
+!!      m_pawdij,pawdenpot,pawdfptenergy
+!!
+!! CHILDREN
+!!      xmpi_allgather,xmpi_allgatherv
+!!
+!! SOURCE
+
+subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawdiju_euijkl'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: cplex_dij,cplex_rf,ndij
+!arrays
+ real(dp),intent(out) :: diju(:,:)
+ real(dp),intent(out),optional :: diju_im(:,:)
+ type(pawrhoij_type),intent(in) :: pawrhoij
+ type(pawtab_type),intent(in) :: pawtab
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: cplex_rhoij,ilmn,ilmnp,irhoij,jlmn,jlmnp,jrhoij,kklmn,kklmn1,klmn,klmn1,lmn2_size,sig1,sig2
+ logical :: compute_diju_im
+ real(dp) :: ro_im
+ character(len=500) :: msg
+!arrays
+ real(dp) :: ro(cplex_rf)
+
+! *************************************************************************
+
+!Useful data
+ lmn2_size=pawtab%lmn2_size
+ cplex_rhoij=pawrhoij%cplex
+ compute_diju_im=(cplex_rf==2.and.present(diju_im))
+
+!Check data consistency
+ if (size(diju,1)/=cplex_rf*lmn2_size.or.size(diju,2)/=ndij) then
+   msg='invalid sizes for diju!'
+   MSG_BUG(msg)
+ end if
+ if (compute_diju_im) then
+   if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
+     msg='invalid sizes for diju_im !'
+     MSG_BUG(msg)
+   end if  
+ end if
+ if (cplex_rhoij<cplex_rf) then
+   msg='cplex_rhoij must be >=cplex_rf!'
+   MSG_BUG(msg)
+ end if
+ if (cplex_dij/=1) then
+   msg='pawdiju_euijkl not yet available for cplex_dij=2!'
+   MSG_ERROR(msg)
+ end if
+
+!------------------------------------------------------------------------
+!----------- Allocations and initializations
+!------------------------------------------------------------------------
+
+ diju=zero
+ if (compute_diju_im) diju_im = zero
+
+!Real on-site quantities
+ if (cplex_rf==1) then
+   do sig1=1,ndij
+     do sig2=1,ndij
+       jrhoij=1
+       do irhoij=1,pawrhoij%nrhoijsel
+         klmn=pawrhoij%rhoijselect(irhoij)
+         ilmn=pawtab%indklmn(7,klmn)
+         jlmn=pawtab%indklmn(8,klmn)
+         ro(1)=pawrhoij%rhoijp(jrhoij,sig2)
+         do jlmnp=1,pawtab%lmn_size
+           do ilmnp=1,jlmnp
+             klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
+
+!            Thanks to Eq.[I] in the comment above:
+             diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             if (ilmn/=jlmn) then
+               diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+             end if
+
+           end do
+         end do
+         jrhoij=jrhoij+cplex_rhoij
+       end do
+     end do
+   end do
+
+!Complex on-site quantities
+ else
+   do sig1=1,ndij
+     do sig2=1,ndij
+       jrhoij=1
+       do irhoij=1,pawrhoij%nrhoijsel
+         klmn=pawrhoij%rhoijselect(irhoij)
+         ilmn=pawtab%indklmn(7,klmn)
+         jlmn=pawtab%indklmn(8,klmn)
+         ro(1:2)=pawrhoij%rhoijp(jrhoij:jrhoij+1,sig2)
+         do jlmnp=1,pawtab%lmn_size
+           do ilmnp=1,jlmnp
+             klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
+             kklmn1 = klmn1 + lmn2_size
+             ro_im = pawrhoij%rhoijim(klmn1,sig2)
+
+!            Thanks to Eq.[I] in the comment above:
+             diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             if (compute_diju_im) then
+               diju_im(klmn1,sig1)=diju_im(klmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+             end if
+
+             if (ilmn/=jlmn) then
+               diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               if (compute_diju_im) then 
+                   diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               end if
+             end if
+           end do
+         end do
+         jrhoij=jrhoij+cplex_rhoij
+       end do
+     end do
+   end do
+ end if
+
+end subroutine pawdiju_euijkl
 !!***
 
 !----------------------------------------------------------------------

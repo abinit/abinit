@@ -322,7 +322,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,opt_gvnl1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
+ integer :: option,opt_gvnl1,qphase_rhoij,sij_opt,spaceworld,usevnl,use_rhoijim,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -774,12 +774,15 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        drho1wfr(:,:,idir1)=zero
        call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
 &                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+       use_rhoijim = 1
+!      use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
+&       use_rhoijim=use_rhoijim,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&         use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
        else
          call pawrhoij_init_unpacked(pawdrhoij1_unsym(:,idir1))
        end if

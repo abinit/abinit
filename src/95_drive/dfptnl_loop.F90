@@ -221,7 +221,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,comm_cell,counter,cplex,cplex_rhoij,formeig,flag1,flag3
- integer :: has_dijfr
+ integer :: has_dijfr,has_diju
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
@@ -349,14 +349,16 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
+
    call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call paw_ij_init(paw_ij1_i2pert,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
 &   dtset%ntypat,dtset%typat,pawtab,&
-&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,&
-&   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom)
+&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,has_dijU=has_diju,&
+&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else
    ABI_ALLOCATE(nhat1_i1pert,(0,0))
    ABI_ALLOCATE(nhat1_i2pert,(0,0))

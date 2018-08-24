@@ -4,8 +4,8 @@
 !! m_abimover
 !!
 !! FUNCTION
-!! This module contains definition the type abimover
-!! and its related routines
+!! This module contains definition the types abimover, mttk, abiforstr, delocint, and bonds
+!! and their related ini and free routines
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2018 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
@@ -27,6 +27,7 @@ module m_abimover
  use m_profiling_abi
  use m_atomdata
  use m_errors
+ use defs_abitypes
 
  use m_geometry,  only : acrossb
 
@@ -34,11 +35,149 @@ module m_abimover
 
  private
 
- ! Helper function
+ public :: abimover_ini
+ public :: abimover_destroy
+ public :: mttk_ini   ! initialize the object
+ public :: mttk_fin   ! Release memory
+ public :: abiforstr_ini  ! Initialize the object
+ public :: abiforstr_fin  ! Free memory
+ public :: delocint_ini  ! Initialize the delocint object
+ public :: delocint_fin  ! Free memory
+ public :: bonds_free
  public :: bond_length
+ public :: print_bonds
+ public :: make_bonds_new
+ public :: calc_prim_int
+ public :: make_prim_internals
 
  integer,public, parameter :: mover_BEFORE=0
  integer,public, parameter :: mover_AFTER=1
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_abimover/abimover
+!! NAME
+!! abimover
+!!
+!! FUNCTION
+!! This datatype has the purpose of store all the data taken
+!! usually from dtset (but not only) needed for the different predictors
+!! to update positions, acell, etc.
+!!
+!! SOURCE
+
+type, public :: abimover
+
+! scalars
+! Delay of Permutation (Used by pred_langevin only)
+integer  :: delayperm
+! DIIS memory (Used by pred_diisrelax only)
+integer  :: diismemory
+! Geometry Optimization Precondition option
+integer  :: goprecon
+! include a JELLium SLAB in the cell
+integer  :: jellslab
+! Number of ATOMs
+integer  :: natom
+! Number of CONstraint EQuations
+integer  :: nconeq
+! Option to add strain when FREEZe DISPlacement
+integer :: ph_freez_disp_addStrain
+! Option for the PHonon FREEZe DISPlacement AMPLitude 
+integer :: ph_freez_disp_option
+! Number of PHonon FREEZe DISPlacement AMPLitude
+integer :: ph_freez_disp_nampl
+! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
+integer  :: ph_nqshift
+! Use by pred_isothermal only
+integer  :: nnos
+! Number of SYMmetry operations
+integer  :: nsym
+! Number of Types of atoms
+integer  :: ntypat
+! OPTimize the CELL shape and dimensions
+integer  :: optcell
+! RESTART Xcart and Fred
+integer  :: restartxf
+! Sign of Permutation (Used by pred_langevin only)
+integer  :: signperm
+! Ion movement
+integer  :: ionmov
+
+! Use by pred_isothermal only
+real(dp) :: bmass
+! Delta Time for IONs
+real(dp) :: dtion
+! Used by pred_langevin only
+real(dp) :: friction
+! Used by pred_langevin only
+real(dp) :: mdwall
+! Used by pred_nose only
+real(dp) :: noseinert
+! STRess PRECONditioner
+real(dp) :: strprecon
+! VIScosity
+real(dp) :: vis
+
+! arrays
+! Indices of AToms that are FIXed
+integer,pointer  :: iatfix(:,:)         ! iatfix(3,natom)
+! SYMmetries, Anti-FerroMagnetic characteristics
+integer,pointer  :: symafm(:)           ! symafm(nsym)
+! SYMmetry in REaL space
+integer,pointer  :: symrel(:,:,:)       ! symrel(3,3,nsym)
+! Translation NON-Symmorphic vectors
+real(dp),pointer :: tnons(:,:)          ! tnons(3,nsym)
+! TYPe of ATom
+integer,pointer  :: typat(:)            ! typat(natom)
+! PRTint ATom LIST
+integer,pointer  :: prtatlist(:)        ! prtatlist(natom)
+! Qpoint grid (used for ionmov 26 and 27)
+integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
+! List of PHonon FREEZe DISPlacement AMPLitude
+real(dp),pointer :: ph_freez_disp_ampl(:,:)
+! shift of the Qpoint Grid (used for ionmov 26 and 27)
+real(dp),pointer :: ph_qshift(:,:)       ! 
+! amu input var for the current image
+real(dp), pointer :: amu_curr(:)     ! amu_curr(ntypat)
+! Mass of each atom 
+real(dp),pointer :: amass(:)            ! amass(natom)
+! Geometry Optimization Preconditioner PaRaMeters
+real(dp),pointer :: goprecprm(:)
+! Molecular Dynamics Initial and Final Temperature
+real(dp),pointer :: mdtemp(:)           ! mdtemp(2) (initial,final)
+! STRess TARGET
+real(dp),pointer :: strtarget(:)        ! strtarget(6)
+! Use by pred_isothermal only
+real(dp),pointer :: qmass(:)
+! Z number of each NUCLeus
+real(dp),pointer :: znucl(:)            ! znucl(npsp)
+
+! Filename for Hessian matrix
+character(len=fnlen), pointer :: fnameabi_hes
+! Filename for _HIST file
+character(len=fnlen), pointer :: filnam_ds(:)   ! dtfil%filnam_ds(5)
+
+end type abimover
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_abimover/abimover_specs
+ type,public :: abimover_specs
+
+   !scalars
+   integer           :: ncycle
+   integer           :: nhist ! Number of step of history needed in the algorithm
+   character(len=8)  :: crit4xml
+   character(len=10) :: type4xml
+   character(len=60) :: method
+   logical :: isFconv ! If the convergence is needed
+   logical :: isARused
+   logical :: isVused
+
+ end type abimover_specs
 !!***
 
 !----------------------------------------------------------------------
@@ -53,6 +192,7 @@ module m_abimover
 !! NOTES
 !!   deloc <type(delocint)>=Important variables for pred_delocint
 !!   |
+!!   ! icenter  = Index of the center of the number of shifts
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions (used for constraints)
@@ -77,6 +217,7 @@ module m_abimover
 type,public :: delocint
 
 ! scalars
+ integer :: icenter
  integer :: nang
  integer :: nbond
  integer :: ncart
@@ -92,151 +233,6 @@ type,public :: delocint
  real(dp),allocatable :: rshift(:,:)
 
 end type delocint
-
- public :: make_prim_internals
- public :: delocint_fin
- public :: calc_prim_int
- !public :: xcart2deloc
-!!***
-
-!----------------------------------------------------------------------
-
-!!****t* m_abimover/abimover
-!! NAME
-!! abimover
-!!
-!! FUNCTION
-!! This datatype has the purpose of store all the data taked
-!! usually from dtset needed for the different predictors
-!! to update positions, acell, etc.
-!!
-!! NOTES
-!!  At present 32 variables are present in abimover
-!!  if a new variable is added in abimover it should
-!!  be added also for nullify in abimover_nullify
-!!
-!! STATS
-!!  integer         => 13
-!!  real            =>  7
-!!  integer array   =>  4
-!!  real array      =>  6
-!!  character array =>  1
-!!  structures      =>  1
-!!  TOTAL              34
-!!
-!! SOURCE
-
-type, public :: abimover
-
-! scalars
-! Delay of Permutation (Used by pred_langevin only)
-integer,pointer  :: delayperm
-! DIIS memory (Used by pred_diisrelax only)
-integer,pointer  :: diismemory
-! Geometry Optimization Precondition option
-integer,pointer  :: goprecon
-! include a JELLium SLAB in the cell
-integer,pointer  :: jellslab
-! Number of ATOMs
-integer,pointer  :: natom
-! Number of CONstraint EQuations
-integer,pointer  :: nconeq
-! Option to add strain when FREEZe DISPlacement
-integer,pointer :: ph_freez_disp_addStrain
-! Option for the PHonon FREEZe DISPlacement AMPLitude 
-integer,pointer :: ph_freez_disp_option
-! Number of PHonon FREEZe DISPlacement AMPLitude
-integer,pointer :: ph_freez_disp_nampl
-! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
-integer,pointer  :: ph_nqshift
-! Use by pred_isothermal only
-integer,pointer  :: nnos
-! Number of SYMmetry operations
-integer,pointer  :: nsym
-! Number of Types of atoms
-integer,pointer  :: ntypat
-! OPTimize the CELL shape and dimensions
-integer,pointer  :: optcell
-! RESTART Xcart and Fred
-integer,pointer  :: restartxf
-! Sign of Permutation (Used by pred_langevin only)
-integer,pointer  :: signperm
-! Ion movement
-integer,pointer  :: ionmov
-
-! Use by pred_isothermal only
-real(dp),pointer :: bmass
-! Delta Time for IONs
-real(dp),pointer :: dtion
-! Used by pred_langevin only
-real(dp),pointer :: friction
-! Used by pred_langevin only
-real(dp),pointer :: mdwall
-! Used by pred_nose only
-real(dp),pointer :: noseinert
-! STRess PRECONditioner
-real(dp),pointer :: strprecon
-! VIScosity
-real(dp),pointer :: vis
-
-! arrays
-! Indices of AToms that are FIXed
-integer,pointer  :: iatfix(:,:)         ! iatfix(3,natom)
-! SYMmetry in REaL space
-integer,pointer  :: symrel(:,:,:)       ! symrel(3,3,nsym)
-! TYPe of ATom
-integer,pointer  :: typat(:)            ! typat(natom)
-! PRTint ATom LIST
-integer,pointer  :: prtatlist(:)        ! prtatlist(natom)
-! Qpoint grid (used for ionmov 26 and 27)
-integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
-! List of PHonon FREEZe DISPlacement AMPLitude
-real(dp),pointer :: ph_freez_disp_ampl(:,:)
-! shift of the Qpoint Grid (used for ionmov 26 and 27)
-real(dp),pointer :: ph_qshift(:,:)       ! symrel(3,nsym)
-! Mass of each atom (NOT IN DTSET)
-real(dp),pointer :: amass(:)            ! amass(natom)
-! Geometry Optimization Preconditioner PaRaMeters
-real(dp),pointer :: goprecprm(:)
-! Molecular Dynamics Initial and Final Temperature
-real(dp),pointer :: mdtemp(:)           ! mdtemp(2) (initial,final)
-! STRess TARGET
-real(dp),pointer :: strtarget(:)        ! strtarget(6)
-! Use by pred_isothermal only
-real(dp),pointer :: qmass(:)
-! Z number of each NUCLeus
-real(dp),pointer :: znucl(:)            ! znucl(npsp)
-
-! Filename for Hessian matrix
-character(len=fnlen), pointer :: fnameabi_hes
-! Filename for _HIST file
-character(len=fnlen), pointer :: filnam_ds(:)   ! dtfil%filnam_ds(5)
-
-! structure for delocalized internal coordinates
-type(delocint) :: deloc
-
-end type abimover
-
- public :: abimover_ini
- public :: abimover_fin
- public :: abimover_nullify
-!!***
-
-!----------------------------------------------------------------------
-
- type,public :: abimover_specs
-
-   !scalars
-   integer           :: ncycle
-   integer           :: nhist ! Number of step of history needed in the algorithm
-   character(len=8)  :: crit4xml
-   character(len=10) :: type4xml
-   character(len=60) :: method
-   logical :: isFconv ! If the convergence is needed
-   logical :: isARused
-   logical :: isVused
-
- end type abimover_specs
 !!***
 
 !----------------------------------------------------------------------
@@ -277,9 +273,6 @@ end type abimover
    ! Positions of thermostat variables
 
  end type mttk_type
-
- public :: mttk_ini   ! initialize the object
- public :: mttk_fin   ! Release memory
 !!***
 
 !----------------------------------------------------------------------
@@ -311,9 +304,6 @@ type, public :: abiforstr
     ! Stress tensor (Symmetrical 3x3 matrix)
 
 end type abiforstr
-
-public :: abiforstr_ini  ! Initialize the object
-public :: abiforstr_fin  ! Free memory
 !!***
 
 !----------------------------------------------------------------------
@@ -376,10 +366,6 @@ real(dp),allocatable :: bond_length(:) ! Bond lengths
 real(dp),allocatable :: bond_vect(:,:) ! Unitary vectors for bonds
 
 end type go_bonds
-
-public :: make_bonds_new
-public :: bonds_free
-public :: print_bonds
 !!***
 
 !----------------------------------------------------------------------
@@ -424,35 +410,13 @@ contains  !=============================================================
 !! abimover_ini
 !!
 !! FUNCTION
-!! Initializes the abimover structure
+!! Initializes the abimover structure and the abimover_specs information
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! USE OF FFT GRIDS:
-!! =================
-!! In case of PAW:
-!! ---------------
-!!    Two FFT grids are used:
-!!    - A "coarse" FFT grid (defined by ecut)
-!!      for the application of the Hamiltonian on the plane waves basis.
-!!      It is defined by nfft, ngfft, mgfft, ...
-!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ...
-!!      are expressed on this grid.
-!!    - A "fine" FFT grid (defined) by ecutdg)
-!!      for the computation of the density inside PAW spheres.
-!!      It is defined by nfftf, ngfftf, mgfftf, ...
-!!      Total density, potentials, ...
-!!      are expressed on this grid.
-!! In case of norm-conserving:
-!! ---------------------------
-!!    - Only the usual FFT grid (defined by ecut) is used.
-!!      It is defined by nfft, ngfft, mgfft, ...
-!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
-!!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
 !!      mover
@@ -462,17 +426,9 @@ contains  !=============================================================
 !!
 !! SOURCE
 
-subroutine abimover_ini(ab_mover,specs,&
-& delayperm,diismemory,goprecon,jellslab,&
-& natom,nconeq,nnos,nsym,ntypat,&
-& optcell,restartxf,signperm,ionmov,&
-& bmass,dtion,friction,mdwall,noseinert,strprecon,vis,&
-& iatfix,symrel,ph_freez_disp_addStrain,ph_freez_disp_ampl,&
-& ph_freez_disp_nampl,ph_freez_disp_option,ph_ngqpt,ph_nqshift,ph_qshift,typat,prtatlist,&
-& amass,goprecprm,mdtemp,strtarget,qmass,znucl,fnameabi_hes,filnam_ds)
+subroutine abimover_ini(ab_mover,amu_curr,dtfil,dtset,specs)
 
 !Arguments ------------------------------------
-!scalars
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -480,95 +436,15 @@ subroutine abimover_ini(ab_mover,specs,&
 #define ABI_FUNC 'abimover_ini'
 !End of the abilint section
 
+real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)  
 type(abimover),intent(out) :: ab_mover
+type(datafiles_type),target,intent(in) :: dtfil
+type(dataset_type),target,intent(in) :: dtset
 type(abimover_specs),intent(out) :: specs
-! Delay of Permutation (Used by pred_langevin only)
-integer,target, intent(in)  :: delayperm
-! DIIS memory (Used by pred_diisrelax only)
-integer,target, intent(in)  :: diismemory
-! Geometry Optimization Precondition option
-integer,target, intent(in)  :: goprecon
-! include a JELLium SLAB in the cell
-integer,target, intent(in)  :: jellslab
-! Number of ATOMs
-integer,target, intent(in)  :: natom
-! Number of CONstraint EQuations
-integer,target, intent(in)  :: nconeq
-! Use by pred_isothermal only
-integer,target, intent(in)  :: nnos
-! Option to add strain when FREEZe DISPlacement
-integer,target,intent(in) :: ph_freez_disp_addStrain
-! Option for the PHonon FREEZe DISPlacement AMPLitude 
-integer,target,intent(in)  :: ph_freez_disp_option
-! Number of PHonon FREEZe DISPlacement AMPLitude
-integer,target,intent(in)  :: ph_freez_disp_nampl
-! Number of q shift
-integer,target, intent(in)  :: ph_nqshift
-! Number of SYMmetry operations
-integer,target, intent(in)  :: nsym
-! Number of Types of atoms
-integer,target, intent(in)  :: ntypat
-! OPTimize the CELL shape and dimensions
-integer,target, intent(in)  :: optcell
-! RESTART Xcart and Fred
-integer,target, intent(in)  :: restartxf
-! Sign of Permutation (Used by pred_langevin only)
-integer,target, intent(in)  :: signperm
-! Ion movement
-integer,target, intent(in)  :: ionmov
-
-! Use by pred_isothermal only
-real(dp),target, intent(in) :: bmass
-! Delta Time for IONs
-real(dp),target, intent(in) :: dtion
-! Used by pred_langevin only
-real(dp),target, intent(in) :: friction
-! Used by pred_langevin only
-real(dp),target, intent(in) :: mdwall
-! Used by pred_nose only
-real(dp),target, intent(in) :: noseinert
-! STRess PRECONditioner
-real(dp),target, intent(in) :: strprecon
-! VIScosity
-real(dp),target, intent(in) :: vis
-
-! arrays
-! Indices of AToms that are FIXed
-integer,target, intent(in)  :: iatfix(:,:)         ! iatfix(3,natom)
-! Qpoint grid
-integer,target,intent(in)  :: ph_ngqpt(:)         !  ph_ngqpt(3)
-! SYMmetry in REaL space
-integer,target, intent(in)  :: symrel(:,:,:)       ! symrel(3,3,nsym)
-! TYPe of ATom
-integer,target, intent(in)  :: typat(:)            ! typat(natom)
-! PRTint ATom LIST
-integer,target, intent(in)  :: prtatlist(:)        ! prtatlist(natom)
-
-! Mass of each atom (NOT IN DTSET)
-real(dp),target, intent(in) :: amass(:)            ! amass(natom)
-! Geometry Optimization Preconditioner PaRaMeters
-real(dp),target, intent(in) :: goprecprm(:)
-! Molecular Dynamics Initial and Final Temperature
-real(dp),target, intent(in) :: mdtemp(:)           ! mdtemp(2) (initial,final)
-! List of PHonon FREEZe DISPlacement AMPLitude
-real(dp),target,intent(in) :: ph_freez_disp_ampl(:,:)
-! shift of the Qpoint Grid
-real(dp),target, intent(in)  :: ph_qshift(:,:)     ! ph_qshift(3,nqshift)
-! STRess TARGET
-real(dp),target, intent(in) :: strtarget(:)        ! strtarget(6)
-! Use by pred_isothermal only
-real(dp),target, intent(in) :: qmass(:)
-! Z number of each NUCLeus
-real(dp),target, intent(in) :: znucl(:)            ! znucl(npsp)
-
-! Filename for Hessian matrix
-character(len=fnlen), target, intent(in) :: fnameabi_hes
-! Filename for _HIST file
-character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
-
 
 !Local variables-------------------------------
 !scalars
+ integer :: iatom,natom
  character(len=500) :: msg
 !arrays
 
@@ -577,88 +453,62 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 
 !write(std_out,*) 'mover 01'
 !###########################################################
-!### 01. Initialization of indexes and allocations of arrays
+!### 01. Initialization of ab_mover
 
-
-!Copy the information from the Dataset (dtset)
+!Copy or create pointers for the information from the Dataset (dtset)
 !to the ab_mover structure
-!Delay of Permutation (Used by pred_langevin only)
- ab_mover%delayperm=>delayperm
-!DIIS memory (Use by pred_diisrelax only)
- ab_mover%diismemory=>diismemory
-!Geometry Optimization Precondition option
- ab_mover%goprecon=>goprecon
-!include a JELLium SLAB in the cell
- ab_mover%jellslab=>jellslab
-!Number of ATOMs
- ab_mover%natom=>natom
-!Number of CONstraint EQuations
- ab_mover%nconeq=>nconeq
-!Use by pred_isothermal only
- ab_mover%nnos=>nnos
-!Number of SYMmetry operations
- ab_mover%nsym=>nsym
-!Number of Type of atoms
- ab_mover%ntypat=>ntypat
-!OPTimize the CELL shape and dimensions
- ab_mover%optcell=>optcell
-!RESTART Xcart and Fred
- ab_mover%restartxf=>restartxf
-!Sign of Permutation (Used by pred_langevin only)
- ab_mover%signperm=>signperm
-!Ion movements
- ab_mover%ionmov=>ionmov
+ natom=dtset%natom
 
-!Use by pred_isothermal only
- ab_mover%bmass=>bmass
-!Delta Time for IONs
- ab_mover%dtion=>dtion
-!Used by pred_langevin only
- ab_mover%friction=>friction
-!Used by pred_langevin only
- ab_mover%mdwall=>mdwall
-!NOT DOCUMENTED
- ab_mover%noseinert=>noseinert
-!STRess PRECONditioner
- ab_mover%strprecon=>strprecon
-!VIScosity
- ab_mover%vis=>vis
+ ab_mover%delayperm   =dtset%delayperm
+ ab_mover%diismemory  =dtset%diismemory
+ ab_mover%goprecon    =dtset%goprecon
+ ab_mover%jellslab    =dtset%jellslab
+ ab_mover%natom       =dtset%natom
+ ab_mover%nconeq      =dtset%nconeq
+ ab_mover%nnos        =dtset%nnos
+ ab_mover%nsym        =dtset%nsym
+ ab_mover%ntypat      =dtset%ntypat
+ ab_mover%optcell     =dtset%optcell
+ ab_mover%restartxf   =dtset%restartxf
+ ab_mover%signperm    =dtset%signperm
+ ab_mover%ionmov      =dtset%ionmov
+ ab_mover%bmass       =dtset%bmass
+ ab_mover%dtion       =dtset%dtion
+ ab_mover%friction    =dtset%friction
+ ab_mover%mdwall      =dtset%mdwall
+ ab_mover%noseinert   =dtset%noseinert
+ ab_mover%ph_nqshift  =dtset%ph_nqshift
+ ab_mover%strprecon   =dtset%strprecon
+ ab_mover%vis         =dtset%vis
+ ab_mover%ph_freez_disp_addStrain =dtset%ph_freez_disp_addStrain
+ ab_mover%ph_freez_disp_option    =dtset%ph_freez_disp_option
+ ab_mover%ph_freez_disp_nampl     =dtset%ph_freez_disp_nampl
 
-!Indices of AToms that are FIXed
- ab_mover%iatfix=>iatfix(:,1:natom)
-!SYMmetry in REaL space
- ab_mover%symrel=>symrel
- !Phonon q grid in the DDB (ionmov 26 and 27)
- ab_mover%ph_freez_disp_addStrain=>ph_freez_disp_addStrain
- ab_mover%ph_freez_disp_option=>ph_freez_disp_option
- ab_mover%ph_freez_disp_nampl=>ph_freez_disp_nampl
- ab_mover%ph_ngqpt=>ph_ngqpt
- ab_mover%ph_nqshift=>ph_nqshift
- ab_mover%ph_qshift=>ph_qshift
- ab_mover%ph_freez_disp_ampl=>ph_freez_disp_ampl
-!TYPe of ATom
- ab_mover%typat => typat(1:natom)
-!PRTint QTom LIST
- ab_mover%prtatlist=>prtatlist(1:natom)
+ ab_mover%iatfix      =>dtset%iatfix(:,1:natom)
+ ab_mover%symafm      =>dtset%symafm
+ ab_mover%symrel      =>dtset%symrel
+ ab_mover%tnons       =>dtset%tnons
+ ab_mover%ph_ngqpt    =>dtset%ph_ngqpt
+ ab_mover%ph_qshift   =>dtset%ph_qshift
+ ab_mover%ph_freez_disp_ampl      =>dtset%ph_freez_disp_ampl
+ ab_mover%typat       =>dtset%typat(1:natom)
+ ab_mover%prtatlist   =>dtset%prtatlist(1:natom)
+ ab_mover%goprecprm   =>dtset%goprecprm
+ ab_mover%mdtemp      =>dtset%mdtemp
+ ab_mover%strtarget   =>dtset%strtarget
+ ab_mover%qmass       =>dtset%qmass
+ ab_mover%znucl       =>dtset%znucl
 
-!Mass of each atom (NOT IN DTSET)
- ab_mover%amass=>amass
-!Geometry Optimization Preconditioner PaRaMeters
- ab_mover%goprecprm=>goprecprm
-!Molecular Dynamics Temperatures
- ab_mover%mdtemp=>mdtemp
-!STRess TARGET
- ab_mover%strtarget=>strtarget
-!Use by pred_isothermal only
- ab_mover%qmass=>qmass
-!Z number of each NUCLeus
- ab_mover%znucl=>znucl
+ ab_mover%amu_curr    =>amu_curr
+ ABI_ALLOCATE(ab_mover%amass,(natom))
+ do iatom=1,natom
+   ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
+ end do
 
 !Filename for Hessian matrix (NOT IN DTSET)
- ab_mover%fnameabi_hes=>fnameabi_hes
+ ab_mover%fnameabi_hes =>dtfil%fnameabi_hes
 !Filename for _HIST file
- ab_mover%filnam_ds=>filnam_ds
-
+ ab_mover%filnam_ds    =>dtfil%filnam_ds
 
 !!DEBUG
 !call abimover_print(ab_mover,ab_out)
@@ -793,28 +643,18 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%method = 'Langevin molecular dynamics'
 !  Number of history
    specs%nhist = 3
-!  This is the initialization for ionmov==10
+!  This is the initialization for ionmov==10 and 11
 !  -------------------------------------------
- case (10)
+ case (10,11)
 !  TEMPORARLY optcell is not allow
    specs%isARused=.FALSE.
 !  Values use in XML Output
-   specs%type4xml='delocint'
+   if(ab_mover%ionmov==10)specs%type4xml='delocint'
+   if(ab_mover%ionmov==11)specs%type4xml='cg'
    specs%crit4xml='tolmxf'
 !  Name of specs%method
-   specs%method = 'BFGS with delocalized internal coordinates'
-!  Number of history
-   specs%nhist = 3
-!  This is the initialization for ionmov==11
-!  -------------------------------------------
- case (11)
-!  TEMPORARLY optcell is not allow
-   specs%isARused=.FALSE.
-!  Values use in XML Output
-   specs%type4xml='cg'
-   specs%crit4xml='tolmxf'
-!  Name of specs%method
-   specs%method = 'Conjugate gradient algorithm'
+   if(ab_mover%ionmov==10)specs%method = 'BFGS with delocalized internal coordinates'
+   if(ab_mover%ionmov==11)specs%method = 'Conjugate gradient with deloc. int. coord.'
 !  Number of history
    specs%nhist = 3
 !  This is the initialization for ionmov==12
@@ -970,244 +810,58 @@ end subroutine abimover_ini
 
 !----------------------------------------------------------------------
 
-!!****f* m_abimover/delocint_fin
-!!
+!!****f* m_abimover/abimover_destroy
 !! NAME
-!! delocint_fin
+!! abimover_destroy
 !!
 !! FUNCTION
-!! destructor function for delocint object
-!!
-!! INPUT
-!! deloc= container object for delocalized internal coordinates
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!      m_abimover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
-!! SOURCE
-
-subroutine delocint_fin(deloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'delocint_fin'
-!End of the abilint section
-
- type(delocint), intent(inout) :: deloc
-
- if(allocated(deloc%angs))  then
-   ABI_DEALLOCATE(deloc%angs)
- end if
- if(allocated(deloc%bonds))  then
-   ABI_DEALLOCATE(deloc%bonds)
- end if
- if(allocated(deloc%carts))  then
-   ABI_DEALLOCATE(deloc%carts)
- end if
- if(allocated(deloc%dihedrals))  then
-   ABI_DEALLOCATE(deloc%dihedrals)
- end if
- if(allocated(deloc%rshift))  then
-   ABI_DEALLOCATE(deloc%rshift)
- end if
-
-end subroutine delocint_fin
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abimover/abimover_nullify
-!! NAME
-!! abimover_nullify
-!!
-!! FUNCTION
-!! Nullify all the pointers in a ab_mover
+!! Destroy the abimover structure
 !!
 !! SIDE EFFECTS
-!!  ab_mover <type(abimover)> = The ab_mover to nullify
+!!  ab_mover <type(abimover)> = The abimover structure to be destroyed
 !!
 !! PARENTS
 !!      m_abimover,mover
 !!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
-!! NOTES
-!!  At present 32 variables are present in abimover
-!!  if a new variable is added in abimover it should
-!!  be added also for nullify here
-!!
-!! STATS
-!!  integer         => 13
-!!  real            =>  7
-!!  integer array   =>  4
-!!  real array      =>  6
-!!  character array =>  1
-!!  structures      =>  1
-!!  TOTAL              32
-!!
 !! SOURCE
 
-subroutine abimover_nullify(ab_mover)
+subroutine abimover_destroy(ab_mover)
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abimover_nullify'
+#define ABI_FUNC 'abimover_destroy'
 !End of the abilint section
 
  type(abimover),intent(inout) :: ab_mover
 
 ! ***************************************************************
 
-! Delay of Permutation (Used by pred_langevin only)
- nullify(ab_mover%delayperm)
-! Number of Geometry histories (Use by pred_diisrelax only)
- nullify(ab_mover%diismemory)
-! Geometry Optimization precondition option
- nullify(ab_mover%goprecon)
-! include a JELLium SLAB in the cell
- nullify(ab_mover%jellslab)
-! Number of ATOMs
- nullify(ab_mover%natom)
-! Number of CONstraint EQuations
- nullify(ab_mover%nconeq)
-! Use by pred_isothermal only
- nullify(ab_mover%nnos)
-! Number of SYMmetry operations
- nullify(ab_mover%nsym)
-! Number of Types of atoms
- nullify(ab_mover%ntypat)
-! OPTimize the CELL shape and dimensions
- nullify(ab_mover%optcell)
-! RESTART Xcart and Fred
- nullify(ab_mover%restartxf)
-! Sign of Permutation (Used by pred_langevin only)
- nullify(ab_mover%signperm)
-! Ion movement
- nullify(ab_mover%ionmov)
-
-! Use by pred_isothermal only
- nullify(ab_mover%bmass)
-! Delta Time for IONs
- nullify(ab_mover%dtion)
-! Used by pred_langevin only
- nullify(ab_mover%friction)
-! Used by pred_langevin only
- nullify(ab_mover%mdwall)
-! NOT DOCUMENTED
- nullify(ab_mover%noseinert)
-! STRess PRECONditioner
- nullify(ab_mover%strprecon)
-! VIScosity
- nullify(ab_mover%vis)
-
-!arrays
-! Indices of AToms that are FIXed
- nullify(ab_mover%iatfix)
-! SYMmetry in REaL space
- nullify(ab_mover%symrel)
-! TYPe of ATom
- nullify(ab_mover%typat)
-! TYPe of ATom
- nullify(ab_mover%prtatlist)
-
-! Mass of each atom (NOT IN DTSET)
- nullify(ab_mover%amass)!
-! Molecular Dynamics Initial Temperature
- nullify(ab_mover%mdtemp)
-! STRess TARGET
- nullify(ab_mover%strtarget)
-! Use by pred_isothermal only
- nullify(ab_mover%qmass)
-! Z number of each NUCLeus
- nullify(ab_mover%znucl)
-! Geometry Optimization Preconditioner PaRaMeters
  nullify(ab_mover%goprecprm)
-! Qpoint Grid
+ nullify(ab_mover%iatfix)
+ nullify(ab_mover%mdtemp)
  nullify(ab_mover%ph_ngqpt)
-! Shift of the Qpoint Grid
+ nullify(ab_mover%ph_freez_disp_ampl)
  nullify(ab_mover%ph_qshift)
-! number of Shift of the Qpoint Grid
- nullify(ab_mover%ph_nqshift)
-! Filename for Hessian matrix
+
+ nullify(ab_mover%prtatlist)
+ nullify(ab_mover%qmass)
+ nullify(ab_mover%strtarget)
+ nullify(ab_mover%symafm)
+ nullify(ab_mover%symrel)
+ nullify(ab_mover%tnons)
+ nullify(ab_mover%typat)
+ nullify(ab_mover%znucl)
+
+ nullify(ab_mover%amu_curr)
+ ABI_FREE(ab_mover%amass)
+
  nullify(ab_mover%fnameabi_hes)
-! Filename for _HIST file
  nullify(ab_mover%filnam_ds)
 
-end subroutine abimover_nullify
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abimover/abimover_fin
-!! NAME
-!! abimover_fin
-!!
-!! FUNCTION
-!! Deallocate all the pointers in a ab_mover
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  ab_mover <type(abimover)> = The ab_mover to destroy
-!!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
-!! NOTES
-!!  At present 32 variables are present in abimover
-!!  if a new variable is added in abimover it should
-!!  be added also for deallocate here
-!!
-!! STATS
-!!  integer         => 13
-!!  real            =>  7
-!!  integer array   =>  4
-!!  real array      =>  6
-!!  character array =>  1
-!!  structures      =>  1
-!!  TOTAL              32
-!!
-!! SOURCE
-
-subroutine abimover_fin(ab_mover)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimover_fin'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- type(abimover),intent(inout) :: ab_mover
-
-! ***************************************************************
-
- call delocint_fin(ab_mover%deloc)
-
-! ab_mover is only pointer associated to other data, except possibly amass.
-! TODO: check for amass in mover.F90
- call abimover_nullify(ab_mover)
-
-end subroutine abimover_fin
+end subroutine abimover_destroy
 !!***
 
 !----------------------------------------------------------------------
@@ -1272,15 +926,19 @@ character(len=110)   :: fmt
 & 'RESTART Xcart and Fred',ab_mover%restartxf,ch10, &
 & 'Molecular Dynamics Initial Temperature',ab_mover%mdtemp(1),ch10, &
 & 'Molecular Dynamics Final Temperature',ab_mover%mdtemp(2),ch10, &
-& 'NOT DOCUMENTED',ab_mover%noseinert,ch10, &
+& 'NOSE thermostat INERTia factor',ab_mover%noseinert,ch10, &
 & 'STRess PRECONditioner',ab_mover%strprecon,ch10, &
 & 'VIScosity',ab_mover%vis,ch10
 
 ! ! arrays
 ! ! Indices of AToms that are FIXed
 ! integer,  pointer :: iatfix(:,:)
+! ! SYMmetries, Anti-FerroMagnetic characteristics
+! integer,  pointer :: symafm(:)
 ! ! SYMmetry in REaL space
 ! integer,  pointer :: symrel(:,:,:)
+! Translation NON-Symmorphic vectors
+! real(dp),  pointer :: tnons(:,:)
 ! ! Mass of each atom (NOT IN DTSET)
 ! real(dp), pointer :: amass(:)
 ! ! STRess TARGET
@@ -1288,7 +946,7 @@ character(len=110)   :: fmt
 ! Filename for Hessian matrix
 ! character(len=fnlen), pointer :: fnameabi_hes
 
- write(iout,*) 'CONTENTS of ab_mover'
+ write(iout,*) 'CONTENT of ab_mover (scalar only)'
  write(iout,'(a)') message
 
 end subroutine abimover_print
@@ -1490,7 +1148,6 @@ end subroutine abiforstr_fin
 !!
 !! INPUTS
 !! natom  = Number of atoms (dtset%natom)
-!! icenter= index of the center of the number of shifts
 !! nrshift= dimension of rshift
 !! rprimd(3,3)=dimensional real space primitive translations (bohr)
 !! rshift(3,nrshift)=shift in xred that must be done to find all neighbors of
@@ -1498,9 +1155,11 @@ end subroutine abiforstr_fin
 !! xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
 !! OUTPUT
+!!
+!! SIDE EFFECTS
 !!   deloc <type(delocint)>=Important variables for
 !!   |                           pred_delocint
-!!   |
+!!   ! icenter  = Index of the center of the number of shifts 
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions
@@ -1524,8 +1183,6 @@ end subroutine abiforstr_fin
 !!   |                    all neighbors of a given atom within a
 !!   |                    given number of neighboring shells
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!
 !!   Adds cartesian coordinates if the number of internals with a
@@ -1540,7 +1197,7 @@ end subroutine abiforstr_fin
 !!
 !! SOURCE
 
-subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znucl)
+subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1554,7 +1211,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
 !Arguments ------------------------------------
 !scalars
  type(delocint),intent(inout) :: deloc
- integer,intent(in) :: icenter,natom,ntypat
+ integer,intent(in) :: natom,ntypat
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
  integer,intent(in) :: typat(natom)
@@ -1574,7 +1231,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
 
  particip_atom(:) = 0
 
- call make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
+ call make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
  do ibond=1,deloc%nbond
    write(std_out,'(a,i4,2(2i5,2x))') 'bond ', ibond, deloc%bonds(:,:,ibond)
@@ -1582,7 +1239,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
    particip_atom(deloc%bonds(1,2,ibond)) = particip_atom(deloc%bonds(1,2,ibond))+1
  end do
 
- call make_angles(deloc,icenter,natom)
+ call make_angles(deloc,natom)
 
  ABI_ALLOCATE(badangles,(deloc%nang))
  badangles(:) = 0
@@ -1636,7 +1293,7 @@ subroutine make_prim_internals(deloc,icenter,natom,ntypat,rprimd,typat,xcart,znu
    end if
  end do
 
- call make_dihedrals(badangles,deloc,icenter)
+ call make_dihedrals(badangles,deloc)
  ABI_DEALLOCATE(badangles)
 
  do idihed=1,deloc%ndihed
@@ -1715,7 +1372,7 @@ end subroutine make_prim_internals
 !!
 !! SOURCE
 
-subroutine make_angles(deloc,icenter,natom)
+subroutine make_angles(deloc,natom)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1728,7 +1385,7 @@ subroutine make_angles(deloc,icenter,natom)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter,natom
+ integer,intent(in) :: natom
  type(delocint),intent(inout) :: deloc
 !arrays
 
@@ -1754,7 +1411,7 @@ subroutine make_angles(deloc,icenter,natom)
    do jbond=ibond+1,deloc%nbond
      ja1 = deloc%bonds(1,1,jbond)
      ja2 = deloc%bonds(1,2,jbond)
-     do ishift=-(icenter-1),+(icenter-1)
+     do ishift=-(deloc%icenter-1),+(deloc%icenter-1)
        js1 = deloc%bonds(2,1,jbond)+ishift
        js2 = deloc%bonds(2,2,jbond)+ishift
 
@@ -1825,7 +1482,7 @@ end subroutine make_angles
 !!
 !! SOURCE
 
-subroutine make_dihedrals(badangles,deloc,icenter)
+subroutine make_dihedrals(badangles,deloc)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1838,7 +1495,6 @@ subroutine make_dihedrals(badangles,deloc,icenter)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter
  type(delocint),intent(inout) :: deloc
 !arrays
  integer,intent(in) :: badangles(deloc%nang)
@@ -1873,7 +1529,7 @@ subroutine make_dihedrals(badangles,deloc,icenter)
      ja1 = deloc%angs(1,1,jang)
      ja2 = deloc%angs(1,2,jang)
      ja3 = deloc%angs(1,3,jang)
-     do ishift=-(icenter-1),(icenter-1)
+     do ishift=-(deloc%icenter-1),(deloc%icenter-1)
        js1 = deloc%angs(2,1,jang)+ishift
        js2 = deloc%angs(2,2,jang)+ishift
        js3 = deloc%angs(2,3,jang)+ishift
@@ -1982,7 +1638,7 @@ end subroutine make_dihedrals
 !!
 !! SOURCE
 
-subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
+subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1995,7 +1651,6 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icenter
  integer,intent(in) :: natom,ntypat
  type(delocint),intent(inout) :: deloc
 !arrays
@@ -2051,7 +1706,7 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
            MSG_ERROR('make_bonds: error too many bonds !')
          end if
          bonds_tmp(1,1,deloc%nbond) = iatom
-         bonds_tmp(2,1,deloc%nbond) = icenter
+         bonds_tmp(2,1,deloc%nbond) = deloc%icenter
          bonds_tmp(1,2,deloc%nbond) = jatom
          bonds_tmp(2,2,deloc%nbond) = irshift
 
@@ -2069,11 +1724,13 @@ subroutine make_bonds(deloc,natom,ntypat,icenter,rprimd,typat,xcart,znucl)
  do ibond=1,deloc%nbond
    deloc%bonds(:,:,ibond) = bonds_tmp(:,:,ibond)
  end do
- ABI_DEALLOCATE(bonds_tmp)
 
-!do ibond=1,deloc%nbond
-!write(std_out,*) 'bond ', ibond, deloc%bonds(:,:,ibond)
-!end do
+! do ibond=1,deloc%nbond
+! write(std_out,*) ' make_bonds : bonds_tmp ', ibond, bonds_tmp(:,:,ibond)
+! write(std_out,*) ' make_bonds : deloc%bonds ', ibond, deloc%bonds(:,:,ibond)
+! end do
+
+  ABI_DEALLOCATE(bonds_tmp)
 
 end subroutine make_bonds
 !!***
@@ -2138,7 +1795,7 @@ subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(delocint),intent(inout) :: deloc
+ type(delocint),intent(in) :: deloc
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
  real(dp),intent(out) :: prim_int(deloc%ninternal)
@@ -2153,7 +1810,7 @@ subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 
 !DEBUG
 !write(std_out,*) ' calc_prim_int : enter'
-!write(std_out,*) shape(angs),shape(deloc%bonds),shape(dihedrals)
+!write(std_out,*) shape(deloc%bonds)
 !do ibond=1,deloc%nbond
 !do i1=1,2
 !write(std_out,'(2I5)') deloc%bonds(:,i1,ibond)
@@ -2834,6 +2491,121 @@ subroutine print_bonds(amu,bonds,natom,ntypat,symbol,typat,znucl)
  end do
 
 end subroutine print_bonds
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abimover/delocint_ini
+!!
+!! NAME
+!! delocint_ini
+!!
+!! FUNCTION
+!! ini function for delocint object
+!!
+!! INPUT
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! deloc= container object for delocalized internal coordinates
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine delocint_ini(deloc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'delocint_ini'
+!End of the abilint section
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ type(delocint), intent(out) :: deloc
+
+ !Local variables ------------------------------
+ !scalars
+ integer :: ii,irshift,jj,kk,nshell
+
+! *********************************************************************
+
+   nshell=3
+   deloc%nrshift=(2*nshell+1)**3
+   deloc%icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
+
+   ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
+   irshift=0
+   do ii=-nshell,nshell
+     do jj=-nshell,nshell
+       do kk=-nshell,nshell
+         irshift=irshift+1
+         deloc%rshift(:,irshift) = (/dble(ii),dble(jj),dble(kk)/)
+       end do
+     end do
+   end do
+
+end subroutine delocint_ini
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abimover/delocint_fin
+!!
+!! NAME
+!! delocint_fin
+!!
+!! FUNCTION
+!! destructor function for delocint object
+!!
+!! INPUT
+!! deloc= container object for delocalized internal coordinates
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_abimover
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,bonds_free,print_bonds
+!!
+!! SOURCE
+
+subroutine delocint_fin(deloc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'delocint_fin'
+!End of the abilint section
+
+ type(delocint), intent(inout) :: deloc
+
+ if(allocated(deloc%angs))  then
+   ABI_DEALLOCATE(deloc%angs)
+ end if
+ if(allocated(deloc%bonds))  then
+   ABI_DEALLOCATE(deloc%bonds)
+ end if
+ if(allocated(deloc%carts))  then
+   ABI_DEALLOCATE(deloc%carts)
+ end if
+ if(allocated(deloc%dihedrals))  then
+   ABI_DEALLOCATE(deloc%dihedrals)
+ end if
+ if(allocated(deloc%rshift))  then
+   ABI_DEALLOCATE(deloc%rshift)
+ end if
+
+end subroutine delocint_fin
 !!***
 
 !----------------------------------------------------------------------

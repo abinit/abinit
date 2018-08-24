@@ -903,7 +903,6 @@ end subroutine scprqt
 !!
 !! INPUTS
 !!  acell(3)=length scales (bohr)
-!!  amu(ntypat)=mass of each atom type
 !!  ecut_eff=effective energy cutoff (hartree) for planewave basis sphere
 !!  ecutc_eff=- PAW only - effective energy cutoff (hartree) for the coarse grid
 !!  natom=number of atoms
@@ -917,7 +916,6 @@ end subroutine scprqt
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
 !! OUTPUT
-!!  amass(natom)=atomic masses for each atom (in atomic units, where the electron mass is one)
 !!  bantot=total number of bands at all k points
 !!  gmet(3,3)=metric for reciprocal space inner products (bohr^-2)
 !!  gprimd(3,3)=dimens. primitive translations for reciprocal space (bohr**-1)
@@ -940,7 +938,7 @@ end subroutine scprqt
 !!
 !! SOURCE
 
-subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
+subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 &  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
 &  response,rmet,rprim,rprimd,ucvol,usepaw)
 
@@ -966,8 +964,8 @@ subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  real(dp),intent(out) :: gsqcut_eff,gsqcutc_eff,ucvol
 !arrays
  integer,intent(in) :: ngfft(18),ngfftc(18)
- real(dp),intent(in) :: acell(3),amu(dtset%ntypat),rprim(3,3)
- real(dp),intent(out) :: amass(natom),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),intent(in) :: acell(3),rprim(3,3)
+ real(dp),intent(out) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),intent(out) :: rprimd(3,3)
 
 !Local variables-------------------------------
@@ -1004,11 +1002,6 @@ subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 !metrics and unit cell volume, from rprimd.
 !Also output rprimd, gprimd and ucvol
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
-
-!Assign masses to each atom (for MD)
- do iatom=1,natom
-   amass(iatom)=amu_emass*amu(dtset%typat(iatom))
- end do
 
 !Get boxcut for given acell, gmet, ngfft, and ecut_eff
 !(center at 000 for groundstate, center at q for respfn):

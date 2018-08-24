@@ -303,7 +303,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
- integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
+ integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot,use_rhoijim
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -439,8 +439,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
 &                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+     use_rhoijim = 1
+!    use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
      call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&     use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
    else
      pawrhoij1_unsym => pawrhoij1
      call pawrhoij_init_unpacked(pawrhoij1_unsym)

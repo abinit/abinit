@@ -191,7 +191,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  logical :: paral_atom,call_pawinit,qeq0
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
  integer :: ask_accurate,band_index,bantot,cplex,cplex_rhoij,dum_nshiftk,flag,gnt_option,gscase
- integer :: has_dijnd,has_kxc,has_k3xc
+ integer :: has_dijnd,has_diju,has_kxc,has_k3xc
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: iatom,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
  integer :: ireadwf0,iscf_eff,ispden,itypat,izero,mcg,me,mgfftf,mkmem_max,mpert,my_natom
@@ -231,7 +231,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dum_shiftk(3,210),dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
+ real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
 ! We need all these arrays instead of one because in Fortran the maximum number of dimensions is 7...
  real(dp),allocatable :: d3e_1(:,:,:,:,:,:,:),d3cart_1(:,:,:,:,:,:,:)
@@ -512,8 +512,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call status(0,dtfil%filstat,iexit,level,'call setup1   ')
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(natom))
- call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
@@ -751,6 +750,7 @@ end if
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_diju=0;if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
    call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
@@ -759,7 +759,7 @@ end if
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else ! PAW vs NCPP
    usexcnhat=0;usecprj=0
@@ -1293,7 +1293,6 @@ end if
    ABI_DEALLOCATE(mvwtk)
    ABI_DEALLOCATE(pwind)
  end if
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)
