@@ -304,8 +304,9 @@ re.I | re.VERBOSE)
     #RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)\s*(?:\(\s*(.*?)\s*\))?\Z", re.I)
     RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)", re.I)
 
-    def __init__(self, verbose=0):
+    def __init__(self, macros=None, verbose=0):
         self.verbose = verbose
+        self.macros = {} if macros is None else macros
 
     #@staticmethod
     #def rstrip_comment(s):
@@ -314,13 +315,15 @@ re.I | re.VERBOSE)
 
     def parse_file(self, path):
         with open(path, "rt") as fh:
-            return self.parse_lines(fh.readlines(), path=path)
+            return self.parse_string(fh.read(), path=path)
 
-    #def parse_string(self, s):
-    #    return self.parse_lines(s.splitlines())
+    def parse_string(self, string, path=None):
+        # Replace macros. Need e.g. to treat USE_DEFS macros in libpaw and tetralib.
+        for macro, value in self.macros.items():
+            string = re.sub(macro, value, string)
 
-    def parse_lines(self, lines, path=None):
-        lines = [l.strip().lower() for l in lines]
+        # Get list of lower-case string.
+        lines = [l.strip().lower() for l in string.splitlines()]
 
         num_doclines, num_f90lines = 0, 0
         preamble, stack, includes  = [], [], []
@@ -370,7 +373,7 @@ re.I | re.VERBOSE)
                 continue
 
             # Find use statements and the corresponding module
-            # TODO in principle one could have use A; use B
+            # TODO in principle one could have `use A; use B`
             if line.startswith("use "):
                 smod = line.split()[1].split(",")[0].lower()
                 if smod.startswith("interfaces_"): continue

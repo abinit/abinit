@@ -116,7 +116,7 @@ contains ! contained procedure
 end program
 """
         p = FortranKissParser()
-        p.parse_lines(s.splitlines())
+        p.parse_string(s)
         assert len(p.programs) == 1
         assert not p.modules and not p.subroutines
         assert "abi_common.h" in p.includes
@@ -194,7 +194,7 @@ end function idx_spatial_inversion
 end module m_crystal
 """
         p = FortranKissParser()
-        p.parse_lines(s.splitlines())
+        p.parse_string(s)
         assert len(p.modules) == 1
         assert not p.programs and not p.subroutines
         assert "abi_common.h" in p.includes

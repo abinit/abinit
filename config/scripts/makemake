@@ -455,28 +455,6 @@ if ( opts.run_source ):
   run_script(my_name, "Generating CPP option dumper",
     "./config/scripts/make-cppopts-dumper")
 
-  abisrc_cmdline = "./src/abisrc.py makemake" 
-  print_message(my_name, "---> running %s" % (abisrc_cmdline))
-  abisrc_exitcode = os.system(abisrc_cmdline)
-  if abisrc_exitcode != 0:
-    sys.stderr.write("""
-       ****************************************************************
-       ***                     FATAL ERROR!                         ***
-       ****************************************************************
-       ***                                                          ***
-       *** The abisrc.py script returned an non-zero exit status.   ***
-       *** This usually means that the script found subroutines or  ***
-       *** functions that are not declared inside modules or that   ***
-       *** there is a syntax error in the Fortran code.             ***
-       *** See above error message.                                 ***
-       *** Please note that procedures outside Fortran modules      ***
-       *** are not allowed any longer.                              ***
-       ****************************************************************
-
-""")
-    sys.stderr.write("[%s] Aborting now\n" % (my_name))
-    sys.exit(1)
-
   if ( opts.run_abilint ):
     abilint_cmdline = "./config/scripts/abilint %s" % \
       (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
@@ -512,6 +490,31 @@ if ( opts.run_source ):
   if ( os.path.exists(os.path.join("bindings", "parser", "dtset.pickle")) ):
     run_script(my_name, "Generating dtset source files",
       "./config/scripts/make-sources-parser")
+
+  # New version based on abisrc.
+  abisrc_cmdline = "./src/abisrc.py makemake" 
+  print_message(my_name, "---> running %s" % (abisrc_cmdline))
+  abisrc_exitcode = os.system(abisrc_cmdline)
+  if abisrc_exitcode != 0:
+    sys.stderr.write("""
+       ****************************************************************
+       ***                     FATAL ERROR!                         ***
+       ****************************************************************
+       ***                                                          ***
+       *** The abisrc.py script returned an non-zero exit status.   ***
+       *** This usually means that the script found subroutines or  ***
+       *** functions that are not declared inside modules or that   ***
+       *** there is a syntax error in the Fortran code.             ***
+       *** See above error message.                                 ***
+       *** Please note that procedures outside Fortran modules      ***
+       *** are not allowed any longer.                              ***
+       ****************************************************************
+
+""")
+    sys.stderr.write("[%s] Aborting now\n" % (my_name))
+    sys.exit(1)
+
+
 else:
   print_message(my_name, "*** Skipping source tree update ***")
 

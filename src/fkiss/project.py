@@ -6,6 +6,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import re
 import time
+import shutil
 import pickle
 
 from collections import OrderedDict, defaultdict
@@ -71,8 +72,8 @@ class FortranFile(object):
     """
 
     @classmethod
-    def from_path(cls, path, verbose=0):
-        p = FortranKissParser(verbose=verbose).parse_file(path)
+    def from_path(cls, path, macros=None, verbose=0):
+        p = FortranKissParser(macros=macros, verbose=verbose).parse_file(path)
 
         new = cls(path)
         new.includes = p.includes
@@ -366,6 +367,17 @@ class AbinitProject(object):
 
     IGNORED_FILES = {"m_build_info.F90", "m_optim_dumper.F90"}
 
+    # Marcos used to import modules in abinit libraries.
+    # Must be consistent with CPP version.
+    MACROS = {
+        # Libpaw.
+        "USE_DEFS": "use defs_basis",
+        "USE_MPI_WRAPPERS": "use m_xmpi",
+        "USE_MSG_HANDLING": "use m_errors, only : msg_hndl, netcdf_check; use m_abicore",
+        "USE_MEMORY_PROFILING": "use m_profiling_abi",
+        # Libtetra.
+    }
+
     @classmethod
     def pickle_load(cls, filepath=None):
         """
@@ -395,7 +407,7 @@ class AbinitProject(object):
                 # Treat executables
                 for basename in filter_fortran(os.listdir(d)):
                     path = os.path.join(d, basename)
-                    self.fort_files[basename] = FortranFile.from_path(path, verbose=verbose)
+                    self.fort_files[basename] = FortranFile.from_path(path, macros=self.MACROS, verbose=verbose)
             else:
                 # Source files
                 abinit_src = os.path.join(d, "abinit.src")
@@ -404,7 +416,7 @@ class AbinitProject(object):
                 for basename in filter_fortran(mod.sources):
                     if basename in self.IGNORED_FILES: continue
                     path = os.path.abspath(os.path.join(d, basename))
-                    fort_file = FortranFile.from_path(path, verbose=verbose)
+                    fort_file = FortranFile.from_path(path, macros=self.MACROS, verbose=verbose)
                     if basename in self.fort_files:
                         raise RuntimeError("Found two Fortran files with same basename `%s`" % basename)
                     self.fort_files[basename] = fort_file
@@ -626,6 +638,7 @@ class AbinitProject(object):
         """
         Write new binaries.conf file
         """
+        dryrun = True
         # Read binaries.conf and add new list of libraries.
         # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
@@ -682,9 +695,12 @@ class AbinitProject(object):
         config.write(fobj)
         s = fobj.getvalue()
         fobj.close()
-        print(s)
-        #with open(binconf_path, "wt") as fh:
-        #    fh.write(s)
+        if dryrun:
+            print(s)
+        else:
+            shutil.copyfile(binconf_path, binconf_path + ".bkp")
+            with open(binconf_path, "wt") as fh:
+                fh.write(s)
 
         return 0
 
@@ -696,6 +712,7 @@ class AbinitProject(object):
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
         """
+        dryrun = True
         dir2files = self.groupby_dirname()
         # Sort...
 
@@ -708,6 +725,8 @@ class AbinitProject(object):
 
 """
         for dirpath, fort_files in dir2files.items():
+            dirname = os.path.basename(dirpath)
+            if dirname == "98_main": continue
 
             # Find dependencies inside this directory (abinit.dep)
             inside_deps = {}
@@ -716,18 +735,29 @@ class AbinitProject(object):
                 inside_deps[this.name] = sorted(set(d.replace(".F90", "") for d in dlist))
 
             lines = []
-            for k, dlist in inside_deps.items():
-                if not dlist: continue
+            cleanfiles = ["CLEANFILES += \\"]
+            n = len(inside_deps)
+            for i, (k, dlist) in enumerate(inside_deps.items()):
                 k = k.replace(".F90", "")
+                end = " " if i == n - 1 else " \\"
+                cleanfiles.append("\t%s.$(MODEXT)%s" % (k, end))
+                if not dlist: continue
                 lines.append("%s.$(OBJEXT): %s" % (k, " ".join("%s.$(OBJEXT)" % v for v in dlist)))
+            cleanfiles.append("\n")
 
             # Write abinit.dep
-            s = template.format(kind="inside the directory", directory=os.path.basename(dirpath))
+            s = template.format(kind="inside the directory", directory=dirname)
+            s += "\n".join(cleanfiles)
             s += "\n\n".join(lines)
-            print(s, end=2 * "\n")
-            # TODO: Ask Yann whether CLEAN_FILES section is still needed.
-            #with open(os.path.join(dirpath, "abinit.dep"), "wt") as fh:
-            #    fh.write(s)
+
+            abinitdep_path = os.path.join(dirpath, "abinit.dep")
+            if dryrun:
+                print("# For dirpath:", dirpath)
+                print(s, end=2 * "\n")
+            else:
+                shutil.copyfile(abinitdep_path, abinitdep_path + ".bkp")
+                with open(abinitdep_path, "wt") as fh:
+                    fh.write(s)
 
             # Find dependencies outside this directory (abinit.dir).
             outside_dir = []
@@ -737,9 +767,13 @@ class AbinitProject(object):
 	    # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
             s += "include_dirs = \\\n" + pformat(sorted(set(outside_dir)))
-            #print(s, end=2 * "\n")
-            #with open(os.path.join(dirpath, "abinit.dir"), "wt") as fh:
-            #    fh.write(s)
+            abinitdir_path = os.path.join(dirpath, "abinit.dir")
+            if dryrun:
+                print(s, end=2 * "\n")
+            else:
+                shutil.copyfile(abinitdir_path, abinitdir_path + ".bkp")
+                with open(abinitdir_path, "wt") as fh:
+                    fh.write(s)
 
     def touch_alldeps(self, verbose=0):
         """
