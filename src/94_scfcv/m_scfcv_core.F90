@@ -67,7 +67,7 @@ module m_scfcv_core
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
 &                               pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim, pawcprj_reorder
- use m_pawdij,           only : pawdij, symdij,pawdijhat
+ use m_pawdij,           only : pawdij, symdij
  use m_pawfgr,           only : pawfgr_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type

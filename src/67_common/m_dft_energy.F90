@@ -281,7 +281,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bdtot_index,blocksize,choice,cplex,cplex_rf,cplex_rhoij,cpopt,dimffnl
+ integer :: bdtot_index,blocksize,choice,cplex,cplex_rhoij,cpopt,dimffnl
  integer :: iband,iband_last,iblock,iblocksize,icg,ider,idir,ierr,ifft,ikg,ikpt,ilm
  integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
@@ -633,7 +633,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
      eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
      if (minval(eig_k)>1.d100) eig_k=zero
-     cplex=2 ; if (istwf_k>1) cplex=1
      eeigk=zero ; ekk=zero ; enlk=zero
 
      ABI_ALLOCATE(kg_k,(3,npw_k))
@@ -741,6 +740,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !        PAW: accumulate rhoij
          if (psps%usepaw==1) then
+           cplex=merge(1,2,istwf_k>1)
            if (mpi_enreg%paral_spinor==1) then
              call pawcprj_gather_spin(cwaveprj,cwaveprj_gat,dtset%natom,1,my_nspinor,dtset%nspinor,&
 &             mpi_enreg%comm_spinor,ierr)
@@ -873,9 +873,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      call pawrhoij_free(pawrhoij_unsym)
      ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
    end if
-   ider=0;izero=0;cplex_rf=1;ipert=0;idir=0;qpt(:)=zero
-
-   call pawmknhat(compch_fft,cplex_rf,ider,idir,ipert,izero,gprimd,&
+   ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
+   call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &   my_natom,dtset%natom,nfftf,ngfftf,&
 &   0,dtset%nspden,dtset%ntypat,pawang,pawfgrtab,rhodum,nhat,pawrhoij,pawrhoij,&
 &   pawtab,qpt,rprimd,ucvol_local,dtset%usewvl,xred,&

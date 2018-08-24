@@ -401,8 +401,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DEALLOCATE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
-&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,&
+       call pawdijfr(gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
+&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,cplex,&
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2

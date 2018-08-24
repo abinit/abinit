@@ -623,8 +623,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call paw_an_reset_flags(paw_an1_i2pert) ! Force the recomputation of on-site potentials
                      call paw_ij_reset_flags(paw_ij1_i2pert,all=.true.) ! Force the recomputation of Dij
                      optfr=0
-                     call pawdijfr(cplex,gprimd,i2dir,i2pert,natom,natom,nfftf,ngfftf,nspden,nsppol,&
-&                     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,qphon,&
+                     call pawdijfr(gprimd,i2dir,i2pert,natom,natom,nfftf,ngfftf,nspden,nsppol,&
+&                     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,cplex,qphon,&
 &                     rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 

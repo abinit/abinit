@@ -286,7 +286,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      message = ' dijhat variable must be allocated in odamix ! '
      MSG_ERROR(message)
    end if
-   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%cplex_rf==2)then
+   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
      MSG_ERROR(message)
    end if

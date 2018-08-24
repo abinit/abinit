@@ -121,7 +121,7 @@ MODULE m_pawrhoij
    ! Number of independent spin-components
 
   integer :: qphase
-   ! qphase=2 if rhoij has a exp(iqR) phase, 1 if not
+   ! qphase=2 if rhoij contain a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
    ! (this may change the ij symmetry)
 
   integer :: use_rhoij_=0
@@ -169,6 +169,28 @@ MODULE m_pawrhoij
   real(dp), allocatable :: rhoijim (:,:)
    ! rhoijim(lmn2_size,nspden)
    ! Missing term of the imaginary part of Rho_ij (non-packed storage)
+
+   ! ==== Storage for the 1st dimension ====
+   ! For each klmn=ij:
+   !   When RHOij is complex (cplex=2):
+   !     rhoij(2*ij-1,:) contains the real part
+   !     rhoij(2*ij  ,:) contains the imaginary part
+   !   When a exp(-i.q.r) phase is included (qphase=2):
+   !     rhoij(1:cplex_dij*lmn2_size,:)
+   !         contains the real part of the phase, i.e. RHO_ij*cos(q.r)
+   !     rhoij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
+   !         contains the imaginary part of the phase, i.e. RHO_ij*sin(q.r)
+   ! ==== Storage for the 2nd dimension ====
+   !   No magnetism
+   !     rhoij(:,1) contains rhoij
+   !   Collinear magnetism
+   !     rhoij(:,1) contains rhoij^up
+   !     rhoij(:,2) contains rhoij^dowm
+   !   Non-collinear magnetism
+   !     rhoij(:,1) contains rhoij
+   !     rhoij(:,2) contains rhoij magnetization along x
+   !     rhoij(:,3) contains rhoij magnetization along y
+   !     rhoij(:,4) contains rhoij magnetization along z
 
  end type pawrhoij_type
 !!***
@@ -3516,11 +3538,11 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  cplex_eff=1
  if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex
 
-!Do we have a phase due to q-vector (phonons only) ?
+!Do we have a phase due to q-vector?
  has_qphase=.false.
  if (nrhoij>0) then
    has_qphase=(pawrhoij(1)%qphase==2)
-   if (ipert>0.and.present(qphon)) then
+   if (present(qphon)) then
      if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
        msg='Should have qphase=2 for a non-zero q!'
        MSG_BUG(msg)

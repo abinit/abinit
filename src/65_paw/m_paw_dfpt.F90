@@ -229,8 +229,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='XC kernels for ground state must be in memory!'
        MSG_BUG(msg)
      end if
-     if (paw_ij1(1)%cplex_rf/=paw_an1(1)%cplex) then
-       msg='paw_ij1()%cplex and paw_an1()%cplex must be equal!'
+     if (paw_ij1(1)%qphase/=paw_an1(1)%cplex) then
+       msg='paw_ij1()%qphase and paw_an1()%cplex must be equal!'
        MSG_BUG(msg)
      end if
      if (pawrhoij_a(1)%cplex<paw_an1(1)%cplex.or.pawrhoij_b(1)%cplex<paw_an1(1)%cplex) then
@@ -278,8 +278,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    nspden=paw_an1(iatom)%nspden
    cplex_a=pawrhoij_a(iatom)%cplex
    cplex_b=pawrhoij_b(iatom)%cplex
-   cplex_dijh1=paw_ij1(iatom)%cplex_rf
-   cplex_diju1=paw_ij1(iatom)%cplex_rf
+   cplex_dijh1=paw_ij1(iatom)%qphase
+   cplex_diju1=paw_ij1(iatom)%qphase
    cplex_vxc1=paw_an1(iatom)%cplex
    nlmn2_dij1=paw_ij1(iatom)%lmn2_size
    lm_size_a=paw_an1(iatom)%lm_size
@@ -333,7 +333,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !  If Dij_hartree are not in memory, compute them
    if (paw_ij1(iatom)%has_dijhartree/=2) then
-     call pawdijhartree(cplex_dijh1,paw_ij1(iatom)%dijhartree,paw_ij1(iatom)%nspden,&
+     call pawdijhartree(paw_ij1(iatom)%dijhartree,cplex_dijh1,paw_ij1(iatom)%nspden,&
 &     pawrhoij_a(iatom),pawtab(itypat))
      paw_ij1(iatom)%has_dijhartree=2
    end if
@@ -433,11 +433,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !    If DijU are not in memory, compute them
      if (paw_ij1(iatom)%has_dijU/=2.or.cplex_diju1/=1) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
        if (cplex_diju1==1) then
-         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
+         call pawdiju_euijkl(paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij,cplex_diju1,&
 &             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
        else
          ABI_ALLOCATE(diju_im,(pawtab(itypat)%lmn2_size,paw_ij1(iatom)%ndij))
-         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
+         call pawdiju_euijkl(paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij,cplex_diju1,&
 &             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat),diju_im=diju_im)
        end if
        paw_ij1(iatom)%has_dijU=2
