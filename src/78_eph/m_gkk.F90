@@ -120,7 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_gkk'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

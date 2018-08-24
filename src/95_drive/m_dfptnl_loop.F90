@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfptnl_loop
+!! NAME
+!!  m_dfptnl_loop
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018-2018 ABINIT group (LB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfptnl_loop
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfptnl_loop
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfptnl_loop
 !! NAME
 !! dfptnl_loop
@@ -158,13 +195,12 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal
+ use m_dfptnl_pert, only : dfptnl_pert
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_loop'
- use interfaces_32_util
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -799,4 +835,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  DBG_EXIT("COLL")
 
 end subroutine dfptnl_loop
+!!***
+
+end module m_dfptnl_loop
 !!***

@@ -499,7 +499,6 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'uderiv'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

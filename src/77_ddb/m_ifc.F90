@@ -2634,7 +2634,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_outphbtrap'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

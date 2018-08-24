@@ -81,6 +81,7 @@ module m_nonlinear
  use m_paw_correlations, only : pawpuxinit
  use m_mkcore,           only : mkcore
  use m_pead_nl_loop,     only : pead_nl_loop
+ use m_dfptnl_loop,      only : dfptnl_loop
 
  implicit none
 
@@ -163,7 +164,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none

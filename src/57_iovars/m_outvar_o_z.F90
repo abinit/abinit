@@ -1582,7 +1582,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtocc'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

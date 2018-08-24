@@ -249,7 +249,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstpaw'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

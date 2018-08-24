@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfptnl_pert
+!! NAME
+!!  m_dfptnl_pert
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfptnl_pert
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfptnl_pert
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfptnl_pert
 !! NAME
 !! dfptnl_pert
@@ -1030,7 +1068,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  else
    MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
  end if
- 
+
  call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
  ABI_DEALLOCATE(rho1r1_tot)
@@ -1204,4 +1242,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  DBG_EXIT("COLL")
 
 end subroutine dfptnl_pert
+!!***
+
+end module m_dfptnl_pert
 !!***

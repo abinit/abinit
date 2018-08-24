@@ -961,7 +961,6 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'intagm'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2952,7 +2951,6 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prttagm'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3308,7 +3306,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prttagm_images'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

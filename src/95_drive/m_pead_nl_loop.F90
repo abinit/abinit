@@ -163,7 +163,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pead_nl_loop'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

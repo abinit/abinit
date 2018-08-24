@@ -106,7 +106,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtfil_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -970,7 +969,6 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkfilename'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -624,17 +624,17 @@ class AbinitProject(object):
 
     def write_binaries_conf(self):
         """
-        Print new binaries.conf file.
+        Write new binaries.conf file
         """
         # Read binaries.conf and add new list of libraries.
-        # To treat depencies in an automatic way, I would need either an
+        # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
         # that I can map these names to external libraries.
         import configparser
         config = configparser.ConfigParser()
         config.read(os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf"))
 
-        print("Find all dependenciies of binaries...")
+        print("Finding all binary dependencies...")
         start = time.time()
         # Find programs
         program_paths = []
@@ -767,12 +767,17 @@ class AbinitProject(object):
         """
         Validate project. Return exit status.
         """
+        white_list = set(["m_psxml2ab.F90",])
+
         retcode = 0
         for fort_file in self.fort_files.values():
             count = len(fort_file.subroutines) + len(fort_file.functions)
             if count:
-                print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
-                retcode += 1
+                if fort_file.name in white_list:
+                    print("WHITE_LIST [%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
+                else:
+                    print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
+                    retcode += 1
 
         errstr = self.check_dirlevel()
         if errstr:

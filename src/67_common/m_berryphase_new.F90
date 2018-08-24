@@ -180,7 +180,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'berryphase_new'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
