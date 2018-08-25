@@ -186,7 +186,7 @@ def main():
         else:
             print("\nNo change detected. No need to touch files.\n")
 
-        return ntouch
+        return 0
 
     # After this point I operate an AbinitProject instance.
     # Load the object from pickle first and then check if we need to parse the source files again.
@@ -305,8 +305,6 @@ def main():
     elif options.command == "ipython":
         import IPython
         IPython.embed(header="The Abinit project is bound to the `proj` variable.\n")
-
-
 
     elif options.command == "master":
         print(proj.master())

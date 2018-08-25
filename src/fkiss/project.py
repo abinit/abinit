@@ -627,7 +627,6 @@ class AbinitProject(object):
         while queue:
             fort_file = queue.pop()
             for mod in fort_file.used_mods:
-                #print(mod.name)
                 if mod.basename in visited: continue
                 visited.add(mod.basename)
                 allmods.add(mod)

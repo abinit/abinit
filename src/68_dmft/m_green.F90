@@ -3325,13 +3325,6 @@ end subroutine occup_green_tau
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 
  use m_abicore
@@ -3494,14 +3487,6 @@ end subroutine fermi_green
 !!      compute_green,integrate_green
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
@@ -3917,13 +3902,6 @@ end subroutine newton
 !!      fourier_fct,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
 

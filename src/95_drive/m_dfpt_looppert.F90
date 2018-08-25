@@ -214,12 +214,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
 &  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasval,eigbrd,eig2nkq,&
