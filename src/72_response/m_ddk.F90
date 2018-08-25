@@ -369,8 +369,8 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  bandmax = mband 
  nbcalc  = bandmax-bandmin 
  
- ABI_MALLOC(ug_c,    (mpw))
- ABI_MALLOC(ug_v,    (mpw))
+ ABI_MALLOC(ug_c,    (mpw*nspinor))
+ ABI_MALLOC(ug_v,    (mpw*nspinor))
  ABI_MALLOC(kg_k,    (3,mpw))
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
@@ -383,6 +383,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  write(std_out,*) 'nkpoints:', nkpt
  write(std_out,*) 'nbands:  ', mband
  write(std_out,*) 'spin:    ', nsppol
+ write(std_out,*) 'spinor:  ', nspinor
  write(std_out,*) 'ngfft:   ', in_wfk%hdr%ngfft
  write(std_out,*) 'mpw:     ', mpw
  write(std_out,*) 'ecut:    ', ecut
@@ -448,12 +449,12 @@ do spin=1,nsppol ! Loop over spins
      ! Loop over bands
      do ib_v=bandmin,bandmax
        if (all(task_distrib(:,ib_v,ik,spin) /= my_rank)) cycle
-       ug_v(1:npw_k) = in_wfd%wave(ib_v,ik,spin)%ug
+       ug_v(1:npw_k*nspinor) = in_wfd%wave(ib_v,ik,spin)%ug
 
        ! Loop over bands
        do ib_c=ib_v,bandmax
          if (task_distrib(ib_c,ib_v,ik,spin) /= my_rank) cycle
-         ug_c(1:npw_k) = in_wfd%wave(ib_c,ik,spin)%ug
+         ug_c(1:npw_k*nspinor) = in_wfd%wave(ib_c,ik,spin)%ug
 
          ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
          ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,&
