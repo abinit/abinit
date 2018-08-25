@@ -616,6 +616,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
+ dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
  dtout%ionmov             = dtin%ionmov
@@ -2452,7 +2453,7 @@ subroutine chkvars (string)
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
