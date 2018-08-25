@@ -462,6 +462,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(ylmgr,(0,0,0))
  end if
 
+!DEBUG
+ write(std_out,*)' m_gstate, before SCF history management : initialized, scf_history%history_size=',initialized, scf_history%history_size
+!ENDDEBUG
+
 !SCF history management (allocate it at first call)
  has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
@@ -1241,7 +1245,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (iexit==0) then
 
 !  ###########################################################
-!  ### 14. Move atoms and acell acording to ionmov value
+!  ### 14. Move atoms and acell according to ionmov value
 
 
 !  Eventually symmetrize atomic coordinates over space group elements:
@@ -1252,6 +1256,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  call move, pawuj_drive or brdmin which in turn calls scfcv.
 
    call timab(35,3,tsec)
+
+!DEBUG
+ write(std_out,*)' m_gstate, before scfcv_init : initialized, scf_history%history_size=',initialized, scf_history%history_size
+!ENDDEBUG
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
@@ -2517,7 +2525,7 @@ end subroutine clnup2
 !!
 !! SOURCE
 
-subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
+subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2530,7 +2538,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
 !Arguments ------------------------------------
 !scalars
- type(scfcv_t), intent(inout) :: scfcv
+ type(scfcv_t), intent(inout) :: scfcv_args
  type(dataset_type),intent(inout) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  !type(wffile_type),intent(inout) :: wffnew,wffnow
@@ -2557,14 +2565,14 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
  end if
 
  ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
- ABI_ALLOCATE(cgstart,(2,scfcv%mcg))
+ ABI_ALLOCATE(cgstart,(2,scfcv_args%mcg))
 
 !DEBUG
 !write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
 !END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv%cg
+ cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
@@ -2578,7 +2586,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 !allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
 
  do iuj=1,2
-   if (iuj>1) scfcv%cg(:,:)=cgstart(:,:)
+   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
 
 !  DEBUG
 !  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
@@ -2586,18 +2594,18 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
    dtpawuj(iuj*2-1)%iuj=iuj*2-1
 
-   scfcv%ndtpawuj=>ndtpawuj
-   scfcv%dtpawuj=>dtpawuj
+   scfcv_args%ndtpawuj=>ndtpawuj
+   scfcv_args%dtpawuj=>dtpawuj
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
-   scfcv%fatvshift=scfcv%fatvshift*(-one)
+   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations

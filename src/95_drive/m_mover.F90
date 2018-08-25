@@ -657,7 +657,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !      * In ionmov 4 & 5 xred could change inside SCFCV
 !      So we need to take the values from the output
 !
-!      * Inside scfcv.F90 there is a call to symmetrize_xred.F90
+!      * Inside scfcv_core.F90 there is a call to symmetrize_xred.F90
 !      for the first SCF cycle symmetrize_xred could change xred
        if (ab_mover%ionmov<10)then
          change=any(xred(:,:)/=xred_prev(:,:))
