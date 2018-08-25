@@ -316,4 +316,17 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Check whether we are in profiling mode
+    try:
+        do_prof = sys.argv[1] == "prof"
+        if do_prof: sys.argv.pop(1)
+    except Exception:
+        do_prof = False
+
+    if not do_prof:
+        sys.exit(main())
+    else:
+        import pstats, cProfile
+        cProfile.runctx("main()", globals(), locals(), "Profile.prof")
+        s = pstats.Stats("Profile.prof")
+        s.strip_dirs().sort_stats("time").print_stats()

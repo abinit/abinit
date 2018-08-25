@@ -7,19 +7,35 @@ import re
 
 from textwrap import TextWrapper
 from pprint import pformat
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, deque
 from .tools import lazy_property
 
 
-class Interface(object):
-    def __init__(self, lines):
-        self.lines = lines
-        #self.name =
-
 class Datatype(object):
-    def __init__(self, lines):
+
+    def __init__(self, name, lines):
+        self.name = name
         self.lines = lines
-        #self.name =
+        self._analyzed = False
+
+    def __getattr__(self, name):
+        """Called when an attribute lookup has not found the attribute in the usual places"""
+        if not self._analyzed:
+            self.analyze()
+            return super(Datatype, self).__getattr__(name)
+        else:
+            raise AttributeError("Canoot find attributed `%s`" % str(name))
+
+    def analyze(self):
+        self._analyzed = True
+
+
+class Interface(object):
+
+    def __init__(self, name, lines):
+        self.name = name
+        self.lines = lines
+
 
 
 class Procedure(object):
@@ -145,6 +161,11 @@ class Procedure(object):
             app("INCLUDES:\n%s\n" % w.fill(", ".join(self.includes)))
         if self.contains:
             app("CONTAINS:\n%s\n" % w.fill(", ".join(c.name for c in self.contains)))
+
+        if self.datatypes:
+            app("DATATYPES:\n%s\n" % w.fill(", ".join(d.name for d in self.datatypes)))
+        if self.interfaces:
+            app("INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces)))
 
         app("PARENTS:\n%s\n" % w.fill(", ".join(sorted(p.name for p in self.parents))))
         #if verbose:
@@ -277,18 +298,18 @@ class FortranKissParser(object):
     """
     # PROGRAM [name]
     # END [PROGRAM [name]]
-    RE_PROG_START = re.compile(r"program\s*(?P<name>\w*)\Z", re.I)
-    RE_PROG_END = re.compile(r"end(\s*program\s*(?P<name>\w*)|)\Z", re.I)
+    RE_PROG_START = re.compile(r"^program\s*(?P<name>\w*)\Z", re.I)
+    RE_PROG_END = re.compile(r"^end(\s*program\s*(?P<name>\w*)|)\Z", re.I)
 
     # MODULE <name>
     # END [MODULE [name]]
-    RE_MOD_START= re.compile(r"module\s+(?P<name>\w+)\Z", re.I)
-    RE_MOD_END = re.compile(r"end(\s*module\s*(?P<name>\w*)|)\Z", re.I)
+    RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)\Z", re.I)
+    RE_MOD_END = re.compile(r"^end(\s*module\s*(?P<name>\w*)|)\Z", re.I)
 
     # [<prefix>] <SUBROUTINE> <name> [(<args>)] [<suffix>]
     # END [SUBROUTINE [name]]
     RE_SUB_START = re.compile(r'(?P<prefix>(recursive|pure|elemental|\s)*)subroutine\s*(?P<name>\w+)', re.I)
-    RE_SUB_END = re.compile(r'end(\s*subroutine\s*(?P<name>\w*)|)\Z', re.I)
+    RE_SUB_END = re.compile(r'^end(\s*subroutine\s*(?P<name>\w*)|)\Z', re.I)
 
     # [<prefix>] FUNCTION <name> ([<dummy-arg-list>]) [<suffix>]
     # END [FUNCTION [name]]
@@ -308,11 +329,12 @@ type\s*\(\w+\)
 re.I | re.VERBOSE)
     #RE_FUNC_START = re.compile('^[ \t]*(([^!\'"\n]*?)function)',re.I)
     #RE_FUNC_START = re.compile("^(?:(.+?)\s+)?function\s+(\w+)\s*(\([^()]*\))?(?=(?:.*result\s*\(\s*(\w+)\s*\))?)(?=(?:.*bind\s*\(\s*(.*)\s*\))?).*$", re.I)
-    RE_FUNC_END = re.compile(r"end(\s*function\s*(?P<name>\w*)|)\Z", re.I)
+    RE_FUNC_END = re.compile(r"^end(\s*function\s*(?P<name>\w*)|)\Z", re.I)
 
-    RE_INTERFACE_START = re.compile("(abstract\s+)?interface(?:\s+(\S.+))?$", re.I)
-    RE_INTERFACE_END = re.compile("end\s+interface(?:\s+(\S.+))?$", re.I)
-    #RE_INTERFACE_END = re.compile("end\s+interface(?P<name>\s+\w*|)\Z", re.I)
+    RE_INTERFACE_START = re.compile("^(abstract\s+)?interface(?:\s+(\S.+))?$", re.I)
+    RE_INTERFACE_END = re.compile("^end\s+interface(?:\s+(\S.+))?$", re.I)
+    #RE_INTERFACE_START = re.compile(r"(abstract\s+)?interface\s*(?P<name>\w*)", re.I)
+    #RE_INTERFACE_END = re.compile(r"end\s+interface\s+(?P<name>\w*)", re.I)
 
     # [if ()] call <name> [([<dummy-arg-list>])]
     #RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)\s*(?:\(\s*(.*?)\s*\))?\Z", re.I)
@@ -324,8 +346,10 @@ re.I | re.VERBOSE)
     # component-declaration
     # [ component-declaration ]...
     # END TYPE [ type-name ]
-    RE_TYPE_START = re.compile(r'type\s+::\s*(?P<name>\w+)', re.I)
-    RE_TYPE_END = re.compile(r'^end\s+type', re.I)
+    #RE_TYPE_START = re.compile(r'type\s*(|.*::)\s*(?P<name>\w+)', re.I)
+    RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)\Z', re.I)
+    #RE_TYPE_END = re.compile(r'^end\s+type', re.I)
+    RE_TYPE_END = re.compile(r'^end(\s*type\s*(?P<name>\w*)|)\Z', re.I)
 
     def __init__(self, macros=None, verbose=0):
         self.verbose = verbose
@@ -356,13 +380,15 @@ re.I | re.VERBOSE)
 
     def parse_string(self, string, path=None):
         if path is None: path = "UknownFile"
+        self.path = path
 
         # Replace macros. Need e.g. to treat USE_DEFS macros in libpaw and tetralib.
         for macro, value in self.macros.items():
             string = re.sub(macro, value, string)
 
+        # Perhaps here one should join multiple lines ending with &
         # Get list of lower-case string.
-        self.lines = [l.strip().lower() for l in string.splitlines()]
+        self.lines = deque(l.strip().lower() for l in string.splitlines())
         #self.warnings = []
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
@@ -372,7 +398,7 @@ re.I | re.VERBOSE)
         stack = self.stack
 
         while self.lines:
-            line = self.lines.pop(0)
+            line = self.lines.popleft()
             if not line: continue
             #print(line)
 
@@ -389,6 +415,17 @@ re.I | re.VERBOSE)
             if line.startswith("!$omp"):
                 self.num_omp_statements += 1
 
+            # Invokations of Fortran functions are difficult to handle
+            # without inspecting locals so we only handle explicit calls to routines.
+            # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
+            # should also handle call obj%foo()
+            m = self.RE_SUBCALL.match(line)
+            if m:
+                subname = m.group("name")
+                assert subname
+                stack[-1][0].children.append(subname)
+                continue
+
             # Interface declaration.
             m = self.RE_INTERFACE_START.match(line)
             if m:
@@ -396,10 +433,12 @@ re.I | re.VERBOSE)
                 continue
 
             # Datatype declaration.
-            #m = self.RE_TYPE_START.match(line)
-            #if m:
-            #    self.consume_datatype(m)
-            #    continue
+            m = self.RE_TYPE_START.match(line)
+            if m and stack[-1][0].is_module and "(" not in line:
+            #if m and "(" not in line:
+                assert stack[-1][1] == "open"
+                self.consume_datatype(m)
+                continue
 
             # Handle include statement (CPP or Fortran version).
             if line.startswith("#include ") or line.startswith("include "):
@@ -473,17 +512,6 @@ re.I | re.VERBOSE)
                     raise ValueError("Cannot find procedure name in line:\n\t%s" % line)
                 stack.append([Function(func_name, ancestor, preamble, path=path), "open"])
                 preamble = []
-                continue
-
-            # Invokations of Fortran functions are difficult to handle
-            # without inspecting locals so we only handle explicit calls to routines.
-            # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
-            # should also handle call obj%foo()
-            m = self.RE_SUBCALL.match(line)
-            if m:
-                subname = m.group("name")
-                assert subname
-                stack[-1][0].children.append(subname)
                 continue
 
             #isend, ftype, name = self.maybe_end_procedure(line):
@@ -571,29 +599,37 @@ re.I | re.VERBOSE)
 
     def consume_interface(self, start_match):
         buf = [start_match.string]
+        #name = start_match.group("name")
+        name = "None"
+        if self.verbose > 1: print("begin interface", name, "in line", start_match.string)
         while self.lines:
-            line = self.lines.pop(0)
-            if self.verbose > 1: print("begin interface", line)
+            line = self.lines.popleft()
             buf.append(line)
             end_match = self.RE_INTERFACE_END.match(line)
             if end_match:
-                #end_name = end_match
                 if self.verbose > 1: print("end interface", line)
+                #end_name = end_match.group("name")
+                #if name != end_name: raise ValueError("%s != %s" % (name, end_name))
                 break
-        self.stack[-1][0].interfaces.append(Interface(buf))
+        self.stack[-1][0].interfaces.append(Interface(name, buf))
 
     def consume_datatype(self, start_match):
         buf = [start_match.string]
+        name = start_match.group("name")
+        if self.verbose > 1: print("begin datatype", name, "in line", start_match.string)
         while self.lines:
-            line = self.lines.pop(0)
-            if self.verbose > 1: print("begin datatype", line)
+            line = self.lines.popleft()
             buf.append(line)
             end_match = self.RE_TYPE_END.match(line)
             if end_match:
-                #end_name = end_match
+                end_name = end_match.group("name")
                 if self.verbose > 1: print("end datatype", line)
-                break
-        self.stack[-1][0].datatypes.append(Datatype(buf))
+                if name == end_name:
+                    break
+        else:
+            raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
+
+        self.stack[-1][0].datatypes.append(Datatype(name, buf))
 
     #@staticmethod
     #def maybe_end_procedure(s):
