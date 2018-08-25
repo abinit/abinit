@@ -2330,7 +2330,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%icutcoul=6
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0
-   if ( (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%imgwfstor=1 ! Recommended for band-FFT parallelism
+   if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%imgwfstor=1 ! Recommended for band-FFT parallelism
    dtsets(idtset)%inclvkb=2
    dtsets(idtset)%intxc=0
 !  if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0

@@ -1,6 +1,7 @@
 # Oxygen molecule, treated with fixed occupation numbers with LDA.
 
  nimage 2
+#imgwfstor 1
 
 #ntimimage 2
 

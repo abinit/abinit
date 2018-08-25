@@ -51,7 +51,7 @@ module m_scfcv
  use m_paw_dmft,         only : paw_dmft_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
- use m_scfcv_core,       only : scfcv
+ use m_scfcv_core,       only : scfcv_core
 
  implicit none
 
