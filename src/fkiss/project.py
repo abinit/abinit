@@ -649,9 +649,13 @@ class AbinitProject(object):
             from ConfigParser import ConfigParser
         except ImportError:
             from configparser import ConfigParser
-        config = ConfigParser()
+
         binconf_path = os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf")
+
+        # Read INI file.
+        config = ConfigParser()
         config.read(binconf_path)
+
         # Read header with comments to be added to the new conf file.
         # NB: use [DEFAULT] as sentinel.
         header = []
