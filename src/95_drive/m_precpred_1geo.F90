@@ -277,11 +277,6 @@ real(dp), allocatable :: xred(:,:)
  call abiforstr_fin(preconforstr)
  ABI_FREE(xred)
 
-!DEBUG
-!write(std_out,*)' m_precpred_1geo : exit '
-!call flush(std_out)
-!ENDDEBUG
-
 end subroutine precpred_1geo
 !!***
 
