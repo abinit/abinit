@@ -4642,8 +4642,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !Local variables ---------------------------------------
 !scalars
  integer :: at_indx,cplex_dij,iafm,iatom,iatom_tot,ii
- integer :: il,il0,ilmn,iln,iln0,ilpm,indexi,indexii,indexj,indexjj,indexjj0,indexk,indexkc,indexkc_rf
- integer :: iplex,iplex_rf,irot,ispden,itypat,j0lmn,jl,jl0,jlmn,jln,jln0,jlpm,jspden
+ integer :: il,il0,ilmn,iln,iln0,ilpm,indexi,indexii,indexj,indexjj,indexjj0,indexk,indexkc,indexkc_q
+ integer :: iplex,iq,irot,ispden,itypat,j0lmn,jl,jl0,jlmn,jln,jln0,jlpm,jspden
  integer :: klmn,klmnc,kspden,lmn_size,lmn2_size,mi,mj,my_comm_atom,my_cplex_dij,my_ndij,my_qphase
  integer :: mu,natinc,ndij0,ndij1,nu,optsym,qphase,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
@@ -4936,7 +4936,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                    factsym(2)=-one
                  end if
                  indexkc=cplex_dij*(indexk-1)
-                 indexkc_rf=indexkc+cplex_dij*lmn2_size
+                 indexkc_q=indexkc+cplex_dij*lmn2_size
+
 !DEBUG_ALTERNATE_ALGO
 !                if (noncoll.and.lsymnew) then
 !                  do iplex=1,cplex_dij
@@ -4972,7 +4973,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                    if (qphase==2) &
 &                    sumdij(1:cplex_dij,iafm,2)=sumdij(1:cplex_dij,iafm,2) &
 &                             +fact(1:cplex_dij)*zarot2 &
-&                             *tmp_dij(at_indx)%value(indexkc_rf+1:indexkc_rf+cplex_dij,kspden)
+&                             *tmp_dij(at_indx)%value(indexkc_q+1:indexkc_q+cplex_dij,kspden)
                  end if
 
                  if (noncoll.and.(.not.lsymnew)) then
@@ -4986,8 +4987,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                      do mu=1,3
                        summag(1:cplex_dij,mu,2)=summag(1:cplex_dij,mu,2) &
 &                               +fact(1:cplex_dij)*zarot2 &
-&                               *tmp_dij(at_indx)%value(indexkc_rf+1:indexkc_rf+cplex_dij,1+mu)
-                   end do
+&                               *tmp_dij(at_indx)%value(indexkc_q+1:indexkc_q+cplex_dij,1+mu)
+                     end do
                    end if
                  end if
 !DEBUG_ALTERNATE_ALGO
@@ -5029,7 +5030,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                !Remember, Dij is stored as follows:
                ! Dij=  [Dij(2klmn-1)+i.Dij(2klmn)]
                !    +i.[Dij(lnm2_size+2klmn-1)+i.Dij(lmn2_size+2klmn)]
-               !Note: has_qphase=true implies qphase=2
                if((.not.noncoll).or.(.not.lsymnew)) then
                  do iplex=1,cplex_dij
                    dijc(1)=sumdij(iplex,iafm,1)
@@ -5060,19 +5060,19 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
              end if
 
 !            Add contribution of this rotation
-             do iplex_rf=1,qphase
-               rotdij(1:cplex_dij,iafm,iplex_rf)=rotdij(1:cplex_dij,iafm,iplex_rf) &
-&                                               +sumdij(1:cplex_dij,iafm,iplex_rf)
+             do iq=1,qphase
+               rotdij(1:cplex_dij,iafm,iq)=rotdij(1:cplex_dij,iafm,iq) &
+&                                         +sumdij(1:cplex_dij,iafm,iq)
              end do
              if (noncoll.and.(.not.lsymnew)) then
 !              If non-collinear case, rotate Dij magnetization
 !              Should use symrel^1 but use transpose[symrec] instead
-               do iplex_rf=1,qphase
+               do iq=1,qphase
                  do nu=1,3
                    do mu=1,3
                      !We need the transpose ?
-                     rotmag(1:cplex_dij,mu,iplex_rf)=rotmag(1:cplex_dij,mu,iplex_rf) &
-&                       +symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iplex_rf)
+                     rotmag(1:cplex_dij,mu,iq)=rotmag(1:cplex_dij,mu,iq) &
+&                       +symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
                    end do
                  end do
                end do
@@ -5082,19 +5082,19 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
            if((.not.noncoll).or.(.not.lsymnew)) then
 !            Store new value of dij
-             do iplex_rf=1,qphase
+             do iq=1,qphase
                do iplex=1,cplex_dij
-                 dijnew(iplex,1,iplex_rf)=rotdij(iplex,1,iplex_rf)/nsym_used(1)
-                 if (abs(dijnew(iplex,1,iplex_rf))<=tol10) dijnew(iplex,1,iplex_rf)=zero
+                 dijnew(iplex,1,iq)=rotdij(iplex,1,iq)/nsym_used(1)
+                 if (abs(dijnew(iplex,1,iq))<=tol10) dijnew(iplex,1,iq)=zero
                end do
              end do
 
 !            Antiferromagnetic case: has to fill up "down" component of dij
              if (antiferro.and.nsym_used(2)>0) then
-               do iplex_rf=1,qphase
+               do iq=1,qphase
                  do iplex=1,cplex_dij
-                   dijnew(iplex,2,iplex_rf)=rotdij(iplex,2,iplex_rf)/nsym_used(2)
-                   if (abs(dijnew(iplex,2,iplex_rf))<=tol10) dijnew(iplex,2,iplex_rf)=zero
+                   dijnew(iplex,2,iq)=rotdij(iplex,2,iq)/nsym_used(2)
+                   if (abs(dijnew(iplex,2,iq))<=tol10) dijnew(iplex,2,iq)=zero
                  end do
                end do
              end if
@@ -5112,56 +5112,56 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !          Non-collinear case: store new values of Dij magnetization
            if (noncoll.and.(.not.lsymnew)) then
 !            Select on-zero elements
-             do iplex_rf=1,qphase
+             do iq=1,qphase
                do mu=1,3
                  do iplex=1,cplex_dij
-                   rotmag(iplex,mu,iplex_rf)=rotmag(iplex,mu,iplex_rf)/nsym_used(1)
-                   if (abs(rotmag(iplex,mu,iplex_rf))<=tol10) rotmag(iplex,mu,iplex_rf)=zero
+                   rotmag(iplex,mu,iq)=rotmag(iplex,mu,iq)/nsym_used(1)
+                   if (abs(rotmag(iplex,mu,iq))<=tol10) rotmag(iplex,mu,iq)=zero
                  end do
                end do
              end do
 !            Transfer back to Dij^{alpha,beta}
              if(.not.lsymnew) then
                !Remember: cplex_dij is 2 in that case
-               do iplex_rf=1,qphase
-                 dijnew(1,1,iplex_rf)=half*(dijnew(1,1,iplex_rf)+rotmag(1,3,iplex_rf))
-                 dijnew(2,1,iplex_rf)=half*(dijnew(2,1,iplex_rf)+rotmag(2,3,iplex_rf))
-                 dijnew(1,2,iplex_rf)=      dijnew(1,1,iplex_rf)-rotmag(1,3,iplex_rf)
-                 dijnew(2,2,iplex_rf)=      dijnew(2,1,iplex_rf)-rotmag(2,3,iplex_rf)
-                 dijnew(1,3,iplex_rf)=half*(rotmag(1,1,iplex_rf)+rotmag(2,2,iplex_rf))
-                 dijnew(2,3,iplex_rf)=half*(rotmag(2,1,iplex_rf)-rotmag(1,2,iplex_rf))
-                 dijnew(1,4,iplex_rf)=half*(rotmag(1,1,iplex_rf)-rotmag(2,2,iplex_rf))
-                 dijnew(2,4,iplex_rf)=half*(rotmag(2,1,iplex_rf)+rotmag(1,2,iplex_rf))
+               do iq=1,qphase
+                 dijnew(1,1,iq)=half*(dijnew(1,1,iq)+rotmag(1,3,iq))
+                 dijnew(2,1,iq)=half*(dijnew(2,1,iq)+rotmag(2,3,iq))
+                 dijnew(1,2,iq)=      dijnew(1,1,iq)-rotmag(1,3,iq)
+                 dijnew(2,2,iq)=      dijnew(2,1,iq)-rotmag(2,3,iq)
+                 dijnew(1,3,iq)=half*(rotmag(1,1,iq)+rotmag(2,2,iq))
+                 dijnew(2,3,iq)=half*(rotmag(2,1,iq)-rotmag(1,2,iq))
+                 dijnew(1,4,iq)=half*(rotmag(1,1,iq)-rotmag(2,2,iq))
+                 dijnew(2,4,iq)=half*(rotmag(2,1,iq)+rotmag(1,2,iq))
                end do
              end if
            end if
 !          Transfer new value of Dij in suitable pointer
            ii=klmnc
-           do iplex_rf=1,qphase
+           do iq=1,qphase
              if (option_dij==0) then
-               paw_ij(iatom)%dij(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dij(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==1) then
-               paw_ij(iatom)%dijhat(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijhat(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==2) then
-               paw_ij(iatom)%dijU(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijU(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==3) then
-               paw_ij(iatom)%dijxc(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijxc(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==4) then
-               paw_ij(iatom)%dijxc_hat(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijxc_hat(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==5) then
-               paw_ij(iatom)%dijxc_val(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijxc_val(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==6) then
-               paw_ij(iatom)%dijso(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijso(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==7) then
-               paw_ij(iatom)%dijexxc(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijexxc(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==8) then
-               paw_ij(iatom)%dijfr(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijfr(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==9) then
-               paw_ij(iatom)%dijnd(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijnd(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              else if (option_dij==10) then
-               paw_ij(iatom)%dijhartree(ii+1:ii+cplex_dij)=dijnew(1:cplex_dij,1,iplex_rf)
+               paw_ij(iatom)%dijhartree(ii+1:ii+cplex_dij)=dijnew(1:cplex_dij,1,iq)
              else if (option_dij==11) then
-               paw_ij(iatom)%dijfock(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iplex_rf)
+               paw_ij(iatom)%dijfock(ii+1:ii+cplex_dij,ispden:ispden+ndij0)=dijnew(1:cplex_dij,1:ndij1,iq)
              end if
              ii=ii+lmn2_size*cplex_dij
            end do
@@ -5208,12 +5208,11 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !  *********************************************************************
 !  If nsym==1, only cut small components of dij
 
-   if (my_natom>0) then
-     if(paw_ij(1)%nspden==2.and.paw_ij(1)%nsppol==1) then
-       msg='In the antiferromagnetic case, nsym cannot be 1'
-       MSG_BUG(msg)
-     end if
+   if (antiferro) then
+     msg='In the antiferromagnetic case, nsym cannot be 1'
+     MSG_BUG(msg)
    end if
+
    do iatom=1,my_natom
      do ispden=1,my_ndij
        qphase=paw_ij(iatom)%qphase
@@ -5798,10 +5797,10 @@ subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,nsppol,&
        end do
      else
        do kk=1,lmn2_size
-         dij1(2*kk-1)= dij(2*kk-1,idij)-dij(2*kk  +2*lmn2_size,my_idij)
-         dij1(2*kk  )= dij(2*kk  ,idij)+dij(2*kk-1+2*lmn2_size,my_idij)
-         dij2(2*kk-1)= dij(2*kk-1,idij_sym)+dij(2*kk  +2*lmn2_size,my_idij_sym)
-         dij2(2*kk  )= dij(2*kk  ,idij_sym)-dij(2*kk-1+2*lmn2_size,my_idij_sym)
+         dij1(2*kk-1)= dij(2*kk-1,my_idij)-dij(2*kk  +2*lmn2_size,my_idij)
+         dij1(2*kk  )= dij(2*kk  ,my_idij)+dij(2*kk-1+2*lmn2_size,my_idij)
+         dij2(2*kk-1)= dij(2*kk-1,my_idij_sym)+dij(2*kk  +2*lmn2_size,my_idij_sym)
+         dij2(2*kk  )= dij(2*kk  ,my_idij_sym)-dij(2*kk-1+2*lmn2_size,my_idij_sym)
        end do
      end if
      dij2p => dij1 ; dij2p_ => dij2
