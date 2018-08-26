@@ -1035,6 +1035,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='extrapwf' ; cond_values(1)=dt%extrapwf
      call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
    endif
+   if (dt%ntimimage<=1) then ! imgwfstor activate only when there is more than one time step for images
+     cond_string(1)='ntimimage' ; cond_values(1)=dt%ntimimage
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
+   endif
 
 !  intxc
    if(dt%iscf==-1)then

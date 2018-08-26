@@ -382,6 +382,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) history_size=2
  else
    if (abs(dtset%densfor_pred)==2.or.abs(dtset%densfor_pred)==3) history_size=0
+   if (dtset%imgwfstor==1) history_size=1
    if (dtset%usewvl==0.and.(abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) history_size=2
  end if
  do iimage=1,nimage

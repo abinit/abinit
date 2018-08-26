@@ -462,16 +462,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(ylmgr,(0,0,0))
  end if
 
-!DEBUG
- write(std_out,*)' m_gstate, before SCF history management : initialized, scf_history%history_size=',initialized, scf_history%history_size
-!ENDDEBUG
-
 !SCF history management (allocate it at first call)
  has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
    usecg=0
-   if(dtset%extrapwf>0)usecg=1
+   if(dtset%extrapwf>0 .or. dtset%imgwfstor==1)usecg=1
    call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
 
@@ -758,7 +754,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
 
 !Initialize wavefunctions.
- if(dtset%tfkinfunc /=2) then
+ if(dtset%imgwfstor==1 .and. initialized==1)then
+   cg(:,:)=scf_history%cg(:,:,1) 
+ else if(dtset%tfkinfunc /=2) then
+!if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
@@ -1257,10 +1256,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call timab(35,3,tsec)
 
-!DEBUG
- write(std_out,*)' m_gstate, before scfcv_init : initialized, scf_history%history_size=',initialized, scf_history%history_size
-!ENDDEBUG
-
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
@@ -1563,6 +1558,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
  end if
+
+ if(dtset%imgwfstor==1)then
+   scf_history%cg(:,:,1)=cg(:,:)  
+ endif
 
 !Deallocate arrays
  ABI_DEALLOCATE(atindx)

@@ -6407,7 +6407,7 @@ Variable(
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[paral_kgb]] == 1': '1', 'defaultval': 0}),
     mnemonics="IMaGe WaveFunction STORage",
-    requires="[[extrapwf]] == 0",
+    requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
     text="""
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
 Possible values of [[imgwfstor]] are 0 or 1. 
