@@ -1807,25 +1807,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call ebands_report_gap(ebands, unit=std_out)
  val_indeces = get_valence_idx(ebands)
 
- ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
- ABI_MALLOC(new%mu_e, (new%ntemp))
- new%mu_e = ebands%fermie
-
- ! TODO T == 0 >> SIGSEGV
- !#if 0
- if (new%use_doublegrid) then
-   call ebands_copy(ebands, tmp_ebands)
- else
-   call ebands_copy(ebands_dense, tmp_ebands)
- endif
- !
- do it=1,new%ntemp
-   call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
-   new%mu_e(it) = tmp_ebands%fermie
- end do
- call ebands_free(tmp_ebands)
- !#endif
-
  ! Frequency mesh for sigma(w) and spectral function.
  ! TODO: Use GW variables but change default
  new%nwr = dtset%nfreqsp
@@ -2241,6 +2222,22 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
    endif
  end if
+
+ ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
+ ABI_MALLOC(new%mu_e, (new%ntemp))
+ new%mu_e = ebands%fermie
+
+ if (new%use_doublegrid) then
+   call ebands_copy(ebands_dense, tmp_ebands)
+ else
+   call ebands_copy(ebands, tmp_ebands)
+ endif
+ !
+ do it=1,new%ntemp
+   call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
+   new%mu_e(it) = tmp_ebands%fermie
+ end do
+ call ebands_free(tmp_ebands)
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
