@@ -6405,7 +6405,7 @@ Variable(
     vartype="integer",
     topics=['CrossingBarriers_useful', 'PIMD_useful', 'TransPath_useful'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[paral_kgb]] == 1': '1', 'defaultval': 0}),
+    defaultval=0,
     mnemonics="IMaGe WaveFunction STORage",
     requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
     text="""
@@ -6419,8 +6419,8 @@ the wavefunctions are reinitialised, either at random or from the initial wavefu
 any modification to take into account the computations at the previous value of itimimage.
 
 If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
-are spread over many processors, which happens when [[paral_kgb]] == 1. This justifies chosing
-the default [[imgwfstor]]=1 in this case. For some algorithms, e.g. when some geometry optimization
+are spread over many processors, which happens when [[paral_kgb]] == 1. 
+For some algorithms, e.g. when some geometry optimization
 is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
 For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller. 
 Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
