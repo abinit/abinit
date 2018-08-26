@@ -59,7 +59,7 @@ imgwfstor 1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t20.out, tolnlines = 0, tolabs = 0.0e-00, tolrel = 0.00e+00
+#%%   t20.out, tolnlines = 1, tolabs = 1.1e-08, tolrel = 6.0e-09
 #%% psp_files = 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
