@@ -314,11 +314,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,pointer :: npwarr_(:),pwind(:,:,:)
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
- real(dp),allocatable :: cg(:,:),doccde(:)
- real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: doccde(:)
+ real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
@@ -463,13 +463,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !SCF history management (allocate it at first call)
- has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
    usecg=0
    if(dtset%extrapwf>0 .or. dtset%imgwfstor==1)usecg=1
    call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
+ has_to_init=(initialized==0.or.scf_history%history_size<0)
 
  call timab(33,2,tsec)
  call timab(701,3,tsec)
@@ -705,10 +705,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out of memory in cg")
+ if (dtset%imgwfstor==1) then
+   cg => scf_history%cg(:,:,1)
+   eigen => scf_history%eigen(:,1)
+ else
+   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+   ABI_CHECK(ierr==0, "out of memory in cg")
+   ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ end if
 
- ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
 !mpi_enreg%paralbd=0 ; ask_accurate=0
@@ -756,6 +761,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Initialize wavefunctions.
  if(dtset%imgwfstor==1 .and. initialized==1)then
    cg(:,:)=scf_history%cg(:,:,1) 
+   eigen(:)=scf_history%eigen(:,1) 
  else if(dtset%tfkinfunc /=2) then
 !if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
@@ -1561,13 +1567,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if(dtset%imgwfstor==1)then
    scf_history%cg(:,:,1)=cg(:,:)  
+   scf_history%eigen(:,1)=eigen(:)  
  endif
 
 !Deallocate arrays
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(eigen)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(npwarr)
  ABI_DEALLOCATE(nattyp)
@@ -1578,6 +1583,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_DEALLOCATE(taug)
  ABI_DEALLOCATE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
+
+ if(dtset%imgwfstor==0)then
+   ABI_DEALLOCATE(cg)
+   ABI_DEALLOCATE(eigen)
+ else 
+   nullify(cg,eigen)
+ endif
 
  if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
