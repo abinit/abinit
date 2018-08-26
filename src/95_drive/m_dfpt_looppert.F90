@@ -2077,8 +2077,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #ifdef HAVE_NETCDF
   ! Output DDK file in netcdf format.
    if (me == master .and. ipert == dtset%natom + 1) then
-     fname = strcat(dtfil%filnam_ds(4), "_DDK.nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
+     fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt

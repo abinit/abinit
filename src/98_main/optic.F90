@@ -254,7 +254,7 @@ program optic
    ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
 
-   ! TODO: one should perform basic consistency tests for the GS WFK and the DDK files, e.g.
+   ! TODO: one should perform basic consistency tests for the GS WFK and the EVK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
    ! Note indeed that we are assuming the same numer of bands in all the files.
    call nctk_fort_or_ncfile(wfkfile, iomode, msg)
@@ -264,10 +264,10 @@ program optic
    ! Get header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
 
-   ! Read ddk here from WFK files or afterwards from DDK.nc
+   ! Read ddk here from WFK files or afterwards from EVK.nc
    use_ncddk = .False.
    do ii=1,3
-     use_ncddk(ii) = endswith(infiles(ii), "_DDK.nc")
+     use_ncddk(ii) = endswith(infiles(ii), "_EVK.nc")
      if (.not. use_ncddk(ii)) then
        call nctk_fort_or_ncfile(infiles(ii), iomode, msg)
        if (len_trim(msg) /= 0) MSG_ERROR(msg)
@@ -280,7 +280,7 @@ program optic
    do ii=1,2
      if (.not. use_ncddk(ii) .and. .not. use_ncddk(ii+1)) then
        if (wfk_compare(wfks(ii), wfks(ii+1)) /= 0) then
-         write(msg, "(2(a,i0,a))")"ddkfile", ii," and ddkfile ",ii+1, ", are not consistent. see above messages"
+         write(msg, "(2(a,i0,a))")"evkfile", ii," and evkfile ",ii+1, ", are not consistent. see above messages"
          MSG_ERROR(msg)
        end if
      end if

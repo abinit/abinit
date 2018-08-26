@@ -135,7 +135,7 @@ MODULE m_ddk
    ! velocity on the FS in cartesian coordinates.
 
   logical :: use_ncddk(3)
-   ! True if we are readin DDK matrix elements from DDK.nc instead of WFK file
+   ! True if we are readin DDK matrix elements from EVK.nc instead of WFK file
 
   type(crystal_t) :: cryst
    ! Crystal structure read from file
@@ -208,7 +208,7 @@ subroutine ddk_init(ddk, paths, comm)
 
  ! In this calls everything is broadcast properly to the whole comm
  do ii=1,3
-   ddk%use_ncddk(ii) = endswith(paths(ii), "_DDK.nc")
+   ddk%use_ncddk(ii) = endswith(paths(ii), "_EVK.nc")
    call hdr_read_from_fname(hdrs(ii), paths(ii), fforms(ii), comm)
    if (ddk%debug) call hdr_echo(hdrs(ii), fforms(ii), 4, unit=std_out)
    ! check that 2 headers are compatible
@@ -515,8 +515,8 @@ do spin=1,nsppol ! Loop over spins
      hdr_tmp%qptn = [0,0,0]
 
      do ii=1,3
-         fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
-         NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
+         fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_EVK.nc")
+         NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
          hdr_tmp%pertcase = (cryst%natom*3)+ii
          NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
