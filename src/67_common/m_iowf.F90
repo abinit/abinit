@@ -360,7 +360,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
         npwk_disk = hdr%npwarr(ikpt)
         NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
         vkb = zero; vkbd = zero
-        call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, kg_disk, vkbsign, vkb(:npwk_disk,:,:), vkbd(:npwk_disk,:,:))
+        call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
         if (ikpt == 1) then
           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
           if(dtset%prtvol>=2)then

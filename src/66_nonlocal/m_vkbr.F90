@@ -179,7 +179,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkbsign, (psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
- call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
+ call calc_vkb(cryst,psps,kpoint,npw,npw,gvec,vkbsign,vkb,vkbd)
 
  select case (inclvkb)
  case (2)
@@ -452,7 +452,7 @@ end subroutine add_vnlr_commutator
 !!
 !! SOURCE
 
-subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
+subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -465,14 +465,14 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw_k
+ integer,intent(in) :: npw_k, mpw
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(out) :: vkb (npw_k,psps%lnmax,psps%ntypat)
- real(dp),intent(out) :: vkbd(npw_k,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkb (mpw,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkbd(mpw,psps%lnmax,psps%ntypat)
  real(dp),intent(out) :: vkbsign(psps%lnmax,psps%ntypat)
 
 !Local variables ------------------------------
