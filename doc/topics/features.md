@@ -107,6 +107,7 @@ that apply, generally speaking, to all types of calculations are explained later
   3. [[topic:TransPath|Transition path searches: NEB and string method]]
   4. [[topic:GeoConstraints|Geometry constraints]]
   5. [[topic:PIMD|Path-integral molecular dynamics (PIMD)]]
+  5. [[topic:CrossingBarriers|Crossing barrier search, linear combination of constrained DFT energies and ensemble DFT]]
   6. [[topic:LOTF|Learn-on-the-flight (LOTF)]] (not in production)
 
 ## 5 Correlated electrons

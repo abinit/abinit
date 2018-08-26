@@ -365,6 +365,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
 !Set mpspso and psps%pspso
 !Warning: mpspso might be different for each dataset.
+!         mpspso not relevant in case of PAW.
  psps%mpspso=1
  do ipsp=1,dtset%npsp
    if(dtset%nspinor==1)then
@@ -374,16 +375,20 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      !  MSG_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
-   else
+!    Ideally the following line should not exist,
+!      but at present, the space has to be booked
+     if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
+   else if (psps%usepaw==0) then
      if(dtset%so_psp(ipsp)/=1)then
        psps%pspso(ipsp)=dtset%so_psp(ipsp)
      else
        psps%pspso(ipsp)=pspheads(ipsp)%pspso
      end if
      if(psps%pspso(ipsp)/=0)psps%mpspso=2
+     if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
+   else
+     psps%pspso(ipsp)=1+dtset%pawspnorb
    end if
-!  Ideally the following line should not exist, but at present, the space has to be booked
-   if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
  end do
 
 !Set mpssoang, lmnmax, lnmax
@@ -396,6 +401,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    psps%lmnmax=lmnmaxso
    psps%lnmax=lnmaxso
  end if
+
 !T. Rangel: for wvl + paw do not change psps%lmnmax
  if (psps%useylm==0 .and. psps%usepaw/=1 ) then
    psps%lmnmax=psps%lnmax
@@ -896,24 +902,34 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 &  '  Number of types of atoms   .. ',psps%ntypat
  call wrtout(unt,msg,mode)
 
- SELECT CASE (psps%mpspso)
- CASE (1)
-   call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
- CASE (2)
-   write(msg,'(3a,i3)')&
-&    '  Calculation with spin-orbit coupling ',ch10,&
-&    '  Max number of channels (spin-orbit included) ',psps%mpssoang
+ if (psps%usepaw==0) then
+   SELECT CASE (psps%mpspso)
+   CASE (1)
+     call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
+   CASE (2)
+     write(msg,'(3a,i3)')&
+&      '  Calculation with spin-orbit coupling ',ch10,&
+&      '  Max number of channels (spin-orbit included) ',psps%mpssoang
+     call wrtout(unt,msg,mode)
+     do itypat=1,psps%ntypat
+       if (psps%pspso(itypat) /= 1) then
+         write(msg,'(a,i4,a,i2,a)')&
+&          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
+         call wrtout(unt,msg,mode)
+       end if
+     end do
+   CASE DEFAULT
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
+   END SELECT
+ else
+   SELECT CASE (maxval(psps%pspso))
+   CASE (0,1)
+     msg='  Scalar calculation (no spin-orbit term) '
+   CASE (2)
+     msg='  Calculation with spin-orbit coupling '
+   END SELECT
    call wrtout(unt,msg,mode)
-   do itypat=1,psps%ntypat
-     if (psps%pspso(itypat) /= 1) then
-       write(msg,'(a,i4,a,i2,a)')&
-&        '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
-       call wrtout(unt,msg,mode)
-     end if
-   end do
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
- END SELECT
+ end if
 
  ! Info on nonlocal part
  SELECT CASE (psps%useylm)

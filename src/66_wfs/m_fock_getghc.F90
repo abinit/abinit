@@ -126,11 +126,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! Scalars
  integer,parameter :: tim_fourwf0=0,tim_fourdp0=0,ndat1=1
  integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom
- integer :: iband_cprj,ider,idir,idir1,ier,ind,ipert,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
+ integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipert,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
- logical :: need_ghc
+ logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,occ,wtk
  type(fock_common_type),pointer :: fockcommon
@@ -140,7 +140,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
  real(dp), allocatable :: gvnlc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
@@ -318,6 +318,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* the vector qvec is expressed in reduced coordinates.
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
+   qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
@@ -436,20 +437,22 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
      if (fockcommon%usepaw==1) then
        qphon=qvec_j;nfftotf=product(ngfftf(1:3))
-       cplex_dij=cplex_fock;ndij=nspden_fock
-       ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij))
+       cplex_dij=1;ndij=nspden_fock
+       ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
        dijhat=zero
        do iatom=1,natom
          ipert=iatom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
-         ABI_ALLOCATE(dijhat_tmp,(cplex_dij*lmn2_size,ndij))
+         ABI_ALLOCATE(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
          call pawdijhat(cplex_fock,cplex_dij,dijhat_tmp,gs_ham%gprimd,iatom,ipert,&
-!&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
-         dijhat(1:cplex_dij*lmn2_size,iatom,:)=dijhat_tmp(1:cplex_dij*lmn2_size,:)
+         do ii=1,cplex_fock
+           ind=(ii-1)*lmn2_size
+           dijhat(1:cplex_dij*lmn2_size,iatom,:,ii)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
+         end do
          ABI_DEALLOCATE(dijhat_tmp)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=1

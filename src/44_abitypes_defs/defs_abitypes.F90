@@ -521,6 +521,7 @@ type dataset_type
  integer :: prtvdw
  integer :: prtvha
  integer :: prtvhxc
+ integer :: prtkbff=0
  integer :: prtvol
  integer :: prtvolimg
  integer :: prtvpsp
@@ -848,8 +849,9 @@ type dataset_type
  real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
+ real(dp), allocatable :: mixesimgf(:)        !SET2NULL  ! mixesimgf(nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
- real(dp), allocatable :: occ_orig(:)         !SET2NULL  ! occ_orig(mband*nkpt*nsppol)
+ real(dp), allocatable :: occ_orig(:,:)       !SET2NULL  ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           !SET2NULL  ! pimass(ntypat)
  real(dp), allocatable :: ptcharge(:)         !SET2NULL  ! ptcharge(ntypat)
  real(dp), allocatable :: qmass(:)            !SET2NULL  ! qmass(nnos)
@@ -911,14 +913,14 @@ type dataset_type
 ! Phonon variables.
  integer :: ph_freez_disp_addStrain
  integer :: ph_freez_disp_option
- integer :: ph_freez_disp_nampl 
+ integer :: ph_freez_disp_nampl
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
  integer :: ph_
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
-  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl) 
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)

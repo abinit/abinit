@@ -1,4 +1,4 @@
-# Oxygen molecule, treated like a metal, nnon-spin-polarized and with GGA
+# Oxygen molecule, treated like a metal, non-spin-polarized and with GGA
 # The pseudopotential includes a core charge,
 # inducing non-linear XC core correction
 # Test the stresses (move one cell parameter to get

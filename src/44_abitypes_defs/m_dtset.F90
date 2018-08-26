@@ -90,7 +90,7 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !! Input/Output :
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!   | occ_orig(dtset%nband(1)*nkpt*nsppol)=occupation numbers for each band and k point
+!!   | occ_orig(dtset%nband(1)*nkpt*nsppol,nimage)=occupation numbers for each band and k point
 !!   |   must be input for occopt==0 or 2,
 !!   |   will be an output for occopt==1 or 3 ... 8
 !!
@@ -121,7 +121,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,iatom,iband,ii,ikpt,isppol,nocc
+ integer :: bantot,iatom,iband,ii,iimage,ikpt,isppol,nocc
  real(dp) :: maxocc,nelect_occ,nelect_spin,occlast,sign_spin,zval
  character(len=500) :: message
 !arrays
@@ -182,13 +182,15 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !      Now copy the tmpocc array in the occ array, taking into account the spin
        if(dtset%nsppol==1)then
          do ikpt=1,dtset%nkpt
-           dtset%occ_orig(1+(ikpt-1)*dtset%nband(1):ikpt*dtset%nband(1))=tmpocc(:)
+           do iband=1,dtset%nband(1)
+             dtset%occ_orig(iband+(ikpt-1)*dtset%nband(1),:)=tmpocc(iband)
+           enddo
          end do
        else
          do ikpt=1,dtset%nkpt
            do iband=1,dtset%nband(1)
              do isppol=1,dtset%nsppol
-               dtset%occ_orig(iband+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1))) =  &
+               dtset%occ_orig(iband+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)),:) =  &
 &               tmpocc(isppol+dtset%nsppol*(iband-1))
              end do
            end do
@@ -228,13 +230,12 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !          Fill all bands, except the upper one
            if(dtset%nband(1)>1)then
              do iband=1,nocc-1
-               dtset%occ_orig(iband+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)))=maxocc
+               dtset%occ_orig(iband+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)),:)=maxocc
              end do
            end if
 !          Fill the upper occupied band
-           dtset%occ_orig(nocc+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)))=occlast
+           dtset%occ_orig(nocc+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)),:)=occlast
          end do
-         !write(std_out,*)' dtset%occ_orig(1)=',dtset%occ_orig(1)
        end do
 
      else
@@ -247,14 +248,14 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        MSG_ERROR(message)
      end if
 
-!    Now print the values
+!    Now print the values (only the first image, since they are all the same)
      if(dtset%nsppol==1)then
 
        write(message, '(a,i4,a,a)' ) &
 &       ' chkneu : initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case : '
        call wrtout(std_out,message,'COLL')
        do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)) )
+         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
          call wrtout(std_out,message,'COLL')
        end do
 
@@ -265,14 +266,14 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &       ch10,'    spin up   values : '
        call wrtout(std_out,message,'COLL')
        do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)) )
+         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
          call wrtout(std_out,message,'COLL')
        end do
        write(message, '(a)' ) '    spin down values : '
        call wrtout(std_out,message,'COLL')
        do ii=0,(dtset%nband(1)-1)/12
          write(message,'(12f6.2)') &
-&         dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) )
+&         dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
          call wrtout(std_out,message,'COLL')
        end do
 
@@ -293,57 +294,62 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !The remaining of the routine is for SCF runs and special options
  if(dtset%iscf>0 .or. dtset%iscf==-1 .or. dtset%iscf==-3)then
 
-!  (3) count electrons in bands (note : in case occ has just been
-!  initialized, point (3) and (4) is a trivial test
-   nelect_occ=0.0_dp
-   bantot=0
-   do isppol=1,dtset%nsppol
-     do ikpt=1,dtset%nkpt
-       do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-         bantot=bantot+1
-         nelect_occ=nelect_occ+dtset%wtk(ikpt)*dtset%occ_orig(bantot)
+   do iimage=1,dtset%nimage
+
+!    (3) count electrons in bands (note : in case occ has just been
+!    initialized, point (3) and (4) is a trivial test
+     nelect_occ=0.0_dp
+     bantot=0
+     do isppol=1,dtset%nsppol
+       do ikpt=1,dtset%nkpt
+         do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+           bantot=bantot+1
+           nelect_occ=nelect_occ+dtset%wtk(ikpt)*dtset%occ_orig(bantot,iimage)
+         end do
        end do
      end do
+
+!    (4) if dtset%iscf/=-3, dtset%nelect must equal nelect_occ
+!    if discrepancy exceeds tol11, give warning;  tol8, stop with error
+
+     if (abs(nelect_occ-dtset%nelect)>tol11 .and. dtset%iscf/=-3) then
+
+!      There is a discrepancy
+       write(message, &
+&       '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
+&       ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
+&       '         and input value of charge=',charge,',',ch10,&
+&       '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
+&       '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
+&       '   charge is an input variable (usually 0).'
+       call wrtout(std_out,message,'COLL')
+
+       if (abs(nelect_occ-dtset%nelect)>tol8) then
+!        The discrepancy is severe
+         write(message,'(a,a,e9.2,a,a)')ch10,&
+&         'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
+&         ' This is not the case. '
+       else
+!        The discrepancy is not so severe
+         write(message, '(a,a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+       end if
+       MSG_WARNING(message)
+
+       write(message, '(a,a,a,a,a,a)' ) &
+&       'Action: check input file for occ,wtk, and charge.',ch10,&
+&       'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
+&       'but IS automatically normalized otherwise.',ch10
+       call wrtout(std_out,message,'COLL')
+
+!      If the discrepancy is severe, stop
+       if (abs(nelect_occ-dtset%nelect)>tol8)then
+         MSG_ERROR(message)
+       end if
+
+     end if
+
    end do
 
-!  (4) if dtset%iscf/=-3, dtset%nelect must equal nelect_occ
-!  if discrepancy exceeds tol11, give warning;  tol8, stop with error
-
-   if (abs(nelect_occ-dtset%nelect)>tol11 .and. dtset%iscf/=-3) then
-
-!    There is a discrepancy
-     write(message, &
-&     '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,a,a,a,a)' ) ch10,&
-&     ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
-&     '         and input value of charge=',charge,',',ch10,&
-&     '   nelec_occ is computed from occ and wtk',ch10,&
-&     '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
-&     '   charge is an input variable (usually 0).'
-     call wrtout(std_out,message,'COLL')
-
-     if (abs(nelect_occ-dtset%nelect)>tol8) then
-!      The discrepancy is severe
-       write(message,'(a,a,e9.2,a,a)')ch10,&
-&       'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
-&       ' This is not the case. '
-     else
-!      The discrepancy is not so severe
-       write(message, '(a,a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
-     end if
-     MSG_WARNING(message)
-
-     write(message, '(a,a,a,a,a,a)' ) &
-&     'Action: check input file for occ,wtk, and charge.',ch10,&
-&     'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
-&     'but IS automatically normalized otherwise.',ch10
-     call wrtout(std_out,message,'COLL')
-
-!    If the discrepancy is severe, stop
-     if (abs(nelect_occ-dtset%nelect)>tol8)then
-       MSG_ERROR(message)
-     end if
-
-   end if
  end if !  End the condition dtset%iscf>0 or -1 or -3 .
 
 end subroutine dtset_chkneu
@@ -826,6 +832,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtvdw             = dtin%prtvdw
  dtout%prtvha             = dtin%prtvha
  dtout%prtvhxc            = dtin%prtvhxc
+ dtout%prtkbff            = dtin%prtkbff
  dtout%prtvol             = dtin%prtvol
  dtout%prtvolimg          = dtin%prtvolimg
  dtout%prtvpsp            = dtin%prtvpsp
@@ -1173,6 +1180,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
 
+ call alloc_copy( dtin%mixesimgf, dtout%mixesimgf)
+
  call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
 
  call alloc_copy( dtin%occ_orig, dtout%occ_orig)
@@ -1412,6 +1421,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%mixalch_orig))     then
    ABI_DEALLOCATE(dtset%mixalch_orig)
+ end if
+ if (allocated(dtset%mixesimgf))     then
+   ABI_DEALLOCATE(dtset%mixesimgf)
  end if
  if (allocated(dtset%nucdipmom))      then
    ABI_DEALLOCATE(dtset%nucdipmom)
@@ -2464,7 +2476,7 @@ subroutine chkvars (string)
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
- list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch'
+ list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixesimgf'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
@@ -2503,7 +2515,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
- list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
+ list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
