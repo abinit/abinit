@@ -79,8 +79,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
-& natom,phfrq,qphon,qphnrm,rsus,ucvol)
+subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rsus,ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).

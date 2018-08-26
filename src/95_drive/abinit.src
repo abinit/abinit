@@ -19,7 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_bethe_salpeter.F90",
- "driver.F90",
+ "m_driver.F90",
  "m_eph_driver.F90",
  "m_gstate.F90",
  "m_gstateimg.F90",

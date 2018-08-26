@@ -1,4 +1,59 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_wfsinp
+!! NAME
+!!  m_wvl_wfsinp
+!!
+!! FUNCTION
+!!  Routines to initialize (wavelet) wavefunctions
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_wfsinp
+
+ use defs_basis
+ use defs_abitypes
+ use defs_datatypes
+ use defs_wvltypes
+ use m_wffile
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_geometry,  only : xred2xcart
+ use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
+ use m_psolver,   only : psolver_kernel
+ use m_wvl_rwwf,  only : wvl_read
+ use m_mklocl_realspace, only : mklocl_wavelets
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_wfsinp_disk
+ public :: wvl_wfsinp_reformat
+ public :: wvl_wfsinp_scratch
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wvl_wfsinp_disk
 !! NAME
 !! wvl_wfsinp_disk
@@ -11,13 +66,6 @@
 !! When initialised from scratch or from disk, wvl%wfs%[h]psi comes unallocated
 !! and will be allocated inside this routine.
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
@@ -41,24 +89,8 @@
 !!      first_orthon,wrtout,wvl_occ_abi2big,wvl_read
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff, wfs, wvl, xred)
-
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_wffile
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_abi2big,          only : wvl_occ_abi2big
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : first_orthon,sumrho,communicate_density,plot_density
@@ -70,7 +102,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_disk'
  use interfaces_14_hidewrite
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
   implicit none
@@ -199,12 +230,6 @@ end subroutine wvl_wfsinp_disk
 !! The scalar arrays should be reallocated using dtset%nfft after a call to
 !! this routine.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -225,24 +250,8 @@ end subroutine wvl_wfsinp_disk
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_old)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_geometry,  only : xred2xcart
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : copy_old_wavefunctions, reformatmywaves, first_orthon, &
@@ -258,7 +267,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 #define ABI_FUNC 'wvl_wfsinp_reformat'
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
- use interfaces_62_poisson
 !End of the abilint section
 
   implicit none
@@ -435,13 +443,6 @@ end subroutine wvl_wfsinp_reformat
 !! and will be allocated inside this routine.
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
 !!  hdr0 <type(hdr_type)>=the header of wf, den and pot files (read from restart)
@@ -466,27 +467,8 @@ end subroutine wvl_wfsinp_reformat
 !!      xred2xcart
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
-
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_wffile
- use m_profiling_abi
- use m_errors
- use m_ab7_kpoints
- use m_ab7_symmetry
- use m_xmpi
-
- use m_geometry,         only : xred2xcart
- use m_abi2big,          only : wvl_occ_abi2big,wvl_occopt_abi2big
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : createIonicPotential, input_wf_diag, gaussian_basis, &
@@ -499,7 +481,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_scratch'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
   implicit none
@@ -639,4 +620,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 #endif
 
 end subroutine wvl_wfsinp_scratch
+!!***
+
+end module m_wvl_wfsinp
 !!***

@@ -68,6 +68,8 @@ module m_afterscfloop
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
  use m_forstr,           only : forstr
+ use m_wvl_rho,          only : wvl_mkrho
+ use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -297,7 +299,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #undef ABI_FUNC
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
- use interfaces_62_wvl_wfs
  use interfaces_67_common
 !End of the abilint section
 

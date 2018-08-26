@@ -1,17 +1,63 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_rwwf
+!! NAME
+!!  m_wvl_rwwf
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_rwwf
+
+ use defs_basis
+ use defs_abitypes
+ use defs_datatypes
+ use defs_wvltypes
+ use m_wffile
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+#if defined HAVE_ETSF_IO
+  use etsf_io
+#endif
+
+ use m_geometry,     only : xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_read
+ public :: wvl_write
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wvl_read
 !! NAME
 !! wvl_read
 !!
 !! FUNCTION
 !! Simple wrapper around the read disk methods of BigDFT for wavefunctions.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
@@ -36,30 +82,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, xred)
 
- use defs_basis
- use defs_abitypes
- use defs_abitypes
- use defs_wvltypes
- use m_wffile
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use m_geometry,     only : xred2xcart
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: readonewave, reformatonewave, readmywaves, &
 &                       WF_FORMAT_NONE
-#endif
-#if defined HAVE_ETSF_IO
-  use etsf_io
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -289,7 +316,6 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 end subroutine wvl_read
 !!***
 
-
 !!****f* ABINIT/wvl_write
 !! NAME
 !! wvl_write
@@ -321,22 +347,11 @@ end subroutine wvl_read
 !!      writemywaves,writeonewave,wrtout,xred2xcart
 !!
 !! SOURCE
-subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xred)
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_wffile
- use m_errors
- use m_profiling_abi
- use m_xmpi
- use m_geometry,     only : xred2xcart
+subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xred)
 
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : writeonewave,writemywaves,WF_FORMAT_NONE
-#endif
-#if defined HAVE_ETSF_IO
-  use etsf_io
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -555,4 +570,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 #endif
 
 end subroutine wvl_write
+!!***
+
+end module m_wvl_rwwf
 !!***

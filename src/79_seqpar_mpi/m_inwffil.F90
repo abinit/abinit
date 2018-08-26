@@ -53,6 +53,7 @@ module m_inwffil
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc
  use m_rwwf,     only : rwwf, WffReadSkipK
+ use m_wvl_wfsinp, only : wvl_wfsinp_disk, wvl_wfsinp_scratch
 
  implicit none
 
@@ -188,7 +189,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inwffil'
  use interfaces_14_hidewrite
- use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none
