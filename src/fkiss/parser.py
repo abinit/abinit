@@ -9,36 +9,216 @@ from textwrap import TextWrapper
 from pprint import pformat
 from collections import OrderedDict, defaultdict, deque
 from .tools import lazy_property
+from .regex import HasRegex
 
 
-class Datatype(object):
+class BaseObject(object):
 
-    def __init__(self, name, lines):
-        self.name = name
+    def __repr__(self):
+        if self.ancestor is not None:
+            return "<%s: %s.%s>" % (self.__class__.__name__, self.ancestor.name, self.name)
+        else:
+            return "<%s: %ss>" % (self.__class__.__name__, self.name)
+
+    def __str__(self):
+        # FIXME: This is ABC
+        return self.to_string()
+
+    @staticmethod
+    def terminal_highlight(s, bg="dark"):
+        try:
+            from pygments import highlight
+        except ImportError:
+            return s
+
+        from pygments.lexers import FortranLexer
+        from pygments.formatters import TerminalFormatter
+        return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
+
+
+class FortranVariable(BaseObject):
+    """
+    Fortran Variable.
+    type-spec[ [, att] ... :: ] v[/c-list/][, v[/c-list/]] ...
+    """
+
+    #def __init__(self,name,vartype,parent,attribs=[],intent="",
+    #             optional=False,permission="public",kind=None,
+    #             strlen=None,proto=None,doc=[],points=False,initial_value=None):
+
+    def __init__(self, name, ancestor, ftype, shape, kind=None, strlen=None,
+                 attribs=None, initial_value=None, doc=None):
+        self.name, self.ancestor = name, ancestor
+        self.ftype, self.shape = ftype, shape
+        self.attribs = () if attribs is None else tuple(sorted(attribs))
+        self.initial_value = initial_value
+        self.doc = "" if doc is None else doc
+
+        if ftype == "string":
+            assert kind is None
+            self.strlen = strlen
+        else:
+            assert strlen is None
+            self.kind = kind
+
+    def to_string(self, verbose=0):
+        return "foo"
+
+    @lazy_property
+    def is_scalar(self):
+        return not bool(self.shape)
+
+    @lazy_property
+    def is_array(self):
+        return bool(self.shape)
+
+    @lazy_property
+    def is_allocatable(self):
+        return "allocatable" in self.attribs
+
+    @lazy_property
+    def is_pointer(self):
+        return "pointer" in self.attribs
+
+
+class Datatype(BaseObject, HasRegex):
+
+    def __init__(self, name, ancestor, lines):
+        self.name, self.ancestor = name, ancestor
         self.lines = lines
         self._analyzed = False
 
-    def __getattr__(self, name):
-        """Called when an attribute lookup has not found the attribute in the usual places"""
-        if not self._analyzed:
-            self.analyze()
-            return super(Datatype, self).__getattr__(name)
-        else:
-            raise AttributeError("Canoot find attributed `%s`" % str(name))
+    def to_string(self, verbose=0):
+        s = "\n".join(self.lines)
+        return s
 
-    def analyze(self):
+    #def __getattr__(self, name):
+    #    """Called when an attribute lookup has not found the attribute in the usual places"""
+    #    if not self._analyzed:
+    #        self.analyze()
+    #        return super(Datatype, self).__getattr__(name)
+    #    else:
+    #        raise AttributeError("Cannot find attributed `%s`" % str(name))
+
+    def analyze(self, verbose=0):
+        if self._analyzed: return
+        self._analyzed = True
+        if verbose: print(self.terminal_highlight("\n".join(self.lines)))
+        self.variables = OrderedDict()
+        doc = []
+        names = None
+        visibility = "public"
+
+        for i, line in enumerate(self.lines):
+            line = line.strip()
+            if i == 0 and not line.startswith("type"): raise ValueError(line)
+            if i == len(self.lines) - 1 and not line.startswith("end"): raise ValueError(line)
+            if i in (0, len(self.lines) -1): continue
+            if not line or line.startswith("#"): continue
+
+            if line in ("private", "public"):
+                visibility = line
+                continue
+
+            if line.startswith("!"):
+                doc.append(line)
+            else:
+                # New variable found.
+                if names is not None:
+                    for i, name in enumerate(names):
+                        print("Creating var:", name)
+                        var = FortranVariable(name, self, ftype, shapes[i], kind=kind, strlen=None,
+                                              attribs=attribs, initial_value=initial_values[i], doc="n".join(doc))
+                        self.variables[name] = var
+                        doc = []
+
+                # Assume: integer, attr1, attr2 :: varname(...)
+                line = line.replace(" ", "")
+                if verbose: print(line)
+                print(line)
+                # Handle inlined comment.
+                i = line.find("!")
+                if i != -1:
+                    doc.append(line[i:])
+                    line = line[:i]
+
+                if "::" not in line: raise ValueError(line)
+                pre, post = line.split("::")
+                toks = pre.split(",")
+                ftype = toks[0]
+                attribs = [] if len(toks) == 1 else toks[1:]
+
+                # Extract ftype and kind
+                # TODO
+                kind, strlen = None, None
+                m = self.RE_CHARACTER_DEC.match(ftype)
+                if m:
+                    ftype = "character"
+                    strlen, kind = m.group("len"), None
+
+                m = self.RE_TYPECLASS_DEC.match(ftype)
+                if m:
+                    ftype, kind, strlen = m.group("ftype"), m.group("name"), None
+
+                #m = self.RE_VARNUMBOOL_DEC.match(ftype)
+                #if m:
+                #    ftype, kind, strlen = m.group("ftype"), m.group("kind"), None
+
+                # TODO: a(1,2), b, c(3, 4)
+                if ")" in post:
+                    vlist = post.split("),")
+                    for i, v in enumerate(vlist):
+                        if "(" in v and not v.endswith(")"):
+                            vlist[i] = v + ")"
+                else:
+                    vlist = post.split(",")
+
+                # Extract default values from vlist (e.g. `a = zero`)
+                initial_values = [None] * len(vlist)
+                for i, v in enumerate(vlist):
+                    if "=" in v:
+                        print(v)
+                        v, default = v.split("=", 1)
+                        vlist[i] = v
+                        initial_values[i] = default
+
+                # Extract shapes from vlist (None if scalar)
+                names = [None] * len(vlist)
+                shapes = [None] * len(vlist)
+                for iv, v in enumerate(vlist):
+                    names[iv] = v
+                    j = v.find("(")
+                    if j != -1:
+                        if v[-1] != ")": raise ValueError(v)
+                        names[iv] = v[:j]
+                        shapes[iv] = v[j:]
+
+                if verbose:
+                    print(f"ftype={ftype}, attribs={attribs}, vlist={vlist}, names={names}, shapes={shapes}, initial_values={initial_values}\n".format(locals()))
+
+        for i, name in enumerate(names):
+            var = FortranVariable(name, self, ftype, shapes[i], kind=kind, strlen=strlen,
+                                  attribs=attribs, initial_value=initial_values[i], doc="\n".join(doc))
+            self.variables[name] = var
+
+
+class Interface(BaseObject):
+
+    def __init__(self, name, ancestor, lines):
+        self.name, self.ancestor = name, ancestor
+        self.lines = lines
+        self._analyzed = False
+
+    def to_string(self, verbose=0):
+        s = "\n".join(self.lines)
+        return s
+
+    def analyze(self, verbose=0):
+        if self._analyzed: return
         self._analyzed = True
 
 
-class Interface(object):
-
-    def __init__(self, name, lines):
-        self.name = name
-        self.lines = lines
-
-
-
-class Procedure(object):
+class Procedure(BaseObject):
     """
     Base class
 
@@ -60,7 +240,7 @@ class Procedure(object):
         #self.num_omp_statements = 0
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
-        self.datatypes = []
+        self.types = []
         self.interfaces = []
 
         # TODO
@@ -113,9 +293,6 @@ class Procedure(object):
     #def global_uses(self)
     #    """String with all the modules used by this procedure (locals + globals)"""
 
-    def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.name)
-
     @lazy_property
     def public_procedures(self):
         """List of public procedures."""
@@ -136,9 +313,6 @@ class Procedure(object):
 
         return "\n".join(lines)
 
-    def __str__(self):
-        return self.to_string()
-
     def to_string(self, verbose=0, width=90):
         """
         String representation with verbosity level `verbose`.
@@ -151,7 +325,7 @@ class Procedure(object):
         app("Directory: %s" % os.path.basename(self.dirname))
 
         if self.ancestor is not None:
-            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.ftype))
+            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.proc_type))
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -162,8 +336,8 @@ class Procedure(object):
         if self.contains:
             app("CONTAINS:\n%s\n" % w.fill(", ".join(c.name for c in self.contains)))
 
-        if self.datatypes:
-            app("DATATYPES:\n%s\n" % w.fill(", ".join(d.name for d in self.datatypes)))
+        if self.types:
+            app("DATATYPES:\n%s\n" % w.fill(", ".join(d.name for d in self.types)))
         if self.interfaces:
             app("INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces)))
 
@@ -221,135 +395,34 @@ class Procedure(object):
 
 class Program(Procedure):
     """Fortran program."""
-    ftype = "program"
+    proc_type = "program"
 
 
 class Function(Procedure):
     """Fortran function."""
-    ftype = "function"
+    proc_type = "function"
 
 
 class Subroutine(Procedure):
     """Fortran subroutine."""
-    ftype = "subroutine"
+    proc_type = "subroutine"
 
 
 class Module(Procedure):
     """Fortran module."""
-    ftype = "module"
+    proc_type = "module"
 
     def to_string(self, verbose=0, width=90):
         lines = []; app = lines.append
         app(super(Module, self).to_string(verbose=verbose, width=width))
         #w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
-
         return "\n".join(lines)
 
-# This one is problematic. The firs one is stricter but it does not play well with the other code!!
-# I use the old one used by abilint
-#RE_FUNC_END = re.compile('^[ \t]*end[ \t]*(function\n)',re.I).match
 
-#Detect call (not after an if or ;)
-#re_call = re.compile('(^[ \t]*call[ ]*)(\w+)', re.MULTILINE+re.I)
-
-# Taken from https://github.com/cmacmackin/ford/blob/master/ford/sourceform.py
-#VAR_TYPE_STRING = "^integer|real|double\s*precision|character|complex|logical|type|class|procedure|enumerator"
-#VARKIND_RE = re.compile("\((.*)\)|\*\s*(\d+|\(.*\))")
-#KIND_RE = re.compile("kind\s*=\s*",re.I)
-#LEN_RE = re.compile("len\s*=\s*",re.I)
-#ATTRIBSPLIT_RE = re.compile(",\s*(\w.*?)::\s*(.*)\s*")
-#ATTRIBSPLIT2_RE = re.compile("\s*(::)?\s*(.*)\s*")
-#ASSIGN_RE = re.compile("(\w+\s*(?:\([^=]*\)))\s*=(?!>)(?:\s*([^\s]+))?")
-#POINT_RE = re.compile("(\w+\s*(?:\([^=>]*\)))\s*=>(?:\s*([^\s]+))?")
-#EXTENDS_RE = re.compile("extends\s*\(\s*([^()\s]+)\s*\)")
-#DOUBLE_PREC_RE = re.compile("double\s+precision",re.I)
-#QUOTES_RE = re.compile("\"([^\"]|\"\")*\"|'([^']|'')*'",re.I)
-#PARA_CAPTURE_RE = re.compile("<p>.*?</p>",re.I|re.DOTALL)
-#COMMA_RE = re.compile(",(?!\s)")
-#NBSP_RE = re.compile(" (?= )|(?<= ) ")
-#DIM_RE = re.compile("^\w+\s*(\(.*\))\s*$")
-
-#ATTRIB_RE = re.compile("^(asynchronous|allocatable|bind\s*\(.*\)|data|dimension|external|intent\s*\(\s*\w+\s*\)|optional|parameter|pointer|private|protected|public|save|target|value|volatile)(?:\s+|\s*::\s*)((/|\(|\w).*?)\s*$",re.I)
-#END_RE = re.compile("^end\s*(?:(module|submodule|subroutine|function|procedure|program|type|interface|enum|block\sdata|block|associate)(?:\s+(\w.*))?)?$",re.I)
-#BLOCK_RE = re.compile("^(\w+\s*:)?\s*block\s*$",re.I)
-#BLOCK_DATA_RE = re.compile('^block\s*data\s*(\w+)?\s*$',re.I)
-#ASSOCIATE_RE = re.compile("^(\w+\s*:)?\s*associate\s*\((.+)\)\s*$",re.I)
-#ENUM_RE = re.compile("^enum\s*,\s*bind\s*\(.*\)\s*$",re.I)
-#MODPROC_RE = re.compile("^(module\s+)?procedure\s*(?:::|\s)\s*(\w.*)$",re.I)
-#MODULE_RE = re.compile("^module(?:\s+(\w+))?$",re.I)
-#SUBMODULE_RE = re.compile("^submodule\s*\(\s*(\w+)\s*(?::\s*(\w+))?\s*\)\s*(?:::|\s)\s*(\w+)$",re.I)
-#PROGRAM_RE = re.compile("^program(?:\s+(\w+))?$",re.I)
-#SUBROUTINE_RE = re.compile("^\s*(?:(.+?)\s+)?subroutine\s+(\w+)\s*(\([^()]*\))?(?:\s*bind\s*\(\s*(.*)\s*\))?$",re.I)
-#TYPE_RE = re.compile("^type(?:\s+|\s*(,.*)?::\s*)((?!(?:is\s*\())\w+)\s*(\([^()]*\))?\s*$",re.I)
-#RE_MOD_END = re.compile(r'end(\s*module\s*\w*|)\Z', re.I)
-##~ ABS_INTERFACE_RE = re.compile("^abstract\s+interface(?:\s+(\S.+))?$",re.I)
-#BOUNDPROC_RE = re.compile("^(generic|procedure)\s*(\([^()]*\))?\s*(.*)\s*::\s*(\w.*)",re.I)
-#COMMON_RE = re.compile("^common(?:\s*/\s*(\w+)\s*/\s*|\s+)(\w+.*)",re.I)
-#COMMON_SPLIT_RE = re.compile("\s*(/\s*\w+\s*/)\s*",re.I)
-#FINAL_RE = re.compile("^final\s*::\s*(\w.*)",re.I)
-#USE_RE = re.compile("^use(?:\s*(?:,\s*(?:non_)?intrinsic\s*)?::\s*|\s+)(\w+)\s*($|,.*)",re.I)
-#ARITH_GOTO_RE = re.compile("go\s*to\s*\([0-9,\s]+\)",re.I)
-#CALL_RE = re.compile("(?:^|[^a-zA-Z0-9_% ]\s*)(\w+)(?=\s*\(\s*(?:.*?)\s*\))",re.I)
-
-
-class FortranKissParser(object):
+class FortranKissParser(HasRegex):
     """
     Parse fortran code.
     """
-    # PROGRAM [name]
-    # END [PROGRAM [name]]
-    RE_PROG_START = re.compile(r"^program\s*(?P<name>\w*)\Z", re.I)
-    RE_PROG_END = re.compile(r"^end(\s*program\s*(?P<name>\w*)|)\Z", re.I)
-
-    # MODULE <name>
-    # END [MODULE [name]]
-    RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)\Z", re.I)
-    RE_MOD_END = re.compile(r"^end(\s*module\s*(?P<name>\w*)|)\Z", re.I)
-
-    # [<prefix>] <SUBROUTINE> <name> [(<args>)] [<suffix>]
-    # END [SUBROUTINE [name]]
-    RE_SUB_START = re.compile(r'(?P<prefix>(recursive|pure|elemental|\s)*)subroutine\s*(?P<name>\w+)', re.I)
-    RE_SUB_END = re.compile(r'^end(\s*subroutine\s*(?P<name>\w*)|)\Z', re.I)
-
-    # [<prefix>] FUNCTION <name> ([<dummy-arg-list>]) [<suffix>]
-    # END [FUNCTION [name]]
-    RE_FUNC_START = re.compile(r"""
-(?P<prefix>
-(
-recursive | pure | elemental |
-logical | integer | integer(\s*\(.+\)\s*)? |
-double\s+precision | real(\s*\(.+\))? |
-complex(\s*\(.+\))? |
-character\s*\(len=\w+\s*\) |
-type\s*\(\w+\)
-)
-\s+
-)*
-\s*function\s+(?P<name>\w+)\s*""",
-re.I | re.VERBOSE)
-    #RE_FUNC_START = re.compile('^[ \t]*(([^!\'"\n]*?)function)',re.I)
-    #RE_FUNC_START = re.compile("^(?:(.+?)\s+)?function\s+(\w+)\s*(\([^()]*\))?(?=(?:.*result\s*\(\s*(\w+)\s*\))?)(?=(?:.*bind\s*\(\s*(.*)\s*\))?).*$", re.I)
-    RE_FUNC_END = re.compile(r"^end(\s*function\s*(?P<name>\w*)|)\Z", re.I)
-
-    RE_INTERFACE_START = re.compile("^(abstract\s+)?interface(?:\s+(\S.+))?$", re.I)
-    RE_INTERFACE_END = re.compile("^end\s+interface(?:\s+(\S.+))?$", re.I)
-    #RE_INTERFACE_START = re.compile(r"(abstract\s+)?interface\s*(?P<name>\w*)", re.I)
-    #RE_INTERFACE_END = re.compile(r"end\s+interface\s+(?P<name>\w*)", re.I)
-
-    # [if ()] call <name> [([<dummy-arg-list>])]
-    #RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)\s*(?:\(\s*(.*?)\s*\))?\Z", re.I)
-    RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)", re.I)
-
-    # TYPE [ [ , access-spec ] :: ] type-name
-    # [ PRIVATE ]
-    # [ SEQUENCE ]
-    # component-declaration
-    # [ component-declaration ]...
-    # END TYPE [ type-name ]
-    #RE_TYPE_START = re.compile(r'type\s*(|.*::)\s*(?P<name>\w+)', re.I)
-    RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)\Z', re.I)
-    #RE_TYPE_END = re.compile(r'^end\s+type', re.I)
-    RE_TYPE_END = re.compile(r'^end(\s*type\s*(?P<name>\w*)|)\Z', re.I)
 
     def __init__(self, macros=None, verbose=0):
         self.verbose = verbose
@@ -379,7 +452,7 @@ re.I | re.VERBOSE)
             return self.parse_string(string, path=path)
 
     def parse_string(self, string, path=None):
-        if path is None: path = "UknownFile"
+        if path is None: path = "<UnknownPath>"
         self.path = path
 
         # Replace macros. Need e.g. to treat USE_DEFS macros in libpaw and tetralib.
@@ -393,14 +466,14 @@ re.I | re.VERBOSE)
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
         preamble, self.stack, includes, uses  = [], [], [], []
-        ancestor = None
+        self.ancestor = None
+        self.visibility = "public"
 
         stack = self.stack
 
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
-            #print(line)
 
             # Count number of comments and code line
             # Inlined comments are not counted (also because I don't like them)
@@ -414,6 +487,11 @@ re.I | re.VERBOSE)
 
             if line.startswith("!$omp"):
                 self.num_omp_statements += 1
+
+            m = self.RE_PUB_OR_PRIVATE.match(line)
+            if m:
+                self.visibility = m.group("name")
+                continue
 
             # Invokations of Fortran functions are difficult to handle
             # without inspecting locals so we only handle explicit calls to routines.
@@ -435,9 +513,25 @@ re.I | re.VERBOSE)
             # Datatype declaration.
             m = self.RE_TYPE_START.match(line)
             if m and stack[-1][0].is_module and "(" not in line:
-            #if m and "(" not in line:
-                assert stack[-1][1] == "open"
                 self.consume_datatype(m)
+                continue
+
+            # Find use statements and the corresponding module
+            # TODO in principle one could have `use A; use B`
+            if line.startswith("use "):
+                smod = line.split()[1].split(",")[0].lower()
+                # Remove comment at the end of the line if present.
+                i = smod.find("!")
+                if i != -1: smod = smod[:i]
+                if self.verbose > 1: print("Found used module:", smod)
+                stack[-1][0].local_uses.append(smod)
+                uses.append(smod)
+                continue
+
+            if self.simple_match(line, "contains"):
+                assert stack
+                self.ancestor = stack[-1][0]
+                if self.verbose > 1: print("Setting ancestor to:", repr(self.ancestor))
                 continue
 
             # Handle include statement (CPP or Fortran version).
@@ -449,27 +543,6 @@ re.I | re.VERBOSE)
                     includes.append(what)
                 continue
 
-            # Find use statements and the corresponding module
-            # TODO in principle one could have `use A; use B`
-            if line.startswith("use "):
-                smod = line.split()[1].split(",")[0].lower()
-                #if smod.startswith("interfaces_"): continue
-                # Remove comment at the end of the line if present.
-                i = smod.find("!")
-                if i != -1: smod = smod[:i]
-                if self.verbose > 1: print("Found used module:", smod)
-                # TODO
-                #if stack:
-                stack[-1][0].local_uses.append(smod)
-                uses.append(smod)
-                continue
-
-            if self.simple_match(line, "contains"):
-                assert stack
-                ancestor = stack[-1][0]
-                if self.verbose > 1: print("Setting ancestor to:", repr(ancestor))
-                continue
-
             # Extract name from (module | program).
             m = self.RE_PROG_START.match(line)
             if m:
@@ -477,7 +550,8 @@ re.I | re.VERBOSE)
                 if self.verbose > 1: print("Entering program:", name)
                 if not name:
                     raise ValueError("Cannot find program name in line `%s`" % line)
-                stack.append([Program(name, ancestor, preamble, path=path), "open"])
+                stack.append([Program(name, self.ancestor, preamble, path=path), "open"])
+                self.visibility = "private"
                 preamble = []
                 continue
 
@@ -488,8 +562,10 @@ re.I | re.VERBOSE)
                 # Ignore module procedure
                 #assert name != "procedure"
                 # TODO
-                #assert ancestor is None
-                stack.append([Module(name, ancestor, preamble, path=path), "open"])
+                #assert self.ancestor is None
+                stack.append([Module(name, self.ancestor, preamble, path=path), "open"])
+                self.ancestor = self.stack[-1][0]
+                self.visibility = "public"
                 preamble = []
                 continue
 
@@ -500,7 +576,8 @@ re.I | re.VERBOSE)
                 if not subname:
                     raise ValueError("Cannot find procedure name in line `%s`" % line)
                 if self.verbose > 1: print("Found subroutine:", subname, "in line:\n\t", line)
-                stack.append([Subroutine(subname, ancestor, preamble, path=path), "open"])
+                stack.append([Subroutine(subname, self.ancestor, preamble, path=path), "open"])
+                self.ancestor = self.stack[-1][0]
                 preamble = []
                 continue
 
@@ -510,17 +587,16 @@ re.I | re.VERBOSE)
                 func_name = m.group("name")
                 if not func_name:
                     raise ValueError("Cannot find procedure name in line:\n\t%s" % line)
-                stack.append([Function(func_name, ancestor, preamble, path=path), "open"])
+                stack.append([Function(func_name, self.ancestor, preamble, path=path), "open"])
+                self.ancestor = self.stack[-1][0]
                 preamble = []
                 continue
 
-            #isend, ftype, name = self.maybe_end_procedure(line):
-            #if isend:
             if line.startswith("end "):
                 tokens = line.split()
-                end_ftype = None if len(tokens) == 1 else tokens[1]
-                if end_ftype not in {"program", "function", "subroutine", "module", None}:
-                    #print("end ftype:", end_ftype)
+                end_proc_type = None if len(tokens) == 1 else tokens[1]
+                if end_proc_type not in {"program", "function", "subroutine", "module", None}:
+                    #print("end proc_type:", end_proc_type)
                     continue
 
                 try:
@@ -530,14 +606,14 @@ re.I | re.VERBOSE)
                     #print("index error in:", line)
                     end_name = None
 
-                #if end_ftype == "module": print("got end", end_name)
+                #if end_proc_type == "module": print("got end", end_name)
                 #print(line, end_name)
                 #last_name = stack[-1][0].name
                 #if last_name != end_name:
                 #    print("WARNING: end_name:", end_name, " != last_name:", last_name)
-                #    print("line", line, "end_ftype", end_ftype)
+                #    print("line", line, "end_proc_type", end_proc_type)
 
-                #self.close_stack_entry(end_name, end_ftype)
+                #self.close_stack_entry(end_name, end_proc_type)
                 if end_name is not None:
                     # Close the last entry in the stack with name == end_name.
                     for item in reversed(stack):
@@ -548,26 +624,27 @@ re.I | re.VERBOSE)
                         raise RuntimeError("Cannot find end_name `%s` in stack:\n%s" % (
                             end_name, pformat([s[0].name for s in stack])))
                 else:
-                    # Close the last entry in the stack with end_ftype.
-                    if end_ftype is not None:
+                    # Close the last entry in the stack with end_proc_type.
+                    if end_proc_type is not None:
                         for item in reversed(stack):
-                            if item[0].ftype == end_ftype:
+                            if item[0].proc_type == end_proc_type:
                                 item[1] = "closed"
                                 break
                         else:
-                            raise RuntimeError("Cannot find end_ftype `%s` in stack:\n%s" % (
-                                end_ftype, pformat([s[0].ftype for s in stack])))
+                            raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s" % (
+                                end_proc_type, pformat([s[0].proc_type for s in stack])))
                     else:
                         stack[-1][1] = "closed"
 
                 #print("Closing procedure", stack[-1][0].name)
-                if ancestor is not None and ancestor.name == end_name:
-                    ancestor = ancestor.ancestor
+                if self.ancestor is not None and self.ancestor.name == end_name:
+                    self.ancestor = self.ancestor.ancestor
 
         self.includes = sorted(set(includes))
         self.uses = sorted(set(uses))
 
         # Extract data from stack.
+        # TODO: Support visibility
         self.programs, self.modules, self.subroutines, self.functions = [], [], [], []
         while stack:
             p, status = stack.pop(0)
@@ -581,7 +658,6 @@ re.I | re.VERBOSE)
             if p.ancestor is not None:
                 #print("Adding %s to ancestor %s" % (repr(p), repr(p.ancestor)))
                 p.ancestor.contains.append(p)
-                #p.ancestor.contains[p.name] = p
             else:
                 if p.is_module: self.modules.append(p)
                 elif p.is_subroutine: self.subroutines.append(p)
@@ -598,9 +674,9 @@ re.I | re.VERBOSE)
         return s.strip() == token
 
     def consume_interface(self, start_match):
+        assert self.stack[-1][1] == "open"
         buf = [start_match.string]
-        #name = start_match.group("name")
-        name = "None"
+        name = start_match.group("name")
         if self.verbose > 1: print("begin interface", name, "in line", start_match.string)
         while self.lines:
             line = self.lines.popleft()
@@ -609,9 +685,10 @@ re.I | re.VERBOSE)
             if end_match:
                 if self.verbose > 1: print("end interface", line)
                 #end_name = end_match.group("name")
-                #if name != end_name: raise ValueError("%s != %s" % (name, end_name))
+                #print(type(end_name))
+                #if name != end_name: raise ValueError("`%s` != `%s`" % (name, end_name))
                 break
-        self.stack[-1][0].interfaces.append(Interface(name, buf))
+        self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buf))
 
     def consume_datatype(self, start_match):
         buf = [start_match.string]
@@ -629,18 +706,4 @@ re.I | re.VERBOSE)
         else:
             raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
 
-        self.stack[-1][0].datatypes.append(Datatype(name, buf))
-
-    #@staticmethod
-    #def maybe_end_procedure(s):
-    #    if not line.startswith("end"):
-    #        return False, False, False
-    #    tokens = line.split()
-    #    what = tokens[1]
-    #    assert what in ("program", "function", "subroutine", "module"):
-    #    try:
-    #        fname = tokens[2]
-    #    except IndexError:
-    #        fname = None
-
-    #    return isend, ftype, name
+        self.stack[-1][0].types.append(Datatype(name, self.ancestor, buf))

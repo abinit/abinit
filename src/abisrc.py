@@ -10,6 +10,8 @@ import os
 import argparse
 
 from fkiss.project import FortranFile, AbinitProject
+from fkiss import termcolor
+from fkiss.termcolor import cprint
 
 def get_epilog():
     return """\
@@ -20,37 +22,39 @@ Usage example:
 # Documentation
 ################
 
-  abisrc.py print 41_geometry/m_crystal.F90   ==> Print info about file.
-  abisrc.py print 41_geometry                 ==> Print info about directory.
-  abisrc.py print crystal_init                ==> Print info about public procedure.
-  abisrc.py print m_crystal                   ==> Print info about module.
+  ./abisrc.py print 41_geometry/m_crystal.F90   ==> Print info about file.
+  ./abisrc.py print 41_geometry                 ==> Print info about directory.
+  ./abisrc.py print crystal_init                ==> Print info about public procedure.
+  ./abisrc.py print m_crystal                   ==> Print info about module.
+  ./abisrc.py print crystal_t                   ==> Print info about datatype.
+  ./abisrc.py print xmpi_sum                    ==> Print info about interface.
+  ./abisrc.py interfaces                        ==> Print Fortran interfaces.
 
-  abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results.
+  ./abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results.
 
 #################
 # Graphviz graphs
 #################
 
-  abisrc.py graph 41_geometry/m_crystal.F90   ==> Plot dependency graph for module.
-  abisrc.py graph 41_geometry                 ==> Plot dependency graph for directory.
-  abisrc.py graph fourdp                      ==> Plot dependency graph for public procedure.
+  ./abisrc.py graph 41_geometry/m_crystal.F90   ==> Plot dependency graph for module.
+  ./abisrc.py graph 41_geometry                 ==> Plot dependency graph for directory.
+  ./abisrc.py graph fourdp                      ==> Plot dependency graph for public procedure.
 
 #############
 # Developers
 #############
 
-  abisrc.py makemake           ==> Generate files required by the build system.
-  abisrc.py touch              ==> Touch all files that have been changed + parents.
+  ./abisrc.py makemake           ==> Generate files required by the build system.
+  ./abisrc.py touch              ==> Touch all files that have been changed + parents.
                                    so that make can recompile all the relevant files.
                                    Useful when changing API/ABI.
-  abisrc.py pedit fourdp       ==> Call $EDITOR to edit all the parents of the fourdp routine.
-  abisrc.py stats              ==>
-  abisrc.py abirules           ==>
-  abisrc.py orphans            ==> Show orphans.
-  abisrc.py ipython            ==> Open project in ipython terminal.
-  abisrc.py cpp                ==> List CPP options.
-  abisrc.py robodoc            ==> Generate robodoc files.
-  abisrc.py master             ==> Master the Abinit source tree.
+  ./abisrc.py pedit fourdp       ==> Call $EDITOR to edit all the parents of the fourdp routine.
+  ./abisrc.py stats              ==> Print pandas Dataframe with stats about project/dir/file.
+                                     Use -c to copy to system clipboard
+  ./abisrc.py orphans            ==> Show orphans.
+  ./abisrc.py ipython            ==> Open project in ipython terminal.
+  ./abisrc.py cpp                ==> List CPP options.
+  ./abisrc.py robodoc            ==> Generate robodoc files.
 """
 
 def get_parser():
@@ -64,6 +68,25 @@ def get_parser():
         help='Parse files, generate new pickle file.')
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
+    copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
+
+    # Parent parser for commands that operating on pandas dataframes
+    pandas_parser = argparse.ArgumentParser(add_help=False)
+    pandas_parser.add_argument("-c", '--clipboard', default=False, action="store_true",
+            help="Copy dataframe to the system clipboard. This can be pasted into Excel, for example")
+
+    # Parent parser for commands supporting (ipython/jupyter)
+    #ipy_parser = argparse.ArgumentParser(add_help=False)
+    #ipy_parser.add_argument('-nb', '--notebook', default=False, action="store_true", help='Generate jupyter notebook.')
+    #ipy_parser.add_argument('--foreground', action='store_true', default=False,
+    #    help="Run jupyter notebook in the foreground.")
+    #ipy_parser.add_argument('-ipy', '--ipython', default=False, action="store_true", help='Invoke ipython terminal.')
+
+    # Parent parser for commands supporting (jupyter notebooks)
+    #nb_parser = argparse.ArgumentParser(add_help=False)
+    #nb_parser.add_argument('-nb', '--notebook', default=False, action="store_true", help='Generate jupyter notebook.')
+    #nb_parser.add_argument('--foreground', action='store_true', default=False,
+    #    help="Run jupyter notebook in the foreground.")
 
     # Build the main parser.
     parser = argparse.ArgumentParser(epilog=get_epilog(),
@@ -90,6 +113,10 @@ def get_parser():
         help="Show children of module/procedure.")
     p_print.add_argument("what", nargs="?", default=None, help="File or procedure name")
 
+    # Subparser for interfaces.
+    p_interfaces = subparsers.add_parser('interfaces', parents=[copts_parser], help="Print interfaces.")
+    p_interfaces.add_argument("what", nargs="?", default=None, help="Name of the interface.")
+
     # Subparser for pedit.
     p_edit = subparsers.add_parser("pedit", parents=[copts_parser],
         help="Edit parents of public procedure or module.")
@@ -107,14 +134,13 @@ def get_parser():
     #    help="Run jupyter notebook in the foreground.")
 
     # Subparser for stats.
-    p_stats = subparsers.add_parser("stats", parents=[copts_parser],
-        help="Print statistics about file or directory or project (if no argument is given).")
+    p_stats = subparsers.add_parser("stats", parents=[copts_parser, pandas_parser],
+        help="Print statistics about file or directory or project (if no argument is given). Use -c to copy to system clipboard")
     p_stats.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")
 
     # Subparser for graph.
     p_graph = subparsers.add_parser('graph', parents=[copts_parser],
-        help=("Draw flow and node dependencies with graphviz package. Accept (FLOWDIR|WORKDIR|TASKDIR). "
-             "See https://graphviz.readthedocs.io/."))
+        help="Draw dependency graph flow with graphviz package. See https://graphviz.readthedocs.io/.")
     p_graph.add_argument("-e", "--engine", type=str, default="automatic",
         help=("graphviz engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']. "
               "Default: automatic i.e. the engine is automatically selected. See http://www.graphviz.org/pdf/dot.1.pdf "
@@ -127,8 +153,14 @@ def get_parser():
     p_validate = subparsers.add_parser('validate', parents=[copts_parser],
         help="Validate source tree.")
 
+    #p_abirules = subparsers.add_parser('abirules', parents=[copts_parser], help="Check abirules (still under development).")
+
     p_orphans = subparsers.add_parser('orphans', parents=[copts_parser], help="Print orphans.")
     p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help="Open project in ipython terminal.")
+
+    p_dtype = subparsers.add_parser('dtype', parents=[copts_parser], help="Generate code for datatype.")
+    p_dtype.add_argument("what", nargs="+", default=None,
+            help="Name of datatype followed by the kind of routine that should be generated.")
 
     p_master = subparsers.add_parser('master', parents=[copts_parser], help="How to become a great programmer.")
     p_robodoc = subparsers.add_parser('robodoc', parents=[copts_parser], help="Generate robodoc files.")
@@ -159,6 +191,10 @@ def main():
     if not options.command:
         show_examples_and_exit(error_code=1)
 
+    if options.no_colors:
+        # Disable colors
+        termcolor.enable(False)
+
     os.chdir(os.path.dirname(__file__))
 
     if options.command == "robodoc":
@@ -172,6 +208,10 @@ def main():
     if options.command == "parse":
         fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
         print(fort_file.to_string(verbose=options.verbose))
+        for mod in fort_file.modules:
+            for dtype in mod.types:
+                print("Analyzing", repr(dtype))
+                dtype.analyze()
         return 0
 
     elif options.command == "touch":
@@ -195,7 +235,7 @@ def main():
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
         if needs_reload:
-            print("Source tree changed. Need to parse source files again to rebuild dependency graph...")
+            cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
     if needs_reload:
 	# Parse the source and save new object.
@@ -207,8 +247,9 @@ def main():
     if options.command == "makemake":
         retcode = proj.validate(verbose=options.verbose)
         if retcode != 0:
-            print("validate returned retcode:", retcodea, "Aborting now")
+            cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
+
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
 
@@ -228,8 +269,11 @@ def main():
             if obj is not None:
                 print(obj.to_string(verbose=options.verbose))
             else:
-                print("Cannot find public entity `%s`" % str(options.what))
+                cprint("Cannot find public entity `%s`" % str(options.what), "red")
                 return 1
+
+    elif options.command == "interfaces":
+        print(proj.print_interfaces(what=options.what, verbose=options.verbose))
 
     elif options.command == "graph":
         if options.what is None:
@@ -246,6 +290,7 @@ def main():
         else:
             graph = proj.get_graphviz_pubname(options.what, engine=options.engine)
             if graph is None:
+                cprint("Cannot find public entity `%s` in Abinit project" % options.what, "red")
                 return 1
 
         # Visualize graph
@@ -292,12 +337,10 @@ def main():
             raise TypeError("Requiring directory or file or None but received %s" % str(options.what))
         print(df)
 
-    #elif options.command == "types":
-    #    if options.types is None:
-    #        print(proj.show_datatypes())
-    #    else:
-    #        for typ in options.types:
-    #            proj.show_graph_type(typ)
+        if options.clipboard:
+            cprint("Copying dataframe to the system clipboard.", "green")
+            cprint("This can be pasted into Excel, for example", "green")
+            df.to_clipboard()
 
     elif options.command == "orphans":
         proj.print_orphans(verbose=options.verbose)
@@ -305,6 +348,35 @@ def main():
     elif options.command == "ipython":
         import IPython
         IPython.embed(header="The Abinit project is bound to the `proj` variable.\n")
+
+    elif options.command == "dtype":
+        retcode = 0
+        all_dtypes = proj.get_all_datatypes()
+        for dtype in all_dtypes:
+            print("analyzing:", repr(dtype))
+            try:
+                dtype.analyze(verbose=0)
+            except Exception as exc:
+                cprint(exc, "red")
+                #raise exc
+                retcode += 1
+                try:
+                    dtype.analyze(verbose=1)
+                except Exception as exc:
+                    pass
+
+        print("%d errors out of %d" % (retcode, len(all_dtypes)))
+
+        #dtype = proj.find_datatype(options.what[0])
+        #if dtype is None: return 1
+        #dtype.analyze()
+        #if "free" in options.what[1:]: print(dtype.generate_free_routine())
+        #if "copy" in options.what[1:] print(dtype.generate_copy_routine())
+        #if "xml" in options.what[1:] print(dtype.generate_xml_routine())
+        #if "to_array" in options.what[1:] print(dtype.generate_to_array_routine())
+
+    #elif options.command == "abirules":
+    #    return proj.check_abirules()
 
     elif options.command == "master":
         print(proj.master())

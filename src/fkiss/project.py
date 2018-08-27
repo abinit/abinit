@@ -8,12 +8,14 @@ import re
 import time
 import shutil
 import pickle
+import difflib
 
 from collections import OrderedDict, defaultdict
 from textwrap import TextWrapper
 from pprint import pprint, pformat
 from .parser import FortranKissParser
 from .tools import lazy_property
+from .termcolor import cprint
 
 
 EXTERNAL_MODS = {
@@ -62,6 +64,7 @@ EXTERNAL_MODS = {
 class FortranFile(object):
     """
     Base class for files containing Fortran source code.
+    A FortranFile can have modules, programs, subroutines and functions.
 
     .. attributes:
 
@@ -101,8 +104,25 @@ class FortranFile(object):
         self.programs, self.modules, self.subroutines, self.functions = [], [], [], []
 
         #self.uses, self.includes = [], []
-        self.used_mods, self.usedby_mods = [], []
+        self.all_used_mods = []
+        self.all_usedby_mods = []
         #self.num_f90lines, self.num_doclines = 0, 0
+
+    #@lazy_property
+    #def all_used_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.local_uses)
+    #    return sorted(set(all_mods))
+
+    #@lazy_property
+    #def all_usedby_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.usedby_mods)
+    #    return sorted(set(all_mods))
 
     def __eq__(self, other):
         if other is None: return False
@@ -140,16 +160,16 @@ class FortranFile(object):
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
-        app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.used_mods)))
-        app("Use dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.used_mods))))))
+        app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.all_used_mods)))
+        app("Use dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.all_used_mods))))))
         app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
-        app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.usedby_mods)))
-        app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.usedby_mods))))))
+        app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.all_usedby_mods)))
+        app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.all_usedby_mods))))))
 
         for a in ["programs", "modules", "subroutines", "functions"]:
             plist = getattr(self, a)
             if not plist: continue
-            app("Fortran file contains %d %s" % (len(plist), a))
+            app("Fortran file contains %d %s(s)\n" % (len(plist), a[:-1]))
             for p in plist:
                 app(p.to_string(verbose=verbose, width=width))
 
@@ -181,26 +201,49 @@ class FortranFile(object):
 
     @lazy_property
     def min_dirlevel(self):
-        return max(mod.dirlevel for mod in self.used_mods) if self.used_mods else 999
+        return max(mod.dirlevel for mod in self.all_used_mods) if self.all_used_mods else 999
 
     @lazy_property
     def max_dirlevel(self):
-        return min(mod.dirlevel for mod in self.usedby_mods) if self.usedby_mods else 0
+        return min(mod.dirlevel for mod in self.all_usedby_mods) if self.all_usedby_mods else 0
 
     def iter_procedures(self, visibility="public"):
         for a in ["modules", "programs", "subroutines", "functions"]:
-            for p in getattr(self, a):
-                for e in p.public_procedures:
-                    yield e
+            for container in getattr(self, a):
+                for p in container.public_procedures:
+                    yield p
 
-    def find_public_entity(self, name):
+    def find_public_entity(self, name, all_names=None):
         """
-        Find and return the public procedure with `name` or None if not found
+        Find and return the public procedure or datatype with `name`.
+        Return None if not found.
         """
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
                 for e in p.public_procedures:
                     if e.name == name: return e
+                    if all_names is not None: all_names.append(e.name)
+                if a == "modules":
+                    # Try also in datatypes and interfaces.
+                    for e in p.types:
+                        if e.name == name: return e
+                        if all_names is not None: all_names.append(e.name)
+                    for e in p.interfaces:
+                        if e.name == name: return e
+                        if all_names is not None: all_names.append(e.name)
+
+        return None
+
+    def find_datatype(self, name, all_names=None):
+        """
+        Find and return the public datatype with `name`.
+        Return None if not found.
+        """
+        for p in getattr(self, "modules"):
+            for e in p.types:
+                if e.name == name: return e
+                if all_names is not None: all_names.append(e.name)
+
         return None
 
     def get_stats(self, as_dataframe=False):
@@ -214,8 +257,8 @@ class FortranFile(object):
             #("programs", len(self.programs)),
             #("code_lines", self.num_f90lines),
             #("doc_lines", self.num_doclines),
-            ("use", len(self.used_mods)),
-            ("usedby", len(self.usedby_mods)),
+            ("use", len(self.all_used_mods)),
+            ("usedby", len(self.all_usedby_mods)),
             ("min_dirlevel", self.min_dirlevel),
             ("this_dirlevel", self.dirlevel),
             ("max_dirlevel", self.max_dirlevel),
@@ -260,7 +303,7 @@ class FortranFile(object):
     def get_graphviz(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
         Generate dependency graph for this Fortran file in the DOT language
-        (only used_mods and children of this file).
+        (only all_used_mods and children of this file).
 
         Args:
             engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']
@@ -330,7 +373,7 @@ class FortranFile(object):
         cluster_kwargs = dict(rankdir="LR", pagedir="BL", style="rounded", bgcolor="azure2")
 
         # Build clusters representing directories
-        all_nodes = sorted([self] + self.used_mods + self.usedby_mods, key=lambda o: o.dirname)
+        all_nodes = sorted([self] + self.all_used_mods + self.all_usedby_mods, key=lambda o: o.dirname)
         dir2nodes = defaultdict(list)
         for node in all_nodes:
             dir2nodes[node.dirname].append(node)
@@ -347,9 +390,9 @@ class FortranFile(object):
                 for node in nodes:
                     wg.node(node.name) #, **node_attr) #, **node_kwargs(child))
 
-        for mod in self.used_mods:
+        for mod in self.all_used_mods:
             fg.edge(mod.name, self.name) #, label=edge_label, # color=self.color_hex,
-        for child in self.usedby_mods:
+        for child in self.all_usedby_mods:
             fg.edge(self.name, child.name) #, label=edge_label, # color=self.color_hex,
 
         return fg
@@ -358,8 +401,7 @@ class FortranFile(object):
 class AbinitProject(object):
     """
     This object defines the main entry point for client code.
-    It contains a dictionary (fort_files) mapping the basename of the
-    Fortran files to FortranFile instances.
+    It contains a dictionary (fort_files) mapping the basename of the Fortran files to FortranFile instances.
     Provides methods to traverse the DAG, print information about the source code
     and generate the configuration files required by the build system.
     """
@@ -403,7 +445,7 @@ class AbinitProject(object):
         start = time.time()
         self.fort_files = OrderedDict()
         for d in self.dirpaths:
-            if verbose: print("Analyzing directory:", d)
+            if verbose: print("Analyzing:", d)
             if os.path.basename(d) == "98_main":
                 # Treat executables
                 for basename in filter_fortran(os.listdir(d)):
@@ -433,30 +475,41 @@ class AbinitProject(object):
                 except KeyError:
                     raise RuntimeError(("Fortran module `%s` used by `%s` not found in Abinit project.\n" +
                                         "Add it to the EXTERNAL_MODS set if it's not a typo.") % (use_name, fort_file.path))
-                fort_file.used_mods.append(used_mod)
+                fort_file.all_used_mods.append(used_mod)
 
                 # FIXME
                 key = os.path.basename(used_mod.path)
-                self.fort_files[key].usedby_mods.append(fort_file)
+                self.fort_files[key].all_usedby_mods.append(fort_file)
 
         pub_procs = self.all_public_procedures()
         #assert "gstate" in pub_procs
         miss = []
         for fort_file in self.fort_files.values():
-            for p in fort_file.iter_procedures():
-                for child_name in p.children:
+            for proc in fort_file.iter_procedures():
+                for child_name in proc.children:
                     try:
-                        pub_procs[child_name].parents.append(p)
+                        pub_procs[child_name].parents.append(proc)
                     except KeyError:
                         miss.append(child_name)
 
         def is_internal(name):
             return not any(name.startswith(s) for s in
-                          ("mpi_", "dfftw_", "mkl_", "papif_", "plasma_", "etsf_io_"))
+                set(("mpi_", "dfftw_", "mkl_", "papif_", "plasma_", "elpa", "etsf_io_", "blacs_",
+                     "libpaw_", "gsl_", "gpu_", "xc_", "bigdft_")))
 
         miss = filter(is_internal, miss)
+        from .check_linalg_calls import blas_routines, lapack_routines
         if miss:
-            miss = sorted(set(miss))
+            miss = set(miss)
+            # Remove blas and lapack routines.
+            miss = miss.difference(blas_routines)
+            miss = miss.difference(lapack_routines)
+            # Remove pblas and scalalapack routines.
+            miss = miss.difference("p" + n for n in blas_routines)
+            miss = miss.difference("p" + n for n in lapack_routines)
+            # Remove public interfaces.
+            miss = miss.difference(self.get_all_interfaces().keys())
+            miss = sorted(miss)
             print("Cannot find %d callees. Use --verbose to show list." % len(miss))
             if verbose: pprint(miss)
 
@@ -534,6 +587,13 @@ class AbinitProject(object):
             dir2files[fort_file.dirname].append(fort_file)
         return OrderedDict(dir2files.items())
 
+    def iter_dirname_fortfile(self):
+        """Iterate over (dirname, fort_file)"""
+        dir2files = self.groupby_dirname()
+        for dirname, fort_files in dir2files.items():
+            for fort_file in fort_files:
+                yield dirname, fort_file
+
     def all_public_procedures(self):
         """
         Dictionary mapping name --> Procedure
@@ -546,14 +606,75 @@ class AbinitProject(object):
                     d.update({p.name: p for p in p.public_procedures})
         return d
 
+    def get_all_datatypes(self):
+        """
+        List with all datatypes available in the project.
+        """
+        dtypes = []
+        for f in self.fort_files.values():
+            for p in getattr(f, "modules"):
+                dtypes.extend(p.types)
+        return dtypes
+
+    def get_all_interfaces(self):
+        """
+        Dictionary mapping name --> Interface
+        """
+        d = {}
+        for f in self.fort_files.values():
+            for p in getattr(f, "modules"):
+                d.update({i.name: i for i in p.interfaces})
+        return d
+
+    def print_interfaces(self, what=None, verbose=0):
+        name2interface = self.get_all_interfaces()
+        if what is not None:
+            if what in name2interface:
+                interface = name2interface[what]
+                print(interface.to_string(verbose=verbose))
+            else:
+                cprint("Cannot find interface `%s` in project" % what, "red")
+                matches = difflib.get_close_matches(what, name2interface.keys())
+                if matches:
+                    cprint("Perhaps you meant: {}".format(matches), "red")
+        else:
+            for interface in name2interface.values():
+                cprint(repr(interface), "yellow")
+                print(interface.to_string(verbose=verbose))
+                print("")
+
     def find_public_entity(self, name):
         """
         Find and return Procedure object with name `name`.
         Assume name is unique in the project.
         """
+        all_names = []
         for f in self.fort_files.values():
-            obj = f.find_public_entity(name)
+            obj = f.find_public_entity(name, all_names=all_names)
             if obj is not None: return obj
+
+        # Print closest matches
+        matches = difflib.get_close_matches(name, all_names)
+        if matches:
+            cprint("Perhaps you meant: {}".format(matches), "red")
+
+        return None
+
+    def find_datatype(self, name):
+        """
+        Find and return Datatype object with name `name`.
+        Assume name is unique in the project.
+        """
+        all_names = []
+        for f in self.fort_files.values():
+            obj = f.find_datatype(name, all_names=all_names)
+            if obj is not None: return obj
+
+        # Print closest matches
+        matches = difflib.get_close_matches(name, all_names)
+        if matches:
+            cprint("Perhaps you meant: {}".format(matches), "red")
+
         return None
 
     def find_module_from_entity(self, name):
@@ -603,7 +724,7 @@ class AbinitProject(object):
     #    cycles = defaultdict(list)
     #    for fort_file in self.fort_files.values():
     #        # TODO: This should be recursive
-    #        for child in fort_file.usedby_mods:
+    #        for child in fort_file.all_usedby_mods:
     #            if child.depends_on(fort_file):
     #                cycles[fort_file].append(child)
     #    return cycles
@@ -611,7 +732,7 @@ class AbinitProject(object):
     def check_dirlevel(self):
         errors = []
         for fort_file in self.fort_files.values():
-            for child in fort_file.usedby_mods:
+            for child in fort_file.all_usedby_mods:
                 if child.dirlevel < fort_file.dirlevel:
                     errors.append("%s should be below level: %s" % (repr(child), fort_file.dirlevel))
         return "\n".join(errors)
@@ -626,7 +747,7 @@ class AbinitProject(object):
         queue.add(head)
         while queue:
             fort_file = queue.pop()
-            for mod in fort_file.used_mods:
+            for mod in fort_file.all_used_mods:
                 if mod.basename in visited: continue
                 visited.add(mod.basename)
                 allmods.add(mod)
@@ -736,7 +857,7 @@ class AbinitProject(object):
             # Find dependencies inside this directory (abinit.dep)
             inside_deps = {}
             for this in fort_files:
-                dlist = [f.name for f in fort_files if any(m in this.used_mods for m in f.modules)]
+                dlist = [f.name for f in fort_files if any(m in this.all_used_mods for m in f.modules)]
                 inside_deps[this.name] = sorted(set(d.replace(".F90", "") for d in dlist))
             inside_deps = OrderedDict([(k, inside_deps[k]) for k in sorted(inside_deps.keys())])
 
@@ -768,7 +889,7 @@ class AbinitProject(object):
             # Find dependencies outside this directory (abinit.dir).
             outside_dir = []
             for fort_file in fort_files:
-                outside_dir.extend(m.dirname for m in fort_file.used_mods)
+                outside_dir.extend(m.dirname for m in fort_file.all_used_mods)
 
 	    # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
@@ -809,7 +930,7 @@ class AbinitProject(object):
             changed_mods.extend(f.modules)
 
         for fort_file in self.fort_files.values():
-            if any(m in fort_file.used_mods for m in changed_mods):
+            if any(m in fort_file.all_used_mods for m in changed_mods):
                 print("Touching:", os.path.relpath(fort_file.path))
                 touch(fort_file.path)
                 count += 1
@@ -834,20 +955,22 @@ class AbinitProject(object):
         retcode = 0
         for fort_file in self.fort_files.values():
             count = len(fort_file.subroutines) + len(fort_file.functions)
-            if count:
-                if fort_file.name in white_list:
-                    print("WHITE_LIST [%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
-                else:
-                    print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
-                    retcode += 1
+            if count == 0: continue
+            if fort_file.name in white_list:
+                cprint("WHITE_LIST [%s] Found %d procedure(s) outside module!" % (fort_file.name, count), "green")
+            else:
+                cprint("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count), "red")
+                retcode += 1
 
         errstr = self.check_dirlevel()
         if errstr:
-            print(errstr)
+            cprint(errstr, "red")
             retcode += 1
 
-        print("retcode", retcode)
+        cprint("retcode %d" % retcode, "green" if retcode ==0 else "red")
         return retcode
+
+    #def check_abirules(self, verbose=0):
 
     def pedit(self, name, verbose=0):
         """
@@ -855,7 +978,7 @@ class AbinitProject(object):
         """
         obj = self.find_public_entity(name)
         if obj is None:
-            print("Cannot find public entity `%s`" % str(name))
+            cprint("Cannot find public entity `%s`" % str(name), "red")
             return 1
         if verbose: print(obj)
 
@@ -876,7 +999,7 @@ class AbinitProject(object):
         dirpath = os.path.join(self.srcdir, dirname)
         if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
         index, rows = [], []
-        for fort_file in dir2files[dirpath]:
+        for fort_file in sorted(dir2files[dirpath], key=lambda f: f.basename):
             index.append(fort_file.basename)
             rows.append(fort_file.get_stats())
 
@@ -901,30 +1024,29 @@ class AbinitProject(object):
         """Print orphan procedures and modules."""
         # FIXME: this does not work as expected.
 
-        def find_orphans(fort_file):
+        def find_orphans_in_fort_file(fort_file):
             """List with orphan procedures."""
             orphans = []
             for mod in fort_file.modules:
                 if all(mod.name not in ffile.all_uses for ffile in self.fort_files.values()):
                     orphans.append(mod)
 
-            for p in fort_file.iter_procedures(visibility="public"):
+            for proc in fort_file.iter_procedures(visibility="public"):
                 # programs are orphan by definition
-                if p.is_program: continue
-                if p.is_function: continue
-                if not p.parents:
-                    orphans.append(p)
+                # function callers are difficult to detect.
+                if proc.is_program or proc.is_function: continue
+                if not proc.parents:
+                    orphans.append(proc)
 
             return orphans
 
         dir2files = self.groupby_dirname()
-        for dirname, fort_files in dir2files.items():
-            for fort_file in fort_files:
-                orphans = find_orphans(fort_file)
-                if orphans:
-                    print("Found %d orphans in %s" % (len(orphans), fort_file.basename))
-                    for o in orphans:
-                        print(repr(o))
+        for _, fort_file in self.iter_dirname_fortfile():
+            orphans = find_orphans_in_fort_file(fort_file)
+            if orphans:
+                cprint("Found %d orphans in file: %s" % (len(orphans), fort_file.basename), "yellow")
+                for o in orphans:
+                    print("\t", repr(o))
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -971,7 +1093,7 @@ class AbinitProject(object):
         """
         obj = self.find_public_entity(name)
         if obj is None:
-            print("Cannot find public entity `%s` in project" % str(name))
+            cprint("Cannot find public entity `%s` in project" % str(name), "red")
             return None
 
         obj.parents

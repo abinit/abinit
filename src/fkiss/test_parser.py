@@ -6,6 +6,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from unittest import TestCase
 
 from .parser import FortranKissParser
+from .project import AbinitProject
 
 
 class TestFortranKissParser(TestCase):
@@ -18,7 +19,7 @@ class TestFortranKissParser(TestCase):
         #
         #   "program foo !this is an inlined comment"
         #
-        # because the parser will strip them and operate stripped strings.
+        # because the parser will strip them and operate on stripped strings.
 
         # Program
         m = p.RE_PROG_START.match("program foo")
@@ -55,18 +56,17 @@ class TestFortranKissParser(TestCase):
         m = p.RE_FUNC_START.match("function  foo")
         assert m and m.group("name") == "foo" and not m.group("prefix")
         m = p.RE_FUNC_START.match("integer function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "integer"
         m = p.RE_FUNC_START.match("integer(kind = i8b) function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "integer(kind = i8b)"
         m = p.RE_FUNC_START.match("real(dp) function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "real(dp)"
         m = p.RE_FUNC_START.match("pure complex(dpc) function foo(a)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "pure complex(dpc)"
         m = p.RE_FUNC_START.match("pure logical function foo(a, b)")
-        assert m and m.group("name") == "foo"
-        #assert m.group("prefix") == "foo"
-        m = p.RE_FUNC_START.match("type(foo_t) function foo(a, b) result(res)")
-        assert m and m.group("name") == "foo"
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "pure logical"
+        m = p.RE_FUNC_START.match("type ( foo_t ) function foo(a, b) result(res)")
+        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "type ( foo_t )"
 
         m = p.RE_FUNC_END.match("end  function foo")
         assert m and m.group("name") == "foo"
@@ -80,18 +80,57 @@ class TestFortranKissParser(TestCase):
         assert m and m.group("name") == "foo"
         m = p.RE_SUBCALL.match("if (a == 1) call foo(a=2)")
         assert m and m.group("name") == "foo"
-        #m = p.RE_SUBCALL.match("if (cond) call obj%foo(a, b)")
-        #assert m and m.group("name") == "obj%foo"
-        #m = p.RE_SUBCALL.match("if (.True.) call obj%foo(a=1, b=3)")
-        #assert m and m.group("name") == "obj%foo"
+        #m = p.RE_SUBCALL.match("call obj%foo(a=1, b=3)")
+        #assert m and m.group("name") == "obj%foo" and m.group("method") == "foo"
+        #m = p.RE_SUBCALL.match("if (a == b) call obj%foo(a, b)")
+        #assert m and m.group("name") == "obj%foo" and m.group("method") == "foo"
 
         # Interface
-        m = p.RE_INTERFACE_START.match("abstract interface foo")
-        assert m #and m.group("name") == "foo"
         m = p.RE_INTERFACE_END.match("end interface")
-        assert m # and not m.group("name")
+        assert m  and not m.group("name")
+        m = p.RE_INTERFACE_START.match("abstract interface foo")
+        assert m and m.group("name") == "foo"
         m = p.RE_INTERFACE_END.match("end  interface  foo")
-        assert m # and m.group("name").strip() == "foo"
+        assert m  and m.group("name") == "foo"
+
+        # Intrinsic type declarations.
+        m = p.RE_CHARACTER_DEC.match("character (len= 10)")
+        assert m and m.group("len") == "10"
+        m = p.RE_CHARACTER_DEC.match("character(len=fnlen)")
+        assert m and m.group("len") == "fnlen"
+        m = p.RE_CHARACTER_DEC.match("character(len=*),intent(in)")
+        assert m and m.group("len") == "*"
+
+        assert not p.RE_TYPECLASS_DEC.match("type, public :: foo_t")
+        m = p.RE_TYPECLASS_DEC.match("type( foo_t) :: foo")
+        assert m and m.group("ftype") == "type" and m.group("name") == "foo_t"
+        m = p.RE_TYPECLASS_DEC.match("type(pawrhoij_type ),allocatable :: pawrhoij1_i1pert(:)")
+        assert m and m.group("ftype") == "type" and m.group("name") == "pawrhoij_type"
+        m = p.RE_TYPECLASS_DEC.match("class ( Circle ), intent(in) :: this")
+        assert m and m.group("ftype") == "class" and m.group("name") == "Circle"
+
+        # integer
+        #assert not p.RE_VARNUMBOOL_DEC.match("integer :: timrev")
+        #assert m and m.group("ftype") == "integer" and m.group("kind") == None
+        # real
+        #assert not p.RE_VARNUMBOOL_DEC.match("real(dp) :: ucvol")
+        #assert m and m.group("ftype") == "real" and m.group("kind") == "dp"
+        # boolean
+        #assert not p.RE_VARNUMBOOL_DEC.match("logical :: use_antiferro")
+        #assert m and m.group("ftype") == "logical" and m.group("kind") == None
+
+        # datatype declaration.
+        m = p.RE_TYPE_START.match("type foo_t")
+        assert m and m.group("name") == "foo_t"
+        m = p.RE_TYPE_START.match("type, public :: foo_t")
+        assert m and m.group("name") == "foo_t"
+        assert not p.RE_TYPE_START.match("type(foo_t) :: foo")
+
+        m = p.RE_PUB_OR_PRIVATE.match("public ")
+        assert m and m.group("name") == "public"
+        m = p.RE_PUB_OR_PRIVATE.match("private ! everything private ")
+        assert m and m.group("name") == "private"
+        assert not p.RE_PUB_OR_PRIVATE.match("private = 1 ! this is not private ")
 
     def test_simple_program(self):
         """Parsing Fortran program written following good programming standards."""
@@ -161,11 +200,21 @@ module m_crystal
 
     type,public :: crystal_t
         integer :: nsym
+        ! nsym docstring
         real(dp),allocatable :: xred(:,:)
-    end type
+        ! xred
+        ! docstring
+
+    end type crystal_t
 
     public :: crystal_free
     public :: idx_spatial_inversion
+
+    interface get_unit
+      module procedure get_free_unit
+      module procedure get_unit_from_fname
+
+    end interface
 
     interface operator (==)
       module procedure coeffs_compare
@@ -217,6 +266,27 @@ end module m_crystal
 
         func = mod.contains[1]
         assert func.is_function and func.name == "idx_spatial_inversion" and func.ancestor is mod
+
+        assert len(mod.interfaces) == 2
+        assert mod.interfaces[0].name == "get_unit"
+        #assert mod.interfaces[1].name == "(==)"
+
+        # Test datatype
+        assert len(mod.types) == 1
+        crystal_t = mod.types[0]
+        assert crystal_t.name == "crystal_t"
+        assert crystal_t.ancestor.is_module  and crystal_t.ancestor.name == "m_crystal"
+        str(crystal_t); repr(crystal_t)
+        assert crystal_t.to_string(verbose=2)
+
+        crystal_t.analyze()
+        nsym, xred = crystal_t.variables["nsym"], crystal_t.variables["xred"]
+        str(nsym); repr(nsym)
+        assert nsym.ftype == "integer" and nsym.is_scalar and not nsym.is_pointer
+        assert nsym.doc == "! nsym docstring"
+        #assert xred.ftype == "real" and xred.kind == "dp"
+        assert not xred.is_scalar and xred.is_array and xred.shape == "(:,:)"
+        assert xred.doc.splitlines() == ["! xred", "! docstring"]
 
     def test_tricky_module(self):
         """Parsing tricky Fortran module similar to 42_libpaw/m_libpaw_libxc.F90"""
@@ -399,3 +469,14 @@ module m_libpaw_libxc
 
 end module m_libpaw_libxc
 """
+
+        p = FortranKissParser(macros=AbinitProject.MACROS)
+        p.parse_string(s)
+        assert len(p.modules) == 2
+        mod1, mod2 = p.modules
+        assert mod1.name == "m_libpaw_libxc_funcs" and mod2.name == "m_libpaw_libxc"
+        assert "defs_basis" in mod1.uses
+        assert len(mod1.types) == 1
+        libxc_t = mod1.types[0]
+        assert libxc_t.name == "libpaw_libxc_type"
+        assert len(mod1.interfaces) == 5
