@@ -23,7 +23,7 @@
 module m_wfutils
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_cgtools,  only : cg_to_reim, cg_from_reim

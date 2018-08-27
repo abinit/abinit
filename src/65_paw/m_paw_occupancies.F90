@@ -24,7 +24,7 @@ MODULE m_paw_occupancies
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -116,7 +116,6 @@ CONTAINS  !=====================================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrhoij'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -561,10 +560,10 @@ end subroutine pawmkrhoij
 & my_natom_ref=my_natom)
 
  weight=wtk_k*occ_k
- weight_2=zero
- if(present(occ_k_2).and.nspinor==2) weight_2=wtk_k*occ_k_2
+ weight_2=zero;if(present(occ_k_2).and.nspinor==2) weight_2=wtk_k*occ_k_2
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
+
  if (option==1) then
 
 !  ==================================================================
@@ -691,6 +690,12 @@ end subroutine pawmkrhoij
    compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
    substract_diagonal=(ipert==natom+3)
 
+   if (compute_impart_cplex) then
+     if (.not.allocated(pawrhoij(1)%rhoijim)) then
+       MSG_BUG("pawrhoij(:)%rhoijim must be allocated!")
+     end if
+   end if
+
 !  Accumulate (n,k) contribution to rhoij1
 !  due to derivative of wave-function
    if (nspinor==1) then
@@ -743,14 +748,14 @@ end subroutine pawmkrhoij
            ro12_re=zero;ro21_re=zero
            ro12_im=zero;ro21_im=zero
            do iplex=1,cplex
-             ro11_re=cpj0(iplex,1)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,1)
-             ro22_re=cpj0(iplex,2)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,2)
+             ro11_re=ro11_re+cpj0(iplex,1)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,1)
+             ro22_re=ro22_re+cpj0(iplex,2)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,2)
            end do
            pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight*(ro11_re+ro22_re)
            if (nspden_rhoij>1) then
              do iplex=1,cplex
-               ro12_re=cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
-               ro21_re=cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
+               ro12_re=ro12_re+cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
+               ro21_re=ro21_re+cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
              end do
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
@@ -808,14 +813,15 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
 !            This imaginary part does not have to be computed
 !            It is cancelled because rho_ij+rho_ji is stored in rho_ij
-!            if (compute_impart_cplex) then
-!            klmn_im=klmn_re+1
-!            ro11_im=dcpi0(1,1,1)*cpj0(2,1)-dcpi0(2,1,1)*cpj0(1,1)+cpi0(1,1)*dcpj0(2,1,1)-cpi0(2,1)*dcpj0(1,1,1)
-!            if (substract_diagonal) then
-!            ro11_im=ro11_im-cpi0(1,1)*cpj0(2,1)+cpi0(2,1)*cpj0(1,1)
-!            end if
-!            pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
-!            end if
+             if (compute_impart_cplex) then
+               klmn_im=klmn_re+1
+               ro11_im=dcpi0(1,1,1)*cpj0(2,1)-dcpi0(2,1,1)*cpj0(1,1)+cpi0(1,1)*dcpj0(2,1,1)-cpi0(2,1)*dcpj0(1,1,1)
+               if (substract_diagonal) then
+                 ro11_im=ro11_im-cpi0(1,1)*cpj0(2,1)+cpi0(2,1)*cpj0(1,1)
+               end if
+               pawrhoij(iatom)%rhoijim(klmn,isppol)=pawrhoij(iatom)%rhoijim(klmn,isppol)+weight*ro11_im
+!              pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+             end if
            end do
          end do
        end do
@@ -843,8 +849,8 @@ end subroutine pawmkrhoij
              ro12_re=zero;ro21_re=zero
              ro12_im=zero;ro21_im=zero
              do iplex=1,cplex
-               ro11_re=dcpi0(iplex,1,1)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,1)
-               ro22_re=dcpi0(iplex,2,1)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,1)
+               ro11_re=ro11_re+dcpi0(iplex,1,1)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,1)
+               ro22_re=ro22_re+dcpi0(iplex,2,1)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,1)
              end do
              if (substract_diagonal) then
                do iplex=1,cplex
@@ -855,8 +861,8 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight*(ro11_re+ro22_re)
              if (nspden_rhoij>1) then
                do iplex=1,cplex
-                 ro12_re=dcpi0(iplex,2,1)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,1)
-                 ro21_re=dcpi0(iplex,1,1)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,1)
+                 ro12_re=ro12_re+dcpi0(iplex,2,1)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,1)
+                 ro21_re=ro21_re+dcpi0(iplex,1,1)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,1)
                end do
                if (substract_diagonal) then
                  do iplex=1,cplex
@@ -963,8 +969,8 @@ end subroutine pawmkrhoij
              ro12_re=zero;ro21_re=zero
              ro12_im=zero;ro21_im=zero
              do iplex=1,cplex
-               ro11_re=dcpi0(iplex,1,mu)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,mu)
-               ro22_re=dcpi0(iplex,2,mu)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,mu)
+               ro11_re=ro11_re+dcpi0(iplex,1,mu)*cpj0(iplex,1)+cpi0(iplex,1)*dcpj0(iplex,1,mu)
+               ro22_re=ro22_re+dcpi0(iplex,2,mu)*cpj0(iplex,2)+cpi0(iplex,2)*dcpj0(iplex,2,mu)
              end do
              pawrhoij(iatom)%grhoij(mu,klmn_re,1)=pawrhoij(iatom)%grhoij(mu,klmn_re,1)+weight*(ro11_re+ro22_re)
              if (nspden_rhoij>1) then

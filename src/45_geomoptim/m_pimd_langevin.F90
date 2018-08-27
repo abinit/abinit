@@ -27,7 +27,7 @@
 module m_pimd_langevin
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_pimd
  use m_random_zbq

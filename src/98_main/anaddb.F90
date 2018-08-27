@@ -49,7 +49,7 @@ program anaddb
  use m_build_info
  use m_xmpi
  use m_xomp
- use m_profiling_abi
+ use m_abicore
  use m_errors
  !use m_argparse
  use m_ifc
@@ -89,7 +89,6 @@ program anaddb
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

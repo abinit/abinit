@@ -30,7 +30,7 @@ module m_rwwf
  use defs_abitypes
  use m_errors
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #if defined HAVE_MPI2
  use mpi

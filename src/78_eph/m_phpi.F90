@@ -27,7 +27,7 @@ module m_phpi
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -122,7 +122,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phpi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

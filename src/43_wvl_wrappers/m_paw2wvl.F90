@@ -28,7 +28,7 @@ module m_paw2wvl
 
  use defs_basis
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_pawtab, only : pawtab_type
@@ -397,7 +397,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
    ABI_DATATYPE_ALLOCATE(wvl%paw%paw_ij,(my_natom))
    do iatom=1,my_natom
      call nullify_paw_ij_objects(wvl%paw%paw_ij(iatom))
-     wvl%paw%paw_ij(iatom)%cplex          =paw_ij(iatom)%cplex
+     wvl%paw%paw_ij(iatom)%cplex          =paw_ij(iatom)%cplex_rf
      wvl%paw%paw_ij(iatom)%cplex_dij      =paw_ij(iatom)%cplex_dij
      wvl%paw%paw_ij(iatom)%has_dij        =paw_ij(iatom)%has_dij
      wvl%paw%paw_ij(iatom)%has_dijfr      =0
@@ -434,7 +434,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 !  Option==3: only copy
  elseif(option==3) then
    do iatom=1,my_natom
-     wvl%paw%paw_ij(iatom)%cplex     =paw_ij(iatom)%cplex
+     wvl%paw%paw_ij(iatom)%cplex     =paw_ij(iatom)%cplex_rf
      wvl%paw%paw_ij(iatom)%cplex_dij =paw_ij(iatom)%cplex_dij
      wvl%paw%paw_ij(iatom)%lmn_size  =paw_ij(iatom)%lmn_size
      wvl%paw%paw_ij(iatom)%lmn2_size =paw_ij(iatom)%lmn2_size

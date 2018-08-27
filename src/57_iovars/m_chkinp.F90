@@ -30,7 +30,7 @@ module m_chkinp
  use defs_datatypes
  use defs_abitypes
  use m_gwdefs
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
@@ -94,7 +94,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkinp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -117,7 +116,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
  integer :: fftalg !,fftalga,fftalgc,
- real(dp) :: delta,dz,sumalch,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: message,msg
  type(dataset_type) :: dt
 !arrays
@@ -1016,8 +1015,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  imgmov
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,8,(/0,1,2,4,5,9,10,13/),iout)
-   if (dt%imgmov>0) then ! when imgmov>0, allow only ionmov0 and optcell 0 (temporary)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,9,(/0,1,2,4,5,6,9,10,13/),iout)
+   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov0 and optcell 0 (temporary)
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
      if (dt%imgmov==9.or.dt%imgmov==10.or.dt%imgmov==13) then
@@ -1029,6 +1028,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
      end if
    end if
+
+!  imgwfstor
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,2,(/0,1/),iout)
+   if (dt%extrapwf/=0) then ! extrapwf/=0 not allowed presently with imgwfstor
+     cond_string(1)='extrapwf' ; cond_values(1)=dt%extrapwf
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
+   endif
+   if (dt%ntimimage<=1) then ! imgwfstor activate only when there is more than one time step for images
+     cond_string(1)='ntimimage' ; cond_values(1)=dt%ntimimage
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
+   endif
 
 !  intxc
    if(dt%iscf==-1)then
@@ -1406,8 +1416,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'mffmem',dt%mffmem,2,(/0,1/),iout)
 
 !  mixalch_orig
-!  For each type of atom, the sum of the psp components
-!  must be one.
+!  For each type of atom, the sum of the psp components must be one.
    do iimage=1,dt%nimage
      if(dt%ntypalch>0)then
        do itypat=1,dt%ntypalch
@@ -1429,6 +1438,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end do
      end if
    end do
+
+!  mixesimgf
+!  The sum of the mixing image factors must be one
+   if(dt%imgmov==6)then
+     summix=sum(dt%mixesimgf(1:dt%nimage))
+     if(abs(summix-one)>tol10)then
+       write(message, '(2a,20es12.4)' )ch10,' chkinp : mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
+       call wrtout(iout,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+       write(message, '(a,es12.4,4a)' )&
+&        'The sum of the mixing image factors is',summix,ch10,&
+&        'while it should be one.',ch10,&
+&        'Action: check the content of the input variable mixesimgf.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+   end if
 
 !  natom
    if(dt%prtgeo>0)then
@@ -1907,29 +1932,31 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  occ
 !  Do following tests only for occopt==0 or 2, when occupation numbers are needed
    if ((dt%iscf>0.or.dt%iscf==-1.or.dt%iscf==-3) .and. (dt%occopt==0 .or. dt%occopt==2) ) then
-!    make sure occupation numbers (occ(n)) were defined:
-     sumocc=zero
-     bantot=0
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         do iband=1,dt%nband(ikpt+(isppol-1)*nkpt)
-           bantot=bantot+1
-           sumocc=sumocc+dt%occ_orig(bantot)
-           if (dt%occ_orig(bantot)<zero) then
-             write(message, '(a,2i6,a,e20.10,a,a,a)' )&
-&             'iband,ikpt=',iband,ikpt,' has negative occ=',dt%occ_orig(bantot),' =>stop',ch10,&
-&             'Action: correct this occupation number in input file.'
-             MSG_ERROR_NOSTOP(message,ierr)
-           end if
+     do iimage=1,dt%nimage
+!      make sure occupation numbers (occ(n)) were defined:
+       sumocc=zero
+       bantot=0
+       do isppol=1,nsppol
+         do ikpt=1,nkpt
+           do iband=1,dt%nband(ikpt+(isppol-1)*nkpt)
+             bantot=bantot+1
+             sumocc=sumocc+dt%occ_orig(bantot,iimage)
+             if (dt%occ_orig(bantot,iimage)<-tol8) then
+               write(message, '(a,3i6,a,e20.10,a,a,a)' )&
+&               'iband,ikpt,iimage=',iband,ikpt,iimage,' has negative occ=',dt%occ_orig(bantot,iimage),' =>stop',ch10,&
+&               'Action: correct this occupation number in input file.'
+               MSG_ERROR_NOSTOP(message,ierr)
+             end if
+           end do
          end do
        end do
-     end do
-     if (sumocc<=1.0d-8) then
-       write(message, '(a,1p,e20.10,a,a,a)')&
-&       'Sum of occ=',sumocc, ' =>occ not defined => stop',ch10,&
-&       'Action: correct the array occ in input file.'
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
+       if (sumocc<=1.0d-8) then
+         write(message, '(a,1p,e20.10,a,a,a)')&
+&         'Sum of occ=',sumocc, ' =>occ not defined => stop',ch10,&
+&         'Action: correct the array occ in input file.'
+         MSG_ERROR_NOSTOP(message, ierr)
+       end if
+     enddo
    end if
 
 !  occopt
@@ -3048,7 +3075,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,7,(/0,1,2,3,4,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/0,1,2,3,4,5,6,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
@@ -3446,16 +3473,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      else
        mband = dt%mband
      end if
-     do ii = 1, mband, 1
-       if (dt%occ_orig(ii) < tol8 .and. dt%iscf == 0) then
-         write(message,'(a,f7.4,a,a,a,a,a,a)')&
-&         'One value of occ is found to be ', dt%occ_orig(ii), ch10, &
-&         'The direct minimization is not allowed with empty bands.',ch10,&
-&         'Action: use occopt = 1 for automatic band filling or', ch10, &
-&         'change occ value in your input file'
-         MSG_ERROR_NOSTOP(message,ierr)
-       end if
-     end do
+     do iimage=1,dt%nimage
+       do ii = 1, mband, 1
+         if (dt%occ_orig(ii,iimage) < tol8 .and. dt%iscf == 0) then
+           write(message,'(a,f7.4,a,a,a,a,a,a)')&
+&           'One value of occ is found to be ', dt%occ_orig(ii,iimage), ch10, &
+&           'The direct minimization is not allowed with empty bands.',ch10,&
+&           'Action: use occopt = 1 for automatic band filling or', ch10, &
+&           'change occ value in your input file'
+           MSG_ERROR_NOSTOP(message,ierr)
+         end if
+       end do
+     enddo
      if (npsp /= dt%ntypat) then
        write(message, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
 &       'wvl_wfs_set:  consistency checks failed,', ch10, &

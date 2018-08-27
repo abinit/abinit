@@ -153,7 +153,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     type(entropyDMFT_t) , intent(inout) :: e_t
@@ -410,7 +409,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_restart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     type(entropyDMFT_t), intent(inout) :: e_t
@@ -693,7 +691,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_nextLambda'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     type(entropyDMFT_t) , intent(inout) :: e_t
@@ -963,7 +960,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyDMFT_computeEntropy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     type(entropyDMFT_t), intent(inout) :: e_t

@@ -393,7 +393,6 @@ subroutine pawang_lsylm(pawang)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawang_lsylm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1014,14 +1013,14 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
  do ii=1,(n+1)/2
    z=cos(pi*(ii-0.25_dp)/(n+0.5_dp))
-   do 
+   do
      p1=1._dp
      p2=0._dp
      do jj=1,n
        p3=p2
        p2=p1
        p1=((2._dp*jj-1._dp)*z*p2-(jj-1._dp)*p3)/jj
-     end do  
+     end do
      pp=n*(p2-z*p1)/(1._dp-z**2)
      z1=z
      z=z1-p1/pp

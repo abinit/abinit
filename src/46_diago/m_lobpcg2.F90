@@ -9,7 +9,7 @@ module m_lobpcg2
   use m_xg
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xomp
 #ifdef HAVE_OPENMP

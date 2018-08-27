@@ -30,7 +30,7 @@ MODULE m_ddb
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_ddb_hdr
@@ -537,7 +537,6 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gtblk9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1141,7 +1140,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rdddb9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2097,7 +2095,6 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtech9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2463,7 +2460,6 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_get_dielt_zeff'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2560,7 +2556,6 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_get_dielt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3298,7 +3293,6 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_doutput'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3623,7 +3617,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mblktyp1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3955,7 +3948,6 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mblktyp5'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -204,7 +204,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_wfk
  use m_hamiltonian
  use m_cgtools
@@ -249,8 +249,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstpaw'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -322,7 +320,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
+ integer :: option,opt_gvnl1,sij_opt,spaceworld,usevnl,use_rhoijim,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -346,12 +344,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: d2nl_elfd(:,:),dkinpw(:)
  real(dp),allocatable :: d2nl_k(:,:),d2ovl_drho(:,:,:,:,:),d2ovl_k(:,:)
  real(dp),allocatable :: eig_k(:),eig_kq(:),eig1_k(:)
- real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnl1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
- real(dp),allocatable,target :: work(:,:,:)
- real(dp),pointer :: e1kbfr(:,:,:,:),e1kb_ptr(:,:,:)
+ real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
+ real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
  real(dp),pointer :: ffnl1_idir1(:,:,:,:),vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
@@ -608,7 +606,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      need_pawij10=(usepaw==1)
      if (need_pawij10) then
        ABI_DATATYPE_ALLOCATE(paw_ij10,(my_natom,mdir1))
-       ABI_ALLOCATE(e1kbfr_spin,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,mdir1,my_nsppol))
+       ABI_ALLOCATE(e1kbfr_spin,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex,mdir1,my_nsppol))
      else
        ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
      end if
@@ -658,7 +656,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          if (ipert/=ipert1.or.idir/=idir1.or.force_recompute) then
            option=0
            call pawdijfr(cplex,gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
-&           nspden,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
+&           nspden,nsppol,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
 &           pawtab,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
 &           mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          else
@@ -774,12 +772,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        drho1wfr(:,:,idir1)=zero
        cplex_rhoij=max(cplex,dtset%pawcpxocc)
        nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+       use_rhoijim = 1
+!      use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
+&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,use_rhoijim=use_rhoijim,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&         dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
        else
          call pawrhoij_init_unpacked(pawdrhoij1_unsym(:,idir1))
        end if
@@ -793,24 +793,24 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    ibg1=0;icg1=0
    ibgq=0;icgq=0
 
-!  Has to 1st-order non-local factors before the loop over spins
+!  Has to get 1st-order non-local factors before the loop over spins
 !  because this needs a communication over comm_atom (=comm_spinkpt)
    if (need_pawij10) then
      if (my_nsppol<nsppol) then
-       ABI_ALLOCATE(work,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2))
+       ABI_ALLOCATE(e1kb_work,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex))
      end if
      ii=0
      do isppol=1,nsppol
        if (my_spintab(isppol)==1) ii=ii+1
-       if (my_spintab(isppol)/=1) e1kb_ptr => work
+       if (my_spintab(isppol)/=1) e1kb_ptr => e1kb_work
        do kdir1=1,mdir1
          idir1=jdir1(kdir1)
-         if (my_spintab(isppol)==1) e1kb_ptr => e1kbfr_spin(:,:,:,idir1,ii)
+         if (my_spintab(isppol)==1) e1kb_ptr => e1kbfr_spin(:,:,:,:,idir1,ii)
          call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_comm_atom,e1kbfr=e1kb_ptr,mpi_atmtab=my_atmtab)
        end do
      end do
      if (my_nsppol<nsppol) then
-       ABI_DEALLOCATE(work)
+       ABI_DEALLOCATE(e1kb_work)
      end if
    end if
 
@@ -826,8 +826,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !    Continue to initialize the GS/RF Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
      if (need_pawij10) then
-       ii=min(isppol,size(e1kbfr_spin,5))
-       if (ii>0) e1kbfr => e1kbfr_spin(:,:,:,:,ii)
+       ii=min(isppol,size(e1kbfr_spin,6))
+       if (ii>0) e1kbfr => e1kbfr_spin(:,:,:,:,:,ii)
      end if
 
 !    Initialize accumulation of density
@@ -1178,7 +1178,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            end if
 
 !          Finalize initialization of 1st-order NL hamiltonian
-           if (need_pawij10) rf_hamkq%e1kbfr => e1kbfr(:,:,:,idir1)
+           if (need_pawij10) rf_hamkq%e1kbfr => e1kbfr(:,:,:,:,idir1)
 
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
@@ -1829,7 +1829,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_cgtools
  use m_hamiltonian
  use m_errors

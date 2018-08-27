@@ -30,7 +30,7 @@ module m_pspini
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_psxml2ab
  !use m_psps
@@ -55,6 +55,7 @@ module m_pspini
  use m_psp9,       only : psp9in
  use m_upf2abinit, only : upf2abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 
@@ -137,7 +138,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -270,6 +270,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 &   (psps%pspso(ipsp)==1.and.pspso_old(ipsp)==pspso_zero(ipsp))) then
      new_pspso(ipsp)=0
    end if
+!  No new characteristics if PAW
+   if (psps%usepaw==1) new_pspso(ipsp)=0
 !  Prepare the saving of the intrinsic pseudopotential characteristics
    if(psps%pspso(ipsp)==1) pspso_zero(ipsp)=0
  end do
@@ -832,8 +834,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1036,8 +1036,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !  TODO: in case of pspcod 5 (phoney) and 8 (oncvpsp) this is not specific enough.
 !  they can be non-SOC as well.
 !  HGH is ok - can always turn SOC on or off.
+!  PAW is ok - can be used with or without SOC
 !  write(std_out,*) pspso
-   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10))then
+   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. &
+&     (pspcod/=7).and.(pspcod/=17))then
 !    If pspso requires internal characteristics, set it to 1 for non-HGH psps
      if(psps%pspso(ipsp)==1) psps%pspso(ipsp)=0
      if(psps%pspso(ipsp)/=0)then

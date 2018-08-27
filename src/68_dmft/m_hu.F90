@@ -30,7 +30,7 @@
 
 MODULE m_hu
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use m_pawtab, only : pawtab_type
@@ -129,7 +129,6 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -400,7 +399,6 @@ subroutine print_hu(hu,ntypat,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -481,7 +479,6 @@ subroutine vee2udens_hu(hu,ntypat,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee2udens_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -581,7 +578,6 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotatevee_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1067,7 +1063,6 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printvee_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1427,7 +1422,6 @@ subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee2udensatom_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1590,13 +1584,12 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee_slm2ylm_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1754,7 +1747,7 @@ subroutine vee_ndim2tndim_hu_r(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1849,7 +1842,7 @@ subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1943,13 +1936,12 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee_ylm2jmj_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2115,13 +2107,12 @@ subroutine udens_slatercondon_hu(fk,lcor)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'udens_slatercondon_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2403,13 +2394,12 @@ subroutine udens_inglis_hu(fk,lcor)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'udens_inglis_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

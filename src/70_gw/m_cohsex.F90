@@ -32,7 +32,7 @@ module m_cohsex
  use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
@@ -171,7 +171,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cohsex_me'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -902,7 +901,6 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_coh'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

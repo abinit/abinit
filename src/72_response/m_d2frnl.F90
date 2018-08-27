@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_d2frnl
+!! NAME
+!!  m_d2frnl
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_d2frnl
+
+ implicit none
+
+ private
+!!***
+
+ public :: d2frnl
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/d2frnl
 !! NAME
 !! d2frnl
@@ -6,13 +44,6 @@
 !! FUNCTION
 !! Compute the frozen-wavefunction non-local contribution for response functions
 !! (strain and/or phonon)
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnuC.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of WF
@@ -92,12 +123,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
@@ -106,7 +131,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_cgtools
@@ -139,8 +164,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2frnl'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -203,7 +226,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
- real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:),cg_left(:,:)
+ real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
  real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
  real(dp),allocatable :: enlout_piez1(:),enlout_piez2(:),enlout_phon(:),enlout_strs(:)
@@ -386,7 +409,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,1,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
@@ -400,12 +423,12 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DEALLOCATE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,psps%ntypat,&
+       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
 &       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,&
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
-         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,ii),mpi_atmtab=my_atmtab)
+         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,:,ii),mpi_atmtab=my_atmtab)
        end do
      end do
      call paw_ij_free(paw_ij_tmp)
@@ -656,7 +679,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_piezofr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_piez1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
            piezofrnlk(:,ii)=piezofrnlk(:,ii)+occ_k*enlout_piez1(:)
          end do !end do ii
        end if
@@ -665,7 +688,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if (need_becfr) then
          do ii=1,3 ! Loop over elect. field directions
            call nonlop(choice_bec2,cpopt,cwaveprj,enlout_bec1,gs_ham,0,(/zero/),mpi_enreg,1,&
-&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,ii))
+&           nnlout_bec1,paw_opt_1,signs,nonlop_dum,tim_nonlop,cwavef,cwavef,enl=becij(:,:,:,:,ii))
            becfrnlk(:,:,ii)=becfrnlk(:,:,ii)+occ_k*reshape(enlout_bec1(:),(/3,natom/))
          end do !end do ii
        end if
@@ -1067,4 +1090,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  DBG_EXIT("COLL")
 
 end subroutine d2frnl
+!!***
+
+end module m_d2frnl
 !!***

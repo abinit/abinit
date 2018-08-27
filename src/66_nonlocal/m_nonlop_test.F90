@@ -105,7 +105,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_hamiltonian
@@ -154,7 +154,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),rmet(3,3)
- real(dp),allocatable :: cwavef(:,:),cwavef_out(:,:),enl(:,:,:),enlout(:),kpg_k(:,:),lambda(:)
+ real(dp),allocatable :: cwavef(:,:),cwavef_out(:,:),enl(:,:,:,:),enlout(:),kpg_k(:,:),lambda(:)
  real(dp),allocatable :: scwavef_out(:,:),ylm(:,:),ylmgr(:,:,:),ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable,target :: ffnl(:,:,:,:),ph3d(:,:,:)
  type(pawcprj_type) :: cwaveprj(1,1)
@@ -343,11 +343,11 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    ABI_ALLOCATE(cwavef_out,(2,npw_k))
    if (paw_opt>=3) then
      ABI_ALLOCATE(scwavef_out,(2,npw_k))
-     ABI_ALLOCATE(enl,(0,0,0))
+     ABI_ALLOCATE(enl,(0,0,0,0))
    else
      ABI_ALLOCATE(scwavef_out,(0,0))
-     ABI_ALLOCATE(enl,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2))
-     enl(:,:,:)=one
+     ABI_ALLOCATE(enl,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2,1))
+     enl(:,:,:,:)=one
    end if
 
 !  Compute (k+G) vectors and associated spherical harmonics

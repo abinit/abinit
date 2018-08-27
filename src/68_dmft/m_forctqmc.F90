@@ -134,7 +134,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'qmc_prep_ctqmc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

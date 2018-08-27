@@ -31,7 +31,7 @@ module m_respfn_driver
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_exit
  use m_wffile
@@ -46,6 +46,7 @@ module m_respfn_driver
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
@@ -95,7 +96,8 @@ module m_respfn_driver
  use m_paw_occupancies, only : initrhoij
  use m_paw_correlations,only : pawpuxinit
  use m_mkcore,     only : mkcore, dfpt_mkcore
- use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald
+ use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
+ use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -216,9 +218,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -247,7 +246,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: nk3xc
  integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,coredens_method,cplex
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
+ integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -256,7 +255,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
@@ -286,7 +285,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp),allocatable :: amass(:),becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
+ real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
  real(dp),allocatable :: d2k0(:,:,:,:,:),d2lo(:,:,:,:,:),d2loc0(:,:,:,:,:)
  real(dp),allocatable :: d2matr(:,:,:,:,:),d2nfr(:,:,:,:,:),d2nl(:,:,:,:,:),d2ovl(:,:,:,:,:)
@@ -371,8 +370,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  eii=zero ; eew=zero ; ecore=zero
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(natom))
- call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
@@ -727,10 +725,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_dijnd=0; req_cplex_dij=1
-   if(any(abs(dtset%nucdipmom)>tol8)) then
-     has_dijnd=1; req_cplex_dij=2
-   end if
+   has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
@@ -740,7 +736,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -1784,7 +1780,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
  ABI_DEALLOCATE(clflg)
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)
@@ -1912,7 +1907,6 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrtloctens'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4008,13 +4002,11 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
 
- use m_fft,           only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyfro'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -23,7 +23,7 @@
 module m_parser
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
@@ -51,7 +51,7 @@ module m_parser
  public :: chkint_ne      ! Checks the value of an input integer variable against a list.
  !public :: chkint_prt
 
- public :: prttagm        ! Print the content of dprarr.
+ public :: prttagm        ! Print the content of intarr or dprarr.
  public :: prttagm_images ! Extension to prttagm to include the printing of images information.
  public :: chkvars_in_string   !  Analyze variable names in string. Abort if name is not recognized.
 
@@ -386,7 +386,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'instrng'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -947,7 +946,7 @@ end subroutine incomprs
 !!
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_ingeo_img
+!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
 !!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
@@ -962,8 +961,6 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'intagm'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1573,7 +1570,6 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inarray'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1788,7 +1784,6 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'importxyz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1921,7 +1916,6 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'append_xyz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2110,7 +2104,6 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkdpr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2781,7 +2774,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_prt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2959,7 +2951,6 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prttagm'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3308,14 +3299,13 @@ end subroutine prttagm
 
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
-& mxnimage,nimage,ndtset,prtimg,strimg,firstchar,forceprint)
+& mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prttagm_images'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3331,7 +3321,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 !arrays
  integer,intent(in) :: prtimg(mxnimage,0:ndtset_alloc)
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
- integer,intent(in) :: nimage(0:ndtset_alloc)
+ integer,intent(in) :: nimagem(0:ndtset_alloc)
  character(len=8),intent(in) :: strimg(mxnimage)
  integer,intent(in) :: narrm(0:ndtset_alloc)
  real(dp),intent(in) :: dprarr_images(marr,mxnimage,0:ndtset_alloc)
@@ -3355,11 +3345,13 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 
 ! *************************************************************************
 
+!Test whether for this variable, the content of different images differ.
+!test_multiimages=.false. if, for all datasets, the content is identical.
  test_multiimages=.false.
  do idtset=1,ndtset_alloc
-   if(nimage(idtset)>1)then
+   if(nimagem(idtset)>1)then
      do iarr=1,narrm(idtset)
-       if(sum(abs( dprarr_images(iarr,2:nimage(idtset),idtset)- &
+       if(sum(abs( dprarr_images(iarr,2:nimagem(idtset),idtset)- &
 &       dprarr_images(iarr,1              ,idtset)))>tol12)then
          test_multiimages=.true.
        end if
@@ -3367,14 +3359,10 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    end if
  end do
 
- if(nimage(0)==0)test_multiimages=.true.
+ if(nimagem(0)==0)test_multiimages=.true.
 
-!DEBUG
-!if(trim(token)=='vel')then
-!write(ab_out,*)' test_multiimages=',test_multiimages
-!endif
-!ENDDEBUG
-
+!If there is no differences between images, one is back to the usual prttagm routine.
+!Note the treatment of firstchar and forceprint has to be transmitted to prttagm.
  if(.not.test_multiimages)then
 
    narr=narrm(1)
@@ -3382,14 +3370,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
    do idtset=0,ndtset_alloc
      dprarr(1:narrm(idtset),idtset)=dprarr_images(1:narrm(idtset),1,idtset)
-
-!    DEBUG
-!    if(trim(token)=='vel')then
-!    write(ab_out,*)' idtset,narrm(idtset),dprarr(1:narrm(idtset),idtset)=',&
-!    &    idtset,narrm(idtset),dprarr(1:narrm(idtset),idtset)
-!    endif
-!    ENDDEBUG
-
    end do
    multi_narr=0
    if(ndtset_alloc>1)then
@@ -3397,17 +3377,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
        if(narrm(1)/=narrm(idtset))multi_narr=1
      end do
    end if
-!  if(narrm(0)==0)multi_narr=1
-!  DEBUG
-!  if(trim(token)=='fcart')then
-!  write(std_out,*)' will call prttagm with fcart '
-!  write(std_out,*)' narrm(0:ndtset_alloc)=',narrm(0:ndtset_alloc)
-!  write(std_out,*)' multi_narr=',multi_narr
-!  do idtset=0,ndtset_alloc
-!  write(std_out,*)' dprarr_images(1:narrm(idtset),1,idtset)=',dprarr_images(1:narrm(idtset),1,idtset)
-!  enddo
-!  endif
-!  ENDDEBUG
    if (present(firstchar).and.present(forceprint)) then
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
 &     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
@@ -3434,11 +3403,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    do idtset=1,ndtset_alloc
 
      if (narrm(idtset)>0)then
-       do iimage=1,nimage(idtset)
+       do iimage=1,nimagem(idtset)
 
          print_out=.true.
          if (prtimg(iimage,idtset)==0) print_out=.false.
-         if (nimage(0)>=nimage(idtset)) then
+         if (nimagem(0)>=nimagem(idtset)) then
            if (sum(abs(dprarr_images(1:narrm(idtset),iimage,idtset) &
 &           -dprarr_images(1:narrm(idtset),iimage,0)))<tol12) print_out=.false.
          end if

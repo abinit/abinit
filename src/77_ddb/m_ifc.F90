@@ -29,7 +29,7 @@ MODULE m_ifc
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_sort
  use m_cgtools
@@ -58,6 +58,7 @@ MODULE m_ifc
 &                          massmult_and_breaksym, dfpt_phfrq, dfpt_prtph
  use m_ddb
  use m_ddb_hdr
+ use m_symkpt
 
  implicit none
 
@@ -406,8 +407,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -760,7 +759,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init_fromFile'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -786,7 +784,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
  character(len=500) :: msg
- 
+
 !******************************************************************
 
  !check if ddb file exists
@@ -801,7 +799,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    do i=1,ddb_hdr%natom
      atifc(i)=i
    end do
-   
+
    call ddb_from_file(ddb,filename,1,ddb_hdr%natom,ddb_hdr%natom,atifc,ucell_ddb,comm)
 
    else
@@ -817,7 +815,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    if (iblok == 0) then
      iblok_tmp = ddb_get_dielt(ddb,1,dielt)
    end if
-   
+
    ! ifc to be calculated for interpolation
    write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,&
      &   ' Calculation of the interatomic forces ',ch10
@@ -836,10 +834,10 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    ABI_DEALLOCATE(atifc)
    call ddb_free(ddb)
    call ddb_hdr_free(ddb_hdr)
-   
+
  end subroutine ifc_init_fromFile
 !!***
- 
+
 !----------------------------------------------------------------------
 
 
@@ -873,7 +871,6 @@ subroutine ifc_print(ifc,header,unit,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1216,7 +1213,6 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_speedofsound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2638,8 +2634,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_outphbtrap'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2763,7 +2757,6 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_printbxsf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3325,7 +3318,6 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_test_phinterp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3520,7 +3512,7 @@ end subroutine ifc_test_phinterp
 !! OUTPUT
 !!  (Optional)
 !!  phfrq2l(3*crystal%natom,nph2l)=List of phonon frequencies
-!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities 
+!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities
 !!     (see Eq.(41) of Veithen et al, PRB71, 125107 (2005) [[cite:Veithen2005]])
 !!
 !! NOTES:
@@ -3552,7 +3544,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: qph2l(3, nph2l) 
+ real(dp),intent(in) :: qph2l(3, nph2l)
  real(dp),optional,intent(in) :: qnrml2(nph2l)
  real(dp),optional,intent(out) :: phfrq2l(3*crystal%natom,nph2l), polarity2l(3,3*crystal%natom,nph2l)
 
@@ -3601,7 +3593,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
    if(present(qnrml2))then
      qphnrm(1) = qnrml2(iphl2)
    endif
-     
+
 
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &

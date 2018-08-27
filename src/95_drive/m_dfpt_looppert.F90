@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
-!!  m_dfpt_looper
+!!  m_dfpt_loopert
 !!
 !! FUNCTION
 !!
@@ -31,7 +31,7 @@ module m_dfpt_loopert
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -61,6 +61,7 @@ module m_dfpt_loopert
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
+ use m_fft,        only : fourdp
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -91,6 +92,7 @@ module m_dfpt_loopert
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -235,10 +237,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
- use interfaces_32_util
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -311,7 +309,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
- integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
+ integer :: unitout,useylmgr,useylmgr1,use_rhoijim,vrsddb,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
@@ -1422,8 +1420,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call pawrhoij_nullify(pawrhoij1)
      cplex_rhoij=max(cplex,dtset%pawcpxocc)
      nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+     use_rhoijim = 1
+!    use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&     dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&     dtset%typat,use_rhoijim=use_rhoijim,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,&
+&     mpi_atmtab=mpi_enreg%my_atmtab)
      if (cplex_rhoij/=hdr%pawrhoij(1)%cplex) then
 !      Eventually reallocate hdr%pawrhoij
        call pawrhoij_free(hdr%pawrhoij)
@@ -2557,7 +2558,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2778,7 +2778,6 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtene'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

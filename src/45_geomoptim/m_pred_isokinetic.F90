@@ -26,7 +26,7 @@
 
 module m_pred_isokinetic
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abimover
  use m_abihist
@@ -87,7 +87,6 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isokinetic'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

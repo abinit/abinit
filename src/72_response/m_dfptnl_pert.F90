@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfptnl_pert
+!! NAME
+!!  m_dfptnl_pert
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfptnl_pert
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfptnl_pert
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfptnl_pert
 !! NAME
 !! dfptnl_pert
@@ -132,7 +170,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_wffile
  use m_wfk
  use m_xmpi
@@ -171,7 +209,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_pert'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -236,7 +273,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,debug_mode
- integer :: signs,size_wf,size_cprj,spaceComm,usepaw,useylmgr1
+ integer :: signs,size_wf,size_cprj,spaceComm,typat_ipert_phon,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
  real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
  real(dp) :: sumi,sum_psi1H1psi1,sum_psi1H1psi1_i
@@ -251,7 +288,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  real(dp) :: rmet(3,3),wtk_k
  real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef2(:,:),cwavef3(:,:),dkinpw(:)
  real(dp),allocatable :: eig1_k_i2pert(:),eig1_k_stored(:)
- real(dp),allocatable :: chi_ij(:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
+ real(dp),allocatable :: chi_ij(:,:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),occ_k(:)
  real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
@@ -340,16 +377,16 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    call paw_ij_init(paw_ij_tmp,cplex_loc,dtset%nspinor,nsp,nsp,dtset%pawspnorb,natom,psps%ntypat,&
 &   dtset%typat,pawtab,has_dijfr=1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,psps%ntypat,&
+   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
 &   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,&
 &   (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
+   ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2,cplex_loc))
    call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
-   ABI_ALLOCATE(chi_ij,(0,0,0))
+   ABI_ALLOCATE(chi_ij,(0,0,0,0))
    ABI_ALLOCATE(phkxred,(0,0))
    ABI_DATATYPE_ALLOCATE(pawrhoij21,(0))
    pawrhoij21_unsym => pawrhoij21
@@ -1031,7 +1068,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  else
    MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
  end if
- 
+
  call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
  ABI_DEALLOCATE(rho1r1_tot)
@@ -1056,10 +1093,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      write(msg,'(2(a,i10))') 'pawfgr%nfft/=nfftf : pawfgr%nfft=',pawfgr%nfft,' nfftf = ',nfftf
      MSG_ERROR(msg)
    end if
-   ABI_ALLOCATE(nhat21,(cplex*nfftf,nspden))
+
    call pawnhatfr(0,idir_phon,ipert_phon,natom,dtset%natom,nspden,psps%ntypat,&
 &   pawang,pawfgrtab,pawrhoij11,pawtab,rprimd)
 
+   ABI_ALLOCATE(nhat21,(cplex*nfftf,nspden))
    call pawmkrho(0,arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
 &   natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &   dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
@@ -1081,11 +1119,13 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    if(nspden>1) then
      v_i2pert(:,2) = vhartr1_i2pert(:)
    end if
+
+   typat_ipert_phon = dtset%typat(ipert_phon)
    if (debug_mode/=0) then
-     write(msg,'(2(a,i6))') ' DFPTNL_PERT : pawtab(',ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
+     write(msg,'(2(a,i6))') ' DFPTNL_PERT : pawtab(',typat_ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
      call wrtout(std_out,msg,'COLL')
    end if
-   if (pawtab(ipert_phon)%usexcnhat>0) then
+   if (pawtab(typat_ipert_phon)%usexcnhat>0) then
      v_i2pert(:,:) = v_i2pert(:,:) + vxc1_i2pert(:,:)
    end if
 
@@ -1109,26 +1149,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  sumi = sum_psi1H1psi1_i + sum_lambda1psi1psi1_i + sum_lambda1psi0S1psi1_i + sum_psi0H2psi1a_i + sum_psi0H2psi1b_i
  sumi = sumi   + half * (eHxc21_paw(2)+eHxc21_nhat(2)) + sixth * (exc3(2) + exc3_paw(2))
 
- write(msg,'(2a,3(a,i2,a,i1))') ch10,'NONLINEAR : ',&
- ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
- if (dtset%nonlinear_info>0) then
-   write(msg,'(10(a,2(a,f18.8)),a)') &
-&   ch10,'        sum_psi1H1psi1 = ',sum_psi1H1psi1,        ',',sum_psi1H1psi1_i,&
-&   ch10,'   sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,   ',',sum_lambda1psi1psi1_i,&
-&   ch10,' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i,&
-&   ch10,'       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i,&
-&   ch10,'       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i,&
-&   ch10,'          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2),&
-&   ch10,'         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2),&
-&   ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
-&   ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
-&   ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
- end if
-
 !Real parts
  d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)   = e3tot
  d3etot_1(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sum_psi1H1psi1
@@ -1151,6 +1171,51 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  d3etot_7(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = half * eHxc21_nhat(2)
  d3etot_8(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3(2)
  d3etot_9(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3_paw(2)
+
+!Before printing, set small contributions to zero
+!Real parts
+ if (abs(sum_psi1H1psi1)       <tol8) sum_psi1H1psi1        = zero
+ if (abs(sum_lambda1psi1psi1)  <tol8) sum_lambda1psi1psi1   = zero
+ if (abs(sum_lambda1psi0S1psi1)<tol8) sum_lambda1psi0S1psi1 = zero
+ if (abs(sum_psi0H2psi1a)      <tol8) sum_psi0H2psi1a       = zero
+ if (abs(sum_psi0H2psi1b)      <tol8) sum_psi0H2psi1b       = zero
+ if (abs(eHxc21_paw(1))        <tol8) eHxc21_paw(1)         = zero
+ if (abs(eHxc21_nhat(1))       <tol8) eHxc21_nhat(1)        = zero
+ if (abs(exc3(1))              <tol8) exc3(1)               = zero
+ if (abs(exc3_paw(1))          <tol8) exc3_paw(1)           = zero
+ if (abs(e3tot)                <tol8) e3tot                 = zero
+
+!Imaginary parts
+ if (abs(sum_psi1H1psi1_i)       <tol8) sum_psi1H1psi1_i        = zero
+ if (abs(sum_lambda1psi1psi1_i)  <tol8) sum_lambda1psi1psi1_i   = zero
+ if (abs(sum_lambda1psi0S1psi1_i)<tol8) sum_lambda1psi0S1psi1_i = zero
+ if (abs(sum_psi0H2psi1a_i)      <tol8) sum_psi0H2psi1a_i       = zero
+ if (abs(sum_psi0H2psi1b_i)      <tol8) sum_psi0H2psi1b_i       = zero
+ if (abs(eHxc21_paw(2))          <tol8) eHxc21_paw(2)           = zero
+ if (abs(eHxc21_nhat(2))         <tol8) eHxc21_nhat(2)          = zero
+ if (abs(exc3(2))                <tol8) exc3(2)                 = zero
+ if (abs(exc3_paw(2))            <tol8) exc3_paw(2)             = zero
+ if (abs(sumi)                   <tol8) sumi                    = zero
+
+ write(msg,'(2a,3(a,i2,a,i1))') ch10,'NONLINEAR : ',&
+ ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ if (dtset%nonlinear_info>0) then
+   write(msg,'(10(a,2(a,f18.8)),a)') &
+    ch10,'        sum_psi1H1psi1 = ',sum_psi1H1psi1,        ',',sum_psi1H1psi1_i,&
+    ch10,'   sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,   ',',sum_lambda1psi1psi1_i,&
+    ch10,' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i,&
+    ch10,'       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i,&
+    ch10,'       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i,&
+    ch10,'          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2),&
+    ch10,'         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2),&
+    ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
+    ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
+    ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
 
  if (compute_rho21) then
    call pawcprj_free(cwaveprj0)
@@ -1177,4 +1242,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  DBG_EXIT("COLL")
 
 end subroutine dfptnl_pert
+!!***
+
+end module m_dfptnl_pert
 !!***

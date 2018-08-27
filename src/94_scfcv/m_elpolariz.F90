@@ -29,7 +29,7 @@ module m_elpolariz
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_efield
  use m_xmpi
@@ -139,7 +139,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'elpolariz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -500,8 +499,6 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'uderiv'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

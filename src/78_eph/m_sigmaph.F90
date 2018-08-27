@@ -27,7 +27,7 @@ module m_sigmaph
  use defs_basis
  use defs_abitypes
  use iso_c_binding
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_hide_blas
@@ -66,6 +66,7 @@ module m_sigmaph
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_fourier_interpol, only : transgrid
+ use m_symkpt,     only : symkpt
 ! use m_paw_an,	       only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,	       only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
@@ -320,7 +321,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1436,7 +1436,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph_new'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -43,7 +43,7 @@ program band2eps
  use m_abimover
  use m_build_info
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_effective_potential
  use m_multibinit_dataset
