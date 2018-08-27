@@ -12,7 +12,7 @@ from .tools import lazy_property
 from .regex import HasRegex
 
 
-class BaseObject(object):
+class Node(object):
 
     def __repr__(self):
         if self.ancestor is not None:
@@ -36,7 +36,7 @@ class BaseObject(object):
         return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
 
 
-class FortranVariable(BaseObject):
+class FortranVariable(Node):
     """
     Fortran Variable.
     type-spec[ [, att] ... :: ] v[/c-list/][, v[/c-list/]] ...
@@ -89,7 +89,7 @@ class FortranVariable(BaseObject):
     #    return self.initial_value == "null()"
 
 
-class Datatype(BaseObject, HasRegex):
+class Datatype(Node, HasRegex):
 
     def __init__(self, name, ancestor, lines):
         self.name, self.ancestor = name, ancestor
@@ -210,7 +210,7 @@ class Datatype(BaseObject, HasRegex):
             self.variables[name] = var
 
 
-class Interface(BaseObject):
+class Interface(Node):
 
     def __init__(self, name, ancestor, lines):
         self.name, self.ancestor = name, ancestor
@@ -226,7 +226,7 @@ class Interface(BaseObject):
         self._analyzed = True
 
 
-class Procedure(BaseObject):
+class Procedure(Node):
     """
     Base class
 
@@ -237,7 +237,7 @@ class Procedure(BaseObject):
     children: List of string with the name of the subroutines called by this procedure.
     """
 
-    def __init__(self, name, ancestor, preamble, path=None):
+    def __init__(self, name, ancestor, preamble, visibility="public", path=None):
         self.name = name.strip()
         self.ancestor = ancestor
         self.preamble = "\n".join(preamble)
@@ -252,7 +252,8 @@ class Procedure(BaseObject):
         self.interfaces = []
 
         # TODO
-        self.visibility = "public"
+        # Initialize visibility.
+        self._visibility = visibility
         #self.has_implicit_none = False
 
     @lazy_property
@@ -270,6 +271,34 @@ class Procedure(BaseObject):
     @lazy_property
     def is_function(self):
         return isinstance(self, Function)
+
+    #@lazy_property
+    #def is_contained(self):
+    #    return isinstance(self, Function)
+
+    @lazy_property
+    def visibility(self):
+        # visibility of modules is assumed to be initialized.
+        if self._visibility is not None: return self._visibility
+        if self.is_program: return True
+
+        if self.ancestor is not None:
+            if self.ancestor.is_subroutine or self.ancestor.is_function or self.ancestor.is_program:
+                self._visibility = False
+                return self._visibility
+
+        ancestor = self.ancestor
+        while ancestor is not None:
+            if ancestor.is_module:
+                self._visibility = ancestor.visibility
+                return self._visibility
+            ancestor = self.ancestor
+
+        # Procedure outside module
+        #print(repr(self))
+        #raise RuntimeError("you should not be here!")
+        self._visibility = True
+        return self._visibility
 
     @lazy_property
     def dirpath(self):
@@ -315,7 +344,6 @@ class Procedure(BaseObject):
     def stree(self, level=0):
         lines = [level * "\t" + repr(self)]; app = lines.append
         level += 1
-        #if self.is_module:
         for p in self.contains:
             app(p.stree(level=level))
 
@@ -333,7 +361,7 @@ class Procedure(BaseObject):
         app("Directory: %s" % os.path.basename(self.dirname))
 
         if self.ancestor is not None:
-            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.proc_type))
+            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.__class__.__name__))
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -473,7 +501,7 @@ class FortranKissParser(HasRegex):
         #self.warnings = []
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
-        preamble, self.stack, includes, uses  = [], [], [], []
+        self.preamble, self.stack, includes, uses  = [], [], [], []
         self.ancestor = None
         self.visibility = "public"
 
@@ -487,7 +515,7 @@ class FortranKissParser(HasRegex):
             # Inlined comments are not counted (also because I don't like them)
             if line.startswith("!"):
                 if not stack or (stack and stack[-1][1] != "open"):
-                    preamble.append(line)
+                    self.preamble.append(line)
                 if line.replace("!", ""): self.num_doclines += 1
                 continue
             else:
@@ -511,6 +539,8 @@ class FortranKissParser(HasRegex):
                 assert subname
                 stack[-1][0].children.append(subname)
                 continue
+
+            #if stack[-1][0].is_module:
 
             # Interface declaration.
             m = self.RE_INTERFACE_START.match(line)
@@ -558,23 +588,14 @@ class FortranKissParser(HasRegex):
                 if self.verbose > 1: print("Entering program:", name)
                 if not name:
                     raise ValueError("Cannot find program name in line `%s`" % line)
-                stack.append([Program(name, self.ancestor, preamble, path=path), "open"])
+                stack.append([Program(name, self.ancestor, self.preamble, path=path), "open"])
                 self.visibility = "private"
-                preamble = []
+                self.preamble = []
                 continue
 
             m = self.RE_MOD_START.match(line)
             if m:
-                name = m.group("name")
-                if self.verbose > 1: print("Entering module:", name)
-                # Ignore module procedure
-                #assert name != "procedure"
-                # TODO
-                #assert self.ancestor is None
-                stack.append([Module(name, self.ancestor, preamble, path=path), "open"])
-                self.ancestor = self.stack[-1][0]
-                self.visibility = "public"
-                preamble = []
+                self.consume_module_header(m)
                 continue
 
             # Subroutine declaration.
@@ -584,9 +605,9 @@ class FortranKissParser(HasRegex):
                 if not subname:
                     raise ValueError("Cannot find procedure name in line `%s`" % line)
                 if self.verbose > 1: print("Found subroutine:", subname, "in line:\n\t", line)
-                stack.append([Subroutine(subname, self.ancestor, preamble, path=path), "open"])
+                stack.append([Subroutine(subname, self.ancestor, self.preamble, path=path), "open"])
                 self.ancestor = self.stack[-1][0]
-                preamble = []
+                self.preamble = []
                 continue
 
             # Function declaration
@@ -595,9 +616,9 @@ class FortranKissParser(HasRegex):
                 func_name = m.group("name")
                 if not func_name:
                     raise ValueError("Cannot find procedure name in line:\n\t%s" % line)
-                stack.append([Function(func_name, self.ancestor, preamble, path=path), "open"])
+                stack.append([Function(func_name, self.ancestor, self.preamble, path=path), "open"])
                 self.ancestor = self.stack[-1][0]
-                preamble = []
+                self.preamble = []
                 continue
 
             if line.startswith("end "):
@@ -621,7 +642,6 @@ class FortranKissParser(HasRegex):
                 #    print("WARNING: end_name:", end_name, " != last_name:", last_name)
                 #    print("line", line, "end_proc_type", end_proc_type)
 
-                #self.close_stack_entry(end_name, end_proc_type)
                 if end_name is not None:
                     # Close the last entry in the stack with name == end_name.
                     for item in reversed(stack):
@@ -652,7 +672,8 @@ class FortranKissParser(HasRegex):
         self.uses = sorted(set(uses))
 
         # Extract data from stack.
-        # TODO: Support visibility
+        # TODO: Support visibility But I need to parse the first portion of the header.
+        # to handle e.g. public :: foo
         self.programs, self.modules, self.subroutines, self.functions = [], [], [], []
         while stack:
             p, status = stack.pop(0)
@@ -680,6 +701,15 @@ class FortranKissParser(HasRegex):
         i = s.find("!")
         if i != -1: s = s[:i]
         return s.strip() == token
+
+    def consume_module_header(self, start_match):
+        name = start_match.group("name")
+        if self.verbose > 1: print("Entering module:", name)
+        #assert self.ancestor is None
+        self.stack.append([Module(name, self.ancestor, self.preamble, visibility=self.visibility, path=self.path), "open"])
+        self.ancestor = self.stack[-1][0]
+        self.visibility = "public"
+        self.preamble = []
 
     def consume_interface(self, start_match):
         assert self.stack[-1][1] == "open"

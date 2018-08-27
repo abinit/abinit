@@ -491,6 +491,7 @@ class AbinitProject(object):
                 self.fort_files[key].all_usedby_mods.append(fort_file)
 
         pub_procs = self.all_public_procedures()
+        all_interfaces = self.get_all_interfaces()
         #assert "gstate" in pub_procs
         miss = []
         for fort_file in self.fort_files.values():
@@ -499,6 +500,9 @@ class AbinitProject(object):
                     try:
                         pub_procs[child_name].parents.append(proc)
                     except KeyError:
+                        #if child_name in all_interfaces:
+                        #    print("Found in interfaces:", child_name)
+                        #else:
                         miss.append(child_name)
 
         def is_internal(name):
