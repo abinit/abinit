@@ -728,6 +728,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 
 !Final deallocations
+ if(dtset%imgmov==6)then
+   m1geo_param%iexit=1
+   call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
+&   itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,m1geo_param,dtset%natom,ndynimage,&
+&   nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img)
+ endif
+
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(vel)
  ABI_DEALLOCATE(xred)
@@ -737,15 +744,16 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_DEALLOCATE(amass)
  end if
 
+!This section is useless because of the previous call for deallocations with imgmov==6.
 !This call is needed to free an internal matrix in prec_simpl. However, this is really not optimal ... 
 !One should have a datastructure associated with the preconditioner...
- if (dtset%goprecon>0)then
-   ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
-   call abiforstr_ini(preconforstr,dtset%natom)
-   call prec_simple(m1geo_param%ab_mover,preconforstr,hist_prev(1),1,1,1)
-   call abiforstr_fin(preconforstr)
-   ABI_DATATYPE_DEALLOCATE(hist_prev)
- end if
+!if (dtset%goprecon>0)then
+!  ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
+!  call abiforstr_ini(preconforstr,dtset%natom)
+!  call prec_simple(m1geo_param%ab_mover,preconforstr,hist_prev(1),1,1,1)
+!  call abiforstr_fin(preconforstr)
+!  ABI_DATATYPE_DEALLOCATE(hist_prev)
+!end if
 
  do itimimage=1,ntimimage_stored
    call destroy_results_img(results_img(:,itimimage))
@@ -1099,9 +1107,11 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
- call wrtout(ab_out ,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
-
+!Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
+ if(imgmov/=6 .or. m1geo_param%iexit==0)then
+   call wrtout(ab_out ,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+ endif
 
  select case(imgmov)
 
