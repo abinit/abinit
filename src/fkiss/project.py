@@ -411,8 +411,13 @@ class AbinitProject(object):
     IGNORED_FILES = {"m_build_info.F90", "m_optim_dumper.F90"}
 
     # Marcos used to import modules in abinit libraries.
-    # Must be consistent with CPP version.
+    # Must be consistent with CPP version. see incs/abi_common.h
     MACROS = {
+        # Abinit MACROS.
+        "ABI_ASYNC": ",asynchronous",
+        "ABI_PRIVATE": ",private",
+        "ABI_PROTECTED": ",protected",
+        "ABI_CONTIGUOUS": "contigous,",
         # Libpaw.
         "USE_DEFS": "use defs_basis",
         "USE_MPI_WRAPPERS": "use m_xmpi",
@@ -464,6 +469,10 @@ class AbinitProject(object):
                         raise RuntimeError("Found two Fortran files with same basename `%s`" % basename)
                     self.fort_files[basename] = fort_file
 
+        print("Parsing completed in %.2f [s]" % (time.time() - start))
+        print("Building dependency graph ...")
+        start = time.time()
+
         # def correlate()
         # Build dependency graph
         # TODO: check for cyclic dependencies. ?
@@ -513,7 +522,7 @@ class AbinitProject(object):
             print("Cannot find %d callees. Use --verbose to show list." % len(miss))
             if verbose: pprint(miss)
 
-        print("Analysis completed in %.2f [s]" % (time.time() - start))
+        print("Graph completed in %.2f [s]" % (time.time() - start))
 
     def __str__(self):
          return self.to_string()

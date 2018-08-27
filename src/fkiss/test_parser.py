@@ -15,12 +15,6 @@ class TestFortranKissParser(TestCase):
         """Test regular expressions."""
         p = FortranKissParser
 
-        # Note: Don't use strings with inlined comments e.g.
-        #
-        #   "program foo !this is an inlined comment"
-        #
-        # because the parser will strip them and operate on stripped strings.
-
         # Program
         m = p.RE_PROG_START.match("program foo")
         assert m and m.group("name") == "foo"
@@ -82,16 +76,18 @@ class TestFortranKissParser(TestCase):
         assert m and m.group("name") == "foo"
         #m = p.RE_SUBCALL.match("call obj%foo(a=1, b=3)")
         #assert m and m.group("name") == "obj%foo" and m.group("method") == "foo"
+        #m = p.RE_SUBCALL.match("call obj % foo")
+        #assert m and m.group("name") == "obj%foo" and m.group("method") == "foo"
         #m = p.RE_SUBCALL.match("if (a == b) call obj%foo(a, b)")
         #assert m and m.group("name") == "obj%foo" and m.group("method") == "foo"
 
         # Interface
         m = p.RE_INTERFACE_END.match("end interface")
-        assert m  and not m.group("name")
+        assert m and not m.group("name")
         m = p.RE_INTERFACE_START.match("abstract interface foo")
         assert m and m.group("name") == "foo"
         m = p.RE_INTERFACE_END.match("end  interface  foo")
-        assert m  and m.group("name") == "foo"
+        assert m and m.group("name") == "foo"
 
         # Intrinsic type declarations.
         m = p.RE_CHARACTER_DEC.match("character (len= 10)")
@@ -110,14 +106,24 @@ class TestFortranKissParser(TestCase):
         assert m and m.group("ftype") == "class" and m.group("name") == "Circle"
 
         # integer
-        #assert not p.RE_VARNUMBOOL_DEC.match("integer :: timrev")
-        #assert m and m.group("ftype") == "integer" and m.group("kind") == None
+        m = p.RE_NUMBOOL_DEC.match("integer :: timrev")
+        assert m and m.group("ftype") == "integer" and m.group("kind") is None
+        m = p.RE_NUMBOOL_DEC.match("integer ( i8b ) :: timrev")
+        assert m and m.group("ftype") == "integer" and m.group("kind") == "i8b"
+        m = p.RE_NUMBOOL_DEC.match("integer(kind=4) :: timrev")
+        assert m and m.group("ftype") == "integer" and m.group("kind") == "4"
+        m = p.RE_NUMBOOL_DEC.match("integer ( kind = i4b ) :: timrev")
+        assert m and m.group("ftype") == "integer" and m.group("kind") == "i4b"
         # real
-        #assert not p.RE_VARNUMBOOL_DEC.match("real(dp) :: ucvol")
-        #assert m and m.group("ftype") == "real" and m.group("kind") == "dp"
+        m = p.RE_NUMBOOL_DEC.match("double precision :: ucvol")
+        assert m and m.group("ftype") == "double precision" and m.group("kind") is None
+        m = p.RE_NUMBOOL_DEC.match("double complex :: j")
+        assert m and m.group("ftype") == "double complex" and m.group("kind") is None
+        m = p.RE_NUMBOOL_DEC.match("real(dp) :: ucvol")
+        assert m and m.group("ftype") == "real" and m.group("kind") == "dp"
         # boolean
-        #assert not p.RE_VARNUMBOOL_DEC.match("logical :: use_antiferro")
-        #assert m and m.group("ftype") == "logical" and m.group("kind") == None
+        m = p.RE_NUMBOOL_DEC.match("logical :: use_antiferro")
+        assert m and m.group("ftype") == "logical" and m.group("kind") is None
 
         # datatype declaration.
         m = p.RE_TYPE_START.match("type foo_t")
@@ -287,6 +293,70 @@ end module m_crystal
         #assert xred.ftype == "real" and xred.kind == "dp"
         assert not xred.is_scalar and xred.is_array and xred.shape == "(:,:)"
         assert xred.doc.splitlines() == ["! xred", "! docstring"]
+
+    def test_datatype(self):
+        """Parsing tricky Fortran datatype declaration"""
+        s = """\
+module foo_module
+
+type, public :: foo_t
+
+  integer ( i8b ) , public :: nsym
+  ! number of symmetries
+
+  real (kind = 4), private , allocatable :: xred(:, :)
+
+  type(foo_t), pointer :: foo
+  ! Another foo type
+
+  double complex, allocatable :: cvals(:)
+
+  character (len=fnlen), allocatable , private :: strings(:)
+
+  real(dp), allocatable :: ucvol, ecut  ! doc for ucvol and ecut
+
+end type foo_t
+
+end module foo_module
+"""
+        p = FortranKissParser()
+        p.parse_string(s)
+        dt = p.modules[0].types[0]
+        assert dt.name == "foo_t"
+        dt.analyze()
+
+        # Test nsym
+        nsym = dt.variables["nsym"]
+        assert nsym.ftype == "integer" and nsym.kind == "i8b"
+        assert nsym.doc == "! number of symmetries"
+
+        # Test xred
+        xred = dt.variables["xred"]
+        assert xred.ftype == "real" and xred.kind == "4" and not xred.doc
+        assert xred.is_allocatable and not xred.is_scalar and xred.is_array
+
+        # Test foo
+        foo = dt.variables["foo"]
+        assert foo.is_pointer
+        assert foo.ftype == "type" and foo.kind == "foo_t"
+        assert foo.is_scalar
+        #assert foo.is_pointer_set_to_null
+
+        # Test cvals
+        cvals = dt.variables["cvals"]
+        assert cvals.ftype == "doublecomplex" and cvals.kind is None
+
+        # Test strings
+        strings = dt.variables["strings"]
+        assert strings.ftype == "character"
+        #assert strings.strlen == "fnlen"
+        #assert len(strings.shape) == 1
+
+        ucvol, ecut = dt.variables["ucvol"], dt.variables["ecut"]
+        assert ucvol.is_scalar and ecut.is_scalar
+        assert ucvol.doc == "! doc for ucvol and ecut"
+        assert ucvol.doc == ecut.doc
+
 
     def test_tricky_module(self):
         """Parsing tricky Fortran module similar to 42_libpaw/m_libpaw_libxc.F90"""

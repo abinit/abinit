@@ -206,12 +206,16 @@ def main():
         return list_cpp_options(".")
 
     if options.command == "parse":
-        fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
-        print(fort_file.to_string(verbose=options.verbose))
-        for mod in fort_file.modules:
-            for dtype in mod.types:
-                print("Analyzing", repr(dtype))
-                dtype.analyze()
+        if options.what == ".":
+            proj = AbinitProject(".", verbose=options.verbose)
+            print(proj)
+        else:
+            fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
+            print(fort_file.to_string(verbose=options.verbose))
+            for mod in fort_file.modules:
+                for dtype in mod.types:
+                    print("Analyzing", repr(dtype))
+                    dtype.analyze()
         return 0
 
     elif options.command == "touch":
@@ -360,10 +364,10 @@ def main():
                 cprint(exc, "red")
                 #raise exc
                 retcode += 1
-                try:
-                    dtype.analyze(verbose=1)
-                except Exception as exc:
-                    pass
+                #try:
+                #    dtype.analyze(verbose=1)
+                #except Exception as exc:
+                #    pass
 
         print("%d errors out of %d" % (retcode, len(all_dtypes)))
 

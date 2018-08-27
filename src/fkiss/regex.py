@@ -96,9 +96,6 @@ re.I | re.VERBOSE)
     # [interface-body]...
     # [[MODULE]PROCEDURE name-list]...
     # END INTERFACE [generic-spec]
-    #RE_INTERFACE_START = re.compile("^(abstract\s+)?interface(?:\s+(\S.+))?$", re.I)
-    #RE_INTERFACE_END = re.compile("^end\s+interface(?:\s+(\S.+))?$", re.I)
-
     RE_INTERFACE_START = re.compile(r"(abstract\s+)?interface\s*(?P<name>\w*)", re.I)
     RE_INTERFACE_END = re.compile(r"end\s+interface\s*(?P<name>\w*)", re.I)
 
@@ -112,8 +109,6 @@ re.I | re.VERBOSE)
     #    [component-definition]. . .
     #    [type-bound-procedure-part]
     # END TYPE [name]
-    #RE_TYPE_START = re.compile(r'type\s*(|.*::)\s*(?P<name>\w+)', re.I)
-    #RE_TYPE_END = re.compile(r'^end\s+type', re.I)
     RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)\Z', re.I)
     RE_TYPE_END = re.compile(r'^end(\s*type\s*(?P<name>\w*)|)\Z', re.I)
 
@@ -132,12 +127,14 @@ re.I | re.VERBOSE)
     # For character(len=xxx) or character(len=*)
     RE_CHARACTER_DEC = re.compile(r'character\s*\(\s*len\s*=\s*(?P<len>(\*|\w+))\)', re.I)
 
-    #For complex(kind=dp) or complex(kind(dp))
-    #re_complex = re.compile('complex[(](kind[=(])?(?P<kind>[^)]+)[)]+', re.I)
-    #For real(kind=dp) or real(kind(dp))
-    #re_real = re.compile('real[(](kind[=(])?(?P<kind>[^)]+)[)]+', re.I)
     # For type(xxx)
     RE_TYPECLASS_DEC = re.compile('(?P<ftype>(type|class))\s*\(\s*(?P<name>\w+)\s*\)', re.I)
+
+    RE_NUMBOOL_DEC = re.compile(r"""
+(?P<ftype>(integer|real|double\s*precision|complex|double\s*complex|logical))\s*
+(\(\s*(kind\s*=\s*)?(?P<kind>\w*)\s*\))?
+""",
+re.I | re.VERBOSE)
 
     #Continuation
     #re_continuation = re.compile("&[ \t]*(![^\n]*)?\n")

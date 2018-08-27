@@ -48,17 +48,20 @@ class FortranVariable(BaseObject):
 
     def __init__(self, name, ancestor, ftype, shape, kind=None, strlen=None,
                  attribs=None, initial_value=None, doc=None):
+
         self.name, self.ancestor = name, ancestor
         self.ftype, self.shape = ftype, shape
         self.attribs = () if attribs is None else tuple(sorted(attribs))
         self.initial_value = initial_value
         self.doc = "" if doc is None else doc
 
-        if ftype == "string":
-            assert kind is None
+        if ftype == "character":
+            if kind is not None:
+                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
             self.strlen = strlen
         else:
-            assert strlen is None
+            if strlen is not None:
+                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
             self.kind = kind
 
     def to_string(self, verbose=0):
@@ -79,6 +82,11 @@ class FortranVariable(BaseObject):
     @lazy_property
     def is_pointer(self):
         return "pointer" in self.attribs
+
+    #@lazy_property
+    #def is_pointer_set_to_null(self):
+    #    if not self.is_pointer: return False
+    #    return self.initial_value == "null()"
 
 
 class Datatype(BaseObject, HasRegex):
@@ -160,9 +168,9 @@ class Datatype(BaseObject, HasRegex):
                 if m:
                     ftype, kind, strlen = m.group("ftype"), m.group("name"), None
 
-                #m = self.RE_VARNUMBOOL_DEC.match(ftype)
-                #if m:
-                #    ftype, kind, strlen = m.group("ftype"), m.group("kind"), None
+                m = self.RE_NUMBOOL_DEC.match(ftype)
+                if m:
+                    ftype, kind, strlen = m.group("ftype"), m.group("kind"), None
 
                 # TODO: a(1,2), b, c(3, 4)
                 if ")" in post:
