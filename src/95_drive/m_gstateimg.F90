@@ -728,6 +728,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 
 !Final deallocations
+
+!This call is needed to free internal storages in different routines (prec_simple, pred_bfgs ...)
  if(dtset%imgmov==6)then
    m1geo_param%iexit=1
    call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
@@ -743,17 +745,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  if (allocated(amass)) then
    ABI_DEALLOCATE(amass)
  end if
-
-!This section is useless because of the previous call for deallocations with imgmov==6.
-!This call is needed to free an internal matrix in prec_simpl. However, this is really not optimal ... 
-!One should have a datastructure associated with the preconditioner...
-!if (dtset%goprecon>0)then
-!  ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
-!  call abiforstr_ini(preconforstr,dtset%natom)
-!  call prec_simple(m1geo_param%ab_mover,preconforstr,hist_prev(1),1,1,1)
-!  call abiforstr_fin(preconforstr)
-!  ABI_DATATYPE_DEALLOCATE(hist_prev)
-!end if
 
  do itimimage=1,ntimimage_stored
    call destroy_results_img(results_img(:,itimimage))
