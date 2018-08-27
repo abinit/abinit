@@ -80,7 +80,7 @@ class FortranFile(object):
         p = FortranKissParser(macros=macros, verbose=verbose).parse_file(path)
 
         new = cls(path)
-        new.includes = p.includes
+        new.all_includes = p.all_includes
         new.programs = p.programs
         new.modules = p.modules
         new.subroutines = p.subroutines
@@ -162,7 +162,7 @@ class FortranFile(object):
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
         app("Use modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.all_used_mods)))
         app("Use dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.all_used_mods))))))
-        app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
+        app("Includes:\n%s\n" % w.fill(", ".join(self.all_includes)))
         app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.all_usedby_mods)))
         app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.all_usedby_mods))))))
 
@@ -262,7 +262,7 @@ class FortranFile(object):
             ("min_dirlevel", self.min_dirlevel),
             ("this_dirlevel", self.dirlevel),
             ("max_dirlevel", self.max_dirlevel),
-            ("includes", len(self.includes)),
+            ("includes", len(self.all_includes)),
             #("class", self.__class__.__name__),
         ])
 

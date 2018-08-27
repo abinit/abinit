@@ -201,8 +201,8 @@ class Datatype(Node, HasRegex):
                         names[iv] = v[:j]
                         shapes[iv] = v[j:]
 
-                if verbose:
-                    print(f"ftype={ftype}, attribs={attribs}, vlist={vlist}, names={names}, shapes={shapes}, initial_values={initial_values}\n".format(locals()))
+                #if verbose:
+                #    print(f"ftype={ftype}, attribs={attribs}, vlist={vlist}, names={names}, shapes={shapes}, initial_values={initial_values}\n".format(locals()))
 
         for i, name in enumerate(names):
             var = FortranVariable(name, self, ftype, shapes[i], kind=kind, strlen=strlen,
@@ -420,14 +420,6 @@ class Procedure(Node):
 
         return sorted(set(uses))
 
-    #def analyze(self):
-    #    if self.is_module:
-    #        for p in self.contains:
-    #            p.visibility = self.visibility
-    #    else:
-    #        for p in self.contains:
-    #            p.visibility = "private"
-
 
 class Program(Procedure):
     """Fortran program."""
@@ -501,28 +493,19 @@ class FortranKissParser(HasRegex):
         #self.warnings = []
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
-        self.preamble, self.stack, includes, uses  = [], [], [], []
+        self.preamble, self.stack = [], []
+        self.all_includes, self.all_uses  = [], []
         self.ancestor = None
         self.visibility = "public"
-
         stack = self.stack
 
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
-
-            # Count number of comments and code line
-            # Inlined comments are not counted (also because I don't like them)
-            if line.startswith("!"):
-                if not stack or (stack and stack[-1][1] != "open"):
-                    self.preamble.append(line)
-                if line.replace("!", ""): self.num_doclines += 1
-                continue
-            else:
-                self.num_f90lines += 1
-
-            if line.startswith("!$omp"):
-                self.num_omp_statements += 1
+            if self.handle_comment(line): continue
+            if self.handle_use_statement(line): continue
+            if self.handle_include(line): continue
+            if self.handle_contains(line): continue
 
             m = self.RE_PUB_OR_PRIVATE.match(line)
             if m:
@@ -531,94 +514,16 @@ class FortranKissParser(HasRegex):
 
             # Invokations of Fortran functions are difficult to handle
             # without inspecting locals so we only handle explicit calls to routines.
-            # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
-            # should also handle call obj%foo()
-            m = self.RE_SUBCALL.match(line)
-            if m:
-                subname = m.group("name")
-                assert subname
-                stack[-1][0].children.append(subname)
-                continue
+            if self.handle_call(line): continue
 
-            #if stack[-1][0].is_module:
-
-            # Interface declaration.
-            m = self.RE_INTERFACE_START.match(line)
-            if m:
-                self.consume_interface(m)
-                continue
-
-            # Datatype declaration.
-            m = self.RE_TYPE_START.match(line)
-            if m and stack[-1][0].is_module and "(" not in line:
-                self.consume_datatype(m)
-                continue
-
-            # Find use statements and the corresponding module
-            # TODO in principle one could have `use A; use B`
-            if line.startswith("use "):
-                smod = line.split()[1].split(",")[0].lower()
-                # Remove comment at the end of the line if present.
-                i = smod.find("!")
-                if i != -1: smod = smod[:i]
-                if self.verbose > 1: print("Found used module:", smod)
-                stack[-1][0].local_uses.append(smod)
-                uses.append(smod)
-                continue
-
-            if self.simple_match(line, "contains"):
-                assert stack
-                self.ancestor = stack[-1][0]
-                if self.verbose > 1: print("Setting ancestor to:", repr(self.ancestor))
-                continue
-
-            # Handle include statement (CPP or Fortran version).
-            if line.startswith("#include ") or line.startswith("include "):
-                what = line.split()[1].replace("'", "").replace('"', "")
-                if stack:
-                    stack[-1][0].includes.append(what)
-                else:
-                    includes.append(what)
-                continue
-
-            # Extract name from (module | program).
-            m = self.RE_PROG_START.match(line)
-            if m:
-                name = m.group("name")
-                if self.verbose > 1: print("Entering program:", name)
-                if not name:
-                    raise ValueError("Cannot find program name in line `%s`" % line)
-                stack.append([Program(name, self.ancestor, self.preamble, path=path), "open"])
-                self.visibility = "private"
-                self.preamble = []
+            # Subroutine declaration.
+            # Function declaration
+            if self.handle_procedure(line):
                 continue
 
             m = self.RE_MOD_START.match(line)
             if m:
                 self.consume_module_header(m)
-                continue
-
-            # Subroutine declaration.
-            m = self.RE_SUB_START.match(line)
-            if m:
-                subname = m.group("name")
-                if not subname:
-                    raise ValueError("Cannot find procedure name in line `%s`" % line)
-                if self.verbose > 1: print("Found subroutine:", subname, "in line:\n\t", line)
-                stack.append([Subroutine(subname, self.ancestor, self.preamble, path=path), "open"])
-                self.ancestor = self.stack[-1][0]
-                self.preamble = []
-                continue
-
-            # Function declaration
-            m = self.RE_FUNC_START.match(line)
-            if m:
-                func_name = m.group("name")
-                if not func_name:
-                    raise ValueError("Cannot find procedure name in line:\n\t%s" % line)
-                stack.append([Function(func_name, self.ancestor, self.preamble, path=path), "open"])
-                self.ancestor = self.stack[-1][0]
-                self.preamble = []
                 continue
 
             if line.startswith("end "):
@@ -635,41 +540,14 @@ class FortranKissParser(HasRegex):
                     #print("index error in:", line)
                     end_name = None
 
-                #if end_proc_type == "module": print("got end", end_name)
-                #print(line, end_name)
-                #last_name = stack[-1][0].name
-                #if last_name != end_name:
-                #    print("WARNING: end_name:", end_name, " != last_name:", last_name)
-                #    print("line", line, "end_proc_type", end_proc_type)
-
-                if end_name is not None:
-                    # Close the last entry in the stack with name == end_name.
-                    for item in reversed(stack):
-                        if item[0].name == end_name:
-                            item[1] = "closed"
-                            break
-                    else:
-                        raise RuntimeError("Cannot find end_name `%s` in stack:\n%s" % (
-                            end_name, pformat([s[0].name for s in stack])))
-                else:
-                    # Close the last entry in the stack with end_proc_type.
-                    if end_proc_type is not None:
-                        for item in reversed(stack):
-                            if item[0].proc_type == end_proc_type:
-                                item[1] = "closed"
-                                break
-                        else:
-                            raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s" % (
-                                end_proc_type, pformat([s[0].proc_type for s in stack])))
-                    else:
-                        stack[-1][1] = "closed"
+                self.close_stack_entry(end_name, end_proc_type)
 
                 #print("Closing procedure", stack[-1][0].name)
                 if self.ancestor is not None and self.ancestor.name == end_name:
                     self.ancestor = self.ancestor.ancestor
 
-        self.includes = sorted(set(includes))
-        self.uses = sorted(set(uses))
+        self.all_includes = sorted(set(self.all_includes))
+        self.all_uses = sorted(set(self.all_uses))
 
         # Extract data from stack.
         # TODO: Support visibility But I need to parse the first portion of the header.
@@ -702,6 +580,59 @@ class FortranKissParser(HasRegex):
         if i != -1: s = s[:i]
         return s.strip() == token
 
+    def handle_contains(self, line):
+        if not self.simple_match(line, "contains"): return False
+        self.ancestor = self.stack[-1][0]
+        if self.verbose > 1: print("Setting ancestor to:", repr(self.ancestor))
+        return True
+
+    def handle_include(self, line):
+        # Handle include statement (CPP or Fortran version).
+        if line.startswith("#include ") or line.startswith("include "):
+            what = line.split()[1].replace("'", "").replace('"', "")
+            if self.stack:
+                self.stack[-1][0].includes.append(what)
+            else:
+                self.all_includes.append(what)
+            return True
+        return False
+
+    def handle_comment(self, line):
+        # Count number of comments and code line
+        # Inlined comments are not counted (also because I don't like them)
+        if not line.startswith("!"):
+            self.num_f90lines += 1
+            return False
+
+        if not self.stack or (self.stack and self.stack[-1][1] != "open"):
+            self.preamble.append(line)
+        if line.replace("!", ""): self.num_doclines += 1
+        if line.startswith("!$omp"): self.num_omp_statements += 1
+        return True
+
+    def handle_use_statement(self, line):
+        # Find use statements and the corresponding module
+        # TODO in principle one could have `use A; use B`
+        if not line.startswith("use "): return False
+        smod = line.split()[1].split(",")[0].lower()
+        # Remove comment at the end of the line if present.
+        i = smod.find("!")
+        if i != -1: smod = smod[:i]
+        if self.verbose > 1: print("Found used module:", smod)
+        self.stack[-1][0].local_uses.append(smod)
+        self.all_uses.append(smod)
+        return True
+
+    def handle_call(self, line):
+        # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
+        # should also handle call obj%foo()
+        m = self.RE_SUBCALL.match(line)
+        if not m: return False
+        subname = m.group("name")
+        assert subname
+        self.stack[-1][0].children.append(subname)
+        return True
+
     def consume_module_header(self, start_match):
         name = start_match.group("name")
         if self.verbose > 1: print("Entering module:", name)
@@ -710,6 +641,30 @@ class FortranKissParser(HasRegex):
         self.ancestor = self.stack[-1][0]
         self.visibility = "public"
         self.preamble = []
+
+        while self.lines:
+            line = self.lines.popleft()
+            if not line: continue
+            if self.handle_contains(line): break
+            if self.handle_use_statement(line): continue
+
+            # Interface declaration.
+            m = self.RE_INTERFACE_START.match(line)
+            if m:
+                self.consume_interface(m)
+                continue
+
+            # Datatype declaration.
+            m = self.RE_TYPE_START.match(line)
+            if m and self.stack[-1][0].is_module and "(" not in line:
+                self.consume_datatype(m)
+                continue
+
+            m = self.RE_MOD_END.match(line)
+            if m:
+                end_name = m.group("name")
+                self.close_stack_entry(end_name, "module")
+                break
 
     def consume_interface(self, start_match):
         assert self.stack[-1][1] == "open"
@@ -745,3 +700,55 @@ class FortranKissParser(HasRegex):
             raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
 
         self.stack[-1][0].types.append(Datatype(name, self.ancestor, buf))
+
+    def handle_procedure(self, line):
+        ptype = "subroutine"
+        m = self.RE_SUB_START.match(line)
+        if not m:
+            m = self.RE_FUNC_START.match(line)
+            if m: ptype = "function"
+        if not m:
+            m = self.RE_PROG_START.match(line)
+            if m: ptype = "program"
+        if not m: return False
+
+        # Extract name from (module | program).
+        name = m.group("name")
+        if not name:
+            raise ValueError("Cannot find %s name in line `%s`" % (ptype, line))
+        if self.verbose > 1: print("Found %s:" % ptype, name, "at line:\n\t", line)
+        if ptype == "subroutine":
+            self.stack.append([Subroutine(name, self.ancestor, self.preamble, path=self.path), "open"])
+        elif ptype == "function":
+            self.stack.append([Function(name, self.ancestor, self.preamble, path=self.path), "open"])
+        elif ptype == "program":
+            self.stack.append([Program(name, self.ancestor, self.preamble, path=self.path), "open"])
+        else:
+            raise ValueError(ptype)
+
+        self.ancestor = self.stack[-1][0]
+        self.preamble = []
+        return True
+
+    def close_stack_entry(self, end_name, end_proc_type):
+        if end_name is not None:
+            # Close the last entry in the stack with name == end_name.
+            for item in reversed(self.stack):
+                if item[0].name == end_name:
+                    item[1] = "closed"
+                    break
+            else:
+                raise RuntimeError("Cannot find end_name `%s` in stack:\n%s" % (
+                    end_name, pformat([s[0].name for s in self.stack])))
+        else:
+            # Close the last entry in the stack with end_proc_type.
+            if end_proc_type is not None:
+                for item in reversed(self.stack):
+                    if item[0].proc_type == end_proc_type:
+                        item[1] = "closed"
+                        break
+                else:
+                    raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s" % (
+                        end_proc_type, pformat([s[0].proc_type for s in self.stack])))
+            else:
+                self.stack[-1][1] = "closed"
