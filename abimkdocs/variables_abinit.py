@@ -6328,7 +6328,7 @@ Variable(
     abivarname="imgmov",
     varset="rlx",
     vartype="integer",
-    topics=['PIMD_compulsory', 'TransPath_compulsory'],
+    topics=['CrossingBarriers_useful', 'PIMD_compulsory', 'TransPath_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="IMaGe MOVEs",
@@ -6396,6 +6396,34 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]] = 0).
 
 No meaning for RF calculations.
+""",
+),
+
+Variable(
+    abivarname="imgwfstor",
+    varset="rlx",
+    vartype="integer",
+    topics=['CrossingBarriers_useful', 'PIMD_useful', 'TransPath_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="IMaGe WaveFunction STORage",
+    requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
+    text="""
+Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
+Possible values of [[imgwfstor]] are 0 or 1. 
+If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
+size [[nimage]] more than the storage needed for one set of wavefunctions..
+When the specific computation (optimization/SCF cycle ...) for this image is started,
+the past wavefunctions are used, to speed up the computation. If [[imgwfstor]]==0,
+the wavefunctions are reinitialised, either at random or from the initial wavefunction file (so, without
+any modification to take into account the computations at the previous value of itimimage.
+
+If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
+are spread over many processors, which happens when [[paral_kgb]] == 1. 
+For some algorithms, e.g. when some geometry optimization
+is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
+For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller. 
+Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
 """,
 ),
 

@@ -991,7 +991,7 @@ P           mkmem           4
 
 - subtotal                      21.985  95.9      1.781  80.8
 
- Partitioning of scfcv
+ Partitioning of scfcv_core
 - scfcv                         21.599  94.2      1.436  65.2              1
  
 - scfcv(iniloop, setvtr  )       0.069   0.3      0.067   3.0             13

@@ -51,7 +51,7 @@ module m_scfcv
  use m_paw_dmft,         only : paw_dmft_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
- use m_scfcv_core,       only : scfcv
+ use m_scfcv_core,       only : scfcv_core
 
  implicit none
 
@@ -729,7 +729,7 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
+   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
 &    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
 &    this%initialized,this%irrzon,this%kg,this%mcg,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,this%nfftf,this%npwarr,&
 &    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&

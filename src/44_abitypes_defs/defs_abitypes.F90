@@ -309,6 +309,7 @@ type dataset_type
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
+ integer :: imgwfstor
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov

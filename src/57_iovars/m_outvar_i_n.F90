@@ -358,6 +358,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%imgmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'imgmov','INT',0)
 
+ intarr(1,:)=dtsets(:)%imgwfstor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'imgwfstor','INT',0)
+
  intarr(1,:)=dtsets(:)%inclvkb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'inclvkb','INT',0)
 

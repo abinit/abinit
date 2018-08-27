@@ -795,7 +795,7 @@ P           mkmem           1
 
 - subtotal                       8.734  94.2      8.855  93.8
 
- Partitioning of scfcv
+ Partitioning of scfcv_core
 - scfcv                          8.338  90.0      8.457  89.6              3
  
 - scfcv   (1)                    0.009   0.1      0.009   0.1              3

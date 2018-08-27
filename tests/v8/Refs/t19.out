@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 14 Aug 2018.
-- ( at 15h58 )
+.Starting date : Sun 26 Aug 2018.
+- ( at 08h15 )
   
 - input  file    -> t19.in
 - output file    -> t19.out
-- root for input  files -> i
-- root for output files -> o
+- root for input  files -> t19i
+- root for output files -> t19o
 
 
  Symmetries : space group Pm m m (# 47); Bravais oP (primitive ortho.)
@@ -57,6 +57,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.299 Mbytes.
              ecut      1.30000000E+01 Hartree
 -          fftalg         312
            getwfk          -1
+        imgwfstor           1
            ionmov           2
            istwfk        2
            kptopt           0
@@ -71,6 +72,7 @@ P           mkmem           1
            nsppol           2
              nsym           8
             ntime          10
+        ntimimage           2
            ntypat           1
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000
@@ -116,7 +118,7 @@ P           mkmem           1
 
 
 ================================================================================
- IMAGE COPY FOR 1 TIME STEP
+ IMAGE COPY - TIME STEP     1
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -134,8 +136,8 @@ P           mkmem           1
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    ../Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/linimages/tests/Psps_for_tests/8o.pspnc
+- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/linimages/tests/Psps_for_tests/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -758,6 +760,279 @@ _setup2: Arith. and geom. avg. npw (full set) are    1003.000    1003.000
 - sigma(2 2)=  1.15547500E+02  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  9.63438418E+01  sigma(2 1)=  0.00000000E+00
 
+------------------------------------------------------------
+ IMAGE COPY:
+ Moving images of the cell...
+
+
+================================================================================
+ IMAGE COPY - TIME STEP     2
+================================================================================
+
+--------------------------------------------------------------------------------
+ IMAGE COPY - CELL #    1/   2
+--------------------------------------------------------------------------------
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  5.0000000  0.0000000  0.0000000  G(1)=  0.2000000  0.0000000  0.0000000
+ R(2)=  0.0000000  9.0000000  0.0000000  G(2)=  0.0000000  0.1111111  0.0000000
+ R(3)=  0.0000000  0.0000000 10.0000000  G(3)=  0.0000000  0.0000000  0.1000000
+ Unit cell volume ucvol=  4.5000000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  30  36
+         ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are    1003.000    1003.000
+
+================================================================================
+
+=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+================================================================================
+
+--- Iteration: ( 1/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -31.939752692451    -3.194E+01 6.248E-25 2.651E-17
+
+ At SCF step    1       vres2   =  2.65E-17 < tolvrs=  1.00E-16 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.73165652E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.61291005E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.29158086E-03  sigma(2 1)=  0.00000000E+00
+
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.00000     3.535742     2.592010      6.127752     0.943732
+    2   2.00000     3.535742     2.592010      6.127752     0.943732
+ ---------------------------------------------------------------------
+  Sum:              7.071484     5.184019     12.255504     1.887465
+ Total magnetization (from the atomic spheres):             1.887465
+ Total magnetization (exact up - dn):                       2.000000
+
+---OUTPUT-----------------------------------------------------------------------
+
+ Cartesian coordinates (xcart) [bohr]
+  0.00000000000000E+00  0.00000000000000E+00  1.26476523106862E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.26476523106862E+00
+ Reduced coordinates (xred)
+  0.00000000000000E+00  0.00000000000000E+00  1.26476523106862E-01
+  0.00000000000000E+00  0.00000000000000E+00 -1.26476523106862E-01
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.50262E-06 2.02224E-06 (free atoms)
+ -0.00000000000000E+00 -0.00000000000000E+00  3.50261867929969E-06
+ -0.00000000000000E+00 -0.00000000000000E+00 -3.50261867929969E-06
+ Reduced forces (fred)
+ -0.00000000000000E+00 -0.00000000000000E+00 -3.50261867929969E-05
+  0.00000000000000E+00  0.00000000000000E+00  3.50261867929969E-05
+ Total energy (etotal) [Ha]= -3.19397526924508E+01
+
+ At Broyd/MD step   1, gradients are converged : 
+  max grad (force/stress) = 3.5026E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   9.6524E-26; max=  6.2478E-25
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.126476523107
+       0.000000000000      0.000000000000     -0.126476523107
+ rms dE/dt=  2.0222E-05; max dE/dt=  3.5026E-05; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000035026187
+    2       0.000000000000      0.000000000000      0.000035026187
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.66928493449858
+    2      0.00000000000000     0.00000000000000    -0.66928493449858
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000     0.00000350261868
+    2     -0.00000000000000    -0.00000000000000    -0.00000350261868
+ frms,max,avg= 2.0222378E-06 3.5026187E-06   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000     0.00018011187907
+    2     -0.00000000000000    -0.00000000000000    -0.00018011187907
+ frms,max,avg= 1.0398764E-04 1.8011188E-04   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  5.000000000000  9.000000000000 10.000000000000 bohr
+              =  2.645886042950  4.762594877310  5.291772085900 angstroms
+ Fermi (or HOMO) energy (hartree) =  -0.05701   Average Vxc (hartree)=  -0.19364
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
+ kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.09401   -0.77102   -0.38141   -0.34133   -0.25971   -0.13335   -0.05701    0.05339
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
+ kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.04398   -0.70700   -0.34334   -0.28328   -0.19160   -0.06409    0.02193    0.06124
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  1.88147521624771E+01
+    Hartree energy  =  1.84321750984037E+01
+    XC energy       = -7.87213929606615E+00
+    Ewald energy    = -8.76446581393727E+00
+    PspCore energy  =  8.41345275786368E-02
+    Loc. psp. energy= -5.74443822655549E+01
+    NL   psp  energy=  4.81017289464812E+00
+    >>>>>>>>> Etotal= -3.19397526924508E+01
+
+ Other information on the energy :
+    Total energy(eV)= -8.69124870907748E+02 ; Band energy (Ha)=  -5.6070365459E+00
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.73165652E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.61291005E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.29158086E-03  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.0431E+02 GPa]
+- sigma(1 1)=  1.09789107E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.06295466E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.68416362E+01  sigma(2 1)=  0.00000000E+00
+
+
+--------------------------------------------------------------------------------
+ IMAGE COPY - CELL #    2/   2
+--------------------------------------------------------------------------------
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  5.0000000  0.0000000  0.0000000  G(1)=  0.2000000  0.0000000  0.0000000
+ R(2)=  0.0000000  9.0000000  0.0000000  G(2)=  0.0000000  0.1111111  0.0000000
+ R(3)=  0.0000000  0.0000000 10.0000000  G(3)=  0.0000000  0.0000000  0.1000000
+ Unit cell volume ucvol=  4.5000000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  30  36
+         ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are    1003.000    1003.000
+
+================================================================================
+
+=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+================================================================================
+
+--- Iteration: ( 1/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -31.939741725052    -3.194E+01 1.048E-24 5.013E-17
+
+ At SCF step    1       vres2   =  5.01E-17 < tolvrs=  1.00E-16 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.59487127E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.92738037E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.27466117E-03  sigma(2 1)=  0.00000000E+00
+
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.00000     3.052973     3.052973      6.105947    -0.000000
+    2   2.00000     3.052973     3.052973      6.105947     0.000000
+ ---------------------------------------------------------------------
+  Sum:              6.105947     6.105947     12.211894    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
+ Total magnetization (exact up - dn):                       0.000000
+
+---OUTPUT-----------------------------------------------------------------------
+
+ Cartesian coordinates (xcart) [bohr]
+  0.00000000000000E+00  0.00000000000000E+00  1.26508034537017E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.26508034537017E+00
+ Reduced coordinates (xred)
+  0.00000000000000E+00  0.00000000000000E+00  1.26508034537017E-01
+  0.00000000000000E+00  0.00000000000000E+00 -1.26508034537017E-01
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.24948E-06 2.45344E-06 (free atoms)
+ -0.00000000000000E+00 -0.00000000000000E+00  4.24947542132710E-06
+ -0.00000000000000E+00 -0.00000000000000E+00 -4.24947542132710E-06
+ Reduced forces (fred)
+ -0.00000000000000E+00 -0.00000000000000E+00 -4.24947542132710E-05
+  0.00000000000000E+00  0.00000000000000E+00  4.24947542132710E-05
+ Total energy (etotal) [Ha]= -3.19397417250521E+01
+
+ At Broyd/MD step   1, gradients are converged : 
+  max grad (force/stress) = 4.2495E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.7642E-25; max=  1.0477E-24
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.126508034537
+       0.000000000000      0.000000000000     -0.126508034537
+ rms dE/dt=  2.4534E-05; max dE/dt=  4.2495E-05; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000042494754
+    2       0.000000000000      0.000000000000      0.000042494754
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.66945168580506
+    2      0.00000000000000     0.00000000000000    -0.66945168580506
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000     0.00000424947542
+    2     -0.00000000000000    -0.00000000000000    -0.00000424947542
+ frms,max,avg= 2.4534358E-06 4.2494754E-06   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000     0.00021851679365
+    2     -0.00000000000000    -0.00000000000000    -0.00021851679365
+ frms,max,avg= 1.2616073E-04 2.1851679E-04   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  5.000000000000  9.000000000000 10.000000000000 bohr
+              =  2.645886042950  4.762594877310  5.291772085900 angstroms
+ Fermi (or HOMO) energy (hartree) =  -0.04963   Average Vxc (hartree)=  -0.19547
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
+ kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.08741   -0.75685   -0.37738   -0.31614   -0.25653   -0.10301   -0.04963    0.05755
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
+ kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.08741   -0.75685   -0.37738   -0.31614   -0.25653   -0.10301   -0.04963    0.05755
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  1.86434061883753E+01
+    Hartree energy  =  1.82411469574319E+01
+    XC energy       = -7.80765837381283E+00
+    Ewald energy    = -8.76808671829495E+00
+    PspCore energy  =  8.41345275786368E-02
+    Loc. psp. energy= -5.71721386718064E+01
+    NL   psp  energy=  4.83945436547633E+00
+    >>>>>>>>> Etotal= -3.19397417250521E+01
+
+ Other information on the energy :
+    Total energy(eV)= -8.69124572469651E+02 ; Band energy (Ha)=  -5.7707701328E+00
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.59487127E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.92738037E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.27466117E-03  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.0589E+02 GPa]
+- sigma(1 1)=  1.05764747E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.15547500E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.63438418E+01  sigma(2 1)=  0.00000000E+00
+
+
+================================================================================
+ At time step     2
+ IMAGE COPY has reached energy convergence
+ with Average[Abs(Etotal(t)-Etotal(t-dt))]=  6.075E-13<tolimg=  5.000E-05
+================================================================================
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -768,12 +1043,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1003.000    1003.000
              ecut      1.30000000E+01 Hartree
            etotal     -3.1939752692E+01
       etotal_2img     -3.1939741725E+01
-            fcart     -0.0000000000E+00 -0.0000000000E+00  3.5026223787E-06
-                      -0.0000000000E+00 -0.0000000000E+00 -3.5026223787E-06
-       fcart_2img     -0.0000000000E+00 -0.0000000000E+00  4.2495107068E-06
-                      -0.0000000000E+00 -0.0000000000E+00 -4.2495107068E-06
+            fcart     -0.0000000000E+00 -0.0000000000E+00  3.5026186793E-06
+                      -0.0000000000E+00 -0.0000000000E+00 -3.5026186793E-06
+       fcart_2img     -0.0000000000E+00 -0.0000000000E+00  4.2494754213E-06
+                      -0.0000000000E+00 -0.0000000000E+00 -4.2494754213E-06
 -          fftalg         312
            getwfk          -1
+        imgwfstor           1
            ionmov           2
            istwfk        2
            kptopt           0
@@ -788,6 +1064,7 @@ P           mkmem           1
            nsppol           2
              nsym           8
             ntime          10
+        ntimimage           2
            ntypat           1
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000
@@ -803,9 +1080,9 @@ P           mkmem           1
            prteig           0
             prtwf           0
           spgroup          47
-           strten      3.7316565202E-03  3.6129100559E-03  3.2915808654E-03
+           strten      3.7316565188E-03  3.6129100545E-03  3.2915808647E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-      strten_2img      3.5948712730E-03  3.9273803685E-03  3.2746611740E-03
+      strten_2img      3.5948712713E-03  3.9273803670E-03  3.2746611732E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -903,10 +1180,10 @@ P           mkmem           1
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.9
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.9
+.Delivered   4 WARNINGs and   1 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.0  wall=          6.0

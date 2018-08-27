@@ -2329,6 +2329,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%iboxcut=0
    dtsets(idtset)%icutcoul=6
    dtsets(idtset)%ieig2rf=0
+   dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%inclvkb=2
    dtsets(idtset)%intxc=0
 !  if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
