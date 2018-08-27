@@ -17,10 +17,10 @@
 .Starting date : Fri 10 Aug 2018.
 - ( at 11h52 )
   
-- input  file    -> t19.in
-- output file    -> t19.out
-- root for input  files -> t19i
-- root for output files -> t19o
+- input  file    -> t22.in
+- output file    -> t22.out
+- root for input  files -> t22i
+- root for output files -> t22o
 
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
