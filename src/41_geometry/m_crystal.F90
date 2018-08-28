@@ -453,6 +453,7 @@ type(crystal_t) function crystal_without_symmetries(self) result(new)
   symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
 
 end function crystal_without_symmetries
+!!***
 
 !----------------------------------------------------------------------
 
