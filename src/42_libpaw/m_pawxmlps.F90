@@ -1585,20 +1585,19 @@ end subroutine paw_setup_copy
 !!
 !! INPUTS
 !!  filename= input file name (atomicdata XML)
-!!  funit= input unit number
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      inpspheads
+!!      pawpsxml2ab
 !!
 !! CHILDREN
 !!      paw_rdfromline
 !!
 !! SOURCE
 
- subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup,funit)
+ subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1610,12 +1609,12 @@ end subroutine paw_setup_copy
  implicit none
 
 !Arguments ---------------------------------------------
- integer, intent(in) :: funit
+ 
  character (len=fnlen),intent(in) :: filename
  real(dp), intent(inout) :: ecut_tmp(3,2)
  type(paw_setup_t),intent(inout) :: paw_setup
 !Local variables ---------------------------------------
- integer :: iaewf,ii,ipswf,iproj,ir,igrid,ival,ierr,ishpf,lmax,mesh_size,igauss,iprojfit
+ integer :: funit,iaewf,ii,ipswf,iproj,ir,igrid,ival,ierr,ishpf,lmax,mesh_size,igauss,iprojfit
  logical :: endfile,found,endgauss
  character(len=100) :: msg
  character (len=XML_RECL) :: line,readline
@@ -1629,7 +1628,7 @@ end subroutine paw_setup_copy
 ! *************************************************************************
 
 !Open the atomicdata XML file for reading
- open(unit=funit,file=filename,form='formatted',status='old', recl=XML_RECL)
+ open(newunit=funit,file=filename,form='formatted',status='old', recl=XML_RECL)
 
 !Start a reading loop
  endfile=.false.
@@ -1956,9 +1955,15 @@ end subroutine paw_setup_copy
      paw_setup%valence_states%state(ii)=valstate(ii)
    end do
  end if
+ LIBPAW_DATATYPE_DEALLOCATE(valstate)
+ LIBPAW_DATATYPE_DEALLOCATE(grids)
+ if(allocated(shpf)) then
+   LIBPAW_DEALLOCATE(shpf)
+ end if
  close(funit)
 
  end subroutine rdpawpsxml_header
+!!***
 
 !-------------------------------------------------------------------------
 !!****f* m_pawxmlps/rdpawpsxml
@@ -1970,20 +1975,19 @@ end subroutine paw_setup_copy
 !!
 !! INPUTS
 !!  filename= input file name (atomicdata XML)
-!!  funit= input unit number
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      inpspheads
+!!      pawpsxml2ab
 !!
 !! CHILDREN
 !!      paw_rdfromline
 !!
 !! SOURCE
 
- subroutine rdpawpsxml(filename,paw_setup,funit)
+ subroutine rdpawpsxml(filename,paw_setup)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1995,11 +1999,10 @@ end subroutine paw_setup_copy
  implicit none
 
 !Arguments ---------------------------------------------
- integer, intent(in) :: funit
  character (len=fnlen),intent(in) :: filename
  type(paw_setup_t),intent(inout) :: paw_setup
 !Local variables ---------------------------------------
- integer :: iaewf,ii,ipswf,iproj,ir,igrid,ival,ierr,ishpf,lmax,mesh_size,igauss,iprojfit
+ integer :: funit, iaewf,ii,ipswf,iproj,ir,igrid,ival,ierr,ishpf,lmax,mesh_size,igauss,iprojfit
  logical :: endfile,found,endgauss
  character(len=100) :: msg
  character (len=XML_RECL) :: line,readline
@@ -2013,7 +2016,7 @@ end subroutine paw_setup_copy
 ! *************************************************************************
 
 !Open the atomicdata XML file for reading
- open(unit=funit,file=filename,form='formatted',status='old', recl=XML_RECL)
+ open(newunit=funit,file=filename,form='formatted',status='old', recl=XML_RECL)
 
 !Start a reading loop
  endfile=.false.

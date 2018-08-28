@@ -774,10 +774,11 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 ! *********************************************************************
  
  if (option==1) then
-   call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc,unt)
+   call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
  else
-   call rdpawpsxml(filnam,paw_setuploc,unt)
+   call rdpawpsxml(filnam,paw_setuploc)
  end if
+
  call pawpsp_read_header_xml(lloc,lmax,pspcod,&
 &   pspxc,paw_setuploc,r2well,zionpsp,znuclpsp)
 
@@ -800,7 +801,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
  end do
  pspheads%nprojso=0
  pspheads%pspdat=27061961
- pspheads%pspso=1
+ pspheads%pspso=0
  pspheads%xccc=1
  pspheads%title=paw_setuploc%atom%symbol
 
