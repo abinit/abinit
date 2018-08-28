@@ -822,5 +822,5 @@ end subroutine interpolator_free
 
 !-------------------------------------------------------------------
 
-end module
+end module m_bseinterp
 !!***

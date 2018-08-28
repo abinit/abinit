@@ -56,23 +56,26 @@ class HasRegex(object):
     """
     Mixin class providing regular expressions used to analyze Fortran code.
     """
-
     # https://software.intel.com/en-us/fortran-compiler-18.0-developer-guide-and-reference-interface
+
+    # We don't allow plain `end`. Perhaps this is not standard-compliant
+    # but it makes the code easier and the source more readable.
+    RE_PROC_END = re.compile(r"^end\s*(?P<proc_type>subroutine|function|program|module)\s*(?P<name>\w*)?", re.I)
 
     # PROGRAM [name]
     # END [PROGRAM [name]]
-    RE_PROG_START = re.compile(r"^program\s*(?P<name>\w*)\Z", re.I)
-    RE_PROG_END = re.compile(r"^end(\s*program\s*(?P<name>\w*)|)\Z", re.I)
+    RE_PROG_START = re.compile(r"^program\s*(?P<name>\w*)", re.I)
+    RE_PROG_END = re.compile(r"^end(\s*program\s*(?P<name>\w*)|)", re.I)
 
     # MODULE <name>
     # END [MODULE [name]]
-    RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)\Z", re.I)
-    RE_MOD_END = re.compile(r"^end(\s*module\s*(?P<name>\w*)|)\Z", re.I)
+    RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)", re.I)
+    RE_MOD_END = re.compile(r"^end(\s*module\s*(?P<name>\w*)|)", re.I)
 
     # [<prefix>] <SUBROUTINE> <name> [(<args>)] [<suffix>]
     # END [SUBROUTINE [name]]
     RE_SUB_START = re.compile(r'(?P<prefix>(recursive|pure|elemental|\s)*)subroutine\s*(?P<name>\w+)', re.I)
-    RE_SUB_END = re.compile(r'^end(\s*subroutine\s*(?P<name>\w*)|)\Z', re.I)
+    RE_SUB_END = re.compile(r'^end(\s*subroutine\s*(?P<name>\w*)|)', re.I)
 
     # [<prefix>] FUNCTION <name> ([<dummy-arg-list>]) [<suffix>]
     # END [FUNCTION [name]]
@@ -90,7 +93,7 @@ character\s*\(\s*len=\w+\s*\) | type\s*\(\s*\w+\s*\)
 re.I | re.VERBOSE)
     #RE_FUNC_START = re.compile('^[ \t]*(([^!\'"\n]*?)function)',re.I)
     #RE_FUNC_START = re.compile("^(?:(.+?)\s+)?function\s+(\w+)\s*(\([^()]*\))?(?=(?:.*result\s*\(\s*(\w+)\s*\))?)(?=(?:.*bind\s*\(\s*(.*)\s*\))?).*$", re.I)
-    RE_FUNC_END = re.compile(r"^end(\s*function\s*(?P<name>\w*)|)\Z", re.I)
+    RE_FUNC_END = re.compile(r"^end(\s*function\s*(?P<name>\w*)|)", re.I)
 
     # INTERFACE [generic-spec]
     # [interface-body]...
@@ -109,11 +112,11 @@ re.I | re.VERBOSE)
     #    [component-definition]. . .
     #    [type-bound-procedure-part]
     # END TYPE [name]
-    RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)\Z', re.I)
-    RE_TYPE_END = re.compile(r'^end(\s*type\s*(?P<name>\w*)|)\Z', re.I)
+    RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)', re.I)
+    RE_TYPE_END = re.compile(r'^end(\s*type\s*(?P<name>\w*)|)', re.I)
 
     RE_PUB_OR_PRIVATE = re.compile(r"^(?P<name>public|private)\s*(\!+\s*\w*|\Z)", re.I)
-    #RE_CONTAINS = re.compile(r"^(contains)\s*(\!+\s*\w*|\Z)", re.I)
+    RE_CONTAINS = re.compile(r"^(contains)\s*(\!+\s*\w*|\Z)", re.I)
 
     #re_assumed_shape = re.compile("\(:.*\)", re.I)
     #Ampersand (continuation line)
@@ -140,7 +143,7 @@ re.I | re.VERBOSE)
     #re_continuation = re.compile("&[ \t]*(![^\n]*)?\n")
 
     #Include command
-    #re_include = re.compile('^[ ]*include.*?\n',re.MULTILINE+re.IGNORECASE)
+    #re_include = re.compile('^[ ]*include.*?\n', re.MULTILINE + re.IGNORECASE)
 
-    #Detect robodoc header (!***)
-    #re_robodoc_header = re.compile("!!\*\*\*\*[a-z]\*")
+    # Detect robodoc header (!***)
+    #RE_ROBODOC_HEADER = re.compile("!!\*\*\*\*[a-z]\*")

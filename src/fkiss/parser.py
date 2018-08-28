@@ -8,6 +8,7 @@ import re
 from textwrap import TextWrapper
 from pprint import pformat
 from collections import OrderedDict, defaultdict, deque
+from .termcolor import cprint
 from .tools import lazy_property
 from .regex import HasRegex
 
@@ -50,8 +51,14 @@ class FortranVariable(Node):
                  attribs=None, initial_value=None, doc=None):
 
         self.name, self.ancestor = name, ancestor
-        self.ftype, self.shape = ftype, shape
         self.attribs = () if attribs is None else tuple(sorted(attribs))
+        self.ftype, self.shape = ftype, shape
+        # TODO: dimension
+        #print(self.attribs)
+        #if "dimension" in attribs:
+        #    self.shape = attribs["dimension"].replace(" ", "").replace("dimension", "")
+        #    print("shape", self.shape)
+
         self.initial_value = initial_value
         self.doc = "" if doc is None else doc
 
@@ -237,7 +244,7 @@ class Procedure(Node):
     children: List of string with the name of the subroutines called by this procedure.
     """
 
-    def __init__(self, name, ancestor, preamble, visibility="public", path=None):
+    def __init__(self, name, ancestor, preamble, path=None):
         self.name = name.strip()
         self.ancestor = ancestor
         self.preamble = "\n".join(preamble)
@@ -253,7 +260,7 @@ class Procedure(Node):
 
         # TODO
         # Initialize visibility.
-        self._visibility = visibility
+        self.visibility = "public"
         #self.has_implicit_none = False
 
     @lazy_property
@@ -276,29 +283,30 @@ class Procedure(Node):
     #def is_contained(self):
     #    return isinstance(self, Function)
 
-    @lazy_property
-    def visibility(self):
-        # visibility of modules is assumed to be initialized.
-        if self._visibility is not None: return self._visibility
-        if self.is_program: return True
+    #@lazy_property
+    #def visibility(self):
+    #    # visibility of modules is assumed to be initialized.
+    #    return self._visibility
+    #    if self._visibility is not None: return self._visibility
+    #    if self.is_program: return True
 
-        if self.ancestor is not None:
-            if self.ancestor.is_subroutine or self.ancestor.is_function or self.ancestor.is_program:
-                self._visibility = False
-                return self._visibility
+    #    if self.ancestor is not None:
+    #        if self.ancestor.is_subroutine or self.ancestor.is_function or self.ancestor.is_program:
+    #            self._visibility = False
+    #            return self._visibility
 
-        ancestor = self.ancestor
-        while ancestor is not None:
-            if ancestor.is_module:
-                self._visibility = ancestor.visibility
-                return self._visibility
-            ancestor = self.ancestor
+    #    ancestor = self.ancestor
+    #    while ancestor is not None:
+    #        if ancestor.is_module:
+    #            self._visibility = ancestor.visibility
+    #            return self._visibility
+    #        ancestor = self.ancestor
 
-        # Procedure outside module
-        #print(repr(self))
-        #raise RuntimeError("you should not be here!")
-        self._visibility = True
-        return self._visibility
+    #    # Procedure outside module
+    #    #print(repr(self))
+    #    #raise RuntimeError("you should not be here!")
+    #    self._visibility = True
+    #    return self._visibility
 
     @lazy_property
     def dirpath(self):
@@ -390,7 +398,7 @@ class Procedure(Node):
         #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
 
         if verbose:
-            app("DOC_STRING:\n%s" % self.preamble)
+            app("PREAMBLE:\n%s" % self.preamble)
 
         return "\n".join(lines)
 
@@ -440,6 +448,11 @@ class Module(Procedure):
     """Fortran module."""
     proc_type = "module"
 
+    def __init__(self, name, ancestor, preamble, path=None):
+        super(Module, self).__init__(name, ancestor, preamble, path=path)
+        self.default_visibility = True
+        #self.variables = OrderedDict()
+
     def to_string(self, verbose=0, width=90):
         lines = []; app = lines.append
         app(super(Module, self).to_string(verbose=verbose, width=width))
@@ -455,11 +468,6 @@ class FortranKissParser(HasRegex):
     def __init__(self, macros=None, verbose=0):
         self.verbose = verbose
         self.macros = {} if macros is None else macros
-
-    #@staticmethod
-    #def rstrip_comment(s):
-    #    for i in range(len(s), -1, -1)
-    #        if s[i] == "!"
 
     def parse_file(self, path):
         with open(path, "rt") as fh:
@@ -490,61 +498,41 @@ class FortranKissParser(HasRegex):
         # Perhaps here one should join multiple lines ending with &
         # Get list of lower-case string.
         self.lines = deque(l.strip().lower() for l in string.splitlines())
-        #self.warnings = []
+        #self.lines = deque(l.strip() for l in string.splitlines())
+        #self.lines = deque(l for l in string.splitlines())
+        self.warnings = []
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
         self.preamble, self.stack = [], []
         self.all_includes, self.all_uses  = [], []
         self.ancestor = None
-        self.visibility = "public"
-        stack = self.stack
+
+        # Invokations of Fortran functions are difficult to handle
+        # without inspecting locals so we only handle explicit calls to routines.
+        # in principle I may re-read the source and use regex for val = foo() where foo in one of the routines
+        # but it's gonna be costly.
 
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
             if self.handle_comment(line): continue
+            #line = line.lower()
             if self.handle_use_statement(line): continue
-            if self.handle_include(line): continue
+            if self.handle_cpp_line(line): continue
             if self.handle_contains(line): continue
-
-            m = self.RE_PUB_OR_PRIVATE.match(line)
-            if m:
-                self.visibility = m.group("name")
-                continue
-
-            # Invokations of Fortran functions are difficult to handle
-            # without inspecting locals so we only handle explicit calls to routines.
             if self.handle_call(line): continue
 
-            # Subroutine declaration.
-            # Function declaration
-            if self.handle_procedure(line):
-                continue
+            # Subroutine|Function declaration.
+            if self.handle_procedure(line): continue
+            if self.consume_module_header(line): continue
 
-            m = self.RE_MOD_START.match(line)
+            m = self.RE_PROC_END.match(line)
             if m:
-                self.consume_module_header(m)
-                continue
-
-            if line.startswith("end "):
-                tokens = line.split()
-                end_proc_type = None if len(tokens) == 1 else tokens[1]
-                if end_proc_type not in {"program", "function", "subroutine", "module", None}:
-                    #print("end proc_type:", end_proc_type)
-                    continue
-
-                try:
-                    end_name = tokens[2]
-                except IndexError:
-                    # TODO
-                    #print("index error in:", line)
-                    end_name = None
-
+                #print(line)
+                end_proc_type = m.group("proc_type")
+                end_name = m.group("name")
                 self.close_stack_entry(end_name, end_proc_type)
-
-                #print("Closing procedure", stack[-1][0].name)
-                if self.ancestor is not None and self.ancestor.name == end_name:
-                    self.ancestor = self.ancestor.ancestor
+                continue
 
         self.all_includes = sorted(set(self.all_includes))
         self.all_uses = sorted(set(self.all_uses))
@@ -553,8 +541,8 @@ class FortranKissParser(HasRegex):
         # TODO: Support visibility But I need to parse the first portion of the header.
         # to handle e.g. public :: foo
         self.programs, self.modules, self.subroutines, self.functions = [], [], [], []
-        while stack:
-            p, status = stack.pop(0)
+        while self.stack:
+            p, status = self.stack.pop(0)
             if status != "closed":
                 print("WARNING: unclosed", repr(p), status, "ancestor", repr(p.ancestor))
 
@@ -574,19 +562,18 @@ class FortranKissParser(HasRegex):
 
         return self
 
-    @staticmethod
-    def simple_match(s, token):
-        i = s.find("!")
-        if i != -1: s = s[:i]
-        return s.strip() == token
+    def warn(self, msg):
+        cprint(msg, color="yellow")
+        self.warnings.append(msg)
 
     def handle_contains(self, line):
-        if not self.simple_match(line, "contains"): return False
+        m = self.RE_CONTAINS.match(line)
+        if not m: return False
         self.ancestor = self.stack[-1][0]
         if self.verbose > 1: print("Setting ancestor to:", repr(self.ancestor))
         return True
 
-    def handle_include(self, line):
+    def handle_cpp_line(self, line):
         # Handle include statement (CPP or Fortran version).
         if line.startswith("#include ") or line.startswith("include "):
             what = line.split()[1].replace("'", "").replace('"', "")
@@ -595,7 +582,7 @@ class FortranKissParser(HasRegex):
             else:
                 self.all_includes.append(what)
             return True
-        return False
+        return True if line[0] == "#" else False
 
     def handle_comment(self, line):
         # Count number of comments and code line
@@ -606,8 +593,10 @@ class FortranKissParser(HasRegex):
 
         if not self.stack or (self.stack and self.stack[-1][1] != "open"):
             self.preamble.append(line)
+
         if line.replace("!", ""): self.num_doclines += 1
         if line.startswith("!$omp"): self.num_omp_statements += 1
+
         return True
 
     def handle_use_statement(self, line):
@@ -625,7 +614,7 @@ class FortranKissParser(HasRegex):
 
     def handle_call(self, line):
         # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
-        # should also handle call obj%foo()
+        # should handle call obj%foo() syntax.
         m = self.RE_SUBCALL.match(line)
         if not m: return False
         subname = m.group("name")
@@ -633,83 +622,96 @@ class FortranKissParser(HasRegex):
         self.stack[-1][0].children.append(subname)
         return True
 
-    def consume_module_header(self, start_match):
-        name = start_match.group("name")
+    def consume_module_header(self, line):
+        m = self.RE_MOD_START.match(line)
+        if not m: return False
+        name = m.group("name")
         if self.verbose > 1: print("Entering module:", name)
         #assert self.ancestor is None
-        self.stack.append([Module(name, self.ancestor, self.preamble, visibility=self.visibility, path=self.path), "open"])
-        self.ancestor = self.stack[-1][0]
-        self.visibility = "public"
+        module = Module(name, self.ancestor, self.preamble, path=self.path)
+        self.stack.append([module, "open"])
+        self.ancestor = module
         self.preamble = []
 
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
-            if self.handle_contains(line): break
             if self.handle_use_statement(line): continue
-
-            # Interface declaration.
-            m = self.RE_INTERFACE_START.match(line)
+            m = self.RE_PUB_OR_PRIVATE.match(line)
             if m:
-                self.consume_interface(m)
+                module.default_visibility = m.group("name")
                 continue
-
+            # Interface declaration.
+            if self.consume_interface(line): continue
             # Datatype declaration.
-            m = self.RE_TYPE_START.match(line)
-            if m and self.stack[-1][0].is_module and "(" not in line:
-                self.consume_datatype(m)
-                continue
+            if self.consume_datatype(line): continue
 
+            # Exit here
+            if self.handle_contains(line): return True
+            # or here if the module does not have *contains*
             m = self.RE_MOD_END.match(line)
             if m:
-                end_name = m.group("name")
-                self.close_stack_entry(end_name, "module")
-                break
+                self.close_stack_entry(end_name=m.group("name"), end_proc_type="module")
+                return True
 
-    def consume_interface(self, start_match):
-        assert self.stack[-1][1] == "open"
-        buf = [start_match.string]
-        name = start_match.group("name")
-        if self.verbose > 1: print("begin interface", name, "in line", start_match.string)
+        else:
+            raise ValueError("Cannot find `contains` in %s" % self.path)
+
+    def consume_interface(self, line):
+        m = self.RE_INTERFACE_START.match(line)
+        if not m: return False
+        #assert self.stack[-1][1] == "open"
+        buf = [line]
+        name = m.group("name")
+        if self.verbose > 1: print("begin interface", name, "in line:", line)
         while self.lines:
             line = self.lines.popleft()
             buf.append(line)
             end_match = self.RE_INTERFACE_END.match(line)
             if end_match:
                 if self.verbose > 1: print("end interface", line)
+                # Don't require `end interface name`
                 #end_name = end_match.group("name")
-                #print(type(end_name))
                 #if name != end_name: raise ValueError("`%s` != `%s`" % (name, end_name))
-                break
-        self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buf))
+                self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buf))
+                return True
+        else:
+            raise ValueError("Cannot find `end interface %s` in %s" % (name, self.path))
 
-    def consume_datatype(self, start_match):
-        buf = [start_match.string]
-        name = start_match.group("name")
-        if self.verbose > 1: print("begin datatype", name, "in line", start_match.string)
+    def consume_datatype(self, line):
+        m = self.RE_TYPE_START.match(line)
+        if not m: return False
+        buf = [line]
+        name = m.group("name")
+        if self.verbose > 1: print("begin datatype", name, "in line:", line)
         while self.lines:
             line = self.lines.popleft()
             buf.append(line)
             end_match = self.RE_TYPE_END.match(line)
             if end_match:
                 end_name = end_match.group("name")
-                if self.verbose > 1: print("end datatype", line)
+                if self.verbose > 1: print("end datatype %s in %s" % (end_name, line))
                 if name == end_name:
-                    break
+                    self.stack[-1][0].types.append(Datatype(name, self.ancestor, buf))
+                    return True
+                else:
+                    raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
         else:
             raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
-
-        self.stack[-1][0].types.append(Datatype(name, self.ancestor, buf))
 
     def handle_procedure(self, line):
         ptype = "subroutine"
         m = self.RE_SUB_START.match(line)
+        re_end = self.RE_SUB_END
         if not m:
             m = self.RE_FUNC_START.match(line)
+            re_end = self.RE_FUNC_END
             if m: ptype = "function"
         if not m:
             m = self.RE_PROG_START.match(line)
+            re_end = self.RE_PROG_END
             if m: ptype = "program"
+
         if not m: return False
 
         # Extract name from (module | program).
@@ -725,13 +727,37 @@ class FortranKissParser(HasRegex):
             self.stack.append([Program(name, self.ancestor, self.preamble, path=self.path), "open"])
         else:
             raise ValueError(ptype)
-
         self.ancestor = self.stack[-1][0]
         self.preamble = []
+
+        """
+        has_contains = False
+        while self.lines:
+            line = self.lines.popleft()
+            if not line: continue
+            if self.handle_comment(line): continue
+            if self.handle_use_statement(line): continue
+            if self.handle_cpp_line(line): continue
+            if self.consume_interface(line): continue
+            cont = self.handle_contains(line)
+            if cont: has_contains = True
+            if has_contains:
+               if self.handle_procedure(line): continue
+
+            m = self.RE_PROC_END.match(line)
+            if m:
+                #print(line)
+                end_proc_type = m.group("proc_type")
+                end_name = m.group("name")
+                self.close_stack_entry(end_name, end_proc_type)
+                break
+        else:
+            raise ValueError("Cannot find `end %s `%s`" % (ptype, name))
+        """
         return True
 
     def close_stack_entry(self, end_name, end_proc_type):
-        if end_name is not None:
+        if end_name:
             # Close the last entry in the stack with name == end_name.
             for item in reversed(self.stack):
                 if item[0].name == end_name:
@@ -743,6 +769,7 @@ class FortranKissParser(HasRegex):
         else:
             # Close the last entry in the stack with end_proc_type.
             if end_proc_type is not None:
+                self.warn("Found `end %s` without name in %s" % (end_proc_type, self.path))
                 for item in reversed(self.stack):
                     if item[0].proc_type == end_proc_type:
                         item[1] = "closed"
@@ -751,4 +778,13 @@ class FortranKissParser(HasRegex):
                     raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s" % (
                         end_proc_type, pformat([s[0].proc_type for s in self.stack])))
             else:
+                # This is the best I can do.
+                self.warn("Found plain `end` without procedure_type and name in %s" % (self.path))
                 self.stack[-1][1] = "closed"
+
+        #print("Closing procedure", self.stack[-1][0].name)
+        if self.ancestor is not None and self.ancestor.name == end_name:
+            self.ancestor = self.ancestor.ancestor
+
+        #if self.preamble:
+        #    self.warn("%s, preamble:\n%s" % (self.path, "\n".join(self.preamble)))

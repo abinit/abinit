@@ -23,7 +23,7 @@ module m_tdep_shell
     integer, allocatable :: atomk_in_shell(:)
     integer, allocatable :: sym_in_shell(:)
     integer, allocatable :: transpose_in_shell(:)
-  end type List_of_neighbours  
+  end type List_of_neighbours
 
   type Shell_Variables_type
     integer :: nshell
@@ -39,7 +39,7 @@ module m_tdep_shell
   public :: tdep_init_shell3at
   public :: tdep_destroy_shell
 
-contains 
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
@@ -93,7 +93,7 @@ contains
               ref2at(eatom,fatom,1)=iatcell
               ref2at(eatom,fatom,2)=jatom
               ref2at(eatom,fatom,3)=ishell
-!             The Phij_NN has to be symetric (transposition symetries)              
+!             The Phij_NN has to be symetric (transposition symetries)
               if (InVar%debug) write(InVar%stdout,'(a,1x,4(i4,1x),a,i4)') &
 &                'For:',iatcell,jatom,eatom,fatom,' transformation+permutation with isym=',Isym2at(eatom,fatom,1)
               ref2at(fatom,eatom,1)=iatcell
@@ -101,22 +101,22 @@ contains
               ref2at(fatom,eatom,3)=ishell
               Isym2at(fatom,eatom,1)=Isym2at(eatom,fatom,1)
               Isym2at(fatom,eatom,2)=2
-            else  
+            else
               if (InVar%debug) write(InVar%stdout,'(a,4(1x,i4))') &
 &                'NO SYMETRY OPERATION BETWEEN (iatom,jatom) and (eatom,fatom)=',iatcell,jatom,eatom,fatom
-            end if  
+            end if
           end if !already treated
         end do !fatom
       end do !eatom
-    end do !jatom 
-  end do !iatcell 
+    end do !jatom
+  end do !iatcell
   Shell2at%nshell=ishell
   if (Shell2at%nshell.gt.nshell_max) then
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell2at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
     MSG_ERROR('The maximum number of shells allowed by the code is reached')
-  end if  
+  end if
 
 
 ! Store all the previous quantities in a better way than in ref2at (without using too memory).
@@ -129,7 +129,7 @@ contains
     do iatom=1,natom
       counter=0
       do jatom=1,natom
-        if (ref2at(iatom,jatom,3).eq.ishell) counter=counter+1 
+        if (ref2at(iatom,jatom,3).eq.ishell) counter=counter+1
       end do
       Shell2at%neighbours(iatom,ishell)%n_interactions=counter
       if (counter.eq.0) cycle
@@ -148,7 +148,7 @@ contains
           Shell2at%jatref         (ishell)=ref2at(iatom,jatom,2)
           Shell2at%neighbours(iatom,ishell)%sym_in_shell      (counter)=Isym2at(iatom,jatom,1)
           Shell2at%neighbours(iatom,ishell)%transpose_in_shell(counter)=Isym2at(iatom,jatom,2)
-        end if  
+        end if
       end do
     end do
   end do
@@ -168,7 +168,7 @@ contains
     ncoeff=0
     iatref=Shell2at%iatref(ishell)
     jatref=Shell2at%jatref(ishell)
-    write(InVar%stdout,*) 'Shell number:',ishell 
+    write(InVar%stdout,*) 'Shell number:',ishell
     write(InVar%stdout,'(a,i5,a,i5,a,f16.10)') '  Between atom',iatref,' and ',jatref,' the distance is=',distance(iatref,jatref,1)
     call tdep_calc_nbcoeff(distance,iatref,InVar,ishell,jatref,1,ncoeff,norder,Shell2at%nshell,order,proj,Sym)
     Shell2at%ncoeff     (ishell)=ncoeff
@@ -176,12 +176,12 @@ contains
     ncoeff_prev=ncoeff_prev+ncoeff
     write(InVar%stdout,*)'  Number of independant coefficients in this shell=',ncoeff
     write(InVar%stdout,*) '============================================================================'
-  end do  
+  end do
   write(InVar%stdout,*)'  >>>>>> Total number of coefficients in these shells=',ncoeff_prev
   close(16)
   ntotcoeff=ncoeff_prev
 
- end subroutine
+ end subroutine tdep_init_shell2at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
@@ -221,8 +221,8 @@ contains
     do jatom=1,natom
       do katom=1,natom
 !FB        if((iatcell.ne.jatom).and.(iatcell.ne.katom).and.(jatom.ne.katom)) cycle
-!       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k). 
-!                So, compute |djk| using vec(ij) and vec(ik).      
+!       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k).
+!                So, compute |djk| using vec(ij) and vec(ik).
         norm1=dsqrt((distance(iatcell,katom,2)-distance(iatcell,jatom,2))**2+&
 &                   (distance(iatcell,katom,3)-distance(iatcell,jatom,3))**2+&
 &                   (distance(iatcell,katom,4)-distance(iatcell,jatom,4))**2)
@@ -238,8 +238,8 @@ contains
         do eatom=1,natom
           do fatom=1,natom
             do gatom=1,natom
-!             WARNING: distance(f,g).ne.|dfg| due to the inbox procedure when computing distance(f,g). 
-!                      So, compute |dfg| using vec(ef) and vec(eg).      
+!             WARNING: distance(f,g).ne.|dfg| due to the inbox procedure when computing distance(f,g).
+!                      So, compute |dfg| using vec(ef) and vec(eg).
               norm2=dsqrt((distance(eatom,gatom,2)-distance(eatom,fatom,2))**2+&
 &                         (distance(eatom,gatom,3)-distance(eatom,fatom,3))**2+&
 &                         (distance(eatom,gatom,4)-distance(eatom,fatom,4))**2)
@@ -269,28 +269,28 @@ contains
                     if (InVar%debug.and.ii.gt.1) write(InVar%stdout,'(a,1x,6(i4,1x),a,i4)') &
 &                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' transformation+permutation with isym=',&
 &                       Isym3at(watom,xatom,yatom,1)
-                  end do !ii 
-                else  
+                  end do !ii
+                else
                   if (InVar%debug) then
                     write(InVar%stdout,'(a,4(1x,i4))') &
 &                     'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
 &                    iatcell,jatom,katom,eatom,fatom,gatom
                   end if
-                end if  
+                end if
               end if
             end do !gatom
           end do !fatom
         end do !eatom
-      end do !katom 
-    end do !jatom 
-  end do !iatcell 
+      end do !katom
+    end do !jatom
+  end do !iatcell
   Shell3at%nshell=ishell
   if (Shell3at%nshell.gt.nshell_max) then
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell3at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
     MSG_ERROR('The maximum number of shells allowed by the code is reached')
-  end if  
+  end if
 
 
 ! Store all the previous quantities in a better way than in ref2at (without using too memory).
@@ -304,7 +304,7 @@ contains
       do jatom=1,natom
         do katom=1,natom
           if (ref3at(iatom,jatom,katom,4).eq.ishell) counter=counter+1
-        end do  
+        end do
       end do
       Shell3at%neighbours(iatom,ishell)%n_interactions=counter
       if (counter.eq.0) cycle
@@ -328,8 +328,8 @@ contains
             Shell3at%iatref         (ishell)=ref3at(iatom,jatom,katom,1)
             Shell3at%jatref         (ishell)=ref3at(iatom,jatom,katom,2)
             Shell3at%katref         (ishell)=ref3at(iatom,jatom,katom,3)
-          end if  
-        end do  
+          end if
+        end do
       end do
     end do
   end do
@@ -354,7 +354,7 @@ contains
     iatref=Shell3at%iatref(ishell)
     jatref=Shell3at%jatref(ishell)
     katref=Shell3at%katref(ishell)
-    write(InVar%stdout,*) 'Shell number:',ishell 
+    write(InVar%stdout,*) 'Shell number:',ishell
     write(InVar%stdout,'(a,i5,a,i5,a,f16.10)') '  Between atom',iatref,' and ',jatref,' the distance is=',distance(iatref,jatref,1)
     write(InVar%stdout,'(a,i5,a,i5,a,f16.10)') '  Between atom',jatref,' and ',katref,' the distance is=',distance(jatref,katref,1)
     write(InVar%stdout,'(a,i5,a,i5,a,f16.10)') '  Between atom',katref,' and ',iatref,' the distance is=',distance(katref,iatref,1)
@@ -364,12 +364,12 @@ contains
     ncoeff_prev=ncoeff_prev+ncoeff
     write(InVar%stdout,*)'  Number of independant coefficients in this shell=',ncoeff
     write(InVar%stdout,*) '============================================================================'
-  end do  
+  end do
   write(InVar%stdout,*)'  >>>>>> Total number of coefficients in these shells=',ncoeff_prev
   close(16)
   ntotcoeff=ncoeff_prev
-  
- end subroutine
+
+ end subroutine tdep_init_shell3at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_destroy_shell(natom,order,Shell)
@@ -396,19 +396,19 @@ contains
   end if
   do iatom=1,natom
     do ishell=1,Shell%nshell
-      if (Shell%neighbours(iatom,ishell)%n_interactions.ne.0) then 
+      if (Shell%neighbours(iatom,ishell)%n_interactions.ne.0) then
         ABI_FREE(Shell%neighbours(iatom,ishell)%atomj_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%sym_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%transpose_in_shell)
-        if (order.gt.2) then 
+        if (order.gt.2) then
           ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
         end if
-      end if  
-    end do  
-  end do  
+      end if
+    end do
+  end do
   ABI_FREE(Shell%neighbours)
 
- end subroutine
+ end subroutine tdep_destroy_shell
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_shell

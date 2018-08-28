@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_global
 !! NAME
 !!  m_global
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage error and warnings for the ctqmc
 !!
 !! COPYRIGHT
@@ -26,7 +26,9 @@
 !! SOURCE
 
 #include "defs.h"
+
 MODULE m_Global
+
 #if defined HAVE_CONFIG_H
 ! we are in abinit
 USE defs_basis
@@ -233,5 +235,5 @@ include 'mpif.h'
 END SUBROUTINE WARNALL
 !!***
 
-END MODULE
+END MODULE m_global
 !!***
