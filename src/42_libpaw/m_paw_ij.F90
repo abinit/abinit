@@ -194,7 +194,7 @@ MODULE m_paw_ij
 
   real(dp), allocatable :: dijnd(:,:)
    ! dijnd(cplex_dij*lmn2_size,ndij)
-   ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3 
+   ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3
    ! Same storage as Dij (see above); not available for RF (cplex_rf=1)
 
   real(dp), allocatable :: dijso(:,:)
@@ -714,7 +714,7 @@ subroutine paw_ij_nullify(Paw_ij)
 
  !@Paw_ij_type
 
- ! MGPAW: This one could be removed/renamed, 
+ ! MGPAW: This one could be removed/renamed,
  ! variables can be initialized in the datatype declaration
  ! Do we need to expose this in the public API?
 
@@ -1023,7 +1023,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_ij_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1491,7 +1490,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
          if (paw_ij_in(iat)%has_dij0==2) then
            paw_ij_gathered(iat)%dij0=paw_ij_in(iat)%dij0
          end if
-       end if   
+       end if
        if (paw_ij_gathered(iat)%has_dijexxc >=1) then
          LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijexxc,(cplxdij_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijexxc==2) then
@@ -1499,11 +1498,11 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
          end if
        end if
        if (paw_ij_gathered(iat)%has_dijfock >=1) then
-         LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(cplxdij_lmn2_size,ndij)) 
+         LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(cplxdij_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijfock==2) then
            paw_ij_gathered(iat)%dijfock(:,:)=paw_ij_in(iat)%dijfock(:,:)
          end if
-       end if   
+       end if
        if (paw_ij_gathered(iat)%has_dijfr >=1) then
          LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfr,(cplxdijrf_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijfr==2) then
@@ -1851,13 +1850,13 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      paw_ij_gathered(iat)%ndij=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dij=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dij0=buf_int_all(indx_int) ;indx_int=indx_int+1
-     paw_ij_gathered(iat)%has_dijexxc=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijfock=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijfr=buf_int_all(indx_int) ;indx_int=indx_int+1 
-     paw_ij_gathered(iat)%has_dijhartree=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijhat=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijnd=buf_int_all(indx_int) ;indx_int=indx_int+1    
-     paw_ij_gathered(iat)%has_dijso=buf_int_all(indx_int) ;indx_int=indx_int+1    
+     paw_ij_gathered(iat)%has_dijexxc=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijfock=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijfr=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijhartree=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijhat=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijnd=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijso=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijU=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijxc=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijxc_hat=buf_int_all(indx_int) ;indx_int=indx_int+1
@@ -1906,7 +1905,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      end if
      if (paw_ij_gathered(iat)%has_dijfock >=1) then
        ii=cplxdij_lmn2_size
-       LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(ii,ndij)) 
+       LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(ii,ndij))
        if (paw_ij_gathered(iat)%has_dijfock==2) then
          paw_ij_gathered(iat)%dijfock(:,:)= &
 &          reshape(buf_dp_all(indx_dp:indx_dp+ii*ndij-1),(/ii,ndij/))
@@ -2252,7 +2251,7 @@ subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
 !  A send buffer in an asynchrone communication couldn't be deallocate before it has been receive
    nbsent=0 ; ireq=0 ; iisend=0 ; nbsendreq=0 ; nb_msg=0
    do iisend=1,nbsend
-     iproc_rcv=SendAtomProc(iisend) 
+     iproc_rcv=SendAtomProc(iisend)
      next=-1
      if (iisend < nbsend) next=SendAtomProc(iisend+1)
      if (iproc_rcv /= me_exch) then

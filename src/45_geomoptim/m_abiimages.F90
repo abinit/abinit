@@ -39,7 +39,7 @@
 
 module m_abiimages
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abihist
  use m_xmpi

@@ -53,7 +53,7 @@
 MODULE m_wfk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
 #ifdef HAVE_MPI2
@@ -456,7 +456,6 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_open_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -789,7 +788,6 @@ subroutine wfk_print(wfk,unit,header,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3249,7 +3247,6 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_seek'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4062,7 +4059,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_tofullbz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4374,7 +4370,6 @@ subroutine wfk_nc2fort(nc_path, fort_path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_nc2fort'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4462,7 +4457,6 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_prof'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4935,7 +4929,6 @@ subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fill_or_check'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5088,7 +5081,6 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_diff'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

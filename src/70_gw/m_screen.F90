@@ -30,7 +30,7 @@ MODULE m_screen
  use m_hide_blas
  use m_errors
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_kxc
  use m_screening
  use m_nctk
@@ -350,7 +350,6 @@ subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_info_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -924,7 +923,6 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1296,7 +1294,6 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_symmetrizer'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

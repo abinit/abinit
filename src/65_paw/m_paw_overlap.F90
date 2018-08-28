@@ -27,7 +27,7 @@ MODULE m_paw_overlap
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_special_funcs, only : sbf8

@@ -32,7 +32,7 @@
 MODULE m_paw_slater
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 
@@ -755,7 +755,6 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_sigxcore'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1399,7 +1398,6 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_dijhf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

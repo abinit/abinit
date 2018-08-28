@@ -30,7 +30,7 @@ module m_paw_mkaewf
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_hide_blas
  use m_splines
@@ -56,6 +56,7 @@ module m_paw_mkaewf
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
  use m_paw_nhat,       only : nhatgrid
  use m_mpinfo,         only : proc_distrb_cycle
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -146,8 +147,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkaewf'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

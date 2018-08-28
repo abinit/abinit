@@ -33,7 +33,7 @@ MODULE m_ebands
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_tetrahedron
  use m_bspline
@@ -474,7 +474,6 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaps_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1028,7 +1027,6 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2219,7 +2217,6 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_update_occ'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2401,7 +2398,6 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_set_scheme'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2646,7 +2642,6 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_report_gap'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5593,7 +5588,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_interpolate_kpath'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

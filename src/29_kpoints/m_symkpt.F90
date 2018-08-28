@@ -1,4 +1,45 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_symkpt
+!! NAME
+!!  m_symkpt
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! TODO
+!!  Move it to m_kpts
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_symkpt
+
+ implicit none
+
+ private
+!!***
+
+ public :: symkpt
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/symkpt
 !! NAME
 !! symkpt
@@ -54,17 +95,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
 & symrec,timrev,wtk,wtk_folded)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_sort
 
@@ -72,7 +107,6 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symkpt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -364,4 +398,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
 !ENDDEBUG
 
 end subroutine symkpt
+!!***
+
+end module m_symkpt
 !!***

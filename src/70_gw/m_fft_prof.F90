@@ -23,7 +23,7 @@ MODULE m_FFT_prof
  use defs_abitypes
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fftw3
  use m_fft
 
@@ -458,7 +458,6 @@ subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -738,7 +737,6 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftprof_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -861,7 +859,6 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fourdp'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1149,6 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fourwf'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

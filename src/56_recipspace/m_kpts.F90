@@ -27,7 +27,7 @@ module m_kpts
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal
  use m_sort
  use m_kptrank
@@ -39,6 +39,7 @@ module m_kpts
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -405,7 +406,6 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symkchk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -975,7 +975,6 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkgrid'
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -1720,7 +1719,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smpbz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2294,7 +2292,7 @@ end subroutine smpbz
 !!      inkpts,m_ab7_kpoints
 !!
 !! CHILDREN
-!!      getkgrid,leave_new,matr3inv,metric,smallprim,wrtout,xmpi_abort
+!!      getkgrid,abi_abort,matr3inv,metric,smallprim,wrtout,xmpi_abort
 !!
 !! SOURCE
 
@@ -2306,8 +2304,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'testkgrid'
- use interfaces_14_hidewrite
- use interfaces_16_hideleave
 !End of the abilint section
 
  implicit none
@@ -2952,8 +2948,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
    call wrtout(std_out,message,'COLL',do_flush=.True.)
    call wrtout(iout,message,'COLL',do_flush=.True.)
 
-   call xmpi_abort()
-   call leave_new('PERS',exit_status=0,print_config=.false.)
+   call abi_abort('PERS',exit_status=0,print_config=.false.)
  end if
 
 end subroutine testkgrid
@@ -2967,12 +2962,12 @@ end subroutine testkgrid
 !! Please do not use this  routine, use make_normpath instead.
 !! mknormpath should be removed
 !!
-!!  This simple routine generates a normalized path that can be used to plot a band 
-!!  structures in an easy way. For normalized path we mean a path where the number 
-!!  of division on each segment is proportional to the length of the segment itself. 
-!!  To generate the above mentioned path, the subroutine must be called twice. 
+!!  This simple routine generates a normalized path that can be used to plot a band
+!!  structures in an easy way. For normalized path we mean a path where the number
+!!  of division on each segment is proportional to the length of the segment itself.
+!!  To generate the above mentioned path, the subroutine must be called twice.
 !!  The first call reports the total number of divisions in the normalized path, dimension
-!!  that is required to correctly allocate the array.  
+!!  that is required to correctly allocate the array.
 !!  The second call calculates the reduced coordinates of the circuit.
 !!
 !! COPYRIGHT
@@ -2986,14 +2981,14 @@ end subroutine testkgrid
 !! ndiv_small=number of points to be used to sample the smallest
 !!  segment defined by bounds(:,1:nbounds)
 !! bounds(3,nbounds)=points defining the path
-!! gmet(3,3)=metric 
+!! gmet(3,3)=metric
 !!
 !! OUTPUT
 !! ndiv(nbounds-1)= number of divisions for each segment
 !! npt_tot=total number of points sampled along the circuit
 !! path(3,npt_tot)= normalized path in reciprocal space
 !!
-!! TODO 
+!! TODO
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
 !!
 !! PARENTS
@@ -3012,14 +3007,13 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mknormpath'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
  !F95 construct, interface required but we can call mknormpath once
- !real(dp),pointer :: path(:,:) 
+ !real(dp),pointer :: path(:,:)
 !scalars
  integer,intent(in) :: nbounds,ndiv_small
  integer,intent(inout) :: npt_tot
@@ -3037,7 +3031,7 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  real(dp) :: dd(3),lng(nbounds-1)
 
 ! *************************************************************************
- 
+
  if (ndiv_small<=0) then
    write(message,'(3a,i0)')&
 &   'The argument ndiv_small should be a positive number,',ch10,&
@@ -3045,9 +3039,9 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
    MSG_ERROR(message)
  end if
 
- do ii=1,nbounds-1 
+ do ii=1,nbounds-1
    dd(:)=bounds(:,ii+1)-bounds(:,ii)
-   lng(ii)= sqrt( dd(1)*gmet(1,1)*dd(1)+ &    
+   lng(ii)= sqrt( dd(1)*gmet(1,1)*dd(1)+ &
 &   dd(2)*gmet(2,2)*dd(2)+ &
 &   dd(3)*gmet(3,3)*dd(3)+ &
 &   2.0d0*(dd(1)*gmet(1,2)*dd(2)+ &
@@ -3059,7 +3053,7 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  fct=minval(lng)
 
 !Avoid division by zero if k(:,i+1)=k(:,i)
- if (abs(fct)<tol6) then 
+ if (abs(fct)<tol6) then
    write(message,'(3a)')&
 &   'found two consecutive points in the path which are equal',ch10,&
 &   'This is not allowed, please modify the path in your input file'
@@ -3067,25 +3061,25 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  end if
 
  fct=fct/ndiv_small
- ndiv(:)=nint(lng(:)/fct) 
+ ndiv(:)=nint(lng(:)/fct)
 !The 1 stand for the first point
  npt_tot=sum(ndiv)+1
 
 !allocate(path(3,npt_tot)
- if (.not.present(path)) then 
+ if (.not.present(path)) then
    write(message,'(2a,i8)')ch10,&
 &   ' mknormpath : total number of points on the path : ',npt_tot
    call wrtout(std_out,message,'COLL')
    write(message,'(2a)')ch10,' Number of divisions for each segment of the normalized path : '
-   call wrtout(std_out,message,'COLL') 
+   call wrtout(std_out,message,'COLL')
    do ii=1,nbounds-1
      write(message,'(2(3f8.5,a),i5,a)')&
-     bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndiv : ',ndiv(ii),' )' 
+     bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndiv : ',ndiv(ii),' )'
      call wrtout(std_out,message,'COLL')
-   end do 
+   end do
    write(message,'(a)')ch10
-   call wrtout(std_out,message,'COLL') 
- else 
+   call wrtout(std_out,message,'COLL')
+ else
    write(message,'(2a)')ch10,' Normalized Path : '
    call wrtout(std_out,message,'COLL')
    idx=1
@@ -3095,8 +3089,8 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
        write(message,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
        call wrtout(std_out,message,'COLL')
        idx=idx+1
-     end do 
-   end do 
+     end do
+   end do
  end if
 
 end subroutine mknormpath

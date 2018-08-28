@@ -49,7 +49,7 @@ MODULE m_bz_mesh
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_sort
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
@@ -58,6 +58,7 @@ MODULE m_bz_mesh
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -658,7 +659,6 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kmesh_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1620,7 +1620,6 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'identk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2029,7 +2028,6 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_path'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2621,7 +2619,6 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_init'
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -3082,7 +3079,6 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

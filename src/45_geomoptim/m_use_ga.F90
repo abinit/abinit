@@ -65,7 +65,7 @@
 MODULE m_use_ga
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_ga
  use m_sort
 

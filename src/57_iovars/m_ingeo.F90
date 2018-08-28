@@ -29,7 +29,7 @@ module m_ingeo
  use defs_basis
  use defs_abitypes
  use m_intagm_img
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
@@ -153,7 +153,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1215,7 +1214,6 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeobld'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

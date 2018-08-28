@@ -23,7 +23,7 @@
 MODULE m_dtset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_copy
  use m_errors
  use m_xmpi
@@ -108,7 +108,6 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtset_chkneu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -611,6 +610,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
+ dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
  dtout%ionmov             = dtin%ionmov
@@ -1525,7 +1525,6 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'find_getdtset'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1616,13 +1615,12 @@ end subroutine find_getdtset
 
 subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
+ use m_symkpt,     only : symkpt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -2449,7 +2447,7 @@ subroutine chkvars (string)
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'

@@ -28,7 +28,7 @@ module m_occ
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
  use m_xmpi
 
@@ -124,7 +124,6 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getnel'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -411,7 +410,6 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newocc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1595,7 +1593,6 @@ subroutine dos_hdr_write(deltaene,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_hdr_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -25,7 +25,7 @@ module m_phgamma
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -621,7 +621,6 @@ subroutine phgamma_print(gams,cryst,ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2267,7 +2266,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3634,7 +3632,6 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_tr_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4205,7 +4202,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -4240,7 +4237,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phgamma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -31,7 +31,7 @@
 module m_rec_tools
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  use defs_rectypes, only : recparall_type
 

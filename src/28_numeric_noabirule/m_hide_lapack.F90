@@ -51,7 +51,7 @@
 MODULE m_hide_lapack
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_slk
@@ -328,7 +328,6 @@ subroutine wrap_ZHEEV(jobz,uplo,n,a,w,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrap_ZHEEV'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -834,7 +833,6 @@ subroutine wrap_ZHPEV(jobz,uplo,n,ap,w,z,ldz,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrap_ZHPEV'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1021,7 +1019,6 @@ subroutine wrap_ZHEGV(itype,jobz,uplo,n,a,b,w,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrap_ZHEGV'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1517,7 +1514,6 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrap_ZHEEVX'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2064,7 +2060,6 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrap_ZHEGVX'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2832,7 +2827,6 @@ subroutine cginv(a,n,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cginv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3034,7 +3028,6 @@ subroutine zginv(a,n,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'zginv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3193,7 +3186,6 @@ subroutine zhpd_invert(uplo,a,n,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'zhpd_invert'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

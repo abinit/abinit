@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wvl_wfs
+!! NAME
+!! m_wvl_wfs
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wvl_wfs
+
+ use defs_basis
+ use m_errors
+ use m_abicore
+
+ implicit none
+
+ private
+!!***
+
+ public :: wvl_wfs_set
+ public :: derf_ab
+ public :: wvl_wfs_free
+ public :: wvl_wfs_lr_copy
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wvl_wfs_set
 !! NAME
 !! wvl_wfs_set
@@ -11,13 +55,6 @@
 !! here. See the initialisation routines wvl_wfsinp_disk(), wvl_wfsinp_scratch()
 !! and wvl_wfsinp_reformat() to do it. After allocation, use wvl_wfs_free()
 !! to deallocate all stuff (descriptors and arrays).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
@@ -39,20 +76,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, nproc, nspinor, &
 &  nsppol, nwfshist, occ, psps, rprimd, wfs, wtk, wvl, wvl_crmult, wvl_frmult, xred)
 
- use defs_basis
  use defs_datatypes
  use defs_wvltypes
- use m_profiling_abi
- use m_errors
 
  use m_geometry, only : xred2xcart
 #if defined HAVE_BIGDFT
@@ -66,7 +94,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfs_set'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -229,13 +256,6 @@ end subroutine wvl_wfs_set
 !! FUNCTION
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -247,10 +267,8 @@ end subroutine wvl_wfs_set
 !! CHILDREN
 !!
 !! SOURCE
-subroutine derfcf(derfc_yy,yy)
 
- use m_profiling_abi
- use defs_basis
+subroutine derfcf(derfc_yy,yy)
 
  use m_special_funcs,  only : abi_derfc
 
@@ -281,13 +299,6 @@ end subroutine derfcf
 !! FUNCTION
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -300,10 +311,8 @@ end subroutine derfcf
 !! CHILDREN
 !!
 !! SOURCE
-subroutine derf_ab(derf_yy,yy)
 
- use m_profiling_abi
- use defs_basis
+subroutine derf_ab(derf_yy,yy)
 
  use m_special_funcs,  only : abi_derf
 
@@ -338,13 +347,6 @@ end subroutine derf_ab
 !! FUNCTION
 !! Freeing routine.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DC)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -361,18 +363,10 @@ end subroutine derf_ab
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wvl_wfs_free(wfs)
 
- use defs_basis
  use defs_wvltypes
- use m_profiling_abi
- use m_errors
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: deallocate_Lzd_except_Glr, deallocate_lr, &
       & deallocate_orbs, deallocate_comms
@@ -444,17 +438,8 @@ end subroutine wvl_wfs_free
 !! CHILDREN
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine wvl_wfs_lr_copy(wfs, wvl)
-
- use m_profiling_abi
- use m_errors
 
  use defs_wvltypes
 
@@ -506,4 +491,7 @@ subroutine wvl_wfs_lr_copy(wfs, wvl)
 #endif
 
 end subroutine wvl_wfs_lr_copy
+!!***
+
+end module m_wvl_wfs
 !!***

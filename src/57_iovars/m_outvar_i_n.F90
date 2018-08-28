@@ -28,7 +28,7 @@ module m_outvar_i_n
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_results_out
  use m_errors
@@ -357,6 +357,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%imgmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'imgmov','INT',0)
+
+ intarr(1,:)=dtsets(:)%imgwfstor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'imgwfstor','INT',0)
 
  intarr(1,:)=dtsets(:)%inclvkb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'inclvkb','INT',0)

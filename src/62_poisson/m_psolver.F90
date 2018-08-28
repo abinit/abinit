@@ -29,7 +29,7 @@ module m_psolver
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_cgtools
@@ -108,7 +108,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_rhohxc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -572,7 +571,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_hartree'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -713,7 +711,6 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_kernel'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

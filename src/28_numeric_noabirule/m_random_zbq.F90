@@ -41,7 +41,7 @@
 
 module m_random_zbq
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis,   only : sp, dp, std_out
 

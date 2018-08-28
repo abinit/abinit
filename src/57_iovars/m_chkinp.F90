@@ -30,7 +30,7 @@ module m_chkinp
  use defs_datatypes
  use defs_abitypes
  use m_gwdefs
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
@@ -94,7 +94,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkinp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1033,6 +1032,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
      end if
    end if
+
+!  imgwfstor
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,2,(/0,1/),iout)
+   if (dt%extrapwf/=0) then ! extrapwf/=0 not allowed presently with imgwfstor
+     cond_string(1)='extrapwf' ; cond_values(1)=dt%extrapwf
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
+   endif
+   if (dt%ntimimage<=1) then ! imgwfstor activate only when there is more than one time step for images
+     cond_string(1)='ntimimage' ; cond_values(1)=dt%ntimimage
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'imgwfstor',dt%imgwfstor,1,(/0/),iout)
+   endif
 
 !  intxc
    if(dt%iscf==-1)then
@@ -3069,7 +3079,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,7,(/0,1,2,3,4,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/0,1,2,3,4,5,6,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)

@@ -29,7 +29,7 @@
 MODULE m_exp_mat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
 

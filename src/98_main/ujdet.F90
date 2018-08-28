@@ -39,7 +39,7 @@ program ujdet
  use defs_abitypes
  use defs_datatypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
 
@@ -55,7 +55,6 @@ program ujdet
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ujdet'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

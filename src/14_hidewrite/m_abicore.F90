@@ -1,4 +1,45 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_abicore
+!! NAME
+!!  m_abicore
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2018 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_abicore
+
+ !use defs_basis
+ !use m_build_info
+ use m_profiling_abi
+ use m_specialmsg !,  only : herald, specialmsg_setcount, specialmsg_getcount, specialmsg_mpisum, wrtout
+ !use m_errors
+
+ implicit none
+
+ public
+
+contains  !=====================================================
+!!***
+
+! TODO: Replace with F90 i0
+
 !!****f* ABINIT/appdig
 !! NAME
 !! appdig
@@ -8,13 +49,6 @@
 !! named 'strinn' by concatenating digits of "integ" with characters
 !! of "string"; return final string in "strinn".
 !! Can also treat initial empty string, then simply returns the integer in the form of a string
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! integ=nonnegative integer whose digits will be appended to string
@@ -32,17 +66,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine appdig(integ,string,strinn)
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -68,12 +93,12 @@ subroutine appdig(integ,string,strinn)
 ! *************************************************************************
 !
 !Check that integer is nonnegative
- if (integ<0) then
-   write(msg,'(a,i0,a)') &
-&   'Input integer =',integ,' must not be <0. Argument integ was input as negative.'
-   MSG_BUG(msg)
- end if
-!
+ !if (integ<0) then
+ !  write(msg,'(a,i0,a)') &
+ !  'Input integer =',integ,' must not be <0. Argument integ was input as negative.'
+ !  MSG_BUG(msg)
+ !end if
+
 !Fill output string initially with blanks to end of dimensioned length
  length=len(strinn)
  do i=1,length
@@ -99,5 +124,9 @@ subroutine appdig(integ,string,strinn)
 !(Note that present version writes "1" or "2" for single digit,
 !not "01" or "02".  Latter may be preferable.  Can be amended.)
 !
+
 end subroutine appdig
+!!***
+
+end module m_abicore
 !!***

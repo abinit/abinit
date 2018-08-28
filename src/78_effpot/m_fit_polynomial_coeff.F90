@@ -26,7 +26,7 @@ module m_fit_polynomial_coeff
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_polynomial_coeff
  use m_atomdata
  use m_xmpi
@@ -127,7 +127,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_fit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1161,7 +1160,6 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_getPositive'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1367,7 +1365,6 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_getCoeffBound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

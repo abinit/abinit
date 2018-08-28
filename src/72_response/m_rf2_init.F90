@@ -1,4 +1,49 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_rf2_init
+!! NAME
+!!  m_rf2_init
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! TODO
+!!  Can be merged with m_rf2
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_rf2_init
+
+ use defs_basis
+ use m_errors
+ use m_abicore
+
+ implicit none
+
+ private
+!!***
+
+ public :: rf2_init
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/rf2_init
 !!
 !! NAME
@@ -88,7 +133,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -894,4 +938,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  DBG_EXIT("COLL")
 
 end subroutine rf2_init
+!!***
+
+end module m_rf2_init
 !!***

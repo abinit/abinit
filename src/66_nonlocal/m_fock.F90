@@ -33,7 +33,7 @@ module m_fock
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_mpinfo
  use m_xmpi
@@ -49,7 +49,7 @@ module m_fock
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_symtk,           only : mati3inv, matr3inv
  use m_fftcore,         only : sphereboundary
- use m_fft,             only : zerosym
+ use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
  use m_mpinfo,          only : proc_distrb_cycle
@@ -494,7 +494,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1713,7 +1712,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2176,7 +2174,6 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

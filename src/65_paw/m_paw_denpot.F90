@@ -23,7 +23,7 @@
 MODULE m_paw_denpot
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_time, only : timab
@@ -35,7 +35,7 @@ MODULE m_paw_denpot
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
- use m_pawdij,           only : pawdijhartree,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
+ use m_pawdij,           only : pawdijhartree,pawdiju_euijkl,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
  use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron
  use m_paw_finegrid,     only : pawgylm
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
@@ -152,7 +152,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdenpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -183,11 +182,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc,iatom,iatom_tot,idum,ierr,ipositron,irhoij,ispden,itypat,itypat0
  integer :: jrhoij,kklmn,klmn,lm_size,lmn2_size,mesh_size,my_comm_atom,ndij,nkxc1,nk3xc1,nspdiag,nsppol,opt_compch
  integer :: usecore,usepawu,usetcore,usexcnhat,usenhat,usefock
- logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc,paral_atom,temp_vxc
+ logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc,paral_atom,pawu_new_algo,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
- real(dp) :: eldaumdc,eldaumdcdc,enucdip,espnorb,etild1xc,etild1xcdc
- real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
+ real(dp) :: eldaumdc,eldaumdcdc,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum,ro_im
  character(len=3) :: pertstrg
  character(len=500) :: msg
 !arrays
@@ -195,8 +194,9 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:),lmselect_cur_ep(:),lmselect_ep(:),lmselect_tmp(:)
  real(dp) :: ro(2),mpiarr(7),tsec(2)
- real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:),one_over_rad2(:)
- real(dp),allocatable :: kxc_tmp(:,:,:),k3xc_tmp(:,:,:),nhat1(:,:,:),nhat1_ep(:,:,:)
+ real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:),diju_im(:,:)
+ real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
+ real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
  real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
  real(dp),allocatable :: rho(:),rho1(:,:,:),rho1_ep(:,:,:),rho1xx(:,:,:)
  real(dp),allocatable :: trho1(:,:,:),trho1_ep(:,:,:),vxc_tmp(:,:,:)
@@ -212,9 +212,15 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    MSG_BUG(msg)
  end if
 
+ usepawu=maxval(pawtab(1:ntypat)%usepawu)
+ pawu_new_algo=(usepawu==5.or.usepawu==6)
  if (my_natom>0) then
-   if(paw_ij(1)%has_dijhartree==0.and. .not.(ipert==natom+1.or.ipert==natom+10)) then
+   if(paw_ij(1)%has_dijhartree==0.and.ipert/=natom+1.and.ipert/=natom+10) then
      msg='dijhartree must be allocated !'
+     MSG_BUG(msg)
+   end if
+   if(paw_ij(1)%has_dijU==0.and.pawu_new_algo.and.ipert/=natom+1.and.ipert/=natom+10) then
+     msg='dijU must be allocated !'
      MSG_BUG(msg)
    end if
    if (paw_ij(1)%cplex_rf/=paw_an(1)%cplex) then
@@ -284,7 +290,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  usenhat = usexcnhat
  keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
  if(keep_vhartree) usenhat = 1
- usepawu=maxval(pawtab(1:ntypat)%usepawu)
  non_magnetic_xc=(usepawu==4).or.(usepawu==14)
  compch_sph=-1.d5
  opt_compch=0;if (option/=1.and.ipert<=0) opt_compch=1
@@ -814,9 +819,72 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ========= Compute PAW+U and energy contribution  =========
 !  ==========================================================
 
-   if (pawtab(itypat)%usepawu>0.and.ipert==0.and.ipositron/=1.and.option/=1.and.pawtab(itypat)%usepawu<10) then
-     call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,paw_ij(iatom)%noccmmp, &
-&                    paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
+   if (pawtab(itypat)%usepawu>0.and.ipositron/=1.and.option/=1.and.pawtab(itypat)%usepawu<10) then
+     if (ipert==0.and.option/=1.and.(.not.pawu_new_algo)) then
+       call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,paw_ij(iatom)%noccmmp, &
+&                      paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
+     else
+!      PAW+U Dij computation from euijkl
+       ABI_CHECK(cplex_dij==1,'cplex_dij not yet available!')
+       ABI_CHECK(ndij/=4,'ndij not yet available!')
+       cplex_eq_two=.true.; if (paw_ij(iatom)%cplex_rf==1.or.ipert==0) cplex_eq_two=.false.
+       if (cplex_eq_two.and.option/=1) then
+         ABI_ALLOCATE(diju_im,(pawtab(itypat)%lmn2_size,ndij))
+         call pawdiju_euijkl(cplex,cplex_dij,paw_ij(iatom)%dijU,ndij, &
+&                            pawrhoij(iatom),pawtab(itypat),diju_im=diju_im)
+       else
+         call pawdiju_euijkl(cplex,cplex_dij,paw_ij(iatom)%dijU,ndij, &
+&                            pawrhoij(iatom),pawtab(itypat))
+       end if
+       paw_ij(iatom)%has_dijU=2
+!      PAW+U energy computation
+       if (option/=1) then
+         if (.not.cplex_eq_two) then
+           do ispden=1,ndij
+             jrhoij=1
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+               ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
+               etmp = half*ro(1)*paw_ij(iatom)%dijU(klmn,ispden)
+               eldaumdc   = eldaumdc   + etmp
+               eldaumdcdc = eldaumdcdc - etmp
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end do
+         else
+           do ispden=1,ndij
+             jrhoij=1
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=pawrhoij(iatom)%rhoijselect(irhoij);kklmn=2*klmn-1
+               ro(1:2)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
+               ro_im = pawrhoij(iatom)%rhoijim(klmn,ispden)
+               if (abs(pawtab(itypat)%dltij(klmn)-1)<tol14) then ! case i==j
+                 etmp = half*(ro(1)*paw_ij(iatom)%dijU(kklmn,ispden)+(ro(2)+ro_im)*paw_ij(iatom)%dijU(kklmn+1,ispden))
+               else ! case i/=j (we remove the factor half to take into account that dltij=2)
+                 etmp =        ro(1)*paw_ij(iatom)%dijU(kklmn  ,ispden)                        ! re  * re
+                 etmp = etmp + ro_im*diju_im(klmn,ispden)                                      ! ima * ima
+                 etmp = etmp + ro(2)*(paw_ij(iatom)%dijU(kklmn+1,ispden)-diju_im(klmn,ispden)) ! imb * imb
+               end if
+               eldaumdc   = eldaumdc   + etmp
+               eldaumdcdc = eldaumdcdc - etmp
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end do
+           ABI_DEALLOCATE(diju_im)
+         end if
+         !Add FLL double-counting part
+         if (ipert==0.and.pawu_new_algo.and.pawtab(itypat)%usepawu==5) then
+           do ispden=1,nspdiag
+             jrhoij=1
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+               eldaumdc=eldaumdc+ro(1)*pawtab(itypat)%euij_fll(klmn)
+               jrhoij=jrhoij+pawrhoij(iatom)%cplex
+             end do
+           end do
+         end if
+       end if
+     end if
    end if
 
 !  ========= Compute nuclear dipole moment energy contribution  ========
@@ -1002,7 +1070,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eexex+espnorb+efock+enucdip
      epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+eldaumdcdc-eexex-efockdc
    else
-     epaw=e1xc-etild1xc+eh2
+     epaw=e1xc-etild1xc+eh2+two*eldaumdc
      epawdc=zero
    end if
  end if
@@ -1116,7 +1184,6 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdensities'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1514,7 +1581,6 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_mknewh0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

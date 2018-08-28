@@ -30,7 +30,7 @@ module m_predict_neb
  use defs_abitypes
  use m_splines
  use m_mep
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 

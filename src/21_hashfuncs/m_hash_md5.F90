@@ -27,7 +27,7 @@
 module m_hash_md5
 
   use iso_c_binding
-  use m_profiling_abi
+  use m_abicore
 
   implicit none
 

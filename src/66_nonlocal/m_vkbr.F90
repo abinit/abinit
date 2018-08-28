@@ -28,7 +28,7 @@ MODULE m_vkbr
  use defs_datatypes
  use m_hide_blas
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_gwdefs,        only : czero_gw
  use m_fstrings,      only : sjoin, itoa
