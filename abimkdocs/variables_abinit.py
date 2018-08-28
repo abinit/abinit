@@ -6604,7 +6604,18 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2003]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
+  * 12 --> Isokinetic ensemble molecular dynamics. 
+The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], 
+as worked out in [cite:Minary2003]]. 
+The conservation of the kinetic energy is obtained within machine precision, at each step.
+As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the 
+microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
+minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
+related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
+total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
+e.g. using [[natifix]], the number of degrees of freedom is decreased accordingly, 
+albeit taking into account that the total momentum is not preserved
+anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case the velocities [[vel]] are not initialized, or all initialized to zero.

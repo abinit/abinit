@@ -102,7 +102,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: kk,iatom,idim,idum=5,natfree,ndegfreedom,nfirst,ifirst
+ integer  :: kk,iatom,idim,idum=5,nxyzatfree,ndegfreedom,nfirst,ifirst
  real(dp) :: a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel
@@ -213,11 +213,11 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Count the number of degrees of freedom, taking into account iatfix.
 !Also fix the velocity to zero for the fixed atoms
- natfree=0
+ nxyzatfree=0
  do iatom=1,ab_mover%natom
    do idim=1,3
      if(ab_mover%iatfix(idim,iatom)==0)then
-       natfree=natfree+1
+       nxyzatfree=nxyzatfree+1
      else
        vel(idim,iatom)=zero
      endif
@@ -225,15 +225,16 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  enddo
 
 !Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
-!and because of the fixing of the total momentum for each dimension, in case no atom position is fixed for that dimension 
+!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension 
+!(in the latter case, one degree of freedom has already been taken away)
 !This was not done until v8.9 of ABINIT ...
- ndegfreedom=natfree
-!ndegfreedom=natfree-1
-!do idim=1,3
-!  if(sum(ab_mover%iatfix(idim,:))==0)then
-!    ndegfreedom=ndegfreedom-1
-!  endif
-!enddo
+ ndegfreedom=nxyzatfree
+ ndegfreedom=nxyzatfree-1 ! Kinetic energy conservation
+ do idim=1,3
+   if(sum(ab_mover%iatfix(idim,:))==0)then
+     ndegfreedom=ndegfreedom-1 ! Macroscopic momentum
+   endif
+ enddo
 
 !write(std_out,*) 'isokinetic 04'
 !##########################################################
