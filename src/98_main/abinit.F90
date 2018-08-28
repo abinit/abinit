@@ -117,7 +117,6 @@ program abinit
  use m_exit,        only : get_timelimit_string
  use m_atomdata,    only : znucl2symbol
  use m_libpaw_tools,only : libpaw_spmsg_getcount
- use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
  use m_chkinp,      only : chkinp
@@ -634,11 +633,6 @@ program abinit
    if (xml_output) then
      call outxml_finalise(tsec, values)
    end if
-   do ii=1,npsp_pawxml
-     call paw_setup_free(paw_setup(ii))
-   end do
-   ABI_DATATYPE_DEALLOCATE(paw_setup)
-   ABI_DEALLOCATE(ipsp2xml)
 #ifndef HAVE_MEM_PROFILING
    close(unit=ab_out)
 #endif
