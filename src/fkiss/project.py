@@ -821,8 +821,9 @@ class AbinitProject(object):
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
-            #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
             config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
+            # py3k
+            #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
 
         print("Analysis completed in %.2f [s]" % (time.time() - start))
 
@@ -926,9 +927,8 @@ class AbinitProject(object):
             with open(fname, 'a'):
                 os.utime(fname, times)
 
-        count = 0
-
         # TODO: possible problem if new files have been added.
+        count = 0
         changed_fort_files = []
         for fort_file in self.fort_files.values():
             if fort_file.stat.st_mtime != os.stat(fort_file.path).st_mtime:
@@ -980,7 +980,7 @@ class AbinitProject(object):
             cprint(errstr, "red")
             retcode += 1
 
-        cprint("retcode %d" % retcode, "green" if retcode ==0 else "red")
+        cprint("retcode %d" % retcode, "green" if retcode == 0 else "red")
         return retcode
 
     #def check_abirules(self, verbose=0):

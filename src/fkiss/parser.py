@@ -19,7 +19,7 @@ class Node(object):
         if self.ancestor is not None:
             return "<%s: %s.%s>" % (self.__class__.__name__, self.ancestor.name, self.name)
         else:
-            return "<%s: %ss>" % (self.__class__.__name__, self.name)
+            return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __str__(self):
         # FIXME: This is ABC
@@ -150,7 +150,7 @@ class Datatype(Node, HasRegex):
                 # Assume: integer, attr1, attr2 :: varname(...)
                 line = line.replace(" ", "")
                 if verbose: print(line)
-                print(line)
+                #print(line)
                 # Handle inlined comment.
                 i = line.find("!")
                 if i != -1:
@@ -235,7 +235,7 @@ class Interface(Node):
 
 class Procedure(Node):
     """
-    Base class
+    Base class for programs/routines/functions/modules.
 
     contains: List of contained `Procedure`
     local_uses: List of strings with the name of the modules used (explicit) by this procedure
@@ -244,15 +244,14 @@ class Procedure(Node):
     children: List of string with the name of the subroutines called by this procedure.
     """
 
-    def __init__(self, name, ancestor, preamble, path=None):
+    def __init__(self, name, ancestor, preamble, path="<UnknownFile>"):
         self.name = name.strip()
         self.ancestor = ancestor
         self.preamble = "\n".join(preamble)
         self.path = path
         self.basename = os.path.basename(self.path)
 
-        self.num_f90lines, self.num_doclines = 0, 0
-        #self.num_omp_statements = 0
+        self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
         self.types = []
@@ -260,6 +259,7 @@ class Procedure(Node):
 
         # TODO
         # Initialize visibility.
+        # The real value will be set by analyzing the module.
         self.visibility = "public"
         #self.has_implicit_none = False
 
@@ -278,10 +278,6 @@ class Procedure(Node):
     @lazy_property
     def is_function(self):
         return isinstance(self, Function)
-
-    #@lazy_property
-    #def is_contained(self):
-    #    return isinstance(self, Function)
 
     #@lazy_property
     #def visibility(self):
@@ -320,10 +316,10 @@ class Procedure(Node):
 
     @lazy_property
     def dirlevel(self):
-        # 72_response --> 72
         if self.dirname is None:
             return -1
         else:
+            # 72_response --> 72
             return int(self.dirname.split("_")[0])
 
     @property
@@ -392,12 +388,15 @@ class Procedure(Node):
         app("PARENT_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
 
         app("CHILDREN:\n%s\n" % w.fill(", ".join(sorted(c for c in self.children))))
-        #if verbose:
-        ## Add directory of children
-        #dirnames = sorted(set(os.path.basename(p.dirname) for p in self.children))
-        #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
 
-        if verbose:
+        if verbose > 1:
+            app("")
+            app("number of Fortran lines:%s" % self.num_f90lines)
+            app("number of doc lines: %s" % self.num_doclines)
+            app("number of OpenMP statements: %s" % self.num_omp_statements)
+            # Add directory of children
+            #dirnames = sorted(set(os.path.basename(p.dirname) for p in self.children))
+            #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
             app("PREAMBLE:\n%s" % self.preamble)
 
         return "\n".join(lines)
@@ -452,6 +451,8 @@ class Module(Procedure):
         super(Module, self).__init__(name, ancestor, preamble, path=path)
         self.default_visibility = True
         #self.variables = OrderedDict()
+        #self.public_procedure_names = []
+        #self.private_procedure_names = []
 
     def to_string(self, verbose=0, width=90):
         lines = []; app = lines.append
@@ -491,14 +492,14 @@ class FortranKissParser(HasRegex):
         if path is None: path = "<UnknownPath>"
         self.path = path
 
-        # Replace macros. Need e.g. to treat USE_DEFS macros in libpaw and tetralib.
+        # Replace macros. Needed e.g. to treat USE_DEFS macros in libpaw and tetralib.
         for macro, value in self.macros.items():
             string = re.sub(macro, value, string)
 
         # Perhaps here one should join multiple lines ending with &
         # Get list of lower-case string.
-        self.lines = deque(l.strip().lower() for l in string.splitlines())
-        #self.lines = deque(l.strip() for l in string.splitlines())
+        #self.lines = deque(l.strip().lower() for l in string.splitlines())
+        self.lines = deque(l.strip() for l in string.splitlines())
         #self.lines = deque(l for l in string.splitlines())
         self.warnings = []
 
@@ -516,7 +517,7 @@ class FortranKissParser(HasRegex):
             line = self.lines.popleft()
             if not line: continue
             if self.handle_comment(line): continue
-            #line = line.lower()
+            line = line.lower()
             if self.handle_use_statement(line): continue
             if self.handle_cpp_line(line): continue
             if self.handle_contains(line): continue
@@ -527,9 +528,11 @@ class FortranKissParser(HasRegex):
             if self.consume_module_header(line): continue
 
             m = self.RE_PROC_END.match(line)
+            #m = self.RE_MOD_END.match(line)
             if m:
                 #print(line)
                 end_proc_type = m.group("proc_type")
+                #end_proc_type = "module"
                 end_name = m.group("name")
                 self.close_stack_entry(end_name, end_proc_type)
                 continue
@@ -555,9 +558,10 @@ class FortranKissParser(HasRegex):
                 p.ancestor.contains.append(p)
             else:
                 if p.is_module: self.modules.append(p)
+                elif p.is_program: self.programs.append(p)
+                # Here only if sub/function outside module.
                 elif p.is_subroutine: self.subroutines.append(p)
                 elif p.is_function: self.functions.append(p)
-                elif p.is_program: self.programs.append(p)
                 else: raise ValueError("Don't know how to handle type `%s`" % type(p))
 
         return self
@@ -591,11 +595,14 @@ class FortranKissParser(HasRegex):
             self.num_f90lines += 1
             return False
 
-        if not self.stack or (self.stack and self.stack[-1][1] != "open"):
-            self.preamble.append(line)
-
+        # Count doc line and OMP (preamble in included in num_doclines
         if line.replace("!", ""): self.num_doclines += 1
         if line.startswith("!$omp"): self.num_omp_statements += 1
+
+        if not self.stack or (self.stack and self.stack[-1][1] != "open"):
+            # Ignore stupid robodoc marker.
+            if line != "!!***":
+                self.preamble.append(line)
 
         return True
 
@@ -613,12 +620,13 @@ class FortranKissParser(HasRegex):
         return True
 
     def handle_call(self, line):
-        # TODO: At this level subname is a string that will be replaced by a Procedure object afterwards
-        # should handle call obj%foo() syntax.
+        # At this level subname is a string that will be replaced by a Procedure object afterwards
+        # TODO: should handle `call obj%foo()` syntax.
         m = self.RE_SUBCALL.match(line)
         if not m: return False
         subname = m.group("name")
         assert subname
+        print("Adding %s to children of %s" % (subname, repr(self.stack[-1][0])))
         self.stack[-1][0].children.append(subname)
         return True
 
@@ -629,20 +637,29 @@ class FortranKissParser(HasRegex):
         if self.verbose > 1: print("Entering module:", name)
         #assert self.ancestor is None
         module = Module(name, self.ancestor, self.preamble, path=self.path)
-        self.stack.append([module, "open"])
         self.ancestor = module
+        self.stack.append([module, "open"])
         self.preamble = []
 
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
+            if self.handle_comment(line): continue
+            line = line.lower()
             if self.handle_use_statement(line): continue
             m = self.RE_PUB_OR_PRIVATE.match(line)
             if m:
                 module.default_visibility = m.group("name")
                 continue
+
+            # TODO: Procedure declaration statement.
+            #proc_names
+            #module.public_procedure_names.extend(proc_names)
+            #module.private_procedure_names.extend(proc_names)
+
             # Interface declaration.
             if self.consume_interface(line): continue
+
             # Datatype declaration.
             if self.consume_datatype(line): continue
 
@@ -687,6 +704,8 @@ class FortranKissParser(HasRegex):
         while self.lines:
             line = self.lines.popleft()
             buf.append(line)
+            if self.handle_comment(line): continue
+            line = line.lower()
             end_match = self.RE_TYPE_END.match(line)
             if end_match:
                 end_name = end_match.group("name")
@@ -718,17 +737,24 @@ class FortranKissParser(HasRegex):
         name = m.group("name")
         if not name:
             raise ValueError("Cannot find %s name in line `%s`" % (ptype, line))
-        if self.verbose > 1: print("Found %s:" % ptype, name, "at line:\n\t", line)
+
+        if self.verbose > 1:
+            print("Found `%s %s`" % (ptype, name), "at line:\n\t", line)
+            print("Ancestor is set to", repr(self.ancestor))
+
         if ptype == "subroutine":
-            self.stack.append([Subroutine(name, self.ancestor, self.preamble, path=self.path), "open"])
+            new_node = Subroutine(name, self.ancestor, self.preamble, path=self.path)
         elif ptype == "function":
-            self.stack.append([Function(name, self.ancestor, self.preamble, path=self.path), "open"])
+            new_node = Function(name, self.ancestor, self.preamble, path=self.path)
         elif ptype == "program":
-            self.stack.append([Program(name, self.ancestor, self.preamble, path=self.path), "open"])
+            new_node = Program(name, self.ancestor, self.preamble, path=self.path)
         else:
             raise ValueError(ptype)
+
+        self.stack.append([new_node, "open"])
         self.ancestor = self.stack[-1][0]
         self.preamble = []
+        self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
 
         """
         has_contains = False
@@ -736,6 +762,7 @@ class FortranKissParser(HasRegex):
             line = self.lines.popleft()
             if not line: continue
             if self.handle_comment(line): continue
+            line = line.lower()
             if self.handle_use_statement(line): continue
             if self.handle_cpp_line(line): continue
             if self.consume_interface(line): continue
@@ -754,6 +781,7 @@ class FortranKissParser(HasRegex):
         else:
             raise ValueError("Cannot find `end %s `%s`" % (ptype, name))
         """
+
         return True
 
     def close_stack_entry(self, end_name, end_proc_type):
@@ -761,6 +789,7 @@ class FortranKissParser(HasRegex):
             # Close the last entry in the stack with name == end_name.
             for item in reversed(self.stack):
                 if item[0].name == end_name:
+                    node = item[0]
                     item[1] = "closed"
                     break
             else:
@@ -772,6 +801,7 @@ class FortranKissParser(HasRegex):
                 self.warn("Found `end %s` without name in %s" % (end_proc_type, self.path))
                 for item in reversed(self.stack):
                     if item[0].proc_type == end_proc_type:
+                        node = item[0]
                         item[1] = "closed"
                         break
                 else:
@@ -781,10 +811,16 @@ class FortranKissParser(HasRegex):
                 # This is the best I can do.
                 self.warn("Found plain `end` without procedure_type and name in %s" % (self.path))
                 self.stack[-1][1] = "closed"
+                node = stack[-1][0]
 
-        #print("Closing procedure", self.stack[-1][0].name)
+        if self.verbose > 1: print("Closing", repr(node))
         if self.ancestor is not None and self.ancestor.name == end_name:
             self.ancestor = self.ancestor.ancestor
+
+        # Set attributes of last node.
+        node.num_f90lines = self.num_f90lines
+        node.num_doclines = self.num_doclines
+        node.num_omp_statements = self.num_omp_statements
 
         #if self.preamble:
         #    self.warn("%s, preamble:\n%s" % (self.path, "\n".join(self.preamble)))

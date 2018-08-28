@@ -23,6 +23,7 @@ program hello_world!my first test
     use defs_basis
     implicit none
     call foo()
+    if (.True.) call foobar()
 
 contains! contained procedure
 
@@ -44,11 +45,12 @@ end program
         prog = p.programs[0]
         assert prog.name == "hello_world" and prog.ancestor is None
         assert prog.is_program and not prog.is_subroutine
+        assert prog.to_string(verbose=2)
         preamble = prog.preamble.splitlines()
         assert len(preamble) == 2
-        assert preamble[0] == "! a very simple example"
+        assert preamble[0] == "! A Very simple example"
         assert "foo" in prog.children
-        assert prog.to_string(verbose=2)
+        assert "foobara" in prog.children
 
         assert len(prog.contains) == 2
         sub = prog.contains[0]
@@ -106,14 +108,14 @@ CONTAINS  !=============================
 subroutine crystal_free(cryst)
     type(crystal_t),intent(inout) :: cryst
 
-    ! interfaces inside routines are not parsed but the parser should not crash here.
-    interface
+    ! interfaces inside routines are not parsed
+    interface!but the parser should not crash here.
           function integrand(x)
           integer, parameter :: dp=kind(1.0d0)
           real(dp) integrand
           real(dp),intent(in) :: x
           end function integrand
-    end interface
+end interface
 
     if (allocated(cryst%zion)) then
       ABI_FREE(cryst%zion)
@@ -126,9 +128,10 @@ pure function idx_spatial_inversion(cryst) result(inv_idx)
     if (cryst%nsym > 1)
 end function idx_spatial_inversion
 
-logical function private_function(cryst) result(ans)
+logical function private_bool_function(cryst)
+    logical :: private_bool_function
     type(crystal_t),intent(in) :: cryst
-    ans = (cryst%nsym > 1)
+    private_bool_function = (cryst%nsym > 1)
 end function idx_spatial_inversion
 
 end module m_crystal
@@ -146,7 +149,7 @@ end module m_crystal
         assert mod.is_module and not mod.is_subroutine
         preamble = mod.preamble.splitlines()
         assert len(preamble) == 2
-        assert preamble[0] == "! a very simple example"
+        assert preamble[0] == "! A Very simple example"
         assert not mod.children
         assert mod.to_string(verbose=2)
 
@@ -156,9 +159,22 @@ end module m_crystal
 
         func = mod.contains[1]
         assert func.is_function and func.name == "idx_spatial_inversion" and func.ancestor is mod
+        # TODO
+        #assert func.is_pure
+        #assert func.result.name == "inv_idx"
+        #assert func.is_public
+        #assert func.result.ftype == "integer" and func.result.kind is None
+
+        func = mod.contains[2]
+        assert func.is_function and func.name == "private_bool_function" and func.ancestor is mod
+        #assert not func.is_pure
+        #assert func.result.name == func.name
+        #assert not func.is_public and func.is_provate
+        #assert func.result.ftype == "logical" and func.result.kind is None
 
         assert len(mod.interfaces) == 2
         assert mod.interfaces[0].name == "get_unit"
+        # TODO
         #assert mod.interfaces[1].name == "(==)"
 
         # Test datatype
@@ -174,6 +190,7 @@ end module m_crystal
         str(nsym); repr(nsym)
         assert nsym.ftype == "integer" and nsym.is_scalar and not nsym.is_pointer
         assert nsym.doc == "! nsym docstring"
+        # TODO
         #assert xred.ftype == "real" and xred.kind == "dp"
         assert not xred.is_scalar and xred.is_array and xred.shape == "(:,:)"
         assert xred.doc.splitlines() == ["! xred", "! docstring"]

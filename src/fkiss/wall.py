@@ -269,7 +269,6 @@ class WarningsParser(object):
     def num_warns(self):
         return len(self.warns)
 
-
     def __repr__(self):
         return "<%s %s: num_warns: %s>" % (self.__class__.__name__, self.filepath, self.num_warns)
 

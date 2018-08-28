@@ -273,7 +273,7 @@ def main():
             if obj is not None:
                 print(obj.to_string(verbose=options.verbose))
             else:
-                cprint("Cannot find public entity `%s`" % str(options.what), "red")
+                cprint("Cannot find public entity `%s` in Abinit project." % options.what, "red")
                 return 1
 
     elif options.command == "interfaces":
@@ -294,7 +294,7 @@ def main():
         else:
             graph = proj.get_graphviz_pubname(options.what, engine=options.engine)
             if graph is None:
-                cprint("Cannot find public entity `%s` in Abinit project" % options.what, "red")
+                cprint("Cannot find public entity `%s` in Abinit project." % options.what, "red")
                 return 1
 
         # Visualize graph

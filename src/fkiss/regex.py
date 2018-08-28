@@ -118,6 +118,8 @@ re.I | re.VERBOSE)
     RE_PUB_OR_PRIVATE = re.compile(r"^(?P<name>public|private)\s*(\!+\s*\w*|\Z)", re.I)
     RE_CONTAINS = re.compile(r"^(contains)\s*(\!+\s*\w*|\Z)", re.I)
 
+    #RE_PUB_OR_PRIVATE_MODPROC = re.compile((r"^(?P<name>public|private)\s*(\!+\s*\w*|\Z)", re.I)
+
     #re_assumed_shape = re.compile("\(:.*\)", re.I)
     #Ampersand (continuation line)
     #re_amp = re.compile('[ ]*&[ ]*')
@@ -147,3 +149,16 @@ re.I | re.VERBOSE)
 
     # Detect robodoc header (!***)
     #RE_ROBODOC_HEADER = re.compile("!!\*\*\*\*[a-z]\*")
+
+    #re_cpp_begin=re.compile("^[ ]*#[ \t]*if[ \t]*defined[ \t]*"+my_active_macro)
+    #re_cpp_end  =re.compile("^[ ]*#[ \t]*endif")
+    #re_define   =re.compile("^[ ]*#[ \t]*define[ \t]+")
+
+    #re_comment_match = re.compile("^([ \t]*(([!#].*)|[ ]*)\n)+")
+
+    #re_assumed_shape = re.compile("\(:.*\)", re.IGNORECASE)
+    #re_result = re.compile('result[(](?P<result>[^)]+)[)]')
+
+    #Use statement
+    #re_use = re.compile('^[ \t]*use[ ]*(?P<name>\w+)', re.MULTILINE+re.IGNORECASE)
+    #re_use_prefix = re.compile('^[ \t]*use[ ]*'+prefix+'.*?\n', re.MULTILINE+re.IGNORECASE)
