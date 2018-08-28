@@ -527,12 +527,12 @@ class FortranKissParser(HasRegex):
             if self.handle_procedure(line): continue
             if self.consume_module_header(line): continue
 
-            m = self.RE_PROC_END.match(line)
-            #m = self.RE_MOD_END.match(line)
+            #m = self.RE_PROC_END.match(line)
+            m = self.RE_MOD_END.match(line)
             if m:
                 #print(line)
-                end_proc_type = m.group("proc_type")
-                #end_proc_type = "module"
+                #end_proc_type = m.group("proc_type")
+                end_proc_type = "module"
                 end_name = m.group("name")
                 self.close_stack_entry(end_name, end_proc_type)
                 continue
@@ -756,7 +756,7 @@ class FortranKissParser(HasRegex):
         self.preamble = []
         self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
 
-        """
+        #"""
         has_contains = False
         while self.lines:
             line = self.lines.popleft()
@@ -780,7 +780,7 @@ class FortranKissParser(HasRegex):
                 break
         else:
             raise ValueError("Cannot find `end %s `%s`" % (ptype, name))
-        """
+        #"""
 
         return True
 
