@@ -28,7 +28,7 @@ module m_symsg
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,     only : timab
  use m_spgdata,  only : spgdata

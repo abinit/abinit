@@ -43,7 +43,7 @@ use m_gwls_LanczosResolvents
 use m_gwls_GWanalyticPart, only : get_projection_band_indices
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 use m_io_tools,  only : get_unit
 

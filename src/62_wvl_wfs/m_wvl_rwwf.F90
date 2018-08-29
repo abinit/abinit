@@ -32,7 +32,7 @@ module m_wvl_rwwf
  use defs_wvltypes
  use m_wffile
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #if defined HAVE_ETSF_IO
   use etsf_io
@@ -93,7 +93,6 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_read'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -358,7 +357,6 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

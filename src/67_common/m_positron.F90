@@ -31,7 +31,7 @@ module m_positron
  use defs_abitypes
  use m_efield
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_energies
  use m_wffile
  use m_electronpositron
@@ -71,6 +71,7 @@ module m_positron
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
  use m_prep_kgb,        only : prep_fourwf
+ use m_fft,            only : fourwf, fourdp
 
  implicit none
 
@@ -192,8 +193,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_positron'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -922,7 +921,6 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'poslifetime'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1871,8 +1869,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posdoppler'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -34,7 +34,7 @@ module m_outqmc
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_io_tools,    only : get_unit
@@ -98,7 +98,6 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outqmc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

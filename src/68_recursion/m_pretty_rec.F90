@@ -33,7 +33,7 @@
 MODULE m_pretty_rec
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -76,7 +76,6 @@ subroutine prtworksim(work_now)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtworksim'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -125,7 +124,6 @@ subroutine prtworksiRe(work_now)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtworksiRe'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

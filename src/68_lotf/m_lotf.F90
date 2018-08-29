@@ -22,7 +22,7 @@ module LOTFPATH
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use defs_param_lotf, only : lotfvar
 
@@ -88,7 +88,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_lotf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   integer,intent(in) :: itime
@@ -287,7 +286,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fitclus'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -856,7 +854,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'upd_lis'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1397,7 +1394,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vel_rescale'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   real(dp),intent(in) :: mditemp
@@ -1589,7 +1585,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lotf_interpolation'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

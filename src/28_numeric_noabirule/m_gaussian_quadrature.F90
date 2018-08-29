@@ -36,7 +36,7 @@ module m_gaussian_quadrature
 !
 !----------------------------------------------------------------------------------------------------
 
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_basis, only : dp, tol20, std_out

@@ -28,7 +28,7 @@ module m_dfpt_mkrho
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -36,7 +36,7 @@ module m_dfpt_mkrho
  use m_time,            only : timab
  use m_io_tools,        only : get_unit, iomode_from_fname
  use m_fftcore,         only : sphereboundary
- use m_fft,             only : fftpac
+ use m_fft,             only : fftpac, fourwf
  use m_spacepar,        only : symrhg
  use m_dtfil,           only : status
  use m_hamiltonian,     only : gs_hamiltonian_type
@@ -128,8 +128,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -625,7 +623,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

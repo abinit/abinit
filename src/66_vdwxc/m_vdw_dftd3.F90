@@ -27,7 +27,7 @@
 module m_vdw_dftd3
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
 
@@ -123,7 +123,6 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_dftd3'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none

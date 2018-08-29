@@ -27,7 +27,7 @@
 module m_xcpbe
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_numeric_tools,      only : invcb

@@ -27,7 +27,7 @@ module m_harmonics_terms
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_supercell,only: getPBCIndexes_supercell
  use m_xmpi,only : xmpi_sum
  use m_ifc
@@ -816,7 +816,6 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonics_terms_applySumRule'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

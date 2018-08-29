@@ -34,7 +34,7 @@ MODULE m_invovl
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
 
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
@@ -205,7 +205,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_invovl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

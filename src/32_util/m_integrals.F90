@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_integrals
+!! NAME
+!!  m_integrals
+!!
+!! FUNCTION
+!!  Helper functions to compute integrals
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2010-2018 ABINIT group (Camilo Espejo)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_integrals
+
+ use defs_basis
+ use m_errors
+ use m_abicore
+
+ use m_numeric_tools,   only : simpson_int
+
+ implicit none
+
+ private
+!!***
+
+ public :: radsintr
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/radsintr
 !! NAME
 !!  radsintr
@@ -6,12 +50,6 @@
 !! FUNCTION
 !! Computes the sine transformation of a radial function F(r) to V(q).
 !! Computes integrals using corrected Simpson integration on a linear grid.
-!! 
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Camilo Espejo)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  funr(mrgrid)=F(r) on radial grid
@@ -21,7 +59,7 @@
 !!  rgrid(mrgrid)=r grid values (bohr)
 !!
 !! OUTPUT
-!!  funq(mqgrid)=\int_0^inf 4\pi\frac{\sin(2\pi r)}{2\pi r}r^2F(r)dr 
+!!  funq(mqgrid)=\int_0^inf 4\pi\frac{\sin(2\pi r)}{2\pi r}r^2F(r)dr
 !!  yq1, yqn: d/dq (F(q)) at the ends of the interval
 !!
 !! SIDE EFFECTS
@@ -37,18 +75,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 
- use defs_basis
- use m_profiling_abi
-
- use m_numeric_tools,   only : simpson_int
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -163,7 +191,7 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 !yq(0)=zero
  yq1=zero
 
-!yp(qmax)=$ 
+!yp(qmax)=$
  arg=two_pi*qgrid(mqgrid)
 
 !Integral from 0 to r1 (only if r1<>0)
@@ -192,4 +220,7 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
  ABI_DEALLOCATE(rzf)
 
 end subroutine radsintr
+!!***
+
+end module m_integrals
 !!***

@@ -34,7 +34,7 @@ module m_lobpcgwf
 
  use defs_abitypes
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_lobpcg
  use m_xmpi
  use m_errors

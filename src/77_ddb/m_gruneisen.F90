@@ -29,7 +29,7 @@ MODULE m_gruneisen
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_crystal
  use m_crystal_io
@@ -135,7 +135,6 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gruns_new'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -375,7 +374,6 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gruns_qpath'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -516,7 +514,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gruns_qmesh'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -818,7 +815,6 @@ subroutine gruns_anaddb(inp, prefix, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gruns_anaddb'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

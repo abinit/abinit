@@ -25,7 +25,7 @@
 MODULE m_paw_atomorb
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 
@@ -316,7 +316,6 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_atomorb'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -887,7 +886,6 @@ subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_atomorb'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

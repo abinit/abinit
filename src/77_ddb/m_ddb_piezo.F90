@@ -26,7 +26,7 @@
 module m_ddb_piezo
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -98,7 +98,6 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_piezo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

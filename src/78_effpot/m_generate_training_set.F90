@@ -87,7 +87,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_strain
  use m_abihist, only : abihist,var2hist,abihist_findIndex
@@ -101,7 +101,6 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'generate_training_set'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

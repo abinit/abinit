@@ -34,7 +34,7 @@ module m_sigma_driver
  use m_xmpi
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_nctk
  use m_kxc
@@ -54,6 +54,7 @@ module m_sigma_driver
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
  use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
@@ -204,8 +205,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2514,7 +2513,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3847,7 +3845,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

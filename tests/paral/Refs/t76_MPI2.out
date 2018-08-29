@@ -1270,7 +1270,7 @@ P           mkmem3         32
 
 - subtotal                       7.570  26.3     14.571  34.7
 
- Partitioning of scfcv
+ Partitioning of scfcv_core
 - scfcv                          6.250  21.7     11.787  28.1              4
  
 - scfcv(iniloop, setvtr  )       0.030   0.1      0.030   0.1             14

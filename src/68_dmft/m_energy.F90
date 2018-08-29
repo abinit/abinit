@@ -32,7 +32,7 @@ MODULE m_energy
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawtab, only : pawtab_type
  use m_paw_correlations, only : pawuenergy
@@ -255,7 +255,6 @@ subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_energy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -349,7 +348,6 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_energy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -530,7 +528,6 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,f
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_band_energy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -685,7 +682,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_migdal_energy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -837,7 +833,6 @@ subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_ldau_energy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1013,7 +1008,6 @@ subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_noninterentropy'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

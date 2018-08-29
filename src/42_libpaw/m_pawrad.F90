@@ -451,7 +451,6 @@ subroutine pawrad_print(Rmesh,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawrad_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1112,7 +1111,7 @@ subroutine nderiv_gen(der,func,radmesh,der2)
  end if
 
  compute_2der=(present(der2))
- 
+
  if (radmesh%mesh_type==1) then
 
    call nderiv_lin(radmesh%rstep,func,der,msz,1)

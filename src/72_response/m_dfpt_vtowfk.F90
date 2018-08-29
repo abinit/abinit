@@ -29,12 +29,13 @@ module m_dfpt_vtowfk
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_cgtools
  use m_wfk
  use m_rf2
+ use m_rf2_init,         only : rf2_init
 
  use m_dtfil,        only : status
  use m_time,         only : timab
@@ -193,8 +194,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtowfk'
- use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none

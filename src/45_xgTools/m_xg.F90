@@ -39,7 +39,7 @@
 module m_xg
 
   use m_errors
-  use m_profiling_abi
+  use m_abicore
 
   use defs_basis, only : std_err, std_out
   use m_time,     only: timab

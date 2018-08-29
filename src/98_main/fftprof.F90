@@ -82,7 +82,7 @@ program fftprof
  use m_xomp
  use m_errors
  use m_FFT_prof
- use m_profiling_abi
+ use m_abicore
  use m_dfti
 
  use m_fstrings,   only : lower
@@ -98,7 +98,6 @@ program fftprof
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftprof'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

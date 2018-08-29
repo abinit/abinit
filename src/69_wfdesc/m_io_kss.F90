@@ -30,7 +30,7 @@ MODULE m_io_kss
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_nctk
@@ -128,7 +128,6 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_kss_header'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -859,7 +858,6 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_gvec_kss'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1029,7 +1027,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gshgg_mkncwrite'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1721,7 +1718,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outkss'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2574,7 +2570,6 @@ subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,nty
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memkss'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2713,7 +2708,6 @@ subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dsksta'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

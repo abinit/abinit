@@ -28,12 +28,12 @@
 module m_nucprop
 
   use defs_basis
-  use defs_abitypes, only : MPI_type
-  use m_profiling_abi
+  use m_abicore
   use m_errors
+
+  use defs_abitypes, only : MPI_type
   use m_mpinfo,   only : ptabs_fourdp
   use m_xmpi, only : xmpi_comm_self, xmpi_sum
-  
   use m_geometry,       only : xred2xcart
   use m_linalg_interfaces, only: dsyev
   use m_paw_an,      only : paw_an_type
@@ -45,6 +45,7 @@ module m_nucprop
   use m_paral_atom, only : get_my_atmtab,free_my_atmtab
   use m_special_funcs,  only : abi_derfc
   use m_symtk,          only : matr3inv, matpointsym
+  use m_fft,           only : fourdp
 
   implicit none
 
@@ -136,7 +137,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_efg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     implicit none
@@ -416,7 +416,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_fc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     implicit none
@@ -810,7 +809,6 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_el'
- use interfaces_53_ffts
 !End of the abilint section
 
   implicit none

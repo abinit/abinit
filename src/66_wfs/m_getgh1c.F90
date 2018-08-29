@@ -27,7 +27,7 @@
 module m_getgh1c
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_abitypes, only : MPI_type, dataset_type
@@ -37,7 +37,7 @@ module m_getgh1c
  use m_kg,          only : kpgstr, mkkin, mkkpg
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
- use m_fft,         only : fftpac
+ use m_fft,         only : fftpac, fourwf
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian, load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian
@@ -133,7 +133,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh1c'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

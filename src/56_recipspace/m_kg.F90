@@ -29,7 +29,7 @@ MODULE m_kg
  use defs_abitypes, only : dataset_type
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -113,7 +113,6 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcut'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -266,7 +265,6 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getmpw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -543,7 +541,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpgio'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -28,7 +28,7 @@ module m_metstr
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 

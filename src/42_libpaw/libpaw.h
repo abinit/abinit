@@ -35,7 +35,7 @@
 
 /* Messages, errors */
 /* Other macros already defined in abi_common.h */
-#  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check
+#  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check; use m_abicore
 #  undef  HAVE_YAML
 
 /* Allocation/deallocation with memory profiling */

@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfptnl_loop
+!! NAME
+!!  m_dfptnl_loop
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018-2018 ABINIT group (LB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfptnl_loop
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfptnl_loop
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfptnl_loop
 !! NAME
 !! dfptnl_loop
@@ -125,7 +162,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use defs_wvltypes
 
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hdr
  use m_nctk
  use m_wffile
@@ -136,7 +173,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph
  use m_inwffil,     only : inwffil
-
+ use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
@@ -158,15 +195,12 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal
+ use m_dfptnl_pert, only : dfptnl_pert
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_loop'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_53_ffts
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -220,7 +254,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,comm_cell,counter,cplex,cplex_rhoij,formeig,flag1,flag3
- integer :: has_dijfr
+ integer :: has_dijfr,has_diju
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
@@ -347,14 +381,16 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
+
    call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call paw_ij_init(paw_ij1_i2pert,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
 &   dtset%ntypat,dtset%typat,pawtab,&
-&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,&
-&   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom)
+&   has_dij=1,has_dijhartree=1,has_dijfr=has_dijfr,has_dijU=has_diju,&
+&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else
    ABI_ALLOCATE(nhat1_i1pert,(0,0))
    ABI_ALLOCATE(nhat1_i2pert,(0,0))
@@ -799,4 +835,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  DBG_EXIT("COLL")
 
 end subroutine dfptnl_loop
+!!***
+
+end module m_dfptnl_loop
 !!***

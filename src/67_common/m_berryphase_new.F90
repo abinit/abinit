@@ -31,7 +31,7 @@ module m_berryphase_new
  use defs_wvltypes
  use m_efield
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_berrytk,      only : smatrix, polcart
@@ -180,8 +180,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'berryphase_new'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1817,7 +1815,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'update_e_field_vars'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2335,7 +2332,6 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtefield'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2915,7 +2911,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initberry'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

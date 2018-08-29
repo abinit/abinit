@@ -32,7 +32,7 @@
 MODULE m_nctk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
  use iso_c_binding
@@ -538,7 +538,6 @@ subroutine nctk_test_mpiio()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_test_mpiio'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -800,7 +799,6 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_open_create'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2207,7 +2205,6 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_write_datar'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

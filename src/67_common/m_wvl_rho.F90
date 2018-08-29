@@ -27,7 +27,7 @@
 module m_wvl_rho
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_splines
  use m_errors
  use defs_wvltypes
@@ -96,7 +96,6 @@ subroutine wvl_initro(&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_initro'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -439,7 +438,6 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_mkrho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
