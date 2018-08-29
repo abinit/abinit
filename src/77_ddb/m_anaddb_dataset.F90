@@ -1887,7 +1887,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  end if
 
 !Thermal information
- if(anaddb_dtset%thmflag/=0)then
+ if(anaddb_dtset%thmflag/=0 .or. anaddb_dtset%prtdos/=0)then
    write(nunit,'(a)')' Thermal information :'
    write(nunit,'(3x,a9,3i10)')'    nchan',anaddb_dtset%nchan
    write(nunit,'(3x,a9,3i10)')'   nwchan',anaddb_dtset%nwchan
