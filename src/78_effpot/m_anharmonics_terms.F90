@@ -27,7 +27,7 @@ module m_anharmonics_terms
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_polynomial_coeff
  use m_ifc, only : ifc_type,ifc_free
 

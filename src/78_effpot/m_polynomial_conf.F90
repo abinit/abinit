@@ -28,7 +28,7 @@ module m_polynomial_conf
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi,only   : xmpi_sum
 
  implicit none

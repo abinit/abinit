@@ -30,7 +30,7 @@ module m_cgwf
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_cgtools
  use m_efield
 
@@ -163,7 +163,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1411,7 +1410,6 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linemin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

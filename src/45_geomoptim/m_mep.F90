@@ -33,7 +33,7 @@ MODULE m_mep
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -280,7 +280,6 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_steepest'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -388,7 +387,6 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_qmin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -526,7 +524,6 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_lbfgs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -720,7 +717,6 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_gbfgs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1052,7 +1048,6 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_rk4'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -223,7 +223,7 @@ class FortranFile(object):
 
         if not as_dataframe: return d
         import pandas as pd
-        return pd.DataFrame([d], index=[self.basename], columns=d.keys())
+        return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
     #def write_notebook(self, nbpath=None):
     #    """
@@ -600,7 +600,7 @@ class AbinitProject(object):
         for fort_file in self.fort_files.values():
             for child in fort_file.usedby_mods:
                 if child.dirlevel < fort_file.dirlevel:
-                    errors.append("%s should be below level: %s" % (repr(m), fort_file.dirlevel))
+                    errors.append("%s should be below level: %s" % (repr(child), fort_file.dirlevel))
         return "\n".join(errors)
 
     def find_allmods(self, head_path):
@@ -622,19 +622,36 @@ class AbinitProject(object):
 
         return allmods
 
-    def write_binaries_conf(self):
+    def write_binaries_conf(self, verbose=0):
         """
-        Print new binaries.conf file.
+        Write new binaries.conf file
         """
         # Read binaries.conf and add new list of libraries.
-        # To treat depencies in an automatic way, I would need either an
+        # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
         # that I can map these names to external libraries.
+        # This means that I **cannot generate** the entire file in a programmatic way
+        # but only the libraries entries.
         import configparser
         config = configparser.ConfigParser()
-        config.read(os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf"))
+        binconf_path = os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf")
+        config.read(binconf_path)
+        # Read header with comments to be added to the new conf file.
+        # NB: use [DEFAULT] as sentinel.
+        header = []
+        with open(binconf_path, "rt") as fh:
+            for line in fh:
+                line = line.strip()
+                if line == "[DEFAULT]":
+                    break
+                else:
+                    header.append(line)
+            else:
+                raise ValueError("Cannot find `[DEFAULT]` string in %s" % binconf_path)
+        header.append("")
+        header = "\n".join(header)
 
-        print("Find all dependenciies of binaries...")
+        print("Finding all binary dependencies...")
         start = time.time()
         # Find programs
         program_paths = []
@@ -645,8 +662,9 @@ class AbinitProject(object):
         for prog_file, path in program_paths:
             allmods = self.find_allmods(path)
             dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            #print("For program:", prog_file.name)
-            pprint(dirnames)
+            if verbose:
+                print("For program:", prog_file.name)
+                pprint(dirnames)
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
@@ -660,15 +678,19 @@ class AbinitProject(object):
             from StringIO import StringIO
 
         fobj = StringIO()
+        fobj.write(header)
         config.write(fobj)
-        print(fobj.getvalue())
+        s = fobj.getvalue()
         fobj.close()
+        print(s)
+        #with open(binconf_path, "wt") as fh:
+        #    fh.write(s)
 
         return 0
 
-    def write_buildsys_files(self):
+    def write_buildsys_files(self, verbose=0):
         """
-        Write
+        Write files require by buildsys:
 
             abinit.dep --> Dependencies inside the directory
             abinit.dir --> Dependencies outside the directory
@@ -726,7 +748,6 @@ class AbinitProject(object):
         """
         def touch(fname, times=None):
             """Emulate Unix touch."""
-            import os
             with open(fname, 'a'):
                 os.utime(fname, times)
 
@@ -767,12 +788,17 @@ class AbinitProject(object):
         """
         Validate project. Return exit status.
         """
+        white_list = set(["m_psxml2ab.F90",])
+
         retcode = 0
         for fort_file in self.fort_files.values():
             count = len(fort_file.subroutines) + len(fort_file.functions)
             if count:
-                print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
-                retcode += 1
+                if fort_file.name in white_list:
+                    print("WHITE_LIST [%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
+                else:
+                    print("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count))
+                    retcode += 1
 
         errstr = self.check_dirlevel()
         if errstr:
@@ -814,7 +840,7 @@ class AbinitProject(object):
             rows.append(fort_file.get_stats())
 
         import pandas as pd
-        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys() if rows else None))
 
     def get_stats(self):
         df_list = []

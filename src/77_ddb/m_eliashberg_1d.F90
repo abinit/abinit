@@ -29,9 +29,9 @@ module m_eliashberg_1d
  use defs_basis
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_io_tools
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,   only : simpson_int
 
@@ -81,7 +81,6 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eliashberg_1d'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

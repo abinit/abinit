@@ -153,6 +153,8 @@ def main():
     if not options.command:
         show_examples_and_exit(error_code=1)
 
+    os.chdir(os.path.dirname(__file__))
+
     if options.command == "parse":
         fort_file = FortranFile.from_path(options.what, options.verbose)
         print(fort_file.to_string(verbose=options.verbose))
@@ -189,8 +191,10 @@ def main():
     #assert "abinit.F90" in proj.fort_files
 
     if options.command == "makemake":
-        proj.write_binaries_conf()
-        #proj.write_buildsys_files()
+        retcode = proj.validate(verbose=options.verbose)
+        if retcode != 0: return retcode
+        #proj.write_binaries_conf(verbose=options.verbose)
+        #proj.write_buildsys_files(verbose=options.verbose)
 
     elif options.command == "print":
         if options.what is None:

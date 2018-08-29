@@ -25,7 +25,7 @@ module m_abi_linalg
 
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
   use m_xomp
   use m_slk

@@ -28,7 +28,7 @@ MODULE m_crystal
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_atomdata
 
  use m_numeric_tools,  only : set2unit
@@ -546,7 +546,6 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'crystal_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

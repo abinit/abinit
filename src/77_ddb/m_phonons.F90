@@ -28,7 +28,7 @@ module m_phonons
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
@@ -203,7 +203,6 @@ subroutine phdos_print(PHdos,fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -344,7 +343,6 @@ subroutine phdos_print_debye(PHdos, ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_debye'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -467,7 +465,6 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_thermo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -701,7 +698,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphdos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1897,7 +1893,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2297,7 +2292,6 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_vsound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3583,7 +3577,6 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_symph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

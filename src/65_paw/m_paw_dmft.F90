@@ -34,7 +34,7 @@ MODULE m_paw_dmft
  use defs_abitypes
  use m_CtqmcInterface
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_data4entropyDMFT
 
@@ -342,7 +342,6 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_sc_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -559,7 +558,6 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -935,7 +933,6 @@ subroutine construct_nwlo_dmft(paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'construct_nwlo_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1363,7 +1360,6 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1465,7 +1461,6 @@ subroutine print_sc_dmft(paw_dmft,pawprtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_sc_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1541,7 +1536,6 @@ subroutine saveocc_dmft(paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'saveocc_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1614,7 +1608,6 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'readocc_dmft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -24,7 +24,7 @@ MODULE m_paw_occupancies
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -117,7 +117,6 @@ CONTAINS  !=====================================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrhoij'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -787,6 +786,12 @@ end subroutine pawmkrhoij
    compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
    substract_diagonal=(ipert==natom+3)
 
+   if (compute_impart_cplex) then
+     if (.not.allocated(pawrhoij(1)%rhoijim)) then
+       MSG_BUG("pawrhoij(:)%rhoijim must be allocated!")
+     end if
+   end if
+
 !  Accumulate (n,k) contribution to rhoij1
 !  due to derivative of wave-function
    if (nspinor==1) then
@@ -904,14 +909,15 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
 !            This imaginary part does not have to be computed
 !            It is cancelled because rho_ij+rho_ji is stored in rho_ij
-!            if (compute_impart_cplex) then
-!            klmn_im=klmn_re+1
-!            ro11_im=dcpi0(1,1,1)*cpj0(2,1)-dcpi0(2,1,1)*cpj0(1,1)+cpi0(1,1)*dcpj0(2,1,1)-cpi0(2,1)*dcpj0(1,1,1)
-!            if (substract_diagonal) then
-!            ro11_im=ro11_im-cpi0(1,1)*cpj0(2,1)+cpi0(2,1)*cpj0(1,1)
-!            end if
-!            pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
-!            end if
+             if (compute_impart_cplex) then
+               klmn_im=klmn_re+1
+               ro11_im=dcpi0(1,1,1)*cpj0(2,1)-dcpi0(2,1,1)*cpj0(1,1)+cpi0(1,1)*dcpj0(2,1,1)-cpi0(2,1)*dcpj0(1,1,1)
+               if (substract_diagonal) then
+                 ro11_im=ro11_im-cpi0(1,1)*cpj0(2,1)+cpi0(2,1)*cpj0(1,1)
+               end if
+               pawrhoij(iatom)%rhoijim(klmn,isppol)=pawrhoij(iatom)%rhoijim(klmn,isppol)+weight*ro11_im
+!              pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+             end if
            end do
          end do
        end do

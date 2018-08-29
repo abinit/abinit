@@ -28,7 +28,7 @@ module m_nonlop
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop

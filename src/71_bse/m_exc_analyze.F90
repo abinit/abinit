@@ -29,7 +29,7 @@ module m_exc_analyze
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -104,7 +104,6 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_plot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -458,7 +457,6 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_den'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

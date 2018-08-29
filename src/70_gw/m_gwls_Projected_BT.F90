@@ -42,7 +42,7 @@ use m_gwls_DielectricArray
 use m_gwls_LanczosResolvents
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 
 implicit none

@@ -30,7 +30,7 @@ MODULE m_suscep_stat
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
@@ -40,7 +40,7 @@ MODULE m_suscep_stat
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary
- use m_fft,     only : fftpac
+ use m_fft,     only : fftpac, fourwf
  use m_spacepar,     only : symrhg
  use m_paw_finegrid, only : pawgylmg
  use m_paw_nhat,     only : pawsushat
@@ -916,7 +916,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'susk'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1518,7 +1517,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suskmm'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

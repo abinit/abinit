@@ -28,7 +28,7 @@ module m_epweights
 
  use defs_basis
  use defs_elphon
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_tetrahedron
  use m_xmpi
@@ -1645,7 +1645,6 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_fs_weights'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

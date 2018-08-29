@@ -85,7 +85,7 @@ program optic
  use m_errors
  use m_xmpi
  use m_xomp
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_optic_tools
  use m_wfk
@@ -111,7 +111,6 @@ program optic
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optic'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -131,7 +131,6 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extraprho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

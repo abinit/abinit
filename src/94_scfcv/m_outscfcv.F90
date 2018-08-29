@@ -161,7 +161,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use defs_datatypes
  use defs_wvltypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_sort
  use m_efield
  use m_errors
@@ -221,7 +221,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

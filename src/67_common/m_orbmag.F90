@@ -37,7 +37,7 @@ module m_orbmag
   use defs_basis
   use defs_datatypes
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
 
   use m_berrytk,          only : smatrix
@@ -307,7 +307,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initorbmag'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -957,7 +956,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1402,7 +1400,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'orbmag'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

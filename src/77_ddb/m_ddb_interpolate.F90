@@ -30,7 +30,7 @@ module m_ddb_interpolate
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -89,7 +89,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_interpolate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

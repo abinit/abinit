@@ -28,7 +28,7 @@ module m_symtk
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,  only : isinteger, wrap2_pmhalf
  use m_hide_lapack,    only : matrginv
@@ -991,7 +991,6 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_q'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1892,7 +1891,6 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symatm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2045,7 +2043,6 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symcharac'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2317,7 +2314,6 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symaxes'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2589,7 +2585,6 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symplanes'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3145,7 +3140,6 @@ subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_symmetries'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

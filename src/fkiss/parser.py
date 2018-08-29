@@ -345,13 +345,13 @@ re.I | re.VERBOSE)
             # Interface declaration.
             m = self.RE_INTERFACE_START.match(line)
             if m:
-                if self.verbose: print("begin interface", line)
+                if self.verbose > 1: print("begin interface", line)
                 inblock = "interface"
                 #self.consume_interface_block(m)
                 continue
 
             if inblock == "interface":
-                if self.verbose: print("in interface", line)
+                if self.verbose > 1: print("in interface", line)
                 if self.RE_INTERFACE_END.match(line):
                     inblock = None
                 continue
@@ -405,7 +405,7 @@ re.I | re.VERBOSE)
             m = self.RE_MOD_START.match(line)
             if m:
                 name = m.group("name")
-                if self.verbose: print("Entering module:", name)
+                if self.verbose > 1: print("Entering module:", name)
                 # Ignore module procedure
                 #if name == "procedure": continue
                 # TODO
@@ -421,7 +421,7 @@ re.I | re.VERBOSE)
                 subname = m.group("name")
                 if not subname:
                     raise ValueError("Cannot find procedure name in line `%s`" % line)
-                if self.verbose: print("Found subroutine:", subname, "in line:\n\t", line)
+                if self.verbose > 1: print("Found subroutine:", subname, "in line:\n\t", line)
                 stack.append([Subroutine(subname, ancestor, preamble, path=path), "open"])
                 preamble = []
                 continue
@@ -528,7 +528,7 @@ re.I | re.VERBOSE)
         return s.strip() == token
 
     def consume_interface_block(self, start_match):
-        if self.verbose: print("begin interface", line)
+        if self.verbose > 1: print("begin interface", line)
         buf = [start_match.string]
         while self.lines:
             line = lines.pop(0)

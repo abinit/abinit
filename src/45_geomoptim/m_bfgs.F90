@@ -28,7 +28,7 @@
 MODULE m_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abimover
 
@@ -83,7 +83,6 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hessinit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

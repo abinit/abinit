@@ -54,6 +54,7 @@ module m_mover
  use m_dtfil,              only : dtfil_init_time, status
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
+ use m_precpred_1geo,      only : precpred_1geo
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_fire,          only : pred_fire
@@ -92,7 +93,7 @@ contains
 !! Move ion or change acell acording to forces and stresses
 !!
 !! INPUTS
-!!  amass(natom)=mass of each atom, in unit of electronic mass (=amu*1822...)
+!!  amu_curr(ntypat)=mass of each atom for the current image
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!   | mband=maximum number of bands
@@ -149,7 +150,7 @@ contains
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred, vel, amass,
+!! This subroutine uses the arguments natom, xred, vel, amu_curr,
 !! vis, and dtion (the last two contained in dtset) to make
 !! molecular dynamics updates.  The rest of the lengthy
 !! argument list supports the underlying lda computation
@@ -182,7 +183,7 @@ contains
 !!
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
-!!      abihist_free,abihist_init,abimover_fin,abimover_ini,abimover_nullify
+!!      abihist_free,abihist_init,abimover_fin,abimover_ini
 !!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
 !!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
@@ -195,7 +196,7 @@ contains
 !!
 !! SOURCE
 
-subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
+subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
@@ -204,7 +205,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -221,7 +221,7 @@ logical,optional,intent(in) :: writeHIST
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g95 on yquem_g95 A check of the dim has been added
+real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
@@ -233,9 +233,10 @@ type(abihist) :: hist,hist_prev
 type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
+type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,ntime,option,comm
+integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: nloop,nshell,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -255,7 +256,7 @@ type(crystal_t) :: crystal
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
-real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
+real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -265,13 +266,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
- if ( size(amass) /= scfcv_args%dtset%natom ) then
-   MSG_BUG("amass does not have the proper size.")
- end if
-
  ! enable time limit handler if not done in callers.
- if (need_verbose .and. enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+ if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+   if (need_verbose) then
+     write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+   end if
  end if
 
 !Table of contents
@@ -285,7 +284,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !06. First output before any itime or icycle
 !07. Fill the history of the first SCFCV
 !08. Loop for itime (From 1 to ntime)
-!09. Loop for icycle (From 1 to ncycles)
+!09. Loop for icycle (From 1 to ncycle)
 !10. Output for each icycle (and itime)
 !11. Symmetrize atomic coordinates over space group elements
 !12. => Call to SCFCV routine and fill history with forces
@@ -301,71 +300,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !22. XML Output at the end
 !23. Deallocate hist and ab_mover datatypes
 !
-!IONMOV values:
-!
-!1.  Molecular dynamics without viscosity (vis=0)
-!1.  Molecular dynamics with viscosity (vis/=0)
-!2.  Broyden-Fletcher-Goldfard-Shanno method (forces)
-!3.  Broyden-Fletcher-Goldfard-Shanno method (forces,Tot energy)
-!4.  Conjugate gradient of potential and ionic degrees of freedom
-!5.  Simple relaxation of ionic positions
-!6.  Verlet algorithm for molecular dynamics
-!7.  Verlet algorithm blocking every atom where dot(vel,force)<0
-!8.  Verlet algorithm with a nose-hoover thermostat
-!9.  Langevin molecular dynamics
-!10. BFGS with delocalized internal coordinates
-!11. Conjugate gradient algorithm
-!12. Isokinetic ensemble molecular dynamics
-!13. Isothermal/isenthalpic ensemble molecular dynamics
-!14. Symplectic algorithm Runge-Kutta-Nystrom SRKNa14
-!15. Fast inertial relaxation engine method for relaxation.
-!20. Ionic positions relaxation using DIIS
-!21. Steepest descent algorithm
-!23. LOTF method
-!24. Velocity verlet molecular dynamics
+ call abimover_ini(ab_mover,amu_curr,dtfil,scfcv_args%dtset,specs)
 
- call abimover_nullify(ab_mover)
-
- call abimover_ini(ab_mover,specs,&
-& scfcv_args%dtset%delayperm,&
-& scfcv_args%dtset%diismemory,&
-& scfcv_args%dtset%goprecon,&
-& scfcv_args%dtset%jellslab,&
-& scfcv_args%dtset%natom,&
-& scfcv_args%dtset%nconeq,&
-& scfcv_args%dtset%nnos,&
-& scfcv_args%dtset%nsym,&
-& scfcv_args%dtset%ntypat,&
-& scfcv_args%dtset%optcell,&
-& scfcv_args%dtset%restartxf,&
-& scfcv_args%dtset%signperm,&
-& scfcv_args%dtset%ionmov,&
-& scfcv_args%dtset%bmass,&
-& scfcv_args%dtset%dtion,&
-& scfcv_args%dtset%friction,&
-& scfcv_args%dtset%mdwall,&
-& scfcv_args%dtset%noseinert,&
-& scfcv_args%dtset%strprecon,&
-& scfcv_args%dtset%vis,&
-& scfcv_args%dtset%iatfix,&
-& scfcv_args%dtset%symrel,&
-& scfcv_args%dtset%ph_freez_disp_addStrain,&
-& scfcv_args%dtset%ph_freez_disp_ampl,&
-& scfcv_args%dtset%ph_freez_disp_nampl,&
-& scfcv_args%dtset%ph_freez_disp_option,&
-& scfcv_args%dtset%ph_ngqpt,&
-& scfcv_args%dtset%ph_nqshift,&
-& scfcv_args%dtset%ph_qshift,&
-& scfcv_args%dtset%typat,&
-& scfcv_args%dtset%prtatlist,&
-& amass,&
-& scfcv_args%dtset%goprecprm,&
-& scfcv_args%dtset%mdtemp,&
-& scfcv_args%dtset%strtarget,&
-& scfcv_args%dtset%qmass,&
-& scfcv_args%dtset%znucl,&
-& dtfil%fnameabi_hes,&
-& dtfil%filnam_ds)
+ if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
+   call delocint_ini(deloc)
+ end if
 
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
@@ -489,18 +428,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 07. Fill the history of the first SCFCV
 
-!Compute atomic masses (in a.u.)
- ABI_ALLOCATE(amu,(scfcv_args%dtset%ntypat))
- do kk=1,ab_mover%ntypat
-   do jj=1,ab_mover%natom
-     if (kk==ab_mover%typat(jj)) then
-       amu(kk)=amass(jj)/amu_emass
-       exit
-     end if
-   end do
- end do
-
-
  if (ab_mover%ionmov==26)then
 !Tdep call need to merge with adewandre branch
  else if (ab_mover%ionmov==27)then
@@ -585,7 +512,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #endif
 
 !  ###########################################################
-!  ### 09. Loop for icycle (From 1 to ncycles)
+!  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
 
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
@@ -730,7 +657,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !      * In ionmov 4 & 5 xred could change inside SCFCV
 !      So we need to take the values from the output
 !
-!      * Inside scfcv.F90 there is a call to symmetrize_xred.F90
+!      * Inside scfcv_core.F90 there is a call to symmetrize_xred.F90
 !      for the first SCF cycle symmetrize_xred could change xred
        if (ab_mover%ionmov<10)then
          change=any(xred(:,:)/=xred_prev(:,:))
@@ -795,7 +722,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
-&       ab_mover%ntypat,ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
+&       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 
@@ -846,115 +773,17 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
-
-     write(message,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
-     if(need_verbose)call wrtout(std_out,message,'COLL')
-     if (ab_mover%goprecon>0)then
-       call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
-     end if
-
-!    ###########################################################
 !    ### 17. => Call to each predictor
 
-!    MT->GAF: dirty trick to predict vel(t)
-!    do a double loop: 1- compute vel, 2- exit
-     nloop=1
-
-     !write(message,'(a,i4,a,i4,a,i4)') ' DBGHMC itime= ',itime,' icycle= ',icycle,' ihist= ',hist%ihist
-     !call wrtout(ab_out,message,'COLL')
-
-
-     if (scfcv_args%dtset%nctime>0.and.iexit==1) then
-       iexit=0;nloop=2
-     end if
-
-     do ii=1,nloop
-       if (ii==2) iexit=1
-
-       select case (ab_mover%ionmov)
-       case (1)
-         call pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit)
-       case (2,3)
-         call pred_bfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (4,5)
-         call pred_simple(ab_mover,hist,iexit)
-       case (6,7)
-         call pred_verlet(ab_mover,hist,ab_mover%ionmov,itime,ntime,DEBUG,iexit)
-       case (8)
-         call pred_nose(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (9)
-         call pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle)
-       case (10,11)
-         call pred_delocint(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (12)
-         call pred_isokinetic(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (13)
-         call pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,DEBUG,iexit)
-       case (14)
-         call pred_srkna14(ab_mover,hist,icycle,DEBUG,iexit,skipcycle)
-       case (15)
-         call pred_fire(ab_mover, ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-       case (20)
-         call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (21)
-         call pred_steepdesc(ab_mover,preconforstr,hist,itime,DEBUG,iexit)
-       case (22)
-         call pred_lbfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
-#if defined HAVE_LOTF
-       case (23)
-         call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
-#endif
-       case (24)
-         call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
-       case (25)
-         call pred_hmc(ab_mover,hist,itime,icycle,ntime,scfcv_args%dtset%hmctt,DEBUG,iexit)
-       case (27)
-         !In case of ionmov 27, all the atomic configurations have been computed at the
-         !begining of the routine in generate_training_set, thus we just need to increase the indexes
-         !in the hist
-         hist%ihist = abihist_findIndex(hist,+1)
-
-
-       case default
-         write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
-         MSG_ERROR(message)
-       end select
-
-     end do
-
-     ! check dilatmx here and correct if necessary
-     if (scfcv_args%dtset%usewvl == 0) then
-       call chkdilatmx(scfcv_args%dtset%chkdilatmx,scfcv_args%dtset%dilatmx,&
-&       rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
-       _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
-       if (LEN_TRIM(dilatmx_errmsg) /= 0) then
-         MSG_WARNING(dilatmx_errmsg)
-         nerr_dilatmx = nerr_dilatmx+1
-         if (nerr_dilatmx > 3) then
-           ! Write last structure before aborting, so that we can restart from it.
-           ! zion is not available, but it's not useful here.
-           if (me == master) then
-             ! Init crystal
-             call crystal_init(scfcv_args%dtset%amu_orig(:,1),crystal,0,ab_mover%natom,&
-&             scfcv_args%dtset%npsp,ab_mover%ntypat,scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
-&             [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&             symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
-
-#ifdef HAVE_NETCDF
-             ! Write netcdf file
-             filename = strcat(dtfil%filnam_ds(4), "_DILATMX_STRUCT.nc")
-             NCF_CHECK(crystal_ncwrite_path(crystal, filename))
-#endif
-             call crystal_free(crystal)
-           end if
-           call xmpi_barrier(comm)
-           write (dilatmx_errmsg, '(a,i0,3a)') &
-&           'Dilatmx has been exceeded too many times (', nerr_dilatmx, ')',ch10, &
-&           'Restart your calculation from larger lattice vectors and/or a larger dilatmx'
-           MSG_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
-         end if
-       end if
-     end if
+     call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
+&     scfcv_args%dtset%chkdilatmx,&
+&     scfcv_args%mpi_enreg%comm_cell,&
+&     scfcv_args%dtset%dilatmx,dtfil%filnam_ds(4),&
+&     hist,scfcv_args%dtset%hmctt,&
+&     icycle,iexit,itime,mttk_vars,&
+&     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
+&     scfcv_args%dtset%rprimd_orig,skipcycle,&
+&     scfcv_args%dtset%usewvl)
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
@@ -964,7 +793,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          if (jj>0) then
            option=3
            ihist_prev = abihist_findIndex(hist,-1)
-           call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
+           call wrt_moldyn_netcdf(ab_mover%amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
 &           hist%rprimd(:,:,ihist_prev),dtfil%unpos,hist%vel(:,:,hist%ihist),&
 &           hist%xred(:,:,ihist_prev))
@@ -1036,6 +865,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if(need_verbose)call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
 
+!DEBUG
+     write(std_out,*)' m_mover : will call precpred_1geo'
+!    call flush(std_out)
+!ENDDEBUG
+
+
 !    ###########################################################
 !    ### 19. End loop icycle
 
@@ -1101,6 +936,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 23. Deallocate hist and ab_mover datatypes
 
+!This call is needed to free an internal matrix. However, this is not optimal ...
+!One should instead have a datastructure associated with the preconditioner...
  if (ab_mover%goprecon>0)then
    call prec_simple(ab_mover,preconforstr,hist,1,1,1)
  end if
@@ -1109,13 +946,16 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    call mttk_fin(mttk_vars)
  end if
 
- ABI_DEALLOCATE(amu)
+ if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
+   call delocint_fin(deloc)
+ end if
+
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
 
- call abimover_fin(ab_mover)
+ call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
@@ -1181,7 +1021,6 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1311,7 +1150,6 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'erlxconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1419,7 +1257,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxfase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1761,7 +1598,6 @@ subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtnatom'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1852,7 +1688,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use defs_basis
  use defs_abitypes
  use m_results_gs
- use m_profiling_abi
+ use m_abicore
  use m_errors
 #if defined HAVE_NETCDF
  use netcdf
@@ -1865,7 +1701,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrt_moldyn_netcdf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

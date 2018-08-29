@@ -24,7 +24,7 @@ MODULE m_paw_tools
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -89,7 +89,6 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkpawovlp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -325,7 +324,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawprt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

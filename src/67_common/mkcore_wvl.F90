@@ -27,7 +27,7 @@
 module m_mkcore_wvl
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
  use m_xmpi
@@ -572,7 +572,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_wvl_old'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1123,7 +1122,7 @@ end module m_mkcore_wvl
 !%%
 !%%  use defs_basis
 !%%  use defs_abitypes
-!%%  use m_profiling_abi
+!%%  use m_abicore
 !%%  use m_errors
 !%%  use m_xmpi
 !%%

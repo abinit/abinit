@@ -23,7 +23,7 @@ module work_var_lotf
  use defs_basis
  use defs_param_lotf
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -155,7 +155,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cutoff_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   real(dp)  :: bl(3),blmin

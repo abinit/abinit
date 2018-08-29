@@ -29,7 +29,7 @@ MODULE m_bse_io
  use defs_basis
  use m_xmpi
  use m_errors 
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -171,7 +171,6 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_read_bshdr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -488,7 +487,6 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_read_rcblock'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

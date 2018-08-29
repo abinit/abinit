@@ -28,7 +28,7 @@ module m_vtowfk
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_efield
@@ -48,6 +48,7 @@ module m_vtowfk
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
+ use m_fft,         only : fourwf
 
  implicit none
 
@@ -162,8 +163,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vtowfk'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

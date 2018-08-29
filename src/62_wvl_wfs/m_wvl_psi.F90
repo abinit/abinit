@@ -31,7 +31,7 @@ module m_wvl_psi
   use defs_wvltypes
   use m_errors
   use m_xmpi
-  use m_profiling_abi
+  use m_abicore
 
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
@@ -97,7 +97,6 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_hpsitopsi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -241,7 +240,6 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_psitohpsi'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -373,7 +371,6 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nl_gradient'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -479,7 +476,6 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_tail_corrections'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

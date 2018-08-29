@@ -102,7 +102,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
  use defs_abitypes
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_lobpcg
  use m_abi_linalg
  use m_wfutils
@@ -120,7 +120,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

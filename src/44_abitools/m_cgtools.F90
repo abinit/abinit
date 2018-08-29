@@ -44,7 +44,7 @@
 MODULE m_cgtools
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -2683,7 +2683,6 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgnc_cholesky'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

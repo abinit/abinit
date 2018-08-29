@@ -25,7 +25,7 @@
 module m_atprj
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools, only : get_unit, open_file

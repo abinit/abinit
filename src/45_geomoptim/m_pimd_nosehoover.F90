@@ -28,7 +28,7 @@ module m_pimd_nosehoover
 
  use defs_basis
  use m_pimd
- use m_profiling_abi
+ use m_abicore
 
  use m_geometry,  only : xcart2xred, xred2xcart
 
@@ -300,7 +300,6 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_nosehoover_nvt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

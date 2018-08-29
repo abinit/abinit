@@ -24,7 +24,7 @@
 module m_special_funcs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 

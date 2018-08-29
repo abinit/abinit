@@ -57,7 +57,7 @@ program macroave
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF

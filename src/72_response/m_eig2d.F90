@@ -33,7 +33,7 @@ MODULE m_eig2d
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -906,7 +906,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2stern'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2198,7 +2197,6 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'elph2_fanddw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
