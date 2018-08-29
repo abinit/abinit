@@ -1956,6 +1956,12 @@ end subroutine paw_setup_copy
    end do
  end if
  LIBPAW_DATATYPE_DEALLOCATE(valstate)
+ LIBPAW_DATATYPE_ALLOCATE(paw_setup%radial_grid,(igrid))
+ paw_setup%radial_grid(igrid)%tread=.true.
+ paw_setup%ngrid=igrid
+ do ii=1,igrid
+   paw_setup%radial_grid(ii)=grids(ii)
+ end do
  LIBPAW_DATATYPE_DEALLOCATE(grids)
  if(allocated(shpf)) then
    LIBPAW_DEALLOCATE(shpf)

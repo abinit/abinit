@@ -775,6 +775,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
  
  if (option==1) then
    call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
+   paw_setuploc%idgrid= paw_setuploc%radial_grid(1)%id
  else
    call rdpawpsxml(filnam,paw_setuploc)
  end if
