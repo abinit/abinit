@@ -50,6 +50,8 @@ all-local: bindings-ready
 EXTRA_DIST = @SOURCES@
 
 CLEANFILES = bindings-ready
+
+-include ../config.mk
 """ % (name,stamp,name,b_name)
 
 
