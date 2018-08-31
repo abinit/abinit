@@ -13,12 +13,19 @@
 #include <fstream>
 #include <iomanip>
 #include <triqs/mpi/boost.hpp>
+
+#if not defined HAVE_TRIQS_v1_4
 #include <triqs/h5.hpp>
+#endif
 
 #include "triqs_cthyb_qmc.hpp"
 
 using namespace std;
+#if defined HAVE_TRIQS_v1_4
+using namespace cthyb;
+#else
 using namespace triqs_cthyb;
+#endif
 using namespace triqs::gfs;
 using triqs::operators::many_body_operator_generic;
 using triqs::operators::c;
@@ -115,9 +122,28 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
 	        H = init_fullHamiltonianUpDown( epsi, num_orbitals, umat_ijkl );
     }// else if(rank==0 && verbo>0) std::cout <<endl<<"   == Density-Density Terms Not Included ==	"<<endl<<endl;  
 
+#if defined HAVE_TRIQS_v1_4
+    std::map<std::string, indices_type> gf_struct;
 
-    // std::map<std::string, indices_type> gf_struct;   //TRIQS1.4 
-    std::vector<std::pair<std::string, indices_type>> gf_struct; //TRIQS2.0
+    if( tot_not ){
+        std::map<std::string, indices_type> gf_struct_tmp{{"tot", indices_type{}}};
+
+        for(int o = 0; o < num_orbitals; ++o)
+            gf_struct_tmp["tot"].push_back(o);
+    
+        gf_struct = gf_struct_tmp;
+    }else{ // spin orb case: general case:
+        std::map<std::string, indices_type> gf_struct_tmp{{"up", indices_type{}}, {"down", indices_type{}}};
+
+        for(int o = 0; o < num_orbitals; ++o){
+            gf_struct_tmp["up"].push_back(o);
+            gf_struct_tmp["down"].push_back(o);
+        }
+
+        gf_struct = gf_struct_tmp;
+    }
+#else
+    std::vector<std::pair<std::string, indices_type>> gf_struct;
 
     auto idx_vec = indices_type{};
     for(int o = 0; o < num_orbitals; ++o)
@@ -129,11 +155,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
         gf_struct.emplace_back("up", idx_vec);
         gf_struct.emplace_back("down", idx_vec);
     }
+#endif
 
     if(rank==0 && verbo>0) std::cout <<"   == Green Function Structure Initialized ==	"<< endl << endl;
 
     // Construct CTQMC solver with mesh parameters
+#if defined HAVE_TRIQS_v1_4
+    solver_core solver(beta, gf_struct, Nfreq, Ntau, Nl);
+#else
     solver_core solver({beta, gf_struct, Nfreq, Ntau, Nl});
+#endif
     if(rank==0 && verbo>0) std::cout <<"   == Solver Core Initialized ==	"<< endl << endl;
 
     //Fill in "hybridation+eps"=F(iw)~Delta(iw) coming from fortran inside delta_iw term RHS
@@ -186,7 +217,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
     paramCTQMC.length_cycle = cycle_length;
     paramCTQMC.n_warmup_cycles = ntherm;
     paramCTQMC.verbosity=verbo;
+#if defined HAVE_TRIQS_v1_4
+    paramCTQMC.measure_g_l = leg_measure;
+#else
     paramCTQMC.measure_G_l = leg_measure;
+#endif
     // paramCTQMC.move_double = true; 
     // paramCTQMC.make_histograms=hist;
   
@@ -215,7 +250,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
     for(int oo = 0; oo < num_orbitals; ++oo){ 
         for(int o = 0; o < num_orbitals; ++o){ 
             for(int tau = 0; tau < n_tau; ++tau){
+#if defined HAVE_TRIQS_v1_4
+                g_tau[compteur]= solver.G_tau()[0].data()(tau,o,oo).real();
+#else
                 g_tau[compteur]= (*solver.G_tau)[0].data()(tau,o,oo).real();
+#endif
                 compteur++;
             }
         }  
@@ -227,7 +266,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
         for(int oo = 0; oo < num_orbitals; ++oo){ 
             for(int o = 0; o < num_orbitals; ++o){ 
                 for(int l = 0; l < n_l; ++l){
+#if defined HAVE_TRIQS_v1_4
+        	        gl[compteur]= solver.G_l()[0].data()(l,o,oo).real();
+#else
         	        gl[compteur]= (*solver.G_l)[0].data()(l,o,oo).real();
+#endif
         	        compteur++;
                 }
             }
@@ -249,7 +292,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
 
             for(int o = 0; o < num_orbitals; ++o){ 	    
 	            for(int oo = 0; oo < num_orbitals; ++oo)
+#if defined HAVE_TRIQS_v1_4
+ 	                gtau << fixed<< setprecision(17) << solver.G_tau()[0].data()(tau,o,oo) <<"\t";
+#else
  	                gtau << fixed<< setprecision(17) << (*solver.G_tau)[0].data()(tau,o,oo) <<"\t";
+#endif
 	        }	  
  	        gtau << endl;
 	  
@@ -285,7 +332,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
         for(int l = 0; l < n_l; ++l){
             for(int o = 0; o < num_orbitals; ++o){ 
                 for(int oo = 0; oo < num_orbitals; ++oo)
+#if defined HAVE_TRIQS_v1_4
+                    g_l << fixed << setprecision(17) << solver.G_l()[0].data()(l,o,oo) <<"\t";	      
+#else
                     g_l << fixed << setprecision(17) << (*solver.G_l)[0].data()(l,o,oo) <<"\t";	      
+#endif
             }	  
             g_l << endl;
         }

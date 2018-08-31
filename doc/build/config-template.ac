@@ -994,6 +994,9 @@
 #
 #enable_triqs="no"
 #
+# If you use TRQIS version 1.4, specify here
+#enable_triqs_v1_4="no"
+#
 # Include flags for the TRIQS library (default is unset)
 #
 #with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
