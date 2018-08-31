@@ -334,7 +334,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
          sign_warn=.true.
        else
          m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
-         zpr_frohlich_avg(iband) = DSIGN(zpr_frohlich_avg(iband),m_avg(iband))
+         zpr_frohlich_avg(iband) = -DSIGN(zpr_frohlich_avg(iband),m_avg(iband))
          write(ab_out,'(a,i5,a,f14.10)') &
 &          ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
 &          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
