@@ -730,6 +730,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    end if
    paw_ij(iatom)%has_dijhartree=2
 
+!NOTE : cplex_rhoij pas utilisé ??
+
 !  Hartree energy computation
    if (option/=1) then
      if (cplex==1.or.ipert==0) then
@@ -975,6 +977,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ==== Compute Fock Dij term and Fock energy terms ====
 !  =====================================================
 
+!NOTE : rhoij en mode alpha,beta avec partie imaginaire
+
 !  Computation of Fock contribution to Dij
    if (usefock==1) then
 
@@ -985,7 +989,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        ABI_ALLOCATE(dijfock_vv,(cplex_dij*lmn2_size,ndij))
        ABI_ALLOCATE(dijfock_cv,(cplex_dij*lmn2_size,ndij))
        call pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,cplex,hyb_mixing_,hyb_mixing_sr_, &
-&                      ndij,nspden,nsppol,pawrhoij(iatom),pawtab(itypat))
+&                      ndij,pawrhoij(iatom),pawtab(itypat))
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy

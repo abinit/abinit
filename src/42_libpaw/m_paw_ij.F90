@@ -248,7 +248,7 @@ MODULE m_paw_ij
    ! for each value of ispden (1 or 2)
 
   real(dp), allocatable :: vpawx(:,:,:)
-   ! vpawx(2*lexexch+1,2*lexexch+1,nspden)
+   ! vpawx(1,2*lexexch+1,nspden)
    ! exact exchange potential
 
  end type paw_ij_type

@@ -48,8 +48,8 @@ MODULE m_pawdij
 
 !public procedures.
  public :: pawdij           ! Dij total
- public :: pawdijfock       ! Dij Fock exact-exchange
  public :: pawdijhartree    ! Dij Hartree
+ public :: pawdijfock       ! Dij Fock exact-exchange
  public :: pawdijxc         ! Dij eXchange-Correlation (using (r,theta,phi) grid)
  public :: pawdijxcm        ! Dij eXchange-Correlation (using (l,m) moments)
  public :: pawdijhat        ! Dij^hat (compensation charge contribution)
@@ -670,7 +670,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !      Exact exchange is evaluated for electrons only
        if (ipositron/=1) then
          call pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing_,hyb_mixing_sr_, &
-&                        ndij,nspden,nsppol,pawrhoij(iatom),pawtab(itypat))
+&                        ndij,pawrhoij(iatom),pawtab(itypat))
        end if
        if (dijfock_need) paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
        if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -1118,64 +1118,310 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_rhoij,irhoij,ispden,jrhoij,kklmn,kklmn1,klmn,klmn1,lmn2_size,nspdiag
+ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,irhoij,ispden,jrhoij,klmn,klmn1,lmn2_size,nspdiag
+ real(dp) :: ro
  character(len=500) :: msg
 !arrays
- real(dp) :: ro(2)
 
 ! *************************************************************************
 
-!Useful data
- lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex_rhoij
- nspdiag=1;if (nspden==2) nspdiag=2
-
 !Check data consistency
- if (size(dijhartree,1)/=qphase*lmn2_size) then
+ if (size(dijhartree,1)/=qphase*pawtab%lmn2_size) then
    msg='invalid size for DijHartree !'
    MSG_BUG(msg)
  end if
- if (cplex_rhoij<qphase) then
-   msg='cplex_rhoij must be >=qphase!'
+ if (pawrhoij%qphase<qphase) then
+   msg='pawrhoij%qphase must be >=qphase!'
    MSG_BUG(msg)
  end if
 
 !Initialization
  dijhartree=zero
+ lmn2_size=pawrhoij%lmn2_size
+ cplex_rhoij=pawrhoij%cplex_rhoij
 
+!Loop over (diagonal) spin-components
+ nspdiag=1;if (nspden==2) nspdiag=2
  do ispden=1,nspdiag
-   jrhoij=1
-   do irhoij=1,pawrhoij%nrhoijsel
-     klmn=pawrhoij%rhoijselect(irhoij)
-     ro(1:qphase)=pawrhoij%rhoijp(jrhoij:jrhoij+qphase-1,ispden)*pawtab%dltij(klmn)
 
-     dijhartree(klmn)=dijhartree(klmn)+ro(1)*pawtab%eijkl(klmn,klmn)
-     do klmn1=1,klmn-1
-       dijhartree(klmn1)=dijhartree(klmn1)+ro(1)*pawtab%eijkl(klmn1,klmn)
-     end do
-     do klmn1=klmn+1,lmn2_size
-       dijhartree(klmn1)=dijhartree(klmn1)+ro(1)*pawtab%eijkl(klmn,klmn1)
-     end do
+   !Loop over phase exp(iqr) phase real/imaginary part
+   do iq=1,qphase
+     !First loop: we store the real part in dij(1 -> lmn2_size)
+     !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
+     iq0_dij=merge(0,lmn2_size,iq==1)
+     iq0_rhoij=cplex_rhoij*iq0_dij
 
-!    If Rf calculation, Dij^Hartree has a complex phase
-     if (qphase==2) then
-       kklmn=klmn+lmn2_size
-       dijhartree(kklmn)=dijhartree(kklmn)+ro(2)*pawtab%eijkl(klmn,klmn)
+     !Loop over rhoij elements
+     jrhoij=iq0_rhoij+1
+     do irhoij=1,pawrhoij%nrhoijsel
+       klmn=pawrhoij%rhoijselect(irhoij)
+
+       ro=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn)
+
+       !Diagonal k=l
+       dijhartree(iq0_dij+klmn)=dijhartree(iq0_dij+klmn)+ro*pawtab%eijkl(klmn,klmn)
+
+       !k<=l
        do klmn1=1,klmn-1
-         kklmn1=klmn1+lmn2_size
-         dijhartree(kklmn1)=dijhartree(kklmn1)+ro(2)*pawtab%eijkl(klmn1,klmn)
+         dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn1,klmn)
        end do
+
+       !k>l
        do klmn1=klmn+1,lmn2_size
-         kklmn1=klmn1+lmn2_size
-         dijhartree(kklmn1)=dijhartree(kklmn1)+ro(2)*pawtab%eijkl(klmn,klmn1)
+         dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
+       end do
+
+       jrhoij=jrhoij+cplex_rhoij
+     end do !End loop over rhoij
+
+   end do !End loop over q phase 
+
+ end do !End loop over spin
+
+end subroutine pawdijhartree
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawdijfock
+!! NAME
+!! pawdijfock
+!!
+!! FUNCTION
+!! Compute Fock exact-exchange contribution(s) to the PAW pseudopotential strength Dij
+!! (for one atom only)
+!!
+!! INPUTS
+!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
+!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
+!!  qphase=2 if dij contains a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
+!!  ndij= number of spin components dor Fdij
+!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies (and related data) for current atom
+!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
+!!
+!! OUTPUT
+!!  dijfock_vv(qphase*lmn2_size,ndij)=  D_ij^fock terms for valence-valence interactions
+!!  dijfock_cv(qphase*lmn2_size,ndij)=  D_ij^fock terms for core-valence interactions
+!!    When a exp(-i.q.r) phase is included (qphase=2):
+!!      dij(1:lmn2_size,:)
+!!          contains the real part of the phase, i.e. D_ij*cos(q.r)
+!!      dij(lmn2_size+1:2*lmn2_size,:)
+!!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
+!!
+!!  NOTES:
+!!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
+!!
+!! PARENTS
+!!      m_pawdij,pawdenpot
+!!
+!! CHILDREN
+!!      xmpi_allgather,xmpi_allgatherv
+!!
+!! SOURCE
+
+subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixing_sr,ndij,pawrhoij,pawtab)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawdijfock'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: cplex_dij,ndij,qphase
+ real(dp),intent(in) :: hyb_mixing,hyb_mixing_sr
+!arrays
+ real(dp),intent(out) :: dijfock_vv(:,:),dijfock_cv(:,:)
+ type(pawrhoij_type),intent(in) :: pawrhoij
+ type(pawtab_type),intent(in),target :: pawtab
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ispden,irhokl,jrhokl,ilmn_i,jlmn_j,ilmn_k,jlmn_l
+ integer :: klmn_kl,klmn_ij,klmn_il,klmn_kj,klmn1,nsp,lmn2_size
+ real(dp) :: ro,dij_up,dij_dn,dij_updn_r,dij_updn_i
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: dijfock_vv_tmp(:,:)
+ real(dp),pointer :: eijkl(:,:)
+
+! *************************************************************************
+
+!Check data consistency
+ if (size(dijfock_vv,1)/=qphase*cplex_dij*lmn2_size.or.size(dijfock_vv,2)/=ndij) then
+   msg='invalid sizes for Dijfock_vv!'
+   MSG_BUG(msg)
+ end if
+ if (size(dijfock_cv,1)/=qphase*cplex_dij*lmn2_size.or.size(dijfock_cv,2)/=ndij) then
+   msg='invalid sizes for Dijfock_cv!'
+   MSG_BUG(msg)
+ end if
+ if (pawrhoij%qphase<qphase) then
+   msg='pawrhoij%qphase must be >=qphase!'
+   MSG_BUG(msg)
+ end if
+ if (ndij==4.and.cplex_dij==1) then
+   msg='When ndij=4, cplex_dij must be =2!'
+   MSG_BUG(msg)
+ end if
+
+ if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)>tol8) then
+   msg='invalid hybrid functional'
+   MSG_BUG(msg)
+ else
+   if (abs(hyb_mixing)>tol8) then
+     eijkl => pawtab%eijkl
+   else if (abs(hyb_mixing_sr)>tol8) then
+     eijkl => pawtab%eijkl_sr
+   end if
+ end if
+
+!Useful data
+ lmn2_size=pawtab%lmn2_size
+ cplex_rhoij=pawrhoij%cplex_rhoij
+
+!Init memory
+ dijfock_vv=zero ; dijfock_cv=zero
+
+! ===== Valence-valence contribution =====
+
+ nsp=pawrhoij%nsppol;if (pawrhoij%nspden==4) nsp=4
+ LIBPAW_ALLOCATE(dijfock_vv_tmp,(lmn2_size,nsp))
+ dijfock_vv_tmp=zero
+
+!Loop over phase exp(iqr) phase real/imaginary part
+ do iq=1,qphase
+   !First loop: we store the real part in dij(1 -> lmn2_size)
+   !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
+   iq0_dij=merge(0,lmn2_size,iq==1) ; iq0_rhoij=cplex_rhoij*iq0_dij
+
+   !Loop over spin components
+   do ispden=1,nsp
+
+     !Loop on the non-zero elements rho_kl
+     jrhokl=iq0_rhoij+1
+     do irhokl=1,pawrhoij%nrhoijsel
+       klmn_kl=pawrhoij%rhoijselect(irhokl)
+       ilmn_k=pawtab%indklmn(7,klmn_kl)
+       jlmn_l=pawtab%indklmn(8,klmn_kl)
+
+       ro=pawrhoij%rhoijp(jrhokl,ispden)*pawtab%dltij(klmn_kl)
+
+       !Contribution to the element (k,l) of dijfock
+       dijfock_vv_tmp(klmn_kl,ispden)=dijfock_vv_tmp(klmn_kl,ispden)-ro*eijkl(klmn_kl,klmn_kl)
+
+       !Contribution to the element (i,j) of dijfock with (i,j) < (k,l)
+       !  We remind that i<j and k<l by construction
+       do klmn_ij=1,klmn_kl-1
+         ilmn_i=pawtab%indklmn(7,klmn_ij)
+         jlmn_j=pawtab%indklmn(8,klmn_ij)
+         !In this case, i < l
+         klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
+         !For (k,j), we compute index of (k,j) or index of (j,k)
+         if (ilmn_k>jlmn_j) then
+           klmn_kj=ilmn_k*(ilmn_k-1)/2+jlmn_j
+         else
+           klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+         end if
+         dijfock_vv_tmp(klmn_ij,ispden)=dijfock_vv_tmp(klmn_ij,ispden)-ro*eijkl(klmn_il,klmn_kj)
+       end do
+
+       !Contribution to the element (i,j) of dijfock with (i,j) > (k,l)
+       !  We remind that i<j and k<l by construction
+       do klmn_ij=klmn_kl+1,lmn2_size
+         ilmn_i=pawtab%indklmn(7,klmn_ij)
+         jlmn_j=pawtab%indklmn(8,klmn_ij)
+         !In this case, k < j
+         klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+         !For (i,l), we compute index of (i,l) or index of (l,i)
+         if (ilmn_i>jlmn_l) then
+           klmn_il=ilmn_i*(ilmn_i-1)/2+jlmn_l
+         else
+           klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
+         end if
+         dijfock_vv_tmp(klmn_ij,ispden)=dijfock_vv_tmp(klmn_ij,ispden)-ro*eijkl(klmn_kj,klmn_il)
+       end do
+
+       jrhokl=jrhokl+cplex_rhoij
+     end do !End loop over rhoij
+
+   end do !ispden
+
+!  Regular case: copy spin component into Dij
+   if (ndij/=4.or.nsp/=4) then
+     do ispden=1,nsp
+       klmn1=iq0_dij+1
+       do klmn_ij=1,lmn2_size
+         dijfock_vv(klmn1,ispden)=dijfock_vv_tmp(klmn_ij,ispden)
+         klmn1=klmn1+cplex_dij
+       end do
+     end do
+!    Antiferro case: copy up component into down one
+     if (ndij==2.and.nsp==1) then
+       klmn1=iq0_dij+1
+       do klmn_ij=1,lmn2_size
+         dijfock_vv(klmn1,2)=dijfock_vv_tmp(klmn_ij,1)
+         klmn1=klmn1+cplex_dij
        end do
      end if
+   else
+   !Non-collinear: from (rhoij,m_ij) to rhoij^(alpha,beta)
+   !rhoij=  (rhoij^11+rhoij^22)
+   !mij_x=  (rhoij^12+rhoij^21)
+   !mij_y=i.(rhoij^12+rhoij^21)
+   !mij_z=  (rhoij^11-rhoij^22)
+     klmn1=iq0_dij+1
+     do klmn_ij=1,lmn2_size
+       dij_up=half*(dijfock_vv_tmp(klmn_ij,1)+dijfock_vv_tmp(klmn_ij,4))
+       dij_dn=half*(dijfock_vv_tmp(klmn_ij,1)-dijfock_vv_tmp(klmn_ij,4))
+       dij_updn_r= half*dijfock_vv_tmp(klmn_ij,2)
+       dij_updn_i=-half*dijfock_vv_tmp(klmn_ij,3)
+       dijfock_vv(klmn1  ,1)= dij_up
+       dijfock_vv(klmn1  ,2)= dij_dn
+       dijfock_vv(klmn1  ,3)= dij_updn_r
+       dijfock_vv(klmn1+1,3)= dij_updn_i
+       dijfock_vv(klmn1  ,4)= dij_updn_r
+       dijfock_vv(klmn1+1,4)=-dij_updn_i
+       klmn1=klmn1+cplex_dij
+     end do
+   end if
 
-     jrhoij=jrhoij+cplex_rhoij
+ end do ! qphase
+
+! ===== Core-valence contribution =====
+
+ do ispden=1,pawrhoij%nsppol
+   do iq=1,qphase
+     iq0_dij=merge(0,cplex_dij*lmn2_size,iq==1)
+     klmn1=iq0_dij+1
+     do klmn_ij=1,lmn2_size
+       dijfock_cv(klmn1,ispden)=pawtab%ex_cvij(klmn_ij)
+       klmn1=klmn1+cplex_dij
+     end do
    end do
  end do
 
-end subroutine pawdijhartree
+!Antiferro case: copy up component into down one
+ if (ndij==2.and.pawrhoij%nsppol==1) then
+   dijfock_cv(:,2)=dijfock_cv(:,1)
+ end if
+
+!Apply mixing factors
+ if (abs(hyb_mixing)>tol8) then
+   dijfock_vv(:,:) = hyb_mixing*dijfock_vv(:,:)
+ else if (abs(hyb_mixing_sr)>tol8) then
+   dijfock_vv(:,:) = hyb_mixing_sr*dijfock_vv(:,:)
+ end if
+ dijfock_cv(:,:) = (hyb_mixing+hyb_mixing_sr)*dijfock_cv(:,:)
+
+!Free temporary memory spaces
+ LIBPAW_DEALLOCATE(dijfock_vv_tmp)
+
+end subroutine pawdijfock
 !!***
 
 !----------------------------------------------------------------------
@@ -1450,7 +1696,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 
      end do !ispden
 
-   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+   !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
      dijxc(:,idij)=dijxc(:,idij-1)
      if (cplex_dij==2) then
@@ -1482,308 +1728,6 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  LIBPAW_DEALLOCATE(gg)
 
 end subroutine pawdijxc
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawdij/pawdijfock
-!! NAME
-!! pawdijfock
-!!
-!! FUNCTION
-!! Compute Fock exact-exchange contribution(s) to the PAW pseudopotential strength Dij
-!! (for one atom only)
-!!
-!! INPUTS
-!!  cplex_dij=2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
-!!  qphase=2 if dij contains a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
-!!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
-!!  ndij= number of spin components
-!!  nspden=number of spin density components
-!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies (and related data) for current atom
-!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  lmselect(lm_size)=select the non-zero LM-moments of on-site potentials
-!!  nspden=number of spin density components
-!!  nsppol=number of independent spin WF components
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
-!!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
-!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!
-!! OUTPUT
-!!  dijfock_vv(cplex_dij*qphase*lmn2_size,ndij)=  D_ij^fock terms for valence-valence interactions
-!!  dijfock_cv(cplex_dij*qphase*lmn2_size,ndij)=  D_ij^fock terms for core-valence interactions
-!!    When Dij is complex (cplex_dij=2):
-!!      dij(2*i-1,:) contains the real part, dij(2*i,:) contains the imaginary part
-!!    When a exp(-i.q.r) phase is included (qphase=2):
-!!      dij(1:cplex_dij*lmn2_size,:)
-!!          contains the real part of the phase, i.e. D_ij*cos(q.r)
-!!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
-!!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij,pawdenpot
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
-!!
-!! SOURCE
-
-subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixing_sr,ndij,nspden,nsppol,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfock'
-!End of the abilint section
-
- implicit none
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,nsppol,qphase
- real(dp),intent(in) :: hyb_mixing,hyb_mixing_sr
-!arrays
- real(dp),intent(out) :: dijfock_vv(:,:),dijfock_cv(:,:)
- type(pawrhoij_type),intent(in) :: pawrhoij
- type(pawtab_type),intent(in),target :: pawtab
-
-!Local variables ---------------------------------------
-!scalars
- integer :: cplex_rhoij,idij,idijend,ispden,irhoij,jrhoij,ilmn_i,jlmn_j,ilmn_k,jlmn_l
- integer :: klmn_kl,klmn_ij,klmn_il,klmn_kj,klmn,klmn1,klmn2,nsploop,lmn2_size
-
- character(len=500) :: msg
-!arrays
- real(dp) :: ro(cplex_dij)
- real(dp),allocatable :: dijfock_idij_vv(:),dijfock_idij_cv(:)
- real(dp),pointer :: eijkl(:,:)
-
-! *************************************************************************
-
-!Useful data
- lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex_rhoij
-
-!Check data consistency
- if (qphase==2) then
-   msg='pawdijfock not compatible with qphase=2!'
-   MSG_BUG(msg)
- end if
- if (cplex_dij<cplex_rhoij) then
-   msg='cplex_dij must be >= cplex_rhoij!'
-   MSG_BUG(msg)
- end if
- if (size(dijfock_vv,1)/=cplex_dij*qphase*lmn2_size.or.size(dijfock_vv,2)/=ndij) then
-   msg='invalid sizes for Dijfock_vv!'
-   MSG_BUG(msg)
- end if
- if (size(dijfock_cv,1)/=cplex_dij*qphase*lmn2_size.or.size(dijfock_cv,2)/=ndij) then
-   msg='invalid sizes for Dijfock_cv!'
-   MSG_BUG(msg)
- end if
-
- if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)>tol8) then
-   msg='invalid hybrid functional'
-   MSG_BUG(msg)
- else
-   if (abs(hyb_mixing)>tol8) then
-     eijkl => pawtab%eijkl
-   else if (abs(hyb_mixing_sr)>tol8) then
-     eijkl => pawtab%eijkl_sr
-   end if
- end if
-
-!Init memory
- dijfock_vv=zero ; dijfock_cv=zero
- LIBPAW_ALLOCATE(dijfock_idij_vv,(cplex_dij*lmn2_size))
- LIBPAW_ALLOCATE(dijfock_idij_cv,(cplex_dij*lmn2_size))
-
-!----------------------------------------------------------
-!Loop over spin components
-!----------------------------------------------------------
- nsploop=nsppol;if (ndij==4) nsploop=4
- do idij=1,nsploop
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex_dij==2.and.idij<=nspden)) then
-
-     idijend=idij+idij/3;if (cplex_dij==2) idijend=idij
-     do ispden=idij,idijend
-
-!!!! WARNING : What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
-       dijfock_idij_vv=zero
-       dijfock_idij_cv=zero
-!Real on-site quantities (ground-state calculation)
-       if (cplex_dij==1) then
-!* Loop on the non-zero elements rho_kl
-         do irhoij=1,pawrhoij%nrhoijsel
-           klmn_kl=pawrhoij%rhoijselect(irhoij)
-           ro(1)=pawrhoij%rhoijp(irhoij,ispden)*pawtab%dltij(klmn_kl)
-           ilmn_k=pawtab%indklmn(7,klmn_kl)
-           jlmn_l=pawtab%indklmn(8,klmn_kl)
-!* Fock contribution to the element (k,l) of dijfock
-           dijfock_idij_vv(klmn_kl)=dijfock_idij_vv(klmn_kl)-ro(1)*eijkl(klmn_kl,klmn_kl)
-!* Fock contribution to the element (i,j) of dijfock with (i,j) < (k,l)
-!* We remind that i<j and k<l by construction
-           do klmn_ij=1,klmn_kl-1
-             ilmn_i=pawtab%indklmn(7,klmn_ij)
-             jlmn_j=pawtab%indklmn(8,klmn_ij)
-!* In this case, i < l
-             klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
-!* If k >j, one must consider the index of the symmetric element (j,k) ; otherwise, the index of the element (k,j) is calculated.
-             if (ilmn_k>jlmn_j) then
-               klmn_kj=ilmn_k*(ilmn_k-1)/2+jlmn_j
-             else
-               klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
-             end if
-!* In this case, (i,l) >= (k,j)
-             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_il,klmn_kj)
-           end do
-!* Fock contribution to the element (i,j) of dijfock with (i,j) > (k,l)
-!* We remind that i<j and k<l by construction
-           do klmn_ij=klmn_kl+1,lmn2_size
-             ilmn_i=pawtab%indklmn(7,klmn_ij)
-             jlmn_j=pawtab%indklmn(8,klmn_ij)
-!* In this case, k < j
-             klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
-!* If i >l, one must consider the index of the symmetric element (l,i) ; otherwise, the index of the element (i,l) is calculated.
-             if (ilmn_i>jlmn_l) then
-               klmn_il=ilmn_i*(ilmn_i-1)/2+jlmn_l
-             else
-               klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
-             end if
-!* In this case, (k,j) >= (i,l)
-             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_kj,klmn_il)
-           end do
-         end do
-! Add the core-valence contribution
-         do klmn_ij=1,lmn2_size
-           dijfock_idij_cv(klmn_ij)=dijfock_idij_cv(klmn_ij)+pawtab%ex_cvij(klmn_ij)
-         end do
-
-!Complex on-site quantities
-       else !cplex_dij=2
-         jrhoij=1
-!* Loop on the non-zero elements rho_kl
-         do irhoij=1,pawrhoij%nrhoijsel
-           klmn_kl=pawrhoij%rhoijselect(irhoij)
-           ro(1)=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn_kl)
-           ro(2)=pawrhoij%rhoijp(jrhoij+1,ispden)*pawtab%dltij(klmn_kl)
-           ilmn_k=pawtab%indklmn(7,klmn_kl)
-           jlmn_l=pawtab%indklmn(8,klmn_kl)
-!* Fock contribution to the element (k,l) of dijfock
-           dijfock_idij_vv(klmn_kl)=dijfock_idij_vv(klmn_kl)-ro(1)*eijkl(klmn_kl,klmn_kl)
-           dijfock_idij_vv(klmn_kl+1)=dijfock_idij_vv(klmn_kl)-ro(2)*eijkl(klmn_kl,klmn_kl)
-!* Fock contribution to the element (i,j) of dijfock with (i,j) < (k,l)
-!* We remind that i<j and k<l by construction
-           do klmn_ij=1,klmn_kl-1
-             ilmn_i=pawtab%indklmn(7,klmn_ij)
-             jlmn_j=pawtab%indklmn(8,klmn_ij)
-!* In this case, i < l
-             klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
-!* If k >j, one must consider the index of the symmetric element (j,k) ; otherwise, the index of the element (k,j) is calculated.
-             if (ilmn_k>jlmn_j) then
-               klmn_kj=ilmn_k*(ilmn_k-1)/2+jlmn_j
-             else
-               klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
-             end if
-!* In this case, (i,l) >= (k,j)
-             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_il,klmn_kj)
-             dijfock_idij_vv(klmn_ij+1)=dijfock_idij_vv(klmn_ij)-ro(2)*eijkl(klmn_il,klmn_kj)
-           end do
-!* Fock contribution to the element (i,j) of dijfock with (i,j) > (k,l)
-!* We remind that i<j and k<l by construction
-           do klmn_ij=klmn_kl+1,lmn2_size
-             ilmn_i=pawtab%indklmn(7,klmn_ij)
-             jlmn_j=pawtab%indklmn(8,klmn_ij)
-!* In this case, k < j
-             klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
-!* If i >l, one must consider the index of the symmetric element (l,i) ; otherwise, the index of the element (i,l) is calculated.
-             if (ilmn_i>jlmn_l) then
-               klmn_kj=ilmn_i*(ilmn_i-1)/2+jlmn_l
-             else
-               klmn_kj=jlmn_l*(jlmn_l-1)/2+ilmn_i
-             end if
-!* In this case, (k,j) >= (i,l)
-             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_kj,klmn_il)
-             dijfock_idij_vv(klmn_ij+1)=dijfock_idij_vv(klmn_ij)-ro(2)*eijkl(klmn_kj,klmn_il)
-           end do
-
-           jrhoij=jrhoij+cplex_rhoij
-         end do
-! Add the core-valence contribution
-         do klmn_ij=1,lmn2_size,2
-           dijfock_idij_cv(klmn_ij)=dijfock_idij_cv(klmn_ij)+pawtab%ex_cvij(klmn_ij)
-         end do
-
-       end if
-
-!      ----------------------------------------------------------
-!      Deduce some part of Dij according to symmetries
-!      ----------------------------------------------------------
-
-       !if ispden=1 => real part of D^11_ij
-       !if ispden=2 => real part of D^22_ij
-       !if ispden=3 => real part of D^12_ij
-       !if ispden=4 => imaginary part of D^12_ij
-       klmn1=max(1,ispden-2);klmn2=1
-       do klmn=1,lmn2_size
-         dijfock_vv(klmn1,idij)=dijfock_idij_vv(klmn2)
-         dijfock_cv(klmn1,idij)=dijfock_idij_cv(klmn2)
-         klmn1=klmn1+cplex_dij
-         klmn2=klmn2+qphase
-       end do
-       if (qphase==2) then
-         !Same storage with exp^(-i.q.r) phase
-         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
-         do klmn=1,lmn2_size
-           dijfock_vv(klmn1,idij)=dijfock_idij_vv(klmn2)
-           dijfock_cv(klmn1,idij)=dijfock_idij_cv(klmn2)
-           klmn1=klmn1+cplex_dij
-           klmn2=klmn2+qphase
-         end do
-       endif
-
-     end do !ispden
-
-   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
-   else if (nspden==4.and.idij==4) then
-     dijfock_vv(:,idij)=dijfock_vv(:,idij-1)
-     dijfock_cv(:,idij)=dijfock_cv(:,idij-1)
-     if (cplex_dij==2) then
-       do klmn=2,lmn2_size*cplex_dij,cplex_dij
-         dijfock_vv(klmn,idij)=-dijfock_vv(klmn,idij)
-         dijfock_cv(klmn,idij)=-dijfock_cv(klmn,idij)
-       end do
-       if (qphase==2) then
-         do klmn=2+lmn2_size*cplex_dij,2*lmn2_size*cplex_dij,cplex_dij
-           dijfock_vv(klmn,idij)=-dijfock_vv(klmn,idij)
-           dijfock_cv(klmn,idij)=-dijfock_cv(klmn,idij)
-         end do
-       end if
-     end if
-
-   !Antiferro: D_ij(:,2)=D^down_ij=D^up_ij
-   else if (nsppol==1.and.idij==2) then
-     dijfock_vv(:,idij)=dijfock_vv(:,idij-1)
-     dijfock_cv(:,idij)=dijfock_cv(:,idij-1)
-   end if
-
-!----------------------------------------------------------
-!End loop on spin density components
- end do
-
- if (abs(hyb_mixing)>tol8) then
-   dijfock_vv(:,:) = hyb_mixing*dijfock_vv(:,:)
- else if (abs(hyb_mixing_sr)>tol8) then
-   dijfock_vv(:,:) = hyb_mixing_sr*dijfock_vv(:,:)
- end if
- dijfock_cv(:,:) = (hyb_mixing+hyb_mixing_sr)*dijfock_cv(:,:)
-
-!Free temporary memory spaces
- LIBPAW_DEALLOCATE(dijfock_idij_vv)
- LIBPAW_DEALLOCATE(dijfock_idij_cv)
-
-end subroutine pawdijfock
 !!***
 
 !----------------------------------------------------------------------
@@ -2024,7 +1968,7 @@ subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 
      end do !ispden
 
-   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+   !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
      dijxc(:,idij)=dijxc(:,idij-1)
      if (cplex_dij==2) then
@@ -2328,7 +2272,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
      end do !ispden
 
-   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+   !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
      dijhat(:,idij)=dijhat(:,idij-1)
      if (cplex_dij==2) then
@@ -3032,113 +2976,168 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_rhoij,ilmn,ilmnp,irhoij,jlmn,jlmnp,jrhoij,kklmn,kklmn1,klmn,klmn1,lmn2_size,sig1,sig2
- logical :: compute_diju_im
- real(dp) :: ro_im
+ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij
+ integer :: klmn,klmnp,klmn1,lmn2_size,sig1,sig2
+ logical :: compute_im
  character(len=500) :: msg
 !arrays
- real(dp) :: ro(qphase)
+ real(dp) :: ro(2)
 
 ! *************************************************************************
 
-!Useful data
- lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex_rhoij
- compute_diju_im=(qphase==2.and.present(diju_im))
-
 !Check data consistency
- if (size(diju,1)/=qphase*lmn2_size.or.size(diju,2)/=ndij) then
+ if (size(diju,1)/=qphase*cplex_dij*lmn2_size.or.size(diju,2)/=ndij) then
    msg='invalid sizes for diju!'
    MSG_BUG(msg)
  end if
- if (compute_diju_im) then
-   if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
-     msg='invalid sizes for diju_im !'
-     MSG_BUG(msg)
-   end if  
- end if
- if (cplex_rhoij<qphase) then
-   msg='cplex_rhoij must be >=qphase!'
+ if (pawrhoij%qphase<qphase) then
+   msg='pawrhoij%qphase must be >=qphase!'
    MSG_BUG(msg)
  end if
- if (cplex_dij/=1) then
-   msg='pawdiju_euijkl not yet available for cplex_dij=2!'
-   MSG_ERROR(msg)
+ if (ndij==4) then
+   msg='pawdiju_euijkl not yet available for ndij=4!'
+   MSG_BUG(msg)
  end if
 
-!------------------------------------------------------------------------
-!----------- Allocations and initializations
-!------------------------------------------------------------------------
-
+!Initialization
  diju=zero
- if (compute_diju_im) diju_im = zero
+ lmn2_size=pawrhoij%lmn2_size
+ cplex_rhoij=pawrhoij%cplex_rhoij
+ compute_im=(cplex_dij==2.and.cplex_rhoij==2)
 
-!Real on-site quantities
- if (qphase==1) then
-   do sig1=1,ndij
-     do sig2=1,ndij
-       jrhoij=1
+!Loops over spin-components
+ do sig2=1,max(pawrhoij%nspden,2)
+   do sig1=1,max(pawrhoij%nspden,2)
+
+     !Loop over phase exp(iqr) phase real/imaginary part
+     do iq=1,qphase
+       !First loop: we store the real part in dij(1 -> lmn2_size)
+       !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
+       iq0_dij=merge(0,cplex_dij*lmn2_size,iq==1)
+       iq0_rhoij=merge(0,cplex_rhoij*lmn2_size,iq==1)
+
+       !Loop over rhoij elements
+       jrhoij=iq0_rhoij+1
        do irhoij=1,pawrhoij%nrhoijsel
          klmn=pawrhoij%rhoijselect(irhoij)
          ilmn=pawtab%indklmn(7,klmn)
          jlmn=pawtab%indklmn(8,klmn)
-         ro(1)=pawrhoij%rhoijp(jrhoij,sig2)
-         do jlmnp=1,pawtab%lmn_size
-           do ilmnp=1,jlmnp
-             klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
 
-!            Thanks to Eq.[I] in the comment above:
+         ro(1:cplex_rhoij)=pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,sig2)
+
+         do jlmnp=1,pawtab%lmn_size
+           j0lmnp=jlmnp*(jlmnp-1)/2
+           do ilmnp=1,jlmnp
+             klmnp=j0lmnp+ilmnp
+             klmn1=iq0_dij+cplex_dij*klmnp+cplex_dij-1
+
+!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             if (ilmn/=jlmn) then
-               diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+
+!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
+             if (compute_im) then
+               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+               if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
              end if
 
-           end do
+           end do ! k,l
          end do
-         jrhoij=jrhoij+cplex_rhoij
-       end do
-     end do
-   end do
 
-!Complex on-site quantities
- else
-   do sig1=1,ndij
-     do sig2=1,ndij
-       jrhoij=1
-       do irhoij=1,pawrhoij%nrhoijsel
-         klmn=pawrhoij%rhoijselect(irhoij)
-         ilmn=pawtab%indklmn(7,klmn)
-         jlmn=pawtab%indklmn(8,klmn)
-         ro(1:2)=pawrhoij%rhoijp(jrhoij:jrhoij+1,sig2)
-         do jlmnp=1,pawtab%lmn_size
-           do ilmnp=1,jlmnp
-             klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
-             kklmn1 = klmn1 + lmn2_size
-             ro_im = pawrhoij%rhoijim(klmn1,sig2)
+       end do ! i,j
 
-!            Thanks to Eq.[I] in the comment above:
-             diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             if (compute_diju_im) then
-               diju_im(klmn1,sig1)=diju_im(klmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             end if
+     end do ! q phase
 
-             if (ilmn/=jlmn) then
-               diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               if (compute_diju_im) then 
-                   diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               end if
-             end if
-           end do
-         end do
-         jrhoij=jrhoij+cplex_rhoij
-       end do
-     end do
-   end do
- end if
+   end do  !sig1
+ end do !sig2
+
+
+! OLD VERSION FROM LUCAS BAGUET
+! ----------------------------------------------------------------
+!  if (compute_diju_im) then
+!    if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
+!      msg='invalid sizes for diju_im !'
+!      MSG_BUG(msg)
+!    end if
+!  end if
+!  if (cplex_dij/=1) then
+!    msg='pawdiju_euijkl not yet available for cplex_dij=2!'
+!    MSG_ERROR(msg)
+!  end if
+! 
+!  lmn2_size=pawtab%lmn2_size
+!  cplex_rhoij=pawrhoij%cplex_rhoij
+!  compute_diju_im=(qphase==2.and.present(diju_im))
+! 
+!  diju=zero
+!  if (compute_diju_im) diju_im = zero
+! 
+! !Real on-site quantities
+!  if (qphase==1) then
+!    do sig1=1,ndij
+!      do sig2=1,ndij
+!        jrhoij=1
+!        do irhoij=1,pawrhoij%nrhoijsel
+!          klmn=pawrhoij%rhoijselect(irhoij)
+!          ilmn=pawtab%indklmn(7,klmn)
+!          jlmn=pawtab%indklmn(8,klmn)
+!          ro(1)=pawrhoij%rhoijp(jrhoij,sig2)
+!          do jlmnp=1,pawtab%lmn_size
+!            do ilmnp=1,jlmnp
+!              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
+! 
+! !            Thanks to Eq.[I] in the comment above:
+!              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+!              if (ilmn/=jlmn) then
+!                diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+!              end if
+! 
+!            end do
+!          end do
+!          jrhoij=jrhoij+cplex_rhoij
+!        end do
+!      end do
+!    end do
+! 
+! !Complex on-site quantities
+!  else
+!    do sig1=1,ndij
+!      do sig2=1,ndij
+!        jrhoij=1
+!        do irhoij=1,pawrhoij%nrhoijsel
+!          klmn=pawrhoij%rhoijselect(irhoij)
+!          ilmn=pawtab%indklmn(7,klmn)
+!          jlmn=pawtab%indklmn(8,klmn)
+!          ro(1:2)=pawrhoij%rhoijp(jrhoij:jrhoij+1,sig2)
+!          do jlmnp=1,pawtab%lmn_size
+!            do ilmnp=1,jlmnp
+!              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
+!              kklmn1 = klmn1 + lmn2_size
+!              ro_im = pawrhoij%rhoijim(klmn1,sig2)
+! 
+! !            Thanks to Eq.[I] in the comment above:
+!              diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+!              diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+!              diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+!              if (compute_diju_im) then
+!                diju_im(klmn1,sig1)=diju_im(klmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
+!              end if
+! 
+!              if (ilmn/=jlmn) then
+!                diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+!                diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+!                diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+!                if (compute_diju_im) then 
+!                    diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+!                end if
+!              end if
+!            end do
+!          end do
+!          jrhoij=jrhoij+cplex_rhoij
+!        end do
+!      end do
+!    end do
+!  end if
 
 end subroutine pawdiju_euijkl
 !!***
@@ -3416,7 +3415,7 @@ subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 
      end do !ispden
 
-   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+   !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
      dijexxc(:,idij)=dijexxc(:,idij-1)
      if (cplex_dij==2) then
@@ -4071,7 +4070,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 !      Deduce some part of Dij according to symmetries
 !      ----------------------------------------------------------
 
-     !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+     !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
      else if (nspden==4.and.idij==4) then
        paw_ij1(iatom)%dijfr(:,idij)=paw_ij1(iatom)%dijfr(:,idij-1)
        if (cplex_dij==2) then
@@ -4495,6 +4494,10 @@ end subroutine pawdijfr
  if (size(vpawx,1)/=1.or.size(vpawx,2)/=lmn2_size.or.&
 &    size(vpawx,3)/=ndij) then
    msg='invalid sizes for vpawx !'
+   MSG_BUG(msg)
+ end if
+ if (pawrhoij%qphase==2) then
+   msg='pawxpot not compatible with qphase=2 (DFPT)!'
    MSG_BUG(msg)
  end if
 
