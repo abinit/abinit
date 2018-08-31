@@ -30,7 +30,7 @@ src_dir        = os.path.join(top_dir,"src")
 
 # The dtset resource:
 bindings_dir        = os.path.join(top_dir,"bindings")
-parserdir = os.path.join(bindings_dir, "parser")
+parserdir = os.path.join(src_dir, "57_iovars")
 
 with open(os.path.join(parserdir, "dtset.pickle", "rb")) as fh:
     ab_dtset = cPickle.load(fh,"r")

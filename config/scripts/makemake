@@ -315,7 +315,7 @@ if ( opts.run_clean ):
     run_script(my_name, "Removing C headers for Python bindings",
       "rm -f bindings/parser/ab7_invars.h bindings/parser/ab7_invars_c.h bindings/parser/ab7_invars_py.h")
     run_script(my_name, "Removing Python pickle file for Abinit datasets",
-      "rm -f bindings/parser/dtset.pickle")
+      "rm -f src/57_iovars/dtset.pickle")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
@@ -487,7 +487,7 @@ if ( opts.run_source ):
   else:
     print_message(my_name, "  *** Skipping update of Fortran interfaces ***")
 
-  if ( os.path.exists(os.path.join("bindings", "parser", "dtset.pickle")) ):
+  if ( os.path.exists(os.path.join("src", "57_iovars", "dtset.pickle")) ):
     run_script(my_name, "Generating dtset source files",
       "./config/scripts/make-sources-parser")
 else:
