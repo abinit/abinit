@@ -56,15 +56,15 @@ contains
 !! to build the XC kernel.
 !!
 !! If option==2, Exchange-correlation functional from Perdew-Burke-Ernzerhof,
-!! Phys.Rev.Lett. 77, 3866 (1996).
-!! If option==1, Reduces to Perdew-Wang LSD , PRB45,13244 (1992).
+!! Phys.Rev.Lett. 77, 3866 (1996) [[cite:Perdew1996]].
+!! If option==1, Reduces to Perdew-Wang LSD , PRB45,13244 (1992) [[cite:Perdew1992]].
 !! If option==-1 or -2, take only exchange part of PW (-1) or PBE (-2) functionals.
-!! If option==-4, C09x exchange functional of V. R. Cooper, PRB 81, 161104(R) (2010).
+!! If option==-4, C09x exchange functional of V. R. Cooper, PRB 81, 161104(R) (2010) [[cite:Cooper2010]].
 !! If option==3 or 4, take exchange plus RPA correlation
 !!   part of LSD PW (3) or GGA PBE (4) functionals.
-!! If option==5, revPBE functional of Zhang and Yang, PRL 80, 890 (1998)
-!! If option==6, RPBE functional of Hammer, Hansen and Norskov, PRB 59, 7413 (1999)
-!! If option==7, WC functional of Wu and Cohen, PRB 73, 235116 (2006)
+!! If option==5, revPBE functional of Zhang and Yang, PRL 80, 890 (1998) [[cite:Zhang1998]]
+!! If option==6, RPBE functional of Hammer, Hansen and Norskov, PRB 59, 7413 (1999) [[cite:Hammer1999]]
+!! If option==7, WC functional of Wu and Cohen, PRB 73, 235116 (2006) [[cite:Wu2006]]
 !!
 !! INPUTS
 !!  exexch= choice of local exact exchange. Active if exexch=1
@@ -336,7 +336,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
  end if
 
 !Parameters for the Perdew-Wang 92 LSD as well as LSD-RPA,
-!see Table I of Phys.Rev.B 45,13244 (1992)
+!see Table I of Phys.Rev.B 45,13244 (1992) [[cite:Perdew1992]]
 !GMR (to match Libxc one should comment the next line and uncomment the following two)
  ec0_aa=0.031091_dp  ; ec1_aa=0.015545_dp ; mac_aa=0.016887_dp
 !ec0_aa=0.0310907_dp  ; ec1_aa=0.01554535_dp ; mac_aa=0.0168869_dp

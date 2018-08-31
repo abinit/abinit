@@ -35,6 +35,17 @@ MODULE m_energy
  use m_profiling_abi
 
  use m_pawtab, only : pawtab_type
+ use m_paw_correlations, only : pawuenergy
+ use m_paw_ij, only : paw_ij_type,paw_ij_init,paw_ij_free,paw_ij_nullify
+
+ use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
+ use m_paw_dmft, only : paw_dmft_type
+
+ use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
+& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
+ use m_oper, only : trace_oper
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -112,7 +123,7 @@ CONTAINS  !=====================================================================
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -121,8 +132,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -175,7 +184,7 @@ end subroutine init_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -184,8 +193,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -244,8 +251,6 @@ end subroutine destroy_energy
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
 
- use defs_basis
- use m_crystal, only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -331,7 +336,7 @@ end subroutine print_energy
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      wrtout
@@ -340,13 +345,6 @@ end subroutine print_energy
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -404,7 +402,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! == Compute Band Energy Alternative version: two steps
 !                 == Compute Tr[ln G^{-1}] and -Tr[(Self-hdc)G_dmft]
 ! -----------------------------------------------------------------------
-   if(part=='band') then ! ie if thdyn="fcalc" in dmft_solve.F90
+   if(part=='band') then ! ie if thdyn="fcalc" in m_dmft.F90
 !     call compute_B3(cryst_struc,energies_dmft,eband2,green,mpi_enreg,paw_dmft,2,pawang,self,occ_type,0)
 !     write(message,'(2a,f10.6)') ch10,"Compute Band energy test KS           ",eband2
 !     call wrtout(std_out,message,'COLL')
@@ -528,11 +526,6 @@ end subroutine compute_energy
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -689,12 +682,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 !DEC$ NOOPTIMIZE
 #endif
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_paw_dmft, only : paw_dmft_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -837,7 +824,7 @@ end subroutine compute_migdal_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,m_energy
+!!      m_dmft,m_energy
 !!
 !! CHILDREN
 !!      wrtout
@@ -846,18 +833,12 @@ end subroutine compute_migdal_energy
 
 subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_paw_dmft, only : paw_dmft_type
- use m_paw_ij, only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_ldau_energy'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1027,14 +1008,6 @@ end subroutine compute_ldau_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
- use defs_basis
- use m_crystal, only : crystal_t
- use m_green, only : green_type,icip_green,destroy_green,compa_occup_ks
- use m_self, only : self_type,initialize_self,destroy_self,print_self,new_self,make_qmcshift_self
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,init_matlu,prod_matlu,diag_matlu,destroy_matlu,conjg_matlu,&
-& ln_matlu,add_matlu,zero_matlu,shift_matlu,copy_matlu,trace_matlu,print_matlu
- use m_oper, only : trace_oper
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1148,7 +1121,6 @@ end subroutine compute_noninterentropy
 
  function occup_fd(eig,fermie,temp)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

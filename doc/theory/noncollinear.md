@@ -39,9 +39,11 @@ In the GGA approximation, on the contrary, we **assume** that it is a functional
 We therefore use exactly the same functional as in the spin polarized situation, using the local direction
 of $\vec m(\rr)$ as polarization direction.
 
-We then have 
+We then have
 
-$$ {\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)}$$, 
+$$ 
+{\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)},
+$$
 
 where $\widehat {m(\rr)} = {m(\rr) \over |m(\rr)|}$.
 Now, in the LDA-GGA formulations, $n_\uparrow + n_\downarrow =n$ and $|n_\uparrow-n_\downarrow|=|m|$

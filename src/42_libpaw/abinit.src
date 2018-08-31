@@ -33,6 +33,7 @@ sources = [
  "m_paw_ij.F90",
  "m_pawfgrtab.F90",
  "m_paw_finegrid.F90",
+ "m_paw_onsite.F90",
  "m_pawcprj.F90",
  "m_pawrhoij.F90",
  "m_pawdij.F90",

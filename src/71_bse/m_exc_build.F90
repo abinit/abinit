@@ -54,6 +54,7 @@ module m_exc_build
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_sym,      only : paw_symcprj_op
  use m_wfd,          only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_ihave_cprj
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
@@ -168,7 +169,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_block'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

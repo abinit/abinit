@@ -21,10 +21,10 @@ one hour work. Many of the topics make the link between a physical property or
 quantity (including bibliographical references for the theory, and sometimes
 pointing to published work using this feature) and the way it is to be
 computed with ABINIT (e.g. corresponding input variable, example input files,
-and possibly tutorial(s)).
+and possibly tutorial(s)), and the associated post-processing tools (OPTIC, ANADDB, MULTIBINIT ...).
 
 This "topic"-based approach might be used by the beginner to get a broad
-overview of the capabilities of ABINIT as well as to the more expert user to
+overview of the capabilities of ABINIT applications as well as to the more expert user to
 quickly find the way to compute some existing quantity, or to remember which
 input variable is useful or mandatory for the calculation of a given property.
 Some topics are rather "input"-oriented (e.g. how to specify the atomic
@@ -171,7 +171,18 @@ for isolated defects in a solid, not for e.g. correcting the band gap.
   9. [[topic:RandStopPow|Random electronic stopping power]]
   10. [[topic:GWls|GW- Lanczos-Sternheimer method]] (not in production)
 
-## 8 Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)
+## 8 Second-principles calculations: handling millions of atoms with first-principles accuracy
+
+By constructing model Hamiltonians whose linear and selected non-linear characteristics
+are identical to those from first-principles calculations, and simulating millions
+of atoms with these model Hamiltonians, one can study phase transitions, polarization boundaries,  
+and other larger-scale properties than the ones from first-principles.
+This is implemented in the MULTIBINIT application.
+
+  1. [[topic:LatticeModel|Lattice model at the harmonic level]]
+  2. [[topic:FitProcess|FitProcess]]
+
+## 9 Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)
 
 Many properties are directly deduced from the knowledge of the electronic
 wavefunctions, eigenenergies, density, potential, etc. Some necessitates
@@ -184,23 +195,24 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   2. [[topic:ElecDOS|Electronic DOS and related topics]]
   3. [[topic:EffectiveMass|Effective mass calculations]]
   4. [[topic:Unfolding|Unfolding supercell band structures]]
-  5. [[topic:DensityPotential|Manipulating the density and potentials]]
-  6. [[topic:STM|Scanning Tunneling Microscopy map]]
-  7. [[topic:Wannier|Wannier functions]]
-  8. [[topic:Bader|Bader Atom-In-Molecule analysis]]
+  5. [[topic:DensityPotential|Manipulating the density and potential]]
+  6. [[topic:Macroave|Macroscopic average of density and potential]]
+  7. [[topic:STM|Scanning Tunneling Microscopy map]]
+  8. [[topic:Wannier|Wannier functions]]
+  9. [[topic:Bader|Bader Atom-In-Molecule analysis]]
 
-## 9 Other physical properties (e.g. positron)
+## 10 Other physical properties (e.g. positron)
   
   1. [[topic:positron|Positron calculations]]
   2. [[topic:LDAminushalf|The LDA-1/2 approach]] (not in production)
 
-## 10 Analysis/postprocessing tools
+## 11 Analysis/postprocessing tools
   
   1. [[topic:Abipy|Abipy - ABINIT swiss knife]]
   2. [[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]
   3. [[topic:Band2eps|Band2eps for phonon dispersion curves]]
 
-## 11 Miscellaneous topics
+## 12 Miscellaneous topics
   
   1. [[topic:Verification|Verification of the implementation]]
   2. [[topic:PortabilityNonRegression|Portability and non-regression tests]]

@@ -41,6 +41,7 @@ module m_chebfi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
+ use m_prep_kgb,      only : prep_getghc, prep_index_wavef_bandpp
 
  implicit none
 
@@ -119,7 +120,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 #undef ABI_FUNC
 #define ABI_FUNC 'chebfi'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

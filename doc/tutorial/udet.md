@@ -4,23 +4,25 @@ authors: DJA
 
 # Calculation of *U* and J using Cococcioni's approach  
 
-## How to determine *U* for DFT+*U* in ABINIT ? Cococcioni's approach.  
+## How to determine *U* for DFT+*U* in ABINIT? Cococcioni's approach.  
 
 This tutorial aims to show how you can determine *U* for further DFT+*U*
-calculations consistently and in a fast an easy way. You will learn to prepare
-the input files for the determination and to use the main parameters implemented for this aim.  
-It is supposed that you already know how to run ABINIT in the PAW mode (tutorial [PAW1](paw1)). 
-Obviously, you should also read the tutorial [DFT+U](dftu), and likely the tutorial  [PAW2](paw2), 
+calculations consistently and in a fast an easy way. You will learn how to prepare
+the input files for the determination and how to use the main parameters implemented for this aim.  
+It is supposed that you already know how to run ABINIT with PAW  (tutorial [PAW1](paw1)). 
+Obviously, you should also read the tutorial [DFT+U](dftu), and likely the tutorial [PAW2](paw2), 
 to generate PAW atomic data.  
+
+[TUTORIAL_README]
 
 This tutorial should take about 1/2 hour.
 
-## 1 Summary of linear response method to determine *U*
+## Summary of linear response method to determine *U*
   
 The linear response method has been introduced by several authors 
 [[cite:Cococcioni2002]], [[cite:Cococcioni2005]],[[cite:Dederichs1984]],[[cite:Hybertsen1989]],
-[[cite:Anisimov1991]],[[cite:Pickett1998]]. It is
-based on the fact that *U* corresponds to the energy to localize an additional
+[[cite:Anisimov1991]],[[cite:Pickett1998]]. 
+It is based on the fact that *U* corresponds to the energy to localize an additional
 electron on the same site: *U=E[n+1]+E[n-1]-2E[n]* [[cite:Hybertsen1989]]. This can be reformulated
 as the response to an infinitesimal change of of occupation of the orbital by
 the electrons dn. Then *U* is the second derivative of the energy with respect
@@ -56,28 +58,35 @@ metals", V. I. Anisimov and O. Gunnarsson, Phys. Rev. B42, 7570 (1991)  [[cite:A
 [6] "Reformulation of the LDA+*U* method for a local-orbital basis", W. E.
 Pickett, S. C. Erwin, and E. C. Ethridge, Phys. Rev. B58, 1201 (1998)  [[cite:Pickett1998]]
 
-The implementation of the determination of *U* in ABINIT is briefly discussed in 
-[[cite:Gonze2016]].
+The implementation of the determination of *U* in ABINIT is briefly discussed in  [[cite:Gonze2016]].
 
-## 2 Determine *U* in ABINIT
+## How to determine *U* in ABINIT
   
-*Before continuing, you might consider to work in a different subdirectory as
-for the other tutorials. Why not "Work_udet"?* 
+*Before continuing, you may consider to work in a different subdirectory as
+for the other tutorials. Why not Work_udet?* 
 
 !!! important
 
     In what follows, the name of files are mentioned as if you were in this subdirectory.  
-    All the input files can be found in the ~abinit/tests/tutorial/Input directory
+    All the input files can be found in the $ABI_TUTORIAL/Input directory
      You can compare your results with reference output files located in
-    _~abinit/tests/tutorial/Refs directories (for the present tutorial they are named tudet*.out).
+     $ABI_TUTORIAL/Refs directory (for the present tutorial they are named tudet*.out).
 
-The input file tudet_1.in is an example of a file to prepare a wave function
-for further processing. You might use the file tudet_1.files as a "files"
+The input file *tudet_1.in* is an example of a file to prepare a wave function
+for further processing. You might use the file *tudet_1.files* as a "files"
 file, and get the corresponding output file ../Refs/tudet_1.out).  
 
-Copy the files tudet_1.in and tudet_1.files in your work directory, and run ABINIT:
-    
-    abinit < tudet_1.files > tudet_1.log  
+Copy the files *tudet_1.in* and *tudet_1.files* in your work directory, and run ABINIT:
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_udet
+cd Work_udet
+cp ../tudet_1.files .
+cp ../tudet_1.in .
+
+abinit < tudet_1.files > log 2> err & 
+```
 
 In the meantime, you can read the input file and see that this is a usual
 DFT+U calculation, with *U*=0. 
@@ -87,22 +96,22 @@ DFT+U calculation, with *U*=0.
 This setting allows us to read the occupations of
 the Fe 3d orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
 minimum to get reasonable response matrices. We converge the electronic
-structure to a high accuracy ([[tolvrs]] 10d-12), which usually allows to
+structure to a high accuracy ([[tolvrs]] 10d-12), which usually allows one to
 determine occupations with a precision of 10d-10. The [[ecut]] is chosen very low,
 in order to accelerate calculations.  
-We do not suppress the writing of the _WFK file, because this is the input for
+We do not suppress the writing of the *WFK* file, because this is the input for
 the calculations of U.
 
 Once this calculation has finished, run the second one:  
-Copy the files tudet_2.in and tudet_2.files in your work directory, and run ABINIT:
+Copy the files *tudet_2.in and tudet_2.files* in your work directory, and run ABINIT:
     
     abinit < tudet_2.files > tudet_1.log  
 
 {% dialog tests/tutorial/Input/tudet_2.files tests/tutorial/Input/tudet_2.in %}
 
-As you can see from the tudet_2.files file, this run uses the tudet_1o_WFK as
-an input. In the tudet_2.in all the symmetry relations are specified
-explicitly. In the tudet_2.log you can verify that none of the symmetries
+As you can see from the *tudet_2.files* file, this run uses the *tudet_1o_WFK* as
+an input. In the *tudet_2.in* all the symmetry relations are specified
+explicitly. In the *tudet_2.log* you can verify that none of the symmetries
 connects atoms 1 with atom 2:  
     
     symatm: atom number    1 is reached starting at atom   
@@ -122,10 +131,10 @@ separately on the atoms surrounding the atom on which you apply the perturbation
 
 You can generate these symmetries, in a separate run, where you specify the
 atom where the perturbation is done as a different species. From the output
-you read the number of symmetries ([[nsym]]), the symmetry relations
+you read the number of symmetries ([[nsym]]), the symmetry operations
 ([[symrel]]) and the non-symmorphic vectors ([[tnons]]). This is already
-done here and inserted in the tudet_2.in file. Note that you can alternatively
-just break all the symmetries ([[nsym]]=1), or break specific symmetries by
+done here and inserted in the *tudet_2.in* file. Note that you can alternatively
+disable all symmetries with [[nsym]] = 1, or break specific symmetries by
 displacing the impurity atom in the preliminary run. However, for the
 determination of *U*, the positions should be the ideal positions and only the
 symmetry should be reduced.
@@ -171,24 +180,24 @@ put [[pawujat]] 2. To change the size of the potential shift use e.g.
 [[pawujv]] 0.05 eV. Our tests show that 0.1 eV is the optimal value, but the
 linear response is linear in a wide range (1-0.001 eV).
 
-## 3 The ujdet utility
+## The ujdet utility
   
 In general the calculation of *U* with abinit as described above is sufficient.
 For some post-treatment that goes beyond the standard applications, a separate
-executable ujdet was created. The output of abinit is formatted so that you
-can easily "cut" the part with the ujdet input variables : you can generate
+executable *ujdet* was created. The output of abinit is formatted so that you
+can easily "cut" the part with the ujdet input variables: you can generate
 the standard input file for the ujdet utility by typing:
     
     sed -n "/MARK/,/MARK/p" tudet_2.out  > ujdet.in   
 
-Note that the input for the ujdet utility is always called ujdet.in
+Note that the input for the ujdet utility is always called *ujdet.in*
 
 It contains the potential shifts applied vsh (there are 4 shifts: vsh1, vsh3
 for non-selfconsistent calculations that allows to extract the contribution to
 *U* originating from a non-interacting electron gas, and vsh2, vsh4 for positive
 and negative potential shift). The same applies for the occupations occ[1-4].
 
-We now calculate *U* for an even larger supercell: Uncomment the line scdim in ujdet.in and add
+We now calculate *U* for an even larger supercell: Uncomment the line scdim in *ujdet.in* and add
     
      scdim 6 6 6 
 
@@ -196,7 +205,7 @@ to specify a 6 6 6 supercell or
     
      scdim 700 0 0 
 
-to specify the maximum total number of atoms in the supercell. Then, run ujdet:
+to specify the maximum total number of atoms in the supercell. Then, run *ujdet*:
     
     rm ujdet.[ol]* ; ujdet > ujdet.log    
     
@@ -215,10 +224,10 @@ As you can see, *U* has now been extrapolated to a supercell containing 432 atom
 
 The value of *U* depends strongly on the extension of the projectors used in the
 calculation. If you want to use *U* in LMTO-ASA calculations you can use the
-keyword [[pawujrad]] in the ujdet.in file to get grips of the *U* you want to
+keyword [[pawujrad]] in the *ujdet.in* file to get grips of the *U* you want to
 use there. Just uncomment the line and add the ASA-radius of the specific atom e.g.
     
-      pawujrad 2.5 
+    pawujrad 2.5 
 
 Running
     

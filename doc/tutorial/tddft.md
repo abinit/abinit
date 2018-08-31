@@ -14,11 +14,13 @@ This tutorial aims at showing how to get the following physical properties, for 
 
 in the Casida approach, within Time-Dependent Density Functional Theory.
 
+[TUTORIAL_README]
+
 This tutorial should take about 30 minutes.
 
-## 1 Brief theoretical introduction
+## Brief theoretical introduction
   
-In order to do Time-Dependent Density Functional Theory calculations (TDDFT)
+In order to perform Time-Dependent Density Functional Theory calculations (TDDFT)
 of electronic excitations and oscillator strengths, in the Casida's approach,
 you should first have some theoretical background.  
 TDDFT was first developed in the eighties, but the direct calculation of
@@ -94,7 +96,7 @@ hundreds of papers published on the basis of methodology. Still, its accuracy
 might be below the expectations, as you will see. As often, test this method
 to see if it suits your needs, and read the recent literature ...
 
-## 2 A first computation of electronic excitation energies and oscillator strengths, for N$_2$
+## A first computation of electronic excitation energies and oscillator strengths, for N$_2$
   
 We will now compute and analyse the excitation energies of the diatomic molecule N$_2$. 
 This is a rather simple s.ystem, with cylindrical symmetry,
@@ -104,21 +106,23 @@ an important role in the understanding of the way to use Abinit
 implementation of Casida's formalism.
 
 *Before beginning, you might consider to work in a different subdirectory as
-for the other tutorials. Why not "Work_tddft"?*
+for the other tutorials. Why not Work_tddft?*
+Copy the files *ttddft_x.files* and *ttddft_1.in* in *Work_tddft*:
 
-Now, you are ready to run ABINIT and prepare the needed file.
-
-Copy the files ttddft_x.files and ttddft_1.in in "Work_tddft":
-
-    cp ../ttddft_x.files .
-    cp ../ttddft_1.in .
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_tddft
+cd Work_tddft
+cp ../ttddft_x.files .
+cp ../ttddft_1.in .
+```
 
 So, issue now:
 
-    ../../abinit < ttddft_x.files >& log
+    abinit < ttddft_x.files > log 2> err &
   
 The computation is quite fast: about 15 secs on a 2.8 GHz PC.  
-Let's examine the input file ttddft_1.in.  
+Let's examine the input file *ttddft_1.in*.
 
 {% dialog tests/tutorial/Input/ttddft_1.in %}
 
@@ -139,9 +143,12 @@ we add 7 unoccupied bands in the dataset 2, to obtain a total of 12 bands. The
 box is not very large (6x5x5 Angstrom), the cutoff is quite reasonable, 25
 Hartree), and as requested for the Casida's formalism, only one k point is
 used. We have chosen the Perdew-Wang 92 LDA functional for both the self-
-consistent and non-self-consistent calculations ([[ixc]]=7).
+consistent and non-self-consistent calculations ([[ixc]] = 7).
 
-We can now examine the output file ttddft_1.out.  
+We can now examine the output file *ttddft_1.out.*  
+
+{% dialog tests/tutorial/Refs/ttddft_1.out %}
+
 One can jump to the second dataset section, and skip a few non-interesting
 information, in order to reach the following information:
     
@@ -308,7 +315,7 @@ energy differences, that are (for spin-singlet and -triplet):
     9.91 eV   m=0(twice),+2,-2 odd parity  (Sigma_u and Delta_u states)
     10.81 eV  m=+1,-1   odd parity  (Pi_u state)
 
-## 3 Convergence studies
+## Convergence studies
   
 There are several parameters subject to convergence studies in this context:
 the energy cut-off, the box size, and the number of unoccupied bands.
@@ -328,7 +335,9 @@ are obtained, for nband2 = 12, 30, 60, 100 and 150 (Energies given in eV):
     Triplet 4 :  9.16   9.16   9.15   9.15   9.15
     Triplet 5 :  9.91   9.91   9.91   9.91   9.91
     
-You might try to obtain one of these ... The computation with nband2=100 takes
+You might try to obtain one of these...
+
+The computation with nband2 = 100 takes
 about 7 minutes on a 2.8 GHz PC, and gives a result likely converged within
 0.01 eV. Let's have a look at these data. Unfortunately, none of the above-
 mentioned discrepancies with experimental data is resolved, although the
@@ -352,7 +361,9 @@ ecut = 25, 35, 45, 55, 65, and 75 Ha:
     Triplet 4 :  9.16   9.28   9.33   9.34   9.34
     Triplet 5 :  9.91   9.83   9.78   9.77   9.76
     
-You might try to obtain one of these ... The computation with ecut=75 takes
+You might try to obtain one of these... 
+
+The computation with ecut=75 takes
 about 90 secs on a 2.8 GHz PC, and gives a result likely converged within 0.01
 eV. Let us have a look at these data. Concerning the discrepancies with the
 experimental results, we see that the position of the second spin-singlet
@@ -388,7 +399,7 @@ difficult, especially concerning the supercell size, to converge higher states.
 
 At this stage, we will simply stop this convergence study, and give the
 results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
-bands (not fully converged, though !), then compare the results with other
+bands (not fully converged, though!), then compare the results with other
 LDA/TDLDA results (from [[cite:Casida1998]]) and experimental results:
     
                           present Casida experimental
@@ -409,7 +420,7 @@ of the $^3\Pi_g$ state (0.4 eV). In particular, we note that LDA/TDLDA is
 not able to get the correct ordering of the lower two triplet states ... One
 of our problems was intrinsic to the LDA/TDLDA approximation ...
 
-## 4 The choice of the exchange-correlation potential
+## The choice of the exchange-correlation potential
   
 As emphasized in [[cite:Casida1998]], choosing a different functional for the self-consistent part 
 (XC potential) and the generation of the coupling matrix (XC

@@ -60,10 +60,13 @@ MODULE m_wfd
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
+ use m_paw_nhat,       only : nhatgrid
+ use m_paw_occupancies,only : pawaccrhoij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
+ use m_cgprj,          only : getcprj
 
  implicit none
 
@@ -2137,7 +2140,6 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_ug2cprj'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -6428,7 +6430,6 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_plot_ur'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -7218,7 +7219,6 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_pawrhoij'
  use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

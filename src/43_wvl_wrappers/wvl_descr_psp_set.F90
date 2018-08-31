@@ -15,12 +15,12 @@
 !! nsppol=number of spin components
 !! spinat(3,natom)=spin polarization on each atom
 !! wvl <type(wvl_internal_type)> = wavelet type
-!!                 | psppar   = The covalence radii for each pseudo 
+!!                 | psppar   = The covalence radii for each pseudo
 !!                 | pspcod   = the format -or code- of psp generation
 !!                 | iasctype = semicore code (see defs_datatype)
 !!                 | nzatom   = charge of the nucleus
 !!                 | nelpsp   = the ionic pseudo-charge
-!!                 | natsc    = number of atoms with semicore 
+!!                 | natsc    = number of atoms with semicore
 !!
 !! PARENTS
 !!      gstate
@@ -121,7 +121,7 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*) nsppol,wvl%h(1),psps%npsp,filoccup,spinat(1,1)
-#endif  
+#endif
 
 end subroutine wvl_descr_psp_set
 !!***
@@ -278,4 +278,310 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 #endif
 
 end subroutine wvl_descr_psp_fill
+!!***
+
+
+!!****f* defs_wvltypes/wvl_descr_free
+!!
+!! NAME
+!! wvl_descr_free
+!!
+!! FUNCTION
+!! Free the wvl%atoms% datastructure (deallocate or nullify)
+!!
+!! INPUTS
+!! wvl <type(wvl_internal_type)>=internal variables for wavelets
+!!
+!! OUTPUT
+!! wvl <type(wvl_internal_type)>=internal variables for wavelets
+!!
+!! PARENTS
+!!      gstate,wvl_memory
+!!
+!! CHILDREN
+!!      deallocate_atoms_data,f_free_ptr
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine wvl_descr_free(wvl)
+
+ use m_profiling_abi
+ use defs_wvltypes
+#if defined HAVE_BIGDFT
+ use BigDFT_API, only : deallocate_atoms_data
+ use dynamic_memory
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'wvl_descr_free'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  type(wvl_internal_type), intent(inout) :: wvl
+!arrays
+
+!Local variables-------------------------------
+!scalars
+
+! *********************************************************************
+
+#if defined HAVE_BIGDFT
+!These arrays are pointers on memory handled by ABINIT.
+ nullify(wvl%atoms%astruct%sym%irrzon)
+ nullify(wvl%atoms%astruct%sym%phnons)
+ if (associated(wvl%atoms%nlccpar)) then
+   call f_free_ptr(wvl%atoms%nlccpar)
+ end if
+ call deallocate_atoms_data(wvl%atoms)
+#endif
+ if(allocated(wvl%npspcode_paw_init_guess)) then
+   ABI_DEALLOCATE(wvl%npspcode_paw_init_guess)
+ end if
+end subroutine wvl_descr_free
+!!***
+
+
+!!****f* defs_wvltypes/wvl_descr_atoms_set
+!!
+!! NAME
+!! wvl_descr_atoms_set
+!!
+!! FUNCTION
+!! Defines wvl%atoms% data structure
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (DC)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! acell(3)=unit cell length scales (bohr)
+!! dtset <type(dataset_type)>=all input variables for this dataset
+!!
+!! OUTPUT
+!! wvl <type(wvl_internal_type)>= wavelet type
+!!                 | nat      =  number of atoms
+!!                 | ntypes   =  number of species
+!!                 | alat1    =  acell(1)
+!!                 | alat2    =  acell(2)
+!!                 | alat3    =  acell(3)
+!!                 | iatype   =  types for atoms
+!!                 | lfrztyp  =  flag for the movement of atoms.
+!!                 | natpol   =  integer related to polarisation at the first step
+!!
+!! PARENTS
+!!      gstate,wvl_memory
+!!
+!! CHILDREN
+!!      allocate_atoms_nat,allocate_atoms_ntypes,astruct_set_n_atoms
+!!      astruct_set_n_types,f_release_routine,f_routine
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
+
+ use m_profiling_abi
+ use m_errors
+
+ use defs_basis
+ use defs_wvltypes
+#if defined HAVE_BIGDFT
+ use BigDFT_API, only: atoms_data_null,f_routine,f_release_routine,&
+&                      astruct_set_n_atoms,astruct_set_n_types,&
+&                      allocate_atoms_nat,allocate_atoms_ntypes
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'wvl_descr_atoms_set'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in)                    :: icoulomb, natom, ntypat
+  type(wvl_internal_type), intent(inout) :: wvl
+  !arrays
+  integer, intent(in)                    :: typat(natom)
+  real(dp), intent(in)                   :: acell(3)
+
+!Local variables-------------------------------
+!scalars
+#if defined HAVE_BIGDFT
+  integer :: itype
+#endif
+
+! *********************************************************************
+
+#if defined HAVE_BIGDFT
+
+ call f_routine(ABI_FUNC)
+
+ wvl%atoms=atoms_data_null()
+
+!We create the atoms_data structure from this dataset
+!to be used later in BigDFT routines.
+ if (icoulomb == 0) then
+   wvl%atoms%astruct%geocode = 'P'
+ else if (icoulomb == 1) then
+   wvl%atoms%astruct%geocode = 'F'
+ else if (icoulomb == 2) then
+   wvl%atoms%astruct%geocode = 'S'
+ end if
+ write(wvl%atoms%astruct%units, "(A)") "Bohr"
+
+ call astruct_set_n_atoms(wvl%atoms%astruct, natom)
+ call astruct_set_n_types(wvl%atoms%astruct, ntypat)
+
+ do itype = 1, ntypat, 1
+   write(wvl%atoms%astruct%atomnames(itype), "(A,I2)") "At. type", itype
+ end do
+ wvl%atoms%astruct%cell_dim(1)   =  acell(1)
+ wvl%atoms%astruct%cell_dim(2)   =  acell(2)
+ wvl%atoms%astruct%cell_dim(3)   =  acell(3)
+ wvl%atoms%astruct%iatype   = typat
+
+ wvl%atoms%astruct%sym%symObj = 0
+
+ call allocate_atoms_nat(wvl%atoms)
+ call allocate_atoms_ntypes(wvl%atoms)
+
+ call f_release_routine()
+
+#else
+ BIGDFT_NOTENABLED_ERROR()
+ if (.false.) write(std_out,*) icoulomb,natom,ntypat,wvl%h(1),typat(1),acell(1)
+#endif
+
+end subroutine wvl_descr_atoms_set
+!!***
+
+
+!!****f* defs_wvltypes/wvl_descr_atoms_set_sym
+!!
+!! NAME
+!! wvl_descr_atoms_set_sym
+!!
+!! FUNCTION
+!! Add symmetry information to  wvl%atoms data structure.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (DC)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! acell(3)=unit cell length scales (bohr)
+!! dtset <type(dataset_type)>=all input variables for this dataset
+!!
+!! OUTPUT
+!! wvl <type(wvl_internal_type)>= wavelet type
+!!                 | nat      =  number of atoms
+!!                 | ntypes   =  number of species
+!!                 | alat1    =  acell(1)
+!!                 | alat2    =  acell(2)
+!!                 | alat3    =  acell(3)
+!!                 | iatype   =  types for atoms
+!!                 | lfrztyp  =  flag for the movement of atoms.
+!!                 | natpol   =  integer related to polarisation at the first step
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
+!!
+!! SOURCE
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
+           & symafm, symrel, tnons, tolsym)
+
+ use m_profiling_abi
+ use m_errors
+
+ use defs_basis
+ use defs_wvltypes
+ use m_ab7_symmetry
+#if defined HAVE_BIGDFT
+ use BigDFT_API, only: astruct_set_symmetries
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'wvl_descr_atoms_set_sym'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in)                    :: nsppol,nsym
+  real(dp), intent(in)                   :: tolsym
+  type(wvl_internal_type), intent(inout) :: wvl
+  !arrays
+  integer, intent(in)                    :: symafm(3,3,nsym), symrel(3,3,nsym)
+  integer, target, intent(in)            :: irrzon(:,:,:)
+  real(dp), target, intent(in)           :: phnons(:,:,:)
+  real(dp), intent(in)                   :: efield(3), tnons(3,nsym)
+
+!Local variables-------------------------------
+!scalars
+#if defined HAVE_BIGDFT
+  integer :: errno
+ character(len=500) :: message
+#endif
+
+! *********************************************************************
+
+#if defined HAVE_BIGDFT
+
+ write(message, '(a,a)' ) ch10,&
+& ' wvl_descr_atoms_set_sym: Create symmetries for the wvl%atoms object.'
+ call wrtout(std_out,message,'COLL')
+
+ wvl%atoms%astruct%sym%symObj = -1
+ nullify(wvl%atoms%astruct%sym%irrzon)
+ nullify(wvl%atoms%astruct%sym%phnons)
+ call astruct_set_symmetries(wvl%atoms%astruct, (nsym <= 1), tolsym, efield, nsppol)
+ if (nsym > 1) then
+   call symmetry_set_n_sym(wvl%atoms%astruct%sym%symObj, nsym, symrel, tnons, symafm, errno)
+ end if
+ wvl%atoms%astruct%sym%irrzon => irrzon
+ wvl%atoms%astruct%sym%phnons => phnons
+
+#else
+ BIGDFT_NOTENABLED_ERROR()
+ if (.false.) write(std_out,*) nsppol,nsym,tolsym,wvl%h(1),symafm(1,1,1),symrel(1,1,1),&
+& irrzon(1,1,1),phnons(1,1,1),efield(1),tnons(1,1)
+#endif
+
+end subroutine wvl_descr_atoms_set_sym
 !!***

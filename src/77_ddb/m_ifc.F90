@@ -3520,7 +3520,8 @@ end subroutine ifc_test_phinterp
 !! OUTPUT
 !!  (Optional)
 !!  phfrq2l(3*crystal%natom,nph2l)=List of phonon frequencies
-!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities (see Eq.(41) of Veithen et al, PRB71, 125107 (2005))
+!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities 
+!!     (see Eq.(41) of Veithen et al, PRB71, 125107 (2005) [[cite:Veithen2005]])
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.

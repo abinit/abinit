@@ -35,6 +35,7 @@
 !! prec_simple.F90
 !! pred_bfgs.F90
 !! pred_delocint.F90
+!! pred_fire.F90
 !! pred_diisrelax.F90
 !! pred_isokinetic.F90
 !! pred_isothermal.F90
