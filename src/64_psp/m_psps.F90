@@ -228,7 +228,6 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  ! Transfer md5 checksum
  ABI_ALLOCATE(psps%md5_pseudos, (npsp))
  psps%md5_pseudos = pspheads(1:npsp)%md5_checksum
-
 !Set values independant from dtset
  psps%npsp   = npsp
 !Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
