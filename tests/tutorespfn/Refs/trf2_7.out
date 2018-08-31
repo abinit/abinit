@@ -46,7 +46,7 @@
      ntemper        10
    temperinc         2.00000000E+01
    tempermin         2.00000000E+01
- Description of grid 2 :
+ Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        20        20        20
       ngrids         5
       q2shft         0.00000000E+00  0.00000000E+00  0.00000000E+00
