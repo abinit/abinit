@@ -3005,7 +3005,7 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE alogorithm 
+It is also used in geometric relaxation calculation with the FIRE alogorithm
 ([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
@@ -6613,7 +6613,7 @@ microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic ene
 minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
 total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natifix]], the number of degrees of freedom is decreased accordingly, 
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly, 
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
@@ -13858,7 +13858,7 @@ Variable(
     mnemonics="PRint NABLA",
     requires="[[usepaw]] == 1",
     text="""
-  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]). 
+  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]).
 """,
 ),
 
@@ -15093,7 +15093,7 @@ cell parameters with the lowest energy. Forget all the history and start the
 calculation using those values. The original atomic coordinates and cell
 parameters are irrelevant in that case.
 
-**restartxf=-3 (New)**:Read **ONLY** the last require the atomic positions and cell parameters in the HIST file to restart the Molecular dynamics or structural optimization. 
+**restartxf=-3 (New)**:Read **ONLY** the last require the atomic positions and cell parameters in the HIST file to restart the Molecular dynamics or structural optimization.
 
 NOTES:
 * You can use **restartxf=-1, -2 or -3** for all predictiors that make no use of random numbers.
@@ -18966,4 +18966,21 @@ The first entry gives the initial temperature in Kelvin, the second entry the li
 the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
 """,
 ),
+
+Variable(
+    abivarname="prtkbff",
+    varset="files",
+    topics=['printing_prden'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[iomode]] == 3",
+    mnemonics="PRinT Kleynman-Bylander Form Factors",
+    text="""
+This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
+produced by the GS code.
+""",
+),
+
 ]
+

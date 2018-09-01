@@ -632,13 +632,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   chi0(G,G') at the    2 th omega   0.0000  16.7087 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -4.474   0.000   0.053  -0.000   0.053  -0.000   0.047   0.000
        -0.000   0.000  -0.972  -0.000  -0.110   0.000  -0.110   0.000  -0.109
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  15.0584
+  dielectric constant =  15.0585
   dielectric constant without local fields =  15.7494
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     36.27  [%]

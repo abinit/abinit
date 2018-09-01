@@ -2378,6 +2378,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtvhxc',tread,'INT')
  if(tread==1) dtset%prtvhxc=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkbff',tread,'INT')
+ if(tread==1) dtset%prtkbff=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtvol',tread,'INT')
  if(tread==1) dtset%prtvol=intarr(1)
 

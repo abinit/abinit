@@ -1880,10 +1880,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(a)')' Phonon DOS information :'
    write(nunit,'(3x,a9,es16.8)')'dosdeltae',anaddb_dtset%dosdeltae
    write(nunit,'(3x,a9,es16.8)')' dossmear',anaddb_dtset%dossmear
-   write(nunit,'(a)')' Description of grid 2 for Fourier interpolation :'
-   write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
-   write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
-   write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)
  end if
 
 !Thermal information
@@ -1896,7 +1892,11 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9,3i10)')'  ntemper',anaddb_dtset%ntemper
    write(nunit,'(3x,a9,7x,3es16.8)')'temperinc',anaddb_dtset%temperinc
    write(nunit,'(3x,a9,7x,3es16.8)')'tempermin',anaddb_dtset%tempermin
-   write(nunit,'(a)')' Description of grid 2 :'
+ endif
+
+!Grid 2 description
+ if(anaddb_dtset%thmflag/=0 .or. anaddb_dtset%prtdos/=0)then
+   write(nunit,'(a)')' Description of grid 2 (Fourier interp. or BZ sampling):'
    write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
    write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
    write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)

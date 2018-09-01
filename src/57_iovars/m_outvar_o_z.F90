@@ -608,6 +608,9 @@ contains
  intarr(1,:)=dtsets(:)%prtvhxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtvhxc','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtkbff
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtkbff','INT',0)
+
  intarr(1,:)=dtsets(:)%prtvol
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtvol','INT',0)
 
