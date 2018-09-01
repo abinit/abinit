@@ -6613,7 +6613,7 @@ microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic ene
 minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
 total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natifix]], the number of degrees of freedom is decreased accordingly, 
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly, 
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
