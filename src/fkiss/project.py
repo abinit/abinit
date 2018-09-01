@@ -166,12 +166,13 @@ class FortranFile(object):
         app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.all_usedby_mods)))
         app("Used by dir_levels:\n%s\n" % w.fill(", ".join(map(str, sorted(set(mod.dirlevel for mod in self.all_usedby_mods))))))
 
-        for a in ["programs", "modules", "subroutines", "functions"]:
-            plist = getattr(self, a)
-            if not plist: continue
-            app("Fortran file contains %d %s(s)\n" % (len(plist), a[:-1]))
-            for p in plist:
-                app(p.to_string(verbose=verbose, width=width))
+        if verbose:
+            for a in ["programs", "modules", "subroutines", "functions"]:
+                plist = getattr(self, a)
+                if not plist: continue
+                app("Fortran file contains %d %s(s)\n" % (len(plist), a[:-1]))
+                for p in plist:
+                    app(p.to_string(verbose=verbose, width=width))
 
         if with_dataframe:
             df = self.get_stats(as_dataframe=True)
@@ -251,24 +252,31 @@ class FortranFile(object):
         Return dictionary with FortFile stats or pandas dataframe if as_dataframe.
         """
         d = OrderedDict([
-            #("subroutines", len(self.subroutines)),
-            #("functions", len(self.functions)),
-            #("modules", len(self.modules)),
-            #("programs", len(self.programs)),
-            #("code_lines", self.num_f90lines),
-            #("doc_lines", self.num_doclines),
             ("use", len(self.all_used_mods)),
             ("usedby", len(self.all_usedby_mods)),
             ("min_dirlevel", self.min_dirlevel),
             ("this_dirlevel", self.dirlevel),
             ("max_dirlevel", self.max_dirlevel),
             ("includes", len(self.all_includes)),
-            #("class", self.__class__.__name__),
+            #("subroutines", len(self.subroutines)),
+            #("functions", len(self.functions)),
+            #("modules", len(self.modules)),
+            #("programs", len(self.programs)),
+            #("code_lines", self.num_f90lines),
+            #("doc_lines", self.num_doclines),
         ])
 
         if not as_dataframe: return d
         import pandas as pd
         return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
+
+    def check_abirules(self, verbose=0):
+        retcode = 0
+        for a in ["modules", "programs", "subroutines", "functions"]:
+            for p in getattr(self, a):
+                retcode += p.check_abirules(verbose=verbose)
+
+        return retcode
 
     #def write_notebook(self, nbpath=None):
     #    """
@@ -459,7 +467,6 @@ class AbinitProject(object):
             else:
                 # Source files
                 abinit_src = os.path.join(d, "abinit.src")
-                #abinit_amf = os.path.join(d, "abinit.amf")
                 mod = imp.load_source(abinit_src, abinit_src)
                 for basename in filter_fortran(mod.sources):
                     if basename in self.IGNORED_FILES: continue
@@ -591,6 +598,12 @@ class AbinitProject(object):
         except FileNotFoundError:
             return True
 
+    def fort_files_indir(self, dirname):
+        dir2files = self.groupby_dirname()
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+        dirname = os.path.join(self.srcdir, os.path.basename(dirname))
+        return dir2files[dirname]
+
     def groupby_dirname(self):
         """
         Return dictionary mapping dirname --> List of FortranFile.
@@ -667,6 +680,7 @@ class AbinitProject(object):
             if obj is not None: return obj
 
         # Print closest matches
+        cprint("Cannot find public entity `%s`" % str(name), "red")
         matches = difflib.get_close_matches(name, all_names)
         if matches:
             cprint("Perhaps you meant: {}".format(matches), "red")
@@ -685,8 +699,7 @@ class AbinitProject(object):
 
         # Print closest matches
         matches = difflib.get_close_matches(name, all_names)
-        if matches:
-            cprint("Perhaps you meant: {}".format(matches), "red")
+        if matches: cprint("Perhaps you meant: {}".format(matches), "red")
 
         return None
 
@@ -700,17 +713,18 @@ class AbinitProject(object):
         return obj.ancestor
 
     def print_dir(self, dirname, verbose=0):
-        #print("Print directory:", dirname)
         #dirname = os.path.basename(dirname).replace(os.sep, "")
         #dirname = dirname.replace(os.sep, "")
         #files = [f for f in self.fort_files.values() if os.path.basename(f.dirname) == dirname]
         dir2files = self.groupby_dirname()
         if dirname.endswith(os.sep): dirname = dirname[:-1]
-        print("Print directory:", dirname)
+        print("Printing directory:", dirname)
         dirname = os.path.join(self.srcdir, os.path.basename(dirname))
-        for f in dir2files[dirname]:
-            print(f.to_string(verbose=verbose, with_dataframe=False))
-            print("")
+
+        if verbose:
+            for f in dir2files[dirname]:
+                print(f.to_string(verbose=verbose, with_dataframe=False))
+                print("")
 
         df = self.get_stats_dir(dirname)
         print(df)
@@ -970,9 +984,9 @@ class AbinitProject(object):
             count = len(fort_file.subroutines) + len(fort_file.functions)
             if count == 0: continue
             if fort_file.name in white_list:
-                cprint("WHITE_LIST [%s] Found %d procedure(s) outside module!" % (fort_file.name, count), "green")
+                cprint("WHITE_LIST [%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "green")
             else:
-                cprint("[%s] Found %d procedure(s) outside module!" % (fort_file.name, count), "red")
+                cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "red")
                 retcode += 1
 
         errstr = self.check_dirlevel()
@@ -983,16 +997,23 @@ class AbinitProject(object):
         cprint("retcode %d" % retcode, "green" if retcode == 0 else "red")
         return retcode
 
-    #def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose=0):
+        retcode = 0
+        for name, fort_file in self.fort_files.items():
+            print("Checking abirules for %s..." % name)
+            rv = fort_file.check_abirules(verbose=verbose)
+            retcode += rv
+            msg = "%s [OK]" if rv == 0 else "%s [FAILED]"
+            cprint(msg % name, color="green" if rv == 0 else "red")
+
+        return retcode
 
     def pedit(self, name, verbose=0):
         """
         Edit all children of a public entity specified by name.
         """
         obj = self.find_public_entity(name)
-        if obj is None:
-            cprint("Cannot find public entity `%s`" % str(name), "red")
-            return 1
+        if obj is None: return 1
         if verbose: print(obj)
 
         # Find files with procedures.
@@ -1105,10 +1126,10 @@ class AbinitProject(object):
         Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
         """
         obj = self.find_public_entity(name)
-        if obj is None:
-            cprint("Cannot find public entity `%s` in project" % str(name), "red")
-            return None
+        if obj is None: return None
 
+        print(obj)
+        cprint("graphvis for public entities not yet available", "yellow")
         obj.parents
         obj.children
         #return obj.get_graphviz(engine=engine, graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr)

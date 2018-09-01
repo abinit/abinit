@@ -103,7 +103,7 @@ def abichecks(ctx):
             print("Running", py_script, "... ", end="")
             start = time.time()
             result = ctx.run(py_script, pty=True)
-            msg, color = "[OK]", "green" if result.ok else "[FAILED]", "red"
+            msg, color = ("[OK]", "green") if result.ok else ("[FAILED]", "red")
             cprint("%s (%.2f s)" % (msg, time.time() - start), color=color)
             if not result.ok: retcode += 1
 

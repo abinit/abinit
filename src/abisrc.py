@@ -28,7 +28,7 @@ Usage example:
   ./abisrc.py print m_crystal                   ==> Print info about module.
   ./abisrc.py print crystal_t                   ==> Print info about datatype.
   ./abisrc.py print xmpi_sum                    ==> Print info about interface.
-  ./abisrc.py interfaces                        ==> Print Fortran interfaces.
+  ./abisrc.py interfaces xmpi_sum               ==> Print Fortran interfaces.
 
   ./abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results.
 
@@ -113,8 +113,8 @@ def get_parser():
         help="Show children of module/procedure.")
     p_print.add_argument("what", nargs="?", default=None, help="File or procedure name")
 
-    # Subparser for interfaces.
-    p_interfaces = subparsers.add_parser('interfaces', parents=[copts_parser], help="Print interfaces.")
+    # Subparser for interface.
+    p_interfaces = subparsers.add_parser('interface', parents=[copts_parser], help="Print interface.")
     p_interfaces.add_argument("what", nargs="?", default=None, help="Name of the interface.")
 
     # Subparser for pedit.
@@ -153,7 +153,8 @@ def get_parser():
     p_validate = subparsers.add_parser('validate', parents=[copts_parser],
         help="Validate source tree.")
 
-    #p_abirules = subparsers.add_parser('abirules', parents=[copts_parser], help="Check abirules (still under development).")
+    p_abirules = subparsers.add_parser('abirules', parents=[copts_parser], help="Check abirules (still under development).")
+    p_abirules.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")
 
     p_orphans = subparsers.add_parser('orphans', parents=[copts_parser], help="Print orphans.")
     p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help="Open project in ipython terminal.")
@@ -212,10 +213,10 @@ def main():
         else:
             fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
             print(fort_file.to_string(verbose=options.verbose))
-            for mod in fort_file.modules:
-                for dtype in mod.types:
-                    print("Analyzing", repr(dtype))
-                    dtype.analyze()
+            #for mod in fort_file.modules:
+            #    for dtype in mod.types:
+            #        print("Analyzing", repr(dtype))
+            #        dtype.analyze()
         return 0
 
     elif options.command == "touch":
@@ -273,10 +274,9 @@ def main():
             if obj is not None:
                 print(obj.to_string(verbose=options.verbose))
             else:
-                cprint("Cannot find public entity `%s` in Abinit project." % options.what, "red")
                 return 1
 
-    elif options.command == "interfaces":
+    elif options.command == "interface":
         print(proj.print_interfaces(what=options.what, verbose=options.verbose))
 
     elif options.command == "graph":
@@ -355,13 +355,16 @@ def main():
 
     elif options.command == "dtype":
         retcode = 0
+
         all_dtypes = proj.get_all_datatypes()
         for dtype in all_dtypes:
             print("analyzing:", repr(dtype))
             try:
                 dtype.analyze(verbose=0)
             except Exception as exc:
-                cprint(exc, "red")
+                import traceback
+                cprint(traceback.format_exc(), "red")
+                #cprint(exc, "red")
                 #raise exc
                 retcode += 1
                 #try:
@@ -379,8 +382,19 @@ def main():
         #if "xml" in options.what[1:] print(dtype.generate_xml_routine())
         #if "to_array" in options.what[1:] print(dtype.generate_to_array_routine())
 
-    #elif options.command == "abirules":
-    #    return proj.check_abirules()
+    elif options.command == "abirules":
+        if not options.what:
+            return proj.check_abirules(verbose=options.verbose)
+
+        elif os.path.isdir(options.what):
+            retcode = 0
+            for fort_file in proj.fort_files_indir(options.what):
+                retcode += fort_file.check_abirules(verbose=options.verbose)
+            return retcode
+
+        elif os.path.isfile(options.what):
+            fort_file = proj.fort_files[os.path.basename(options.what)]
+            return fort_file.check_abirules(verbose=options.verbose)
 
     elif options.command == "master":
         print(proj.master())
