@@ -10,19 +10,19 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 15 May 2018.
-- ( at 14h54 )
+.Starting date : Sun  2 Sep 2018.
+- ( at 18h08 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--tmulti1_DDB
+-/mnt/STORAGE/alex/dev/abinit/tests/tutomultibinit/Input/tmulti1_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -413,6 +413,6 @@
 
 ================================================================================
 
-+Total cpu time      0.363  and wall time      0.363 sec
++Total cpu time      0.361  and wall time      0.361 sec
 
  multibinit : the run completed succesfully.

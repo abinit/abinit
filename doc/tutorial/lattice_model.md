@@ -49,8 +49,10 @@ At **the harmonic part level**, we can express the potential as a sum of three c
   $$\displaystyle E^{harm}(u,\eta) =  E^{harm}(u) + E^{harm}(u,\eta) + E^{harm}(\eta)$$
 
   * A Computation of the phonon response (short range + dipole-dipole interaction):
+  
       $$\displaystyle E^{harm}(u) => \underbrace{\frac{\partial^2 E}{\partial
-          u^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}} +
+          u^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}} $$
+  $$+ 
      \underbrace{\frac{\partial^2 E}{\partial
           {\cal{E}}^2}}_{\text{Dielectric tensor}} +
       \underbrace{\frac{\partial^2 E}{\partial{\cal{E}} \partial u}}_{\text{Effective charges}} $$
@@ -113,7 +115,7 @@ Once the DDB file is complete, the generation of the XML file within multibinit 
 
    * [[multibinit:prt_model]] = 1     => active the generation of the XML file, takes the time to read the possible options for [[multibinit:prt_model]].
    * [[multibinit:ngqpt]]    = 2 2 2 => specified the q-point mesh included in the tmulti1_DDB file
-   * [[multibinit:dipdip]]   = 0     => here the computation of the dipole-dipole interaction is disable because we don't need to compute it to generate the XML, indeed in multibinit will be able to regenerate the dipole-dipole interaction in a next run. Let's remind you that the default for this option is 1, so in many of you multibinit run you will never use this input.
+   * [[multibinit:dipdip]]   = 0     => here the computation of the dipole-dipole interaction is disable because we don't need to compute it to generate the XML, multibinit will be able to regenerate the dipole-dipole interaction in a next run. Let's remind you that the default for this option is 1, so in many of you multibinit run you will never use this input.
 
 After this run, you should see in your directory tmulti1_1_model.xml, you can take some time to open and read this file. You will find all the informations about the system definition (lattice parameters, atomic positions) and the data for the harmonic part of the potential.
 
