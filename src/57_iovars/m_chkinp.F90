@@ -1137,6 +1137,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_ge(2,2,cond_string,cond_values,ierr,'iscf',dt%iscf,10,iout)
    end if
 
+!  When usepawu=4, iscf must be <=9 (the reason needs to be studied)
+   if (dt%usepawu==4) then
+     cond_string(1)='usepawu' ; cond_values(1)=4
+     call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
+   end if
+
 !  istatimg
    call chkint_eq(0,0,cond_string,cond_values,ierr,'istatimg',dt%istatimg,2,(/0,1/),iout)
    if (dt%string_algo==2) then

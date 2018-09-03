@@ -1,0 +1,68 @@
+#Fe in GGAU with usepawu=4
+
+#OPTIONS AND DATASETS
+ndtset 1
+prtvol 3
+pawprtvol -3
+getwfk -1
+irdwfk1 0
+iscf 7 
+nstep 16
+tolvrs 1.0d-10
+chksymbreak 0
+
+
+# CONVERGENCE PARAM
+ecut 16
+pawecutdg  40
+nband  16
+occopt 7
+tsmear 1600 K
+
+
+# PHYSICAL DATA
+natom 1 ntypat  1 typat  1  
+znucl  26.0 
+xred  0.d0   0.d0   0.d0
+rprim   1.0  0.0 0.0
+        0.5  0.5 0.5
+        0.0  0.0 1.0
+acell  3*5.41
+
+# POINTSK 
+kptopt 1  
+ngkpt 6 6 6
+nshiftk 1
+shiftk 1/2 1/2 1/2
+
+
+# SPIN 
+nsppol 2  
+nspden 2 
+spinat 0.0 0.0 4.0
+
+# LDA+U
+usepawu    4
+dmatpuopt 2
+lpawu   2
+upawu  6.0000 eV
+jpawu  0.0000 eV
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t35.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%% psp_files = 26fe.lda.paw
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = PAW, LDAU
+#%% description =
+#%%   Test to use usepawu=4
+#%% topics = DFT+U
+#%%<END TEST_INFO>
+
