@@ -78,6 +78,8 @@ def top_template(name,stamp,b_list):
 AM_DISTCHECK_CONFIGURE_FLAGS = \\
   @bnd_ac_distcheck@
 
+CLEANFILES = libpaw-[0-9]*.tar.gz
+
 SUBDIRS =%s
 %s
 """ % (name,stamp,name," \\\n  " + " \\\n  ".join(b_list),targets)
