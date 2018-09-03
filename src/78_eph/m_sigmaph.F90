@@ -720,9 +720,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end do
 
      ! Weights for Re-Im with i.eta shift.
-     ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, ndiv))
+     ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, eph_dg%dense_nbz))
      ! Weights for Im (tethraedron, eta --> 0)
-     ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, ndiv))
+     ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, eph_dg%dense_nbz))
+     sigma%deltaw_pm = -1
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
      ! Continue to initialize the Hamiltonian
@@ -848,14 +849,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        if (sigma%qint_method > 0) then
          if (sigma%use_doublegrid) then
            do jj=1,eph_dg%ndiv
-#if 0
-             iq_ibz_fine = eph_dg_mapping(6,jj)
-             iqlk(jj) = iq_ibz_fine
-#else
              iq_bz_fine = eph_dg_mapping(3,jj)
              iqlk(jj) = lgroup_find_ibzimage(sigma%ephwg%lgk, eph_dg%kpts_dense(:,iq_bz_fine))
              ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
-#endif
            end do
          else
            iqlk(1) = iq_ibz
@@ -1116,12 +1112,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, jj) +  &
-                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, jj) )*weight
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, iqlk(jj)) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, iqlk(jj)) )*weight
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, jj) +  &
-                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, jj) )*weight
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, iqlk(jj)) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, iqlk(jj)) )*weight
                      end if
                    end do
                  else
@@ -1174,57 +1170,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                end if
 
- 
-#if 0
-               if (sigma%imag_only) then
-                 ! Accumulate imaginary part at w = eKS
-                 if (sigma%qint_method == 0) then
-                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * aimag(cfact)
-                 else
-                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                     (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu) +  &
-                     (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu) )
-                 end if
-               else
-                 ! Accumulate Re-Im of Sigma(w = eKS) for state ib_k
-                 if (sigma%qint_method == 0) then
-                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
-                 else
-                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                     (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu) +  &
-                     (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu) )
-                   ! Have to rescale gkk2 before computing derivative
-                   gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
-                 end if
-
-                 ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
-                 !old derivative
-                 ! This to avoid numerical instability
-                 !cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) ** 2 &
-                 !        -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ** 2
-                 !sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
-                 !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                 !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
-                 !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
-                 cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
-                 gmod2 = cfact * dconjg(cfact)
-                 cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
-                 hmod2 = cfact * dconjg(cfact)
-
-                 sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
-                   (nqnu + f_mkq)        * (gmod2 - two * (eig0nk - eig0mkq + wqnu) ** 2) / gmod2 ** 2 + &
-                   (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
-                 )
-
-                 ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
-                 ! TODO: weigths
-                 if (sigma%nwr > 0) then
-                   cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
-                                 (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
-                   sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
-                 end if
-               end if ! imag_only
-#endif
              end do ! it
            end do ! ib_k
          end do ! nu
@@ -1535,15 +1480,18 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, 
     !iq_ibz_fine = eph_dg_mapping(6,jj)
     !iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
 
+    !if already computed, no need to recompute it 
+    if (sigma%deltaw_pm(1,1,1,iqlk(jj))<=1) cycle
+
     if (sigma%imag_only) then
       ! Compute weigths for delta functions at the KS energies with tetra.
-      call ephwg_get_dweights(sigma%ephwg, iqlk(jj), nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
-        use_bzsum=.true.)
+      call ephwg_get_dweights(sigma%ephwg, iqlk(jj), nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, &
+        sigma%deltaw_pm(:,:,:,iqlk(jj)), comm, use_bzsum=.true.)
     else
       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
       ABI_MALLOC(zvals, (nz, nbc))
       zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-      call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
+      call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,iqlk(jj)), comm, &
         use_bzsum=.true.)
       ABI_FREE(zvals)
     end if
