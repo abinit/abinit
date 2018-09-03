@@ -1,4 +1,5 @@
-#Fe in GGAU with usepawu=4
+# Fe in GGAU with usepawu=4
+# Test done in comparison to https://journals.aps.org/prb/abstract/10.1103/PhysRevB.93.045133
 
 #OPTIONS AND DATASETS
 ndtset 1
@@ -48,13 +49,28 @@ lpawu   2
 upawu  6.0000 eV
 jpawu  0.0000 eV
 
+usedmatpu 8
+dmatpawu
+     0.74105    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.74105    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.85515    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.74105    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.85515
+
+     0.49984    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.49984    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.15478    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.49984    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.15478
+
+
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t35.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%%   t35.out, tolnlines = 5, tolabs = 7.000e-02, tolrel = 2.100e-01, fld_options =  -easy
 #%% psp_files = 26fe.lda.paw
 #%% [paral_info]
 #%% max_nprocs = 1
