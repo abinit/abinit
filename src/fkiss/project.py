@@ -1042,8 +1042,7 @@ class AbinitProject(object):
 
         # Find files with procedures.
         paths = sorted(set(p.path for p in obj.parents))
-        if verbose:
-           print(paths)
+        if verbose: print(paths)
         # TODO
         #from pymods.tools import Editor
         from fkiss.tools import Editor

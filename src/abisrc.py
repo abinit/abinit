@@ -54,8 +54,8 @@ Usage example:
   ./abisrc.py orphans            ==> Show orphans.
   ./abisrc.py ipython            ==> Open project in ipython terminal.
   ./abisrc.py cpp                ==> List CPP options.
-  ./abisrc.py robodoc            ==> Generate robodoc files.
 """
+  #./abisrc.py robodoc            ==> Generate robodoc files.
 
 def get_parser():
     """Build and return parser object."""
@@ -165,7 +165,7 @@ def get_parser():
             help="Name of datatype followed by the kind of routine that should be generated.")
 
     p_master = subparsers.add_parser('master', parents=[copts_parser], help="How to become a great programmer.")
-    p_robodoc = subparsers.add_parser('robodoc', parents=[copts_parser], help="Generate robodoc files.")
+    #p_robodoc = subparsers.add_parser('robodoc', parents=[copts_parser], help="Generate robodoc files.")
     p_cpp = subparsers.add_parser('cpp', parents=[copts_parser], help="List CPP options.")
 
     return parser
@@ -212,9 +212,9 @@ def main():
         cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
         options.jobs = 1
 
-    if options.command == "robodoc":
-        from fkiss.mkrobodoc_dirs import mkrobodoc_files
-        return mkrobodoc_files(".")
+    #if options.command == "robodoc":
+    #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
+    #    return mkrobodoc_files(".")
 
     if options.command == "cpp":
         from fkiss.list_cpp_options import list_cpp_options

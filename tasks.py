@@ -64,9 +64,11 @@ def make(ctx, jobs="auto", clean=False):
 
     with cd(top):
         if clean: ctx.run("make clean", pty=True)
-        cmd = "make -j%d > make.log 2> make.stderr" % jobs
+        #cmd = "make -j%d > make.log 2> make.stderr" % jobs
+        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
         ctx.run(cmd, pty=True)
+        # TODO Check for errors in make.stderr
 
 
 @task
