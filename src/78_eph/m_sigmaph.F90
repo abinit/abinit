@@ -719,11 +719,18 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
 
-     ! Weights for Re-Im with i.eta shift.
-     ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, eph_dg%dense_nbz))
-     ! Weights for Im (tethraedron, eta --> 0)
-     ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, eph_dg%dense_nbz))
-     sigma%deltaw_pm = -1
+     if (sigma%use_doublegrid) then
+        ! Weights for Re-Im with i.eta shift.
+        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, sigma%ephwg%lgk%nibz*nbsum))
+        ! Weights for Im (tethraedron, eta --> 0)
+        ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, sigma%ephwg%lgk%nibz*nbsum))
+        sigma%deltaw_pm = -1
+     else
+        ! Weights for Re-Im with i.eta shift.
+        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, ndiv))
+        ! Weights for Im (tethraedron, eta --> 0)
+        ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, ndiv))
+     endif
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
      ! Continue to initialize the Hamiltonian
@@ -1112,12 +1119,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, iqlk(jj)) +  &
-                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, iqlk(jj)) )*weight
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) )*weight
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, iqlk(jj)) +  &
-                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, iqlk(jj)) )*weight
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) )*weight
                      end if
                    end do
                  else
@@ -1481,18 +1488,18 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, 
     !iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
 
     !if already computed, no need to recompute it 
-    if (sigma%deltaw_pm(1,1,1,iqlk(jj))<=1) cycle
+    if (sigma%deltaw_pm(1,1,1,(iqlk(jj)-1)*sigma%nbsum+ibsum_kq)>=0) cycle
 
     if (sigma%imag_only) then
       ! Compute weigths for delta functions at the KS energies with tetra.
       call ephwg_get_dweights(sigma%ephwg, iqlk(jj), nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, &
-        sigma%deltaw_pm(:,:,:,iqlk(jj)), comm, use_bzsum=.true.)
+        sigma%deltaw_pm(:,:,:,(iqlk(jj)-1)*sigma%nbsum+ibsum_kq), comm, use_bzsum=.true.)
     else
       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
       ABI_MALLOC(zvals, (nz, nbc))
       zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-      call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,iqlk(jj)), comm, &
-        use_bzsum=.true.)
+      call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, &
+        sigma%cweights(:,:,:,:,(iqlk(jj)-1)*sigma%nbsum+ibsum_kq), comm, use_bzsum=.true.)
       ABI_FREE(zvals)
     end if
   end do
