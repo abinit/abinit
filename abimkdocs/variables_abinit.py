@@ -18978,14 +18978,16 @@ Variable(
     mnemonics="PRinT Kleynman-Bylander Form Factors",
     text="""
 This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
-produced at the end of the ground-state calculation.
+produced at the end of the ground-state calculation. Remember to set [[iomode]] to 3.
+
 The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
-of the non-local part of the pseudopotential.
+of the non-local part of the (NC) pseudopotentials.
 This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+The option is ignored if PAW.
 
 !!! important
 
-    At the time of writing (|today|), [[istwkf]] must be set to 1 for all k-points in the IBZ
+    At the time of writing (|today|, [[istwfk]] must be set to 1 for all k-points in the IBZ
     since external codes do not support wavefunctions given on the reduced G-sphere.
     Moreover [[useylm]] must be 0 (default if NC pseudos).
 """,
