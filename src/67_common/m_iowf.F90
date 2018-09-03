@@ -310,7 +310,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(done, "cg_ncwrite must handle the output of the WFK file.")
 #endif
 
-#if 1
     ! Write KB form factors. Only master works. G-vectors are read from file to avoid
     ! having to deal with paral_kgb distribution.
     if (me == master .and. dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
@@ -360,17 +359,19 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
         NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
         vkb = zero; vkbd = zero
         call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
+
         if (ikpt == 1) then
+          ! This for the automatic tests.
           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
           if(dtset%prtvol>=2)then
-            write(msg,'(a)') 'prtkbff: writting first and last G-components of the KB form factors'
+            write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
             call wrtout(ab_out,msg,'COLL')
             do iat=1,psps%ntypat
               write(msg,'(a10,i5)') 'atype ',iat
               call wrtout(ab_out,msg,'COLL')
               do iproj=1,psps%lnmax
                 write(msg,'(a10,i5,a,a10,e12.4,a,3(a10,2e12.4,a))') &
-                       'projector ', iproj,ch10, & 
+                       'projector ', iproj,ch10, &
                        'vkbsign   ', vkbsign(iproj,iat), ch10, &
                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,:,iat), ch10, &
                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,:,iat), ''
@@ -379,6 +380,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
             end do
           end if
         end if
+
         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
       end do
@@ -398,7 +400,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      MSG_WARNING(msg)
      iomode=IO_MODE_MPI
    end if
-#endif
 
    call cwtime(cpu, wall, gflops, "start")
 

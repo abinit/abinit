@@ -2726,6 +2726,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  prtwf
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtwf',dt%prtwf,5,[-1,0,1,2,3],iout)
 
+   if (dt%prtkbff == 1 .and. dt%useylm /= 0) then
+     MSG_ERROR_NOSTOP("prtkbff == 1 requires useylm == 0", ierr)
+   end if
 
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)

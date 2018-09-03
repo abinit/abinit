@@ -3023,7 +3023,7 @@ Variable(
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case 
+impose that the extremal configurations of the string are fixed. In case
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -6335,7 +6335,7 @@ Variable(
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-consistent 
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent
 calculations for possibly different (evolving) geometries is managed, while with
 [[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
@@ -6410,7 +6410,7 @@ Variable(
     requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
     text="""
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
-Possible values of [[imgwfstor]] are 0 or 1. 
+Possible values of [[imgwfstor]] are 0 or 1.
 If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
 size [[nimage]] more than the storage needed for one set of wavefunctions..
 When the specific computation (optimization/SCF cycle ...) for this image is started,
@@ -6419,10 +6419,10 @@ the wavefunctions are reinitialised, either at random or from the initial wavefu
 any modification to take into account the computations at the previous value of itimimage.
 
 If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
-are spread over many processors, which happens when [[paral_kgb]] == 1. 
+are spread over many processors, which happens when [[paral_kgb]] == 1.
 For some algorithms, e.g. when some geometry optimization
 is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
-For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller. 
+For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller.
 Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
 """,
 ),
@@ -6604,16 +6604,16 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. 
-The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], 
-as worked out in [cite:Minary2003]]. 
+  * 12 --> Isokinetic ensemble molecular dynamics.
+The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
+as worked out in [cite:Minary2003]].
 The conservation of the kinetic energy is obtained within machine precision, at each step.
-As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the 
+As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
 microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
 minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
 total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly, 
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
@@ -8719,7 +8719,7 @@ temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
 
 In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
-to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run. 
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
 
@@ -11361,7 +11361,7 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin 
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin
 (but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
 [[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
 [[nband]] * [[nsppol]] elements, read in by the code.
@@ -17341,7 +17341,7 @@ Variable(
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
 (see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
-while pseudopotential calculations are performed in ABINIT with norm-conserving 
+while pseudopotential calculations are performed in ABINIT with norm-conserving
 pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.
 """,
@@ -18978,7 +18978,16 @@ Variable(
     mnemonics="PRinT Kleynman-Bylander Form Factors",
     text="""
 This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
-produced by the GS code.
+produced at the end of the ground-state calculation.
+The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
+of the non-local part of the pseudopotential.
+This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+
+!!! important
+
+    At the time of writing (|today|), [[istwkf]] must be set to 1 for all k-points in the IBZ
+    since external codes do not support wavefunctions given on the reduced G-sphere.
+    Moreover [[useylm]] must be 0 (default if NC pseudos).
 """,
 ),
 
