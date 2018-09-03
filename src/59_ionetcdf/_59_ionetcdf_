@@ -14,8 +14,5 @@
 !! CHILDREN
 !! interfaces_59_ionetcdf.F90
 !! m_crystal_io.F90
-!! m_dfpt_io.F90
-!! write_eig.F90
-!! wrt_moldyn_netcdf.F90
 !!
 !!***

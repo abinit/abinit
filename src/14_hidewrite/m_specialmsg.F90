@@ -572,12 +572,6 @@ end subroutine wrtout
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 
  use defs_basis

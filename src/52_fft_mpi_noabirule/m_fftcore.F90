@@ -3616,7 +3616,7 @@ end subroutine mpifft_fg2dbox
 !----------------------------------------------------------------------
 
 !!****f* m_fftcore/mpifft_fg2dbox_dpc
-!! NAME_
+!! NAME
 !!  mpifft_fg2dbox_dpc
 !!
 !! FUNCTION

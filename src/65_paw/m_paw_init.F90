@@ -166,12 +166,6 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
 
@@ -685,7 +679,7 @@ end subroutine pawinit
 !!
 !! SOURCE
 
-subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit) 
+subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
 
 !This section has been created automatically by the script Abilint (TD).

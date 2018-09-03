@@ -365,9 +365,9 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 
  !TODO: hardcoded for now but should be an arugment
  bandmin = 1
- bandmax = mband 
- nbcalc  = bandmax-bandmin 
- 
+ bandmax = mband
+ nbcalc  = bandmax-bandmin
+
  ABI_MALLOC(ug_c,    (mpw*nspinor))
  ABI_MALLOC(ug_v,    (mpw*nspinor))
  ABI_MALLOC(kg_k,    (3,mpw))
@@ -389,21 +389,21 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 
  !create distribution of the wavefunctions mask
  keep_ur = .false.
- bks_mask = .false. 
+ bks_mask = .false.
  nband = mband
 
  ! Distribute the k-points and bands over the processors
  ABI_MALLOC(task_distrib,(bandmin:bandmax,bandmin:bandmax,nkpt,nsppol))
  call xmpi_distab(nproc,task_distrib)
- 
+
  ! create bks_mask to load the wavefunctions
  do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
      do ib_v=bandmin,bandmax ! Loop over v bands
        do ib_c=bandmin,bandmax ! Loop over c bands
          if (task_distrib(ib_c,ib_v,ik,spin) == my_rank) then
-           bks_mask(ib_v,ik,spin) = .true. 
-           bks_mask(ib_c,ik,spin) = .true. 
+           bks_mask(ib_v,ik,spin) = .true.
+           bks_mask(ib_c,ik,spin) = .true.
          end if
        end do
      end do
@@ -464,7 +464,7 @@ do spin=1,nsppol ! Loop over spins
          ! Perturbations with DFPT are along the reciprocal lattice vectors
          ! Perturbations with Commutator are along real space lattice vectors
          ! dot(A, DFPT) = X
-         ! dot(B, COMM) = X 
+         ! dot(B, COMM) = X
          ! B = 2 pi (A^{-1})^T =>
          ! dot(B^T B,COMM) = 2 pi DFPT
          vr = (2*pi)*(2*pi)*sum(ihrc(:,:),2)
@@ -475,7 +475,7 @@ do spin=1,nsppol ! Loop over spins
          ! Save matrix elements of i*r in the IBZ
          dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg)
          dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg) ! Hermitian conjugate
-         if (ib_v == ib_c) then 
+         if (ib_v == ib_c) then
             dipoles(:,2,ib_c,ib_v,ik,spin) = 0
             dipoles(:,2,ib_v,ib_c,ik,spin) = 0
          else
@@ -536,7 +536,7 @@ do spin=1,nsppol ! Loop over spins
 
  ABI_FREE(dipoles)
 
-end subroutine
+end subroutine eph_ddk
 !!***
 
 

@@ -12,6 +12,7 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !! CHILDREN
-!! interface_triqs_ctqmc.F90
+!! interfaces_67_triqs_ext.F90
+!! triqs_interface_ctqmc.F90
 !!
 !!***

@@ -558,8 +558,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !!
 !! CHILDREN
 !!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
