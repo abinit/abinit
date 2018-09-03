@@ -69,6 +69,7 @@ def get_parser():
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
     copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
+    copts_parser.add_argument('-j', "--jobs", type=int, default=2,  help="Number of python processes to use.")
 
     # Parent parser for commands that operating on pandas dataframes
     pandas_parser = argparse.ArgumentParser(add_help=False)
@@ -198,6 +199,19 @@ def main():
 
     os.chdir(os.path.dirname(__file__))
 
+    #from tests.pymods.devtools import number_of_cpus
+    #ncpus_detected = max(1, number_of_cpus())
+    #import multiprocessing
+    #try:
+    #    ncpus = multiprocessing.cpu_count()
+    #except NotImplementedError
+    #    ncpus = 1
+    #processes = max(1, ncpus // 2)
+
+    if sys.version_info[0] < 3 and options.jobs > 1:
+        cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
+        options.jobs = 1
+
     if options.command == "robodoc":
         from fkiss.mkrobodoc_dirs import mkrobodoc_files
         return mkrobodoc_files(".")
@@ -208,7 +222,7 @@ def main():
 
     if options.command == "parse":
         if options.what == ".":
-            proj = AbinitProject(".", verbose=options.verbose)
+            proj = AbinitProject(".", processes=options.jobs, verbose=options.verbose)
             print(proj)
         else:
             fort_file = FortranFile.from_path(options.what, macros="abinit",  verbose=options.verbose)
@@ -226,7 +240,7 @@ def main():
 
         if ntouch:
             print("\nTouched %d files. Need to parse source files again and dump new pickle file\n" % ntouch)
-            new_proj = AbinitProject(".", verbose=options.verbose)
+            new_proj = AbinitProject(".", processes=options.jobs, verbose=options.verbose)
             new_proj.pickle_dump()
         else:
             print("\nNo change detected. No need to touch files.\n")
@@ -244,7 +258,7 @@ def main():
 
     if needs_reload:
 	# Parse the source and save new object.
-        proj = AbinitProject(".", verbose=options.verbose)
+        proj = AbinitProject(".", processes=options.jobs, verbose=options.verbose)
         proj.pickle_dump()
 
     #assert "abinit.F90" in proj.fort_files

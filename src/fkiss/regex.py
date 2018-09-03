@@ -74,19 +74,20 @@ class HasRegex(object):
     RE_PROC_END = re.compile(r"^end\s*(?P<proc_type>subroutine|function|program)\s+(?P<name>\w*)", re.I)
 
     # PROGRAM [name] && END [PROGRAM [name]]
-    # NB: we enforce PROGRAM and name
+    # NB: we enforce PROGRAM and NAME
     RE_PROG_START = re.compile(r"^program\s+(?P<name>\w+)", re.I)
     RE_PROG_END = re.compile(r"^end\s+program\s+(?P<name>\w+)", re.I)
 
     # MODULE <name> && END [MODULE [name]]
-    # NB: we enforce module and name in END
+    # NB: we enforce MODULE and NAME in END
     RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)", re.I)
     RE_MOD_END = re.compile(r"^end\s+module\s+(?P<name>\w+)", re.I)
 
     #[ MODULE ] PROCEDURE <procedure-name-list>
     #re.compile(r"(module\s*|)procedure\s(?P<namelist>\w+)", re.I)
 
-    # [<prefix>] <SUBROUTINE> <name> [(<args>)] [<suffix>] END [SUBROUTINE [name]]
+    # [<prefix>] <SUBROUTINE> <name> [(<args>)] [<suffix>]
+    # END [SUBROUTINE [name]]
     # NB: we enforce name and name
     RE_SUB_START = re.compile(r'(?P<prefix>(recursive|pure|elemental|\s)*)subroutine\s*(?P<name>\w+)', re.I)
     RE_SUB_END = re.compile(r'^end\s+subroutine\s+(?P<name>\w+)', re.I)
@@ -131,7 +132,8 @@ re.I | re.VERBOSE)
     #    [type-bound-procedure-part]
     # END TYPE [name]
     # NB: Enforcing name in END
-    RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)', re.I)
+    #RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)', re.I)
+    RE_TYPE_START = re.compile(r'^type(?P<attribs>(?:\s+|\s*(,.*)?::\s*))(?P<name>\w+)', re.I)
     RE_TYPE_END = re.compile(r'^end\s+type\s+(?P<name>\w+)', re.I)
 
     RE_PUB_OR_PRIVATE = re.compile(r"^(?P<name>public|private)\s*(\!+\s*\w*|\Z)", re.I)
@@ -155,6 +157,9 @@ re.I | re.VERBOSE)
 
     # For character(len=xxx) or character(len=*)
     RE_CHARACTER_DEC = re.compile(r'^character\s*\(\s*len\s*=\s*(?P<len>(\*|\w+))\)', re.I)
+
+    # To search for intent.
+    RE_INTENT = re.compile(r",\s+intent\s*\(\s*(?P<value>in|out|inout)\s*\)", re.I)
 
     # For type(xxx)
     RE_TYPECLASS_DEC = re.compile('^(?P<ftype>(type|class))\s*\(\s*(?P<name>\w+)\s*\)', re.I)
@@ -185,7 +190,7 @@ re.I | re.VERBOSE)
     #VARIABLE_STRING = "^(integer|real|double\s*precision|character|complex|logical|type(?!\s+is)|class(?!\s+is|\s+default)|procedure|enumerator{})\s*((?:\(|\s\w|[:,*]).*)$"
 
 
-INTRINSICS = [
+FORTRAN_INTRINSICS = {
     'abort','abs','abstract','access','achar','acos','acosh','adjustl',
     'adjustr','aimag','aint','alarm','all','allocatable','allocate',
     'allocated','and','anint','any','asin','asinh','assign','associate',
@@ -262,4 +267,4 @@ INTRINSICS = [
     'type','type_as','ubound','ucobound','umask','unlock','unlink',
     'unpack','use','value','verify','volatile','wait','where','while',
     'write','xor','zabs',
-]
+}

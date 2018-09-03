@@ -666,11 +666,10 @@ end subroutine smatrix
 !!               in atomic units
 !!
 !! NOTES
-!! The sum of the electronic and ionic Berry phase is folded into
-!! [-1,1] before it is transformed to cartesian coordinates.
-!! This means that in some cases, ptot_cart /= pel_cart + pion_cart
+!! - The sum of the electronic and ionic Berry phase is folded into
+!!   [-1,1] before it is transformed to cartesian coordinates.
+!!   This means that in some cases, ptot_cart /= pel_cart + pion_cart
 !!
-!! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol.
 !!   At the opposite, this factor is taken into account in
 !!   pel_cart and pion_cart

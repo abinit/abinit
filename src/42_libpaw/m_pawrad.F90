@@ -20,9 +20,8 @@
 !!    that all the strongly connected routines are changed accordingly to accommodate the modification of the data type
 !!    Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
-!! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
-!!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
+!!  * FOR DEVELOPERS: in order to preserve the portability of libPAW library,
+!!    please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
 

@@ -26,11 +26,8 @@ class TestRegext(TestCase):
         # Program
         m = p.RE_PROG_START.match("program foo")
         assert m and m.group("name") == "foo"
-        #assert p.RE_PROG_START.match("program")
-        m = p.RE_PROG_END.match("end program foo")
-        assert m and m.group("name") == "foo"
-        #m = p.RE_PROG_END.match("end")
-        #assert m and m.group("name") is None
+        m = p.RE_PROC_END.match("end program foo")
+        assert m and m.group("proc_type") == "program" and m.group("name") == "foo"
 
         # Module
         m = p.RE_MOD_START.match("module   foo")
@@ -39,8 +36,6 @@ class TestRegext(TestCase):
         assert m and m.group("name") == "foo"
         m = p.RE_MOD_END.match("end   module   foo")
         assert m and m.group("name") == "foo"
-        #m = p.RE_MOD_END.match("end")
-        #assert m and m.group("name") is None
 
         # Subroutine
         m = p.RE_SUB_START.match("subroutine  foo")
@@ -49,10 +44,10 @@ class TestRegext(TestCase):
         assert m and m.group("name") == "foo" and m.group("prefix") == ""
         m = p.RE_SUB_START.match("pure  subroutine foo(a, b)")
         assert m and m.group("name") == "foo" and m.group("prefix").strip() == "pure"
-        m = p.RE_SUB_END.match("end  subroutine foo!hello")
-        assert m and m.group("name") == "foo"
-        #m = p.RE_SUB_END.match("end")
-        #assert m and m.group("name") is None
+        #m = p.RE_SUB_END.match("end  subroutine foo!hello")
+        #assert m and m.group("name") == "foo"
+        m = p.RE_PROC_END.match("end  subroutine foo!hello")
+        assert m and m.group("proc_type") == "subroutine" and m.group("name") == "foo"
 
         # Functions: these are tricky so test them carefully.
         m = p.RE_FUNC_START.match("function  foo")
@@ -105,6 +100,9 @@ class TestRegext(TestCase):
         m = p.RE_CHARACTER_DEC.match("character(len=*),intent(in)")
         assert m and m.group("len") == "*"
 
+        m = p.RE_INTENT.search("integer, intent( inout )")
+        assert m and m.group("value") == "inout"
+
         assert not p.RE_TYPECLASS_DEC.match("type, public :: foo_t")
         m = p.RE_TYPECLASS_DEC.match("type( foo_t) :: foo")
         assert m and m.group("ftype") == "type" and m.group("name") == "foo_t"
@@ -135,9 +133,11 @@ class TestRegext(TestCase):
 
         # datatype declaration.
         m = p.RE_TYPE_START.match("type foo_t")
-        assert m and m.group("name") == "foo_t"
+        assert m and m.group("name") == "foo_t" and not m.group("attribs").strip()
         m = p.RE_TYPE_START.match("type, public :: foo_t")
-        assert m and m.group("name") == "foo_t"
+        assert m and m.group("name") == "foo_t" and "public" in m.group("attribs")
+        m = p.RE_TYPE_START.match("type, public, foobar :: foo_t")
+        assert m and m.group("name") == "foo_t" and "foobar" in m.group("attribs")
         assert not p.RE_TYPE_START.match("type(foo_t) :: foo")
 
         m = p.RE_PUB_OR_PRIVATE.match("public ")

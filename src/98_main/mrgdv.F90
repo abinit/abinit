@@ -21,8 +21,6 @@
 !!     Abinit header with info on the perturbation and the FFT mesh
 !!     potential on the FFT mesh
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN

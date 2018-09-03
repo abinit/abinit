@@ -7157,7 +7157,6 @@ end subroutine test_charge
 !!***
 
 !!****f* m_wfd/wfd_pawrhoij
-!!
 !! NAME
 !! wfd_pawrhoij
 !!

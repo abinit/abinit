@@ -33,6 +33,7 @@ program hello_world!my first test
 
 contains! contained procedures
 
+ ! foo_preamble
   subroutine foo()!hello
  ! An openMP do loop
 !
@@ -42,6 +43,8 @@ contains! contained procedures
     end do
   END subroutine foo
 
+ ! bar
+ ! preamble
 function bar ( )
     use moda; use modb
     end FUNCTION BAR
@@ -73,6 +76,7 @@ end PROGRAM HELLO_WORLD
         assert foo.num_doclines == 1
         assert foo.num_omp_statements == 1
         assert foo.num_f90lines == 3
+        assert foo.preamble == "! foo_preamble"
 
         bar = prog.contains[1]
         assert bar.is_function and bar.name == "bar" and bar.ancestor is prog
@@ -82,6 +86,7 @@ end PROGRAM HELLO_WORLD
         #assert bar.num_doclines == 1
         #assert bar.num_omp_statements == 1
         #assert bar.num_f90lines == 3
+        assert bar.preamble.splitlines() == ["! bar", "! preamble"]
 
     def test_continuation_lines(self):
         s = """
@@ -94,8 +99,9 @@ foobar()
  call foobar2("hello", &
 & 'world')
 
- #call foo1("hello"); call foo2 &
- # ('word2')
+ ! & and ; on the same line are not treated
+ !call foo1("hello"); call &
+ !  foo2 ('word2')
 
   call foo3("hello; world")
 
@@ -130,7 +136,7 @@ subroutine foo
         assert foo.name == "foo"
         assert "foobar" in foo.children
         assert "foobar2" in foo.children
-        # TODO
+        # TODO  & and ; on the same line are not treated
         #assert "foo1" in foo.children and "foo2" in foo.children
         assert len(foo.contains) == 2
         ifunc = foo.contains[0]
@@ -138,8 +144,7 @@ subroutine foo
 
         hello = foo.contains[1]
         assert hello.name == "hello"
-        #assert len(hello.args) == 3
-        #assert 0
+        assert len(hello.args) == 3 and list(hello.args.keys()) == ["a", "b", "c"]
 
     def test_simple_module(self):
         """Parsing Fortran module written following good programming standards."""
@@ -160,6 +165,7 @@ module m_crystal
     implicit none
     private
 
+    ! crystal_t_preamble
     type,public :: crystal_t
         integer :: nsym
         ! nsym docstring
@@ -246,21 +252,22 @@ end module m_crystal
         sub = mod.contains[0]
         assert sub.is_subroutine and sub.name == "crystal_free"
         assert sub.ancestor is mod and sub.is_contained
+        assert not sub.attribs
 
         func = mod.contains[1]
         assert func.is_function and func.name == "idx_spatial_inversion" and func.ancestor is mod
+        assert "pure" in func.attribs
         # TODO
-        #assert func.is_pure
         #assert func.result.name == "inv_idx"
         #assert func.is_public
         #assert func.result.ftype == "integer" and func.result.kind is None
 
         func = mod.contains[2]
         assert func.is_function and func.name == "private_bool_function" and func.ancestor is mod
+        assert "logical" in func.attribs
         # TODO
-        #assert not func.is_pure
         #assert func.result.name == func.name
-        #assert not func.is_public and func.is_provate
+        #assert not func.is_public and func.is_private
         #assert func.result.ftype == "logical" and func.result.kind is None
 
         assert len(mod.interfaces) == 2
@@ -275,6 +282,8 @@ end module m_crystal
         assert crystal_t.ancestor.is_module  and crystal_t.ancestor.name == "m_crystal"
         str(crystal_t); repr(crystal_t)
         assert crystal_t.to_string(verbose=3)
+        # TODO
+        #assert crystal_t.preamble == "! crystal_t_preamble"
 
         crystal_t.analyze()
         nsym, xred = crystal_t.variables["nsym"], crystal_t.variables["xred"]
@@ -318,6 +327,7 @@ END MODULE FOO_MOdule
         p.parse_string(s)
         dt = p.modules[0].types[0]
         assert dt.name == "foo_t"
+        assert "public" in dt.attribs
         dt.analyze()
 
         # Test nsym
@@ -334,10 +344,11 @@ END MODULE FOO_MOdule
 
         # Test foo
         foo = dt.variables["foo"]
-        assert foo.is_pointer
         assert foo.ftype == "type" and foo.kind == "foo_t"
         assert foo.is_scalar
-        #assert foo.is_pointer_set_to_null
+        assert foo.is_pointer
+        # TODO
+        #assert not foo.is_pointer_set_to_null
 
         # Test cvals
         cvals = dt.variables["cvals"]
@@ -356,26 +367,87 @@ END MODULE FOO_MOdule
         #assert ucvol.doc == "! doc for ucvol and ecut"
         assert ucvol.doc == ecut.doc
 
+    #def test_F2003_datatype(self):
+
     def test_variables(self):
-        s = """
-  REAL  A !decimal number.
-  INTEGER  B !whole number.
-  CHARACTER  C !single character (strings are coming up)
-
-  REAL D(5,7,10)
-  DOUBLE PRECISION X(3)
-  DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: xx
-  DOUBLE PRECISION, POINTER, DIMENSION(:) :: y => null()
-  REAL, DIMENSION(-2:10) :: A
-
-  !use SomeModule, DoSomething => A
-  !implicit none
-
-  integer, parameter :: m = 3, n = 3
-  integer, pointer :: p(:)=>null(), q(:,:) => null()
-  integer, allocatable, target :: Atarget(:,:)
-  integer :: istat = 0, i, j
-  character(80) :: fmt
-"""
+        """Testing parse_variables."""
         p = FortranKissParser(verbose=3)
-        #variables = p.parse_vars(s.splitlines())
+
+        ######
+        # F77
+        ######
+        #fvars = p.parse_variables("INTEGER  B !whole number")
+        #assert len(fvars) == 1
+        #var = fvars[0]
+        #assert var.name == "b" and var.ftype == "integer" and var.kind is None and var.doc == "!whole number"
+
+        #var = p.parse_variables("REAL  A !decimal number")[0]
+        #assert var.name == "a" and var.ftype == "real" and var.kind is None and var.doc == "!decimal number"
+
+        #var = p.parse_variables("CHARACTER  C !single character (strings are coming up)")[0]
+        #assert var.name == "c" and var.ftype == "character" and var.kind is None and var.strlen == 1
+
+        #var = p.parse_variables("DOUBLE PRECISION X(3)")[0]
+        #assert var.name == "x" and var.ftype == "doubleprecision" and var.shape == (3,))
+
+        #var = p.parse_variables("REAL D(5,7,10)")[0]
+        #assert var.name == "d" and var.ftype == "real" and var.shape == (5, 7, 10) and not var.is_allocatable
+
+        #var = p.parse_variables("real :: A(LDA, *)")[0]
+        #assert var.name == "d" and var.ftype == "real" and var.shape == (5, 7, 10) and not var.is_allocatable
+
+        fvars = p.parse_variables("integer, parameter :: m = 3, n = 5")
+        assert len(fvars) == 2
+        m, n = fvars
+        assert m.name == "m" and m.initial_value == "3" and "parameter" in m.attribs and m.intent is None
+        assert n.name == "n" and n.initial_value == "5" and "parameter" in n.attribs
+
+        #fvars = p.parse_variables("integer:: istat = 0, i, j")
+
+        #fvars = p.parse_variables("character(80) :: fmt")
+        #var = fvars[0]
+        #assert var.name == "fmt" and var.ftype == "character" and var.kind is None and var.strlen == "80"
+
+        #######
+        # F90
+        #######
+        #fvars = p.parse_variables("DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: xx")
+        #var = fvars[0]
+        #assert var.name == "xx" and var.ftype == "doubleprecision" and var.shape == (5, 7, 10) and var.is_allocatable
+
+        fvars = p.parse_variables("integer, intent(in):: usewvl, wvl_ngauss(2)")
+        # TODO
+        #assert len(fvars) == 2
+        #var = fvars[0]
+        #assert var.name == "usewvl" and var.ftype == "integer" and var.intent == "in"
+        #var = fvars[1]
+        #assert var.name == "wvl_ngauss" and var.ftype == "integer" and var.intent == "in" #and var.shape == "(2)
+
+        var = p.parse_variables("real(kind=C_DOUBLE) :: A(n, m)")[0]
+        assert var.name == "a" and var.ftype == "real" and var.kind == "c_double" #and var.shape == (-2:10))
+
+        #var = p.parse_variables("REAL(dp), DIMENSION(-2:10) :: A")[0]
+        #assert var.name == "a" and var.ftype == "real" and var.kind="dp" # and var.shape == (-2:10))
+
+        #Cannot find Fortran type in line:
+        #var = p.parse_variables("character(kind=c_char,len=1), intent(in)  :: c_string(*)")[0]
+        #var = p.parse_variables("character(*), intent(in) :: s")[0]
+
+        #var = p.parse_variables("complex(dpc), pointer, dimension(:) :: y")[0]
+        #assert var.name == "y" and var.ftype == "complex" and var.kind == "dpc"
+        #assert var.intent is None and not var.is_scalar and var.is_pointer
+
+        #var = p.parse.variables("array(wfd%nspinor,2*lpawu+1, sigp % npwx , qmesh% nibz)")[0]
+
+        #fvars = p.parse_variables("integer, pointer :: p(:)=>null(), q(:,:) => null()")
+        #p, q = fvars
+
+        #fvars = p.parse_variables("integer(kind=i8b), allocatable, intent(inout), target :: Atarget(:,:)")
+
+        var = p.parse_variables("type( foo_t ), intent( in ) :: foo")[0]
+        assert var.name == "foo" and var.ftype == "type" and var.kind == "foo_t"
+        assert var.intent == "in" and var.is_scalar
+
+        var = p.parse_variables("type(foo_t) , contiguous, intent(in) :: foo_arr(:,:)")[0]
+        assert var.name == "foo_arr" and var.ftype == "type" and var.kind == "foo_t"
+        assert var.intent == "in" and not var.is_scalar

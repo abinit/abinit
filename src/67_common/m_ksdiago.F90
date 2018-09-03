@@ -232,12 +232,11 @@ contains
 !! * The routine RE-compute all Hamiltonian terms. So it is equivalent to an additional electronic SC cycle.
 !!   (This has no effect is convergence was reach. If not, eigenvalues/vectors may differs from the conjugate gradient ones)
 !!
-!! NOTES
-!!  Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
-!!  or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
-!!  ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
-!!  or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
-!!  the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
+!! * Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
+!!   or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
+!!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
+!!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
+!!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
 !!      m_shirley,outkss

@@ -443,40 +443,61 @@ class AbinitProject(object):
         with open(filepath, "rb") as fh:
             return pickle.load(fh)
 
-    def __init__(self, srcdir, verbose=0):
+    def __init__(self, srcdir, processes=1, verbose=0):
         # Find directories with abinit.src files inside srcdir
         # and get list of files treated by the build system.
         self.srcdir = os.path.abspath(srcdir)
         self.dirpaths = self.get_dirpaths()
+        self.verbose = verbose
 
-        import imp
+        # Get source files from abinit.src and build mapping basename --> FortranFile
+        start = time.time()
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
 
-        # Get source files from abinit.src and build mapping basename --> FortranFile
-        print("Analyzing directories...")
-        start = time.time()
-        self.fort_files = OrderedDict()
+        import imp
+        name2path = OrderedDict()
         for d in self.dirpaths:
-            if verbose: print("Analyzing:", d)
             if os.path.basename(d) == "98_main":
-                # Treat executables
+                # Special treatment for programs (no abinit.src here)
                 for basename in filter_fortran(os.listdir(d)):
-                    path = os.path.join(d, basename)
-                    self.fort_files[basename] = FortranFile.from_path(path, macros=self.MACROS, verbose=verbose)
+                    if basename in name2path:
+                        raise RuntimeError("Found two Fortran files with same basename `%s`" % basename)
+                    name2path[basename] = os.path.join(d, basename)
             else:
-                # Source files
+                # Get source files from abinit.src.
                 abinit_src = os.path.join(d, "abinit.src")
                 mod = imp.load_source(abinit_src, abinit_src)
                 for basename in filter_fortran(mod.sources):
                     if basename in self.IGNORED_FILES: continue
-                    path = os.path.abspath(os.path.join(d, basename))
-                    fort_file = FortranFile.from_path(path, macros=self.MACROS, verbose=verbose)
-                    if basename in self.fort_files:
+                    if basename in name2path:
                         raise RuntimeError("Found two Fortran files with same basename `%s`" % basename)
-                    self.fort_files[basename] = fort_file
+                    name2path[basename] = os.path.join(d, basename)
+
+        print("Using %d processes to analyze %d directories with %d files" % (processes, len(self.dirpaths), len(name2path)))
+
+        self.fort_files = OrderedDict()
+        if processes == 1:
+            for basename, path in name2path.items():
+                self.fort_files[basename] = FortranFile.from_path(path, macros=self.MACROS, verbose=self.verbose)
+        else:
+            from multiprocessing import Pool
+            pool = Pool(processes=processes)
+            results = pool.map(self._pool_f, list(name2path.items()))
+            for basename, fort_file in results:
+                self.fort_files[basename] = fort_file
 
         print("Parsing completed in %.2f [s]" % (time.time() - start))
+        self.correlate()
+
+    def _pool_f(self, item):
+        #import sys
+        #sys.stdout = open(str(os.getpid()) + ".out", "w")
+        #sys.stderr = open(str(os.getpid()) + ".err", "w")
+        basename, path = item
+        return (basename, FortranFile.from_path(path, macros=self.MACROS, verbose=self.verbose))
+
+    def correlate(self):
         print("Building dependency graph ...")
         start = time.time()
 
@@ -499,7 +520,6 @@ class AbinitProject(object):
 
         pub_procs = self.all_public_procedures()
         all_interfaces = self.get_all_interfaces()
-        #assert "gstate" in pub_procs
         miss = []
         for fort_file in self.fort_files.values():
             for proc in fort_file.iter_procedures():
@@ -507,6 +527,7 @@ class AbinitProject(object):
                     try:
                         pub_procs[child_name].parents.append(proc)
                     except KeyError:
+                        # TODO: Could be in subroutine contains
                         #if child_name in all_interfaces:
                         #    print("Found in interfaces:", child_name)
                         #else:
@@ -519,6 +540,7 @@ class AbinitProject(object):
 
         miss = filter(is_internal, miss)
         from .check_linalg_calls import blas_routines, lapack_routines
+        from .regex import FORTRAN_INTRINSICS
         if miss:
             miss = set(miss)
             # Remove blas and lapack routines.
@@ -529,9 +551,11 @@ class AbinitProject(object):
             miss = miss.difference("p" + n for n in lapack_routines)
             # Remove public interfaces.
             miss = miss.difference(self.get_all_interfaces().keys())
+            # Remove intrincs.
+            miss = miss.difference(FORTRAN_INTRINSICS)
             miss = sorted(miss)
             print("Cannot find %d callees. Use --verbose to show list." % len(miss))
-            if verbose: pprint(miss)
+            if self.verbose: pprint(miss)
 
         print("Graph completed in %.2f [s]" % (time.time() - start))
 

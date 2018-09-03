@@ -21,10 +21,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!!
-!! CHILDREN
-!!      conducti_nc, conducti_paw
-!!
 !! PARENTS
 !!
 !! CHILDREN
