@@ -323,9 +323,13 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
       ncerr = nctk_def_dims(ncid, [ &
        nctkdim_t("mproj", psps%mproj), &
        nctkdim_t("mpsang", psps%mpsang), &
+       nctkdim_t("mpssoang", psps%mpssoang), &
        nctkdim_t("lnmax", psps%lnmax), &
        nctkdim_t("lmnmax", psps%lmnmax) &
       ])
+      NCF_CHECK(ncerr)
+
+      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
       NCF_CHECK(ncerr)
 
       ! Write indlmn table (needed to access vkb arrays)
@@ -340,6 +344,11 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
       ! Switch to write mode.
       NCF_CHECK(nctk_set_datamode(ncid))
       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
+
+       ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+        "mpspso"], &
+        [psps%mpspso])
+       NCF_CHECK(ncerr)
 
       ! Calculate KB form factors and derivatives.
       ! The arrays are allocated with lnmax to support pseudos with more than projector.
