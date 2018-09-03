@@ -14,8 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -66,8 +64,6 @@ module m_fock
 !! FUNCTION
 !!   This object stores the occupied wavefunctions and other quantities
 !!   needed to calculate Fock exact exchange
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2231,8 +2227,6 @@ end subroutine fock_print
 !!
 !! FUNCTION
 !! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
-!!
-!! NOTES
 !!
 !! INPUTS
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).

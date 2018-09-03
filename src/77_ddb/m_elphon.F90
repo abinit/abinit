@@ -148,8 +148,6 @@ contains
 !!      printvtk,rchkgsheader,read_el_veloc,symkpt,timein,wrap2_pmhalf,wrtout
 !!      xmpi_bcast
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
@@ -5300,6 +5298,7 @@ end subroutine get_nv_fs_temp
 !!  kphon_full2irr = mapping of full FS kpts to irreducible ones
 !!   FSfullpqtofull = mapping of k + q to k
 !!   FSirredtoGS = mapping of irreducible kpoints to GS set
+!!
 !! OUTPUT
 !! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
 !!

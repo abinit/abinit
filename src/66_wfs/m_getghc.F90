@@ -1427,6 +1427,10 @@ end subroutine multithreaded_getghc
 !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
 !!
 !! NOTES
+!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
+!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
+!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
+!!  input vector in one shot.
 !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
 !!
 !! PARENTS
@@ -1434,12 +1438,6 @@ end subroutine multithreaded_getghc
 !!
 !! CHILDREN
 !!      zhpmv
-!!
-!! NOTES
-!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
-!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
-!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
-!!  input vector in one shot.
 !!
 !! SOURCE
 

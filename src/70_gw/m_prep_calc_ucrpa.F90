@@ -20,6 +20,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,7 +33,7 @@ MODULE m_prep_calc_ucrpa
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: prep_calc_ucrpa
 !!***
@@ -131,12 +132,6 @@ contains
 !!      wfd_paw_get_aeur,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&

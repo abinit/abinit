@@ -4388,7 +4388,6 @@ end subroutine xmpio_write_frmarkers
 !!  To read the columns from (1,2) up to (2,2) one should use array_of_starts=(1,2) and array_of_ends=(2,2).
 !!  The MPI-IO file view should be created by moving the file pointer so that it points to the elements (1,2).
 !!
-!! NOTES
 !!  File views for C-streams is not optimal since one can use a single slice of contigous data.
 !!
 !! PARENTS

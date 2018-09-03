@@ -4268,13 +4268,6 @@ end subroutine dvdb_v1r_long_range
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, &
 &          ngqpt, qptopt, mpi_enreg, comm)

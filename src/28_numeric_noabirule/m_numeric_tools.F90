@@ -3741,8 +3741,6 @@ end function simpson_cplx
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -3839,8 +3837,6 @@ end subroutine hermitianize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
@@ -4123,8 +4119,6 @@ end subroutine hermit
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -4213,8 +4207,6 @@ end subroutine symmetrize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
