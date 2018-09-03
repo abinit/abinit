@@ -180,27 +180,30 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc,iatom,iatom_tot,idum,ierr,ipositron,irhoij,ispden,itypat,itypat0
- integer :: jrhoij,kklmn,klmn,lm_size,lmn2_size,mesh_size,my_comm_atom,ndij,nkxc1,nk3xc1,nspdiag,nsppol,opt_compch
- integer :: usecore,usepawu,usetcore,usexcnhat,usenhat,usefock
- logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc,paral_atom,pawu_new_algo,temp_vxc
+ integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc
+ integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0,iq0_dij,iq0_rhoij,ir,irhoij,ispden,itypat,itypat0
+ integer :: jrhoij,kklmn,klmn,lm_size,lmn2_size,mesh_size
+ integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nspdiag,nsppol,opt_compch
+ integer :: qphase,usecore,usepawu,usetcore,usexcnhat,usenhat,usefock
+ logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc
+ logical :: paral_atom,pawu_new_algo,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
  real(dp) :: eldaumdc,eldaumdcdc,enucdip,etmp,espnorb,etild1xc,etild1xcdc
- real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum,ro_im
+ real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum,ro,ro_im
  character(len=3) :: pertstrg
  character(len=500) :: msg
 !arrays
  integer :: idum1(0),idum3(0,0,0)
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:),lmselect_cur_ep(:),lmselect_ep(:),lmselect_tmp(:)
- real(dp) :: ro(2),mpiarr(7),tsec(2)
+ real(dp) :: mpiarr(7),tsec(2)
  real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:),diju_im(:,:)
  real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
  real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
  real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
  real(dp),allocatable :: rho(:),rho1(:,:,:),rho1_ep(:,:,:),rho1xx(:,:,:)
- real(dp),allocatable :: trho1(:,:,:),trho1_ep(:,:,:),vxc_tmp(:,:,:)
+ real(dp),allocatable :: trho1(:,:,:),trho1_ep(:,:,:),vh(:),vxc_tmp(:,:,:)
 
 ! *************************************************************************
 
@@ -228,8 +231,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      msg='paw_ij()%qphase and paw_an()%cplex must be equal !'
      MSG_BUG(msg)
    end if
-   if (pawrhoij(1)%cplex_rhoij<paw_an(1)%cplex) then
-     msg='pawrhoij()%cplex_rhoij must be >=paw_an()%cplex  !'
+   if (pawrhoij(1)%qphase<paw_an(1)%cplex) then
+     msg='pawrhoij()%qphase must be >=paw_an()%cplex  !'
      MSG_BUG(msg)
    end if
    if (ipert>0.and.(ipert<=natom.or.ipert==natom+2).and.paw_an0(1)%has_kxc/=2) then
@@ -358,6 +361,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    cplex=paw_an(iatom)%cplex
    cplex_dij=paw_ij(iatom)%cplex_dij
    cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
+   qphase=pawrhoij(iatom)%qphase
    ndij=paw_ij(iatom)%ndij
 
 !  Allocations of "on-site" densities
@@ -701,7 +705,37 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ==== Compute Hartree potential terms and some energy terms ====
 !  ===============================================================
 
-!  Electron-positron calculation: compute Dij due to fixed particles (elec. or pos. depending on calctype)
+!  Hartree Dij computation
+   if (ipositron/=1) then
+     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat))
+   else
+     paw_ij(iatom)%dijhartree(:)=zero
+   end if
+   paw_ij(iatom)%has_dijhartree=2
+
+!  Hartree energy computation
+   if (option/=1) then
+     do ispden=1,nspdiag
+       do iq=1,qphase
+         iq0_rhoij=0;if (iq==2) iq0_rhoij=cplex_rhoij*lmn2_size
+         iq0_dij=0;if (iq==2) iq0_dij=lmn2_size
+         jrhoij=iq0_rhoij+1
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=iq0_dij+pawrhoij(iatom)%rhoijselect(irhoij)
+           do ii=1,cplex_rhoij
+             eh2=eh2+pawrhoij(iatom)%rhoijp(jrhoij,ispden)*paw_ij(iatom)%dijhartree(klmn) &
+&                   *pawtab(itypat)%dltij(klmn)
+             jrhoij=jrhoij+1 ; klmn=klmn+1
+           end do
+         end do
+       end do
+     end do
+   end if
+
+!  Electron-positron calculation:
+!    - Compute Dij due to fixed particles (elec. or pos. depending on calctype)
+!    - Compute contribution to energy
+!    - Add electron and positron
    if (ipositron/=0) then
      ABI_CHECK(cplex==1,'BUG in pawdenpot: cplex should be 1 for electron-positron!')
      ABI_ALLOCATE(dij_ep,(cplex*lmn2_size))
@@ -712,56 +746,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
          do irhoij=1,pawrhoij(iatom)%nrhoijsel
            klmn=pawrhoij(iatom)%rhoijselect(irhoij)
            kklmn=klmn;if (cplex==2) kklmn=2*klmn-1
-           ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-           electronpositron%e_paw  =electronpositron%e_paw  -ro(1)*dij_ep(kklmn)
-           electronpositron%e_pawdc=electronpositron%e_pawdc-ro(1)*dij_ep(kklmn)
-           if (ipositron==1) e1t10=e1t10+ro(1)*two*(pawtab(itypat)%kij(klmn)-pawtab(itypat)%dij0(klmn))
+           ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
+           electronpositron%e_paw  =electronpositron%e_paw  -ro*dij_ep(kklmn)
+           electronpositron%e_pawdc=electronpositron%e_pawdc-ro*dij_ep(kklmn)
            jrhoij=jrhoij+cplex_rhoij
          end do
        end do
      end if
-   end if
-
-!  Hartree Dij computation
-   if (ipositron/=1) then
-     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat))
-   else
-     paw_ij(iatom)%dijhartree(:)=zero
-   end if
-   paw_ij(iatom)%has_dijhartree=2
-
-!NOTE : cplex_rhoij pas utilisé ??
-
-!  Hartree energy computation
-   if (option/=1) then
-     if (cplex==1.or.ipert==0) then
-       do ispden=1,nspdiag
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-           ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-           eh2=eh2    +ro(1)*paw_ij(iatom)%dijhartree(klmn)
-           e1t10=e1t10+ro(1)*pawtab(itypat)%dij0(klmn)
-           jrhoij=jrhoij+cplex_rhoij
-         end do
-       end do
-     else
-       do ispden=1,nspdiag
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=pawrhoij(iatom)%rhoijselect(irhoij);kklmn=klmn+lmn2_size
-           ro(1:2)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-           eh2=eh2+ro(1)*paw_ij(iatom)%dijhartree(klmn)+ro(2)*paw_ij(iatom)%dijhartree(kklmn)
-!          Imaginary part (not used)
-!          eh2=eh2+ro(2)*paw_ij(iatom)%dijhartree(klmn)-ro(1)*paw_ij(iatom)%dijhartree(kklmn)
-           jrhoij=jrhoij+cplex_rhoij
-         end do
-       end do
-     end if
-   end if
-
-!  Electron-positron calculation: add electron and positron
-   if (ipositron/=0) then
      paw_ij(iatom)%dijhartree(:)=paw_ij(iatom)%dijhartree(:)-dij_ep(:)
      ABI_DEALLOCATE(dij_ep)
    end if
@@ -781,39 +772,66 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (.not. allocated(paw_an(iatom)%vht1)) then
        ABI_ALLOCATE(paw_an(iatom)%vht1,(cplex*mesh_size,1,1))
      end if
-
-     !Construct vh1
-     !  The sqrt(4pi) factor comes from the fact we are calculating the spherical moments,
-     !   and for the 00 channel the prefactor of Y_00 = 2 sqrt(pi)
      ABI_ALLOCATE(rho,(mesh_size))
-     rho(1:mesh_size)=(rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
-&                    *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-!    rho(1:mesh_size)=rho1(1:mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-     call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vh1(:,1,1))
-     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
-&                                      -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
-!    TODO: check this is equivalent to the previous version (commented) which explicitly recalculated VH(coredens)
-!    DONE: numerically there are residual differences on abiref (7th digit).
-!         paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-!&                                          +sqrt(four_pi) * pawtab(itypat)%VHnZC(2:mesh_size)
-     call pawrad_deducer0(paw_an(iatom)%vh1(:,1,1),mesh_size,pawrad(itypat))
+     ABI_ALLOCATE(vh,(mesh_size))
 
-!    !Same for vht1
-     rho = zero
-     if (usenhat /= 0) rho(1:mesh_size)=nhat1(1:mesh_size,1,1)
-     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1)) &
-&                    *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-!    rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1))*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-     call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vht1(:,1,1))
-     paw_an(iatom)%vht1(2:mesh_size,1,1)=(paw_an(iatom)%vht1(2:mesh_size,1,1) &
-&     -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
-!    paw_an(iatom)%vht1(2:mesh_size,1,1)=paw_an(iatom)%vht1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-!&                                      +sqrt(four_pi) * pawtab(itypat)%vhtnzc(2:mesh_size)
-     call pawrad_deducer0(paw_an(iatom)%vht1(:,1,1),mesh_size,pawrad(itypat))
+     do iq=1,cplex
+       iq0=0;if (iq==2) iq0=mesh_size
+       !Construct vh1
+       !  The sqrt(4pi) factor comes from the fact we are calculating the spherical moments,
+       !   and for the 00 channel the prefactor of Y_00 = 2 sqrt(pi)
+       rho(1:mesh_size)=rho1(iq0+1:iq0+mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       if (usecore) then
+         rho(1:mesh_size)=rho(1:mesh_size)+sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size) &
+&                                         *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       end if
+!      rho(1:mesh_size)=rho1(iq0+1:iq0+mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       call poisson(rho,0,pawrad(itypat),vh)
+       if (usecore) then
+         vh(2:mesh_size)=vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+         call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
+       end if
+       ir=iq
+       do ii=1,mesh_size
+         paw_an(iatom)%vh1(ir,1,1)=vh(ii)
+         ir=ir+cplex
+       end do
+!      TODO: check this is equivalent to the previous version (commented) which explicitly recalculated VH(coredens)
+!      DONE: numerically there are residual differences on abiref (7th digit).
+!            paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
+!&                                          +sqrt(four_pi) * pawtab(itypat)%VHnZC(2:mesh_size)
+
+       !Same for vht1
+       rho(1:mesh_size)=trho1(iq0+1:iq0+mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       if (usenhat/=0) then
+         rho(1:mesh_size)=rho(1:mesh_size)+nhat1(iq0+1:iq0+mesh_size,1,1) &
+&                                         *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       end if
+       if (usetcore) then
+         rho(1:mesh_size)=rho(1:mesh_size)+sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1) &
+&                                         *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       end if
+!      rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1))*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+       call poisson(rho,0,pawrad(itypat),vh)
+       if (usetcore) then
+         vh(2:mesh_size)=vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+         call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
+       end if
+       ir=iq
+       do ii=1,mesh_size
+         paw_an(iatom)%vht1(ir,1,1)=vh(ii)
+         ir=ir+cplex
+       end do
+
+     end do ! cplex phase
 
      paw_an(iatom)%has_vhartree=2
      ABI_DEALLOCATE(rho)
+     ABI_DEALLOCATE(vh)
    end if
+
+!!!! RESTORE rho1 format (with cplex!) !!!!!
+
 
 !  ========= Compute PAW+U and energy contribution  =========
 !  ==========================================================
@@ -887,7 +905,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    end if
 
 !  ========= Compute nuclear dipole moment energy contribution  ========
-!  ==========================================================
+!  =====================================================================
 
 !  Compute nuclear dipole contribution to Dij if necessary
    if (any(abs(nucdipmom(:,iatom))>tol8).and.ipert==0.and.ipositron/=1.and.option/=1) then
@@ -1031,12 +1049,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      paw_ij(iatom)%has_dijfock=2
    end if
 
-!  ==========================================================
-!  No more need of densities
-   ABI_DEALLOCATE(rho1)
-   ABI_DEALLOCATE(trho1)
-   ABI_DEALLOCATE(nhat1)
-
 !  === Compute the zero of the potentials if requested ==================
 !  ======================================================================
 
@@ -1057,6 +1069,41 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end do
 
    end if
+
+!  ======= Compute atomic contribution to the energy (Dij0)   ===========
+!  ======================================================================
+
+   if (option/=1.and.ipert<=0) then
+
+     do ispden=1,nspdiag
+       jrhoij=1
+       do irhoij=1,pawrhoij(iatom)%nrhoijsel
+         klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+         e1t10=e1t10+pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dij0(klmn) &
+&                   *pawtab(itypat)%dltij(klmn)
+         jrhoij=jrhoij+cplex_rhoij
+       end do
+     end do
+
+!    Positron special case (dij0 is opposite, except for kinetic term)
+     if (ipositron/=0) then
+       do ispden=1,nspdiag
+         jrhoij=1
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+           e1t10=e1t10+pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn) &
+&                     *two*(pawtab(itypat)%kij(klmn)-pawtab(itypat)%dij0(klmn))
+           jrhoij=jrhoij+cplex_rhoij
+         end do
+       end do
+
+   end if
+
+!  ==========================================================
+!  No more need of densities
+   ABI_DEALLOCATE(rho1)
+   ABI_DEALLOCATE(trho1)
+   ABI_DEALLOCATE(nhat1)
 
 !  =========== End loop on atoms ============================
 !  ==========================================================
