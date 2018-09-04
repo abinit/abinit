@@ -991,10 +991,10 @@
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
 #
-#enable_triqs="no"
-#
-# If you use TRQIS version 1.4, specify here
+#enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
 #
 # Include flags for the TRIQS library (default is unset)
