@@ -6,15 +6,15 @@ ndtset 1
 prtvol 3
 pawprtvol -3
 iscf 3 
-nstep 10
+nstep 7
 tolvrs 1.0d-10
 chksymbreak 0
 
 
 # CONVERGENCE PARAM
-ecut 16
-pawecutdg  40
-nband  16
+ecut 14
+pawecutdg  30
+nband  12
 occopt 7
 tsmear 1600 K
 
@@ -68,7 +68,7 @@ dmatpawu
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t35.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%%   t35.out, tolnlines = 34, tolabs = 3.000e-05, tolrel = 3.000e-03
 #%% psp_files = 26fe.lda2.paw
 #%% [paral_info]
 #%% max_nprocs = 1
