@@ -31,15 +31,19 @@ module m_wvl_wfsinp
  use defs_datatypes
  use defs_wvltypes
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
+
 
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
  use m_psolver,   only : psolver_kernel
  use m_wvl_rwwf,  only : wvl_read
  use m_mklocl_realspace, only : mklocl_wavelets
+ use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free, wvl_wfs_lr_copy
+ use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
+ use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
 
  implicit none
 
@@ -101,7 +105,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_disk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -265,8 +268,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_reformat'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
   implicit none
@@ -480,7 +481,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_scratch'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

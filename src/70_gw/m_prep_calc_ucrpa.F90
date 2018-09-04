@@ -20,6 +20,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,7 +33,7 @@ MODULE m_prep_calc_ucrpa
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: prep_calc_ucrpa
 !!***
@@ -132,12 +133,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
@@ -145,7 +140,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
  use m_xmpi
  use m_defs_ptgroups
@@ -177,7 +172,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

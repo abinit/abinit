@@ -24,7 +24,7 @@
 MODULE m_paw_nhat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use defs_abitypes
  use m_errors
  use m_xmpi
@@ -41,7 +41,7 @@ MODULE m_paw_nhat
  use m_geometry,     only : xred2xcart
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
- use m_fft,          only : zerosym
+ use m_fft,          only : zerosym, fourwf, fourdp
  use m_paw_lmn,      only : klmn2ijlmn
 
  implicit none
@@ -131,7 +131,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -691,7 +690,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat_psipsi'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1472,7 +1470,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawsushat'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

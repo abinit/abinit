@@ -23,7 +23,7 @@
 MODULE m_paw_denpot
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_time, only : timab
@@ -152,7 +152,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdenpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1185,7 +1184,6 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdensities'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1583,7 +1581,6 @@ subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_mknewh0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

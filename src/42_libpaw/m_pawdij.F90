@@ -3034,7 +3034,7 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
    if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
      msg='invalid sizes for diju_im !'
      MSG_BUG(msg)
-   end if  
+   end if
  end if
  if (cplex_rhoij<cplex_rf) then
    msg='cplex_rhoij must be >=cplex_rf!'
@@ -3107,7 +3107,7 @@ subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
                diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
                diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
                diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-               if (compute_diju_im) then 
+               if (compute_diju_im) then
                    diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
                end if
              end if
@@ -4125,7 +4125,6 @@ end subroutine pawdijfr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpupot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4415,7 +4414,6 @@ end subroutine pawdijfr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4580,7 +4578,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symdij'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5652,7 +5649,6 @@ subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdij_print_dij'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

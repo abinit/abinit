@@ -26,6 +26,8 @@
 
 module m_newvtr
 
+ use m_fft,     only : fourdp
+
  implicit none
 
  private
@@ -191,7 +193,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_ab7_mixing
@@ -208,7 +210,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newvtr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

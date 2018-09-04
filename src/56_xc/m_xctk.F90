@@ -28,12 +28,13 @@ module m_xctk
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft_mesh, only : phase
+ use m_fft,      only : fourdp
 
  implicit none
 
@@ -99,7 +100,6 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcden'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -409,7 +409,6 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcpot'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -34,7 +34,7 @@
 module m_levenberg_marquardt
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 ! MINPACK routines which are used by both LMDIF & LMDER
 ! 25 October 2001:
 !    Changed INTENT of iflag in several places to IN OUT.

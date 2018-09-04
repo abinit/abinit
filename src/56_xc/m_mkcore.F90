@@ -28,7 +28,7 @@ module m_mkcore
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_linalg_interfaces
@@ -555,8 +555,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !!  Define magnitude of cross product of two vectors
 !!
 !! PARENTS
-!!
-!! CHILDREN
 !!
 !! CHILDREN
 !!

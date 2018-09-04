@@ -25,7 +25,7 @@ MODULE m_paw_uj
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
  use m_xmpi
@@ -237,7 +237,6 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_det'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -781,7 +780,6 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawuj_red'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1033,7 +1031,6 @@ subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chiscwrt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1143,7 +1140,6 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linvmat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1262,7 +1258,6 @@ subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lprtmat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

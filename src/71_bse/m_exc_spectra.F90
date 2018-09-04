@@ -27,7 +27,7 @@ MODULE m_exc_spectra
  use defs_basis
  use defs_datatypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use iso_c_binding
  use m_xmpi
  use m_errors
@@ -52,6 +52,7 @@ MODULE m_exc_spectra
  use m_paw_hr,          only : pawhur_t
  use m_wfd,             only : wfd_t
  !use m_bse_io,          only : exc_amplitude
+ use m_wfd_optic,       only : calc_optical_mels
 
  implicit none
 
@@ -110,8 +111,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'build_spectra'
- use interfaces_14_hidewrite
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none
@@ -356,7 +355,6 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_write_data'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -678,7 +676,6 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_eps_resonant'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -938,7 +935,6 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_eps_coupling'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1418,7 +1414,6 @@ subroutine check_kramerskronig(n,o,eps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'check_kramerskronig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1560,7 +1555,6 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'check_fsumrule'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

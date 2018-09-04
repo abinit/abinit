@@ -907,7 +907,7 @@ at fixed atomic positions, these subroutines are:
 1. **abinit**: the main routine 
 2. **driver**: select ground state or response calculations 
 3. **gstate**: the driver of the ground state calculations 
-4. **scfcv**: the SCF cycle driver 
+4. **scfcv_core**: the SCF cycle driver 
 5. **vtorho**: compute the density from the potential (it includes a loop over spins and k-points) 
 6. **vtowfk**: compute the wavefunctions at one particular k-point (includes a non self consistent loop, and a loop over bands) 
 7. **cgwf**: optimize one wavefunction in a fixed potential 

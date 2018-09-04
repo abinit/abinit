@@ -31,7 +31,7 @@ module m_respfn_driver
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_exit
  use m_wffile
@@ -46,6 +46,7 @@ module m_respfn_driver
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
@@ -95,7 +96,8 @@ module m_respfn_driver
  use m_paw_occupancies, only : initrhoij
  use m_paw_correlations,only : pawpuxinit
  use m_mkcore,     only : mkcore, dfpt_mkcore
- use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald
+ use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
+ use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -216,9 +218,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -1908,7 +1907,6 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrtloctens'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4004,13 +4002,11 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
 
- use m_fft,           only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyfro'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

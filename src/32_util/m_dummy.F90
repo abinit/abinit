@@ -1,3 +1,45 @@
+!!****f* DUMMY_TESTS/m_dummy_tests
+!! NAME
+!! m_dummy_tests
+!!
+!! FUNCTION
+!!  Dummy module, to detect unused values
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  used_arg = used argument
+!!
+!! OUTPUT
+!!  dummy_out1 = first output value
+!!
+!! SIDE EFFECTS
+!!  used_arg = used argument
+!!
+!! PARENTS
+!!      dummy_tests
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ module m_dummy_tests
+
+ implicit none
+
+ !private
+ public
+
+ double precision, save :: dummy_value
+ public :: test_dummy
+
+ contains
+!!***
+
 !!****f* DUMMY_TESTS/test_unused_arg
 !! NAME
 !! test_unused_arg
@@ -85,12 +127,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
 
 
@@ -113,53 +149,6 @@
  dummy_out2=used_arg+2
 
  end subroutine test_same_actual_arg
-!!***
-
-!!****f* DUMMY_TESTS/m_dummy_tests
-!! NAME
-!! m_dummy_tests
-!!
-!! FUNCTION
-!!  Dummy module, to detect unused values
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  used_arg = used argument
-!!
-!! OUTPUT
-!!  dummy_out1 = first output value
-!!
-!! SIDE EFFECTS
-!!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
- module m_dummy_tests
-
- implicit none
-
- private
-
- double precision, save :: dummy_value
- public :: test_dummy
-
- contains
 !!***
 
 !!****f* DUMMY_TESTS/test_dummy

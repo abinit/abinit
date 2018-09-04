@@ -29,9 +29,9 @@ module m_eliashberg_1d
  use defs_basis
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_io_tools
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,   only : simpson_int
 
@@ -81,7 +81,6 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eliashberg_1d'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -393,8 +392,6 @@ end subroutine eli_app_m_1d
 !!
 !! CHILDREN
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine eli_diag_m_1d (delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
@@ -502,8 +499,6 @@ end subroutine eli_diag_m_1d
 !! OUTPUT
 !!   lambda_1d = coupling constant as a function of frequency
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      eliashberg_1d
 !!
@@ -568,7 +563,6 @@ end subroutine eli_lambda_1d
 !!***
 
 !!****f* m_eliashberg_1d/eli_m_iter_1d
-!!
 !! NAME
 !! eli_m_iter_1d
 !!
@@ -587,14 +581,10 @@ end subroutine eli_lambda_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
-!! CHILDREN
-!!      eli_app_m_1d
-!!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
+!!      eli_app_m_1d
 !!
 !! SOURCE
 

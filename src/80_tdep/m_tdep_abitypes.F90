@@ -7,7 +7,7 @@
 module m_tdep_abitypes
 
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_nctk
   use m_xmpi
   use m_errors
@@ -77,7 +77,7 @@ contains
   ABI_FREE(znucl)
   ABI_FREE(zion)
 
- end subroutine
+ end subroutine tdep_init_crystal
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt_cart,Shell2at,Sym)
@@ -177,7 +177,7 @@ contains
     end if
   end if
 
- end subroutine
+ end subroutine tdep_init_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ddb(DDB,InVar,Lattice)
@@ -249,7 +249,7 @@ contains
   ABI_FREE(spqpt)
   ABI_FREE(q1shft)
 
- end subroutine
+ end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
@@ -388,7 +388,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 #else
   if (unitfile.eq.0) then
     open(unit=77,file=trim(InVar%output_prefix)//'ifc.tdep')
-  else 
+  else
     open(unit=77,file=trim(InVar%output_prefix)//'ifc.out')
   end if
   if (unitfile.eq.0) then

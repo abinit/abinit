@@ -28,7 +28,7 @@ MODULE m_numeric_tools
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
 
  use m_fstrings,   only : itoa, sjoin
@@ -3704,8 +3704,6 @@ end function simpson_cplx
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -3802,8 +3800,6 @@ end subroutine hermitianize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
@@ -3982,7 +3978,6 @@ subroutine hermit(chmin,chmout,ierr,ndim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hermit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4087,8 +4082,6 @@ end subroutine hermit
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -4177,8 +4170,6 @@ end subroutine symmetrize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
@@ -4344,7 +4335,6 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr1d_spc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4414,7 +4404,6 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr1d_dpc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4484,7 +4473,6 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr2d_spc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4559,7 +4547,6 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr2d_dpc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6715,7 +6702,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'findmin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6908,7 +6894,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kramerskronig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

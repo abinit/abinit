@@ -384,7 +384,7 @@ subroutine pawfgrtab_nullify(Pawfgrtab)
 
 !@Pawfgrtab_type
 
-! MGPAW: This one could be removed/renamed, 
+! MGPAW: This one could be removed/renamed,
 ! variables can be initialized in the datatype declaration
 ! Do we need to expose this in the public API?
 
@@ -602,7 +602,6 @@ subroutine pawfgrtab_print(Pawfgrtab,natom,unit,prtvol,mode_paral,mpi_atmtab,com
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawfgrtab_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1011,8 +1010,6 @@ end subroutine pawfgrtab_gather
 !!****f* m_pawfgrtab/pawfgrtab_redistribute
 !! NAME
 !! pawfgrtab_redistribute
-!!
-!! FUNCTION
 !!
 !! FUNCTION
 !!   Redistribute an array of pawfgrtab datastructures

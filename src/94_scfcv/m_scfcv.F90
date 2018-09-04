@@ -29,7 +29,7 @@
 module m_scfcv
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use defs_datatypes
  use defs_abitypes
@@ -51,7 +51,7 @@ module m_scfcv
  use m_paw_dmft,         only : paw_dmft_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
- use m_scfcv_core,       only : scfcv
+ use m_scfcv_core,       only : scfcv_core
 
  implicit none
 
@@ -565,14 +565,6 @@ end subroutine scfcv_run
 !!subroutine scfcv_reformatWFK(this,rhog, rhor, rprimd, xred, xred_old)
 !!
 !!
-!!!This section has been created automatically by the script Abilint (TD).
-!!!Do not modify the following lines by hand.
-!!#undef ABI_FUNC
-!!#define ABI_FUNC 'scfcv_reformatWFK'
-!! use interfaces_67_common
-!! use interfaces_79_seqpar_mpi
-!!!End of the abilint section
-!!
 !! type(scfcv_t), intent(inout) :: this
 !! real(dp), intent(inout) :: xred(3,this%dtset%natom)
 !! real(dp), intent(inout) :: xred_old(3,this%dtset%natom)
@@ -737,7 +729,7 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
+   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
 &    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
 &    this%initialized,this%irrzon,this%kg,this%mcg,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,this%nfftf,this%npwarr,&
 &    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&

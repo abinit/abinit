@@ -29,7 +29,7 @@ MODULE m_rf2
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_hamiltonian
  use m_cgtools
@@ -300,7 +300,6 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_accumulate_bands'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -475,7 +474,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_apply_hamiltonian'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

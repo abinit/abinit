@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_ldau_self
@@ -34,7 +33,7 @@ MODULE m_ldau_self
 
  implicit none
 
- private 
+ private
 
  public :: ldau_self
 !!***
@@ -75,16 +74,9 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use defs_datatypes
@@ -104,7 +96,6 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ldau_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

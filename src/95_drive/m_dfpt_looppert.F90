@@ -31,7 +31,7 @@ module m_dfpt_loopert
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -61,6 +61,7 @@ module m_dfpt_loopert
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
+ use m_fft,        only : fourdp
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -91,6 +92,7 @@ module m_dfpt_loopert
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -212,12 +214,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
 &  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasval,eigbrd,eig2nkq,&
@@ -235,10 +231,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
- use interfaces_32_util
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -2080,8 +2072,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #ifdef HAVE_NETCDF
   ! Output DDK file in netcdf format.
    if (me == master .and. ipert == dtset%natom + 1) then
-     fname = strcat(dtfil%filnam_ds(4), "_DDK.nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
+     fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
@@ -2560,7 +2552,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2781,7 +2772,6 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtene'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

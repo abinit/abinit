@@ -28,12 +28,12 @@
 module m_nucprop
 
   use defs_basis
-  use defs_abitypes, only : MPI_type
-  use m_profiling_abi
+  use m_abicore
   use m_errors
+
+  use defs_abitypes, only : MPI_type
   use m_mpinfo,   only : ptabs_fourdp
   use m_xmpi, only : xmpi_comm_self, xmpi_sum
-  
   use m_geometry,       only : xred2xcart
   use m_linalg_interfaces, only: dsyev
   use m_paw_an,      only : paw_an_type
@@ -45,6 +45,7 @@ module m_nucprop
   use m_paral_atom, only : get_my_atmtab,free_my_atmtab
   use m_special_funcs,  only : abi_derfc
   use m_symtk,          only : matr3inv, matpointsym
+  use m_fft,           only : fourdp
 
   implicit none
 
@@ -120,12 +121,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
   subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,paral_kgb,&
        &                    paw_an,pawang,pawrad,pawrhoij,pawtab,&
        &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
@@ -136,13 +131,12 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_efg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     implicit none
 
     !Arguments ------------------------------------
-    !scalars 
+    !scalars
     integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,paral_kgb,prtefg,usepaw
     integer,optional,intent(in) :: comm_atom
     real(dp),intent(in) :: ucvol
@@ -159,7 +153,7 @@ contains
     type(pawrad_type),intent(in) :: pawrad(ntypat)
     type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
     type(pawtab_type),intent(in) :: pawtab(ntypat)
-    
+
     !Local variables-------------------------------
     !scalars
     integer :: INFO,LDA,LWORK,N,iatom,my_comm_atom
@@ -195,9 +189,9 @@ contains
     efg_ion(:,:,:) = zero
     efg_paw(:,:,:) = zero
     efg_point_charge(:,:,:) = zero
-    
+
     call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
-    
+
     call make_efg_ion(efg_ion,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
     if (paral_atom) then
@@ -212,16 +206,16 @@ contains
     !note here all atoms of the same type will have the same valence; in the future this
     !could be made more flexible by having ptcharge(natom) but that will require a slightly
     !different version than the existing make_efg_ion routine
-    if(prtefg > 2) then  
+    if(prtefg > 2) then
        call make_efg_ion(efg_point_charge,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,ptcharge)
     end if
-    
+
     efg(:,:,:) = efg_el(:,:,:) + efg_ion(:,:,:) + efg_paw(:,:,:)
-    
+
     write(message,'(a,a,a)' ) ch10,' Electric Field Gradient Calculation ',ch10
     call wrtout(ab_out,message,'COLL')
 
-    LDA=3; LWORK=8;N=3 ! these parameters are needed for the LAPACK dsyev routine 
+    LDA=3; LWORK=8;N=3 ! these parameters are needed for the LAPACK dsyev routine
     do iatom = 1, natom
        matr(:,:) = efg(:,:,iatom)
        call dsyev('V','U',N,matr,LDA,eigval,work,LWORK,INFO) ! get eigenvalues and eigenvectors
@@ -244,7 +238,7 @@ contains
           cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
           if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
              eta = abs(vxx - vyy)/abs(vzz)
-          else 
+          else
              eta=zero
           end if
        else
@@ -307,7 +301,7 @@ contains
              cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
              if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
                 eta = abs(vxx - vyy)/abs(vzz)
-             else 
+             else
                 eta=zero
              end if
           else
@@ -340,21 +334,21 @@ contains
     end do
     write(message,'(3a)')ch10,ch10,ch10
     call wrtout(ab_out,message,'COLL')
-    
+
     ABI_DEALLOCATE(efg)
     ABI_DEALLOCATE(efg_el)
     ABI_DEALLOCATE(efg_ion)
     ABI_DEALLOCATE(efg_paw)
     ABI_DEALLOCATE(efg_point_charge)
-    
+
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
-    
+
     !DEBUG
     !write(std_out,*)' calc_efg : exit '
     !stop
     !ENDDEBUG
-    
+
   end subroutine calc_efg
 !!***
 
@@ -402,12 +396,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
@@ -416,16 +404,15 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_fc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     implicit none
 
     !Arguments ------------------------------------
-    !scalars 
+    !scalars
     integer,intent(in) :: my_natom,natom,nspden,ntypat,usepaw
     integer,optional,intent(in) :: comm_atom
-    !arrays 
+    !arrays
     integer,intent(in) :: typat(natom)
     integer,optional,target,intent(in) :: mpi_atmtab(:)
     type(pawrad_type),intent(in) :: pawrad(ntypat)
@@ -437,7 +424,7 @@ contains
     integer :: iatom,my_comm_atom
     logical :: my_atmtab_allocated,paral_atom
     character(len=500) :: message
-    !arrays 
+    !arrays
     integer,pointer :: my_atmtab(:)
     real(dp),allocatable :: fc(:,:)
 
@@ -454,7 +441,7 @@ contains
     nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
-    
+
     !Initialization
     ABI_ALLOCATE(fc,(nspden,natom))
 
@@ -549,12 +536,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
 
@@ -587,7 +568,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
   real(dp) :: rhok(3),rhored(3),rpl(3)
   real(dp),allocatable :: efg_g(:,:,:),efg_r(:,:,:)
   real(dp),allocatable :: xcart(:,:)
-  
+
   ! ************************************************************************
 
   !DEBUG
@@ -607,7 +588,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
      rpl(ii) = sqrt(rprimd(1,ii)**2+rprimd(2,ii)**2+rprimd(3,ii)**2)
   end do
   xi0 = sqrt(pi/(maxval(rpl)*minval(rpl))) ! this estimate for xi0 is from Honma's paper
-  
+
   call matr3inv(rprimd,gprimd) ! gprimd holds the inverse transpose of rprimd
   !remember ordering: rprimd( (x_comp,y_comp,z_comp), (edge 1, edge 2, edge 3) )
   !while gprimd( (edge 1, edge 2, edge 3),(x_comp, y_comp, z_comp) )
@@ -618,7 +599,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
   !go out enough shells such that g**2/4*xi0**2 is of order 30
   nshell = int(anint(sqrt(30.0)*xi0/(pi*minval(gpl))))
   glkcut = (0.95*nshell*two*pi*minval(gpl))**2
-  
+
   do ishell = 0, nshell ! loop over shells
      do sx = -ishell, ishell
         do sy = -ishell, ishell
@@ -716,7 +697,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
         end do ! end loop over sy cells
      end do ! end loop over sx cells
   end do ! end loop over shells
-  
+
   !now combine the g-space and r-space parts, properly weighted (see Honma)
   do iatom = 1, natom
      do ii = 1, 3
@@ -798,11 +779,6 @@ end subroutine make_efg_ion
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include "abi_common.h"
-
 subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
 
 
@@ -810,7 +786,6 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_el'
- use interfaces_53_ffts
 !End of the abilint section
 
   implicit none
@@ -839,7 +814,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   real(dp),allocatable :: fofg(:,:),fofr(:),gq(:,:),xcart(:,:)
 
   ! ************************************************************************
-  
+
   !DEBUG
   !write(std_out,*)' make_efg_el : enter'
   !ENDDEBUG
@@ -867,7 +842,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
   nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
-  
+
   call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp) ! construct charge density in G space
 
   ! the following loops over G vectors has been copied from hartre.F90 in order to be compatible with
@@ -900,7 +875,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
            ! Do the test that eliminates the Gamma point outside of the inner loop
            ii1=1
            if(i23==0 .and. ig2==0 .and. ig3==0) ii1=2
-           
+
            ! Final inner loop on the first dimension (note the lower limit)
            do i1=ii1,n1
               !         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
@@ -928,7 +903,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   end do ! End loop on i3
 
   call xmpi_sum(efg,mpi_enreg%comm_fft,ierr)
-  
+
   ! symmetrize tensor at each atomic site using point symmetry operations
   do iatom = 1, natom
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
@@ -938,7 +913,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   ABI_DEALLOCATE(fofr)
   ABI_DEALLOCATE(xcart)
   ABI_DEALLOCATE(gq)
-  
+
   !DEBUG
   !write(std_out,*)' make_efg_el : exit '
   !stop

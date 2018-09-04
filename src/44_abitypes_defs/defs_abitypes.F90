@@ -47,7 +47,7 @@
 module defs_abitypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
 
  use m_pawrhoij, only : pawrhoij_type
@@ -309,6 +309,7 @@ type dataset_type
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
+ integer :: imgwfstor
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
@@ -521,6 +522,7 @@ type dataset_type
  integer :: prtvdw
  integer :: prtvha
  integer :: prtvhxc
+ integer :: prtkbff=0
  integer :: prtvol
  integer :: prtvolimg
  integer :: prtvpsp
@@ -912,14 +914,14 @@ type dataset_type
 ! Phonon variables.
  integer :: ph_freez_disp_addStrain
  integer :: ph_freez_disp_option
- integer :: ph_freez_disp_nampl 
+ integer :: ph_freez_disp_nampl
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
  integer :: ph_
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
-  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl) 
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)

@@ -28,7 +28,7 @@ MODULE m_model_screening
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_io_tools,       only : open_file
 

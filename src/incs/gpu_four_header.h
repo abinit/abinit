@@ -24,7 +24,7 @@
 extern "C" {
 #endif
   
-  void leave_new_(char*);
+  void abi_cabort();
   
   
   //Headers for Fourwf :

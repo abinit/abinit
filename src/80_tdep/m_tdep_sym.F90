@@ -8,7 +8,7 @@
 module m_tdep_sym
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_symtk,            only : mati3inv, symatm
@@ -120,8 +120,6 @@ contains
   end do
 
   ABI_FREE(tmp1)
-
-
 
  end subroutine tdep_make_sym
 
@@ -345,7 +343,7 @@ contains
   ABI_FREE(indsym2)
   write(InVar%stdout,'(a)') ' See the Indsym*.dat files (if debug)'
 
- end subroutine
+ end subroutine tdep_SearchS_1at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_SearchS_2at(InVar,iatom,jatom,eatom,fatom,Isym2at,Sym,xred_ideal)

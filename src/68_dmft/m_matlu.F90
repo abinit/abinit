@@ -37,7 +37,7 @@ MODULE m_matlu
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_hide_lapack,  only : xginv
  use m_geometry, only : symredcart
@@ -407,7 +407,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -905,7 +904,6 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'diff_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1079,7 +1077,6 @@ end subroutine add_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chg_repr_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1209,7 +1206,6 @@ end subroutine add_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'trace_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1330,7 +1326,6 @@ end subroutine add_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gather_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1459,7 +1454,6 @@ end subroutine add_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'diag_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2689,7 +2683,6 @@ end subroutine add_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'slm2ylm_matlu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

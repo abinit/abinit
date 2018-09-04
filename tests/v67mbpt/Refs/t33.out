@@ -360,11 +360,11 @@ P           mkmem           8
  Writing KS-RPA macroscopic dielectric function without local fields to file: t33o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t33o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 188 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 185 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
  Writing EXC Macroscopic dielectric function to file: t33o_DS1_EXC_MDF
   
  Macroscopic dielectric function:
@@ -373,12 +373,12 @@ P           mkmem           8
    0.1000  20.3545   0.0349  16.6902   0.0179  18.8916   0.0267
    0.2000  20.4068   0.0702  16.7170   0.0358  18.9315   0.0536
    0.3000  20.4946   0.1064  16.7618   0.0541  18.9985   0.0810
-   0.4000  20.6191   0.1439  16.8251   0.0728  19.0933   0.1093
+   0.4000  20.6191   0.1439  16.8250   0.0728  19.0933   0.1093
    0.5000  20.7818   0.1833  16.9072   0.0920  19.2167   0.1386
    0.6000  20.9849   0.2252  17.0088   0.1120  19.3700   0.1694
    0.7000  21.2311   0.2702  17.1308   0.1329  19.5549   0.2021
-   0.8000  21.5240   0.3193  17.2742   0.1548  19.7734   0.2370
-   0.9000  21.8680   0.3733  17.4401   0.1781  20.0280   0.2747
+   0.8000  21.5240   0.3193  17.2742   0.1548  19.7735   0.2370
+   0.9000  21.8680   0.3733  17.4400   0.1781  20.0280   0.2747
   
 
 == END DATASET(S) ==============================================================

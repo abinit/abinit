@@ -18,10 +18,9 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_dfpt_fef.F90",
- "dfptnl_pert.F90",
+ "m_dfptnl_pert.F90",
  "m_dfpt_cgwf.F90",
  "m_dfpt_elt.F90",
- "dfpt_ewald.F90",
  "m_dfpt_mkrho.F90",
  "m_dfpt_mkvxcstr.F90",
  "m_dfpt_nstwf.F90",
@@ -29,7 +28,7 @@ sources = [
  "m_dfpt_scfcv.F90",
  "m_dfpt_vtorho.F90",
  "m_dfpt_vtowfk.F90",
- "d2frnl.F90",
+ "m_d2frnl.F90",
  "m_ddb.F90",
  "m_ddb_hdr.F90",
  "m_ddk.F90",
@@ -39,8 +38,7 @@ sources = [
  "m_rf2.F90",
  "m_paral_pert.F90",
  "m_strain.F90",
- "pead_nl_resp.F90",
- "rf2_init.F90",
+ "m_rf2_init.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

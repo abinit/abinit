@@ -27,7 +27,7 @@ module m_pred_delocint
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xfpack
@@ -107,7 +107,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_delocint'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -710,7 +709,6 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'deloc2xcart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -894,7 +892,6 @@ subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fred2fdeloc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

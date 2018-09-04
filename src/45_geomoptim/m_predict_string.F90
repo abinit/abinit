@@ -28,7 +28,7 @@ module m_predict_string
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_splines
  use m_mep
  use m_errors

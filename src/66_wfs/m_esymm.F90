@@ -28,7 +28,7 @@
 MODULE m_esymm
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,       only : file_exists
@@ -261,7 +261,6 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -860,7 +859,6 @@ subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1119,7 +1117,6 @@ subroutine esymm_finalize(esymm,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_finalize'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

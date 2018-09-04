@@ -168,8 +168,8 @@ real(dp), allocatable :: xred(:,:)
 !Precondition forces, stress and energy
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
- if (ab_mover%goprecon>0)then
-   call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
+ if (ab_mover%goprecon>0 .or. iexit==1)then
+   call prec_simple(ab_mover,preconforstr,hist,icycle,itime,iexit)
  end if
 
 !Call to each predictor
@@ -276,11 +276,6 @@ real(dp), allocatable :: xred(:,:)
 
  call abiforstr_fin(preconforstr)
  ABI_FREE(xred)
-
-!DEBUG
-!write(std_out,*)' m_precpred_1geo : exit '
-!call flush(std_out)
-!ENDDEBUG
 
 end subroutine precpred_1geo
 !!***

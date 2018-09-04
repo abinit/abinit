@@ -31,7 +31,7 @@
 MODULE m_lobpcg
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use defs_abitypes
  use m_wfutils

@@ -29,7 +29,7 @@ module m_ksdiago
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
@@ -232,12 +232,11 @@ contains
 !! * The routine RE-compute all Hamiltonian terms. So it is equivalent to an additional electronic SC cycle.
 !!   (This has no effect is convergence was reach. If not, eigenvalues/vectors may differs from the conjugate gradient ones)
 !!
-!! NOTES
-!!  Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
-!!  or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
-!!  ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
-!!  or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
-!!  the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
+!! * Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
+!!   or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
+!!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
+!!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
+!!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
 !!      m_shirley,outkss
@@ -261,7 +260,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ksdiago'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -718,7 +716,6 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_ddiago_ctl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

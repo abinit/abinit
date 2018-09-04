@@ -31,7 +31,7 @@ module m_iogkk
  use defs_abitypes
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_kptrank
  use m_hdr
@@ -103,7 +103,6 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_gkk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -743,7 +742,6 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outgkk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1228,7 +1226,6 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inpgkk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1516,7 +1513,6 @@ subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'normsq_gkq'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -20,7 +20,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_argparse.F90",
  "m_bethe_salpeter.F90",
- "dfptnl_loop.F90",
+ "m_dfptnl_loop.F90",
  "m_dfpt_looppert.F90",
  "m_driver.F90",
  "m_eph_driver.F90",

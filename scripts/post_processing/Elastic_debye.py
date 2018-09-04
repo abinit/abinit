@@ -246,10 +246,16 @@ def sound_velocities(data):
     YZZ = 1.0/s[2,2]
     
     #calculate vl
-    vl  = np.sqrt((B+4.0/3.0*G)*kbar_to_GPa/(density/kgm3_to_cm3))*m_to_cm# convert kbar to GPa and then g/cm3 to kg /m3
+    if B + 4.0/3.0*G <= 0:
+        vl = 0
+    else:  
+    	vl  = np.sqrt((B+4.0/3.0*G)*kbar_to_GPa/(density/kgm3_to_cm3))*m_to_cm # convert kbar to GPa and then g/cm3 to kg /m3
     
     #calculate vs
-    vs = np.sqrt(G*kbar_to_GPa/(density/kgm3_to_cm3))*m_to_cm
+    if G <= 0:
+	G = 0
+    else:
+        vs = np.sqrt(G*kbar_to_GPa/(density/kgm3_to_cm3))*m_to_cm # convert kbar to GPa and then g/cm3 to kg /m3
     
     #calculate va
     va = (1.0/3.0*((1.0/vl**3)+(2.0/vs**3)))**(-1.0/3.0)
@@ -549,7 +555,7 @@ if sys.argv[1].startswith('--'):
         f1.write('\nReferences:\n')
         f1.write('Derived Elastic properties from:\n')
         f1.write('Phys. Rev. B 95, 155206 (2017)\n')
-        f1.write('Pike et al. Unpublished (2018)\n\n')
+        f1.write('Pike et al. Phys. Rev. Mat. 2, 063608 (2018)\n\n')
         f1.write('Slack Model for Thermal Conductivity from:\n')
         f1.write('Slack J. Phys. Chem. Solids 34, 321 (1973)\n')
         f1.close() 

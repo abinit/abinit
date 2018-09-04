@@ -31,7 +31,7 @@
 MODULE m_vcoul
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_splines
@@ -212,7 +212,6 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1354,7 +1353,6 @@ subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1678,7 +1676,6 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cutoff_cylinder'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -32,7 +32,7 @@ module m_nonlinear
  use defs_wvltypes
  use m_wffile
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_hdr
  use m_ebands
@@ -46,6 +46,7 @@ module m_nonlinear
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
+ use m_fft,      only : fourdp
  use m_kpts,     only : getkgrid
  use m_inwffil,  only : inwffil
  use m_spacepar, only : hartre, setsym
@@ -80,6 +81,7 @@ module m_nonlinear
  use m_paw_correlations, only : pawpuxinit
  use m_mkcore,           only : mkcore
  use m_pead_nl_loop,     only : pead_nl_loop
+ use m_dfptnl_loop,      only : dfptnl_loop
 
  implicit none
 
@@ -162,9 +164,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none

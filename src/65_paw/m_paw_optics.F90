@@ -28,7 +28,7 @@ MODULE m_paw_optics
  use m_xmpi
  use m_errors
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 
  use m_time,         only : timab

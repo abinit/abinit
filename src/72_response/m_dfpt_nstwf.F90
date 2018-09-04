@@ -183,12 +183,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &                  eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &                  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
@@ -204,7 +198,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_wfk
  use m_hamiltonian
  use m_cgtools
@@ -249,8 +243,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstpaw'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1816,12 +1808,6 @@ end subroutine dfpt_nstpaw
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &                 icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpt,kpq,&
 &                 mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
@@ -1831,7 +1817,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_cgtools
  use m_hamiltonian
  use m_errors

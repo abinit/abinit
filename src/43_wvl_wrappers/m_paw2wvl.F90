@@ -28,7 +28,7 @@ module m_paw2wvl
 
  use defs_basis
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_pawtab, only : pawtab_type

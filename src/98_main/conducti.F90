@@ -21,10 +21,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!!
-!! CHILDREN
-!!      conducti_nc, conducti_paw
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -46,7 +42,7 @@ program conducti
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif

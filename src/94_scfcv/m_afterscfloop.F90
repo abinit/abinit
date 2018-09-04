@@ -32,7 +32,7 @@ module m_afterscfloop
  use defs_wvltypes
  use m_energies
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_efield
  use m_ab7_mixing
  use m_hdr
@@ -298,7 +298,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'afterscfloop'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

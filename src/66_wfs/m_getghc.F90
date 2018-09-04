@@ -29,7 +29,7 @@ module m_getghc
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_time,        only : timab
@@ -39,6 +39,7 @@ module m_getghc
  use m_fock,        only : fock_common_type, fock_get_getghc_call
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
+ use m_fft,         only : fourwf
 
  implicit none
 
@@ -132,8 +133,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -800,7 +799,6 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc_mGGA'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1429,6 +1427,10 @@ end subroutine multithreaded_getghc
 !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
 !!
 !! NOTES
+!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
+!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
+!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
+!!  input vector in one shot.
 !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
 !!
 !! PARENTS
@@ -1436,12 +1438,6 @@ end subroutine multithreaded_getghc
 !!
 !! CHILDREN
 !!      zhpmv
-!!
-!! NOTES
-!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
-!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
-!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
-!!  input vector in one shot.
 !!
 !! SOURCE
 

@@ -21,4 +21,5 @@ inp_files = [
 "-t10.in", # Disabled
 "t21.in",
 "t22.in",
+"t30.in",
 ]

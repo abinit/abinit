@@ -92,12 +92,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mpw,my_natom,natom,&
 &                      nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,ntypat,&
 &                       paw_ij,pawtab,ph1d,psps,rprimd,typat,xred)
@@ -105,7 +99,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_hamiltonian

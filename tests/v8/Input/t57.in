@@ -61,8 +61,8 @@
     getwfk5   4
     get1wf5   2
   
-    kptopt5   0        # K-points can be specified in any way one want, they just need to be present in the 
-    nkpt5     2        # ground state calc. too.
+    kptopt5   0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
+    nkpt5     2        
     kpt5      0.00 0.00 0.00   # Gamma                                                                      
               0.00 0.50 0.50   # X
               

@@ -28,7 +28,7 @@
 module m_psps
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_nctk
@@ -228,7 +228,6 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  ! Transfer md5 checksum
  ABI_ALLOCATE(psps%md5_pseudos, (npsp))
  psps%md5_pseudos = pspheads(1:npsp)%md5_checksum
-
 !Set values independant from dtset
  psps%npsp   = npsp
 !Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
@@ -841,7 +840,6 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

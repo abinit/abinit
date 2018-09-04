@@ -32,7 +32,7 @@ module m_scfcv_core
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_wffile
  use m_rec
  use m_ab7_mixing
@@ -89,6 +89,7 @@ module m_scfcv_core
  use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_fft,              only : fourdp
  use m_vtorhorec,        only : first_rec, vtorhorec
  use m_vtorhotf,         only : vtorhotf
  use m_outscfcv,         only : outscfcv
@@ -121,15 +122,15 @@ module m_scfcv_core
  private
 !!***
 
- public :: scfcv
+ public :: scfcv_core
 !!***
 
 contains
 !!***
 
-!!****f* ABINIT/scfcv
+!!****f* ABINIT/scfcv_core
 !! NAME
-!! scfcv
+!! scfcv_core
 !!
 !! FUNCTION
 !! Self-consistent-field convergence.
@@ -273,7 +274,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -284,9 +285,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'scfcv'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
+#define ABI_FUNC 'scfcv_core'
 !End of the abilint section
 
  implicit none
@@ -543,7 +542,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
-   write(std_out,*)"in scfcv: results_gs%fermie: ",results_gs%fermie
+   write(std_out,*)"in scfcv_core: results_gs%fermie: ",results_gs%fermie
  end if
 
  select case(dtset%usepotzero)
@@ -602,13 +601,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
 !This is only needed for the tddft routine, and does not
 !correspond to the intented use of results_gs (should be only
-!for output of scfcv
+!for output of scfcv_core
  etotal = results_gs%etotal
 
-!Entering a scfcv loop, printing data to XML file if required.
+!Entering a scfcv_core loop, printing data to XML file if required.
  prtxml=0;if (me==0.and.dtset%prtxml==1) prtxml=1
  if (prtxml == 1) then
-!  scfcv() will handle a scf loop, so we output the scfcv markup.
+!  scfcv_core() will handle a scf loop, so we output the scfcv markup.
    write(ab_xml_out, "(A)") '    <scfcvLoop>'
    write(ab_xml_out, "(A)") '      <initialConditions>'
 !  We output the geometry of the dataset given in argument.
@@ -626,7 +625,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  ABI_ALLOCATE(fred,(3,dtset%natom))
  fred(:,:)=zero
  fcart(:,:)=results_gs%fcart(:,:) ! This is a side effect ...
-!results_gs should not be used as input of scfcv
+!results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
 
  call scprqt(choice,cpus,deltae,diffor,dtset,&
@@ -1028,13 +1027,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out, sjoin(" scfcv: previous iteration took ",sec2str(wtime_step)))
+     call wrtout(std_out, sjoin(" scfcv_core: previous iteration took ",sec2str(wtime_step)))
 
      if (have_timelimit_in(ABI_FUNC)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv."
+           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
            MSG_COMMENT(message)
            call wrtout(ab_out, message, "COLL")
            timelimit_exit = 1
@@ -1215,12 +1214,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
            else
 !DEBUG
-             write(std_out,*)' scfcv : recompute the density after the wf mixing '
+             write(std_out,*)' scfcv_core : recompute the density after the wf mixing '
 !ENDDEBUG
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
 !DEBUG
-!          write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
+!          write(std_out,*)' scfcv_core : for debugging purposes, set rhor to zero '
 !          rhor=zero
 !ENDDEBUG
              if(dtset%usekden==1)then
@@ -1499,7 +1498,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
 !  The next flag says whether the xred have to be changed in the current iteration
    moved_atm_inside=0
-   ! /< Hack to remove iapp from scfcv
+   ! /< Hack to remove iapp from scfcv_core
    ! for ionmov 4|5 ncycle=1
    ! Hence iapp = itime
    if ( dtset%jdtset /= scfcv_jdtset ) then
@@ -1510,7 +1509,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    if ( istep .eq. 1 ) scfcv_itime = scfcv_itime + 1
    if(dtset%ionmov==4 .and. mod(scfcv_itime,2)/=1 .and. dtset%iscf>=0 ) moved_atm_inside=1
    if(dtset%ionmov==5 .and. scfcv_itime/=1 .and. istep==1 .and. dtset%iscf>=0) moved_atm_inside=1
-   ! /< Hack to remove iapp from scfcv
+   ! /< Hack to remove iapp from scfcv_core
 
 !  Thomas-Fermi scheme might use a different toldfe criterion
    if (dtset%tfkinfunc>0.and.dtset%tfkinfunc/=2) then
@@ -2136,7 +2135,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  call timab(247,2,tsec)
 
 !######################################################################
-!All calculations in scfcv are finished. Printing section
+!All calculations in scfcv_core are finished. Printing section
 !----------------------------------------------------------------------
 
  call timab(248,1,tsec)
@@ -2294,7 +2293,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
  DBG_EXIT("COLL")
 
-end subroutine scfcv
+end subroutine scfcv_core
 !!***
 
 !!****f* ABINIT/etotfor
@@ -2431,7 +2430,7 @@ end subroutine scfcv
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      scfcv_core
 !!
 !! CHILDREN
 !!      forces,nres2vres,pawgrnl,timab
@@ -2750,7 +2749,7 @@ end subroutine etotfor
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv
+!!      scfcv_core
 !!
 !! CHILDREN
 !!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
@@ -2881,7 +2880,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !The reference is the cg+cprj output after the wf optimization at istep 1.
 !It comes as input to the present routine as cgcprj input at step 2, and is usually found at indh=1.
 
-!In the simple mixing case (wfmixalg==1), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
+!In the simple mixing case (wfmixalg==2), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
 !previous input (that was stored in indh=1), then generate the next input, which is stored again in indh=1
 
 !When the storage is not spared:
