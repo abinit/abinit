@@ -591,10 +591,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
 
+   ! Set dielectric tensor, Becs and has_dielt_zeff flag that
+   ! acivates automatically the treatmen of the long-range term in the Fourier interpolation
+   ! of the DFPT potentials.
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
      dvdb%has_dielt_zeff = .True.
+     call wrtout(std_out, "Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
    end if
 
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.

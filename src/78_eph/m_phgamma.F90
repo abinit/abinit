@@ -884,6 +884,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
      end do
    end if
 #endif
+
  case (1)
    ! Diagonalize gamma matrix at qpoint (complex matrix).
    ! MJV NOTE: gam_now is recast implicitly here to matrix
@@ -2629,7 +2630,7 @@ end if
  end do
 
 #ifdef DEV_MJV
- ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]]) 
+ ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]])
  if (my_rank == master) then
    ntemp = 100
    min_temp = zero
@@ -2638,7 +2639,7 @@ end if
    ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
-print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
+   print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -5051,7 +5052,6 @@ end if
        ! Get phonon frequencies and displacements for this q-point
        ! used in scalar product with H(1)_atom,idir  matrix elements
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
-
        !call ifc_diagoq(ifc,cryst,qpt,phfrq,displ_cart,nanaqdir)
      end if
 
