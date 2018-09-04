@@ -2496,8 +2496,8 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
 ! *************************************************************************
 
- if (ebands_has_metal_scheme(ebands)) then
-   msg = "set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_ferme!"
+ if (.not.ebands_has_metal_scheme(ebands)) then
+   msg = "set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!"
    MSG_ERROR(msg)
  end if
 
