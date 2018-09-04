@@ -154,6 +154,12 @@ subroutine destroy_tetra (tetra)
  if (allocated(tetra%tetra_wrap))  then
    TETRA_DEALLOCATE(tetra%tetra_wrap)
  end if
+ if (allocated(tetra%ibz_tetra_count)) then
+   TETRA_DEALLOCATE(tetra%ibz_tetra_count)
+ end if
+ if (allocated(tetra%ibz_tetra_mapping)) then
+   TETRA_DEALLOCATE(tetra%ibz_tetra_mapping)
+ end if
 
 end subroutine destroy_tetra
 !!***
@@ -488,7 +494,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 
  ! 1. First we count what is the maximum number of distinct tetrahedra
  ! that each k-point contains
- ABI_MALLOC(tetra%ibz_tetra_count,(nkpt_ibz))
+ TETRA_ALLOCATE(tetra%ibz_tetra_count,(nkpt_ibz))
  tetra%ibz_tetra_count(:) = 0
  ! Count max tetra contrubuting
  do ii=1,tetra%ntetra
@@ -504,7 +510,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  end do
 
  ! 2. Then we build mapping of ikbz to tetra
- ABI_MALLOC(tetra%ibz_tetra_mapping,(nkpt_ibz,maxval(tetra%ibz_tetra_count)))
+ TETRA_ALLOCATE(tetra%ibz_tetra_mapping,(nkpt_ibz,maxval(tetra%ibz_tetra_count)))
  tetra%ibz_tetra_count(:) = 0
  do ii=1,tetra%ntetra
    ! Here we need the original ordering to reference the correct irred kpoints
