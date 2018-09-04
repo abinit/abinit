@@ -46,32 +46,31 @@ Now from this reference, we consider the set of perturbation, the atomic displac
 
 At **the harmonic part level**, we can express the potential as a sum of three contributions (with respect to the set of pertubations ($u$,$\eta$)):
 
-  $$\displaystyle E^{harm}(u,\eta) =  E^{harm}(u) + E^{harm}(u,\eta) + E^{harm}(\eta)$$
+$$\displaystyle E^{harm}(u,\eta) =  E^{harm}(u) + E^{harm}(u,\eta) + E^{harm}(\eta)$$
 
-  * A Computation of the phonon response (short range + dipole-dipole interaction):
+  * A contribution of the phonon response (short range + dipole-dipole interaction):
   
-      $$\displaystyle E^{harm}(u) => \underbrace{\frac{\partial^2 E}{\partial
-          u^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}} $$
-  $$+ 
+$$\displaystyle E^{harm}(u) => \underbrace{\frac{\partial^2 E}{\partial
+          u^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}}+ 
      \underbrace{\frac{\partial^2 E}{\partial
           {\cal{E}}^2}}_{\text{Dielectric tensor}} +
       \underbrace{\frac{\partial^2 E}{\partial{\cal{E}} \partial u}}_{\text{Effective charges}} $$
   
-  * A Computation of the strain response:
+  * A contribution of the strain response:
 $$\displaystyle  E^{harm}(\eta) =>\underbrace{\frac{\partial^2 E}{\partial
             \eta^2}}_{\text{Elastic constants}} $$
 
-  * A Computation of the strain-phonon coupling:
+  * A contribution of the strain-phonon coupling:
 $$\displaystyle E^{harm}(u,\eta) =>
       \underbrace{\frac{\partial^2
             E}{\partial\eta \partial u}}_{\substack{\text{Internal strain}}} $$
 
-We note that for the harmonic part, All the needed quantities can be computed with the DFPT features of abinit and the resulting file is called the DDB file.
+We note that for the harmonic part, all the needed quantities can be computed with the DFPT features of abinit and the resulting file is called the DDB file.
 In the case of insulator, the dipole-dipole interaction will be recomputed directly within Multibinit.
 Thereby you need to provide into the DDB file the clamped ion dielectric tensor and the Born effective charges.
 Don't forget to add the in the final DDB file the DDB from the single DFT calculation done on the reference system (you can still use mrgddb).
 
-Moreover, the ddb file is also an output of a DFT calculation. In the case of the generation of a model with multibinit, it is important to merge into the final DDB file,
+Moreover, the ddb file is also an output of a DFT calculation. In the case of the generation of a model with multibinit, it is important to merge into the final DDB file.
 
 In this tutorial, we will take as an example of a material without unstabilities, the perovskite CaTiO3 in the Pnma phase.
 
@@ -101,7 +100,7 @@ You should read carefully the input file:
 
 {% dialog tests/tutomultibinit/Input/tmulti1_1.in %}
 
-You now should make the run (less than a seconds):
+You can now run multiinit with(less than a seconds):
 
     multibinit < tmulti1.files > tmulti1_1_stdout
 
@@ -109,9 +108,9 @@ The resulting main output file, trf1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
 
 
-The aim of the run that you just made was to read the DDB file, generate the short range interatomic force constants and extract all the other informations for the harmonic part of the model.
+The aim of the previous run was to read the DDB file, generate the short range interatomic force constants in real space and extract all the other informations for the harmonic part of the model.
 You can see into the output file, the Born effective charges, The clamped ion elastic tensor and the internal strain coupling parameters. Take some time to open and read the tmulti1_1.out file.
-Once the DDB file is complete, the generation of the XML file within multibinit requires only few input variables:
+Since the DDB file is complete, the generation of the XML file within multibinit requires only few input variables:
 
    * [[multibinit:prt_model]] = 1     => active the generation of the XML file, takes the time to read the possible options for [[multibinit:prt_model]].
    * [[multibinit:ngqpt]]    = 2 2 2 => specified the q-point mesh included in the tmulti1_DDB file
@@ -119,7 +118,8 @@ Once the DDB file is complete, the generation of the XML file within multibinit 
 
 After this run, you should see in your directory tmulti1_1_model.xml, you can take some time to open and read this file. You will find all the informations about the system definition (lattice parameters, atomic positions) and the data for the harmonic part of the potential.
 
-You XML file is now generated you can now use it as input for multibinit. To do that, open copy now in your work directory the files ~abinit/tests/tutomultibinit/Input/tmulti2.files; you should see inside:
+You XML file is now generated, this file represent your model ans you can now use it as input for multibinit.
+You can now copy in your work directory the files ~abinit/tests/tutomultibinit/Input/tmulti2.files; you should see inside:
 
       tutomulti1_2.in
       tutomulti1_2.out
@@ -136,7 +136,15 @@ With the two last examples, we showed that multibinit is able to read either the
 We can now run our first dynamic within multibinit, you can copy into you directory the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3*. and have a look the
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
+
+run 
+
+    multibinit < tmulti3.files > tmulti1_3_stdout
+
+If  you linked the NETCDF library (see [[help:multibinit | guide of multibinit]]), multibinit will create the output of the molecular dynamics into tmulti1_3.out_HIST.nc. You can use the agate software to analize you simulation, just run:
+
+    qagate tmulti1_3.out_HIST.nc
   
 * * *
 
-This MULTIBINIT tutorial is now finished. You are advised to read now the [[lesson:fit_process|second tutorial on Multibinit]]
+This MULTIBINIT tutorial is now finished. You will soon be able to follow the [[lesson:fit_process|second tutorial on Multibinit]].
