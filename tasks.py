@@ -47,17 +47,18 @@ def cd(path):
         os.chdir(cwd)
 
 @task
-def make(ctx, jobs="auto", clean=False):
+def make(ctx, jobs="auto", touch=True, clean=False):
     """
     Touch all modified files and recompile the code with -jNUM.
     """
     with cd(ABINIT_SRCDIR):
-        cmd = "./abisrc.py touch"
-        cprint("Executing: %s" % cmd, "yellow")
-        result = ctx.run(cmd, pty=True)
-        if not result.ok:
-            cprint("`%s` failed. Aborting now!" % cmd, "red")
-            return 1
+        if touch:
+            cmd = "./abisrc.py touch"
+            cprint("Executing: %s" % cmd, "yellow")
+            result = ctx.run(cmd, pty=True)
+            if not result.ok:
+                cprint("`%s` failed. Aborting now!" % cmd, "red")
+                return 1
 
     top = find_top_build_tree(".", with_abinit=False)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)

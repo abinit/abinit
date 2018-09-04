@@ -243,6 +243,8 @@ MODULE m_dvdb
  public :: dvdb_findq             ! Returns the index of the q-point.
  public :: dvdb_read_onev1        ! Read and return the DFPT potential for given (idir, ipert, iqpt).
  public :: dvdb_readsym_allv1     ! Read and return all the 3*natom DFPT potentials (either from file or symmetrized)
+ public :: dvdb_readsym_qbz       ! Reconstruct the DFPT potential for a q-point in the BZ starting
+                                  ! from its symmetrical image in the IBZ.
  public :: dvdb_list_perts        ! Check if all the (phonon) perts are available taking into account symmetries.
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
@@ -1120,6 +1122,85 @@ end subroutine dvdb_readsym_allv1
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_readsym_qbz
+!! NAME
+!!  dvdb_readsym_qbz
+!!
+!! FUNCTION
+!! Reconstruct the DFPT potential for a q-point in the BZ starting
+!! from its symmetrical image in the IBZ.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  qbz(3)=Q-point in BZ.
+!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk.
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  cplex=1 if real, 2 if complex.
+!!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_readsym_qbz'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,comm
+ integer,intent(out) :: cplex
+ type(crystal_t),intent(in) :: cryst
+ type(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfft(18)
+ integer,intent(in) :: indq2db(6)
+ real(dp),intent(in) :: qbz(3)
+ real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: db_iqpt,itimrev,isym
+ logical :: isirr_q
+!arrays
+ integer :: g0q(3)
+ real(dp),allocatable :: work(:,:,:,:)
+
+! *************************************************************************
+
+ db_iqpt = indq2db(1)
+ ! IS(q_dvdb) + g0q = q_bz
+ isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
+ isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+
+ ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
+ ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+ call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, xmpi_comm_self)
+
+ if (.not. isirr_q) then
+   ! Rotate db_iqpt to get qpoint
+   ABI_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom))
+   work = v1scf
+   call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+     db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
+   ABI_FREE(work)
+ end if
+
+end subroutine dvdb_readsym_qbz
+!!***
 
 !!****f* m_dvdb/v1phq_complete
 !! NAME
