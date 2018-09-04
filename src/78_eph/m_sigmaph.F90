@@ -1198,9 +1198,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call wrtout(std_out, msg, do_flush=.True.)
      end do ! iq_ibz (sum over q-points)
 
+     if (sigma%qint_method > 0) then
+       ABI_FREE(sigma%deltaw_pm)
+       ABI_FREE(sigma%cweights)
+     end if
      ABI_FREE(sigma%e0vals)
-     ABI_FREE(sigma%deltaw_pm)
-     ABI_FREE(sigma%cweights)
      ABI_FREE(zvals)
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
