@@ -436,6 +436,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
+ integer :: ibsum_stop, ibsum_start
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
@@ -469,7 +470,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: eph_dg_mapping(:,:), iqlk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: phfrq_ibz(3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,emin,emax
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
@@ -719,17 +720,19 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
 
-     if (sigma%use_doublegrid) then
-        ! Weights for Re-Im with i.eta shift.
-        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, sigma%ephwg%lgk%nibz*nbsum))
-        ! Weights for Im (tethraedron, eta --> 0)
-        ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, sigma%ephwg%lgk%nibz*nbsum))
-        sigma%deltaw_pm = -1
-     else
-        ! Weights for Re-Im with i.eta shift.
-        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, ndiv))
-        ! Weights for Im (tethraedron, eta --> 0)
-        ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, ndiv))
+     if (sigma%qint_method > 0) then
+       if (sigma%use_doublegrid) then
+          ! Weights for Re-Im with i.eta shift.
+          ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, sigma%ephwg%lgk%nibz*nbsum))
+          ! Weights for Im (tethraedron, eta --> 0)
+          ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, sigma%ephwg%lgk%nibz*nbsum))
+          sigma%deltaw_pm = -1
+       else
+          ! Weights for Re-Im with i.eta shift.
+          ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, 1))
+          ! Weights for Im (tethraedron, eta --> 0)
+          ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, 1))
+       endif
      endif
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
@@ -1951,7 +1954,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (abs(new%symsigma) == 1) then
      do spin=1,new%nsppol
        ibstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
-       write(*,*) new%bstart_ks(ikcalc,spin), ibstop
        call enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), ibstop, &
          changed, tol_enediff, degblock=degblock)
        if (changed) then
@@ -3107,7 +3109,6 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%bz2ibz_dense(:) = indqq(:,1)
 
 #if 0
- !debug
  open (unit = 2, file = "ibz.dat")
  do ii=1,eph_dg%dense_nibz
    write(2,*) eph_dg%kpts_dense_ibz(:,ii)
@@ -3145,7 +3146,6 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
                                          dksqmean/eph_dg%dense_nbz/maxfreq
  ABI_FREE(displ_cart)
 
-#endif
  open (unit = 2, file = "coarse2dense.dat")
  do ii=1,eph_dg%coarse_nbz
    write(2,*)
@@ -3168,7 +3168,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
    write(2,*) eph_dg%kpts_dense(:,ii)
  end do
  close(2)
- !end debug
+#endif
 
 end function eph_double_grid_new
 !!***
