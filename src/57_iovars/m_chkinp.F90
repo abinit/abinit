@@ -801,7 +801,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-!  eph variables
+   ! eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,7,[0,1,2,3,4,5,6],iout)
@@ -811,6 +811,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     end if
+
+     if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
+       MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
      end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
@@ -2811,7 +2815,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !      Check that so_psp is between 0 and 3
        if ( dt%so_psp(ipsp)<0 .or. dt%so_psp(ipsp)>3 ) then
          write(message, '(a,i3,a,i3,a,a,a,a,a)' )&
-&         'so_psp(',ipsp,' ) was input as',dt%so_psp(ipsp),' .',ch10,&
+&         'so_psp(',ipsp,' ) was input as ',dt%so_psp(ipsp),' .',ch10,&
 &         'Input value must be 0, 1, 2, or 3.',ch10,&
 &         'Action: modify value of so_psp (old name : so_typat) in input file.'
          MSG_ERROR_NOSTOP(message, ierr)
@@ -2819,7 +2823,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !      If nspinor=1, the spin-orbit contribution cannot be taken into account
        if ( nspinor==1 .and. (dt%so_psp(ipsp)==2 .or. dt%so_psp(ipsp)==3) ) then
          write(message, '(a,i2,a,i3,a,a,a,a,a)' )&
-&         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
+&         'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
 &         'When nspinor=1, so_psp cannot be required to be 2 or 3.',ch10,&
 &         'Action: modify value of so_psp (old name : so_typat) or nspinor in input file.'
          MSG_ERROR_NOSTOP(message, ierr)
@@ -2828,7 +2832,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !      unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
          write(message, '(a,i2,a,i3,9a)' )&
-&         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
+&         'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
 &         'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
 &         'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,&
 &         'Action: choose a pseudopotential that contains information about the spin-orbit interaction,',ch10,&
@@ -2842,21 +2846,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
      if(nsppol==1)then
        write(message, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as',dt%spinmagntarget,ch10,&
+&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
 &       'When nsppol=1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
 &       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(message, ierr)
      end if
      if(optdriver==RUNL_RESPFN)then
        write(message, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as',dt%spinmagntarget,ch10,&
+&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
 &       'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
 &       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(message, ierr)
      end if
      if(dt%prtdos==1)then
        write(message, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as',dt%spinmagntarget,ch10,&
+&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
 &       'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
 &       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(message, ierr)
@@ -2920,7 +2924,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  symchi
    if (all(dt%symchi /= [0, 1])) then
-     write(message, '(a,i0,2a)' )'symchi  was input as ',dt%symchi,ch10,'Input value must be 0, 1.'
+     write(message, '(a,i0,2a)' )'symchi was input as ',dt%symchi,ch10,'Input value must be 0, 1.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 
