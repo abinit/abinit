@@ -50,7 +50,6 @@ module m_fock
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
- use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 
