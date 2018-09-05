@@ -12,8 +12,8 @@ chksymbreak 0
 
 
 # CONVERGENCE PARAM
-ecut 14
-pawecutdg  30
+ecut 16
+pawecutdg  40
 nband  16
 occopt 7
 tsmear 1600 K
