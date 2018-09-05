@@ -6,15 +6,15 @@ ndtset 1
 prtvol 3
 pawprtvol -3
 iscf 3 
-nstep 7
+nstep 10
 tolvrs 1.0d-10
 chksymbreak 0
 
 
 # CONVERGENCE PARAM
-ecut 16
-pawecutdg  40
-nband  16
+ecut 14
+pawecutdg  30
+nband  12
 occopt 7
 tsmear 1600 K
 
