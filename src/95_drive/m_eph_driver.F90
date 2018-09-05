@@ -136,8 +136,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
- use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+ use m_pawtab,          only : pawtab_type
+ use m_paw_an,          only : paw_an_type, paw_an_free !, paw_an_nullify, paw_an_init,
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
@@ -592,7 +592,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
 
    ! Set dielectric tensor, Becs and has_dielt_zeff flag that
-   ! acivates automatically the treatmen of the long-range term in the Fourier interpolation
+   ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials.
    if (iblock /= 0) then
      dvdb%dielt = dielt
@@ -625,7 +625,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if(dtset%eph_frohlichm/=0)then
-
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
@@ -633,7 +632,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #else
    MSG_ERROR("netcdf support not enabled")
 #endif
-
  endif
 
  ! ===========================================
@@ -650,9 +648,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
  ! ====================================================
-! TODO: decide whether to make several driver functions.
-!  before that, however, need to encapsulate most of the functionalities in eph_phgamma
-!  otherwise there will be tons of duplicated code
 
  ! TODO: Make sure that all subdrivers work with useylm == 1
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
@@ -686,8 +681,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (5)
    ! Interpolate the phonon potential
    call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
-&   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
-&   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+     ifc%ngqpt,ifc%nqshft,ifc%qshft, dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model

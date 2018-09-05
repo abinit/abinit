@@ -2266,7 +2266,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
  ABI_FREE(v1r_qbz)
  ABI_FREE(v1r_lr)
 
-
 end subroutine dvdb_ftinterp_setup
 !!***
 
@@ -2939,8 +2938,7 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 
 !Local variables-------------------------------
 !scalars
- integer :: ipert, nqbz
- integer :: nproc,my_rank
+ integer :: ipert, nqbz, ierr, nproc, my_rank
 !arrays
  real(dp),allocatable :: v1scf_rpt(:,:,:,:)
 
@@ -2951,12 +2949,13 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
  nqbz = product(ngqpt) * nqshift
  db%nrpt = nqbz
 
- ABI_MALLOC(v1scf, (2,nfftf,db%nspden,db%natom3))
+ ABI_STAT_MALLOC(v1scf, (2,nfftf,db%nspden,db%natom3), ierr)
+ ABI_CHECK(ierr == 0, "out of memory in v1scf")
 
- ABI_MALLOC(v1scf_rpt, (2,db%nrpt,nfft,db%nspden))
+ ABI_STAT_MALLOC(v1scf_rpt, (2,db%nrpt,nfft,db%nspden), ierr)
+ ABI_CHECK(ierr == 0, "out of memory in v1scf_rpt")
 
  do ipert=1,db%natom3
-
    write(std_out, "(a,i4,a,i4,a)") "Interpolating potential for perturbation ", ipert, " / ", db%natom3, ch10
 
    ! FIXME I think this should be ngfftf and not ngfft

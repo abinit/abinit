@@ -1246,7 +1246,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 end subroutine sigmaph
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_sigmaph/sigmaph_get_qweights
