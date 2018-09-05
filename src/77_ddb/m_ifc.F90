@@ -840,7 +840,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_ifc/ifc_print
 !! NAME
 !!  ifc_print
@@ -905,7 +904,7 @@ subroutine ifc_print(ifc,header,unit,prtvol)
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
  call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
  call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
- call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
+ call wrtout(unt, sjoin(" Dielectric tensor: ", ch10, ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom
    call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))

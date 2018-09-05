@@ -38,21 +38,28 @@ module m_phgamma
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_wfk
+ use m_ddk
+ use m_ddb
+ use m_dvdb
+ use m_fft
+ use m_hamiltonian
+ use m_pawcprj
 
- use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
+ use m_time,           only : cwtime, sec2str
+ use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ftoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
- use m_io_tools,       only : open_file
+ use m_io_tools,       only : open_file, iomode_from_fname
  use m_symtk,          only : littlegroup_q
  use m_geometry,       only : normv
  use m_special_funcs,  only : dirac_delta
- use m_fftcore,        only : ngfft_seq
+ use m_fftcore,        only : ngfft_seq, get_kg
  use m_fft_mesh,       only : rotate_fft_mesh
- !use m_cgtools,        only : set_istwfk
+ use m_cgtools,        only : dotprod_g !set_istwfk
  use m_cgtk,           only : cgtk_rotate
  use m_kg,             only : getph
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
- use defs_datatypes,   only : ebands_t
+ use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
@@ -61,6 +68,18 @@ module m_phgamma
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
  use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_fourier_interpol, only : transgrid
+ use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
+                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type
+ use m_pawfgr,          only : pawfgr_type
+! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
+! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+! use m_pawdij,          only : pawdij, symdij
+! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
  implicit none
 
@@ -1399,7 +1418,6 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
    end do ! idir
  end do ! jdir
 
-
 end subroutine phgamma_vv_eval_qibz
 !!***
 
@@ -1739,7 +1757,6 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
        end do
      end do
 
-
      ABI_FREE(coskr)
      ABI_FREE(sinkr)
    end if
@@ -1957,7 +1974,6 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
      NCF_CHECK(nf90_put_var(ncid, vid("phlambda_qpath"), all_lambdaq))
 #endif
    end if
-
  end if ! master
 
  ABI_FREE(all_phfreq)
@@ -2262,9 +2278,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      ! Interpolate or evaluate gamma directly.
 #ifdef DEV_MJV
      if (do_qintp) then
-       call phgamma_interp(gams,cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
+       call phgamma_interp(gams,cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee)
      else
-       call phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
+       call phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee)
      end if
 #else
      if (do_qintp) then
@@ -4027,40 +4043,6 @@ end subroutine a2fw_tr_write
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_wfk
- use m_ddk
- use m_ddb
- use m_dvdb
- use m_ifc
- use m_fft
- use m_hamiltonian
- use m_pawcprj
-
- use m_time,            only : sec2str
- use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
- use m_io_tools,        only : iomode_from_fname
- use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg
- use m_crystal,         only : crystal_t
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_pawfgr,          only : pawfgr_type
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4412,7 +4394,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_CHECK(ierr==0, 'out of memory in kg_k')
  ABI_STAT_MALLOC(kg_kq, (3, mpw), ierr)
  ABI_CHECK(ierr==0, 'out of memory in kg_kq')
-
 
  ! Spherical Harmonics for useylm==1.
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))

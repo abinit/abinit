@@ -76,11 +76,6 @@ MODULE m_ddk
 
  type,public :: ddk_t
 
-  !integer :: fh(3)
-  ! file handler
-  !  Fortran unit number if iomode==IO_MODE_FORTRAN
-  !  MPI file handler if iomode==IO_MODE_MPI
-
   integer :: comm
   ! MPI communicator used for IO.
 
@@ -95,10 +90,6 @@ MODULE m_ddk
 
   integer :: rw_mode = DDK_NOMODE
    ! (Read|Write) mode
-
-  !integer :: current_fpos
-  ! The current position of the file pointer used for sequential access with Fortran-IO
-  !  FPOS_EOF signals the end of file
 
   integer :: nsppol
    ! Number of spin polarizations.
