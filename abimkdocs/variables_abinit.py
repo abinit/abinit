@@ -17369,7 +17369,7 @@ following a DFT+U calculation is done (important!).
     * If [[usepawu]] = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
 
     * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
-    polarization in the exchange correlation functional (cf [[cite:Park2015]]). In this case, one must use [[iscf]]<10.
+    polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
 If LDA+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
