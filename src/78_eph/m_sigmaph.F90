@@ -541,6 +541,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
+ ! Set cache for q-points.
+ if (dtset%useric /= 0) then
+    call wrtout(std_out, "Activating cache for V(q)")
+    call dvdb_set_qcache(dvdb, dtset%useric)
+ end if
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Compute gaussian spline.
@@ -942,6 +947,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  end if
 
                  ! Accumulate d(Re Sigma) / dw(w=eKS) for state ib_k
+                 !cfact(x) =  (nqnu + f_mkq      ) / (x - eig0mkq + wqnu + sigma%ieta) + &
+                 !            (nqnu - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
                  gmod2 = (eig0nk - eig0mkq + wqnu) ** 2
                  hmod2 = (eig0nk - eig0mkq - wqnu) ** 2
                  rfact = (nqnu + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
@@ -1017,8 +1024,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        else where
          sqrt_phfrq0 = zero
        end where
-       d0mat = reshape(displ_cart, [2, natom3, natom3])
        ! cmat contains the displament vectors as complex array
+       d0mat = reshape(displ_cart, [2, natom3, natom3])
        cmat = dcmplx(d0mat(1,:,:), d0mat(2,:,:))
        ! Multiply d by M to get e * M^{1/2}
        do nu=1,natom3
@@ -1030,32 +1037,26 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end do
 
        ! Integral over IBZ. Note that here we can use IBZ(k=0).
-       ! symsigma == 0 activates sum over full BZ for debugging purpose.
-       ! For the time being, integrate over full BZ
        ! TODO Bug if symsigma 0 ?
-       nq = sigma%nqibz
-       if (sigma%symsigma == 0) nq = sigma%nqbz
-       !if (sigma%symsigma == 0) nq = sigma%nqibz_k
-       !do iq_ibz=1,sigma%nqibz
-       !nq = sigma%nqbz
+       nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
+       !if (sigma%symsigma == -1) nq = sigma%nqibz_k
        do iq_ibz=1,nq
          if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
-#if 0
-         qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
-#else
          if (abs(sigma%symsigma) == 1) then
            qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
            !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
          else
            qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
-           !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
          end if
-#endif
+
          ! Get phonons for this q-point.
          ! DEBUG
          !call ifc_fourq(ifc, cryst, sigma%qibz(:, sigma%indkk(iq_ibz, 1)), phfrq_ibz, displ_cart)
-         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
          !phfrq = phfrq_ibz
+         !if (all(abs(qpt) < tol12)) cycle
+         ! TODO
+         !displ_cart = displ_red
 
          ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
          ! Needed for Giustino's equation.
@@ -1066,10 +1067,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                             sqrt_phfrq0(:) * dbwl_nu(2, in, im, :))
              do ii=1,natom3
                cvec2 = cmat(ii,:)
-               !hka_mn(ii, im, in) = xdotu(natom3, cvec2, 1, cvec1, 1)
                hka_mn(ii, im, in) = dot_product(dconjg(cvec2), cvec1)
                !hka_mn(ii, im, in) = dconjg(hka_mn(ii, im, in))
-               !write(std_out,*)"hka_mn: ",hka_mn(ii, im, in)
              end do
            end do
          end do
@@ -1093,6 +1092,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                dkpa  = dcmplx(displ_cart(1, idir1, ipert2, nu), displ_cart(2, idir1, ipert2, nu))
                dkpap = dcmplx(displ_cart(1, idir2, ipert2, nu), displ_cart(2, idir2, ipert2, nu))
                tpp(ip1,ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
+               !tpp(ip1,ip2) = dconjg(dka) * dkap + dconjg(dkpa) * dkpap
                !write(std_out,*)"tpp: ",tpp(ip1, ip2)
              end do
            end do
@@ -1124,13 +1124,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do ibsum=1,nbsum
              eig0mk = ebands%eig(ibsum, ik_ibz, spin)
              do ib_k=1,nbcalc_ks
-               band = ib_k + bstart_ks - 1
-               eig0nk = ebands%eig(band, ik_ibz, spin)
-               ! Handle n == m and degenerate states (either ignore or add broadening)
-               cplx_ediff = (eig0nk - eig0mk)
-               !if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
-               if (abs(cplx_ediff) < tol6) cycle
-
 #if 1
                ! Compute DW term following XG paper. Check prefactor.
                ! gkk0_atm(2, nbcalc_ks, nbsum, natom3)
@@ -1160,10 +1153,23 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two / deg_ibk(ib_k)
                !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
-#endif
                ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
+             end do ! ibsum
+           end do ! ib_k
+#endif
+
+           do ibsum=1,nbsum
+             eig0mk = ebands%eig(ibsum, ik_ibz, spin)
+             do ib_k=1,nbcalc_ks
+               band = ib_k + bstart_ks - 1
+               eig0nk = ebands%eig(band, ik_ibz, spin)
+               ! Handle n == m and degenerate states (either ignore or add broadening)
+               cplx_ediff = (eig0nk - eig0mk)
+               !if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
+               if (abs(cplx_ediff) < tol6) cycle
 
                ! accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
+               ! - (2 n_{q\nu} + 1) * gdw2 / (e_{nk} - e_{mk})
                do it=1,sigma%ntemp
                  cfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
                  rfact = real(cfact)

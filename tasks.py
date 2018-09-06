@@ -46,8 +46,18 @@ def cd(path):
     finally:
         os.chdir(cwd)
 
+
+#@task
+#def vim(ctx, tag):
+#    """Invoke """
+#    with cd(ABINIT_SRCDIR):
+#        cmd = "mvim -t %s" % tag
+#        #cmd = "vim -t %s" % tag
+#        ctx.run(cmd)
+
+
 @task
-def make(ctx, jobs="auto", touch=True, clean=False):
+def make(ctx, jobs="auto", touch=False, clean=False):
     """
     Touch all modified files and recompile the code with -jNUM.
     """

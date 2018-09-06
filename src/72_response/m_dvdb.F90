@@ -78,6 +78,12 @@ module m_dvdb
 
  integer,private,parameter :: FPOS_EOF = -1
 
+ type,private :: qcache_t
+   real(dp), allocatable :: v1scf(:,:,:,:)
+     ! v1scf(cplex, nfftf, nspden, 3*natom))
+     ! cached potentials
+ end type qcache_t
+
 !----------------------------------------------------------------------
 
 !!****t* m_dvdb/dvdb_t
@@ -167,6 +173,14 @@ module m_dvdb
   logical :: symv1=.False.
    ! Activate symmetrization of v1 potentials.
 
+  integer :: qcache_size = 0
+   ! Number of q-points in Vscf(q) stored in the cache.
+   ! Useful when evaluating expressions requiring integration in q-space
+
+  type(qcache_t), allocatable :: qcache(:)
+    ! qcache(nqpt)
+    ! Cache used to stores potentials (see dvdb_readsym_qbz for the implementation)
+
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name
 
@@ -243,6 +257,7 @@ module m_dvdb
  public :: dvdb_readsym_allv1     ! Read and return all the 3*natom DFPT potentials (either from file or symmetrized)
  public :: dvdb_readsym_qbz       ! Reconstruct the DFPT potential for a q-point in the BZ starting
                                   ! from its symmetrical image in the IBZ.
+ public :: dvdb_set_qcache        ! Allocate internal cache for potentials.
  public :: dvdb_list_perts        ! Check if all the (phonon) perts are available taking into account symmetries.
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
@@ -641,6 +656,10 @@ subroutine dvdb_free(db)
 !scalars
  type(dvdb_t),intent(inout) :: db
 
+!Local variables-------------------------------
+!scalars
+ integer :: iq
+
 !************************************************************************
 
  ! integer arrays
@@ -680,6 +699,16 @@ subroutine dvdb_free(db)
  ! types
  call crystal_free(db%cryst)
  call destroy_mpi_enreg(db%mpi_enreg)
+
+ ! Clean cache
+ if (db%qcache_size > 0) then
+   do iq=1,db%nqpt
+     if (allocated(db%qcache(iq)%v1scf)) then
+       ABI_FREE(db%qcache(iq)%v1scf)
+     end if
+   end do
+   ABI_FREE(db%qcache)
+ end if
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
@@ -736,6 +765,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 !Local variables-------------------------------
 !scalars
  integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
+ real(dp) :: cache_size
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -754,6 +784,11 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
+ write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
+ if (db%qcache_size > 0) then
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3)
+   write(std_out,'(a,f12.1,a)')' Memory needed for cache: ', dp * cache_size * b2Mb,' [Mb]'
+ end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
@@ -1127,7 +1162,7 @@ end subroutine dvdb_readsym_allv1
 !!
 !! FUNCTION
 !! Reconstruct the DFPT potential for a q-point in the BZ starting
-!! from its symmetrical image in the IBZ.
+!! from its symmetrical image in the IBZ. Implements caching mechanism to reduce IO.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
@@ -1171,25 +1206,78 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym
- logical :: isirr_q
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc
+ logical :: isirr_q,incache
 !arrays
- integer :: g0q(3)
+ integer :: pinfo(3,3*db%mpert)
+ integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
  real(dp),allocatable :: work(:,:,:,:)
 
 ! *************************************************************************
 
  db_iqpt = indq2db(1)
+
  ! IS(q_dvdb) + g0q = q_bz
  isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
- ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
- ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
- call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, xmpi_comm_self)
+ ! Check whether db_iqpt is in cache.
+ incache = .False.
+ if (db%qcache_size > 0) then
+   ! Get number of perturbations computed for this iqpt as well as cplex.
+   npc = dvdb_get_pinfo(db, db_iqpt, cplex, pinfo)
+   ABI_CHECK(npc /= 0, "npc == 0!")
+
+   if (allocated(db%qcache(db_iqpt)%v1scf)) then
+      if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
+          size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
+        v1scf = db%qcache(db_iqpt)%v1scf
+        incache = .True.
+        !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
+      else
+        ! This to handle the unlikely event in which the caller changes ngfft!
+        !write(std_out, *)"cplex cache, out:", size(db%qcache(db_iqpt)%v1scf, dim=1), cplex
+        !write(std_out, *)"nfft cache, out", size(db%qcache(db_iqpt)%v1scf, dim=2), nfft
+        !MSG_WARNING("Had to free cache item due to different cplex or nfft!")
+        ABI_FREE(db%qcache(db_iqpt)%v1scf)
+      end if
+   else
+      !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read from file...", itoa(db_iqpt)))
+      continue
+   end if
+ end if
+
+ if (.not. incache) then
+   ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
+   ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, xmpi_comm_self)
+ end if
+
+ if (db%qcache_size > 0 .and. .not. incache) then
+   ! Entry not in cache. --> Count number of entries in qcache first.
+   nqcache = 0; lgsize = -1
+   do iq=1,db%nqpt
+     if (allocated(db%qcache(iq)%v1scf)) then
+        nqcache = nqcache + 1
+        lgsize(iq) = count(db%symq_table(4,:,:,iq) == 1)
+     end if
+   end do
+
+   ! Deallocate one item if needed. Prefer q-points with
+   ! largest number of symmetries in the litte-group e.g. Gamma.
+   if (nqcache >= db%qcache_size) then
+     iqmax = maxloc(lgsize); iq = iqmax(1)
+     ABI_CHECK(allocated(db%qcache(iq)%v1scf), "free error")
+     ABI_FREE(db%qcache(iq)%v1scf)
+   end if
+
+   ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
+   ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
+   db%qcache(db_iqpt)%v1scf = v1scf
+ end if
 
  if (.not. isirr_q) then
-   ! Rotate db_iqpt to get qpoint
+   ! Rotate db_iqpt to get qpoint.
    ABI_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom))
    work = v1scf
    call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
@@ -1199,6 +1287,59 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 end subroutine dvdb_readsym_qbz
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_set_qcache
+!! NAME
+!!  dvdb_set_qcache
+!!
+!! FUNCTION
+!! Allocate internal cache storing v1scf potentials.
+!! < 0 to allocate all q-points. 0 has not effect. > 0 for cache with nqpt points.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_set_qcache(db, nqpt)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_set_qcache'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqpt
+ type(dvdb_t),intent(inout) :: db
+
+!Local variables-------------------------------
+ integer :: qsize
+
+! *************************************************************************
+
+ if (nqpt < 0) qsize = db%nqpt
+ if (nqpt == 0) return
+ if (nqpt > 0) qsize = nqpt
+ qsize = min(qsize, db%nqpt)
+
+ db%qcache_size = qsize
+ ABI_MALLOC(db%qcache, (db%nqpt))
+
+end subroutine dvdb_set_qcache
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_dvdb/v1phq_complete
 !! NAME
@@ -4383,7 +4524,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: qptrlatt(3,3)
  integer :: symq(4,2,cryst%nsym)
  integer :: rfdir(3)
- integer,allocatable :: pinfo(:,:),rfpert(:),pertsy(:,:,:),iq_read(:)
+ integer,allocatable :: pinfo(:,:),rfpert(:),pertsy(:,:,:),iq_read(:),this_pertsy(:,:)
  real(dp) :: qpt(3)
  real(dp) :: rhog1_g0(2)
  real(dp),allocatable :: v1scf(:,:,:), v1scf_rpt(:,:,:,:),v1(:)
@@ -4474,6 +4615,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  ABI_MALLOC(q_interp, (3,nqibz))
 
  ABI_MALLOC(pertsy, (nqibz,3,dvdb%mpert))
+ ABI_MALLOC(this_pertsy, (3,dvdb%mpert))
  ABI_MALLOC(rfpert, (dvdb%mpert))
  ABI_MALLOC(pinfo, (3,3*dvdb%mpert))
  rfpert = 0; rfpert(1:cryst%natom) = 1; rfdir = 1
@@ -4516,7 +4658,8 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      ! Find the list of irreducible perturbations for this q-point.
      call irreducible_set_pert(cryst%indsym,dvdb%mpert,cryst%natom,cryst%nsym,&
-         pertsy(nqpt_interpolate,:,:),rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
+         this_pertsy,rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
+         pertsy(nqpt_interpolate,:,:) = this_pertsy
 
      do iat=1,natom
        do idir=1,3
@@ -4600,7 +4743,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
      ! entry set to -1 for perturbations that can be found from basis perturbations.
      if (sum(pertsy(:,idir,iat)) == -nqpt_interpolate) cycle
 
-     call wrtout(std_out, sjoin("Interpolating perturbation iat,idir = ",itoa(iat), itoa(idir)))
+     call wrtout(std_out, sjoin("Interpolating perturbation iat, idir = ",itoa(iat), itoa(idir)))
 
      ! Compute phonon potential in real space lattice representation
      call dvdb_get_v1scf_rpt(dvdb, cryst, ngqpt_coarse, nqshift_coarse, &
@@ -4653,6 +4796,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  ABI_FREE(wtq)
  ABI_FREE(iq_read)
  ABI_FREE(pertsy)
+ ABI_FREE(this_pertsy)
  ABI_FREE(rfpert)
  ABI_FREE(pinfo)
 
