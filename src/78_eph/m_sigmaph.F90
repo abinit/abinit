@@ -1121,36 +1121,31 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
-           do ibsum=1,nbsum
-             eig0mk = ebands%eig(ibsum, ik_ibz, spin)
-             do ib_k=1,nbcalc_ks
 #if 1
+           do ibsum=1,nbsum
+             do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
                ! gkk0_atm(2, nbcalc_ks, nbsum, natom3)
                ! previous version
                gdw2_mn(ibsum, ib_k) = zero
                do ip2=1,natom3
                  do ip1=1,natom3
-                   gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + tpp(ip1,ip2) * ( &
-                     gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) + &
-                     gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2) + &
-                     gkk0_atm(1, ib_k, ibsum, ip2) * gkk0_atm(1, ib_k, ibsum, ip1) + &
-                     gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
-                    )
+                   cfact = ( &
+                     + gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) &
+                     + gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2) &
+                     + gkk0_atm(1, ib_k, ibsum, ip2) * gkk0_atm(1, ib_k, ibsum, ip1) &
+                     + gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
+                   )
+
+                   !cfact = ( &
+                   !  + gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) &
+                   !  + gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2) &
+                   !)
+                   !cfact = tol3
+                   gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + real(tpp(ip1,ip2) * cfact)
                  end do
-
-                 !do ip1=1,natom3
-                 !  gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + tpp(ip1,ip2) * ( &
-                 !    gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) + &
-                 !    gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2)  ) + &
-                 !    tpp(ip2, ip1) * ( &
-                 !    gkk0_atm(1, ib_k, ibsum, ip2) * gkk0_atm(1, ib_k, ibsum, ip1) + &
-                 !    gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
-                 !   )
-                 !end do
-
                end do
-               !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
+
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two / deg_ibk(ib_k)
                !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
                ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
