@@ -27,7 +27,7 @@ MODULE m_plowannier
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_io_tools,  only : open_file
  use m_mpinfo,    only : proc_distrb_cycle
@@ -300,7 +300,7 @@ subroutine init_plowannier(dtset,wan)
   use defs_datatypes
   use defs_abitypes
   use defs_wvltypes
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xmpi
 
@@ -308,7 +308,6 @@ subroutine init_plowannier(dtset,wan)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_plowannier'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -458,8 +457,7 @@ subroutine init_plowannier(dtset,wan)
      call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
    endif
 
-
-end subroutine
+end subroutine init_plowannier
 !!***
 
 
@@ -707,7 +705,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_hide_lapack
@@ -721,7 +719,6 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_coeff_plowannier'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2929,8 +2926,6 @@ do isppol = 1,wan%nsppol
 
 end do
   close(unt)
-
-
 
 end subroutine print_operwan
 

@@ -27,7 +27,7 @@ MODULE m_paw_overlap
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_special_funcs, only : sbf8
@@ -83,13 +83,13 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !! k1k2_paw(2,mband,mband) :: array of the on-site PAW parts of the overlaps between Bloch states at points
-!!   k1 and k2, for the various pairs of bands, that is, the on-site part of 
+!!   k1 and k2, for the various pairs of bands, that is, the on-site part of
 !!   <u_nk1|u_mk2>
 !!
 !! SIDE EFFECTS
 !!
 !! NOTES
-!! This routine assumes that the cprj are not explicitly ordered by 
+!! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
 !! PARENTS
@@ -99,12 +99,6 @@ CONTAINS  !=====================================================================
 !!      expibi,qijb_kk
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
 &                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
@@ -234,12 +228,6 @@ CONTAINS  !=====================================================================
 !!      simp_gen
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine smatrix_pawinit(atindx1,cm2,cprj,ikpt1,ikpt2,isppol,&
 & g1,gprimd,kpt,mband,mbandw,mkmem,mpi_enreg,&
@@ -662,12 +650,6 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
 
 
@@ -773,12 +755,6 @@ CONTAINS  !=====================================================================
 !!      initylmr,sbf8,simp_gen
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine qijb_kk(calc_qijb,dkvecs,expibi,gprimd,lmn2max,natom,ntypat,&
 &                   pawang,pawrad,pawtab,typat)
@@ -929,12 +905,6 @@ CONTAINS  !=====================================================================
 !! CHILDREN
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine expibi(calc_expibi,dkvecs,natom,xred)
 

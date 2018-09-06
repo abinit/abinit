@@ -30,14 +30,14 @@
 
 MODULE m_hu
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use m_pawtab, only : pawtab_type
 
  implicit none
 
- private 
+ private
 
  public :: init_hu
  public :: destroy_hu
@@ -67,7 +67,7 @@ MODULE m_hu
 
  type, public :: hu_type ! for each typat
 
-  integer :: lpawu         
+  integer :: lpawu
 
   logical :: jmjbasis
 
@@ -129,7 +129,6 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -164,7 +163,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
    if(lpawu.ne.-1) then
      hu(itypat)%upawu=pawtab(itypat)%upawu
      hu(itypat)%jpawu=pawtab(itypat)%jpawu
-     
+
    ! The if below are necessary for an unknown reason with the NAG  compiler.
     if(pawtab(itypat)%f4of2_sla>=0) then
       hu(itypat)%f4of2_sla = pawtab(itypat)%f4of2_sla
@@ -236,7 +235,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
      ij=0
      do ms=1,2*ndim-1
          xij(ms,ms)=0
-       do ms1=ms+1,2*ndim 
+       do ms1=ms+1,2*ndim
          ij=ij+1
          xij(ms,ms1)=ij
          xij(ms1,ms)=ij
@@ -268,7 +267,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
      call wrtout(std_out,  message,'COLL')
 !     xtemp1b=0.d0
 ! ====================================
-!  Print hu(iatom)%uqmc 
+!  Print hu(iatom)%uqmc
 ! ====================================
      ij1=-10
      ij2=-10
@@ -278,7 +277,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
          ij=ij+1
          if(j==i+1) ij1=ij
          if(j==2*ndim) ij2=ij
-       enddo 
+       enddo
 !       write(std_out,*) itypat
 !       do m=1,i
 !        write(std_out,*) i,m
@@ -292,7 +291,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
        if(i==2*ndim)          write(message,'(i3,14f7.3)') i, &
 &                  (hu(itypat)%uqmc(xij(i,m)), m=1,i-1),xtemp
        call wrtout(std_out,  message,'COLL')
-     enddo 
+     enddo
        write(message,'(5x,a)') "--------------------------------------------------------"
        call wrtout(std_out,  message,'COLL')
      ABI_DEALLOCATE(xij)
@@ -315,7 +314,7 @@ end subroutine init_hu
 !!
 !! INPUTS
 !!  ntypat = number of species
-!!  hu <type(hu_type)> = data for the interaction in DMFT. 
+!!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
 !!
@@ -379,7 +378,7 @@ end subroutine destroy_hu
 !! INPUTS
 !!  ntypat = number of species
 !!  prtopt = option for printing
-!!  hu <type(hu_type)> = data for the interaction in DMFT. 
+!!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
 !!
@@ -400,7 +399,6 @@ subroutine print_hu(hu,ntypat,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -463,7 +461,7 @@ end subroutine print_hu
 !! OUTPUT
 !!
 !! SIDE EFFECT
-!!  hu <type(hu_type)> = data for the interaction in DMFT. 
+!!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! PARENTS
 !!
@@ -481,7 +479,6 @@ subroutine vee2udens_hu(hu,ntypat,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee2udens_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -508,7 +505,7 @@ subroutine vee2udens_hu(hu,ntypat,prtopt)
      ij=0
      do ms=1,2*ndim-1
 !         xij(ms,ms)=0
-       do ms1=ms+1,2*ndim 
+       do ms1=ms+1,2*ndim
          ij=ij+1
 !         xij(ms,ms1)=ij
 !         xij(ms1,ms)=ij
@@ -560,7 +557,7 @@ end subroutine vee2udens_hu
 !! OUTPUT
 !!
 !! SIDE EFFECT
-!!  hu <type(hu_type)> = data for the interaction in DMFT. 
+!!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! PARENTS
 !!      hubbard_one,qmc_prep_ctqmc
@@ -581,7 +578,6 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotatevee_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -593,7 +589,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
  type(hu_type),intent(in) :: hu(cryst_struc%ntypat)
  type(coeff2c_type),optional,intent(in) :: rot_mat(cryst_struc%natom,nsppol)
  type(coeff2_type),intent(inout) :: udens_atoms(cryst_struc%natom)
- 
+
 !Local variables-------------------------------
  integer :: dim_vee,iatom,itypat
  integer :: lpawu,m1,m2,m3,m4,mi,mj,mk,ml,natom,ndim,tndim
@@ -636,7 +632,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 
 
 !================================================
-!  NSPINOR = 2 and J/=0 
+!  NSPINOR = 2 and J/=0
 !================================================
  else if (nspinor==2) then
    write(std_out,*)
@@ -683,8 +679,8 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
          fk(2)=fk(1)*hu(itypat)%f4of2_sla
          fk(3)=fk(1)*hu(itypat)%f6of2_sla
        endif
- 
- 
+
+
 
 
 !      ==================================
@@ -702,7 +698,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veeslm),"slm")
 
        dim_vee=ndim
-       basis_vee='Slm' 
+       basis_vee='Slm'
 !     first print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
        call printvee_hu(tndim,real(veeslm2),1,basis_vee)
@@ -740,7 +736,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
          enddo
 
          dim_vee=tndim
-         basis_vee='Diagonal basis from Slm basis' 
+         basis_vee='Diagonal basis from Slm basis'
 !      In the Ylm basis
 !      ================================================================================
        else if (rot_type==2.or.rot_type==3.or.rot_type==4) then
@@ -750,7 +746,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !      Change basis from slm to ylm basis
          call vee_slm2ylm_hu(lpawu,veeslm,veeylm,1,2)
 
-         basis_vee='Ylm' 
+         basis_vee='Ylm'
          dim_vee=ndim
 
 !        print interaction matrix in the ylm basis
@@ -782,12 +778,12 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !        print interaction matrix in the JMJ basis from Inglis and Julien tables
            if(pawprtvol>=3) call udens_inglis_hu(fk,lpawu)
 
-!          new dimension 
- 
- 
+!          new dimension
+
+
 
            dim_vee=tndim
-           basis_vee='JmJ' 
+           basis_vee='JmJ'
 
          else if (rot_type==4) then
 
@@ -818,12 +814,12 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            enddo
 
            dim_vee=tndim
-           basis_vee='Diagonal basis from Ylm' 
+           basis_vee='Diagonal basis from Ylm'
 
          endif
        endif
        ABI_ALLOCATE(veenew,(dim_vee,dim_vee,dim_vee,dim_vee))
-       if(rot_type==0) then   ; veenew=veeslm    
+       if(rot_type==0) then   ; veenew=veeslm
        else if(rot_type==1) then  ; veenew=veerotated
        else if(rot_type==2) then  ; veenew=veeylm
        else if(rot_type==3) then  ; veenew=veejmj
@@ -843,7 +839,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        !write(6,*) "u average",uaver/float(4*ndim*ndim)
 
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veenew),"basis_vee",prtonly=1)
-    
+
 
        ABI_DEALLOCATE(veenew)
        ABI_DEALLOCATE(veeslm)
@@ -894,8 +890,8 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
                call wrtout(std_out,  message,'COLL', do_flush=.True.)
              endif
            endif
-         end do 
-       end do 
+         end do
+       end do
        ABI_ALLOCATE(temp_mat,(ndim,ndim))
        ABI_ALLOCATE(temp_mat2,(ndim,ndim))
        ABI_ALLOCATE(veetemp,(ndim,ndim,ndim,ndim))
@@ -990,7 +986,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !       udens_atoms(iatom)%value=zero
 !       ij=0
 !       do ms=1,2*ndim-1
-!         do ms1=ms+1,2*ndim 
+!         do ms1=ms+1,2*ndim
 !           ij=ij+1
 !           if(ms<=ndim.and.ms1>ndim) then
 !             m1 = ms1 - ndim
@@ -1042,7 +1038,7 @@ end subroutine rotatevee_hu
 !! printvee_hu
 !!
 !! FUNCTION
-!!  print vee 
+!!  print vee
 !!
 !! INPUTS
 !!  vee = number of species
@@ -1067,7 +1063,6 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printvee_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1180,7 +1175,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
      call wrtout(std_out,  message,'COLL')
    enddo
    write(message,'(a)') ch10;  call wrtout(std_out,  message,'COLL')
-   
+
    if(prtopt>=3) then
      if(ndim==7) then
        averu=zero
@@ -1279,7 +1274,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
          !write(6,*) "J averages",aver52,aver72,avernondiag,averall
 
 
-         
+
 
        aver52=zero
        do m1=1,6
@@ -1310,7 +1305,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
        enddo
        averall=averall/182.d0
        !write(6,*) "U-J averages",aver52,aver72,avernondiag,averall
-       
+
      endif
    endif
 
@@ -1406,7 +1401,7 @@ end subroutine printvee_hu
 !!
 !! INPUTS
 !!  ntypat = number of species
-!!  hu <type(hu_type)> = data for the interaction in DMFT. 
+!!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
 !!
@@ -1427,7 +1422,6 @@ subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee2udensatom_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1451,7 +1445,7 @@ subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
    udens_atoms=zero
    ij=0
    do ms=1,2*ndim-1
-     do ms1=ms+1,2*ndim 
+     do ms1=ms+1,2*ndim
        ij=ij+1
        if(ms<=ndim.and.ms1>ndim) then
          m1 = ms1 - ndim
@@ -1521,7 +1515,7 @@ end subroutine vee2udensatom_hu
 !! SOURCE
 
 function reddd(mi,ndim)
-    
+
  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1580,23 +1574,17 @@ end function reddd
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee_slm2ylm_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1630,7 +1618,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
    write(message,'(3a)') ch10, "   vee_slm2ylm_hu"
    call wrtout(std_out,message,'COLL')
  end if
- 
+
  if(abs(prtvol)>2) then
    if(option==1) then
      write(message,'(3a)') ch10,"matrix in Slm basis is changed into Ylm basis"
@@ -1646,7 +1634,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
  slm2ylm=czero
  mat_out_c=czero
 
-!  ===== Definitions of slm2ylm 
+!  ===== Definitions of slm2ylm
  do im=1,2*ll+1
    mm=im-ll-1;jm=-mm+ll+1   ! mmj=-mm
 !! im is in {1,....2*ll+1}
@@ -1671,8 +1659,8 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
 ! end do
 
 !  ===== Definitions of slm2ylm
-!!!!  pawtab(itypat)%vee(m11,m31,m21,m41)= <m11 m31| vee| m21 m41 > 
-!!!!  pawtab(itypat)%vee(m11,m21,m31,m41)= <m11 m21| vee| m31 m41 > 
+!!!!  pawtab(itypat)%vee(m11,m31,m21,m41)= <m11 m31| vee| m21 m41 >
+!!!!  pawtab(itypat)%vee(m11,m21,m31,m41)= <m11 m21| vee| m31 m41 >
 
  do jm=1,2*ll+1
    do im=1,2*ll+1
@@ -1733,7 +1721,7 @@ end subroutine vee_slm2ylm_hu
 !!
 !!
 !! OUTPUT
-!!  mat_out_c= real output matrix 
+!!  mat_out_c= real output matrix
 !!
 !! NOTES
 !!
@@ -1744,17 +1732,12 @@ end subroutine vee_slm2ylm_hu
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine vee_ndim2tndim_hu_r(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1828,7 +1811,7 @@ end subroutine vee_ndim2tndim_hu_r
 !!
 !!
 !! OUTPUT
-!!  mat_out_c= Complex output matrix 
+!!  mat_out_c= Complex output matrix
 !!
 !! NOTES
 !!
@@ -1839,17 +1822,12 @@ end subroutine vee_ndim2tndim_hu_r
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1933,23 +1911,17 @@ end subroutine vee_ndim2tndim_hu
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vee_ylm2jmj_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1978,7 +1950,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
    message=' option=/1 and =/2 !'
    MSG_BUG(message)
  end if
- 
+
  if(option==1) then
    write(message,'(3a)') ch10,&
 &   "matrix in |l,s,m_l,m_s> basis is changed into |l,s,j,m_j> basis"
@@ -1988,7 +1960,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 &   "matrix in |l,s,j,m_j> basis is changed into |l,s,m_l,m_s> basis"
    call wrtout(std_out,message)
  end if
- 
+
 !--------------- Built indices + allocations
  ll=lcor
  ABI_ALLOCATE(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
@@ -2012,7 +1984,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
  end if
  jc1=0
  invsqrt2lp1=one/sqrt(float(2*lcor+1))
- do jj=ll,ll+1 
+ do jj=ll,ll+1
    xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}
    do jm=-jj,jj-1
      xmj=float(jm)+half  ! xmj is in {-xj,xj}
@@ -2079,7 +2051,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! udens_slatercondon_hu
 !!
 !! FUNCTION
-!! For a given angular momentum l and Slater integrals, give the 
+!! For a given angular momentum l and Slater integrals, give the
 !! density density interactions U(m,m') and J(m,m') from Slater and
 !! Condon tables
 !!
@@ -2105,23 +2077,17 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine udens_slatercondon_hu(fk,lcor)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'udens_slatercondon_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2152,11 +2118,11 @@ subroutine udens_slatercondon_hu(fk,lcor)
  udens=zero
  jdens=zero
  if(lcor==0) then
-   aklmlmp(0,0,0)=1    
+   aklmlmp(0,0,0)=1
 !
-   bklmlmp(0,0,0)=0    
+   bklmlmp(0,0,0)=0
  else if(lcor==1) then
-   aklmlmp(0, :, :)=1    
+   aklmlmp(0, :, :)=1
    aklmlmp(1, 1, 1)= one/25._dp
    aklmlmp(1,-1,-1)= one/25._dp
    aklmlmp(1,-1, 1)= one/25._dp
@@ -2166,7 +2132,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
    aklmlmp(1, 0,-1)=-two/25._dp
    aklmlmp(1, 0, 1)=-two/25._dp
    aklmlmp(1, 0, 0)= four/25._dp
-!   
+!
    bklmlmp(0, 1, 1)= one
    bklmlmp(0,-1,-1)= one
    bklmlmp(0, 0, 0)= one
@@ -2180,7 +2146,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
    bklmlmp(1, 0, 1)= three/25._dp
    bklmlmp(1, 0, 0)= four/25._dp
  else if(lcor==2) then
-   aklmlmp(0, :, :)=1    
+   aklmlmp(0, :, :)=1
    aklmlmp(1, 2, 2)=  four / 49._dp
    aklmlmp(1, 2, 1)=  -two / 49._dp
    aklmlmp(1, 2, 0)= -four / 49._dp
@@ -2247,33 +2213,33 @@ subroutine udens_slatercondon_hu(fk,lcor)
    !  call wrtout(std_out,  message,'COLL')
    !enddo
 
-   bklmlmp(0, 2, 2)=1    
-   bklmlmp(0, 1, 1)=1    
-   bklmlmp(0, 0, 0)=1    
-   bklmlmp(0,-1,-1)=1    
-   bklmlmp(0,-2,-2)=1    
+   bklmlmp(0, 2, 2)=1
+   bklmlmp(0, 1, 1)=1
+   bklmlmp(0, 0, 0)=1
+   bklmlmp(0,-1,-1)=1
+   bklmlmp(0,-2,-2)=1
    bklmlmp(1, 2, 2)= four / 49._dp
    bklmlmp(1, 2, 1)=  six / 49._dp
    bklmlmp(1, 2, 0)= four / 49._dp
-   bklmlmp(1, 2,-1)=  zero 
-   bklmlmp(1, 2,-2)=  zero 
+   bklmlmp(1, 2,-1)=  zero
+   bklmlmp(1, 2,-2)=  zero
    bklmlmp(1, 1, 2)=  six / 49._dp
    bklmlmp(1, 1, 1)=  one / 49._dp
    bklmlmp(1, 1, 0)=  one / 49._dp
    bklmlmp(1, 1,-1)=  six / 49._dp
-   bklmlmp(1, 1,-2)=  zero 
+   bklmlmp(1, 1,-2)=  zero
    bklmlmp(1, 0, 2)= four / 49._dp
    bklmlmp(1, 0, 1)=  one / 49._dp
    bklmlmp(1, 0, 0)= four / 49._dp
    bklmlmp(1, 0,-1)=  one / 49._dp
    bklmlmp(1, 0,-2)= four / 49._dp
-   bklmlmp(1,-1, 2)=  zero 
+   bklmlmp(1,-1, 2)=  zero
    bklmlmp(1,-1, 1)=  six / 49._dp
    bklmlmp(1,-1, 0)=  one / 49._dp
    bklmlmp(1,-1,-1)=  one / 49._dp
    bklmlmp(1,-1,-2)=  six / 49._dp
-   bklmlmp(1,-2, 2)=  zero 
-   bklmlmp(1,-2, 1)=  zero 
+   bklmlmp(1,-2, 2)=  zero
+   bklmlmp(1,-2, 1)=  zero
    bklmlmp(1,-2, 0)= four / 49._dp
    bklmlmp(1,-2,-1)=  six / 49._dp
    bklmlmp(1,-2,-2)= four / 49._dp
@@ -2367,7 +2333,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! udens_inglis_hu
 !!
 !! FUNCTION
-!! For a given angular momentum l and Slater integrals, give the 
+!! For a given angular momentum l and Slater integrals, give the
 !! density density interactions U(m,m') and J(m,m') from Inglis tables
 !! in JMJ Basis
 !!
@@ -2393,23 +2359,17 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !!      wrtout
 !!
 !! SOURCE
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine udens_inglis_hu(fk,lcor)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'udens_inglis_hu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

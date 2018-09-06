@@ -28,7 +28,7 @@ module m_skw
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_crystal
  use m_sort
@@ -164,7 +164,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'skw_new'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -281,7 +280,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  end do
 
  ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", &
+ call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", & ! [[cite:Pickett1988]]
              do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))

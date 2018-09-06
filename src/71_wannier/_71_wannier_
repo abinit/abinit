@@ -15,10 +15,9 @@
 !!
 !! CHILDREN
 !! defs_wannier90.F90
-!! defs_wannier90.F90
+!! interfaces_71_wannier.F90
 !! m_mlwfovlp.F90
-!! m_plowannier.F90
 !! m_mlwfovlp_qp.F90
-!! read_plowannier.F90
+!! m_plowannier.F90
 !!
 !!***

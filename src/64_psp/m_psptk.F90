@@ -28,7 +28,7 @@ module m_psptk
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use m_numeric_tools,  only : ctrap

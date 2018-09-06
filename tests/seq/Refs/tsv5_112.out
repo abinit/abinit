@@ -335,7 +335,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    2006.000    2005.997
    0.00000   0.00000   9.20921   0.00000   0.00000  38.14838   0.00000   0.00000
    0.00000   0.00000   0.00000   9.20921   0.00000   0.00000  38.14838   0.00000
    0.00141   0.03831   0.00000   0.00000   9.23577   0.00000   0.00000  38.25301
- Atom #  2
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  3 components have a value greater than   25.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+  Atom #  2
    2.66214   0.26940   0.00000   0.00000  -0.00187   0.00000   0.00000   0.00007
    0.26940   0.03264   0.00000   0.00000  -0.00155   0.00000   0.00000  -0.00004
    0.00000   0.00000   2.38944   0.00000   0.00000   0.06549   0.00000   0.00000

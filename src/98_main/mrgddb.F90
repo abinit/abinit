@@ -31,10 +31,6 @@
 !! counting the final number of blocks, and second to merge
 !! the two DDBs. This would save memory.
 !!
-!! CHILDREN
-!!      abi_io_redirect,destroy_mpi_enreg,flush_unit,herald,mrgddb_init,initmpi_seq
-!!      inprep8,mblktyp1,mblktyp5,timein,wrtout,xmpi_end,xmpi_init
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -54,7 +50,7 @@ program mrgddb
 
  use defs_basis
  use m_build_info
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_ddb_hdr
@@ -69,7 +65,6 @@ program mrgddb
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgddb'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

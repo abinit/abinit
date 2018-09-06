@@ -33,7 +33,7 @@ module m_bethe_salpeter
  use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_screen
@@ -52,6 +52,7 @@ module m_bethe_salpeter
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
+ use m_fft,             only : fourdp
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
  use m_crystal_io,      only : crystal_ncwrite, crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
@@ -194,8 +195,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bethe_salpeter'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1125,7 +1124,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1601,7 +1599,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
          jj=jj+1
          eigen  (jj)=energies_p(ib,ik_ibz,isppol)
          if (occ_from_dtset) then
-           occfact(jj)=Dtset%occ_orig(ibtot)
+           !Not occupations must be the same for different images
+           occfact(jj)=Dtset%occ_orig(ibtot,1)
          else
            occfact(jj)=Hdr_wfk%occ(ibtot)
          end if
@@ -2085,7 +2084,6 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse_interp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

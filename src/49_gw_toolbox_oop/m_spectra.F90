@@ -34,7 +34,7 @@ MODULE m_spectra
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_io_tools,      only : open_file
  use m_fstrings,      only : strcat

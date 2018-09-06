@@ -27,7 +27,7 @@ module m_sigmaph
  use defs_basis
  use defs_abitypes
  use iso_c_binding
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_hide_blas
@@ -68,6 +68,7 @@ module m_sigmaph
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_fourier_interpol, only : transgrid
+ use m_symkpt,     only : symkpt
 ! use m_paw_an,	       only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,	       only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
@@ -352,7 +353,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -380,6 +380,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !scalars
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
+ integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
@@ -408,6 +409,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
+ integer,allocatable :: indq2dvdb(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: phfrq_ibz(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
@@ -464,7 +466,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  mpw = sigma%mpw; gmax = sigma%gmax
 
  ! Init work_ngfft
- gmax = gmax + 4 ! FIXME: this is to account for umklapp
+ gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
@@ -571,13 +573,27 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    kk_ibz = ebands%kptns(:,ik_ibz)
    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
-   ! Activate Fourier interpolation if q-points are not in the DVDB file.
-   ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
-   ! without performing FT interpolation.
+   ! Find correspondence IBZ_k --> set of q-points in DVDB.
+   ! Need to handle q_bz = S q_ibz by symmetrizing the potentials already available in the DVDB.
+   ! Activate Fourier interpolation only if q-points cannot be reconstructed from the DVDB file.
+   !
+   ! Note:
+   !   * q --> -q symmetry is always used for phonons.
+   !   * we use symrec instead of symrel (see also m_dvdb)
+   !
+   ABI_MALLOC(indq2dvdb, (6, sigma%nqibz_k))
    do_ftv1q = 0
    do iq_ibz=1,sigma%nqibz_k
-     if (dvdb_findq(dvdb, sigma%qibz_k(:,iq_ibz)) == -1) do_ftv1q = do_ftv1q + 1
+     call listkk(dksqmax, cryst%gmet, indkk_kq, dvdb%qpts, sigma%qibz_k(:,iq_ibz), dvdb%nqpt, 1, cryst%nsym, &
+        1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+     indq2dvdb(:, iq_ibz) = indkk_kq(1, :)
+     if (dksqmax > tol12) then
+       ! Cannot recostruct this qpt by symmetry. Set entry to -1 and activate Fourier interpolation.
+       indq2dvdb(:, iq_ibz) = -1
+       do_ftv1q = do_ftv1q + 1
+     end if
    end do
+
    if (do_ftv1q /= 0) then
      write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",sigma%nqibz_k,"]"
      call wrtout(std_out, msg)
@@ -671,18 +687,19 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
        call cwtime(cpu,wall,gflops,"start")
 
-       ! Find the index of the q-point in the DVDB.
-       db_iqpt = dvdb_findq(dvdb, qpt)
+       db_iqpt = indq2dvdb(1, iq_ibz)
+       !db_iqpt = dvdb_findq(dvdb, qpt)
 
-       ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
        if (db_iqpt /= -1) then
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
-         ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
+         ! Read and reconstruct the dvscf potentials for all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
+         !call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
+
+         call dvdb_readsym_qbz(dvdb, cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
-         if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
          ! Fourier interpolation of the potential
+         if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
          ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
          cplex = 2
          ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
@@ -709,7 +726,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        !
        kq = kk + qpt
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-         1,cryst%symafm,cryst%symrel,sigma%timrev,use_symrec=.False.)
+         sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev,use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(4a,es16.6,7a)' )&
@@ -939,6 +956,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  rfact = (nqnu + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
                          (nqnu - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
                  sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * rfact
+                 !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                 !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                 !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
 
                  !cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
                  !gmod2 = cfact * dconjg(cfact)
@@ -1028,15 +1048,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
          if (abs(sigma%symsigma) == 1) then
            qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
+           !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
          else
-           ! symsigma == 0 activates sum over full BZ for debugging purpose.
            qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
+           !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
          end if
 
          ! Get phonons for this q-point.
          ! DEBUG
          !call ifc_fourq(ifc, cryst, sigma%qibz(:, sigma%indkk(iq_ibz, 1)), phfrq_ibz, displ_cart)
-         !call ifc_fourq(ifc, cryst, [zero, zero, zero], phfrq, displ_red)
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
          !phfrq = phfrq_ibz
          !if (all(abs(qpt) < tol12)) cycle
@@ -1102,6 +1122,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
            end do
            ABI_FREE(wmat1)
+           !gdw2_mn = zero
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
@@ -1188,6 +1209,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, comm)
    end do ! spin
 
+   ABI_FREE(indq2dvdb)
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
    ABI_FREE(ylm_k)
@@ -1411,7 +1433,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph_new'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1427,7 +1448,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,occopt3=3,qptopt1=1
+ integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj,bstart,nbcount
@@ -1645,7 +1666,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  do ikcalc=1,new%nkcalc
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
-      1,cryst%symafm,cryst%symrel,new%timrev,use_symrec=.False.)
+      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,use_symrec=.False.)
 
    new%kcalc2ibz(ikcalc, :) = indkk_k(1, :)
 

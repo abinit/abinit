@@ -10,88 +10,11 @@ from .parser import FortranKissParser
 
 class TestFortranKissParser(TestCase):
 
-    def test_regex(self):
-        """Test regular expressions."""
-        p = FortranKissParser
-
-        # Note: Don't use strings with inlined comments e.g.
-        #
-        #   "program foo !this is an inlined comment"
-        #
-        # because the parser will strip them and operate stripped strings.
-
-        # Program
-        m = p.RE_PROG_START.match("program foo")
-        assert m and m.group("name") == "foo"
-        assert p.RE_PROG_START.match("program")
-        m = p.RE_PROG_END.match("end program foo")
-        assert m and m.group("name") == "foo"
-        m = p.RE_PROG_END.match("end")
-        assert m and m.group("name") is None
-
-        # Module
-        m = p.RE_MOD_START.match("module   foo")
-        assert m and m.group("name") == "foo"
-        #m = p.RE_MOD_START.match("module   foo !hello")
-        #assert m and m.group("name") == "foo"
-        m = p.RE_MOD_END.match("end   module   foo")
-        assert m and m.group("name") == "foo"
-        m = p.RE_MOD_END.match("end")
-        assert m and m.group("name") is None
-
-        # Subroutine
-        m = p.RE_SUB_START.match("subroutine  foo")
-        assert m and m.group("name") == "foo" and not m.group("prefix")
-        m = p.RE_SUB_START.match("subroutine foo(a, b)")
-        assert m and m.group("name") == "foo" and m.group("prefix") == ""
-        m = p.RE_SUB_START.match("pure  subroutine foo(a, b)")
-        assert m and m.group("name") == "foo" and m.group("prefix").strip() == "pure"
-        m = p.RE_SUB_END.match("end  subroutine foo")
-        assert m and m.group("name") == "foo"
-        m = p.RE_SUB_END.match("end")
-        assert m and m.group("name") is None
-
-        # Functions: these are tricky so test them carefully.
-        m = p.RE_FUNC_START.match("function  foo")
-        assert m and m.group("name") == "foo" and not m.group("prefix")
-        m = p.RE_FUNC_START.match("integer function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
-        m = p.RE_FUNC_START.match("integer(kind = i8b) function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
-        m = p.RE_FUNC_START.match("real(dp) function foo(a, b)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
-        m = p.RE_FUNC_START.match("pure complex(dpc) function foo(a)")
-        assert m and m.group("name") == "foo" #and not m.group("prefix")
-        m = p.RE_FUNC_START.match("pure logical function foo(a, b)")
-        assert m and m.group("name") == "foo"
-        #assert m.group("prefix") == "foo"
-        m = p.RE_FUNC_START.match("type(foo_t) function foo(a, b) result(res)")
-        assert m and m.group("name") == "foo"
-
-        m = p.RE_FUNC_END.match("end  function foo")
-        assert m and m.group("name") == "foo"
-        m = p.RE_FUNC_END.match("end")
-        assert m and m.group("name") is None
-
-        # Calls to subroutines
-        m = p.RE_SUBCALL.match("call  foo")
-        assert m and m.group("name") == "foo"
-        m = p.RE_SUBCALL.match("call  foo ( a, b)")
-        assert m and m.group("name") == "foo"
-        m = p.RE_SUBCALL.match("if (a == 1) call foo(a=2)")
-        assert m and m.group("name") == "foo"
-        #m = p.RE_SUBCALL.match("if (cond) call obj%foo(a, b)")
-        #assert m and m.group("name") == "obj%foo"
-        #m = p.RE_SUBCALL.match("if (.True.) call obj%foo(a=1, b=3)")
-        #assert m and m.group("name") == "obj%foo"
-
-        # Interface
-        m = p.RE_INTERFACE_START.match("abstract interface foo")
-        assert m #and m.group("name") == "foo"
-        m = p.RE_INTERFACE_END.match("end interface")
-        assert m and not m.group("name")
-        m = p.RE_INTERFACE_END.match("end  interface  foo")
-        assert m and m.group("name").strip() == "foo"
+    def test_helper_functions(self):
+        p = FortranKissParser(verbose=3)
+        s = "'hello; world' !foo; bar"
+        toks = p.quote_split(";", s, strip=True)
+        assert len(toks) == 2 and toks[0] == "'hello; world' !foo" and toks[1] == "bar"
 
     def test_simple_program(self):
         """Parsing Fortran program written following good programming standards."""
@@ -99,54 +22,138 @@ class TestFortranKissParser(TestCase):
 #include "abi_common.h"
 
 ! A Very simple example
-! of Fortran program written following good programming standards
+! of Fortran program written following (not so) good programming standards
 
-program hello_world
+program hello_world!my first test
     use defs_basis
+
     implicit none
     call foo()
+    if (.True.) call foobar()
 
-contains ! contained procedure
+contains! contained procedures
 
-    subroutine foo()
-    end subroutine foo
+ ! foo_preamble
+  subroutine foo()!hello
+ ! An openMP do loop
+!
+    !$OMP PARALLEL DO
+    do i = 1, 3
+        print("hello world")
+    end do
+  END subroutine foo
 
-    function bar()
-    end function bar
-end program
+ ! bar
+ ! preamble
+function bar ( )
+    use moda; use modb
+    end FUNCTION BAR
+end PROGRAM HELLO_WORLD
 """
-        p = FortranKissParser()
-        p.parse_lines(s.splitlines())
+        p = FortranKissParser(verbose=3)
+        p.parse_string(s)
         assert len(p.programs) == 1
-        assert not p.modules and not p.subroutines
-        assert "abi_common.h" in p.includes
-        assert "defs_basis" in p.uses
+        assert not p.modules
+        assert not p.subroutines
+        assert "abi_common.h" in p.all_includes
+        assert "defs_basis" in p.all_uses
+        assert "moda" in p.all_uses and "modb" in p.all_uses
 
         prog = p.programs[0]
         assert prog.name == "hello_world" and prog.ancestor is None
         assert prog.is_program and not prog.is_subroutine
-        assert len(prog.preamble) == 2
-        assert prog.preamble[0] == "! a very simple example"
-        assert "foo" in prog.children
         assert prog.to_string(verbose=2)
+        preamble = prog.preamble.splitlines()
+        assert len(preamble) == 2
+        assert preamble[0] == "! A Very simple example"
+        assert "foo" in prog.children
+        assert "foobar" in prog.children
 
         assert len(prog.contains) == 2
-        sub = prog.contains[0]
-        assert sub.is_subroutine and sub.name == "foo" and sub.ancestor is prog
-        assert sub.to_string(verbose=2)
+        foo = prog.contains[0]
+        assert foo.is_subroutine and foo.name == "foo" and foo.ancestor is prog
+        assert foo.to_string(verbose=2)
+        assert foo.num_doclines == 1
+        assert foo.num_omp_statements == 1
+        assert foo.num_f90lines == 3
+        assert foo.preamble == "! foo_preamble"
 
-        func = prog.contains[1]
-        assert func.is_function and func.name == "bar" and func.ancestor is prog
-        assert func.to_string(verbose=2)
+        bar = prog.contains[1]
+        assert bar.is_function and bar.name == "bar" and bar.ancestor is prog
+        assert bar.to_string(verbose=2)
+        assert "moda" in bar.uses and "modb" in bar.uses
+        # TODO
+        #assert bar.num_doclines == 1
+        #assert bar.num_omp_statements == 1
+        #assert bar.num_f90lines == 3
+        assert bar.preamble.splitlines() == ["! bar", "! preamble"]
+
+    def test_continuation_lines(self):
+        s = """
+subroutine &
+  foo ()
+
+  if &
+& (.True)call &
+foobar()
+ call foobar2("hello", &
+& 'world')
+
+ ! & and ; on the same line are not treated
+ !call foo1("hello"); call &
+ !  foo2 ('word2')
+
+  call foo3("hello; world")
+
+end &
+& subroutine &
+foo
+
+cont&! yet another crazy line
+&ains
+
+integer &
+ function ifunc(i) result(res)
+ integer,intent(in) :: &
+   i
+
+end &
+    ! this is a bastard comment
+&function ifunc
+
+subroutine hello(a,&
+& b, & ! optional args
+& c) !last (arg)
+
+end subroutine hello
+
+end&
+subroutine foo
+"""
+        p = FortranKissParser(verbose=3)
+        p.parse_string(s)
+        foo = p.subroutines[0]
+        assert foo.name == "foo"
+        assert "foobar" in foo.children
+        assert "foobar2" in foo.children
+        # TODO  & and ; on the same line are not treated
+        #assert "foo1" in foo.children and "foo2" in foo.children
+        assert len(foo.contains) == 2
+        ifunc = foo.contains[0]
+        assert ifunc.name == "ifunc"
+
+        hello = foo.contains[1]
+        assert hello.name == "hello"
+        assert len(hello.args) == 3 and list(hello.args.keys()) == ["a", "b", "c"]
 
     def test_simple_module(self):
         """Parsing Fortran module written following good programming standards."""
         s = """
 #if defined HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 
-#include "abi_common.h"
+include 'abi_common.h'
 
 ! A Very simple example
 ! of Fortran module written following good programming standards
@@ -158,242 +165,289 @@ module m_crystal
     implicit none
     private
 
+    ! crystal_t_preamble
     type,public :: crystal_t
         integer :: nsym
+        ! nsym docstring
         real(dp),allocatable :: xred(:,:)
-    end type
+        ! xred
+        ! docstring
+
+    END TYPE crystal_t!Enforcing name
 
     public :: crystal_free
     public :: idx_spatial_inversion
 
-    interface operator (==)
-      module procedure coeffs_compare
+interface get_unit
+      module procedure get_free_unit
+      module procedure get_unit_from_fname
+
+    END INTERFACE!hello
+
+  interface Operator (==)
+      module  procedure  coeffs_compare
     end interface operator (==)
 
-CONTAINS  !=============================
+CONTAINS!=============================
 !!***
 
 subroutine crystal_free(cryst)
+
     type(crystal_t),intent(inout) :: cryst
+
+    ! interfaces inside routines are not parsed
+    interface!but the parser should not crash here.
+          function integrand(x)
+          integer, parameter :: dp=kind(1.0d0)
+          real(dp) integrand
+          real(dp),intent(in) :: x
+          end function integrand
+end interface
+
     if (allocated(cryst%zion)) then
       ABI_FREE(cryst%zion)
     end if
+
 end subroutine crystal_free
 
 pure function idx_spatial_inversion(cryst) result(inv_idx)
+
     integer :: inv_idx
     type(crystal_t),intent(in) :: cryst
-    if (cryst%nsym > 1)
+    if (cryst%nsym > 1) ! Syntax error but the body is not parsed
+
 end function idx_spatial_inversion
 
-logical function private_function(cryst) result(ans)
+logical function private_bool_function(cryst)
+
+    logical :: private_bool_function
     type(crystal_t),intent(in) :: cryst
-    ans = (cryst%nsym > 1)
+    private_bool_function = (cryst%nsym > 1)
+
 end function idx_spatial_inversion
 
 end module m_crystal
 """
-        p = FortranKissParser()
-        p.parse_lines(s.splitlines())
+        p = FortranKissParser(verbose=3)
+        p.parse_string(s)
+        assert p.warnings
         assert len(p.modules) == 1
         assert not p.programs and not p.subroutines
-        assert "abi_common.h" in p.includes
-        assert "defs_basis" in p.uses
-        assert "m_fstrings" in p.uses
+        assert "abi_common.h" in p.all_includes
+        assert "defs_basis" in p.all_uses
+        assert "m_fstrings" in p.all_uses
 
         mod = p.modules[0]
         assert mod.name == "m_crystal" and mod.ancestor is None
-        assert mod.is_module and not mod.is_subroutine
-        assert len(mod.preamble) == 2
-        assert mod.preamble[0] == "! a very simple example"
+        assert mod.is_module and not mod.is_subroutine and not mod.is_contained
+        assert not mod.includes
+        #assert mod.default_visibility == "private"
+        preamble = mod.preamble.splitlines()
+        assert len(preamble) == 2
+        assert preamble[0] == "! A Very simple example"
         assert not mod.children
-        assert mod.to_string(verbose=2)
+        assert mod.to_string(verbose=3)
 
         assert len(mod.contains) == 3
         sub = mod.contains[0]
-        assert sub.is_subroutine and sub.name == "crystal_free" and sub.ancestor is mod
+        assert sub.is_subroutine and sub.name == "crystal_free"
+        assert sub.ancestor is mod and sub.is_contained
+        assert not sub.attribs
 
         func = mod.contains[1]
         assert func.is_function and func.name == "idx_spatial_inversion" and func.ancestor is mod
+        assert "pure" in func.attribs
+        # TODO
+        #assert func.result.name == "inv_idx"
+        #assert func.is_public
+        #assert func.result.ftype == "integer" and func.result.kind is None
 
-    def test_tricky_module(self):
-        """Parsing tricky Fortran module similar to 42_libpaw/m_libpaw_libxc.F90"""
+        func = mod.contains[2]
+        assert func.is_function and func.name == "private_bool_function" and func.ancestor is mod
+        assert "logical" in func.attribs
+        # TODO
+        #assert func.result.name == func.name
+        #assert not func.is_public and func.is_private
+        #assert func.result.ftype == "logical" and func.result.kind is None
+
+        assert len(mod.interfaces) == 2
+        assert mod.interfaces[0].name == "get_unit"
+        # TODO
+        #assert mod.interfaces[1].name == "(==)"
+
+        # Test datatype
+        assert len(mod.types) == 1
+        crystal_t = mod.types[0]
+        assert crystal_t.name == "crystal_t"
+        assert crystal_t.ancestor.is_module  and crystal_t.ancestor.name == "m_crystal"
+        str(crystal_t); repr(crystal_t)
+        assert crystal_t.to_string(verbose=3)
+        # TODO
+        #assert crystal_t.preamble == "! crystal_t_preamble"
+
+        crystal_t.analyze()
+        nsym, xred = crystal_t.variables["nsym"], crystal_t.variables["xred"]
+        str(nsym); repr(nsym)
+        assert nsym.ftype == "integer" and nsym.is_scalar and not nsym.is_pointer
+        assert nsym.doc == "! nsym docstring"
+        # TODO
+        #assert xred.ftype == "real" and xred.kind == "dp"
+        assert not xred.is_scalar and xred.is_array and xred.shape == "(:,:)"
+        assert xred.doc.splitlines() == ["! xred", "! docstring"]
+
+    def test_datatype(self):
+        """Parsing Fortran datatype declaration"""
         s = """\
-#include "libpaw.h"
+MODule foo_module!my first module
 
-module m_libpaw_libxc_funcs
+type, public :: foo_t
 
- USE_DEFS
- USE_MSG_HANDLING
- USE_MEMORY_PROFILING
-#ifdef LIBPAW_ISO_C_BINDING
- use iso_c_binding
-#endif
+  integer ( i8b ) , public :: nsym
+  ! number of symmetries
 
- implicit none
- private
+  real (kind = 4), private , allocatable:: xred(:, :)
 
-!Public functions
- public :: libpaw_libxc_check              ! Check if the code has been compiled with libXC
+  real (kind = 4), dimension(:,:) , allocatable:: xcart
 
-!Private functions
- private :: libpaw_libxc_constants_load    ! Load libXC constants from C headers
- private :: char_c_to_f                    ! Convert a string from C to Fortran
+  type(foo_t), pointer :: foo
+  ! Another foo type
 
-!Public constants (use libpaw_libxc_constants_load to init them)
- integer,public,save :: LIBPAW_XC_FAMILY_UNKNOWN       = -1
- logical,private,save :: libpaw_xc_constants_initialized=.false.
+  double complex,allocatable::cvals(:)!inlined
 
-!XC functional public type
- type,public :: libpaw_libxc_type
-   integer  :: id              ! identifier
-   logical  :: has_exc         ! TRUE is exc is available for the functional
-   real(dp) :: hyb_mixing      ! Hybrid functional: mixing factor of Fock contribution (default=0)
-#ifdef LIBPAW_ISO_C_BINDING
-   type(C_PTR),pointer :: conf => null() ! C pointer to the functional itself
-#endif
- end type libpaw_libxc_type
+  character (len=fnlen), allocatable , private :: strings(:)
 
-!Private global XC functional
- type(libpaw_libxc_type),target,save :: paw_xc_global(2)
+  real(dp), allocatable :: ucvol, &
+    ecut  ! doc for ucvol and ecut
 
-!----------------------------------------------------------------------
+end type fOO_t!foo_t
 
-!Interfaces for C bindings
-#ifdef LIBPAW_ISO_C_BINDING
- interface
-   integer(C_INT) function xc_func_init(xc_func,functional,nspin) bind(C,name="xc_func_init")
-     use iso_c_binding, only : C_INT,C_PTR
-     integer(C_INT),value :: functional,nspin
-     type(C_PTR) :: xc_func
-   end function xc_func_init
- end interface
-!
- interface
-   subroutine xc_func_end(xc_func) bind(C,name="xc_func_end")
-     use iso_c_binding, only : C_PTR
-     type(C_PTR) :: xc_func
-   end subroutine xc_func_end
- end interface
-!
- interface
-   integer(C_INT) function xc_family_from_id(id,family,number) &
-&                          bind(C,name="xc_family_from_id")
-     use iso_c_binding, only : C_INT,C_PTR
-     integer(C_INT),value :: id
-     type(C_PTR),value :: family,number
-   end function xc_family_from_id
- end interface
-!
- interface
-   subroutine xc_hyb_cam_coef(xc_func,omega,alpha,beta) &
-&             bind(C,name="xc_hyb_cam_coef")
-     use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE) :: omega,alpha,beta
-     type(C_PTR) :: xc_func
-   end subroutine xc_hyb_cam_coef
- end interface
-!
- interface
-   subroutine xc_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
-&             v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
-&             v2sigmalapl,v2sigmatau,v2lapltau) &
-&             bind(C,name="xc_mgga")
-     use iso_c_binding, only : C_INT,C_PTR
-     integer(C_INT),value :: np
-     type(C_PTR),value :: rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
-&                         v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
-&                         v2sigmalapl,v2sigmatau,v2lapltau
-     type(C_PTR) :: xc_func
-   end subroutine xc_mgga
- end interface
-#endif
-
-contains
-
- subroutine libpaw_libxc_constants_load()
-
-#if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
-#endif
-
- end subroutine libpaw_libxc_constants_load
-
- subroutine libpaw_libxc_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
-&           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
-
- implicit none
-
-!Arguments ------------------------------------
- integer, intent(in) :: ndvxc,nd2vxc,npts,nspden,order
- real(dp),intent(in)  :: rho(npts,nspden)
- real(dp),intent(out) :: vxc(npts,nspden),exc(npts)
- real(dp),intent(in),optional :: grho2(npts,2*min(nspden,2)-1)
- real(dp),intent(out),optional :: vxcgr(npts,3)
- real(dp),intent(in),optional :: lrho(npts,nspden)
- real(dp),intent(out),optional :: vxclrho(npts,nspden)
- real(dp),intent(in),optional :: tau(npts,nspden)
- real(dp),intent(out),optional :: vxctau(npts,nspden)
- real(dp),intent(out),optional :: dvxc(npts,ndvxc)
- real(dp),intent(out),optional :: d2vxc(npts,nd2vxc)
- real(dp),intent(in),optional :: xc_tb09_c
- type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
-
-! *************************************************************************
-
-end subroutine libpaw_libxc_getvxc
-
-#if defined LIBPAW_ISO_C_BINDING
-function char_f_to_c(f_string) result(c_string)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: f_string
- character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
-!Local variables -------------------------------
- integer :: ii,strlen
-!! *************************************************************************
- strlen=len_trim(f_string)
- forall(ii=1:strlen)
-   c_string(ii)=f_string(ii:ii)
- end forall
- c_string(strlen+1)=C_NULL_CHAR
- end function char_f_to_c
-#endif
-
-#if defined LIBPAW_ISO_C_BINDING
-subroutine char_c_to_f(c_string,f_string)
-
- character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
- character(len=*),intent(out) :: f_string
-
-!Local variables -------------------------------
- integer :: ii
-!! *************************************************************************
- ii=1
- do while(c_string(ii)/=C_NULL_CHAR.and.ii<=len(f_string))
-   f_string(ii:ii)=c_string(ii) ; ii=ii+1
- end do
- if (ii<len(f_string)) f_string(ii:)=' '
- end subroutine char_c_to_f
-#endif
-!!***
-
-!----------------------------------------------------------------------
-
-end module m_libpaw_libxc_funcs
-!!***
-
-module m_libpaw_libxc
-
-#if defined HAVE_LIBPAW_ABINIT
- use libxc_functionals
-#else
- use m_libpaw_libxc_funcs, only : &
-& libxc_functionals_check            => libpaw_libxc_check, &
-& libxc_functionals_gga_from_hybrid  => libpaw_libxc_gga_from_hybrid
-#endif
-
- implicit none
-
-end module m_libpaw_libxc
+END MODULE FOO_MOdule
 """
+        p = FortranKissParser(verbose=3)
+        p.parse_string(s)
+        dt = p.modules[0].types[0]
+        assert dt.name == "foo_t"
+        assert "public" in dt.attribs
+        dt.analyze()
+
+        # Test nsym
+        nsym = dt.variables["nsym"]
+        assert nsym.ftype == "integer" and nsym.kind == "i8b"
+        assert nsym.doc == "! number of symmetries"
+
+        # Test xred && xcart
+        # TODO: xcart
+        for vname in ["xred",]: # "xcart"]:
+            var = dt.variables[vname]
+            assert var.ftype == "real" and var.kind == "4" and not var.doc
+            assert var.is_allocatable and not var.is_scalar and var.is_array
+
+        # Test foo
+        foo = dt.variables["foo"]
+        assert foo.ftype == "type" and foo.kind == "foo_t"
+        assert foo.is_scalar
+        assert foo.is_pointer
+        # TODO
+        #assert not foo.is_pointer_set_to_null
+
+        # Test cvals
+        cvals = dt.variables["cvals"]
+        assert cvals.ftype == "doublecomplex" and cvals.kind is None
+
+        # Test strings
+        strings = dt.variables["strings"]
+        assert strings.ftype == "character"
+        # TODO
+        #assert strings.strlen == "fnlen"
+        #assert len(strings.shape) == 1
+
+        ucvol, ecut = dt.variables["ucvol"], dt.variables["ecut"]
+        assert ucvol.is_scalar and ecut.is_scalar
+        # TODO
+        #assert ucvol.doc == "! doc for ucvol and ecut"
+        assert ucvol.doc == ecut.doc
+
+    #def test_F2003_datatype(self):
+
+    def test_variables(self):
+        """Testing parse_variables."""
+        p = FortranKissParser(verbose=3)
+
+        ######
+        # F77
+        ######
+        #fvars = p.parse_variables("INTEGER  B !whole number")
+        #assert len(fvars) == 1
+        #var = fvars[0]
+        #assert var.name == "b" and var.ftype == "integer" and var.kind is None and var.doc == "!whole number"
+
+        #var = p.parse_variables("REAL  A !decimal number")[0]
+        #assert var.name == "a" and var.ftype == "real" and var.kind is None and var.doc == "!decimal number"
+
+        #var = p.parse_variables("CHARACTER  C !single character (strings are coming up)")[0]
+        #assert var.name == "c" and var.ftype == "character" and var.kind is None and var.strlen == 1
+
+        #var = p.parse_variables("DOUBLE PRECISION X(3)")[0]
+        #assert var.name == "x" and var.ftype == "doubleprecision" and var.shape == (3,))
+
+        #var = p.parse_variables("REAL D(5,7,10)")[0]
+        #assert var.name == "d" and var.ftype == "real" and var.shape == (5, 7, 10) and not var.is_allocatable
+
+        #var = p.parse_variables("real :: A(LDA, *)")[0]
+        #assert var.name == "d" and var.ftype == "real" and var.shape == (5, 7, 10) and not var.is_allocatable
+
+        fvars = p.parse_variables("integer, parameter :: m = 3, n = 5")
+        assert len(fvars) == 2
+        m, n = fvars
+        assert m.name == "m" and m.initial_value == "3" and "parameter" in m.attribs and m.intent is None
+        assert n.name == "n" and n.initial_value == "5" and "parameter" in n.attribs
+
+        #fvars = p.parse_variables("integer:: istat = 0, i, j")
+
+        #fvars = p.parse_variables("character(80) :: fmt")
+        #var = fvars[0]
+        #assert var.name == "fmt" and var.ftype == "character" and var.kind is None and var.strlen == "80"
+
+        #######
+        # F90
+        #######
+        #fvars = p.parse_variables("DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: xx")
+        #var = fvars[0]
+        #assert var.name == "xx" and var.ftype == "doubleprecision" and var.shape == (5, 7, 10) and var.is_allocatable
+
+        fvars = p.parse_variables("integer, intent(in):: usewvl, wvl_ngauss(2)")
+        # TODO
+        #assert len(fvars) == 2
+        #var = fvars[0]
+        #assert var.name == "usewvl" and var.ftype == "integer" and var.intent == "in"
+        #var = fvars[1]
+        #assert var.name == "wvl_ngauss" and var.ftype == "integer" and var.intent == "in" #and var.shape == "(2)
+
+        var = p.parse_variables("real(kind=C_DOUBLE) :: A(n, m)")[0]
+        assert var.name == "a" and var.ftype == "real" and var.kind == "c_double" #and var.shape == (-2:10))
+
+        #var = p.parse_variables("REAL(dp), DIMENSION(-2:10) :: A")[0]
+        #assert var.name == "a" and var.ftype == "real" and var.kind="dp" # and var.shape == (-2:10))
+
+        #Cannot find Fortran type in line:
+        #var = p.parse_variables("character(kind=c_char,len=1), intent(in)  :: c_string(*)")[0]
+        #var = p.parse_variables("character(*), intent(in) :: s")[0]
+
+        #var = p.parse_variables("complex(dpc), pointer, dimension(:) :: y")[0]
+        #assert var.name == "y" and var.ftype == "complex" and var.kind == "dpc"
+        #assert var.intent is None and not var.is_scalar and var.is_pointer
+
+        #var = p.parse.variables("array(wfd%nspinor,2*lpawu+1, sigp % npwx , qmesh% nibz)")[0]
+
+        #fvars = p.parse_variables("integer, pointer :: p(:)=>null(), q(:,:) => null()")
+        #p, q = fvars
+
+        #fvars = p.parse_variables("integer(kind=i8b), allocatable, intent(inout), target :: Atarget(:,:)")
+
+        var = p.parse_variables("type( foo_t ), intent( in ) :: foo")[0]
+        assert var.name == "foo" and var.ftype == "type" and var.kind == "foo_t"
+        assert var.intent == "in" and var.is_scalar
+
+        var = p.parse_variables("type(foo_t) , contiguous, intent(in) :: foo_arr(:,:)")[0]
+        assert var.name == "foo_arr" and var.ftype == "type" and var.kind == "foo_t"
+        assert var.intent == "in" and not var.is_scalar

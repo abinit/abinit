@@ -18,6 +18,11 @@ You will learn about the use of k-points, as well as the smearing of the plane-w
 
 This tutorial should take about 1 hour.
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## Computing the total energy of silicon at a fixed number of k-points
 
 *Before beginning, you might consider working in a different subdirectory, as

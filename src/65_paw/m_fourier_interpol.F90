@@ -25,10 +25,10 @@ MODULE m_fourier_interpol
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
- use m_fft,    only : zerosym,indirect_parallel_Fourier
+ use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
 
  implicit none
@@ -107,7 +107,6 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'transgrid'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

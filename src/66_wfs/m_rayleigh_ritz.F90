@@ -33,7 +33,7 @@ module m_rayleigh_ritz
  use m_errors
  use m_cgtools
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_abi_linalg
  use m_slk
 
@@ -95,7 +95,6 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rayleigh_ritz_subdiago'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

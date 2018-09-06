@@ -55,7 +55,7 @@ private
 ! Don't use dp because stupid abilint generates wrong interfaces
 integer, parameter :: dp_ = kind(1.0d0)
 
-real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0, one = 1.d0
+real(dp_),parameter  :: tol6 = 1.d-14, tol14 = 1.d-14, zero = 0.d0, one = 1.d0
 
 real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
 

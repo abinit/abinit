@@ -45,7 +45,7 @@ module m_extraprho
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
-
+ use m_cgprj,    only : ctocprj
 
  implicit none
 
@@ -131,7 +131,6 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extraprho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -552,7 +551,6 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extrapwf'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

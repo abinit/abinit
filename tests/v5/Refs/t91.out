@@ -42,7 +42,7 @@
  Phonon DOS information :
    dosdeltae  4.55633525E-06
     dossmear  9.00000000E-05
- Description of grid 2 for Fourier interpolation :
+ Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        20        20        20
       ngrids         4
       q2shft         0.00000000E+00  0.00000000E+00  0.00000000E+00

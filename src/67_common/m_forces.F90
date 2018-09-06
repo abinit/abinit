@@ -30,7 +30,7 @@ module m_forces
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_efield
  use m_errors
  use m_atomdata
@@ -42,13 +42,15 @@ module m_forces
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl
  use m_predtk,           only : prtxvf
  use m_xchybrid,         only : xchybrid_ncpp_cc
+ use m_mkcore,           only : mkcore, mkcore_alt
+ use m_mkcore_wvl,       only : mkcore_wvl
 
  implicit none
 
@@ -181,9 +183,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
- use interfaces_53_ffts
- use interfaces_56_xc
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -745,8 +744,6 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fresidrsp'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1527,7 +1524,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'constrf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

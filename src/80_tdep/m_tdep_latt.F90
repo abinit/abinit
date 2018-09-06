@@ -7,7 +7,7 @@
 module m_tdep_latt
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_symtk,            only : matr3inv
@@ -82,7 +82,7 @@ subroutine tdep_make_inbox(tab,natom,tol,&
     end do
   end do
 
-end subroutine
+end subroutine tdep_make_inbox
 
 !=====================================================================================================
  subroutine tdep_make_latt(InVar,Lattice)
@@ -367,7 +367,7 @@ end subroutine
   Lattice%rprimdtm1     (:,:)=rprimdtm1     (:,:)
   Lattice%rprimd_MD     (:,:)=rprimd_MD     (:,:)
 
- end subroutine
+ end subroutine tdep_make_latt
 !=====================================================================================================
 
 end module m_tdep_latt

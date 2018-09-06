@@ -25,7 +25,7 @@ module m_phgamma
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -101,8 +101,9 @@ module m_phgamma
   integer :: nqbz
   ! Number of q-points in the BZ.
 
-  integer :: eph_scalprod
-  !
+  integer :: eph_scalprod=0
+  ! This to call anaddb routines. Note that eph_scalprod 1 is not supported in eph.
+
   integer :: nrpt
   ! Number of points in the real space representation of the gamma matrices.
 
@@ -487,7 +488,6 @@ end subroutine phgamma_free
 !! cryst<crystal_t>
 !! ifc<ifc_type>=Interatomic force constants.
 !! symdynmat=1 to activa symmetrization of gamma matrices.
-!! eph_scalprod
 !! ngqpt(3)=Q-mesh divisions
 !! nsppol=Number of spin polarizations
 !! nspinor=Number of spinorial components.
@@ -621,7 +621,6 @@ subroutine phgamma_print(gams,cryst,ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -851,69 +850,38 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  ! Get phonon frequencies and eigenvectors.
  call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
- select case (gams%eph_scalprod)
- case (0)
-   ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
-   tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3,natom3])
-   call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+ ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
+ tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3,natom3])
+ call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-   do nu1=1,natom3
-     gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-     img(nu1) = tmp_gam1(2, nu1, nu1)
-     if (abs(img(nu1)) > tol8) then
-       write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-       MSG_WARNING(msg)
-     end if
-   end do
-
-#ifdef DEV_MJV
-   if (present (gamma_ph_ee)) then
-     do iene = 1, gams%nene
-       do jene = 1, gams%nene
-         tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
-         call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-         do nu1=1,natom3
-           gamma_ph_ee(jene,iene,nu1) = tmp_gam1(1, nu1, nu1)
-           img(nu1) = tmp_gam1(2, nu1, nu1)
-           if (abs(img(nu1)) > tol8) then
-             write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-             MSG_WARNING(msg)
-           end if
-         end do
-       end do
-     end do
-   end if
-#endif
- case (1)
-   ! Diagonalize gamma matrix at qpoint (complex matrix).
-   ! MJV NOTE: gam_now is recast implicitly here to matrix
-   gam_now = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3**2])
-
-   call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-   call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-
-   diagerr = zero
-   do nu2=1,natom3
-     gamma_ph(nu2) = tmp_gam2(1,nu2,nu2)
-
-     do nu1=1,nu2-1
-       diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-     end do
-     do nu1=nu2+1,natom3
-       diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-     end do
-     diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-   end do
-
-   if (diagerr > tol12) then
-     write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+ do nu1=1,natom3
+   gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
+   img(nu1) = tmp_gam1(2, nu1, nu1)
+   if (abs(img(nu1)) > tol8) then
+     write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
      MSG_WARNING(msg)
    end if
+ end do
 
- case default
-   MSG_BUG(sjoin("Wrong value for eph_scalprod:",itoa(gams%eph_scalprod)))
- end select
+#ifdef DEV_MJV
+ if (present (gamma_ph_ee)) then
+   do iene = 1, gams%nene
+     do jene = 1, gams%nene
+       tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
+       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+
+       do nu1=1,natom3
+         gamma_ph_ee(jene,iene,nu1) = tmp_gam1(1, nu1, nu1)
+         img(nu1) = tmp_gam1(2, nu1, nu1)
+         if (abs(img(nu1)) > tol8) then
+           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
+           MSG_WARNING(msg)
+         end if
+       end do
+     end do
+   end do
+ end if
+#endif
 
  ! Compute lambda
  ! TODO : check this - looks like a factor of 2 wrt the inline documentation!
@@ -1050,64 +1018,33 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
  ! Get phonon frequencies and eigenvectors.
  call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
- select case (gams%eph_scalprod)
- case (0)
-   ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
-   tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
-   call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+ ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
+ tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
+ call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-   do nu1=1,natom3
-     gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-     img(nu1) = tmp_gam1(2, nu1, nu1)
-     if (abs(img(nu1)) > tol8) then
-       write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-       MSG_WARNING(msg)
-     end if
-   end do
-
-
-!   do iene = 1, gams%nene
-!     do jene = 1, gams%nene
-!       tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
-!       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-!       do nu1=1,natom3
-!         gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-!         img(nu1) = tmp_gam1(2, nu1, nu1)
-!         if (abs(img(nu1)) > tol8) then
-!           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-!           MSG_WARNING(msg)
-!         end if
-!       end do
-!     end do
-!   end do
-
- case (1)
-   ! Diagonalize gamma matrix at qpoint (complex matrix).
-   ! MJV NOTE: gam_now is recast implicitly here to matrix
-   call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-   call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-
-   diagerr = zero
-   do nu2=1,natom3
-     gamma_ph(nu2) = tmp_gam2(1,nu2,nu2)
-
-     do nu1=1,nu2-1
-       diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-     end do
-     do nu1=nu2+1,natom3
-       diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-     end do
-     diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-   end do
-
-   if (diagerr > tol12) then
-     write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+ do nu1=1,natom3
+   gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
+   img(nu1) = tmp_gam1(2, nu1, nu1)
+   if (abs(img(nu1)) > tol8) then
+     write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
      MSG_WARNING(msg)
    end if
+ end do
 
- case default
-   MSG_BUG(sjoin("Wrong value for eph_scalprod:",itoa(gams%eph_scalprod)))
- end select
+! do iene = 1, gams%nene
+!   do jene = 1, gams%nene
+!     tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
+!     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+!     do nu1=1,natom3
+!       gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
+!       img(nu1) = tmp_gam1(2, nu1, nu1)
+!       if (abs(img(nu1)) > tol8) then
+!         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
+!         MSG_WARNING(msg)
+!       end if
+!     end do
+!   end do
+! end do
 
  ! Compute lambda
  !spinfact should be 1 for a normal non sppol calculation without spinorbit
@@ -1409,96 +1346,36 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
  ! Get phonon frequencies and eigenvectors.
  call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
- select case (gams%eph_scalprod)
- case (0)
-   do jdir = 1,gams%ndir_transp
-     do idir = 1,gams%ndir_transp
-       ii = idir + gams%ndir_transp*(jdir-1)
-       ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
-       tmp_gam2 = reshape(gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin), [2,natom3,natom3])
-       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+ do jdir = 1,gams%ndir_transp
+   do idir = 1,gams%ndir_transp
+     ii = idir + gams%ndir_transp*(jdir-1)
+     ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
+     tmp_gam2 = reshape(gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin), [2,natom3,natom3])
+     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-       do nu1=1,natom3
-         gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-         img(nu1) = tmp_gam1(2, nu1, nu1)
-         if (abs(img(nu1)) > tol8) then
-           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-           MSG_WARNING(msg)
-         end if
-       end do
-
-       tmp_gam2 = reshape(gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin), [2,natom3,natom3])
-       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-       do nu1=1,natom3
-         gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-         img(nu1) = tmp_gam1(2, nu1, nu1)
-         if (abs(img(nu1)) > tol8) then
-           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-           MSG_WARNING(msg)
-         end if
-       end do
-
-     end do ! idir
-   end do ! jdir
-
- case (1)
-   do jdir = 1,gams%ndir_transp
-     do idir = 1,gams%ndir_transp
-       ii = idir + gams%ndir_transp*(jdir-1)
-       ! Diagonalize gamma matrix at qpoint (complex matrix).
-       ! MJV NOTE: gam_now is recast implicitly here to matrix
-       gam_now  = gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin)
-
-       call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-       call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-
-       diagerr = zero
-       do nu2=1,natom3
-         gamma_in_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-
-         do nu1=1,nu2-1
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         do nu1=nu2+1,natom3
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-       end do
-
-       if (diagerr > tol12) then
-         write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+     do nu1=1,natom3
+       gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
+       img(nu1) = tmp_gam1(2, nu1, nu1)
+       if (abs(img(nu1)) > tol8) then
+         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
          MSG_WARNING(msg)
        end if
+     end do
 
-       gam_now  = gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin)
+     tmp_gam2 = reshape(gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin), [2,natom3,natom3])
+     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-       call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-       call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-
-       diagerr = zero
-       do nu2=1,natom3
-         gamma_out_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-
-         do nu1=1,nu2-1
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         do nu1=nu2+1,natom3
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-       end do
-
-       if (diagerr > tol12) then
-         write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+     do nu1=1,natom3
+       gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
+       img(nu1) = tmp_gam1(2, nu1, nu1)
+       if (abs(img(nu1)) > tol8) then
+         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
          MSG_WARNING(msg)
        end if
-     end do ! idir
-   end do ! jdir
+     end do
 
- case default
-   MSG_BUG(sjoin("Wrong value for eph_scalprod:",itoa(gams%eph_scalprod)))
- end select
+   end do ! idir
+ end do ! jdir
 
  ! Compute lambda
  do jdir = 1,gams%ndir_transp
@@ -1628,81 +1505,31 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
        call tgamma_symm(cryst,qpt,gam_out_now)
      end if
 
-     select case (gams%eph_scalprod)
-     case (0)
-       ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
-       tmp_gam2 = reshape (gam_in_now, [2,natom3,natom3])
-       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+     ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
+     tmp_gam2 = reshape (gam_in_now, [2,natom3,natom3])
+     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-       do nu1=1,natom3
-         gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-         img(nu1) = tmp_gam1(2, nu1, nu1)
-         if (abs(img(nu1)) > tol8) then
-           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-           MSG_WARNING(msg)
-         end if
-       end do
-
-       tmp_gam2 = reshape (gam_out_now, [2,natom3,natom3])
-       call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-       do nu1=1,natom3
-         gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-         img(nu1) = tmp_gam1(2, nu1, nu1)
-         if (abs(img(nu1)) > tol8) then
-           write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-           MSG_WARNING(msg)
-         end if
-       end do
-
-     case (1)
-       ! Diagonalize gamma matrix at qpoint (complex matrix).
-       ! MJV NOTE: gam_now is recast implicitly here to matrix
-       call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_in_now,natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-       call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,  natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-
-       diagerr = zero
-       do nu2=1,natom3
-         gamma_in_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-
-         do nu1=1,nu2-1
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         do nu1=nu2+1,natom3
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-       end do
-
-       if (diagerr > tol12) then
-         write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+     do nu1=1,natom3
+       gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
+       img(nu1) = tmp_gam1(2, nu1, nu1)
+       if (abs(img(nu1)) > tol8) then
+         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
          MSG_WARNING(msg)
        end if
+     end do
 
-       call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_out_now,natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
-       call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,  natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
+     tmp_gam2 = reshape (gam_out_now, [2,natom3,natom3])
+     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
-       diagerr = zero
-       do nu2=1,natom3
-         gamma_out_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-
-         do nu1=1,nu2-1
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         do nu1=nu2+1,natom3
-           diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
-         end do
-         diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
-       end do
-
-       if (diagerr > tol12) then
-         write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
+     do nu1=1,natom3
+       gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
+       img(nu1) = tmp_gam1(2, nu1, nu1)
+       if (abs(img(nu1)) > tol8) then
+         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
          MSG_WARNING(msg)
        end if
+     end do
 
-     case default
-       MSG_BUG(sjoin("Wrong value for eph_scalprod:",itoa(gams%eph_scalprod)))
-     end select
    end do
  end do
 
@@ -2267,7 +2094,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2631,7 +2457,7 @@ end if
  end do
 
 #ifdef DEV_MJV
- ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]]) 
+ ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]])
  if (my_rank == master) then
    ntemp = 100
    min_temp = zero
@@ -2640,7 +2466,7 @@ end if
    ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
-print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
+   print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -3634,7 +3460,6 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_tr_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4205,7 +4030,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -4240,7 +4065,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phgamma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4269,13 +4093,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
+ integer,parameter :: eph_scalprod0=0
  integer :: my_rank,nproc,iomode,mband,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
  integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
  integer :: ii,ipw,mpw,my_mpw,mnb,ierr,my_kstart,my_kstop,cnt,ncid
- integer :: isig,n1,n2,n3,n4,n5,n6,nspden,eph_scalprod,do_ftv1q
+ integer :: isig,n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
  integer :: iene, jene
@@ -4389,13 +4214,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  end if
 
- eph_scalprod = 0
  gamma_ngqpt = ifc%ngqpt
  ! TODO might this next condition not be any instead of all?
  if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  ! TODO: Support nsig in phgamma_init
- call phgamma_init(gams,cryst,ifc,fstab(1),dtset%symdynmat,eph_scalprod,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
+ call phgamma_init(gams,cryst,ifc,fstab(1),dtset%symdynmat,eph_scalprod0,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
  call wrtout(std_out, sjoin("Will compute",itoa(gams%nqibz),"q-points in the IBZ"))
 
  ncid = nctk_noid
@@ -5051,22 +4875,7 @@ end if
        call xmpi_sum(tgamvv_out, comm, ierr)
      end if ! add transport things
 
-     if (eph_scalprod == 1) then
-       ! Get phonon frequencies and displacements for this q-point
-       ! used in scalar product with H(1)_atom,idir  matrix elements
-       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
-
-       !call ifc_diagoq(ifc,cryst,qpt,phfrq,displ_cart,nanaqdir)
-     end if
-
      do isig=1,nsig
-       if (eph_scalprod == 1) then
-         ! TODO: NotTested: moreover one should make sure that the phase of the eigenvectors is deterministic.
-         ! Multiply by displacement matrices. Results are returned in temp_tgam.
-         call gam_mult_displ(natom3, displ_red, tgam(:,:,:,isig), temp_tgam)
-         tgam(:,:,:,isig) = temp_tgam
-       end if
-
        ! Save results for this (q-point, spin)
        !write(std_out,*)tgam(:,:,:,isig)
        gvals_qibz(:,:,:,isig,iq_ibz,spin) = tgam(:,:,:,isig)

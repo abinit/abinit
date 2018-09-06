@@ -9,3 +9,4 @@ Tests 1-4 : main ABINIT testing of ETSF_IO, norm-conserving
 Tests 6-8 : wavelets with ETSF_IO output.
 Tests 9-10 : PAW with ETSF_IO
 Tests 21 : test another NETCDF type of file, from molecular dynamics runs.
+Tests 30 : test KB form factors in the netcdf file

@@ -1,6 +1,6 @@
 # Installation instructions specific to ABINIT
 
-Please report problems or comments on the ABINIT [forum](http://forum.abinit.org).
+Please report problems or comments on the ABINIT [forum](https://forum.abinit.org).
 
 ## Quick install, starting from the tar.gz file:
 

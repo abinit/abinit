@@ -31,7 +31,7 @@ module m_gstate
  use defs_rectypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use libxc_functionals
  use m_exit
  use m_crystal
@@ -60,11 +60,12 @@ module m_gstate
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
  use m_kg,               only : kpgio, getph
+ use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_abi2big,          only : wvl_occ_abi2big
+ use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
  use m_energies,         only : energies_type, energies_init
  use m_args_gs,          only : args_gs_type
  use m_results_gs,       only : results_gs_type
@@ -74,7 +75,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
- use m_paw_orbmag,       only : orbmag_type,destroy_orbmag
+ use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
@@ -94,6 +95,14 @@ module m_gstate
  use m_mpinfo,           only : proc_distrb_cycle
  use m_common,           only : setup1, prteigrs, prtene
  use m_fourier_interpol, only : transgrid
+ use m_psolver,          only : psolver_kernel
+ use m_paw2wvl,          only : paw2wvl, wvl_paw_free
+ use m_berryphase_new,   only : init_e_field_vars,prtefield
+ use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free, wvl_wfs_lr_copy
+ use m_wvl_rho,          only : wvl_initro, wvl_mkrho
+ use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
+ use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
+ use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -230,12 +239,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
- use interfaces_53_ffts
- use interfaces_56_io_mpi
- use interfaces_62_poisson
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -311,11 +314,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,pointer :: npwarr_(:),pwind(:,:,:)
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
- real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
- real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: doccde(:)
+ real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
@@ -403,8 +406,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call energies_init(results_gs%energies)
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(dtset%natom))
- call setup1(acell,amass,args_gs%amu,bantot,dtset,&
+ call setup1(acell,bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,rprim,rprimd,ucvol,psps%usepaw)
@@ -461,13 +463,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !SCF history management (allocate it at first call)
- has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
    usecg=0
-   if(dtset%extrapwf>0)usecg=1
+   if(dtset%extrapwf>0 .or. dtset%imgwfstor==1)usecg=1
    call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
+ has_to_init=(initialized==0.or.scf_history%history_size<0)
 
  call timab(33,2,tsec)
  call timab(701,3,tsec)
@@ -703,10 +705,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out of memory in cg")
+ if (dtset%imgwfstor==1) then
+   cg => scf_history%cg(:,:,1)
+   eigen => scf_history%eigen(:,1)
+ else
+   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+   ABI_CHECK(ierr==0, "out of memory in cg")
+   ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ end if
 
- ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
 !mpi_enreg%paralbd=0 ; ask_accurate=0
@@ -718,7 +725,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  Create access arrays for wavefunctions and allocate wvl%wfs%psi (other arrays are left unallocated).
    call wvl_wfs_set(dtset%strprecon,dtset%spinmagntarget, dtset%kpt, mpi_enreg%me_wvl,&
 &   dtset%natom, sum(dtset%nband), &
-&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig, &
+&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, occ, &
 &   psps, rprimd, wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, &
 &   xred)
 !  We transfer wavelets information to the hdr structure.
@@ -752,7 +759,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
 
 !Initialize wavefunctions.
- if(dtset%tfkinfunc /=2) then
+ if(dtset%imgwfstor==1 .and. initialized==1)then
+   cg(:,:)=scf_history%cg(:,:,1) 
+   eigen(:)=scf_history%eigen(:,1) 
+ else if(dtset%tfkinfunc /=2) then
+!if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
@@ -1207,7 +1218,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
     call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                   rprimd,symrec,xred)
  end if
 
@@ -1239,7 +1250,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (iexit==0) then
 
 !  ###########################################################
-!  ### 14. Move atoms and acell acording to ionmov value
+!  ### 14. Move atoms and acell according to ionmov value
 
 
 !  Eventually symmetrize atomic coordinates over space group elements:
@@ -1265,7 +1276,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   if (dtset%ionmov==0) then
+   if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
@@ -1286,7 +1297,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if (dtset%ionmov>50.or.dtset%ionmov<=27) then
 
      ! TODO: return conv_retcode
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
+     call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
 &     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
 
 !    Compute rprim from rprimd and acell
@@ -1554,12 +1565,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%strten,results_gs%synlgr,xred)
  end if
 
+ if(dtset%imgwfstor==1)then
+   scf_history%cg(:,:,1)=cg(:,:)  
+   scf_history%eigen(:,1)=eigen(:)  
+ endif
+
 !Deallocate arrays
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(eigen)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(npwarr)
  ABI_DEALLOCATE(nattyp)
@@ -1570,6 +1583,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_DEALLOCATE(taug)
  ABI_DEALLOCATE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
+
+ if(dtset%imgwfstor==0)then
+   ABI_DEALLOCATE(cg)
+   ABI_DEALLOCATE(eigen)
+ else 
+   nullify(cg,eigen)
+ endif
 
  if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
@@ -1737,7 +1757,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1884,8 +1903,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup1'
- use interfaces_14_hidewrite
- use interfaces_59_ionetcdf
 !End of the abilint section
 
  implicit none
@@ -2083,7 +2100,6 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2260,7 +2276,6 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2521,7 +2536,7 @@ end subroutine clnup2
 !!
 !! SOURCE
 
-subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
+subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2534,7 +2549,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
 !Arguments ------------------------------------
 !scalars
- type(scfcv_t), intent(inout) :: scfcv
+ type(scfcv_t), intent(inout) :: scfcv_args
  type(dataset_type),intent(inout) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  !type(wffile_type),intent(inout) :: wffnew,wffnow
@@ -2561,14 +2576,14 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
  end if
 
  ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
- ABI_ALLOCATE(cgstart,(2,scfcv%mcg))
+ ABI_ALLOCATE(cgstart,(2,scfcv_args%mcg))
 
 !DEBUG
 !write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
 !END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv%cg
+ cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
@@ -2582,7 +2597,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 !allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
 
  do iuj=1,2
-   if (iuj>1) scfcv%cg(:,:)=cgstart(:,:)
+   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
 
 !  DEBUG
 !  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
@@ -2590,18 +2605,18 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
    dtpawuj(iuj*2-1)%iuj=iuj*2-1
 
-   scfcv%ndtpawuj=>ndtpawuj
-   scfcv%dtpawuj=>dtpawuj
+   scfcv_args%ndtpawuj=>ndtpawuj
+   scfcv_args%dtpawuj=>dtpawuj
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
-   scfcv%fatvshift=scfcv%fatvshift*(-one)
+   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations
@@ -2615,6 +2630,296 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
  DBG_EXIT("COLL")
 
 end subroutine pawuj_drive
+!!***
+
+!!****f* ABINIT/outxfhist
+!! NAME
+!! outxfhist
+!!
+!! FUNCTION
+!!  read/write xfhist
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2018 ABINIT group (MB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  option =
+!!   1: write
+!!   2: read only nxfh
+!!   3: read xfhist
+!!  response =
+!!   0: GS wavefunctions
+!!   1: RF wavefunctions
+!!  natom = number of atoms in unit cell
+!!  mxfh = last dimension of the xfhist array
+!!
+!! OUTPUT
+!!  ios = error code returned by read operations
+!!
+!! SIDE EFFECTS
+!!  nxfh = actual number of (x,f) history pairs, see xfhist array
+!!  wff2 = structured info for wavefunctions
+!!  xfhist(3,natom+4,2,ab_xfh%mxfh) = (x,f) history array, also including
+!!   rprim and stress
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
+!!
+!! SOURCE
+
+subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
+
+ use defs_basis
+ use m_abicore
+ use m_abimover
+ use m_xmpi
+ use m_wffile
+ use m_errors
+#if defined HAVE_NETCDF
+ use netcdf
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'outxfhist'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer          ,intent(in)    :: natom,option
+ integer          ,intent(out)   :: ios
+ type(wffile_type),intent(inout)    :: wff2
+ type(ab_xfh_type),intent(inout) :: ab_xfh
+
+!Local variables-------------------------------
+ integer :: ierr,ixfh,ncid_hdr,spaceComm,xfdim2
+ real(dp),allocatable :: xfhist_tmp(:)
+ character(len=500) :: message
+!no_abirules
+#if defined HAVE_NETCDF
+ integer :: ncerr
+ integer :: nxfh_id, mxfh_id, xfdim2_id, dim2inout_id, dimr3_id,xfhist_id
+ integer :: nxfh_tmp,mxfh_tmp,xfdim2_tmp,dim2inout_tmp
+#endif
+
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)'outxfhist  : enter, option = ', option
+!ENDDEBUG
+ ncid_hdr = wff2%unwff
+ xfdim2 = natom+4
+
+ ios = 0
+
+!### (Option=1) Write out content of all iterations
+!#####################################################################
+ if ( option == 1 ) then
+
+!  Write the (x,f) history
+   if (wff2%iomode == IO_MODE_FORTRAN) then
+     write(unit=wff2%unwff)ab_xfh%nxfh
+     do ixfh=1,ab_xfh%nxfh
+       write(unit=wff2%unwff)ab_xfh%xfhist(:,:,:,ixfh)
+     end do
+
+   else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
+!    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
+!    if node is master
+     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+&     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
+     MSG_ERROR(message)
+
+     write(unit=wff2%unwff)ab_xfh%nxfh
+     do ixfh=1,ab_xfh%nxfh
+       write(unit=wff2%unwff)ab_xfh%xfhist(:,:,:,ixfh)
+     end do
+
+!    insert mpi broadcast here
+
+   else if(wff2%iomode==IO_MODE_MPI)then
+     ABI_ALLOCATE(xfhist_tmp,(3*(natom+4)*2))
+     spaceComm=xmpi_comm_self
+     call xderiveWRecInit(wff2,ierr)
+     call xderiveWrite(wff2,ab_xfh%nxfh,ierr)
+     call xderiveWRecEnd(wff2,ierr)
+     do ixfh=1,ab_xfh%nxfh
+       xfhist_tmp(:)=reshape(ab_xfh%xfhist(:,:,:,ixfh),(/3*(natom+4)*2/))
+       call xderiveWRecInit(wff2,ierr)
+       call xderiveWrite(wff2,xfhist_tmp,3*(natom+4)*2,spaceComm,ierr)
+       call xderiveWRecEnd(wff2,ierr)
+     end do
+     ABI_DEALLOCATE(xfhist_tmp)
+
+#if defined HAVE_NETCDF
+   else if (wff2%iomode == IO_MODE_NETCDF) then
+!    check if nxfh and xfhist are defined
+     ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
+
+     if (ncerr /= NF90_NOERR) then
+!      need to define everything
+       ncerr = nf90_redef (ncid=ncid_hdr)
+       NCF_CHECK_MSG(ncerr," outxfhist : going to define mode ")
+
+       ncerr = nf90_def_dim(ncid=ncid_hdr,name="dim2inout",len=2,dimid=dim2inout_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : define dim2inout")
+       ncerr = nf90_def_dim(ncid=ncid_hdr,name="mxfh",len=ab_xfh%mxfh,dimid=mxfh_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : define mxfh")
+       ncerr = nf90_def_dim(ncid=ncid_hdr,name="nxfh",len=ab_xfh%nxfh,dimid=nxfh_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : define nxfh")
+       ncerr = nf90_def_dim(ncid=ncid_hdr,name="xfdim2",len=xfdim2,dimid=xfdim2_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : define xfdim2")
+
+       ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="dimr3",dimid=dimr3_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire dimr3")
+
+!      ab_xfh%xfhist(3,natom+4,2,ab_xfh%mxfh)
+       ncerr = nf90_def_var(ncid=ncid_hdr,name="xfhist",xtype=NF90_DOUBLE,&
+&       dimids=(/dimr3_id,xfdim2_id,dim2inout_id,mxfh_id/),varid=xfhist_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : define xfhist")
+
+!      End define mode and go to data mode
+       ncerr = nf90_enddef(ncid=ncid_hdr)
+       NCF_CHECK_MSG(ncerr," outxfhist : enddef call ")
+     else
+!      check that the dimensions are correct
+       ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
+       ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=nxfh_id,&
+&       len=nxfh_tmp)
+       NCF_CHECK_MSG(ncerr,"  outxfhist : get nxfh")
+       ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="xfdim2",dimid=xfdim2_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire xfdim2")
+       ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=xfdim2_id,&
+&       len=xfdim2_tmp)
+       NCF_CHECK_MSG(ncerr,"  outxfhist : get xfdim2")
+       ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="mxfh",dimid=mxfh_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire mxfh")
+       ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=mxfh_id,&
+&       len=mxfh_tmp)
+       NCF_CHECK_MSG(ncerr,"  outxfhist : get mxfh")
+       ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="dim2inout",dimid=dim2inout_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire dim2inout")
+       ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=dim2inout_id,&
+&       len=dim2inout_tmp)
+       NCF_CHECK_MSG(ncerr,"  outxfhist : get dim2inout")
+
+       ncerr = nf90_inq_varid(ncid=ncid_hdr,name="xfhist",varid=xfhist_id)
+       NCF_CHECK_MSG(ncerr," outxfhist : inquire xfhist")
+
+       if (mxfh_tmp /= ab_xfh%mxfh .or. dim2inout_tmp /= 2 .or. xfdim2_tmp /= xfdim2) then
+         write (message,"(A)") 'outxfhist : ERROR xfhist has bad dimensions in NetCDF file. Can not re-write it.'
+         MSG_ERROR(message)
+       end if
+
+     end if
+
+!    Now fill the data
+     ncerr = nf90_put_var(ncid=ncid_hdr,varid=xfhist_id,values=ab_xfh%xfhist)
+     NCF_CHECK_MSG(ncerr," outxfhist : fill xfhist")
+
+!    end NETCDF definition ifdef
+#endif
+   end if  ! end iomode if
+
+!  ### (Option=2) Read in number of iterations
+!  #####################################################################
+ else if ( option == 2 ) then
+
+   if (wff2%iomode == IO_MODE_FORTRAN) then
+     read(unit=wff2%unwff,iostat=ios)ab_xfh%nxfh
+
+   else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
+!    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
+!    if node is master
+     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+&     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
+     MSG_ERROR(message)
+
+     read(unit=wff2%unwff,iostat=ios)ab_xfh%nxfh
+
+   else if (wff2%iomode == IO_MODE_MPI) then
+     call xderiveRRecInit(wff2,ierr)
+     call xderiveRead(wff2,ab_xfh%nxfh,ierr)
+     call xderiveRRecEnd(wff2,ierr)
+
+#if defined HAVE_NETCDF
+   else if (wff2%iomode == IO_MODE_NETCDF) then
+     ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
+     NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
+     ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=nxfh_id,&
+&     len=ab_xfh%nxfh)
+     NCF_CHECK_MSG(ncerr,"  outxfhist : get nxfh")
+#endif
+   end if
+
+!  ### (Option=3) Read in iteration content
+!  #####################################################################
+ else if ( option == 3 ) then
+   if (wff2%iomode == IO_MODE_FORTRAN) then
+     do ixfh=1,ab_xfh%nxfhr
+       read(unit=wff2%unwff,iostat=ios)ab_xfh%xfhist(:,:,:,ixfh)
+     end do
+   else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
+!    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
+!    if node is master
+     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+&     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
+     MSG_ERROR(message)
+
+     do ixfh=1,ab_xfh%nxfhr
+       read(unit=wff2%unwff,iostat=ios)ab_xfh%xfhist(:,:,:,ixfh)
+     end do
+
+   else if (wff2%iomode == IO_MODE_MPI) then
+     ABI_ALLOCATE(xfhist_tmp,(3*(natom+4)*2))
+     spaceComm=xmpi_comm_self
+     do ixfh=1,ab_xfh%nxfhr
+       call xderiveRRecInit(wff2,ierr)
+       call xderiveRead(wff2,xfhist_tmp,3*(natom+4)*2,spaceComm,ierr)
+       call xderiveRRecEnd(wff2,ierr)
+       xfhist_tmp(:)=xfhist_tmp(:)
+     end do
+     ABI_DEALLOCATE(xfhist_tmp)
+   end if
+
+!  FIXME: should this be inside the if not mpi as above for options 1 and 2?
+!  it is placed here because the netcdf read is a single operation
+#if defined HAVE_NETCDF
+   if (wff2%iomode == IO_MODE_NETCDF) then
+     ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
+     NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
+     ncerr = nf90_Inquire_Dimension(ncid=ncid_hdr,dimid=nxfh_id,&
+&     len=ab_xfh%nxfhr)
+     NCF_CHECK_MSG(ncerr,"  outxfhist : get nxfh")
+
+     ncerr = nf90_inq_varid(ncid=ncid_hdr,varid=xfhist_id,name="xfhist")
+     NCF_CHECK_MSG(ncerr," outxfhist : inquire xfhist")
+     ncerr = nf90_get_var(ncid=ncid_hdr,varid=xfhist_id,values=ab_xfh%xfhist,&
+&     start=(/1,1,1,1/),count=(/3,natom+4,2,ab_xfh%nxfhr/))
+     NCF_CHECK_MSG(ncerr," outxfhist : read xfhist")
+   end if
+#endif
+
+ else
+!  write(std_out,*)' outxfhist : option ', option , ' not available '
+   write(message, "(A,A,A,A,I3,A)") ch10, "outxfhist: ERROR -", ch10, &
+&   "option ", option, " not available."
+   MSG_ERROR(message)
+ end if
+
+end subroutine outxfhist
 !!***
 
 end module m_gstate

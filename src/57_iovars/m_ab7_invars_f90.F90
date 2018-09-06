@@ -32,11 +32,8 @@ module m_ab7_invars
   use defs_datatypes
   use defs_abitypes
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
-  use interfaces_18_timing
-  use interfaces_32_util
-  use interfaces_57_iovars
 
   use m_time,     only : timab
   use m_fstrings, only : inupper
@@ -44,6 +41,8 @@ module m_ab7_invars
   use m_dtset,    only : dtset_free, macroin, macroin2
   use m_dtfil,    only : status
   use m_pspheads, only : inpspheads, pspheads_comm
+  use m_invars1,  only : invars1m, invars0, indefo
+  use m_invars2,  only : invars2, invars2m
 
   implicit none
 
@@ -591,7 +590,6 @@ end subroutine ab7_invars_new_from_file
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_load'
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId

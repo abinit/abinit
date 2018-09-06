@@ -28,7 +28,7 @@ MODULE m_oscillators
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fft
 
  use m_gwdefs,    only : czero_gw

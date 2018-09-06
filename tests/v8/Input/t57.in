@@ -61,8 +61,8 @@
     getwfk5   4
     get1wf5   2
   
-    kptopt5   0        # K-points can be specified in any way one want, they just need to be present in the 
-    nkpt5     2        # ground state calc. too.
+    kptopt5   0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
+    nkpt5     2        
     kpt5      0.00 0.00 0.00   # Gamma                                                                      
               0.00 0.50 0.50   # X
               
@@ -121,6 +121,7 @@ diemac 6
  ecut 30               # Underconverged ecut. 
 #ecut 15
 nstep 100
+
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -131,7 +132,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t57.out, tolnlines = 2, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium ;
+#%%   t57.out, tolnlines = 4, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium;
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1

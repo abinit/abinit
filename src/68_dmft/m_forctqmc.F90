@@ -26,7 +26,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_forctqmc
@@ -35,7 +34,7 @@ MODULE m_forctqmc
 
  implicit none
 
- private 
+ private
 
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
@@ -86,12 +85,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
 
  use defs_basis
@@ -134,7 +127,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'qmc_prep_ctqmc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2321,11 +2313,11 @@ end subroutine qmc_prep_ctqmc
 !! OUTPUT
 !! fw1_nd = non diagonal hybridization
 !! fw1 = hybridization
-!! umod = value of U 
-!!  
+!! umod = value of U
+!!
 !!
 !! SIDE EFFECTS
-!!  gtmp_nd  
+!!  gtmp_nd
 !!  gw_tmp_nd
 !!
 !! NOTES
@@ -2336,12 +2328,6 @@ end subroutine qmc_prep_ctqmc
 !! CHILDREN
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hybri_limit,&
 &   nflavor,opt,temp,testrot,testcode,umod)
@@ -2587,7 +2573,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
        write(444,*) real(itau-1)/(temp*real(dmftqmc_l)),real(RR1(1,1)),real(RR1(2,2)),real(RR1(1,2)),real(RR1(2,1))
      end do
 
-   end if 
+   end if
 
    ! Print out rotated Green's function
    !=====================================
@@ -2595,7 +2581,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
      write(555,'(e14.5,4(2e14.5,3x))') real(itau-1)/(temp*real(dmftqmc_l)),gtmp_nd(itau,1,1),&
 &     gtmp_nd(itau,2,2),gtmp_nd(itau,1,2),gtmp_nd(itau,2,1)
    end do
-   
+
    write(message,'(2a)') ch10,' testcode end of test calculation'
    MSG_ERROR(message)
 

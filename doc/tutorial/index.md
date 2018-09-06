@@ -61,6 +61,11 @@ in the tutorials in the light brown blocks. Finally, the Many-Body Perturbation 
 capabilities are demonstrated in the tutorials belonging to the dark brown blocks.
 The right-hand side blocks gather the tutorials related to the parallelism inside ABINIT.
 
+Visualisation tools are NOT covered in the ABINIT tutorials. 
+Powerful visualisation procedures have been developed in the Abipy context, 
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 Before following the tutorials, you should have read the 
 [new user's guide](..),
 as well as the pages

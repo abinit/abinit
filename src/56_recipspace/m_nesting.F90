@@ -27,7 +27,7 @@ MODULE m_nesting
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_kptrank
  use m_sort
 

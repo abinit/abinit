@@ -29,7 +29,7 @@ module m_classify_bands
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_esymm
  use m_errors
 

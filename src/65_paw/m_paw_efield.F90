@@ -23,7 +23,7 @@
 MODULE m_paw_efield
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_time, only : timab
  use m_xmpi, only : xmpi_sum

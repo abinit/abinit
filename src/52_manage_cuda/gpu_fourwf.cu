@@ -180,13 +180,13 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     printf("FFT SIZE ERROR: \n when gpu mode is on the fft grid must not be augmented\n");
     printf("(n1,n2,n3) = (%d,%d,%d) whereas (n4,n5,n6) = (%d,%d,%d) \n",n1,n2,n3,*n4,*n5,*n6);
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   if((*cplex)==2){
     printf("gpu_fourwf: cplex == 2 is not treated in GPU mode\n");
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //If fft size has changed, we realloc our buffers
@@ -208,7 +208,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR while copying fofr to gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -218,7 +218,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR while copying input data to gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
 
     //We launch async transfert of denpot
@@ -227,7 +227,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
       if(cuda_return != cudaSuccess){
 	printf("ERROR while copying denpot to gpu: %s \n",cudaGetErrorString(cuda_return));
 	fflush(stdout);
-	leave_new_("COLL");
+	abi_cabort();
       }
     }
     //We launch async transfert of denpot
@@ -237,7 +237,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
       if(cuda_return != cudaSuccess){
 	printf("ERROR while copying weight to gpu: %s \n",cudaGetErrorString(cuda_return));
 	fflush(stdout);
-	leave_new_("COLL");
+	abi_cabort();
       }
     }
 
@@ -250,7 +250,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
       printf("ERROR while fft work_gpu ==> fofr:\n%s\n",cufftGetErrorString(cufft_state));
       //printf("last cudaError was : %s \n",cudaGetErrorString(cudaGetLastError()));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -261,13 +261,13 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR when synchronizing after FFT on gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
     cuda_return = cudaMemcpy(fofr,fofr_gpu,2*(*ndat)*nfft_tot*sizeof(double),cudaMemcpyDeviceToHost);
     if(cuda_return != cudaSuccess){
       printf("ERROR while copying fofr from gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -277,7 +277,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR while getting denpot and weight on gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
 
     //call density accumulation routine on gpu
@@ -288,7 +288,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR while copying denpot from gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -306,7 +306,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cufft_state!=CUFFT_SUCCESS){
       printf("ERROR while fft fofr ==> work_gpu:\n%s\n",cufftGetErrorString(cufft_state));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
 
     //call post processing  routine on gpu
@@ -318,7 +318,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     if(cuda_return != cudaSuccess){
       printf("ERROR while copying fofgout from gpu: %s \n",cudaGetErrorString(cuda_return));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -343,7 +343,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   if(cuda_return != cudaSuccess){
     printf("ERROR: when creating cuda streams:\n%s\n",cudaGetErrorString(cuda_return));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //Size modification if too little memory allocation
@@ -370,7 +370,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   if(cufft_state!=CUFFT_SUCCESS){
     printf("alloc_gpu_fourwf:\n ERROR: At creation of cufftPlan:\n%s\n",cufftGetErrorString(cufft_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //Association du plan au stream de calcul
@@ -378,7 +378,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   if(cufft_state!=CUFFT_SUCCESS){
     printf("alloc_gpu_fourwf:\n ERROR: while associating cufftPlan to a stream:\n%s\n",cufftGetErrorString(cufft_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   cuda_return = cudaMalloc(&work_gpu,2*ndat_loc*fft_size*sizeof(double));
@@ -393,7 +393,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   if(cuda_return != cudaSuccess){
     printf("alloc_gpu_fourwf: ERROR while allocating memory on gpu: %s \n",cudaGetErrorString(cuda_return));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
 
@@ -404,7 +404,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   if(cuda_return != cudaSuccess){
     printf("alloc_gpu_fourwf:\n ERROR while allocating pinned memory for transfert to gpu: %s \n",cudaGetErrorString(cuda_return));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }//End of alloc_gpu_fourwf_
 
@@ -418,7 +418,7 @@ extern "C" void free_gpu_fourwf_(){
   if(cufft_state!=CUFFT_SUCCESS){
     printf("free_gpu_fourwf:\n ERROR: at destruction of cufftPlan \n");
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   cuda_return = cudaFree(work_gpu);
@@ -436,7 +436,7 @@ extern "C" void free_gpu_fourwf_(){
   if(cuda_return != cudaSuccess){
     printf("free_gpu_fourwf:\n ERROR while freeing memory on gpu: %s \n",cudaGetErrorString(cuda_return));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   cuda_return = cudaStreamDestroy(stream_cpy);
@@ -444,7 +444,7 @@ extern "C" void free_gpu_fourwf_(){
   if(cuda_return != cudaSuccess){
     printf("free_gpu_fourwf:\n ERROR: at destruction of streams: %s \n",cudaGetErrorString(cuda_return));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   gpu_initialized = 0;

@@ -29,7 +29,7 @@
 MODULE m_mpiotk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 #if defined HAVE_MPI2 && defined HAVE_MPI_IO

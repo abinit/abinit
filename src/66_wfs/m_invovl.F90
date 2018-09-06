@@ -34,13 +34,14 @@ MODULE m_invovl
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
 
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
  use m_nonlop,      only : nonlop
+ use m_prep_kgb,    only : prep_nonlop
 
  implicit none
 
@@ -204,7 +205,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_invovl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -469,7 +469,6 @@ end subroutine make_invovl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'apply_invovl'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

@@ -29,7 +29,7 @@ module m_stress
  use defs_basis
  use defs_abitypes
  use m_efield
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -41,12 +41,13 @@ module m_stress
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_mpinfo,           only : ptabs_fourdp
  use m_vdw_dftd2,        only : vdw_dftd2
  use m_vdw_dftd3,        only : vdw_dftd3
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl_recipspace
+ use m_mkcore,           only : mkcore, mkcore_alt
 
  implicit none
 
@@ -183,9 +184,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'stress'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -366,7 +364,7 @@ contains
  call timab(38,2,tsec)
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
-!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]  
+!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]
 !HONG  Nature Physics: M. Stengel et.al. (2009)) [[cite:Stengel1999]]
 !=======================================================================
 !=================== Berry phase contribution ==========================

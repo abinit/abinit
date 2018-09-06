@@ -826,16 +826,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  43.4539  -0.0000  34.8670  -0.0000  42.4650   0.0000
-   0.1000  43.4984   0.0897  34.8889   0.0439  42.5057   0.0819
-   0.2000  43.6328   0.1806  34.9547   0.0883  42.6285   0.1649
-   0.3000  43.8588   0.2742  35.0651   0.1333  42.8348   0.2500
-   0.4000  44.1798   0.3717  35.2210   0.1795  43.1274   0.3384
-   0.5000  44.6004   0.4748  35.4237   0.2273  43.5101   0.4313
-   0.6000  45.1269   0.5853  35.6750   0.2771  43.9880   0.5302
-   0.7000  45.7676   0.7052  35.9771   0.3294  44.5678   0.6366
-   0.8000  46.5332   0.8372  36.3328   0.3848  45.2580   0.7527
-   0.9000  47.4370   0.9845  36.7455   0.4440  46.0691   0.8806
+   0.0000  43.4540  -0.0000  34.8671  -0.0000  42.4651   0.0000
+   0.1000  43.4986   0.0897  34.8890   0.0439  42.5059   0.0819
+   0.2000  43.6330   0.1806  34.9548   0.0883  42.6287   0.1649
+   0.3000  43.8590   0.2742  35.0653   0.1333  42.8350   0.2500
+   0.4000  44.1799   0.3717  35.2211   0.1795  43.1276   0.3384
+   0.5000  44.6005   0.4748  35.4238   0.2273  43.5103   0.4313
+   0.6000  45.1270   0.5853  35.6751   0.2771  43.9882   0.5302
+   0.7000  45.7678   0.7052  35.9772   0.3294  44.5680   0.6366
+   0.8000  46.5334   0.8373  36.3329   0.3848  45.2582   0.7527
+   0.9000  47.4371   0.9845  36.7456   0.4440  46.0693   0.8806
   
 
 ================================================================================
@@ -1173,10 +1173,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  Writing GW-RPA macroscopic dielectric function without local fields to file: t31o_DS5_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 176 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 189 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 184 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 181 iterations.
  Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1185,12 +1185,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
    0.1000  20.3545   0.0349  16.6902   0.0179  18.8621   0.0267
    0.2000  20.4068   0.0702  16.7170   0.0358  18.9022   0.0537
    0.3000  20.4946   0.1064  16.7618   0.0541  18.9694   0.0812
-   0.4000  20.6191   0.1439  16.8251   0.0728  19.0644   0.1096
+   0.4000  20.6191   0.1439  16.8250   0.0728  19.0644   0.1096
    0.5000  20.7818   0.1833  16.9072   0.0920  19.1882   0.1391
    0.6000  20.9849   0.2252  17.0088   0.1120  19.3420   0.1700
-   0.7000  21.2311   0.2702  17.1308   0.1329  19.5275   0.2028
+   0.7000  21.2311   0.2702  17.1308   0.1329  19.5276   0.2028
    0.8000  21.5240   0.3193  17.2742   0.1548  19.7468   0.2379
-   0.9000  21.8680   0.3733  17.4401   0.1781  20.0023   0.2757
+   0.9000  21.8680   0.3733  17.4400   0.1781  20.0023   0.2757
   
 
 == END DATASET(S) ==============================================================

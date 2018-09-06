@@ -29,7 +29,7 @@
 MODULE m_ioarr
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_wffile
  use m_errors
@@ -143,7 +143,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioarr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -713,7 +712,6 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftdatar_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1041,7 +1039,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_rhor'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

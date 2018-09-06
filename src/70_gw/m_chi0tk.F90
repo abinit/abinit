@@ -27,7 +27,7 @@
 MODULE m_chi0tk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
@@ -389,7 +389,6 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetrize_afm_chi0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1573,7 +1572,6 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_spectral'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1725,7 +1723,6 @@ subroutine hilbert_transform(npwe,nomega,nomegasf,my_wl,my_wr,kkweight,sf_chi0,c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hilbert_transform'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1812,7 +1809,6 @@ subroutine hilbert_transform_headwings(npwe,nomega,nomegasf,my_wl,my_wr,kkweight
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hilbert_transform_headwings'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1921,7 +1917,6 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'completechi0_deltapart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2048,7 +2043,6 @@ subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_s
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'output_chi0sumrule'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2247,7 +2241,6 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_transitions'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

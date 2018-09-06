@@ -27,7 +27,7 @@ MODULE m_dens
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_splines
 
@@ -694,7 +694,6 @@ subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mag_constr_e'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -869,7 +868,6 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdensph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
