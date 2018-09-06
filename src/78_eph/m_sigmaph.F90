@@ -67,13 +67,6 @@ module m_sigmaph
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
- use m_fourier_interpol, only : transgrid
- use m_symkpt,     only : symkpt
-! use m_paw_an,	       only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,	       only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,	       only : pawdij, symdij
 
  implicit none
 
@@ -739,7 +732,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .False.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
        ! Get npw_kq, kg_kq for k+q
@@ -1191,8 +1184,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  end if
                end do
 
-             end do
-           end do
+             end do ! ibsum
+           end do ! ib_k
 
          end do ! nu
        end do ! iq_ibz
@@ -1705,13 +1698,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
            "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),ibstop
          MSG_COMMENT(msg)
        end if
-       ! Store band indices used for averaging.
+       ! Store band indices used for averaging (shifted by bstart_ks)
        ndeg = size(degblock, dim=2)
        ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
        do ii=1,ndeg
          cnt = degblock(2, ii) - degblock(1, ii) + 1
          ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii), degblock(2, ii))]
+         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
+                                                           degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
        end do
        ABI_FREE(degblock)
      end do
@@ -2427,9 +2421,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), c2r(self%vals_wr), start=[1,1,1,1,ikcalc,spin]))
 
    ! Compute spectral function.
-   ! A = 1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
+   ! A = -1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
    ABI_MALLOC(aw, (self%nwr, self%ntemp, self%max_nbcalc))
-
    do ib=1,self%nbcalc_ks(ikcalc,spin)
      band = self%bstart_ks(ikcalc, spin) + ib - 1
      kse = ebands%eig(band, ik_ibz, spin)

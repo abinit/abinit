@@ -29,7 +29,46 @@ module m_eph_driver
  use defs_basis
  use m_errors
  use m_abicore
+ use defs_datatypes
+ use defs_abitypes
+ use m_xmpi
+ use m_xomp
+ use m_hdr
+ use m_crystal
+ use m_crystal_io
+ use m_ebands
+ use m_efmas_defs
+ use m_ddk
+ use m_ddb
+ use m_dvdb
+ use m_ifc
+ use m_phonons
+ use m_nctk
+ use m_wfk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
+ use m_io_tools,        only : file_exists
+ use m_time,            only : cwtime
+ use m_fstrings,        only : strcat, sjoin, ftoa, itoa
+ use m_fftcore,         only : print_ngfft
+ use m_frohlichmodel,   only : frohlichmodel
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type
+ use m_paw_an,          only : paw_an_type, paw_an_free !, paw_an_nullify, paw_an_init,
+ use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+ use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+ use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_phgamma,         only : eph_phgamma
+ use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
+ use m_gkk,             only : eph_gkk, ncwrite_v1qnu
+ use m_phpi,            only : eph_phpi
+ use m_sigmaph,         only : sigmaph
+ use m_ephwg,           only : ephwg_test
  use m_pspini,          only : pspini
 
  implicit none
@@ -104,50 +143,6 @@ contains
 !! SOURCE
 
 subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_xomp
- use m_errors
- use m_hdr
- use m_crystal
- use m_crystal_io
- use m_ebands
- use m_efmas_defs
- use m_ddk
- use m_ddb
- use m_dvdb
- use m_ifc
- use m_phonons
- use m_nctk
- use m_wfk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-
- use m_io_tools,        only : file_exists
- use m_time,            only : cwtime
- use m_fstrings,        only : strcat, sjoin, ftoa, itoa
- use m_fftcore,         only : print_ngfft
- use m_frohlichmodel,   only : frohlichmodel
- use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_paw_an,          only : paw_an_type, paw_an_free !, paw_an_nullify, paw_an_init,
- use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
- use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
- use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_phgamma,         only : eph_phgamma
- use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
- use m_gkk,             only : eph_gkk, ncwrite_v1qnu
- use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph
- use m_ephwg,           only : ephwg_test
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -250,7 +245,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
- use_dvdb = (dtset%eph_task /= 0  .and. dtset%eph_frohlichm/=1)
+ use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm/=1)
 
  if(dtset%eph_frohlichm/=1)then
    efmas_path = dtfil%fnameabi_efmas
@@ -282,7 +277,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        end if
      end do
    end if
-
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -307,6 +301,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: Should perform consistency check
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
+
  if (dtset%eph_frohlichm/=1) then
    call xmpi_bcast(efmas_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", efmas_path) )
@@ -512,11 +507,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ifc_print(ifc, unit=std_out)
 
  ! Test B-spline interpolation of phonons
- !if (.True.) then
  if (.False.) then
+   ! TODO: Remove
    call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
-   !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
-   !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
    call xmpi_end()
  end if
 
@@ -607,24 +600,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if
 
- if(dtset%eph_frohlichm/=1)then
+ ! TODO Recheck getng, should use same trick as that used in screening and sigma.
+ call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
+ gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
-   ! TODO Recheck getng, should use same trick as that used in screening and sigma.
-   call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
+ call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
 
-   call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
-   call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
-
-   ! Fake MPI_type for the sequential part.
-   call initmpi_seq(mpi_enreg)
-   call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
-   call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
-
- endif
+ ! Fake MPI_type for the sequential part.
+ call initmpi_seq(mpi_enreg)
+ call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
+ call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
 !I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
- if(dtset%eph_frohlichm/=0)then
+ if (dtset%eph_frohlichm/=0) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
@@ -638,12 +627,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! === Open and read pseudopotential files ===
  ! ===========================================
 
- if(dtset%eph_frohlichm/=1)then
-
-   call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
-&   pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
-
- endif
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
+&  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
@@ -702,10 +687,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ifc_free(ifc)
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
- if(dtset%eph_frohlichm/=1)then
-   call pawfgr_destroy(pawfgr)
-   call destroy_mpi_enreg(mpi_enreg)
- endif
+ call pawfgr_destroy(pawfgr)
+ call destroy_mpi_enreg(mpi_enreg)
  if(allocated(efmasdeg))then
    call efmasdeg_free_array(efmasdeg)
  endif

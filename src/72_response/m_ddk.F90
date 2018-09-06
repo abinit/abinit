@@ -173,7 +173,6 @@ CONTAINS
 
 subroutine ddk_init(ddk, paths, comm)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -752,7 +751,6 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
 end subroutine ddk_fs_average_veloc
 !!***
-
 
 !----------------------------------------------------------------------
 

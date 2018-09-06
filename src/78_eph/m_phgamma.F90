@@ -67,7 +67,6 @@ module m_phgamma
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
  use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
- use m_fourier_interpol, only : transgrid
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
                                wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
  use m_pawang,          only : pawang_type
