@@ -1109,7 +1109,6 @@ subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
 end subroutine cg_zgemm
 !!***
 
-
 !!****f* m_cgtools/set_istwfk
 !! NAME
 !!  set_istwfk

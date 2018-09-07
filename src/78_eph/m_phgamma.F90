@@ -4106,7 +4106,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !arrays
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
  integer :: indkk_kq(1,6)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), phfrq(3*cryst%natom),lf(2),rg(2),res(2)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
@@ -4315,9 +4315,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! no memory distribution, each node has the full set of states.
  !bks_mask(1:mband,:,:) = .True.
 
+ ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
+ ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkpt))
+ wfd_istwfk = 1
+
  ecut = dtset%ecut ! dtset%dilatmx
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,ngfft,&
+   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
  call wfd_print(wfd,header="Wavefunctions on the Fermi Surface",mode_paral='PERS')
@@ -4325,6 +4330,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
 
  iomode = iomode_from_fname(wfk0_path)
 
