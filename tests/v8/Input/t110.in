@@ -1,7 +1,6 @@
       NormalMode
 # Unit cell definition
             brav   7   0
-# XG20180711 WARNING : at present, tdep parser is very rigid, NOT WORKING WITH KEYWORDS, but line-by-line ! The present line is for angle_alpha if needed
   natom_unitcell             5
    xred_unitcell   0.000000000e+00  0.000000000e+00  0.000000000e+00   5.000000000e-01  5.000000000e-01  5.000000000e-01   0.000000000e+00  5.000000000e-01  5.000000000e-01   5.000000000e-01  0.000000000e+00  5.000000000e-01   5.000000000e-01  5.000000000e-01  0.000000000e+00
   typat_unitcell   3   2   1   1   1
