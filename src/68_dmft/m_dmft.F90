@@ -163,8 +163,8 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
 
  check=paw_dmft%dmftcheck ! checks enabled
- paw_dmft%dmft_fepr=tol5
- paw_dmft%dmft_chpr=tol6
+ !paw_dmft%dmft_fermi_prec=tol5
+ paw_dmft%dmft_chpr=paw_dmft%dmft_fermi_prec/ten
 !paw_dmft%dmft_chpr=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0

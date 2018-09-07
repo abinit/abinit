@@ -266,7 +266,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  if(hu(1)%jpawu_zero.and.nsppol==2) nsppol_imp=2
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1
 !  Diagonalize energy levels
- useylm=1
+ useylm=paw_dmft%dmft_blockdiag
  if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,1,pawprtvol)
  testblock=1
  if(useylm==1) testblock=8
