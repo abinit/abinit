@@ -1244,11 +1244,11 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
- do iatom = 1 , natom
-   write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
-   write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
-   write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
- enddo ! natom
+! do iatom = 1 , natom
+   !write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+! enddo ! natom
      if(paw_dmft%dmft_solv==4)  then 
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
@@ -1270,9 +1270,9 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 &               + fermilevel                               &
 &               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-          if(ikpt==2.and.ib==ib1) then
-            write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-          endif
+          !if(ikpt==2.and.ib==ib1) then
+          !  write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !endif
 !&               - (self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
 !               if(prtopt>5) then
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then

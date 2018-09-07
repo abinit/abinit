@@ -47,6 +47,7 @@ MODULE m_self
  public :: dc_self
  public :: new_self
  public :: make_qmcshift_self
+ public :: selfreal2imag_self
 
 !!***
 
@@ -1477,14 +1478,16 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 !                 write(672,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
 !               enddo
 !                 TEST*************************
+               write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
                do ifreq=1,self%nw
                  selftemp_re(ifreq)=selftemp_re(ifreq)+ &
  &                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
-  &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)
+  &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+!    The factor two is here to compensate for the factor two in OmegaMaxent..
 !  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
-                 write(67,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+                 write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
                write(67,*) 
              enddo
@@ -1494,12 +1497,107 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
      enddo ! isppol
    endif ! lpawu=/-1
  enddo ! iatom
+     write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
                
  ABI_DEALLOCATE(selftemp_re)
  ABI_DEALLOCATE(selftemp_imag)
 
 
 end subroutine kramerskronig_self
+!!***
+
+!!****f* m_self/selfreal2imag_self
+!! NAME
+!! selfreal2imag_self
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  hu <type(hu_type)> = U interaction
+!!  paw_dmft  <type(paw_dmft_type)> = paw+dmft related data
+!!
+!! OUTPUT
+!!  self%qmc_shift in self <type(self_type)> = Self-energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine selfreal2imag_self(selfr,self)
+
+ use defs_basis
+ use m_paw_dmft, only : paw_dmft_type
+ use m_matlu, only : matlu_type,copy_matlu
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'selfreal2imag_self'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!type
+ type(self_type),intent(inout) :: selfr
+ type(self_type),intent(inout) :: self
+
+!Local variables-------------------------------
+ integer :: ifreq,jfreq,iidim,isppol,ispinor,ispinor1,im,im1,iatom
+ complex(dpc), allocatable :: selftempmatsub(:)
+ integer :: natom,ndim,nsppol,nspinor
+ real(dp) :: delta,real_part,imag_part
+! *********************************************************************
+ delta=0.0000000
+ ABI_ALLOCATE(selftempmatsub,(self%nw))
+ natom=self%hdc%natom
+ nsppol  = self%hdc%nsppol
+ nspinor=self%hdc%nspinor
+!  Compute limit of Real Part and put in double counting energy.
+! call copy_matlu(selfhdc,self%hdc%matlu,natom)
+ write(6,*) "A"
+     write(6,*) "self3",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
+ do iatom=1,natom
+   if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+     ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
+ write(6,*) "B"
+     do isppol=1,nsppol
+       do ispinor=1,nspinor
+         do ispinor1=1,nspinor
+           do im=1,ndim
+             do im1=1,ndim
+ write(6,*) "C"
+               do jfreq=1,selfr%nw-1
+                 write(6700,*)  selfr%omega(jfreq),aimag(selfr%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+               enddo
+                 write(6700,*) 
+               do ifreq=1,self%nw
+                 selftempmatsub(ifreq)=czero
+                 do jfreq=1,selfr%nw-1
+                   selftempmatsub(ifreq)=selftempmatsub(ifreq) -   &
+ &                   aimag(selfr%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
+ &                   /(cmplx(zero,self%omega(ifreq),kind=dp)-selfr%omega(jfreq))   &
+ &                 * (selfr%omega(jfreq+1)-selfr%omega(jfreq))
+                 enddo 
+                 selftempmatsub(ifreq)=selftempmatsub(ifreq)/pi
+                 write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),imag(selftempmatsub(ifreq))
+               enddo
+                 write(672,*)  
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo ! isppol
+   endif ! lpawu=/-1
+ enddo ! iatom
+               
+ ABI_DEALLOCATE(selftempmatsub)
+
+
+end subroutine selfreal2imag_self
 !!***
 
 END MODULE m_self

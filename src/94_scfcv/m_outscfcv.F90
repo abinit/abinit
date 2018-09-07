@@ -211,7 +211,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_datafordmft,      only : datafordmft
  use m_green,            only : green_type,compute_green,&
 &                      fourier_green,print_green,init_green,destroy_green,init_green_tau
- use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self
+ use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1091,7 +1091,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      write(message,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out,message,'COLL')
-     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,&
+&     dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
@@ -1121,14 +1122,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
       write(6,*) "init green done with allocation of green%oper"
       write(6,*) "opt_imagonly",opt_imagonly
-       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly,  &                
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &                
      &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
+     write(6,*) "self2r",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
      write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
       write(6,*) "read self done"
-       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,opt_self=1,opt_nonxsum=0)
+       call selfreal2imag_self(selfr,self)
+      write(6,*) "selfreal2imag_self done"
+       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
+&       opt_self=1,opt_nonxsum=0)
       write(6,*) "compute green done"
        if(me==master) then
-         call print_green("forspectralfunction",greenr,5,paw_dmft,pawprtvol=3,opt_wt=1)
+         call print_green("forspectralfunction",greenr,5,paw_dmft,&
+&         pawprtvol=3,opt_wt=1)
         write(6,*) "print green done"
        endif
 
