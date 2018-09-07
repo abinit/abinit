@@ -199,6 +199,7 @@ type dataset_type
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo
+ integer :: dmft_occnd_imag
  integer :: dmft_rslf
  integer :: dmft_read_occnd
  integer :: dmft_solv
@@ -682,6 +683,7 @@ type dataset_type
  real(dp) :: diemix
  real(dp) :: diemixmag
  real(dp) :: dilatmx
+ real(dp) :: dmft_fermi_prec
  real(dp) :: dmft_mxsf
  real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc

@@ -2164,6 +2164,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_mxsf=0.3_dp
+   dtsets(idtset)%dmft_occnd_imag=1
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
@@ -2171,6 +2172,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_t2g=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
+   dtsets(idtset)%dmft_fermi_prec=tol5
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0
