@@ -79,9 +79,11 @@ module m_dvdb
  integer,private,parameter :: FPOS_EOF = -1
 
  type,private :: qcache_t
+
    real(dp), allocatable :: v1scf(:,:,:,:)
      ! v1scf(cplex, nfftf, nspden, 3*natom))
      ! cached potentials
+
  end type qcache_t
 
 !----------------------------------------------------------------------
@@ -176,6 +178,9 @@ module m_dvdb
   integer :: qcache_size = 0
    ! Number of q-points in Vscf(q) stored in the cache.
    ! Useful when evaluating expressions requiring integration in q-space
+
+  integer :: prev_db_iqpt = 0
+    ! Index in the DVDB of the last point added to the cache.
 
   type(qcache_t), allocatable :: qcache(:)
     ! qcache(nqpt)
@@ -1267,6 +1272,11 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ! largest number of symmetries in the litte-group e.g. Gamma.
    if (nqcache >= db%qcache_size) then
      iqmax = maxloc(lgsize); iq = iqmax(1)
+     ! Try to avoid removing the last qpt added to cache.
+     if (iq == db%prev_db_iqpt .and. nqcache > 1) then
+        lgsize(iq) = -1
+        iqmax = maxloc(lgsize); iq = iqmax(1)
+     end if
      ABI_CHECK(allocated(db%qcache(iq)%v1scf), "free error")
      ABI_FREE(db%qcache(iq)%v1scf)
    end if
@@ -1274,6 +1284,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
    db%qcache(db_iqpt)%v1scf = v1scf
+   db%prev_db_iqpt = db_iqpt
  end if
 
  if (.not. isirr_q) then
