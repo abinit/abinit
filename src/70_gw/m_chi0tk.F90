@@ -27,7 +27,7 @@
 MODULE m_chi0tk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
@@ -37,7 +37,7 @@ MODULE m_chi0tk
  use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
- use m_blas,     only : xgerc, xgemm
+ use m_hide_blas,     only : xgerc, xgemm
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
  use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
@@ -389,7 +389,6 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetrize_afm_chi0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1331,13 +1330,14 @@ end subroutine assemblychi0sf
 !!
 !! FUNCTION
 !!  Approximate the Dirac function using two methods:
-!!  method 1) a triangular funtion centered at the value egwdiff_re (Eq 17 of PRB 74, 035101 (2006)
+!!  method 1) a triangular funtion centered at the value egwdiff_re, Eq 17 of PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!  method 2) a gaussian of witdth ep%spsmear expandended in Taylor series
 !!  (at the moment only the 0-th moments)
 !!
 !!  Subroutine needed to implement the calculation
 !!  of the polarizability using the spectral representation as proposed in:
-!!  PRB 74, 035101 (2006) and PRB 61, 7172 (1999)
+!!  PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!!  and PRB 61, 7172 (2000) [[cite:Miyake2000]]
 !!
 !! INPUTS
 !!  nomegasf=number of frequencies in the grid for Im \chi_0
@@ -1434,7 +1434,8 @@ end subroutine approxdelta
 !!
 !!  Subroutine needed to implement the calculation
 !!  of the polarizability using the spectral representation as proposed in:
-!!  PRB 74, 035101 (2006) and PRB 61, 7172 (1999)
+!!  PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!!  and PRB 61, 7172 (2000) [[cite:Miyake2000]]
 !!
 !! INPUTS
 !! nsp=number of frequencies where the imaginary part of the polarizability is evaluated
@@ -1444,7 +1445,7 @@ end subroutine approxdelta
 !! delta=small imaginary part used to avoid poles, input variables
 !!
 !! OUTPUT
-!! kkweight(nsp,ne)=frequency dependent weights (Eq A1 PRB 74, 035101 (2006)
+!! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!
 !! PARENTS
 !!      m_chi0
@@ -1532,7 +1533,8 @@ end subroutine calc_kkweight
 !!  setup_spectral
 !!
 !! FUNCTION
-!! Calculation of \chi_o based on the spectral method as proposed in PRB 74, 035101 (2006) and PRB 61, 7172 (1999).
+!! Calculation of \chi_o based on the spectral method as proposed in PRB 74, 035101 (2006) [[cite:Shishkin2006]]
+!! and PRB 61, 7172 (2000) [[cite:Miyake2000]].
 !! Setup of the real frequency mesh for $\Im\chi_o$ and of the frequency-dependent weights for
 !! Hilbert transform. Note that CPU time does not depend dramatically on nomegasf unlike memory.
 !! spmeth defines the approximant for the delta function:
@@ -1570,7 +1572,6 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_spectral'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1722,7 +1723,6 @@ subroutine hilbert_transform(npwe,nomega,nomegasf,my_wl,my_wr,kkweight,sf_chi0,c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hilbert_transform'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1809,7 +1809,6 @@ subroutine hilbert_transform_headwings(npwe,nomega,nomegasf,my_wl,my_wr,kkweight
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hilbert_transform_headwings'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1918,7 +1917,6 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'completechi0_deltapart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2045,7 +2043,6 @@ subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_s
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'output_chi0sumrule'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2166,7 +2163,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 !************************************************************************
 
  ! Accumulating the sum rule on chi0.
- ! Eq.(5.284) in G. D. Mahan Many-Particle Physics 3rd edition
+ ! Eq.(5.284) in G. D. Mahan Many-Particle Physics 3rd edition [[cite:Mahan2000]]
 
  SELECT CASE (symchi)
  CASE (0)
@@ -2244,7 +2241,6 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_transitions'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -27,7 +27,7 @@ module m_pred_delocint
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xfpack
@@ -100,24 +100,24 @@ contains
 !!
 !! SOURCE
 
-subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
+subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_delocint'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(abimover),intent(inout)       :: ab_mover
+ type(abimover),intent(in)       :: ab_mover
  type(ab_xfh_type),intent(inout)    :: ab_xfh
  type(abihist),intent(inout) :: hist
  type(abiforstr),intent(in) :: forstr
+ type(delocint),intent(inout) :: deloc
  integer,intent(in) :: itime
  integer,intent(in) :: ionmov
  integer,intent(in) :: iexit
@@ -240,27 +240,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
    ABI_ALLOCATE(vin_prev,(ndim))
    ABI_ALLOCATE(vout_prev,(ndim))
    ABI_ALLOCATE(hessin,(ndim,ndim))
-!  DELOCINT
-!  Allocate all the variables of deloc,
-!  Needed for compilers such as Pathscale that fails if
-!  unallocated variables are passed as arguments
-!  TODO:
-!  all of the following should go into an init routine in m_abimover
-
-   nshell=3
-   ab_mover%deloc%nrshift=(2*nshell+1)**3
-   icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
-
-   ABI_ALLOCATE(ab_mover%deloc%rshift,(3,ab_mover%deloc%nrshift))
-   irshift=0
-   do ii=-nshell,nshell
-     do jj=-nshell,nshell
-       do kk=-nshell,nshell
-         irshift=irshift+1
-         ab_mover%deloc%rshift(:,irshift) = (/dble(ii),dble(jj),dble(kk)/)
-       end do
-     end do
-   end do
 
  end if
 
@@ -325,50 +304,50 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !### 05. Compute internals for first time
 
  if (itime==1)then
-   call make_prim_internals(ab_mover%deloc,icenter,ab_mover%natom,&
+   call make_prim_internals(deloc,ab_mover%natom,&
 &   ab_mover%ntypat,rprimd,ab_mover%typat,xcart,ab_mover%znucl)
 
-   ABI_ALLOCATE(prim_int,(ab_mover%deloc%ninternal))
+   ABI_ALLOCATE(prim_int,(deloc%ninternal))
 
    if(DEBUG)then
-     write (message,'(a,i6)') 'Number of primitive internal coordinates (ninternal): ',ab_mover%deloc%ninternal
+     write (message,'(a,i6)') 'Number of primitive internal coordinates (ninternal): ',deloc%ninternal
      call wrtout(std_out,  message,'COLL')
    end if
 
    if (allocated(u_matrix))  then
      ABI_DEALLOCATE(u_matrix)
    end if
-   ABI_ALLOCATE(u_matrix,(ab_mover%deloc%ninternal,ndeloc))
+   ABI_ALLOCATE(u_matrix,(deloc%ninternal,ndeloc))
 
-   call calc_prim_int(ab_mover%deloc,ab_mover%natom,rprimd,xcart,prim_int)
+   call calc_prim_int(deloc,ab_mover%natom,rprimd,xcart,prim_int)
 
    if(DEBUG)then
      write (message,'(a)') 'Primitive internal coordinate values:'
      call wrtout(std_out,  message,'COLL')
      write (message,'(a)') ' Bonds:'
      call wrtout(std_out,  message,'COLL')
-     do ii = 1, ab_mover%deloc%nbond
+     do ii = 1, deloc%nbond
        write (message,'(i6,E20.10)') ii, prim_int(ii)
        call wrtout(std_out,  message,'COLL')
      end do
 
      write (message,'(a)') ' Angles:'
      call wrtout(std_out,  message,'COLL')
-     do ii = ab_mover%deloc%nbond+1, ab_mover%deloc%nbond+ab_mover%deloc%nang
+     do ii = deloc%nbond+1, deloc%nbond+deloc%nang
        write (message,'(i6,2(E20.10,2x))') ii, prim_int(ii), prim_int(ii)/pi*180.0_dp
        call wrtout(std_out,  message,'COLL')
      end do
 
      write (message,'(a)') ' Dihedrals:'
      call wrtout(std_out,  message,'COLL')
-     do ii = ab_mover%deloc%nbond+ab_mover%deloc%nang+1, ab_mover%deloc%nbond+ab_mover%deloc%nang+ab_mover%deloc%ndihed
+     do ii = deloc%nbond+deloc%nang+1, deloc%nbond+deloc%nang+deloc%ndihed
        write (message,'(i6,2(E20.10,2x))') ii, prim_int(ii), prim_int(ii)/pi*180.0_dp
        call wrtout(std_out,  message,'COLL')
      end do
 
      write (message,'(a)') ' Cartesian auxiliary coordinates for constraints:'
      call wrtout(std_out,  message,'COLL')
-     do ii = ab_mover%deloc%nbond+ab_mover%deloc%nang+ab_mover%deloc%ndihed+1, ab_mover%deloc%ninternal
+     do ii = deloc%nbond+deloc%nang+deloc%ndihed+1, deloc%ninternal
        write (message,'(i6,E20.10)') ii, prim_int(ii)
        call wrtout(std_out,  message,'COLL')
      end do
@@ -384,7 +363,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
  end if
 
- ABI_ALLOCATE(prim_int,(ab_mover%deloc%ninternal))
+ ABI_ALLOCATE(prim_int,(deloc%ninternal))
 
 !write(std_out,*) 'delocint 06'
 !##########################################################
@@ -393,7 +372,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !xcart ---> deloc_int
 
 !Convert positions to delocalized coordinates for next step
- call xcart2deloc(ab_mover%deloc,ab_mover%natom,rprimd,xcart,&
+ call xcart2deloc(deloc,ab_mover%natom,rprimd,xcart,&
 & bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
 !fred ---> deloc_force
@@ -486,7 +465,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
      call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 &     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
-&     vout,vout_prev,xred,ab_mover%deloc,deloc_int,deloc_force,bt_inv_matrix,gprimd,prim_int,&
+&     vout,vout_prev,xred,deloc,deloc_int,deloc_force,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
 
    end if
@@ -628,7 +607,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !this routine contains an iterative scheme to find xcart
 !from the non-linear relations between deloc and xcart
 !SIGNIFICANTLY DIFFERENT FROM xcart2deloc
- call deloc2xcart(ab_mover%deloc,ab_mover%natom,rprimd,xcart,&
+ call deloc2xcart(deloc,ab_mover%natom,rprimd,xcart,&
 & deloc_int,bt_inv_matrix,u_matrix)
 
 !Convert new xcart (cartesian) to xred (reduced coordinates)
@@ -730,7 +709,6 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'deloc2xcart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -738,7 +716,7 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(delocint),intent(inout) :: deloc
+ type(delocint),intent(in) :: deloc
 !arrays
  real(dp),intent(in) :: deloc_int(3*(natom-1)),rprimd(3,3)
  real(dp),intent(inout) :: u_matrix(deloc%ninternal,3*(natom-1))
@@ -914,7 +892,6 @@ subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fred2fdeloc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1008,7 +985,7 @@ subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(delocint),intent(inout) :: deloc
+ type(delocint),intent(in) :: deloc
 
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
@@ -1619,7 +1596,7 @@ subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(delocint),intent(inout) :: deloc
+ type(delocint),intent(in) :: deloc
 !arrays
  real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
  real(dp),intent(inout) :: u_matrix(deloc%ninternal,3*(natom-1))
@@ -1911,7 +1888,7 @@ real(dp),intent(inout) :: ucvol,ucvol0
 type(ab_xfh_type),intent(inout) :: ab_xfh
 type(abimover),intent(in) :: ab_mover
 ! DELOCINT specials
-type(delocint),intent(inout) :: deloc
+type(delocint),intent(in) :: deloc
 
 !arrays
 real(dp),intent(inout) :: acell(3)

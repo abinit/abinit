@@ -26,7 +26,7 @@
 MODULE m_bseinterp
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -39,7 +39,7 @@ MODULE m_bseinterp
 
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : pseudopotential_type
- use m_blas,              only : xdotc
+ use m_hide_blas,         only : xdotc
  use m_fft_mesh,          only : calc_ceigr
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t
@@ -822,5 +822,5 @@ end subroutine interpolator_free
 
 !-------------------------------------------------------------------
 
-end module
+end module m_bseinterp
 !!***

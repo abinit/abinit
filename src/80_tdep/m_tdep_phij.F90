@@ -8,7 +8,7 @@ module m_tdep_phij
 
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
@@ -357,8 +357,8 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
 ! Write the Phij_unitcell.dat and Phij_NN.dat files
   if (InVar%debug) then
     write(InVar%stdout,'(a)') ' See the Phij*.dat file'
-    open(unit=52,file='Phij_unitcell.dat')
-    open(unit=55,file='Phij_NN.dat')
+    open(unit=52,file=trim(InVar%output_prefix)//'Phij_unitcell.dat')
+    open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN.dat')
     do jatom=1,3*InVar%natom
       if (jatom.le.3*InVar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phij_NN(jatom,:)
@@ -659,7 +659,7 @@ subroutine tdep_destroy_eigen2nd(Eigen2nd)
 end subroutine tdep_destroy_eigen2nd
 
 !=====================================================================================================
-subroutine tdep_write_yaml(Eigen2nd,Qpt)
+subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -672,13 +672,14 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt)
 
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
+  character(len=*) :: Prefix
 ! type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: ii,iqpt,imode,nmode
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file='phonon-bands.yaml')
+  open(unit=52,file=trim(Prefix)//'phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'
@@ -694,7 +695,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt)
     write(52,'(a,f15.6)') '  distance:',distance
     do ii=1,Qpt%qpt_tot
       if (sum(abs(Qpt%qpt_red(:,iqpt)-Qpt%special_red(ii,:))).lt.tol8) then
-        write(52,'(3a)') "  label: '",Qpt%special_qpt(ii),"'"
+        write(52,'(3a)') "  label: '",trim(Qpt%special_qpt(ii)),"'"
         exit
       end if
     end do !ii

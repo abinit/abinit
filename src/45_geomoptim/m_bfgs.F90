@@ -28,7 +28,7 @@
 MODULE m_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abimover
 
@@ -83,7 +83,6 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hessinit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -354,7 +353,7 @@ end subroutine hessupdt
 !! with a line minimisation that take into account the total energies.
 !! Also transfer vin to vin_prev, vout to vout_prev, and etotal to etotal_prev
 !! Could see Numerical Recipes (Fortran), 1986, page 307,
-!! as well as Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! as well as Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !!
 !! INPUTS
 !!  etotal=new total energy (no meaning at output)

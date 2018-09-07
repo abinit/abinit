@@ -29,7 +29,7 @@ module m_multipoles
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
  use m_xmpi
  use m_atomdata
@@ -249,7 +249,6 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multipoles_out'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -386,7 +385,6 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'out1dm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

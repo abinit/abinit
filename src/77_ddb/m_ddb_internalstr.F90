@@ -27,7 +27,7 @@
 module m_ddb_internalstr
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_crystal
  use m_ddb
@@ -96,7 +96,6 @@ natom,nblok)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_internalstr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

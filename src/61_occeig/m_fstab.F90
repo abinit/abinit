@@ -26,7 +26,7 @@ module m_fstab
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -247,7 +247,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fstab_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -485,7 +484,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
-       ! Calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+       ! Calculate general integration weights at each irred kpoint 
+       ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
 
@@ -693,7 +693,6 @@ subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fstab_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -784,7 +783,6 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkqptequiv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

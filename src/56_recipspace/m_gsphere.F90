@@ -30,7 +30,7 @@
 MODULE m_gsphere
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_distribfft
  use m_sort
@@ -731,7 +731,6 @@ subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_gsphere'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1203,7 +1202,6 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'merge_and_sort_kg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1487,7 +1485,6 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getfullg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -25,7 +25,7 @@
 module m_predict_steepest
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_mep
 
  use m_results_img, only : results_img_type,get_geometry_img

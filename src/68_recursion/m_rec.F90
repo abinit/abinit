@@ -44,7 +44,7 @@ module m_rec
  use defs_datatypes
  use defs_abitypes
  use defs_rectypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
@@ -114,7 +114,6 @@ subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'H_D_distrib'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -319,7 +318,6 @@ end subroutine find_maxmin_proc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cpu_distribution'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -638,7 +636,6 @@ subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Init_MetricRec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -719,7 +716,6 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Init_nlpspRec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -916,7 +912,6 @@ subroutine Calcnrec(rset,b2)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Calcnrec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1328,7 +1323,6 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspnl_operat_rec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1568,7 +1562,6 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspnl_hgh_rec'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

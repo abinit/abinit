@@ -30,10 +30,6 @@
 !!      1WF header = hdr1
 !!      1st order eigenvalues = eigen1
 !!
-!! CHILDREN
-!!      abi_io_redirect,destroy_mpi_enreg,flush_unit,hdr_free,herald
-!!      initmpi_seq,rwwf,wrtout,xmpi_end,xmpi_init
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -54,7 +50,7 @@ program mrggkk
  use defs_basis
  use defs_abitypes
  use m_build_info
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -73,7 +69,6 @@ program mrggkk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrggkk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -182,7 +177,7 @@ program mrggkk
    ios = open_file(outfile,message,unit=unitout,form='formatted')
    rdwrout = 4
  else
-   MSG_ERROR(' binascii must be 0 or 1')
+   MSG_ERROR(' binascii must be between 0 and 2')
  end if
 
  ABI_CHECK(ios==0,message)

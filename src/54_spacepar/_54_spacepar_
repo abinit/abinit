@@ -21,9 +21,8 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! dotprod_vn.F90
 !! interfaces_54_spacepar.F90
-!! meanvalue_g.F90
-!! multipoles_fftr.F90
+!! m_multipoles.F90
+!! m_spacepar.F90
 !!
 !!***

@@ -28,7 +28,7 @@
 MODULE m_esymm
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,       only : file_exists
@@ -36,7 +36,7 @@ MODULE m_esymm
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
- use m_abilasi,        only : xgeev, xginv
+ use m_hide_lapack,    only : xgeev, xginv
  use m_crystal,        only : crystal_t, idx_spatial_inversion
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
@@ -261,7 +261,6 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -860,7 +859,6 @@ subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1119,7 +1117,6 @@ subroutine esymm_finalize(esymm,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_finalize'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

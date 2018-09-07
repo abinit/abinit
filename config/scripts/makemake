@@ -258,7 +258,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing uncertified build examples",
     "rm -f doc/build/config-examples/uncertified/*.ac")
   run_script(my_name, "Removing RoboDOC tarball",
-    "rm -f infos_html*.tar.gz robodoc-html*.tar.gz")
+    "rm -f robodoc-html*.tar.gz")
 
   # Identify subdirs to clean, delegate the rest to the subsystems
   print_header(my_name, "Core-managed build files")
@@ -460,6 +460,7 @@ if ( opts.run_source ):
       (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
     print_message(my_name, "Updating Fortran interfaces")
     print_message(my_name, "---> running %s" % (abilint_cmdline))
+    #abilint_exitcode  = 0
     abilint_exitcode = os.system(abilint_cmdline)
 
     if ( abilint_exitcode != 0 ):
@@ -490,6 +491,31 @@ if ( opts.run_source ):
   if ( os.path.exists(os.path.join("bindings", "parser", "dtset.pickle")) ):
     run_script(my_name, "Generating dtset source files",
       "./config/scripts/make-sources-parser")
+
+  # New version based on abisrc.
+  os.system("rm -rf ./src/*/interfaces_*.F90")
+  abisrc_cmdline = "./src/abisrc.py validate" 
+  #abisrc_cmdline = "./src/abisrc.py makemake" 
+  print_message(my_name, "---> running %s" % (abisrc_cmdline))
+  abisrc_exitcode = os.system(abisrc_cmdline)
+  if abisrc_exitcode != 0:
+    sys.stderr.write("""
+       ****************************************************************
+       ***                     FATAL ERROR!                         ***
+       ****************************************************************
+       ***                                                          ***
+       *** The abisrc.py script returned an non-zero exit status.   ***
+       *** This usually means that the script found subroutines or  ***
+       *** functions that are not declared inside modules or that   ***
+       *** there is a syntax error in the Fortran code.             ***
+       *** See above error message.                                 ***
+       *** Please note that procedures outside Fortran modules      ***
+       *** are not allowed any longer.                              ***
+       ****************************************************************\n""")
+    sys.stderr.write("[%s] Aborting now\n" % (my_name))
+    sys.exit(1)
+
+
 else:
   print_message(my_name, "*** Skipping source tree update ***")
 

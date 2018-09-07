@@ -2,11 +2,11 @@
 authors: MVer
 ---
 
-# Electron-phonon lesson  
+# Electron-phonon tutorial
 
 ## Electron-Phonon interaction and superconducting properties of Al.  
 
-This lesson demonstrates how to obtain the following physical properties, for a metal:
+This tutorial demonstrates how to obtain the following physical properties, for a metal:
 
   * the phonon linewidths (inverse lifetimes) due to the electron-phonon interaction
   * the Eliashberg spectral function
@@ -19,34 +19,44 @@ utility. This implies a preliminary calculation of the electron-phonon matrix
 elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
-This lesson should take about 1 hour.
+[TUTORIAL_README]
+
+This tutorial should take about 1 hour.
+
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 ## 1 Calculation of the ground state and phonon structure of fcc Al
 
-  
 *Before beginning, you might consider making a different subdirectory to work
-in. Why not create "Work_eph" in ~abinit/tests/tutorespfn/Input?*
+in. Why not create Work_eph in \$ABI_TUTORESPFN/Input?*
 
 It is presumed that the user has already followed the Tutorials [RF1](rf1) and [RF2](rf2), 
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-The file ~abinit/tests/tutorespfn/Input/teph_1.files lists the file names and
-root names for the first run (GS+perturbations). You can copy it to the
-working directory. You can also copy the file
-~abinit/tests/tutorespfn/Input/teph_1.in to your working directory. 
-This is your input file.
+The file *teph_1.files* lists the file names and root names for the first run (GS+perturbations).
+You can copy it to the working directory. You can also copy the file *teph_1.in* to your working directory. 
 
-    cp ../teph_1.files
-    cp ../teph_1.in
+```sh
+cd $ABI_TUTORESPFN/Input
+mkdir Work_eph
+cd Work_eph
+cp ../teph_1.file . 
+cp ../teph_1.in .
+```
+
+{% dialog tests/tutorespfn/Input/teph_1.in %}
 
 You can immediately start this run - the input files will be examined later...
     
-    ../../abinit < teph_1.files > tmp-log &
+    abinit < teph_1.files > log 2> err &
 
 ### Dataset Structure and Flow
 
-The teph_1.in file contains a number of datasets (DS). These will perform the
+The *teph_1.in* file contains a number of datasets (DS). These will perform the
 ground state (DS 1), then the phonon perturbations (DS 2-4), for a cell of FCC
 aluminium. The DDK perturbation (DS 5) is also calculated, and will be used to
 obtain the Fermi velocities for the transport calculations in Section 6.
@@ -76,11 +86,11 @@ very different from versions before 7.6.
 
 The calculation is done using minimal values of a number of parameters, in
 order to make it tractable in a time appropriate for a tutorial. The results
-will be completely unconverged, but by the end of the lesson you should know
+will be completely unconverged, but by the end of the tutorial you should know
 how to run a full electron phonon calculation, and be able to improve the
 convergence on your own.
 
-Edit the file teph_1.in. We now examine several variables. The kinetic energy
+Edit the file *teph_1.in*. We now examine several variables. The kinetic energy
 cutoff [[ecut]] is a bit low, and the number of k-points (determined by
 [[ngkpt]]) is much too low. Electron-phonon calculations require a very
 precise determination of the Fermi surface of the metal. This implies a very
@@ -141,7 +151,7 @@ contain the 2DTE for the different phonons wavevectors q.
 
 ## 2 Merging of the 2DTE DDB files using MRGDDB
   
-You can copy the following content to a file teph_2.in within your working directory:
+You can copy the following content to a file *teph_2.in* within your working directory:
     
     teph_2.ddb.out
     Total ddb for Al FCC system
@@ -150,12 +160,16 @@ You can copy the following content to a file teph_2.in within your working direc
     teph_1o_DS3_DDB
     teph_1o_DS4_DDB
     
+or use
+
+{% dialog tests/tutorespfn/Input/teph_2.in %}
+
 This is your input file for the [[help:mrgddb|MRGDDB]] utility, which will
 take the different _DDB files and merge them into a single one which ANADDB
-will use to determine the phonon frequencies and eigenvectors. teph_2.in
-contains the name of the final file, a comment line, then the number of _DDB
+will use to determine the phonon frequencies and eigenvectors. *teph_2.in*
+contains the name of the final file, a comment line, then the number of *_DDB*
 files to be merged and their names.
-mrgddb is run with the command
+*mrgddb* is run with the command
     
      mrgddb < teph_2.in 
 
@@ -165,7 +179,7 @@ It runs in a few seconds.
   
 A merge similar to that in the last section must be carried out for the
 electron-phonon matrix elements. This is done using the MRGGKK utility, and
-its input file is ~abinit/tests/tutorespfn/Input/teph_3.in, shown below
+its input file is *\$ABI_TUTORESPFN/Input/teph_3.in*, shown below
     
     teph_3o_GKK.bin   # Name of output file
     0                    # binary (0) or ascii (1) output
@@ -175,9 +189,13 @@ its input file is ~abinit/tests/tutorespfn/Input/teph_3.in, shown below
     teph_1o_DS2_GKK2
     ...
 
+or use
+
+{% dialog tests/tutorespfn/Input/teph_3.in %}
+
 The matrix element sections of all the _GKK files will be extracted and
-concatenated into one (binary) file, here named teph_3o_GKK.bin. The following
-lines in teph_3.in give the output format (0 for binary or 1 for ascii), then
+concatenated into one (binary) file, here named *teph_3o_GKK.bin*. The following
+lines in *teph_3.in* give the output format (0 for binary or 1 for ascii), then
 the name of the ground state wavefunction file. The fourth line contains 3
 integers, which give the number of _1WF files (which can also be used to
 salvage the GKK), the number of _GKK files, and the number of perturbations in
@@ -196,11 +214,14 @@ superconductivity is reviewed in [[cite:Allen1983a|Theory of Superconducting Tc]
 by P.B. Allen and B. Mitrovic.
 The first implementations similar to that in ABINIT are those in [[cite:Savrasov1996]] and [[cite:Liu1996]].
 
-File ~abinit/tests/tutorespfn/Input/teph_4.in contains the input needed by
-ANADDB to carry out the calculation of the electron-phonon quantities. ANADDB
-takes a files file, just like ABINIT, which tells it where to find the input,
+File *\$ABI_TUTORESPFN/Input/teph_4.in* contains the input needed by
+ANADDB to carry out the calculation of the electron-phonon quantities.
+
+{% dialog tests/tutorespfn/Input/teph_4.in %}
+
+ANADDB takes a files file, just like ABINIT, which tells it where to find the input,
 ddb, and gkk files, and what to name the output, thermodynamical output, and
-electron phonon output files. ~abinit/tests/tutorespfn/Input/teph_4.files is
+electron phonon output files. *\$ABI_TUTORESPFN/Input/teph_4.files* is
 your files file for ANADDB. You can edit it now.
 
 The new variables are at the head of the file:
@@ -226,7 +247,7 @@ The new variables are at the head of the file:
 [[anaddb:elphflag]] is a flag to turn on the calculation of the electron-
 phonon quantities. The first quantities which will be calculated are the
 phonon linewidths along a path in reciprocal space (exactly like the band
-structure in [[lesson:base3]]. The path is specified by the
+structure in [the tutorial 3](base3). The path is specified by the
 variable [[anaddb:qpath]] giving the apexes of the path in reciprocal space,
 which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
@@ -240,18 +261,18 @@ calculations which are presently implemented in ANADDB, in particular for
 superconductivity, determine isotropic quantities, which are averaged over the
 Fermi surface and summed over q-points. Integrating the coupling over
 reciprocal space, but keeping the resolution in the phonon mode's energy, one
-calculates the Eliashberg spectral function α²F. The α²F function is similar
+calculates the Eliashberg spectral function $\alpha^2F$. The $\alpha^2F$ function is similar
 to the density of states of the phonons, but is weighted according to the
 coupling of the phonons to the electrons. It is output to a file with suffix
 _A2F, which is ready to be represented using any graphical software (Xmgr,
-matlab, OpenDX...). The first inverse moment of α²F gives the global coupling
-strength, or mass renormalization factor, λ. From λ, using the [[cite:McMillan1968|McMillan formula]]
+matlab, OpenDX...). The first inverse moment of $\alpha^2F$ gives the global coupling
+strength, or mass renormalization factor, $\lambda$. From $\lambda$, using the [[cite:McMillan1968|McMillan formula]]
 as modified by [[cite:Allen1975|Allen and Dynes]]
 ANADDB calculates the critical temperature for superconductivity. 
 The formula contains an adjustable
-parameter μ* which approximates the effect of Coulomb interactions, and is
+parameter $\mu^{\star}$ which approximates the effect of Coulomb interactions, and is
 given by the input variable [[anaddb:mustar]]. For Al with the k-point grid
-given and a value of μ=0.136 the ANADDB output file shows the following values
+given and a value of $\mu^{\star}$=0.136 the ANADDB output file shows the following values
     
      mka2f: lambda <omega^2> =     8.891284E-07
      mka2f: lambda <omega^3> =     7.757272E-10
@@ -265,7 +286,7 @@ given and a value of μ=0.136 the ANADDB output file shows the following values
 As expected, this is a fairly bad estimation of the experimental value of 1.2
 K. The coupling strength is severely overestimated (experiment gives 0.44),
 and the logarithmic average frequency is too low, but not nearly enough to
-compensate λ. Aluminum is a good case in which things can be improved, easily
+compensate $\lambda$. Aluminum is a good case in which things can be improved, easily
 because its Fermi surface is isotropic and the coupling is weak.
 
 ## 5 Convergence tests of the integration techniques
@@ -282,16 +303,19 @@ unit cell. In the Gaussian case, the width of the smearing can be controlled
 using the input variable [[anaddb:elphsmear]].
 
 To test our calculations, they should be re-done with a denser k-point grid
-and a denser q-point grid, until the results (α²F or λ) are converged. The
+and a denser q-point grid, until the results ($\alpha^2F$ or $\lambda$) are converged. The
 value of [[anaddb:elphsmear]] should also be checked, to make sure that it
 does not affect results. Normally, the limit for a very small
 [[anaddb:elphsmear]] and a very dense k-point grid is the same as the value
 obtained with the tetrahedron method (which usually converges with a sparser k-point grid).
 
-Edit input file ~abinit/tests/tutorespfn/Input/teph_5.in and you will see the
-main difference with teph_4.in is the choice of the tetrahedron integration
-method. If you are patient, save the output _LWD and _A2F files and run the
-full lesson again with a denser k-point grid (say, 6x6x6) and you will be able
+Edit input file *\$ABI_TUTORESPFN/Input/teph_5.in* and you will see the
+main difference with teph_4.in is the choice of the tetrahedron integration method.
+
+{% dialog tests/tutorespfn/Input/teph_5.in %}
+
+If you are patient, save the output _LWD and _A2F files and run the
+full tutorial again with a denser k-point grid (say, 6x6x6) and you will be able
 to observe the differences in convergence.
 
 ## 6 Transport quantities within Boltzmann theory
@@ -300,16 +324,16 @@ The electron-phonon interaction is also responsible for the resistivity of
 normal metals and related phenomena. Even in a perfect crystal, interaction
 with phonons will limit electron life times (and vice versa). This can be
 calculated fairly simply using the Boltzmann theory of transport with first
-order scattering by phonons (see, e.g., "Electrons and Phonons" by Ziman).
+order scattering by phonons (see, e.g., [[cite:Ziman1960|"Electrons and Phonons" by Ziman]]).
 
 The additional ingredient needed to calculate transport quantities (electrical
 resistivity, heat conductivity limited by electron-phonon coupling) is the
 Fermi velocity, i.e. the group velocity of a wavepacket of electrons placed at
 the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
-Ashcroft and Mermin as well). The velocity can be related simply to a
+[[cite:Ashcroft1976|Ashcroft and Mermin]] as well). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
-a DDK calculation (see [[lesson:rf1|the Gamma point phonon tutorial]].
+a DDK calculation (see [the first DFPT tutorial (DFPT1)](rf1).
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
 phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more
@@ -348,10 +372,14 @@ additional dataset, DS5, with the following lines of teph_1.in:
     
 
 Copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
-run anaddb with the new "files" file. The input for teph_6 has added to teph_5.in the following 2 lines:
+run anaddb with the new "files" file. The input for teph_6 has added to *teph_5.in* the following 2 lines:
     
     ifltransport 1
     ep_keepbands 1
+
+see
+
+{% dialog tests/tutorespfn/Input/teph_6.in %}
 
 and has produced a number of additional files:
 
@@ -364,8 +392,8 @@ and has produced a number of additional files:
 The high T behavior is necessarily linear if you include only first order e-p
 coupling and neglect the variation of the GKK off of the Fermi surface. The
 inset shows the low T behavior, which is not a simple polynomial (with simple
-models it should be T^3 or T^5 - see Ashcroft and Mermin). See the Savrasov
-paper above for reference values in simple metals using well converged k- and q- point grids.
+models it should be T^3 or T^5 - see [[cite:Ashcroft1976|Ashcroft and Mermin]]). See the [[cite:Savrasov1996|Savrasov paper]]
+above for reference values in simple metals using well converged k- and q- point grids.
 
 Finally, note that the _RHO and _WTH files contain a series of tensor
 components, for the resistivity tensor (2 1 = y x or the current response

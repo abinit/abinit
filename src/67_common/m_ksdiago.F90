@@ -29,14 +29,14 @@ module m_ksdiago
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
 
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
  use m_fft,               only : fftpac
@@ -50,6 +50,8 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc
+ use m_fourier_interpol,  only : transgrid
+ use m_cgprj,             only : getcprj
 
  implicit none
 
@@ -230,12 +232,11 @@ contains
 !! * The routine RE-compute all Hamiltonian terms. So it is equivalent to an additional electronic SC cycle.
 !!   (This has no effect is convergence was reach. If not, eigenvalues/vectors may differs from the conjugate gradient ones)
 !!
-!! NOTES
-!!  Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
-!!  or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
-!!  ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
-!!  or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
-!!  the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
+!! * Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
+!!   or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
+!!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
+!!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
+!!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
 !!      m_shirley,outkss
@@ -259,9 +260,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ksdiago'
- use interfaces_14_hidewrite
- use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -718,7 +716,6 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_ddiago_ctl'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

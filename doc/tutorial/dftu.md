@@ -2,19 +2,21 @@
 authors: SPesant, MCote, XG, BAmadon
 ---
 
-# Lesson on DFT+U  
+# Tutorial on DFT+U  
 
 ## The projected density of states of NiO.  
 
-This lesson aims at showing how to perform a DFT+U calculation using Abinit.
+This tutorial aims at showing how to perform a DFT+U calculation using Abinit (see also [[cite:Amadon2008a]])
 
 You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two lessons on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
+Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
 
-This lesson should take about 1 hour to complete.
+[TUTORIAL_README]
+
+This tutorial should take about 1 hour to complete.
 
 ## 0 Short summary of the DFT+U method
   
@@ -23,8 +25,8 @@ correlation energy is fit to homogeneous electron gas results, is a functional
 that works well for a vast number of compounds. But, for some crystals, the
 interactions between electrons are so important that they cannot be
 represented by the LDA alone. Generally, these highly correlated materials
-contain rare-earth metals or transition metals, which have partially filled d
-or f bands and thus localized electrons.
+contain rare-earth metals or transition metals, which have partially filled *d*
+or *f* bands and thus localized electrons.
 
 The LDA tends to delocalize electrons over the crystal, and each electron
 feels an average of the Coulombic potential. For highly correlated materials,
@@ -33,7 +35,7 @@ represented by a functional such as the LDA. A way to avoid this problem is to
 add a Hubbard-like, localised term, to the LDA density functional. This
 approach is known as LDA+U (actually DFT+U). In the actual implementation, we
 separate localized d or f electrons, on which the Hubbard term will act, from
-the delocalized ones (s and p electrons). The latter are correctly described
+the delocalized ones (*s* and *p* electrons). The latter are correctly described
 by the usual LDA calculation. In order to avoid the double counting of the
 correlation part for localized electrons (already included in the LDA,
 although in an average manner), another term - called the double-counting
@@ -41,24 +43,33 @@ correction - is subtracted from the Hamiltonian.
 
 In Abinit, two double-counting corrections are currently implemented:
 
--The Full localized limit (FLL) [[cite:Liechtenstein1995]]
+-The Full localized limit (FLL) [[cite:Liechtenstein1995]] ([[usepawu]]=1)
 
--The Around Mean Field (AMF) [[cite:Czyzyk1994]] 
+-The Around Mean Field (AMF) [[cite:Czyzyk1994]]  ([[usepawu]]=2)
 
 For some systems, the result might depend on the choice of the double-counting method. 
 However, the two methods generally give similar results.
 
 ## 1 Ground state calculation of NiO using LDA
-  
-You might create a subdirectory of the ~abinit/tests/tutorial directory, and
-use it for the tutorial. In what follows, the names of files will be mentioned
-as if you were in this subdirectory
 
-*Copy the files ../Input/tdftu_1.in and ../Input/tdftu_x.files in your Work directory and run*
+*Before continuing, you might consider to work in a different subdirectory as
+for the other tutorials. Why not Work_dftu?
+In what follows, the names of files will be mentioned as if you were in this subdirectory.*
+
+Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TUTORIAL/Input* to your *Work_dftu* directory with:
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_dftu
+cd Work_dftu
+cp ../tdftu_x.files .  # You will need to edit this file.
+cp ../tdftu_1.in .
+```
 
 {% dialog tests/tutorial/Input/tdftu_x.files tests/tutorial/Input/tdftu_1.in %}
 
-This run should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
+Now run the code as usual.
+The job should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
 ground state of the NiO crystal. A low cutoff and a small number of k-points
 are used in order to speed up the calculation. During this time you can take a
 look at the input file.
@@ -96,11 +107,9 @@ cell. Fortunately, the LDA succeeds to give an antiferromagnetic ground state
 for the NiO. But the result does not agree with the experimental data. 
 
 The magnetic moment (the difference between up and down spin on the nickel atom)
-range around 1.6-1.9 according to experiments (A. K. Cheetham and D. A. O.
-Hope, Phys. Rev. B. 27, 6964 (1983), H. A. Alperin, J. Phys. Soc. Jpn. 17, 12
-(1962), W. Neubeck et al., J. Appl. Phys. 85, 4847 (1999), G. A. Sawatzky and
-J. W. Allen, Phys. Rev. Lett. 53, 2339 (1984) and S. Hufner et al., Solid
-State Comm. 52, 793 (1984) ). Also, as the Fermi level is at 0.22347 Ha, one
+range around 1.6-1.9 according to experiments  ([[cite:Cheetham1983]],[[cite:Neubeck1999]],[[cite:Sawatzky1984]],
+[[cite:Hufner1984]])
+Also, as the Fermi level is at 0.22347 Ha, one
 can see that the band gap obtained between the last occupied (0.20672 Ha, at k
 point 2) and the first unoccupied band (0.23642 Ha, at kpoint 3) is
 approximately 0.8 eV which is lower than the measured value of 4.0-4.3 eV
@@ -131,8 +140,8 @@ the rotationally invariant interaction is used.
     It is important to notice that in order to use LDA+U in Abinit, you must
     employ PAW pseudopotentials.
 
-*You should run abinit on the input file tdftu_2.in. This calculation takes
-less than 30 seconds on a PC 3.0 GHz*
+You should run abinit with the *tdftu_2.in* input file. This calculation takes
+less than 30 seconds on a PC 3.0 GHz
 During the calculation, you can take a look at the input file. 
 
 {% dialog tests/tutorial/Input/tdftu_2.in %}
@@ -141,9 +150,9 @@ Some variable describing the LDA+U parameters have been added to the previous fi
 other parameters were kept constant from the preceding calculation. First, you
 must set the variable [[usepawu]] to one (for the FLL method) and two (for the
 AMT method) in order to enable the LDA+U calculation. Then, with [[lpawu]] you
-give for each atomic species ([[znucl]] the values of angular momentum (l) for
+give for each atomic species ([[znucl]]) the values of angular momentum (l) for
 which the LDA+U correction will be applied. The choices are 2 for d-orbitals
-and 3 for f-orbitals. You cannot treat s and p orbitals with LDA+U in the
+and 3 for *f*-orbitals. You cannot treat s and p orbitals with LDA+U in the
 present version of ABINIT. Also, if you do not want to apply LDA+U correction
 on a species, you can set the variable to -1. For the case of NiO, we put
 [[lpawu]] to 2 for Ni and -1 for O.
@@ -156,7 +165,7 @@ indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
 NiO, we will use variables that are generally accepted for this type of compound:
 
     upawu 8.0 eV
-    jpawu 0.8 eV (10% of U)
+    jpawu 0.8 eV 
 
 You can take a look at the result of the calculation. The magnetic moment is now:
     
@@ -210,7 +219,7 @@ thus the spin-density matrix is kept constant for 5 SCF steps.
 
 {% dialog tests/tutorial/Input/tdftu_3.in %}
 
-In the log file (not the usual output file), you might find for each step, the
+In the log file (not the usual output file), you will find for each step, the
 calculated density matrix, followed by the imposed density matrix. After the
 first 5 SCF steps, the initial density matrix is no longer imposed. Here is a
 section of the log file, in which the imposed occupation matrices are echoed:
@@ -257,16 +266,16 @@ local minimum. Trying different starting points might be important...
   
 Now we will use the other implementation for the double-counting term in LDA+U
 (in Abinit), known as AMF. As the FLL method, this method uses the number of
-electrons for each spin independently and the complete interactions U(m1,m2,m3,m4) and J(m1,m2,m3,m4).
+electrons for each spin independently and the complete interactions $U(m_1,m_2,m_3,m_4)$ and $J(m_1,m_2,m_3,m_4)$.
 
 As in the preceding run, we will start with a fixed density matrix for d
-orbitals. You might now start your calculation, with the tdftu_4.in and
-tdftu_4.files, or skip the calculation, and rely on the reference file
-provided in the ~abinit/tests/tutorial/Refs directory. Examine the tdftu_4.in file. 
+orbitals. You might now start your calculation, with the *tdftu_4.in* and
+*tdftu_4.files*, or skip the calculation, and rely on the reference file
+provided in the *\$ABI_TUTORIAL/Refs* directory. Examine the *tdftu_4.in* file. 
 
 {% dialog tests/tutorial/Input/tdftu_4.in %}
 
-The only difference in the input file compared to tdftu_3.in is the
+The only difference in the input file compared to *tdftu_3.in* is the
 value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
@@ -285,5 +294,5 @@ spin. The AMF should be used when orbital occupations are near the average occup
 
 ## 5 Projected density of states in LDA+U
   
-Using prtdos 3, you can now compute the projected d and f density of states.
+Using [[prtdos]] 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.

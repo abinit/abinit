@@ -34,7 +34,7 @@ module m_sigma_driver
  use m_xmpi
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_nctk
  use m_kxc
@@ -48,12 +48,13 @@ module m_sigma_driver
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
- use m_blas,          only : xdotc
+ use m_hide_blas,     only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
  use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
@@ -91,6 +92,12 @@ module m_sigma_driver
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_slater,    only : paw_mkdijexc_core, paw_dijhf
  use m_paw_dmft,      only : paw_dmft_type
+ use m_paw_sphharm,   only : setsym_ylm
+ use m_paw_mkrho,     only : denfgr
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_tools,     only : chkpawovlp,pawprt
+ use m_paw_denpot,    only : pawdenpot
+ use m_paw_init,      only : pawinit,paw_gencond
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
@@ -101,6 +108,10 @@ module m_sigma_driver
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
+ use m_calc_ucrpa,    only : calc_ucrpa
+ use m_prep_calc_ucrpa,only : prep_calc_ucrpa
+
+ use m_paw_correlations,only : pawpuxinit
 
  implicit none
 
@@ -177,7 +188,7 @@ contains
 !!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
 !!      pawrhoij_free,pawtab_get_lsize,pawtab_print,ppm_free,ppm_init
 !!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
-!!      setsymrhoij,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
+!!      setsym_ylm,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
 !!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
 !!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
@@ -194,10 +205,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_65_paw
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -496,7 +503,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    Paw_dmft%use_dmft=Dtset%usedmft
@@ -2506,7 +2513,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3205,6 +3211,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
 
+ Sigp%ecuteps = Gsph_c%ecut
+ Dtset%ecuteps = Sigp%ecuteps
+
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)
@@ -3836,8 +3845,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

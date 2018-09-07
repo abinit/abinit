@@ -28,7 +28,7 @@
 MODULE m_results_gs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_energies
  use m_errors

@@ -10,7 +10,7 @@ module m_tdep_phdos
 !FB  use m_nctk
 !FB  use m_xmpi
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_phonons
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
@@ -95,7 +95,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 !   Write the Phij_NN-new.dat file
     if (InVar%debug) then
       write(InVar%stdout,'(a)') ' See the Phij_NN-new.dat file corresponding to the ifc.tdep/Phij_NN file'
-      open(unit=55,file='Phij_NN-new.dat')
+      open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN-new.dat')
       do iatom=1,3*natom
         write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
       end do
@@ -130,7 +130,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 ! =======================
   ABI_MALLOC(displ,(2*3*natom_unitcell*3*natom_unitcell,Qpt%nqpt)); displ(:,:)=zero
   ABI_MALLOC(omega,(3*natom_unitcell,Qpt%nqpt)); omega(:,:)=zero
-  open(unit=53,file='omega-abinit.dat')
+  open(unit=53,file=trim(InVar%output_prefix)//'omega-abinit.dat')
   do iqpt=1,Qpt%nqpt
     call ifc_fourq(Ifc,Crystal,Qpt%qpt_red(:,iqpt),omega(:,iqpt),displ(:,iqpt))
     if (iqpt.le.Qpt%nqpt) then
@@ -143,7 +143,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 
 ! Print the DOS
 ! =============
-  phdos_fname = "TDEP_PHDOS"
+  phdos_fname = trim(InVar%output_prefix)//"_PHDOS"
   call phdos_print(PHdos,phdos_fname)
   domega=(InVar%dosdeltae*Ha_meV)
   integ=0.d0
@@ -151,7 +151,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
     integ=integ + domega*PHdos%phdos(iomega)
   end do
   PHdos%phdos(:)=PHdos%phdos(:)/integ
-  open(unit=56,file='vdos.dat')
+  open(unit=56,file=trim(InVar%output_prefix)//'vdos.dat')
   do iomega=1,PHdos%nomega
     if (InVar%Enunit.eq.0) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
     if (InVar%Enunit.eq.1) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_cmm1   ,PHdos%phdos(iomega)
@@ -188,7 +188,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
 
 ! The heat capacity, entropy, internal and free energies (direct calculation)
 ! ===========================================================================
-  open(unit=20,file='thermo.dat')
+  open(unit=20,file=trim(InVar%output_prefix)//'thermo.dat')
 !FB  k_B=8.617343d-5 !in eV/K
   k_B=kb_HaK*Ha_eV
   domega=(InVar%dosdeltae*Ha_meV)
@@ -196,7 +196,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   heatcapa=0.d0 ; entropy=0.d0 ; internalE=0.d0 ; freeE=0.d0
   do iomega=1,PHdos%nomega
     xx=PHdos%omega(iomega)*Ha_eV
-    if (xx.lt.0) cycle
+    if (xx.lt.tol8) cycle
     expm2x=exp(-2.d0*wovert*xx)
     ln2shx=wovert*xx+log(1.d0-expm2x)
     cothx=(1.d0+expm2x)/(1.d0-expm2x)
@@ -237,7 +237,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
     freeE=0.d0
     do iomega=1,PHdos%nomega
       xx=PHdos%omega(iomega)*Ha_eV
-      if (xx.lt.0) cycle
+      if (xx.lt.tol8) cycle
       freeE=freeE + log(2*sinh(wovert*xx))*PHdos%phdos(iomega)*domega
     end do
     freeE=freeE*3*k_B

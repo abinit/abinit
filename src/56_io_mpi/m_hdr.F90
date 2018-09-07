@@ -40,7 +40,7 @@ MODULE m_hdr
  use defs_basis
  use m_build_info
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_wffile
  use m_sort
@@ -173,7 +173,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(47) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(48) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -251,7 +251,8 @@ MODULE m_hdr
 
    ! Miscellaneous
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
-   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
+   abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -3801,7 +3802,7 @@ end subroutine hdr_get_occ3d
 !! INPUTS
 !!  fform=integer specification of data type (expected)
 !!  fform0=integer specification of data type (from disk file)
-!!  mode_paral : COLL or PERS, for all leave_new and wrtout calls
+!!  mode_paral: COLL or PERS, for all wrtout calls
 !!  hdr <type(hdr_type)>=the header structured variable from dtset and psps
 !!  hdr0<type(hdr_type)>=the header structured variable from the disk file
 !!
@@ -3868,7 +3869,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hdr_check'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4753,7 +4753,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hdr_vs_dtset'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4972,7 +4971,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compare_int'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

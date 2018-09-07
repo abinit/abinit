@@ -93,7 +93,7 @@ contains
 !!  Sr%x_mat(minbnd:maxbnd,minbnd:maxbnd,%nsppol*Sigp%nsig_ab)=Matrix elements of Sigma_x.
 !!
 !! NOTES
-!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) is included.
+!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) [[cite:Gigy1986]] is included.
 !!
 !!  2) On the symmetrization of Sigma matrix elements
 !!     If  Sk = k+G0 then  M_G(k, Sq)= e^{-i( Sq+G).t} M_{ S^-1(G}   (k,q)
@@ -131,14 +131,14 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_gwdefs
  use m_xmpi
  use m_defs_ptgroups
  use m_errors
  use m_time
 
- use m_blas,          only : xdotc, xgemv
+ use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -152,6 +152,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat_psipsi
+ use m_paw_sym,       only : paw_symcprj
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur, wfd_get_many_ur,&
 &                            wfd_sym_ur
  use m_sigma,         only : sigma_t, sigma_distribute_bks
@@ -163,8 +165,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_sigx_me'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

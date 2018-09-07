@@ -1,0 +1,25 @@
+!!****d* ABINIT/44_abitools
+!! NAME
+!! 44_abitools
+!!
+!! DESCRIPTION
+!!  This directory contains several low-level files including
+!!   tools to be used by ABINIT high-level routines.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_44_abitools.F90
+!! m_berrytk.F90
+!! m_cgtools.F90
+!! m_dynmat.F90
+!! m_macroave.F90
+!! m_optic_tools.F90
+!! m_wfutils.F90
+!!
+!!***

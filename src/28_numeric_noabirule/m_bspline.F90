@@ -60,7 +60,7 @@
 
 module m_bspline
 
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_basis,   only : sp, dp, std_out

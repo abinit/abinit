@@ -29,7 +29,7 @@ module m_effective_potential_file
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_harmonics_terms
  use m_anharmonics_terms
@@ -104,12 +104,12 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_readStrainCoupling(filename,natom,&
 &     nrpt,voigt,elastic3rd,elastic_displacement,&
-&     strain_coupling,phonon_strain_atmfrc,phonon_strain_cell)&
+&     strain_coupling,phonon_strain_atmfrc,phonon_straincell)&
 &                          bind(C,name="effpot_xml_readStrainCoupling")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom
      integer(C_INT) :: nrpt,voigt
-     integer(c_INT) :: phonon_strain_cell(3,nrpt)
+     integer(c_INT) :: phonon_straincell(3,nrpt)
      real(C_DOUBLE) :: elastic3rd(6,6),elastic_displacement(6,3,natom)
      real(C_DOUBLE) :: strain_coupling(3,natom)
      real(C_DOUBLE) :: phonon_strain_atmfrc(3,natom,3,natom,nrpt)
@@ -249,7 +249,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_read'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -413,7 +412,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &         ' with NetCDF in order to fit the polynomial coefficients'
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
-        call effective_potential_file_readMDfile(filename,hist,option=inp%fit_ts_option)
+        call effective_potential_file_readMDfile(filename,hist,option=inp%ts_option)
       else
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
@@ -604,7 +603,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimSystem'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -665,35 +663,36 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    MSG_ERROR(message)
  end if
 
+! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
 ! Do some checks
- if (natom < 1) then
-   write(message, '(a,a,a,a,a)' )&
-&   ' Unable to read the number of atom from ',trim(filename),ch10,&
-&   'This file  is not compatible with multibinit',ch10
-   MSG_ERROR(message)
- end if
-
- if (filetype==2 .or. filetype==23) then
-
-   if (natom < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of atom from ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (nrpt < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of rpt points ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (ntypat < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
- end if
+! if (natom < 1) then
+!   write(message, '(a,a,a,a,a)' )&
+!&   ' Unable to read the number of atom from ',trim(filename),ch10,&
+!&   'This file  is not compatible with multibinit',ch10
+!   MSG_ERROR(message)
+! end if
+!
+! if (filetype==2 .or. filetype==23) then
+!
+!   if (natom < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of atom from ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (nrpt < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of rpt points ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (ntypat < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of type of atoms ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+! end if
 
 end subroutine effective_potential_file_getDimSystem
 !!***
@@ -729,7 +728,6 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimCoeff'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1150,6 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_getDimFromXML'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1347,7 +1344,6 @@ end subroutine system_getDimFromXML
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_xml2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1396,7 +1392,7 @@ end subroutine system_getDimFromXML
  type(atomdata_t) :: atom
 #ifdef HAVE_LIBXML
  real(dp),allocatable :: phonon_strain_atmfrc(:,:,:,:,:)
- integer,allocatable  :: phonon_strain_cell(:,:)
+ integer,allocatable  :: phonon_straincell(:,:)
 #endif
 #ifndef HAVE_LIBXML
  real(dp),allocatable :: work2(:,:)
@@ -1500,22 +1496,22 @@ end subroutine system_getDimFromXML
 !  Get the Phonon Strain coupling
    do voigt = 1,6
      nrpt_scoupling = phonon_strain(voigt)%nrpt
-     ABI_ALLOCATE(phonon_strain_cell,(3,nrpt_scoupling))
+     ABI_ALLOCATE(phonon_straincell,(3,nrpt_scoupling))
      ABI_ALLOCATE(phonon_strain_atmfrc,(3,natom,3,natom,nrpt_scoupling))
 
 !      Get The value
        call effpot_xml_readStrainCoupling(char_f2c(trim(filename)),natom,nrpt_scoupling,(voigt-1),&
 &                                         elastic3rd(voigt,:,:),elastic_displacement(voigt,:,:,:),&
 &                                         strain_coupling(voigt,:,:),&
-&                                         phonon_strain_atmfrc,phonon_strain_cell)
+&                                         phonon_strain_atmfrc,phonon_straincell)
 
 !      Check if the 3rd order strain_coupling is present
        if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
        phonon_strain(voigt)%atmfrc(:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
-       phonon_strain(voigt)%cell(:,:)   = phonon_strain_cell(:,:)
+       phonon_strain(voigt)%cell(:,:)   = phonon_straincell(:,:)
        if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
 
-       ABI_DEALLOCATE(phonon_strain_cell)
+       ABI_DEALLOCATE(phonon_straincell)
        ABI_DEALLOCATE(phonon_strain_atmfrc)
    end do
 #else
@@ -2286,17 +2282,11 @@ end subroutine system_xml2effpot
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_dynmat
  use m_xmpi
 
@@ -2311,7 +2301,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2336,7 +2325,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer,parameter :: master=0
  integer :: nptsym,nsym
  integer :: msym = 192,  use_inversion = 1, space_group
- real(dp):: tolsym = tol8
+ real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
@@ -2396,6 +2385,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
+
   call crystal_init(ddb%amu,effective_potential%crystal,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
@@ -2498,13 +2488,13 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    else
 !    firts give the corect stress values store in hartree
 !    diagonal parts
-     effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok)
-     effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok)
-     effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok)
+     effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok) *  crystal%ucvol
 !    the shear parts
-     effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok)
-     effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok)
-     effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok)
+     effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok) *  crystal%ucvol
+     effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok) *  crystal%ucvol
    end if
 !  Get forces
    effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
@@ -2541,18 +2531,18 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(1 1)=',effective_potential%strten(1),&
-&   '  sigma(3 2)=',effective_potential%strten(4)
+&   '  sigma(1 1)=',effective_potential%strten(1) / crystal%ucvol,&
+&   '  sigma(3 2)=',effective_potential%strten(4) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(2 2)=',effective_potential%strten(2),&
-&   '  sigma(3 1)=',effective_potential%strten(5)
+&   '  sigma(2 2)=',effective_potential%strten(2) / crystal%ucvol,&
+&   '  sigma(3 1)=',effective_potential%strten(5) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(3 3)=',effective_potential%strten(3),&
-&   '  sigma(2 1)=',effective_potential%strten(6)
+&   '  sigma(3 3)=',effective_potential%strten(3) / crystal%ucvol,&
+&   '  sigma(2 1)=',effective_potential%strten(6) / crystal%ucvol
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' ) ' '
@@ -2673,7 +2663,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
-! Interpolation of the dynamical matrix for each qpoint from ifc, maybe useless...
+! Interpolation of the dynamical matrix for each qpoint from ifc
 !***************************************************************************
 
   ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
@@ -2692,8 +2682,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
 
 !Transfer value in effective_potential structure
-  effective_potential%harmonics_terms%nqpt      = inp%nph1l
+  effective_potential%harmonics_terms%nqpt         = inp%nph1l
   effective_potential%harmonics_terms%qpoints(:,:) = inp%qph1l(:,:)
+
+! Store the highest frequency
+  max_phfq = zero
 
   do iphl1=1,inp%nph1l
 
@@ -2715,10 +2708,17 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! Write the phonon frequencies
     call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
+!   Store the highest frequency in cmm-1
+    max_phfq = max(maxval(phfrq*Ha_cmm1),max_phfq)
+
     effective_potential%harmonics_terms%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
     effective_potential%harmonics_terms%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
 
   end do
+
+  write(message, '(2a,f15.7,a)' ) ch10,&
+&   ' The highest frequency found is ',max_phfq,' cm-1'
+  call wrtout(std_out,message,'COLL')
 
   ABI_DEALLOCATE(d2cart)
   ABI_DEALLOCATE(displ)
@@ -2926,7 +2926,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
             effective_potential%harmonics_terms%strain_coupling(ipert1,idir2,ipert2)=&
-&                                                            instrain(ii,ipert1)
+&                                                            (-1.0_dp)*instrain(ii,ipert1)
         end do
       end do
     end do
@@ -2988,7 +2988,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'coeffs_xml2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3543,7 +3542,6 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_mapHistToRef'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3557,12 +3555,12 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  type(abihist),intent(inout) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
+ integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
  real(dp):: factor
  logical :: revelant_factor,need_map,need_verbose
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
- integer :: n_cell(3)
+ integer :: ncell(3)
  integer,allocatable  :: blkval(:),list(:)
  real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
  character(len=500) :: msg
@@ -3603,11 +3601,11 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     n_cell(ia) = nint(factor)
+     ncell(ia) = nint(factor)
    end if
  end do
 
- ncell = product(n_cell)
+ ncells = product(ncell)
 
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
@@ -3615,13 +3613,13 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
    if(factE_hist == 1) then
 !    In this case we mutiply the energy of the hist by the number of cell
-     hist%etot(ii) = hist%etot(ii)  * ncell
+     hist%etot(ii) = hist%etot(ii)  * ncells
    end if
-   if(factE_hist /=1 .and. factE_hist /= ncell)then
+   if(factE_hist /=1 .and. factE_hist /= ncells)then
      write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
 &          ' --- !WARNING',ch10,&
 &          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
-&          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
+&          '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
 &          '     Please check the energy of the step ',ii,ch10,&
 &          ' ---',ch10
      if(need_verbose) call wrtout(std_out,msg,'COLL')
@@ -3630,7 +3628,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 
 !Set the new supercell datatype into the effective potential reference
- call effective_potential_setSupercell(eff_pot,comm,n_cell)
+ call effective_potential_setSupercell(eff_pot,comm,ncell)
 
 !allocation
  ABI_ALLOCATE(blkval,(natom_hist))
@@ -3646,7 +3644,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  if(need_verbose) then
    write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
-&       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
+&       ' The size of the supercell for the fit is ',ncell(1),' ',ncell(2),' ',ncell(3)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -3770,7 +3768,6 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_readDisplacement'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -7,7 +7,7 @@
 module m_tdep_abitypes
 
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_nctk
   use m_xmpi
   use m_errors
@@ -77,7 +77,7 @@ contains
   ABI_FREE(znucl)
   ABI_FREE(zion)
 
- end subroutine
+ end subroutine tdep_init_crystal
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt_cart,Shell2at,Sym)
@@ -169,7 +169,7 @@ contains
 !   Write the Phij_NN.dat file
     if (InVar%debug) then
       write(InVar%stdout,'(a)') ' See the Phij_NN.dat file corresponding to the ifc.in file'
-      open(unit=55,file='Phij_NN.dat')
+      open(unit=55,file=trim(InVar%output_prefix)//'Phij_NN.dat')
       do iatom=1,3*InVar%natom
         write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
       end do
@@ -177,7 +177,7 @@ contains
     end if
   end if
 
- end subroutine
+ end subroutine tdep_init_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ddb(DDB,InVar,Lattice)
@@ -249,7 +249,7 @@ contains
   ABI_FREE(spqpt)
   ABI_FREE(q1shft)
 
- end subroutine
+ end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
@@ -373,18 +373,13 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   atifc(:)=          1
   ifcout=          min(Ifc%nrpt,200)
   prt_ifc=           1
-  if (unitfile.eq.0) then
-    open(unit=7,file='ifc.tdep')
-  else if (unitfile.eq.1) then
-    open(unit=7,file='ifc.out')
-  end if
 #ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
     write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep and anaddb.nc'
   else
     write(InVar%stdout,'(a)') ' Write in ifc.out and anaddb.nc the IFC read previously'
   end if
-  NCF_CHECK_MSG(nctk_open_create(ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
+  NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
@@ -392,13 +387,18 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   write(InVar%stdout,'(a)') ' ------- achieved'
 #else
   if (unitfile.eq.0) then
+    open(unit=77,file=trim(InVar%output_prefix)//'ifc.tdep')
+  else
+    open(unit=77,file=trim(InVar%output_prefix)//'ifc.out')
+  end if
+  if (unitfile.eq.0) then
     write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep'
   else
     write(InVar%stdout,'(a)') ' Write in ifc.out the IFC read previously'
   end if
-  call ifc_print(Ifc,"TDEP",7,prt_ifc)
+  call ifc_print(Ifc,"TDEP",77,prt_ifc)
 #endif
-  close(7)
+  close(77)
 
 end subroutine tdep_write_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -4,13 +4,19 @@ This file provides a description of the operations needed to install the
 ABINIT package, to generate the executable and to make the tests. 
 It provides also the description of simple modifications of the package, for developers.
 
+Examples of configuration files to configure and compile Abinit on clusters are available
+in the |abiconfig| package on github while the configuration files 
+used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/).
+
+<!--
 See a recent version of the [new user's guide](..),
 for an introduction to the abinit package. 
 See a recent version of the [[help:abinit]] file for learning how to use the code. 
 Both of them can be found either on the Web, or in the doc subdirectory of the package.
+-->
 
 Any comment or suggestion to improve the procedure will be welcome! 
-Simply contact the ABINIT group <http://forum.abinit.org/>
+Simply contact the ABINIT group <https://forum.abinit.org/>
 
 ## Short Howto
 
@@ -85,7 +91,7 @@ If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.
 If it is only very occasional, you might as well rely on the [ABINIT Github Web site](https://github.com/abinit).
 
-It is strongly advised to subscribe to the [ABINIT forum](http://forum.abinit.org/) 
+It is strongly advised to subscribe to the [ABINIT forum](https://forum.abinit.org/) 
 if you want to be able to get the latest information concerning the autotools development mode.
 
 After having installed git, and obtained a branch on the ABINIT worldwide

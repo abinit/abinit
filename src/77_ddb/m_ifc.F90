@@ -29,7 +29,7 @@ MODULE m_ifc
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_sort
  use m_cgtools
@@ -58,6 +58,7 @@ MODULE m_ifc
 &                          massmult_and_breaksym, dfpt_phfrq, dfpt_prtph
  use m_ddb
  use m_ddb_hdr
+ use m_symkpt
 
  implicit none
 
@@ -406,8 +407,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init'
- use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -760,7 +759,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init_fromFile'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -786,7 +784,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
  character(len=500) :: msg
- 
+
 !******************************************************************
 
  !check if ddb file exists
@@ -801,7 +799,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    do i=1,ddb_hdr%natom
      atifc(i)=i
    end do
-   
+
    call ddb_from_file(ddb,filename,1,ddb_hdr%natom,ddb_hdr%natom,atifc,ucell_ddb,comm)
 
    else
@@ -817,7 +815,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    if (iblok == 0) then
      iblok_tmp = ddb_get_dielt(ddb,1,dielt)
    end if
-   
+
    ! ifc to be calculated for interpolation
    write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,&
      &   ' Calculation of the interatomic forces ',ch10
@@ -836,12 +834,11 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    ABI_DEALLOCATE(atifc)
    call ddb_free(ddb)
    call ddb_hdr_free(ddb_hdr)
-   
+
  end subroutine ifc_init_fromFile
 !!***
- 
-!----------------------------------------------------------------------
 
+!----------------------------------------------------------------------
 
 !!****f* m_ifc/ifc_print
 !! NAME
@@ -873,7 +870,6 @@ subroutine ifc_print(ifc,header,unit,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -908,7 +904,7 @@ subroutine ifc_print(ifc,header,unit,prtvol)
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
  call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
  call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
- call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
+ call wrtout(unt, sjoin(" Dielectric tensor: ", ch10, ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom
    call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
@@ -1216,7 +1212,6 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_speedofsound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2638,8 +2633,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_outphbtrap'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2763,7 +2756,6 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_printbxsf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3325,7 +3317,6 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_test_phinterp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3503,7 +3494,7 @@ end subroutine ifc_test_phinterp
 
 !----------------------------------------------------------------------
 
-!!****f* m_gruneisen/ifc_calcnwrite_nana_terms
+!!****f* m_ifc/ifc_calcnwrite_nana_terms
 !! NAME
 !!  ifc_calcnwrite_nana_terms
 !!
@@ -3515,10 +3506,13 @@ end subroutine ifc_test_phinterp
 !!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
 !!    to the Gamma-point phonon frequencies will be calculated
 !!    The direction is in CARTESIAN COORDINATES
-!!  qnrml2(nph2l)=Normalizatin factor.
+!!  qnrml2(nph2l)=Normalization factor.
 !!
 !! OUTPUT
-!!  Only writing.
+!!  (Optional)
+!!  phfrq2l(3*crystal%natom,nph2l)=List of phonon frequencies
+!!  polarity2l(3,3*crystal%natom,nph2l)=List of mode-polarities
+!!     (see Eq.(41) of Veithen et al, PRB71, 125107 (2005) [[cite:Veithen2005]])
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.
@@ -3531,7 +3525,8 @@ end subroutine ifc_test_phinterp
 !!
 !! SOURCE
 
-subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
+subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
+&  qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3543,15 +3538,18 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: nph2l, ncid
+ integer,intent(in) :: nph2l
+ integer,optional,intent(in) :: ncid
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: qph2l(3, nph2l), qnrml2(nph2l)
+ real(dp),intent(in) :: qph2l(3, nph2l)
+ real(dp),optional,intent(in) :: qnrml2(nph2l)
+ real(dp),optional,intent(out) :: phfrq2l(3*crystal%natom,nph2l), polarity2l(3,3*crystal%natom,nph2l)
 
 !Local variables-------------------------------
 !scalars
- integer :: iphl2
+ integer :: iatom,idir,imode,iphl2
  !character(len=500) :: msg
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -3580,15 +3578,21 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
    ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
 
 #ifdef HAVE_NETCDF
- iphl2 = 0
- call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+ if(present(ncid))then
+   iphl2 = 0
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+ endif
 #endif
 
  ! Examine every wavevector of this list
  do iphl2=1,nph2l
    ! Initialisation of the phonon wavevector
    qphon(:,1) = qph2l(:,iphl2)
-   qphnrm(1) = qnrml2(iphl2)
+   qphnrm(1)=zero
+   if(present(qnrml2))then
+     qphnrm(1) = qnrml2(iphl2)
+   endif
+
 
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
@@ -3598,9 +3602,26 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
    ! Write the phonon frequencies
    !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
+   if(present(phfrq2l))then
+     phfrq2l(:,iphl2)=phfrq(:)
+   endif
+
+   if(present(polarity2l))then
+     polarity2l(:,:,iphl2)=zero
+     do imode=1,3*crystal%natom
+       do iatom=1,crystal%natom
+         do idir=1,3
+           polarity2l(:,imode,iphl2)=polarity2l(:,imode,iphl2)+ifc%zeff(:,idir,iatom)*displ_cart(1,idir+(iatom-1)*3,imode)
+         enddo
+       enddo
+     enddo
+   endif
+
 #ifdef HAVE_NETCDF
-   ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+   if(present(ncid))then
+     ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+     call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+   endif
 #endif
  end do ! iphl2
 

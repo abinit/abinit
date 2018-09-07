@@ -40,7 +40,7 @@
 MODULE m_dfti
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xomp
  use m_cgtools
@@ -52,7 +52,7 @@ MODULE m_dfti
 #endif
 
  use m_fstrings,  only : basename, strcat, int2char10
- use m_blas,      only : xcopy
+ use m_hide_blas, only : xcopy
  use m_fft_mesh,  only : zpad_t, zpad_init, zpad_free
 
  implicit none

@@ -26,13 +26,13 @@
 module m_relaxpol
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_fstrings,  only : sjoin, itoa
  use m_symtk,     only : matr3inv
  use m_berrytk,   only : polcart
- use m_abilasi,   only : dzgedi, dzgefa
+ use m_hide_lapack,   only : dzgedi, dzgefa
  use m_geometry,  only : xcart2xred
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t
@@ -57,7 +57,7 @@ contains
 !! 1) Compute polarization in cartesian coordinates
 !! 2) Structural relaxation at fixed polarization: this routine
 !!    solves the linear system of equations Eq.(13)
-!!    of Na Sai et al., PRB 66, 104108 (2002).
+!!    of Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]].
 !!
 !! INPUTS
 !! blkflg(msize) = flag for every matrix element (0=> the element

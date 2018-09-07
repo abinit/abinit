@@ -36,11 +36,11 @@
 MODULE m_fftw3
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xomp
  use m_xmpi
- use m_blas
+ use m_hide_blas
  use m_cgtools
  use m_cplxtools
  use m_distribfft
@@ -2814,7 +2814,6 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dplan_many_dft_1D'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2875,7 +2874,6 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dplan_many_dft_2D'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2937,7 +2935,6 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cplan_many_dft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2999,7 +2996,6 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'zplan_many_dft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3062,7 +3058,6 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dplan_many_dft_r2c'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3123,7 +3118,6 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dplan_many_dft_c2r'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

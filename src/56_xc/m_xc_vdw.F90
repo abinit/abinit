@@ -13,8 +13,8 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
-!!  RS09 = doi:10.1103/PhysRevLett.103.096102
+!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401 [[cite:Dion2004]]
+!!  RS09 = doi:10.1103/PhysRevLett.103.096102 [[cite:Romanperez2009]]
 !!
 !! SOURCE
 
@@ -29,7 +29,7 @@ module m_xc_vdw
 
  use defs_basis
  use iso_c_binding
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use libxc_functionals
  use m_splines
@@ -37,8 +37,9 @@ module m_xc_vdw
  use netcdf
 #endif
 
- use m_io_tools, only : flush_unit, open_file
+ use m_io_tools,      only : flush_unit, open_file
  use m_numeric_tools, only : simpson_int, cspint
+ use m_integrals,     only : radsintr
 
  implicit none
 
@@ -284,7 +285,6 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_aggregate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -995,7 +995,6 @@ subroutine xc_vdw_init(vdw_params)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1467,7 +1466,6 @@ subroutine xc_vdw_memcheck(unt,vp)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_memcheck'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1585,7 +1583,6 @@ subroutine xc_vdw_read(filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_read'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1869,7 +1866,6 @@ subroutine xc_vdw_show(unt,vp)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_show'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1990,7 +1986,6 @@ subroutine xc_vdw_trigger(condition)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_trigger'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2053,7 +2048,6 @@ subroutine xc_vdw_write(filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_vdw_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2248,7 +2242,6 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_filter'
- use interfaces_32_util
 !End of the abilint section
 
   implicit none
@@ -2383,7 +2376,7 @@ end subroutine vdw_df_filter
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates.
 !!  Decides whether to use direct integration of Eq.(14) of
-!!  Dion et al., PRL 92, 246401 (2004), or to return a 4th-order
+!!  Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]], or to return a 4th-order
 !!  polynomial for small distances.
 !!
 !! INPUTS
@@ -2489,7 +2482,7 @@ end function vdw_df_kernel
 !!
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates. Uses
-!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
+!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]].
 !!
 !! INPUTS
 !!  d1= first coordinate
@@ -2513,7 +2506,6 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_kernel_value'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2839,7 +2831,6 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_create_mesh'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -3204,7 +3195,6 @@ subroutine vdw_df_internal_checks(test_mode)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_internal_checks'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -3432,7 +3422,6 @@ subroutine vdw_df_write_func(func_name,mode)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_write_func'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

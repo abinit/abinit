@@ -107,12 +107,6 @@ contains
 !! SOURCE
 
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
 &  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
@@ -121,7 +115,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xcdata
  use libxc_functionals
@@ -132,7 +126,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_paw_ij,      only : paw_ij_type
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_blas,        only : xdotc
+ use m_paw_denpot,  only : paw_mknewh0
+ use m_hide_blas,   only : xdotc
  use m_wfd,         only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, wfd_change_ngfft
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
@@ -145,8 +140,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vhxc_me'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

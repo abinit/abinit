@@ -13,12 +13,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! hdr_vs_dtset.F90
 !! interfaces_56_io_mpi.F90
 !! m_abi_etsf.F90
 !! m_exit.F90
 !! m_hdr.F90
-!! outxfhist.F90
-!! rwwf.F90
+!! m_rwwf.F90
 !!
 !!***

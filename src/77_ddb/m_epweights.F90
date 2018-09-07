@@ -28,7 +28,7 @@ module m_epweights
 
  use defs_basis
  use defs_elphon
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_tetrahedron
  use m_xmpi
@@ -1480,7 +1480,8 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+!      calculate general integration weights at each irred kpoint 
+!      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
 &       tweight,dtweightde,xmpi_comm_self)
@@ -1644,7 +1645,6 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_fs_weights'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1737,8 +1737,8 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
-
+!      calculate general integration weights at each irred kpoint 
+!      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
 &       tweight,dtweightde,xmpi_comm_self)

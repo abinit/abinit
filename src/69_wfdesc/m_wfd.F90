@@ -27,7 +27,7 @@ MODULE m_wfd
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_copy
  use m_errors
@@ -40,7 +40,7 @@ MODULE m_wfd
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks
- use m_blas,           only : xcopy, xdotc
+ use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary
@@ -60,10 +60,13 @@ MODULE m_wfd
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
+ use m_paw_nhat,       only : nhatgrid
+ use m_paw_occupancies,only : pawaccrhoij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
  use m_spacepar,       only : symrhg, irrzg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
+ use m_cgprj,          only : getcprj
 
  implicit none
 
@@ -879,7 +882,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1929,7 +1931,6 @@ subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2137,7 +2138,6 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_ug2cprj'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -4530,7 +4530,6 @@ subroutine wfd_sanity_check(Wfd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_sanity_check'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5222,7 +5221,6 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_test_ortho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5649,7 +5647,6 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_write_wfk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5841,7 +5838,6 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_read_wfk'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6427,8 +6423,6 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_plot_ur'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -6616,13 +6610,6 @@ end subroutine wfd_plot_ur
 !!!   !use m_pawcprj
 !!!   use m_hamiltonian,    only : destroy_hamiltonian, init_hamiltonian, &
 !!!                                load_spin_hamiltonian,load_k_hamiltonian, gs_hamiltonian_type
-!!!
-!!!  !This section has been created automatically by the script Abilint (TD).
-!!!  !Do not modify the following lines by hand.
-!!!  #undef ABI_FUNC
-!!!  #define ABI_FUNC 'wfd_get_socpert'
-!!!   use interfaces_66_nonlocal
-!!!  !End of the abilint section
 !!!
 !!!   implicit none
 !!!
@@ -6845,7 +6832,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_mkrho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -7085,7 +7071,6 @@ subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'test_charge'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -7172,7 +7157,6 @@ end subroutine test_charge
 !!***
 
 !!****f* m_wfd/wfd_pawrhoij
-!!
 !! NAME
 !! wfd_pawrhoij
 !!
@@ -7217,8 +7201,6 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_pawrhoij'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

@@ -23,7 +23,7 @@
 MODULE m_fold2block
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  implicit none

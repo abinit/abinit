@@ -32,7 +32,7 @@ module m_nonlinear
  use defs_wvltypes
  use m_wffile
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_hdr
  use m_ebands
@@ -47,6 +47,7 @@ module m_nonlinear
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
+ use m_fft,      only : fourdp
  use m_kpts,     only : getkgrid
  use m_inwffil,  only : inwffil
  use m_spacepar, only : hartre, setsym
@@ -61,7 +62,13 @@ module m_nonlinear
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
+ use m_paw_sphharm, only : setsym_ylm
+ use m_paw_nhat,    only : nhatgrid,pawmknhat
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_init,    only : pawinit,paw_gencond
+ use m_paw_tools,   only : chkpawovlp
  use m_mkrho,       only : mkrho
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini
@@ -70,6 +77,12 @@ module m_nonlinear
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
+ use m_fourier_interpol, only : transgrid
+ use m_paw_occupancies,  only : initrhoij
+ use m_paw_correlations, only : pawpuxinit
+ use m_mkcore,           only : mkcore
+ use m_pead_nl_loop,     only : pead_nl_loop
+ use m_dfptnl_loop,      only : dfptnl_loop
 
  implicit none
 
@@ -147,15 +160,11 @@ contains
 subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                    pawang,pawrad,pawtab,psps,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_56_xc
- use interfaces_65_paw
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none
@@ -182,7 +191,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  logical :: paral_atom,call_pawinit,qeq0
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
  integer :: ask_accurate,band_index,bantot,cplex,dum_nshiftk,flag,gnt_option,gscase
- integer :: has_dijnd,has_kxc,has_k3xc
+ integer :: has_dijnd,has_diju,has_kxc,has_k3xc
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: iatom,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
  integer :: ireadwf0,iscf_eff,ispden,itypat,izero,mcg,me,mgfftf,mkmem_max,mpert,my_natom
@@ -190,7 +199,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
- integer :: psp_gencond,pead,req_cplex_dij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
+ integer :: psp_gencond,pead,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
  integer :: use_sym,usecprj,usexcnhat
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -222,7 +231,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
+ real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
 ! We need all these arrays instead of one because in Fortran the maximum number of dimensions is 7...
  real(dp),allocatable :: d3e_1(:,:,:,:,:,:,:),d3cart_1(:,:,:,:,:,:,:)
@@ -503,8 +512,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call status(0,dtfil%filstat,iexit,level,'call setup1   ')
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(natom))
- call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
@@ -692,7 +700,7 @@ end if
      call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
-     call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
+     call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
      ! Update internal values
@@ -704,7 +712,7 @@ end if
      if (pawtab(1)%has_nabla==1) pawtab(1:psps%ntypat)%has_nabla=2
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    pawtab(:)%usepawu=0
    pawtab(:)%useexexch=0
    pawtab(:)%exchmix=zero
@@ -741,19 +749,17 @@ end if
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_dijnd=0; req_cplex_dij=1
-   if(any(abs(dtset%nucdipmom)>tol8)) then
-     has_dijnd=1; req_cplex_dij=2
-   end if
+   has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_diju=0;if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
+   call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
-   if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,nk3xc1,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,has_k3xc=has_k3xc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  else ! PAW vs NCPP
    usexcnhat=0;usecprj=0
@@ -986,7 +992,7 @@ end if
  if (psps%usepaw==1) then
 !  Allocate/initialize only zarot in pawang1 datastructure
    call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
-   call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+   call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  end if
 
  if (pead/=0) then
@@ -1286,7 +1292,6 @@ end if
    ABI_DEALLOCATE(mvwtk)
    ABI_DEALLOCATE(pwind)
  end if
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)

@@ -46,6 +46,7 @@ topology.so
 *.abiauty
 *.abirules
 *.fdb_latexmk
+*.synctex.gz
 *.fls
 *.la
 *.lo
@@ -78,7 +79,6 @@ tests/TestBot_MPI*/*
 /stamp-h1
 /abinit-*.tar.gz
 /confstat.*
-/infos_html*
 /robodoc-html*
 /bindings/abinit-bindings-*.tar.gz
 /bindings/aclocal.m4
@@ -304,6 +304,7 @@ scripts/*/*/dist
 src/tags
 build2-debug-s
 .prev_run.pickle
+_project.pickle
 buildbot.ac
 tests/Analysis*
 tests/report.log

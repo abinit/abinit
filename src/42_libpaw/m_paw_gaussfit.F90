@@ -54,7 +54,7 @@ module m_paw_gaussfit
  private:: gaussfit_rlsf !retreined least squares fit
  private:: gaussfit_chisq_alpha_beta
 !set parameters for LSF (for 5 different forms of gauss. sums):
- private:: gaussfit_set_param1 
+ private:: gaussfit_set_param1
  private:: gaussfit_set_param2
  private:: gaussfit_set_param3
  private:: gaussfit_set_param4
@@ -120,14 +120,13 @@ CONTAINS
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussfit_main'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::mparam,nr,nterm_bounds(2)
- integer,intent(in)::option 
+ integer,intent(in)::option
  integer,intent(in),optional:: comm_mpi
  real(dp),intent(in)::rpaw
  real(dp),intent(inout)::y(nr)
@@ -154,7 +153,7 @@ CONTAINS
  real(dp),allocatable::chisq_array(:),recv_buf(:),send_buf(:)
  real(dp),allocatable::y_out(:)
  character(len=500) :: msg
- 
+
 ! *************************************************************************
 
 !initialize variables
@@ -179,7 +178,7 @@ CONTAINS
  my_chisq_size=nterm_bounds(2)-nterm_bounds(1)+1 !all terms
  if(nproc>1 .and. .not. me==master) then
    do nterm=nterm_bounds(1),nterm_bounds(2)
-     if(.not. proc_dist(nterm)==me+1) cycle  
+     if(.not. proc_dist(nterm)==me+1) cycle
      my_chisq_size=my_chisq_size+1
    end do
  end if
@@ -212,7 +211,7 @@ CONTAINS
  ichisq=0
  do nterm=nterm_bounds(1),nterm_bounds(2)
 !  mpi distribution
-   if(.not. proc_dist(nterm)==me+1) cycle  
+   if(.not. proc_dist(nterm)==me+1) cycle
    ichisq=ichisq+1
 
 !   call CPU_TIME(T1)
@@ -221,7 +220,7 @@ CONTAINS
    if(option==2) nparam=nterm*6
    if(option==3) nparam=nterm*2
    if(option==4) nparam=nterm*4
-!  set initial guess 
+!  set initial guess
 !   if(option==1) then
 !     call gaussfit_set_param3(nterm,nparam,param_tmp(1:nparam),sep(ii))
 !   elseif(option==2) then
@@ -233,11 +232,11 @@ CONTAINS
      call gaussfit_set_param5(nterm,nparam,nr,&
 &     param_tmp(1:nparam),rpaw,y)
    end if
-!      
-!      
+!
+!
    call gaussfit_constrains_init(weight(1:nparam),constrains(1:nparam),&
 &   limit(1:nparam),nparam,nterm,nr,option,rpaw,y)
-!      
+!
    call gaussfit_fit(chisq,constrains(1:nparam),&
 &   limit(1:nparam),maxiter,nparam,nterm,nr,option,outfile,param_tmp,&
 &   verbosity,weight(1:nparam),pawrad%rad(1:nr),y,y_out)
@@ -247,7 +246,7 @@ CONTAINS
    if(abs(chisq+1.d0)<tol8) chisq=99999
    if(abs(chisq)==chisq*chisq) chisq=99999
    if(chisq .ne. chisq) chisq=99999
-!  
+!
    chisq_array(ichisq)=chisq
 
 !   call CPU_TIME(T2)
@@ -324,25 +323,25 @@ CONTAINS
    if(option==2)nparam=6*nterm
    if(option==3)nparam=2*nterm
    if(option==4)nparam=4*nterm
- 
-!  set initial guess 
+
+!  set initial guess
    if (option==3) then
      call gaussfit_set_param4(nparam,param_tmp(1:nparam))
    elseif (option==4) then
      call gaussfit_set_param5(nterm,nparam,nr,&
 &     param_tmp(1:nparam),rpaw,y)
    end if
-!  
+!
    call gaussfit_constrains_init(weight(1:nparam),constrains(1:nparam),&
 &   limit(1:nparam),nparam,nterm,nr,option,rpaw,y)
 !
-   verbosity=1; 
+   verbosity=1;
    maxiter=1000 !this time we do more iterations
    call gaussfit_fit(chisq,constrains(1:nparam),&
 &   limit(1:nparam),maxiter,nparam,nterm,nr,option,outfile,param_tmp,&
 &   verbosity,weight(1:nparam),pawrad%rad(1:nr),y,y_out)
 
-!  Write out best solution   
+!  Write out best solution
    write(msg,'(3a)')"Best solution (with more iterations):",ch10,"   ngauss    chisq"
    call wrtout(std_out,msg,'COLL')
    if(option==1) ngauss=nterm*4
@@ -373,11 +372,11 @@ CONTAINS
 
  param_out(:)=param_tmp
 
- if(modify_y) then 
+ if(modify_y) then
 !   call xmpi_scatterv(y_out,nr,mpi_displ,y_out,nr,0,comm_mpi,ierr)
    y=y_out !at output modify y for the fitted y
  end if
- 
+
  LIBPAW_DEALLOCATE(y_out)
  LIBPAW_DEALLOCATE(chisq_array)
  if(me==master) then
@@ -395,7 +394,7 @@ end subroutine gaussfit_main
 !!
 !! FUNCTION
 !! It sets a weight to the number of
-!! Gaussians used. 
+!! Gaussians used.
 !! This was calculated by measuring the time
 !! it takes to fit a projector with different
 !! number of gaussians.
@@ -434,7 +433,7 @@ end subroutine gaussfit_main
 !************************************************************************
 
  !The following parameters were obtained
- !from the time (in seconds) 
+ !from the time (in seconds)
  !it takes to fit a given projector
  !using from 1 to 100 gaussians.
  a               = -0.374137d0      !  +/- 2.013        (538.1%)
@@ -634,7 +633,7 @@ end subroutine gaussfit_main
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments ------------------------------------
  integer,intent(in)::iterm,jterm,nproc,nterm_bounds(2)
  integer,intent(inout)::proc_dist(nterm_bounds(1):nterm_bounds(2)),proc_load(nproc)
@@ -706,7 +705,7 @@ end subroutine gaussfit_main
 !End of the abilint section
 
  implicit none
-  
+
 !Arguments ------------------------------------
  integer,intent(in)::iterm,nproc,nterm_bounds(2)
  integer,intent(inout)::proc_dist(nterm_bounds(1):nterm_bounds(2)),proc_load(nproc)
@@ -714,7 +713,7 @@ end subroutine gaussfit_main
 !Local variables ------------------------------
  integer:: iproc,jproc,dev
  integer:: deviation(nproc),mindev
- character(len=100) :: msg 
+ character(len=100) :: msg
 
 !************************************************************************
 
@@ -778,7 +777,6 @@ end subroutine gaussfit_main
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussfit_mpi_main'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -815,7 +813,7 @@ end subroutine gaussfit_main
    end do
 !!  Try to reassign tasks to different processors
    do iterm=nterm_bounds(2),nterm_bounds(1),-1
-     iproc=proc_dist(iterm) 
+     iproc=proc_dist(iterm)
 !    Remove this job from this node
      call gaussfit_mpi_remove_item(iterm,proc_load(iproc))
 !    Accomodate this again:
@@ -867,7 +865,7 @@ end subroutine gaussfit_main
 !!         if(option==2)nparam=nterm*6
 !!         if(option==3)nparam=nterm*2
 !!         if(option==4)nparam=nterm*4
-!!  nterm= number of Gaussians 
+!!  nterm= number of Gaussians
 !!  nx=number of points along the x axis
 !!  option=1 fit to a1 cos(a2 x^2)+ a3 sin( a4 x^2)
 !!         2 fit to a1 exp(-a2 x^2)*(a3 cos (a4 x^2) + a5 sin (a6 x^2) )
@@ -947,8 +945,8 @@ subroutine gaussfit_fit(chisq,constrains,&
    elseif(option==4) then
      call gaussfit_calc_deriv_c4(nparam,nterm,nx,1,param,x,y_out)
    end if
-!  
-!  
+!
+!
    open(wfn_unit,file=outfile,form='formatted',status='unknown')
 !  per_error=0.d0
    do ix=1, nx
@@ -956,7 +954,7 @@ subroutine gaussfit_fit(chisq,constrains,&
      write(wfn_unit,'(6(e20.12,1x))')x(ix),y(ix),y_out(ix),rerror
    end do
    close(wfn_unit)
-  
+
  end if
 
  LIBPAW_DEALLOCATE(sy)
@@ -1055,25 +1053,25 @@ subroutine gaussfit_calc_deriv_r(nterm,nparam,nx,opt,param,x,y_out,&
 !Calculate derivatives:
 !
  if(opt==2) then
-!  
+!
 !  alpha1
-!  
+!
    do iexp=1,nterm
      aux1(:)=term1(:,iexp)/alpha1(iexp)
      deriv(:,iexp)=aux1(:)
    end do
-!  
+!
 !  alpha2
-!  
+!
    do iexp=1,nterm
      ii=nterm+iexp
      aux1(:)=-term1(:,iexp)*(x(:)-alpha3(iexp))
      deriv(:,ii)=aux1(:)
      deriv(:,ii)=0.1d0
    end do
-!  
+!
 !  alpha3
-!  
+!
    do iexp=1,nterm
      ii=2*nterm+iexp
      aux1(:)=term1(:,iexp)*2.d0*alpha2(iexp)
@@ -1162,7 +1160,7 @@ subroutine gaussfit_calc_deriv_c3(nparam,nterm,nx,opt,param,x,y_out,&
 !
  do iexp=1,nterm
    aux1(:)=alpha3(iexp)*x(:)**2
-!  
+!
    sin1(:,iexp)=sin(aux1(:))
    cos1(:,iexp)=cos(aux1(:))
  end do
@@ -1177,15 +1175,15 @@ subroutine gaussfit_calc_deriv_c3(nparam,nterm,nx,opt,param,x,y_out,&
 !Calculate derivatives:
 !
  if(opt==2) then
-!  
+!
 !  alpha1
-!  
+!
    do iexp=1,nterm
      deriv(:,iexp)=sin1(:,iexp)
    end do
-!  
+!
 !  alpha2
-!  
+!
    do iexp=1,nterm
      ii=nterm+iexp
      deriv(:,ii)=cos1(:,iexp)
@@ -1270,13 +1268,13 @@ subroutine gaussfit_calc_deriv_c2(nparam,nterm,nx,opt,param,x,y_out,&
  do iexp=1,nterm
    aux1(:)=alpha2(iexp)*x(:)**2
    sin1(:,iexp)=sin(aux1(:))
-!  
+!
    aux1(:)=alpha4(iexp)*x(:)**2
    sin2(:,iexp)=sin(aux1(:))
-!  
+!
    aux1(:)=alpha2(iexp)*x(:)**2
    cos1(:,iexp)=cos(aux1(:))
-!  
+!
    aux1(:)=alpha4(iexp)*x(:)**2
    cos2(:,iexp)=cos(aux1(:))
  end do
@@ -1291,30 +1289,30 @@ subroutine gaussfit_calc_deriv_c2(nparam,nterm,nx,opt,param,x,y_out,&
 !Calculate derivatives:
 !
  if(opt==2) then
-!  
+!
 !  alpha1
-!  
+!
    do iexp=1,nterm
      deriv(:,iexp)=sin1(:,iexp)
    end do
-!  
+!
 !  alpha2
-!  
+!
    do iexp=1,nterm
      ii=nterm+iexp
      aux1(:)=alpha1(iexp)*cos1(:,iexp)*x(:)**2
      deriv(:,ii)=aux1(:)
    end do
-!  
+!
 !  alpha3
-!  
+!
    do iexp=1,nterm
      ii=2*nterm+iexp
      deriv(:,ii)=cos2(:,iexp)
    end do
-!  
+!
 !  alpha4
-!  
+!
    do iexp=1,nterm
      ii=3*nterm+iexp
      aux1(:)=-alpha3(iexp)*sin2(:,iexp)*x(:)**2
@@ -1406,13 +1404,13 @@ subroutine gaussfit_calc_deriv_c(nparam,nterm,nx,opt,param,x,y_out,&
  do iexp=1,nterm
    aux1(:)=alpha4(iexp)*x(:)**2
    sin1(:,iexp)=sin(aux1(:))
-!  
+!
    aux1(:)=alpha6(iexp)*x(:)**2
    sin2(:,iexp)=sin(aux1(:))
-!  
+!
    aux1(:)=alpha4(iexp)*x(:)**2
    cos1(:,iexp)=cos(aux1(:))
-!  
+!
    aux1(:)=alpha6(iexp)*x(:)**2
    cos2(:,iexp)=cos(aux1(:))
  end do
@@ -1427,51 +1425,51 @@ subroutine gaussfit_calc_deriv_c(nparam,nterm,nx,opt,param,x,y_out,&
 !Calculate derivatives:
 !
  if(opt==2) then
-!  
+!
 !  alpha1
-!  
+!
    do iexp=1,nterm
      aux1(:)=term1(:,iexp)/alpha1(iexp)
      aux2(:)=aux1(:)*term2(:,iexp)
      deriv(:,iexp)=aux2(:)
    end do
-!  
+!
 !  alpha2
-!  
+!
    do iexp=1,nterm
      ii=nterm+iexp
      aux1(:)=-term1(:,iexp)*term2(:,iexp)
      aux2(:)=aux1(:)*x(:)**2
      deriv(:,ii)=aux2(:)
    end do
-!  
+!
 !  alpha3
-!  
+!
    do iexp=1,nterm
      ii=2*nterm+iexp
      aux1(:)=term1(:,iexp)*sin1(:,iexp)
      deriv(:,ii)=aux1(:)
    end do
-!  
+!
 !  alpha4
-!  
+!
    do iexp=1,nterm
      ii=3*nterm+iexp
      aux1(:)=term1(:,iexp)*alpha3(iexp)
      aux2(:)=cos1(:,iexp)*x(:)**2
      deriv(:,ii)=aux2(:)*aux1(:)
    end do
-!  
+!
 !  alpha5
-!  
+!
    do iexp=1,nterm
      ii=4*nterm+iexp
      aux1(:)=term1(:,iexp)*cos2(:,iexp)
      deriv(:,ii)=aux1(:)
    end do
-!  
+!
 !  alpha6
-!  
+!
    do iexp=1,nterm
      ii=5*nterm+iexp
      aux1(:)=-term1(:,iexp)*alpha5(iexp)
@@ -1546,7 +1544,7 @@ subroutine gaussfit_calc_deriv_c4(nparam,nterm,nx,opt,param,x,y_out,&
 !
  sep=1.1d0
  y_out(:)=0.d0
- 
+
 !Get parameters from param array:
 !
  alpha1(:)=param(1:nterm)
@@ -1570,7 +1568,7 @@ subroutine gaussfit_calc_deriv_c4(nparam,nterm,nx,opt,param,x,y_out,&
 !
  do iexp=1,nterm
    aux1(:)=alpha5(iexp)*x(:)**2
-!  
+!
    sin1(:,iexp)=sin(aux1(:))
    cos1(:,iexp)=cos(aux1(:))
  end do
@@ -1585,34 +1583,34 @@ subroutine gaussfit_calc_deriv_c4(nparam,nterm,nx,opt,param,x,y_out,&
 !Calculate derivatives:
 !
  if(opt==2) then
-!  
+!
 !  alpha1
-!  
+!
    do iexp=1,nterm
      aux1(:)=term1(:,iexp)/alpha1(iexp)
      aux2(:)=aux1(:)*term2(:,iexp)
      deriv(:,iexp)=aux2(:)
    end do
-!  
+!
 !  alpha2
-!  
+!
    do iexp=1,nterm
      ii=nterm+iexp
      aux1(:)=-term1(:,iexp)*term2(:,iexp)
      aux2(:)=aux1(:)*x(:)**2
      deriv(:,ii)=aux2(:)
    end do
-!  
+!
 !  alpha3
-!  
+!
    do iexp=1,nterm
      ii=2*nterm+iexp
      aux1(:)=term1(:,iexp)*sin1(:,iexp)
      deriv(:,ii)=aux1(:)
    end do
-!  
+!
 !  alpha4
-!  
+!
    do iexp=1,nterm
      ii=3*nterm+iexp
      aux1(:)=term1(:,iexp)*cos1(:,iexp)
@@ -1673,7 +1671,6 @@ subroutine gaussfit_rlsf(&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussfit_rlsf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1713,19 +1710,19 @@ subroutine gaussfit_rlsf(&
  deltax=x(2)-x(1) !we assume this is a linear grid
 !
  iter_loop: do iter=1,maxiter
-!  
+!
    call gaussfit_chisq_alpha_beta(alpha0,beta,chisq0,&
 &   nparam,nterm,nx,option,parameters,x,y)
-!  
+!
    flag=0
    lastdeltachi=chisq0
-!  
-!  
+!
+!
    while_flag: do
      if(flag .ne. 0) exit while_flag
-!    
+!
      tmp1=0.d0
-     do ii=1,nparam  
+     do ii=1,nparam
        tmp1(ii,ii)=1.d0*flambda  !identity matrix * flambda
      end do
      alpha=alpha0+tmp1*alpha0
@@ -1750,7 +1747,7 @@ subroutine gaussfit_rlsf(&
        chisq=-1.d0
        exit iter_loop
      end if
-!    
+!
      if(tmp1(1,1) .ne. tmp1(1,1)) then !If is NaN
        chisq=-1.d0
        exit iter_loop
@@ -1764,7 +1761,7 @@ subroutine gaussfit_rlsf(&
        do jj=1,nparam
          deltapar(ii)=deltapar(ii)+beta(jj)*tmp1(jj,ii)
        end do
-     end do 
+     end do
 !    apply constrains
      workpar(1:nparam)=parameters(1:nparam)+deltapar(1:nparam)*weight(1:nparam)
      call gaussfit_apply_constrains(constrains,limit,nparam,workpar)
@@ -1783,9 +1780,9 @@ subroutine gaussfit_rlsf(&
        chisq=chisq + ((y(ii)-yfit(ii)))**2
      end do
      chisq=chisq*deltax
-!    
+!
 !    write(*,'("chisq ",f12.5,"  chisq0 ",f12.5)')chisq,chisq0
-!    
+!
      if(chisq > chisq0) then
        flambda=flambda*2.0d0
        if( flambda > 1000.d0) then
@@ -1861,7 +1858,7 @@ subroutine gaussfit_chisq_alpha_beta(alpha,beta,chisq,&
 
 !Arguments -------------------------------
  integer,intent(in)::nparam,nterm,nx
- integer,intent(in)::option 
+ integer,intent(in)::option
  real(dp),intent(out)::chisq
  real(dp),intent(in)::parameters(nparam),x(nx),y(nx)
  real(dp),intent(out)::alpha(nparam,nparam),beta(nparam)
@@ -1965,7 +1962,7 @@ subroutine gaussfit_set_param1(nterm,nparam,nx,param,sep,x,y)
 !exps=1.0/(x(nx)**2)
 !
 !alpha1
- 
+
 !raux=maxval( y(:),nx )
 !maxval gives problems in some architectures:
  raux=-9999999
@@ -2198,7 +2195,7 @@ end subroutine gaussfit_set_param3
 !!      pawrad_init,wrtout
 !!
 !! SOURCE
- 
+
 subroutine gaussfit_set_param4(nparam,param)
 
 
@@ -2341,8 +2338,8 @@ subroutine gaussfit_constrains_init(cons1,cons2,limit,nparam,nterm,nx,option,rpa
 !
 !DEFAULT: no weight
  cons1(:)=1.d0
- limit(:)=0.d0 
- cons2=1 
+ limit(:)=0.d0
+ cons2=1
 !
  if(option==4) then
      cons1(1:nterm)=0.2d0
@@ -2361,14 +2358,14 @@ subroutine gaussfit_constrains_init(cons1,cons2,limit,nparam,nterm,nx,option,rpa
    a1=a1/real(nterm,dp)
 
    mm=0.01
-!  
+!
    rc=1.7d0*rpaw
-   raux=log(a1/mm)/rc**2  
-!  
+   raux=log(a1/mm)/rc**2
+!
 !  Constraint exponential of gaussians to be positive (multiplied by -1),
 !  so that it decays to zero.
 !  Constraint as well its value, so that it does not get too big
-!  and it decays soon, 
+!  and it decays soon,
 !  This prevents that a gaussian grows at a very large x value.
    cons2(nterm+1:nterm*2)=restricted_and_positive
    limit(nterm+1:nterm*2)=raux
@@ -2428,7 +2425,7 @@ subroutine gaussfit_apply_constrains(const,limit,nparam,ioparams)
    if(const(ii)==positive .or. const(ii)==restricted_and_positive ) ioparams(ii)=abs(ioparams(ii))
 
  end do
- 
+
 end subroutine gaussfit_apply_constrains
 !!***
 
@@ -2455,7 +2452,7 @@ end subroutine gaussfit_apply_constrains
 !!  param = parameters found  (Gaussian coefficients and factors).
 !!
 !! NOTES
-!! chisq=accuracy_p= sum_x abs(f(x)-y(x))/nx. 
+!! chisq=accuracy_p= sum_x abs(f(x)-y(x))/nx.
 !!    nx is the number of points, f(x) and y(x) are the fitted and original functions.
 !!
 !! PARENTS
@@ -2475,7 +2472,6 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussfit_projector'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2547,7 +2543,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 !  take out 1/r factor from eq.(3) of M. Torrent CMS 42, 337 (2008)
 !  since: <phi|proj>=1 from atompaw, and phi=phi*r, alors proj=proj/r
 
-   tproj_tmp1(2:msz1)=tproj_tmp1(2:msz1)/(pawrad%rad(2:msz1)) 
+   tproj_tmp1(2:msz1)=tproj_tmp1(2:msz1)/(pawrad%rad(2:msz1))
    call pawrad_deducer0(tproj_tmp1(1:msz1),msz1,pawrad)
 
 !  splint to a different mesh:
@@ -2556,10 +2552,10 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 &   zero,zero,d2)
 
    do ir=2,msz2
-     rr=mesh_tmp%rad(ir) 
+     rr=mesh_tmp%rad(ir)
      if( rr(1)-rpaw > tol8 ) then
        !after rpaw projectors are zero
-       raux=zero 
+       raux=zero
      else
        call paw_splint(msz1,pawrad%rad,&
 &       tproj_tmp1(:),d2(:),&
@@ -2596,7 +2592,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 !  ! do ir=1,mesh_tmp%mesh_size
 !  !  write(unitp,'(2(f16.7,x,f16.7))')mesh_tmp%rad(ir),y(ir)
 !  ! end do
-!  LIBPAW_DEALLOCATE(y) 
+!  LIBPAW_DEALLOCATE(y)
 
  end do
 

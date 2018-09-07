@@ -25,7 +25,7 @@ module m_gkk
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_ifc
@@ -59,7 +59,8 @@ module m_gkk
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
  use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_fourier_interpol, only : transgrid
 ! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
 ! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
 ! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
@@ -119,8 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_gkk'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -582,7 +581,6 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ncwrite_v1qnu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -748,7 +746,7 @@ end subroutine ncwrite_v1qnu
 subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_fftcore,         only : get_kg

@@ -28,7 +28,7 @@ module m_dtfil
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_build_info
@@ -106,7 +106,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtfil_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -141,7 +140,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  character(len=9) :: stringvar
  character(len=15) :: stringfile
  character(len=500) :: message
- character(len=fnlen) :: filsus,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr
+ character(len=fnlen) :: filsus,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,fil_efmas
  character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
  character(len=fnlen) :: filwfkfine
@@ -343,6 +342,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 & ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fildens1in=trim(filnam_ds(3))//'_DEN'
 
+!According to getefmas and irdefmas, build _EFMAS file name, referred as fil_efmas
+!A default is available if getefmas is 0
+ stringfile='_EFMAS.nc' ; stringvar='efmas'
+ call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,&
+& ndtset,stringfile,stringvar,will_read)
+ if(will_read==0)fil_efmas=trim(filnam_ds(3))//'_EFMAS.nc'
+
 !According to getscr and irdscr, build _SCR file name, referred as filscr
 !A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
@@ -407,6 +413,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_sus  =filsus
  dtfil%fnameabi_qps  =filqps
  dtfil%fnameabi_scr  =filscr
+ dtfil%fnameabi_efmas=fil_efmas
  dtfil%filddbsin     =filddbsin
  dtfil%fildensin     =fildensin
  dtfil%fildens1in    =fildens1in
@@ -962,8 +969,6 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkfilename'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -29,7 +29,7 @@ MODULE m_ddb_hdr
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_copy,      only : alloc_copy
@@ -277,7 +277,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  if (present(occ)) then
    ddb_hdr%occ(:) = occ(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
  else
-   ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
+   ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol,1)
  end if
 
 
@@ -1276,7 +1276,6 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioddb8_in'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1961,7 +1960,6 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inprep8'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3103,7 +3101,6 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_io_out'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

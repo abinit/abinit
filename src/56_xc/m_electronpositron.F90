@@ -29,7 +29,7 @@ MODULE m_electronpositron
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_energies
  use m_xmpi
@@ -43,6 +43,7 @@ MODULE m_electronpositron
  use m_xcpositron, only : xcpositron
  use m_drivexc,    only : mkdenpos
  use m_xctk,       only : xcden
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -517,7 +518,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exchange_electronpositron'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

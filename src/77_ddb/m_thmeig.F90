@@ -27,7 +27,7 @@
 module m_thmeig
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_errors
  use m_ddb
@@ -88,7 +88,6 @@ subroutine thmeig(inp, ddb, crystal, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'thmeig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -819,7 +818,8 @@ subroutine thmeig(inp, ddb, crystal, &
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
 
-!    calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+!    calculate general integration weights at each irred kpoint 
+!    as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
      call get_tetra_weight(eigen_in,enemin,enemax,&
 &     one,nene,nqpt,tetrahedra,bcorr0,&
 &     tweight,dtweightde,xmpi_comm_self)
@@ -1055,7 +1055,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outphdos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

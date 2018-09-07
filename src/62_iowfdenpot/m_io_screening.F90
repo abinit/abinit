@@ -27,7 +27,7 @@ MODULE m_io_screening
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -763,7 +763,6 @@ subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hscr_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1318,7 +1317,6 @@ subroutine hscr_merge(Hscr_in,Hscr_out)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hscr_merge'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1604,7 +1602,6 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_screening'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1941,7 +1938,6 @@ subroutine hscr_mpio_skip(mpio_fh,fform,offset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hscr_mpio_skip'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2036,7 +2032,6 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioscr_qmerge'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2185,7 +2180,6 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioscr_qrecover'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2322,7 +2316,6 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioscr_wmerge'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2627,7 +2620,6 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioscr_wremove'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -30,7 +30,7 @@ module m_sg2002
 
  use defs_basis
  use defs_fftdata
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 

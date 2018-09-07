@@ -45,7 +45,7 @@ module m_extraprho
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
-
+ use m_cgprj,    only : ctocprj
 
  implicit none
 
@@ -66,7 +66,7 @@ contains
 !! FUNCTION
 !! Extrapolate electronic density for new ionic positions
 !! from values of density of previous SCF cycle.
-!! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33
+!! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33 [[cite:Alfe1999]]
 !!
 !! INPUTS
 !!  atindx
@@ -131,7 +131,6 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extraprho'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -209,7 +208,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
 !---------------------------------------------------------------
 !----------- Compute Alpha and Beta
-!----------- see (4) in Comp. Phys. Comm. 118 (1999), 31-33
+!----------- see (4) in Comp. Phys. Comm. 118 (1999), 31-33 [[cite:Alfe1999]]
 !---------------------------------------------------------------
 
 !Compute a_ij matrix
@@ -502,7 +501,7 @@ end subroutine extraprho
 !! FUNCTION
 !! Extrapolate wavefunctions for new ionic positions
 !! from values of wavefunctions of previous SCF cycle.
-!! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992)
+!! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992) [[cite:Arias1992]]
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms
@@ -552,7 +551,6 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extrapwf'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
