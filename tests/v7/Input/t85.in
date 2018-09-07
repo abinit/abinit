@@ -6,7 +6,7 @@
 
 ndtset 10
 prtpot 1
-istwfk *1   # limitation of wfd_t
+#istwfk *1
 nstep  50
 #nsppol 2
 
