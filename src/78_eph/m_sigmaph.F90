@@ -542,10 +542,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
  ! Set cache for q-points.
- if (dtset%useric /= 0) then
-    call wrtout(std_out, "Activating cache for V(q)")
-    call dvdb_set_qcache(dvdb, dtset%useric)
- end if
+ if (abs(dtset%userra) /= zero) call dvdb_set_qcache_mb(dvdb, dtset%userra)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Compute gaussian spline.

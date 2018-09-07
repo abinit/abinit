@@ -262,7 +262,7 @@ module m_dvdb
  public :: dvdb_readsym_allv1     ! Read and return all the 3*natom DFPT potentials (either from file or symmetrized)
  public :: dvdb_readsym_qbz       ! Reconstruct the DFPT potential for a q-point in the BZ starting
                                   ! from its symmetrical image in the IBZ.
- public :: dvdb_set_qcache        ! Allocate internal cache for potentials.
+ public :: dvdb_set_qcache_mb     ! Allocate internal cache for potentials.
  public :: dvdb_list_perts        ! Check if all the (phonon) perts are available taking into account symmetries.
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
@@ -1301,15 +1301,18 @@ end subroutine dvdb_readsym_qbz
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dvdb_set_qcache
+!!****f* m_dvdb/dvdb_set_qcache_mb
 !! NAME
-!!  dvdb_set_qcache
+!!  dvdb_set_qcache_mb
 !!
 !! FUNCTION
 !! Allocate internal cache storing v1scf potentials.
-!! < 0 to allocate all q-points. 0 has not effect. > 0 for cache with nqpt points.
 !!
 !! INPUTS
+!!  mbsize: Cache size in megabytes.
+!!    < 0 to allocate all q-points.
+!!    0 has not effect.
+!!    > 0 for cache with automatically computed nqpt points.
 !!
 !! OUTPUT
 !!
@@ -1319,35 +1322,41 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_set_qcache(db, nqpt)
+subroutine dvdb_set_qcache_mb(db, mbsize)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dvdb_set_qcache'
+#define ABI_FUNC 'dvdb_set_qcache_mb'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqpt
+ real(dp),intent(in) :: mbsize
  type(dvdb_t),intent(inout) :: db
-
-!Local variables-------------------------------
- integer :: qsize
 
 ! *************************************************************************
 
- if (nqpt < 0) qsize = db%nqpt
- if (nqpt == 0) return
- if (nqpt > 0) qsize = nqpt
- qsize = min(qsize, db%nqpt)
+ if (abs(mbsize) < tol3) then
+   db%qcache_size = 0
+   return
+ end if
 
- db%qcache_size = qsize
+ if (mbsize < zero) then
+   db%qcache_size = db%nqpt
+ else
+   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * dp * b2Mb / mbsize)
+ end if
+ db%qcache_size = min(db%qcache_size, db%nqpt)
+
+ call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f6.1"), "[Mb]"))
+ call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
+
  ABI_MALLOC(db%qcache, (db%nqpt))
 
-end subroutine dvdb_set_qcache
+end subroutine dvdb_set_qcache_mb
 !!***
 
 !----------------------------------------------------------------------
