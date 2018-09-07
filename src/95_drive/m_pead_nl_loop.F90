@@ -767,13 +767,6 @@ end subroutine pead_nl_loop
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 & kg,mband,mgfft,mkmem,mk1mem,&

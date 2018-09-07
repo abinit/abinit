@@ -383,7 +383,6 @@ end subroutine paw_an_init
 !! SIDE EFFECTS
 !!  Paw_an(:)<type(Paw_an_type)>=various arrays given on ANgular mesh or ANgular moments
 !!
-!! SIDE EFFECTS
 !!  All associated pointers in Paw_an(:) are deallocated
 !!
 !! PARENTS

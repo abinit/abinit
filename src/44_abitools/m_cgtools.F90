@@ -572,8 +572,6 @@ end subroutine cg_zcopy
 !! OUTPUT
 !!  x = Updated vector.
 !!
-!! OUTPUT
-!!
 !! PARENTS
 !!      cgwf,m_cgtools
 !!
@@ -623,8 +621,6 @@ end subroutine cg_zscal
 !! INPUTS
 !!  n = Specifies the number of elements in vector x.
 !!  x(2*x) = Input array.
-!!
-!! OUTPUT
 !!
 !! OUTPUT
 !!

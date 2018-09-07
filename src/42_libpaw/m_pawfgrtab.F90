@@ -1012,8 +1012,6 @@ end subroutine pawfgrtab_gather
 !! pawfgrtab_redistribute
 !!
 !! FUNCTION
-!!
-!! FUNCTION
 !!   Redistribute an array of pawfgrtab datastructures
 !!   Input pawfgrtab is given on a MPI communicator
 !!   Output pawfgrtab is redistributed on another MPI communicator

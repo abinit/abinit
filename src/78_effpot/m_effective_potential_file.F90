@@ -2282,12 +2282,6 @@ end subroutine system_xml2effpot
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
@@ -2400,7 +2394,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &                   .FALSE.,crystal%title,&
 &                   symrel=symrel,tnons=tnons,&
 &                   symafm=symafm)
-  
+
   ABI_DEALLOCATE(spinat)
   ABI_DEALLOCATE(ptsymrel)
   ABI_DEALLOCATE(symafm)
@@ -2693,7 +2687,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 ! Store the highest frequency
   max_phfq = zero
-  
+
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector

@@ -1202,7 +1202,7 @@ end subroutine fixsym
 !!***
 
 !!****f* m_geometry/metric
-!! NAME metric
+!! NAME
 !! metric
 !!
 !! FUNCTION

@@ -14,10 +14,7 @@
 !!
 !! CHILDREN
 !! interfaces_62_wvl_wfs.F90
-!! wvl_hpsitopsi.F90
-!! wvl_nl_gradient.F90
-!! wvl_psitohpsi.F90
-!! wvl_rwwf.F90
-!! wvl_tail_corrections.F90
+!! m_wvl_psi.F90
+!! m_wvl_rwwf.F90
 !!
 !!***
