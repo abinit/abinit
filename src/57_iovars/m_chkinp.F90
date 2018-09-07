@@ -813,9 +813,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
 
-     if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
-       MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
-     end if
+     !if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
+     !  MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
+     !end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)

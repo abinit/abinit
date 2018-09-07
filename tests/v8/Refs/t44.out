@@ -1,5 +1,5 @@
 
-.Version 8.7.6 of ABINIT 
+.Version 8.9.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  9 Mar 2018.
-- ( at 06h52 )
+.Starting date : Fri  7 Sep 2018.
+- ( at 23h32 )
   
 - input  file    -> t44.in
 - output file    -> t44.out
@@ -32,11 +32,11 @@
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          54        mffmem =           1         mkmem =           8
-       mpw =         332          nfft =        8000          nkpt =           8
+       mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.134 Mbytes of memory.
+P This job should need less than                       5.106 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -49,11 +49,11 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          54        mffmem =           1         mkmem =           8
-       mpw =         332          nfft =        8000          nkpt =           8
+       mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.134 Mbytes of memory.
+P This job should need less than                       5.106 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -          fftalg         312
            getddb          20
            getwfk          20
-           istwfk        1    0    1    0    0    0    1    0
+           istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -224,12 +224,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =          12.4735 [km/s]
+ Average speed of sound partial sums:     0.5483362867E-02 (at units)
+-                                   =          11.9959 [km/s]
 
- Debye frequency from partial sums:     0.5262667706E-02 (Ha)
--                                 =     0.3462669009E+02 (THz)
--Debye temperature from partial sums:     0.1661817053E+04 (K)
+ Debye frequency from partial sums:     0.5061172088E-02 (Ha)
+-                                 =     0.3330091260E+02 (THz)
+-Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -307,32 +307,32 @@ Notations:
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.821   -0.032   -0.033   -0.001    0.994   -0.088    0.055    0.000    0.000
-   2  12.800   13.192    0.392    1.024   -0.333    0.383    0.053    0.970   21.589   22.014
+   2  12.800   13.192    0.392    1.024   -0.333    0.383    0.053    0.971   21.589   22.014
    3  12.800   13.124    0.324    0.845   -0.333    0.383    0.053    0.792    0.000   -0.068
-   4  12.800   13.193    0.392    1.024   -0.333    0.383    0.053    0.970    0.000    0.068
-   5  18.426   18.406   -0.020   -0.056   -0.316    0.364   -0.802    0.746    5.626    5.213
-   6  18.426   18.447    0.021    0.058   -0.316    0.364   -0.802    0.860    0.000    0.042
-   7  18.426   18.406   -0.020   -0.056   -0.316    0.364   -0.802    0.746    0.000   -0.041
+   4  12.800   13.192    0.391    1.021   -0.333    0.383    0.054    0.968    0.000    0.067
+   5  18.426   18.406   -0.020   -0.056   -0.316    0.364   -0.802    0.746    5.626    5.214
+   6  18.426   18.447    0.021    0.058   -0.316    0.364   -0.802    0.860    0.000    0.041
+   7  18.426   18.406   -0.020   -0.055   -0.316    0.364   -0.801    0.746    0.000   -0.041
    8  26.686   26.382   -0.304   -0.328   -0.008    0.928   -0.371    0.043    8.260    7.976
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.213 (adiabatic:    4.546)
- QP_gap - KS_gap:   -0.413 (adiabatic:   -1.080)
+ QP gap:    5.214 (adiabatic:    4.549)
+ QP_gap - KS_gap:   -0.412 (adiabatic:   -1.077)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.764    0.063    0.093   -0.115    0.677   -0.011    0.104    0.000    0.000
-   2  -0.746   -0.658    0.088    0.136   -0.102    0.651   -0.195    0.331    2.081    2.106
-   3   9.967   10.334    0.366    1.047   -0.476    0.350    0.162    0.885   10.714   10.991
+   2  -0.746   -0.659    0.087    0.134   -0.102    0.651   -0.195    0.329    2.081    2.105
+   3   9.967   10.333    0.366    1.047   -0.476    0.350    0.162    0.885   10.714   10.992
    4   9.967   10.282    0.315    0.900   -0.476    0.350    0.163    0.738    0.000   -0.051
-   5  21.328   21.104   -0.224   -1.159   -1.029    0.193   -2.078    0.919   11.360   10.822
-   6  21.328   21.088   -0.240   -1.244   -1.029    0.193   -2.078    0.834    0.000   -0.016
-   7  22.066   22.209    0.143    0.238   -0.079    0.602    0.178    0.060    0.738    1.121
-   8  28.462   28.299   -0.163   -0.357   -0.275    0.456   -0.973    0.617    6.396    6.091
+   5  21.328   21.104   -0.224   -1.161   -1.029    0.193   -2.078    0.917   11.360   10.822
+   6  21.328   21.087   -0.240   -1.245   -1.029    0.193   -2.078    0.833    0.000   -0.016
+   7  22.066   22.206    0.141    0.234   -0.079    0.602    0.178    0.055    0.738    1.119
+   8  28.462   28.299   -0.163   -0.356   -0.275    0.456   -0.973    0.617    6.396    6.093
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.822 (adiabatic:    9.301)
- QP_gap - KS_gap:   -0.538 (adiabatic:   -2.059)
+ QP gap:   10.822 (adiabatic:    9.299)
+ QP_gap - KS_gap:   -0.539 (adiabatic:   -2.061)
  
 
 ================================================================================
@@ -373,12 +373,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =          12.4735 [km/s]
+ Average speed of sound partial sums:     0.5483362867E-02 (at units)
+-                                   =          11.9959 [km/s]
 
- Debye frequency from partial sums:     0.5262667706E-02 (Ha)
--                                 =     0.3462669009E+02 (THz)
--Debye temperature from partial sums:     0.1661817053E+04 (K)
+ Debye frequency from partial sums:     0.5061172088E-02 (Ha)
+-                                 =     0.3330091260E+02 (THz)
+-Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -438,32 +438,32 @@ Notations:
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.821   -0.032   -0.033   -0.001    0.994   -0.088    0.055    0.000    0.000
-   2  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911   21.589   21.991
-   3  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911    0.000    0.000
-   4  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911    0.000    0.000
-   5  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    5.626    5.250
-   6  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
-   7  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
+   2  12.800   13.169    0.369    0.963   -0.333    0.383    0.053    0.910   21.589   21.991
+   3  12.800   13.169    0.369    0.963   -0.333    0.383    0.053    0.910    0.000    0.000
+   4  12.800   13.169    0.369    0.963   -0.333    0.383    0.053    0.910    0.000    0.000
+   5  18.426   18.420   -0.006   -0.018   -0.316    0.364   -0.802    0.784    5.626    5.250
+   6  18.426   18.420   -0.006   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
+   7  18.426   18.420   -0.006   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
    8  26.686   26.382   -0.304   -0.328   -0.008    0.928   -0.371    0.043    8.260    7.962
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.250 (adiabatic:    4.644)
- QP_gap - KS_gap:   -0.376 (adiabatic:   -0.982)
+ QP gap:    5.250 (adiabatic:    4.645)
+ QP_gap - KS_gap:   -0.376 (adiabatic:   -0.981)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.764    0.063    0.093   -0.115    0.677   -0.011    0.104    0.000    0.000
-   2  -0.746   -0.658    0.088    0.136   -0.102    0.651   -0.195    0.331    2.081    2.106
-   3   9.967   10.308    0.340    0.974   -0.476    0.350    0.163    0.811   10.714   10.966
+   2  -0.746   -0.659    0.087    0.134   -0.102    0.651   -0.195    0.329    2.081    2.105
+   3   9.967   10.308    0.340    0.974   -0.476    0.350    0.163    0.811   10.714   10.967
    4   9.967   10.308    0.340    0.974   -0.476    0.350    0.163    0.811    0.000    0.000
-   5  21.328   21.096   -0.232   -1.202   -1.029    0.193   -2.078    0.876   11.360   10.788
-   6  21.328   21.096   -0.232   -1.202   -1.029    0.193   -2.078    0.876    0.000    0.000
-   7  22.066   22.209    0.143    0.238   -0.079    0.602    0.178    0.060    0.738    1.113
-   8  28.462   28.299   -0.163   -0.357   -0.275    0.456   -0.973    0.617    6.396    6.091
+   5  21.328   21.096   -0.232   -1.203   -1.029    0.193   -2.078    0.875   11.360   10.788
+   6  21.328   21.096   -0.232   -1.203   -1.029    0.193   -2.078    0.875    0.000    0.000
+   7  22.066   22.206    0.141    0.234   -0.079    0.602    0.178    0.055    0.738    1.111
+   8  28.462   28.299   -0.163   -0.357   -0.275    0.456   -0.973    0.617    6.396    6.093
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.788 (adiabatic:    9.185)
- QP_gap - KS_gap:   -0.572 (adiabatic:   -2.175)
+ QP gap:   10.788 (adiabatic:    9.184)
+ QP_gap - KS_gap:   -0.572 (adiabatic:   -2.177)
  
 
 == END DATASET(S) ==============================================================
@@ -490,7 +490,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 -          fftalg         312
            getddb          20
            getwfk          20
-           istwfk        1    0    1    0    0    0    1    0
+           istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -668,10 +668,10 @@ P           mkmem           8
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          7.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=          9.2
++Overall time at end (sec) : cpu=          5.6  wall=          7.3

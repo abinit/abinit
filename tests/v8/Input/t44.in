@@ -9,7 +9,7 @@ getddb   20      # Read DDB files from DS20_DDB
 ecut   20
 ecutsm 0.5
 tolwfr 1e-16
-istwfk *1
+#istwfk *1
 
 # K-mesh (must equal the one used to produce the WFK file)
 ngkpt    4 4 4
