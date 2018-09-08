@@ -242,7 +242,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
  efmas_path = dtfil%fnameabi_efmas
- dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+ ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
+ dvdb_path = dtfil%fildvdbin
+ if (dvdb_path == ABI_NOFILE) then
+   dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+ end if
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm/=1)
@@ -470,6 +474,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (dtset%natom))
 
+ ! TODO
  ! WARNING. This choice is only to insure backwards compatibility with the tests,
  ! while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  brav1 = 1; if (dtset%eph_transport > 0) brav1 = -1
@@ -665,8 +670,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (5)
    ! Interpolate the phonon potential
-   call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
-     ifc%ngqpt,ifc%nqshft,ifc%qshft, dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+   call dvdb_interpolate_and_write(dtfil%fnameabo_dvdb,ngfftc,ngfftf,cryst,dvdb,&
+     ifc%ngqpt,ifc%nqshft,ifc%qshft, dtset%eph_ngqpt_fine,dtset%qptopt,comm)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model

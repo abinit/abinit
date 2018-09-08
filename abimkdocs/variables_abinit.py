@@ -1646,6 +1646,28 @@ A zero value has no action of the job.
 ),
 
 Variable(
+    abivarname="dvdb_qcache_mb",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=512,
+    mnemonics="DVDB Q-CACHE size in Megabytes",
+    text="""
+This variable activates a caching mechanism for the DFPT potentials.
+The code will store in memory multiple q-points up to this size in Megabytes in order
+to reduce the number of IO operations required to read the potentials from the DVDB file.
+
+This option leads to a significant speedup of calculations requiring integrations
+in q-space ([[eph_task]] == 4) at the price of an increase of the memory requirements.
+The speedup is important especially if the QP corrections are computed for several k-points.
+
+A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
+A zero value disables the cache.
+""",
+),
+
+Variable(
     abivarname="d3e_pert1_atpol",
     varset="dfpt",
     vartype="integer",
@@ -1873,7 +1895,7 @@ Variable(
     abivarname="ddb_ngqpt",
     varset="eph",
     vartype="integer",
-    topics=['ElPhonInt_expert'],
+    topics=['ElPhonInt_basic'],
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Derivative DataBase: Number of Grid points for Q-PoinTs",
@@ -3023,7 +3045,7 @@ Variable(
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case 
+impose that the extremal configurations of the string are fixed. In case
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -3599,7 +3621,7 @@ Variable(
     abivarname="eph_ngqpt_fine",
     varset="eph",
     vartype="integer",
-    topics=['ElPhonInt_expert'],
+    topics=['ElPhonInt_useful'],
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Electron-PHonon: Number of Grid Q-PoinTs in FINE grid.",
@@ -3628,7 +3650,7 @@ Variable(
     abivarname="eph_task",
     varset="eph",
     vartype="integer",
-    topics=['ElPhonInt_expert'],
+    topics=['ElPhonInt_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Electron-PHonon: Task",
@@ -3641,7 +3663,7 @@ The choice is among:
  * 2 --> Compute electron-phonon matrix elements.
  * 3 --> Compute phonon self-energy.
  * 4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller).
- * 5 --> Interpolate DFPT potentials.
+ * 5 --> Interpolate DFPT potentials to produce a new DVDB file that can be read with [[getdvdb]]
 """,
 ),
 
@@ -4470,13 +4492,13 @@ Variable(
     abivarname="getddb",
     varset="files",
     vartype="integer",
-    topics=['ElPhonInt_expert', 'TDepES_useful'],
+    topics=['ElPhonInt_basic', 'TDepES_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET the DDB from...",
     text="""
-This variable should be used when performing electron-phonon or temperature-
-dependence calculations. The Born effective charge as well as the dielectric
+This variable should be used when performing electron-phonon or temperature-dependent calculations.
+The Born effective charge as well as the dielectric
 tensor will be read from a previous DFPT calculations of the electric field at
 q=Gamma. The use of this variable will trigger the cancellation of a residual
 dipole that leads to an unphysical divergence of the GKK with vanishing
@@ -4591,6 +4613,22 @@ dataset to find the proper dataset. As an example:
       ndtset 3   jdtset 1 2 4  getXXX -1
 
 refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getdvdb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the DVDB from...",
+    text="""
+This variable can be used when performing electron-phonon calculations with [[optdriver]] = 7
+to read a DVDB file produced in a previous dataset.
+For example, one can concatenate a dataset in which an initial set of DFPT potentials
+on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
 """,
 ),
 
@@ -6335,7 +6373,7 @@ Variable(
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-consistent 
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent
 calculations for possibly different (evolving) geometries is managed, while with
 [[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
@@ -6410,7 +6448,7 @@ Variable(
     requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
     text="""
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
-Possible values of [[imgwfstor]] are 0 or 1. 
+Possible values of [[imgwfstor]] are 0 or 1.
 If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
 size [[nimage]] more than the storage needed for one set of wavefunctions..
 When the specific computation (optimization/SCF cycle ...) for this image is started,
@@ -6419,10 +6457,10 @@ the wavefunctions are reinitialised, either at random or from the initial wavefu
 any modification to take into account the computations at the previous value of itimimage.
 
 If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
-are spread over many processors, which happens when [[paral_kgb]] == 1. 
+are spread over many processors, which happens when [[paral_kgb]] == 1.
 For some algorithms, e.g. when some geometry optimization
 is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
-For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller. 
+For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller.
 Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
 """,
 ),
@@ -6604,16 +6642,16 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. 
-The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], 
-as worked out in [cite:Minary2003]]. 
+  * 12 --> Isokinetic ensemble molecular dynamics.
+The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
+as worked out in [cite:Minary2003]].
 The conservation of the kinetic energy is obtained within machine precision, at each step.
-As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the 
+As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
 microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
 minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
 total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly, 
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
@@ -6979,6 +7017,19 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irddvdb",
+    varset="files",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    mnemonics="Integer that governs the ReaDing of DVDB file",
+    text="""
+This variable can be used when performing electron-phonon calculations with [[optdriver]] = 7
+to read an *input* DVDB file. See also [[getdvdb]]
 """,
 ),
 
@@ -8719,7 +8770,7 @@ temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
 
 In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
-to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run. 
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
 
@@ -11361,7 +11412,7 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin 
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin
 (but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
 [[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
 [[nband]] * [[nsppol]] elements, read in by the code.
@@ -17341,7 +17392,7 @@ Variable(
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
 (see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
-while pseudopotential calculations are performed in ABINIT with norm-conserving 
+while pseudopotential calculations are performed in ABINIT with norm-conserving
 pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.
 """,

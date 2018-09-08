@@ -246,8 +246,7 @@ end subroutine invars2m
 !!
 !! SOURCE
 
-subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
-& mband,msym,npsp,string,usepaw,zionpsp)
+subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1186,6 +1185,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb',tread,'INT')
  if(tread==1) dtset%getddb=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb',tread,'INT')
+ if(tread==1) dtset%getdvdb=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getden',tread,'INT')
  if(tread==1) dtset%getden=intarr(1)
 
@@ -1285,6 +1287,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_qcache_mb',tread,'DPR')
+ if(tread==1) dtset%dvdb_qcache_mb = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_addStrain',tread,'INT')
  if(tread==1) dtset%ph_freez_disp_addStrain=intarr(1)
@@ -1459,6 +1464,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdden',tread,'INT')
  if(tread==1) dtset%irdden=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddvdb',tread,'INT')
+ if(tread==1) dtset%irddvdb = intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdpawden',tread,'INT')
  if(tread==1) dtset%irdpawden=intarr(1)

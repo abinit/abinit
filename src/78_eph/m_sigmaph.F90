@@ -548,8 +548,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
- ! Set cache for q-points.
- if (abs(dtset%userra) /= zero) call dvdb_set_qcache_mb(dvdb, dtset%userra)
+ ! Set cache in Mb for q-points.
+ call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Compute gaussian spline.
@@ -690,14 +690,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call cwtime(cpu,wall,gflops,"start")
 
        db_iqpt = indq2dvdb(1, iq_ibz)
-       !db_iqpt = dvdb_findq(dvdb, qpt)
 
        if (db_iqpt /= -1) then
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
-         ! Read and reconstruct the dvscf potentials for all 3*natom perturbations.
+         ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         !call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
-
          call dvdb_readsym_qbz(dvdb, cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
          ! Fourier interpolation of the potential

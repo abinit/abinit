@@ -511,6 +511,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
+ dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
 
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
@@ -543,6 +544,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%getbscoup          = dtin%getbscoup
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
+ dtout%getdvdb            = dtin%getdvdb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
  dtout%getdkdk            = dtin%getdkdk
@@ -622,6 +624,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%irdbsreso          = dtin%irdbsreso
  dtout%irdbscoup          = dtin%irdbscoup
  dtout%irdddb             = dtin%irdddb
+ dtout%irddvdb            = dtin%irddvdb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
@@ -2388,7 +2391,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip  dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -2426,7 +2429,7 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getefmas getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine'
  list_vars=trim(list_vars)//' getsuscep '
@@ -2450,7 +2453,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'

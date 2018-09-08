@@ -799,6 +799,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(3,:)=dtsets(:)%ddb_shiftq(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_shiftq','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
+
  intarr(1,:)=dtsets(:)%ph_ndivsm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
 
@@ -1026,6 +1029,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%getden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getden','INT',0)
+
+ intarr(1,:)=dtsets(:)%getdvdb
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getdvdb','INT',0)
 
  intarr(1,:)=dtsets(:)%getefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getefmas','INT',0)
