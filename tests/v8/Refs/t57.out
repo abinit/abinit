@@ -154,7 +154,12 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
          eph_task4          1
          eph_task5          1
          eph_task6          6
-        ddb_ngqpt        1    1    1
+        ddb_ngqpt1       0    0    0
+        ddb_ngqpt2       0    0    0
+        ddb_ngqpt3       0    0    0
+        ddb_ngqpt4       0    0    0
+        ddb_ngqpt5       0    0    0
+        ddb_ngqpt6       1    1    1
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -322,6 +327,12 @@ P          mk1mem6          2
          prtefmas4          0
          prtefmas5          1
          prtefmas6          0
+         prtphdos1          1
+         prtphdos2          1
+         prtphdos3          1
+         prtphdos4          1
+         prtphdos5          1
+         prtphdos6          0
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2
@@ -1808,21 +1819,6 @@ The associated tensor(s) will therefore not be printed.
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1868829320E-02 (at units)
--                                   =           4.0884 [km/s]
-
- Debye frequency from partial sums:     0.1265660439E-02 (Ha)
--                                 =     0.8327645640E+01 (THz)
--Debye temperature from partial sums:     0.3996634822E+03 (K)
-
- Average speed of sound partial sums:     0.1868829320E-02 (at units)
--                                   =           4.0884 [km/s]
-
- Debye frequency from partial sums:     0.1265660439E-02 (Ha)
--                                 =     0.8327645640E+01 (THz)
--Debye temperature from partial sums:     0.3996634822E+03 (K)
-
-- Writing phonon DOS to file: t57o_DS6_PHDOS
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Ca.psp8
@@ -1910,7 +1906,12 @@ The associated tensor(s) will therefore not be printed.
          eph_task4          1
          eph_task5          1
          eph_task6          6
-        ddb_ngqpt        1    1    1
+        ddb_ngqpt1       0    0    0
+        ddb_ngqpt2       0    0    0
+        ddb_ngqpt3       0    0    0
+        ddb_ngqpt4       0    0    0
+        ddb_ngqpt5       0    0    0
+        ddb_ngqpt6       1    1    1
            etotal1    -5.5386471108E+01
            etotal2    -2.0593241427E+01
            etotal3    -5.0518883538E+01
@@ -2085,6 +2086,12 @@ P          mk1mem6          2
          prtefmas4          0
          prtefmas5          1
          prtefmas6          0
+         prtphdos1          1
+         prtphdos2          1
+         prtphdos3          1
+         prtphdos4          1
+         prtphdos5          1
+         prtphdos6          0
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2

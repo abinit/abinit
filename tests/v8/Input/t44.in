@@ -1,6 +1,6 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
-ndtset 6
+ndtset 4
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -19,11 +19,15 @@ shiftk   0.0 0.0 0.0
 ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
 
 
-############
-# Dataset 1
-############
+##############
+# Dataset 1/2
+##############
 symsigma1  0
 symsigma2  1
+
+# Test qcache
+dvdb_qcache_mb1 -1.0
+dvdb_qcache_mb2 0.0
 
 optdriver  7
 nband     54
@@ -56,17 +60,26 @@ ph_nqshift 1
 ph_qshift  0 0 0 
 
 
-# Activate Fourier interpolation of DFPT potentials.
-eph_task5 5
-eph_ngqpt_fine5  4 4 4 
+############
+# Dataset 3
+############
+# Interpolate DFPT potentials, produced new DVDB file with 4x4x4 q-mesh.
+eph_task3 5
+eph_ngqpt_fine3  4 4 4 
 
+#############
+## Dataset 4
+#############
 # Read previous (interpolated) DVDB file and use it to compute the QP
 # corrections on a 4x4x4 q-mesh. 
-eph_task6 4
-getdvdb6 -1
-eph_ngqpt_fine6  4 4 4 
-symsigma6 1
-dvdb_qcache_mb 0.0   # Don't use cache (just for testing)
+eph_task4 4
+getdvdb4 -1
+eph_ngqpt_fine4  4 4 4 
+symsigma4 1
+
+#########
+# Global
+#########
 
 # Structure 
 acell 3*6.70346805
