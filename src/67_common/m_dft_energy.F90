@@ -56,7 +56,6 @@ module m_dft_energy
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_nhat,         only : pawmknhat
  use m_paw_occupancies,  only : pawaccrhoij
- use m_cgtools,          only : dotprod_vn
  use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
  use m_dens,             only : mag_constr

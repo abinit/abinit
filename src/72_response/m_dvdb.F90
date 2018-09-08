@@ -2968,7 +2968,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
+ real(dp),intent(in) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
  real(dp),intent(out) :: v1scf_qpt(2,nfft,db%nspden)
 
 !Local variables-------------------------------

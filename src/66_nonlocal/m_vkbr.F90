@@ -824,14 +824,13 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
        il = 1 + psps%indlmn(1,ilmn,itypat)
        in = psps%indlmn(3,ilmn,itypat)
        iln = psps%indlmn(5,ilmn,itypat)
+       ! spin = 1 if scalar term (spin diagonal), 2 if SOC term.
+       !spin = psps%indlmn(6, ilmn, itypat)
        if (iln <= iln0) cycle
        iln0 = iln
        if (vkbsign(iln,itypat) == zero) cycle
-       !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-       !end do
-       !do il=1,psps%mpsang
+       !if (spin /= 1 .or. vkbsign(iln,itypat) == zero) cycle
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
-       !iln = il
        do im=1,2*(il-1)+1
          ! Index of im and il
          ilm = im + (il-1)*(il-1)

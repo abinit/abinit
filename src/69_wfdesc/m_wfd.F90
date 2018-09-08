@@ -49,7 +49,6 @@ MODULE m_wfd
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
  use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
- use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
