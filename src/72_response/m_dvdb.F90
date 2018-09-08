@@ -1211,7 +1211,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym,nqcache,iq,npc
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr
  logical :: isirr_q,incache
 !arrays
  integer :: pinfo(3,3*db%mpert)
@@ -1236,6 +1236,8 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
+        ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+        ABI_CHECK(ierr == 0, "OOM in v1scf")
         v1scf = db%qcache(db_iqpt)%v1scf
         incache = .True.
         !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
