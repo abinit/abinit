@@ -1525,7 +1525,7 @@ end subroutine sphereboundary
 !!
 !! TODO
 !! 1) Order arguments
-!! 2) Split the two cases: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
+!! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!

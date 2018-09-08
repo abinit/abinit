@@ -50,7 +50,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit
+ use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
@@ -458,7 +458,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:)
- integer,allocatable :: indq2dvdb(:,:)
+ integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: phfrq_ibz(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
@@ -532,14 +532,21 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_MALLOC(keep_ur,(mband, nkpt ,nsppol))
  nband=mband; bks_mask=.True.; keep_ur=.False.
 
+ ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
+ ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkpt))
+ wfd_istwfk = 1
+
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,ngfft,&
+   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
  call wfd_print(wfd,header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
+
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
 
  call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
@@ -607,8 +614,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
- ! Set cache for q-points.
- if (abs(dtset%userra) /= zero) call dvdb_set_qcache_mb(dvdb, dtset%userra)
+ ! Set cache in Mb for q-points.
+ ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
+ ! and if we have a cache hit we "rotate" the qibz in the cache to return V(qbz) else the code reads qibz and rotates.
+ ! When we need to remove a cache item because we've reached the dvdb_qcache_mb limit, we select the q-point
+ ! which the largest number of operations in the little group (e.g. Gamma) while trying to keep the previous qibz in cache
+ ! The cache is built dynamically so it depends on the way we loop over q-points in the caller.
+ ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells*  to minimise cache misses.
+ call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Compute gaussian spline.
@@ -749,14 +762,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call cwtime(cpu,wall,gflops,"start")
 
        db_iqpt = indq2dvdb(1, iq_ibz)
-       !db_iqpt = dvdb_findq(dvdb, qpt)
 
        if (db_iqpt /= -1) then
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
-         ! Read and reconstruct the dvscf potentials for all 3*natom perturbations.
+         ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         !call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
-
          call dvdb_readsym_qbz(dvdb, cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
          ! Fourier interpolation of the potential
@@ -1345,6 +1355,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10, ch10))
 
+ ! Print cache stats
+ if (dvdb%qcache_size > 0) then
+   write(std_out, "(a)")"Qcache stats"
+   write(std_out, "(a, i0)")"Total Number of calls", dvdb%qcache_stats(1)
+   write(std_out, "(a, i0, f4.1)")"Cache hit:", dvdb%qcache_stats(2), (one * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1)
+   write(std_out, "(a, i0, f4.1)")"Cache miss:", dvdb%qcache_stats(3), (one * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1)
+ end if
+
  ! Free memory
  ABI_FREE(gvnl1)
  ABI_FREE(grad_berry)
@@ -1912,7 +1930,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%vals_nuq, (new%ntemp, new%max_nbcalc, 3*cryst%natom, new%nqbz, 2))
  end if
 
- new%imag_only = .False.; if (dtset%useria == 23) new%imag_only = .True.
+ new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+ ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
  write(std_out, *)"imag_only:", new%imag_only, ", ;qint_method:", new%qint_method
 
@@ -2262,6 +2281,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1
+ character(len=1) :: sord
  real(dp) :: dksqmax
  type(lgroup_t) :: lgk
 
@@ -2286,7 +2306,8 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
  else if (abs(self%symsigma) == 1) then
    ! Use the symmetries of the little group
-   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
+   sord = ">" !; if (iseven(ikcalc)) sord = "<" ! Alternate shell ordering to reduce qcache misses.
+   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, sord=sord)
 
    self%nqibz_k = lgk%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))

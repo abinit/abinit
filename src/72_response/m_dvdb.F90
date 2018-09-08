@@ -41,7 +41,7 @@ module m_dvdb
 #endif
  use m_hdr
 
- use defs_abitypes,   only : hdr_type, mpi_type, datafiles_type
+ use defs_abitypes,   only : hdr_type, mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime
  use m_io_tools,      only : open_file, file_exists
@@ -78,9 +78,13 @@ module m_dvdb
 
  integer,private,parameter :: FPOS_EOF = -1
 
- type,private :: qcache_t
+ integer,private,parameter :: QCACHE_KIND = dp
+ ! Uncomment this line and recompile to use single precision cache
+ !integer,private,parameter :: QCACHE_KIND = sp
 
-   real(dp), allocatable :: v1scf(:,:,:,:)
+ type, private :: qcache_t
+
+   real(QCACHE_KIND), allocatable :: v1scf(:,:,:,:)
      ! v1scf(cplex, nfftf, nspden, 3*natom))
      ! cached potentials
 
@@ -102,9 +106,6 @@ module m_dvdb
 !! NOTES
 !!  natom, nspden, nspinor, and usepaw are global variables in the sense that it's not possible to add
 !!  new entries to the database if these dimension differ from the global ones.
-!!
-!! TODO
-!!  * Add option to store potentials in memory to reduce IO pressure
 !!
 !! SOURCE
 
@@ -179,12 +180,15 @@ module m_dvdb
    ! Number of q-points in Vscf(q) stored in the cache.
    ! Useful when evaluating expressions requiring integration in q-space
 
+  integer :: qcache_stats(3) = 0
+  ! Total Number of calls, no cache hit, no cache miss.
+
   integer :: prev_db_iqpt = 0
     ! Index in the DVDB of the last point added to the cache.
 
   type(qcache_t), allocatable :: qcache(:)
     ! qcache(nqpt)
-    ! Cache used to stores potentials (see dvdb_readsym_qbz for the implementation)
+    ! Cache used to store potentials (see dvdb_readsym_qbz for the implementation)
 
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name
@@ -706,7 +710,7 @@ subroutine dvdb_free(db)
  call destroy_mpi_enreg(db%mpi_enreg)
 
  ! Clean cache
- if (db%qcache_size > 0) then
+ if (allocated(db%qcache)) then
    do iq=1,db%nqpt
      if (allocated(db%qcache(iq)%v1scf)) then
        ABI_FREE(db%qcache(iq)%v1scf)
@@ -791,8 +795,8 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
-   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3)
-   write(std_out,'(a,f12.1,a)')' Memory needed for cache: ', dp * cache_size * b2Mb,' [Mb]'
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND
+   write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
@@ -1211,7 +1215,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym,nqcache,iq,npc
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr
  logical :: isirr_q,incache
 !arrays
  integer :: pinfo(3,3*db%mpert)
@@ -1232,11 +1236,15 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ! Get number of perturbations computed for this iqpt as well as cplex.
    npc = dvdb_get_pinfo(db, db_iqpt, cplex, pinfo)
    ABI_CHECK(npc /= 0, "npc == 0!")
+   db%qcache_stats(1) = db%qcache_stats(1) + 1
 
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
+        ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+        ABI_CHECK(ierr == 0, "OOM in v1scf")
         v1scf = db%qcache(db_iqpt)%v1scf
+        db%qcache_stats(2) = db%qcache_stats(2) + 1
         incache = .True.
         !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
       else
@@ -1248,7 +1256,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read from file...", itoa(db_iqpt)))
-      continue
+      db%qcache_stats(3) = db%qcache_stats(3) + 1
    end if
  end if
 
@@ -1347,9 +1355,10 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * dp * b2Mb / mbsize)
+   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
+ if (db%qcache_size == 0) db%qcache_size = 1
 
  call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f6.1"), "[Mb]"))
  call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
@@ -2129,9 +2138,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 ! *************************************************************************
 
  if (allocated(db%v1scf_rpt)) then
-   if (db%debug) then
-     call wrtout(std_out, "v1scf_rpt is already computed. Returning")
-   end if
+   if (db%debug) call wrtout(std_out, "v1scf_rpt is already computed. Returning")
    return
  end if
 
@@ -2968,7 +2975,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
+ real(dp),intent(in) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
  real(dp),intent(out) :: v1scf_qpt(2,nfft,db%nspden)
 
 !Local variables-------------------------------
@@ -3100,6 +3107,7 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 !Local variables-------------------------------
 !scalars
  integer :: ipert, nqbz, ierr, nproc, my_rank
+ !real(dp) :: work_size
 !arrays
  real(dp),allocatable :: v1scf_rpt(:,:,:,:)
 
@@ -3112,6 +3120,9 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 
  ABI_STAT_MALLOC(v1scf, (2,nfftf,db%nspden,db%natom3), ierr)
  ABI_CHECK(ierr == 0, "out of memory in v1scf")
+
+ !work_size = db%nrpt * two * nfft * db%nspden
+ !write(std_out,'(a,f12.1,a)')'Memory needed for v1scf_rpt array: ', dp * work_size * b2Mb,' [Mb]'
 
  ABI_STAT_MALLOC(v1scf_rpt, (2,db%nrpt,nfft,db%nspden), ierr)
  ABI_CHECK(ierr == 0, "out of memory in v1scf_rpt")
@@ -4499,9 +4510,9 @@ end subroutine dvdb_v1r_long_range
 !!
 !! SOURCE
 
-subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
+subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, &
-&          ngqpt, qptopt, mpi_enreg, comm)
+&          ngqpt, qptopt, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4515,10 +4526,9 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 !scalars
  integer,intent(in) :: comm
  integer,intent(in) :: qptopt,nqshift_coarse
- type(datafiles_type),intent(in) :: dtfil
+ character(len=*),intent(in) :: new_dvdb_fname
  type(crystal_t),intent(in) :: cryst
- type(dvdb_t),target,intent(inout) :: dvdb
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(dvdb_t),intent(inout) :: dvdb
 !arrays
  integer,intent(in) :: ngfft(18), ngfftf(18)
  integer,intent(in) :: ngqpt(3), ngqpt_coarse(3)
@@ -4539,7 +4549,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master
  character(len=500) :: msg
- character(len=fnlen) :: new_ddb_fname
 !arrays
  integer :: qptrlatt(3,3)
  integer :: symq(4,2,cryst%nsym)
@@ -4552,13 +4561,10 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  type(hdr_type) :: hdr_ref
 
 !************************************************************************
- ABI_UNUSED(mpi_enreg%nproc)
-
- call cwtime(cpu,wall,gflops,"start")
 
  write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential", ch10
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call wrtout(ab_out, msg, do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  i_am_master = (my_rank == master)
@@ -4698,8 +4704,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  nperts = nperts_read + nperts_interpolate
 
  if (my_rank == master) then
-   new_ddb_fname = strcat(dtfil%filnam_ds(4), '_DVDB')
-   if (open_file(new_ddb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
+   if (open_file(new_dvdb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
      MSG_ERROR(msg)
    end if
    write(ount, err=10, iomsg=msg) dvdb_last_version
@@ -4763,7 +4768,8 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
      ! entry set to -1 for perturbations that can be found from basis perturbations.
      if (sum(pertsy(:,idir,iat)) == -nqpt_interpolate) cycle
 
-     call wrtout(std_out, sjoin("Interpolating perturbation iat, idir = ",itoa(iat), itoa(idir)))
+     call wrtout(std_out, sjoin("Interpolating perturbation iat, idir = ",itoa(iat), itoa(idir)), do_flush=.True.)
+     call cwtime(cpu, wall, gflops, "start")
 
      ! Compute phonon potential in real space lattice representation
      call dvdb_get_v1scf_rpt(dvdb, cryst, ngqpt_coarse, nqshift_coarse, &
@@ -4794,8 +4800,12 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
          if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
        end if
-
      end do
+
+     call cwtime(cpu, wall, gflops, "stop")
+     write(msg,'(2(a,f8.2))')"completed. cpu:",cpu,", wall:",wall
+     call wrtout(std_out, msg, do_flush=.True.)
+
      ABI_FREE(dvdb%rpt)
    end do
  end do
@@ -4822,11 +4832,9 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
  call hdr_free(hdr_ref)
 
- call cwtime(cpu,wall,gflops,"stop")
-
  write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential completed", ch10
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call wrtout(ab_out, msg, do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
 
  return
 

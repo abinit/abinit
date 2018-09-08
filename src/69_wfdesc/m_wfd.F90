@@ -43,12 +43,12 @@ MODULE m_wfd
  use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
- use m_fftcore,        only : print_ngfft, kgindex, sphereboundary
+ use m_cgtk,           only : cgtk_change_gsphere
+ use m_fftcore,        only : print_ngfft, kgindex, sphereboundary, ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
  use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
- use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
@@ -1038,8 +1038,8 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
    MSG_WARNING("istwfk/=1 still under development!")
    write(std_out,*)Wfd%istwfk
  end if
- !
- ! * Get the number of planewaves npw_k
+
+ ! Get the number of planewaves npw_k
  ABI_MALLOC(Wfd%npwarr,(Wfd%nkibz))
 
  if (Wfd%gamma_centered) then
@@ -1069,17 +1069,17 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
  ! Allocate u(g) and, if required, also u(r) ===
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
  write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb]'
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
    write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb]'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
  end if
 
  ur_size = one*nspinor*Wfd%nfft*COUNT(Wfd%keep_ur)
  write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb]'
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  ABI_DT_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
 
@@ -1089,11 +1089,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
      npw_k = Wfd%npwarr(ik_ibz)
      do band=1,Wfd%nband(ik_ibz,spin)
        if (bks_mask(band,ik_ibz,spin)) then
-         !if (Wfd%keep_ur(band,ik_ibz,spin)) then
-         !  call wave_init(Wfd%Wave(band,ik_ibz,spin),Wfd%usepaw,npw_k,Wfd%nfft,Wfd%nspinor,Wfd%natom,Wfd%nlmn_atm,CPR_RANDOM)
-         !else
          call wave_init(Wfd%Wave(band,ik_ibz,spin),Wfd%usepaw,npw_k,nfft0,Wfd%nspinor,Wfd%natom,Wfd%nlmn_atm,CPR_RANDOM)
-         !end if
        end if
      end do
    end do
@@ -4555,7 +4551,7 @@ subroutine wfd_sanity_check(Wfd)
       do band=1,Wfd%nband(ik_ibz,spin)
         if (Wfd%bks_tab(band,ik_ibz,spin, Wfd%my_rank) == WFD_STORED .and. .not. wfd_ihave_ug(Wfd,band,ik_ibz,spin,"Stored") ) then
           write(msg,'(a,3(i0,1x))')" Found inconsistency in bks_tab for (band, ik_ibz, spin): ",band,ik_ibz,spin
-          call wrtout(std_out,msg,"PERS")
+          call wrtout(std_out, msg)
           ierr=ierr+1
         end if
      end do
@@ -5681,8 +5677,8 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  ! Select the IO library from the file extension.
  iomode = iomode_from_fname(wfk_fname)
- write(msg,'(3a,i0)')ABI_FUNC//': writing GS WFK file ',trim(wfk_fname),", with iomode ",iomode
- call wrtout(std_out,msg,'PERS')
+ write(msg,'(3a,i0)')'Writing GS WFK file ',trim(wfk_fname),", with iomode ",iomode
+ call wrtout(std_out, msg)
 
  if (nprocs > 1 .and. iomode /= IO_MODE_MPI) then
    MSG_ERROR("You need MPI-IO to write wavefunctions in parallel")
@@ -5756,7 +5752,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
      ABI_CHECK(nblocks==1,"nblocks !=1")
      write(msg,"(a,3(i0,2x))")"Will write (ik_ibz, spin, nblocks)",ik_ibz,spin,nblocks
-     call wrtout(std_out,msg,"PERS")
+     call wrtout(std_out, msg)
 
      ! Extract the block of wavefunctions from Wfd.
      ! Try to allocate all u(g) first,
@@ -5795,7 +5791,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')" write all cg cpu: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"PERS")
+ call wrtout(std_out, msg, do_flush=.True.)
 
  DBG_EXIT("COLL")
 
@@ -5809,8 +5805,7 @@ end subroutine wfd_write_wfk
 !! wfd_read_wfk
 !!
 !! FUNCTION
-!!  This routine reads the WFK file completing the initialization of the wavefunction
-!!  descriptor used in the GW code.
+!!  This routine reads the WFK file completing the initialization of the wavefunction descriptor
 !!
 !! INPUTS
 !!  wfk_fname=Name of the WFK file.
@@ -5850,19 +5845,21 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_rwwf0=0,headform0=0,icg0=0,formeig0=0,optkg1=1
- integer,parameter :: option1=1 ! for reading cg and eigen,
- integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode
+ integer,parameter :: formeig0=0, optkg1=1
+ integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii
  integer :: comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
- integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount
+ integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
  integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad,ib,method
+ logical :: change_gsphere
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
  type(Wfk_t) :: Wfk
  type(Hdr_type) :: Hdr
 !arrays
  integer,allocatable :: gf2wfd(:),kg_k(:,:)
+ integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3)
  real(dp),allocatable :: eig_k(:),cg_k(:,:) !occ_k(:),
+ real(dp),allocatable :: out_cg(:,:), work(:,:,:,:)
  logical,allocatable :: my_readmask(:,:,:)
  character(len=6) :: tag_spin(2)
 
@@ -5883,7 +5880,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
 
- call wrtout(std_out," wfd_read_wfk: reading "//TRIM(wfk_fname),"COLL")
+ call wrtout(std_out," wfd_read_wfk: reading "//TRIM(wfk_fname))
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
@@ -5894,7 +5891,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
- !
+
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ABI_MALLOC(my_readmask,(mband_disk,Wfd%nkibz,Wfd%nsppol))
  my_readmask=.FALSE.
@@ -5912,7 +5909,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  end do
 
  write(msg,'(3a,i0,a)')" ",ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
- call wrtout(std_out,msg,"PERS")
+ call wrtout(std_out, msg)
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu,wall,gflops,"start")
 
@@ -5923,6 +5920,9 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
     do ik_ibz=1,Wfd%nkibz
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
+      istwfk_disk = hdr%istwfk(ik_ibz)
+      change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
+      ABI_CHECK(.not. change_gsphere, "different istwfk values are not coded")
 
       nband_wfd  = Wfd%nband(ik_ibz,spin)
       if (nband_wfd > nband_disk) then
@@ -5939,7 +5939,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
       ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
       ABI_CHECK(ierr==0, "out of memory in cg_k")
 
-      call wfk_read_band_block(Wfk,(/1,nband_wfd/),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
+      call wfk_read_band_block(Wfk, [1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
       if (wfd%prtvol > 0 .and. Wfd%my_rank==Wfd%master) then
         if (Wfd%nsppol==2) then
@@ -5948,22 +5948,20 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
           write(std_out,'(i3,7x,10f7.2/50(10x,10f7.2/))')ik_ibz,(eig_k(ib)*Ha_eV,ib=1,nband_wfd)
         end if
       end if
-      !
-      ! * Table with the correspondence btw the k-centered sphere of the WFK file
-      !   and the one used in Wfd (possibly smaller due to ecutwfn).
+
+      ! Table with the correspondence btw the k-centered sphere of the WFK file
+      ! and the one used in Wfd (possibly smaller due to ecutwfn).
       ABI_MALLOC(gf2wfd,(npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
-        call kg_map(wfd%npwarr(ik_ibz),wfd%kdata(ik_ibz)%kg_k,npw_disk,kg_k,gf2wfd,nmiss)
+        call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if
-
       !if (nmiss/=0) then
       !  write(msg,'(a,2(1x,i0),a,i0)')" For (k,s) ",ik_ibz,spin," the number of missing G is ",nmiss
       !  MSG_WARNING(msg)
       !end if
-      !
-      ! * Conversion of the basis set.
-      do band=1,Wfd%nband(ik_ibz,spin)
 
+      ! Conversion of the basis set.
+      do band=1,Wfd%nband(ik_ibz,spin)
         if (my_readmask(band,ik_ibz,spin)) then
           Wfd%Wave(band,ik_ibz,spin)%ug = czero
           cg_bpad=npw_disk*Wfd%nspinor*(band-1)
@@ -5975,15 +5973,11 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
               igw = gf2wfd(ig)+gw_spad
               if (gf2wfd(ig) /= 0) then
                 Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg))
-              !else
-              !  not in thebasis set, set the component to zero.
-              !  Wfd%Wave(band,ik_ibz,spin)%ug(igw) = czero
               end if
             end do
           end do
           Wfd%Wave(band,ik_ibz,spin)%has_ug = WFD_STORED
         end if
-
       end do
 
       ABI_FREE(eig_k)
@@ -5994,12 +5988,15 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
   end do !spin
 
  else if (method==2) then
+  ! DEFAULT ALGO: This seems to be the most efficient one.
 
   do spin=1,Wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
       !write(std_out,*)"about to read ik_ibz: ",ik_ibz,", spin: ",spin
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
+      istwfk_disk = hdr%istwfk(ik_ibz)
+      change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
 
       nband_wfd  = Wfd%nband(ik_ibz,spin)
 
@@ -6018,57 +6015,82 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
       call wfk_read_bmask(Wfk,my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
 
-      if (Wfd%my_rank==Wfd%master .and. wfd%prtvol > 0) then
+      if (Wfd%my_rank == Wfd%master .and. wfd%prtvol > 0) then
         if (Wfd%nsppol==2) then
           write(std_out,'(i3,a,10f7.2/50(10x,10f7.2/))') ik_ibz,tag_spin(spin),(eig_k(ib)*Ha_eV,ib=1,nband_wfd)
         else
           write(std_out,'(i3,7x,10f7.2/50(10x,10f7.2/))')ik_ibz,(eig_k(ib)*Ha_eV,ib=1,nband_wfd)
         end if
       end if
-      !
-      ! * Table with the correspondence btw the k-centered sphere of the WFK file
-      !   and the one used in Wfd (possibly smaller due to ecutwfn).
+
+      ! Table with the correspondence btw the k-centered sphere of the WFK file
+      ! and the one used in Wfd (possibly smaller due to ecutwfn).
+      ! TODO: Here I should treat the case in which istwfk in wfd differs from the one on disk.
       ABI_MALLOC(gf2wfd,(npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
-        call kg_map(wfd%npwarr(ik_ibz),wfd%kdata(ik_ibz)%kg_k,npw_disk,kg_k,gf2wfd,nmiss)
+        call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if
-
       !if (nmiss/=0) then
       !  write(msg,'(a,2(1x,i0),a,i0)')" For (k,s) ",ik_ibz,spin," the number of missing G is ",nmiss
       !  MSG_WARNING(msg)
       !end if
-      !
-      ! * Conversion of the basis set.
+
+      if (change_gsphere .and. any(my_readmask(:,ik_ibz,spin))) then
+        ! Prepare call to ctgk_change_sphere
+        ! FFT box must enclose the two spheres (wfd(k), wfk(k))
+        gmax_wfd = maxval(abs(wfd%kdata(ik_ibz)%kg_k), dim=2)
+        gmax_disk = maxval(abs(kg_k), dim=2)
+        do ii=1,3
+          gmax(ii) = max(gmax_wfd(ii), gmax_disk(ii))
+        end do
+        gmax = 2*gmax + 1
+        call ngfft_seq(work_ngfft, gmax)
+        ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+        ABI_MALLOC(out_cg, (2, wfd%npwarr(ik_ibz) * wfd%nspinor))
+     end if
+
+      ! Conversion of the basis set.
       bcount = 0
       do band=1,Wfd%nband(ik_ibz,spin)
-
         if (my_readmask(band,ik_ibz,spin)) then
           Wfd%Wave(band,ik_ibz,spin)%ug = czero
           bcount = bcount + 1
           cg_bpad=npw_disk*Wfd%nspinor*(bcount-1)
-          do spinor=1,Wfd%nspinor
-            cg_spad=(spinor-1)*npw_disk
-            gw_spad=(spinor-1)*Wfd%npwarr(ik_ibz)
-            do ig=1,npw_disk
-              icg = ig+cg_spad+cg_bpad
-              igw = gf2wfd(ig)+gw_spad
-              if (gf2wfd(ig) /= 0) then
-                Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg))
-              !else
-              !  not in thebasis set, set the component to zero.
-              !  Wfd%Wave(band,ik_ibz,spin)%ug(igw) = czero
-              end if
+
+          if (change_gsphere) then
+            ! Different istwfk storage.
+            call cgtk_change_gsphere(wfd%nspinor, &
+               npw_disk, istwfk_disk, kg_k, cg_k(:, cg_bpad+1:), &
+               wfd%npwarr(ik_ibz), wfd%istwfk(ik_ibz), wfd%kdata(ik_ibz)%kg_k, out_cg, work_ngfft, work)
+            wfd%wave(band,ik_ibz,spin)%ug(:) = CMPLX(out_cg(1, :), out_cg(2, :))
+          else
+            do spinor=1,Wfd%nspinor
+              cg_spad=(spinor-1)*npw_disk
+              gw_spad=(spinor-1)*Wfd%npwarr(ik_ibz)
+              do ig=1,npw_disk
+                icg = ig+cg_spad+cg_bpad
+                igw = gf2wfd(ig)+gw_spad
+                if (gf2wfd(ig) /= 0) then
+                  Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg))
+                end if
+              end do
             end do
-          end do
+          end if
+
           Wfd%Wave(band,ik_ibz,spin)%has_ug = WFD_STORED
         end if
-
       end do
 
       ABI_FREE(eig_k)
       ABI_FREE(kg_k)
       ABI_FREE(cg_k)
       ABI_FREE(gf2wfd)
+      if (allocated(work)) then
+        ABI_FREE(work)
+      end if
+      if (allocated(out_cg)) then
+        ABI_FREE(out_cg)
+      end if
     end do !ik_ibz
   end do !spin
 
@@ -6078,7 +6100,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f9.2))')" cpu_time = ",cpu,", wall_time = ",wall
- call wrtout(std_out,msg,"PERS", do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
 
  call wfk_close(Wfk)
  call hdr_free(Hdr)
@@ -6460,7 +6482,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
  DBG_ENTER("COLL")
 
- call wrtout(std_out," Plotting |wfs|^2 ...","COLL")
+ call wrtout(std_out," Plotting |wfs|^2 ...")
  !
  ! Change the FFT mesh if needed because we want u(r) on the ngfftf mesh (pawecutd for PAW).
  call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
@@ -7017,12 +7039,12 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  !call prtrhomxmn(std_out,wfd%mpi_enreg,nfftf,ngfftf,wfd%nspden,1,rhor,optrhor=optcalc,ucvol=crystl%ucvol)
 
  write(msg,'(a,f9.4)')' planewave contribution to nelect: ',SUM(rhor(:,1))*Cryst%ucvol/nfftf
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  if (Wfd%nspden==4) then
    write(msg,'(a,3f9.4)')&
      ' mx, my, mz: ',SUM(rhor(:,2))*Cryst%ucvol/nfftf,SUM(rhor(:,3))*Cryst%ucvol/nfftf,SUM(rhor(:,4))*Cryst%ucvol/nfftf
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
 
  ABI_FREE(wfr)
@@ -7110,11 +7132,11 @@ end if
        write(msg,'(3a,f22.15)')TRIM(msg),ch10,' Compensation charge over fft grid         = ',compch_fft
      end if
    end if
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
    write(msg,'(a)')ch10
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
  end if !PAW
 
  nelectron_pw =SUM(rhor(:,1))*ucvol/nfftf
@@ -7136,22 +7158,22 @@ end if
    write(msg,'(2(a,f9.4),a)')&
 &   ' Total number of electrons per unit cell = ',nelectron_sph,' (Spherical mesh), ',nelectron_fft,' (FFT mesh)'
  end if
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out, msg)
+ call wrtout(ab_out, msg)
 
 !$write(msg,'(a,f9.4)')' Renormalizing smooth charge density using nratio = ',nratio
 !! rhor(:,:)=nratio*rhor(:,:)
 
  write(msg,'(a,f9.6)')' average of density, n = ',rhoav
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out, msg)
+ call wrtout(ab_out, msg)
  write(msg,'(a,f9.4)')' r_s = ',rs
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out, msg)
+ call wrtout(ab_out, msg)
  omegaplasma=SQRT(four_pi*rhoav)
  write(msg,'(a,f9.4,2a)')' omega_plasma = ',omegaplasma*Ha_eV,' [eV]',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out, msg)
+ call wrtout(ab_out, msg)
 
 end subroutine test_charge
 !!***
@@ -7308,11 +7330,11 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 &     ' ====== Values of RHOIJ in wfd_pawrhoij (iatom=',iatom,') ======'
      if (pawrhoij(iatom)%nspden==2.and.pawrhoij(iatom)%nsppol==1) write(msg,'(3a)') trim(msg),ch10,&
 &     '      (antiferromagnetism case: only one spin component)'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
      do spin=1,nsp2
        if (pawrhoij(iatom)%nspden/=1) then
          write(msg, '(3a)') '   Component ',trim(dspin(spin+2*(pawrhoij(iatom)%nspden/4))),':'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out, msg)
        end if
        call pawio_print_ij(std_out,pawrhoij(iatom)%rhoij_(:,spin),pawrhoij(iatom)%lmn2_size,&
 &       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,-1,idum,0,pawprtvol,idum,-1.d0,1)

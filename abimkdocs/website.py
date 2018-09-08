@@ -823,10 +823,10 @@ The bibtex file is available [here](../abiref.bib).
         pages_on_disk = set(p.relpath for p in self.md_pages)
         diff = pages_on_disk.difference(pages_in_toolbar)
         if diff:
-            self.warn("Found markdown files on disk not included in mkdocs.py:\n%s" % "\n".join(diff))
+            self.warn("Found markdown files on disk not included in mkdocs.yml:\n%s" % "\n".join(diff))
         diff = pages_in_toolbar.difference(pages_on_disk)
         if diff:
-            self.warn("Found markdown files in mkdocs.py not present in directories:\n%s" % "\n".join(diff))
+            self.warn("Found markdown files in mkdocsyml not present in directories:\n%s" % "\n".join(diff))
 
     def slugify(self, value):
         """

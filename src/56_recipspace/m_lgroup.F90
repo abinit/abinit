@@ -149,6 +149,8 @@ contains  !=====================================================
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
 !!  kibz(3,nkibz)=Irreducible zone.
+!!  sord=Defines how to order the points in %ibz.
+!!   ">" for increasing norm. "<" decreasing. Default: ">"
 !!
 !! PARENTS
 !!
@@ -156,7 +158,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz) result(new)
+type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -171,6 +173,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !scalars
  integer,intent(in) :: timrev,nkibz,nkbz
  type(crystal_t),intent(in) :: cryst
+ character(len=1),optional,intent(in) :: sord
 !arrays
  real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
 
@@ -178,6 +181,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !scalars
  integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
  integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik_ibz,ik_bz
+ real(dp) :: ksign
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
@@ -239,9 +243,14 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ! Here I repack the IBZ points. In principle, the best would be
  ! to pack stars using crystal%symrec. For the time being we pack shells (much easier).
  ! Use wtk as workspace to store the norm.
+ ksign = + one
+ if (present(sord)) then
+   if (sord == "<") ksign = - one
+ end if
+
  do ik_ibz=1,new%nibz
    call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
-   wtk(ik_ibz) = normv(kred, cryst%gmet, "G")
+   wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
  end do
  ABI_MALLOC(kord, (3, new%nibz))
  ABI_MALLOC(iperm, (new%nibz))
@@ -259,7 +268,6 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 
  ABI_FREE(iperm)
  ABI_FREE(kord)
-
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)

@@ -130,6 +130,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 ! Others unit numbers will be used in the case of the variational and 2n+1 expressions.
 ! In defs_basis, one defines :
 !   std_in=5, ab_in=5, std_out=6, ab_out=7, tmp_unit=9, tmp_unit2=10
+! TODO: Remove all these units and use get_unit API
  integer,parameter :: unchi0=42,unddb=16,unddk=50,undkdk=54,undkde=55,unkg1=19,unkg=17,unkgq=18
  integer,parameter :: unpaw=26,unpaw1=27,unpawq=28,unpos=30
  integer,parameter :: unwff1=1,unwff2=2,unwff3=8,unwffgs=3,unwfkq=4,unwft1=11
@@ -226,7 +227,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
 
 !Treatment of the other get wavefunction variable, if response function case or nonlinear case
- if ( ANY(dtset%optdriver == (/RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH/)) ) then
+ if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH])) then
 
 !  According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
@@ -266,11 +267,20 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !-------------------------------------------------------------------------------------------
 !Build name of files from dtfil%filnam_ds(3)
 
-!SP :According to getddb, build _DDB file name, referred as filddbsin
+! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'
  stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,&
 & ndtset,stringfile,stringvar,will_read)
+
+! According to getdvdb, build _DVDB file name
+! A default is available if getden is 0
+ stringfile='_DVDB'
+ stringvar='dvdb'
+ call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,&
+& ndtset,stringfile,stringvar,will_read)
+ !if (will_read == 0) dtfile%fildvdbin = trim(filnam_ds(3))//'_DVDB'
+ if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
 !According to getden, build _DEN file name, referred as fildensin
 !A default is available if getden is 0
@@ -291,8 +301,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
 
- if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) &
-& .and.dtset%iscf<0) ireadden=1
+ if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
 !if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
 
 !According to getpawden, build _PAWDEN file name, referred as filpawdensin
@@ -439,6 +448,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_ddb=trim(dtfil%filnam_ds(4))//'_DDB'
  dtfil%fnameabo_den=trim(dtfil%filnam_ds(4))//'_DEN'
  dtfil%fnameabo_dos=trim(dtfil%filnam_ds(4))//'_DOS'
+ dtfil%fnameabo_dvdb=trim(dtfil%filnam_ds(4))//'_DVDB'
  dtfil%fnameabo_eelf=trim(dtfil%filnam_ds(4))//'_EELF'
  dtfil%fnameabo_eig=trim(dtfil%filnam_ds(4))//'_EIG'
  dtfil%fnameabo_eigi2d=trim(dtfil%filnam_ds(4))//'_EIGI2D'

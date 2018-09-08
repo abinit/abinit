@@ -45,7 +45,7 @@ module m_gkk
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_symtk,          only : littlegroup_q
- use m_fftcore,        only : ngfft_seq, get_kg, kpgsph, sphere
+ use m_fftcore,        only : ngfft_seq, get_kg
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
@@ -57,16 +57,8 @@ module m_gkk
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
- use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                              wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
- use m_fourier_interpol, only : transgrid
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg, wfd_read_wfk
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
 
  implicit none
 
@@ -166,7 +158,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -248,17 +240,26 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    bks_mask_kq(:,ikq,:) = .True.
  end do
 
+ ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
+ ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkpt))
+ wfd_istwfk = 1
 
  ! Initialize the wavefunction descriptors
  call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands_k%istwfk,ebands_k%kptns,ngfft,&
+   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+ ABI_FREE(wfd_istwfk)
 
  call wfd_print(wfd_k,header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
+ ABI_MALLOC(wfd_istwfk, (nkpt_kq))
+ wfd_istwfk = 1
+
  call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,dtset%paral_kgb,dummy_npw,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands_kq%istwfk,ebands_kq%kptns,ngfft,&
+   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+ ABI_FREE(wfd_istwfk)
 
  call wfd_print(wfd_kq,header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
 

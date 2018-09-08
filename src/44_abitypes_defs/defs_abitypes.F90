@@ -243,6 +243,7 @@ type dataset_type
  integer :: ga_n_rules
  integer :: getcell
  integer :: getddb
+ integer :: getdvdb = 0
  integer :: getddk
  integer :: getdelfd
  integer :: getdkdk
@@ -317,6 +318,7 @@ type dataset_type
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
+ integer :: irddvdb = 0
  integer :: irdddk
  integer :: irdden
  integer :: irdefmas
@@ -689,6 +691,7 @@ type dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dvdb_qcache_mb = 512.0_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx
@@ -1340,6 +1343,11 @@ type dataset_type
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
 
+  character(len=fnlen) :: fildvdbin
+   ! if no dataset mode             : abi//'DVDB'
+   ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
@@ -1476,10 +1484,10 @@ type dataset_type
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_dos
+  character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
   character(len=fnlen) :: fnameabo_eig
   character(len=fnlen) :: fnameabo_eigi2d
