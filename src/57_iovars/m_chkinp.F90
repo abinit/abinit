@@ -564,7 +564,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_gmove',dt%dmftctqmc_gmove,0,iout)
          cond_string(1)='dmft_solv' ; cond_values(1)=5
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
          if (dt%dmft_solv>=6) then
            cond_string(1)='dmft_solv' ; cond_values(1)=5
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_qmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
@@ -604,7 +604,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-#if !defined HAVE_TRIQS
+#if !defined HAVE_TRIQS_v2_0 && !defined HAVE_TRIQS_v1_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(message, '(a,a,a)' )&
 &     ' dmft_solv=6, or 7 is only relevant if the TRIQS library is linked',ch10,&
@@ -1138,6 +1138,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='nspden'    ; cond_values(1)=nspden
      cond_string(2)='pawoptmix' ; cond_values(2)=dt%pawoptmix
      call chkint_ge(2,2,cond_string,cond_values,ierr,'iscf',dt%iscf,10,iout)
+   end if
+
+!  When usepawu=4, iscf must be <=9 (the reason needs to be studied)
+   if (dt%usepawu==4) then
+     cond_string(1)='usepawu' ; cond_values(1)=4
+     call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
 
 !  istatimg
