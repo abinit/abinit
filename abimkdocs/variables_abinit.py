@@ -3561,7 +3561,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     text="""
 This variable defines the energy window around the Fermi level used for e-ph
-calculations ([[optdriver]] = 7). Only the states located in the energy range
+calculations ([[optdriver]] = 7). Only states located in the energy range
 [efermi - eph_fsewin, efermi + eph_fsewin] are included in the e-ph calculation.
 
 Related input variables: [[eph_intmeth]], [[eph_fsmear]], [[eph_extrael]] and [[eph_fermie]].
@@ -3653,17 +3653,19 @@ Variable(
     topics=['ElPhonInt_basic'],
     dimensions="scalar",
     defaultval=1,
+    requires="[[optdriver]] == 7",
     mnemonics="Electron-PHonon: Task",
     text="""
-When [[optdriver]] == 7, select the task to be performed.
+Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
- * 0 --> No computation (mainly used to access the post-processing tools)
- * 1 --> Compute phonon linewidths in metals.
- * 2 --> Compute electron-phonon matrix elements.
- * 3 --> Compute phonon self-energy.
- * 4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller).
- * 5 --> Interpolate DFPT potentials to produce a new DVDB file that can be read with [[getdvdb]]
+* 0 --> No computation (mainly used to access the post-processing tools)
+* 1 --> Compute phonon linewidths in metals.
+* 2 --> Compute electron-phonon matrix elements.
+* 3 --> Compute phonon self-energy.
+* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections.
+* -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy).
+* 5 --> Interpolate DFPT potentials to produce a new DVDB file that can be read with [[getdvdb]]
 """,
 ),
 

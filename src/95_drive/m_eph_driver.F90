@@ -660,13 +660,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- case (4)
+ case (4, -4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- case (-4)
-   call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
+   !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
 
  case (5)
    ! Interpolate the phonon potential

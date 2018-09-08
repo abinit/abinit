@@ -78,12 +78,15 @@ module m_dvdb
 
  integer,private,parameter :: FPOS_EOF = -1
 
- type,private :: qcache_t
+ integer,private,parameter :: QCACHE_KIND = dp
+ ! Uncomment this line and recompile to use single precision cache
+ !integer,private,parameter :: QCACHE_KIND = sp
 
-   real(dp), allocatable :: v1scf(:,:,:,:)
+ type, private :: qcache_t
+
+   real(QCACHE_KIND), allocatable :: v1scf(:,:,:,:)
      ! v1scf(cplex, nfftf, nspden, 3*natom))
      ! cached potentials
-     ! TODO: single precision?
 
  end type qcache_t
 
@@ -177,14 +180,15 @@ module m_dvdb
    ! Number of q-points in Vscf(q) stored in the cache.
    ! Useful when evaluating expressions requiring integration in q-space
 
-  !integer :: qcache_kind = dp
+  integer :: qcache_stats(3) = 0
+  ! Total Number of calls, no cache hit, no cache miss.
 
   integer :: prev_db_iqpt = 0
     ! Index in the DVDB of the last point added to the cache.
 
   type(qcache_t), allocatable :: qcache(:)
     ! qcache(nqpt)
-    ! Cache used to stores potentials (see dvdb_readsym_qbz for the implementation)
+    ! Cache used to store potentials (see dvdb_readsym_qbz for the implementation)
 
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name
@@ -706,7 +710,7 @@ subroutine dvdb_free(db)
  call destroy_mpi_enreg(db%mpi_enreg)
 
  ! Clean cache
- if (db%qcache_size > 0) then
+ if (allocated(db%qcache)) then
    do iq=1,db%nqpt
      if (allocated(db%qcache(iq)%v1scf)) then
        ABI_FREE(db%qcache(iq)%v1scf)
@@ -791,8 +795,8 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
-   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3)
-   write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', dp * cache_size * b2Mb,' [Mb]'
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND
+   write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
@@ -1232,6 +1236,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ! Get number of perturbations computed for this iqpt as well as cplex.
    npc = dvdb_get_pinfo(db, db_iqpt, cplex, pinfo)
    ABI_CHECK(npc /= 0, "npc == 0!")
+   db%qcache_stats(1) = db%qcache_stats(1) + 1
 
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
@@ -1239,6 +1244,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
         ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
         ABI_CHECK(ierr == 0, "OOM in v1scf")
         v1scf = db%qcache(db_iqpt)%v1scf
+        db%qcache_stats(2) = db%qcache_stats(2) + 1
         incache = .True.
         !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
       else
@@ -1250,7 +1256,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read from file...", itoa(db_iqpt)))
-      continue
+      db%qcache_stats(3) = db%qcache_stats(3) + 1
    end if
  end if
 
@@ -1349,9 +1355,10 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * dp * b2Mb / mbsize)
+   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
+ if (db%qcache_size == 0) db%qcache_size = 1
 
  call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f6.1"), "[Mb]"))
  call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))

@@ -50,7 +50,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit
+ use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
@@ -549,6 +549,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
  ! Set cache in Mb for q-points.
+ ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
+ ! and if we have a cache hit we "rotate" the qibz in the cache to return V(qbz) else the code reads qibz and rotates.
+ ! When we need to remove a cache item because we've reached the dvdb_qcache_mb limit, we select the q-point
+ ! which the largest number of operations in the little group (e.g. Gamma) while trying to keep the previous qibz in cache
+ ! The cache is built dynamically so it depends on the way we loop over q-points in the caller.
+ ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells*  to minimise cache misses.
  call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
@@ -1216,6 +1222,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10, ch10))
 
+ ! Print cache stats
+ if (dvdb%qcache_size > 0) then
+   write(std_out, "(a)")"Qcache stats"
+   write(std_out, "(a, i0)")"Total Number of calls", dvdb%qcache_stats(1)
+   write(std_out, "(a, i0, f4.1)")"Cache hit:", dvdb%qcache_stats(2), (one * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1)
+   write(std_out, "(a, i0, f4.1)")"Cache miss:", dvdb%qcache_stats(3), (one * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1)
+ end if
+
  ! Free memory
  ABI_FREE(gvnl1)
  ABI_FREE(grad_berry)
@@ -1777,7 +1791,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%vals_nuq, (new%ntemp, new%max_nbcalc, 3*cryst%natom, new%nqbz, 2))
  end if
 
- new%imag_only = .False.; if (dtset%useria == 23) new%imag_only = .True.
+ new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+ ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
  write(std_out, *)"imag_only:", new%imag_only, ", ;qint_method:", new%qint_method
 
@@ -2127,6 +2142,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1
+ character(len=1) :: sord
  real(dp) :: dksqmax
  type(lgroup_t) :: lgk
 
@@ -2151,7 +2167,8 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
  else if (abs(self%symsigma) == 1) then
    ! Use the symmetries of the little group
-   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
+   sord = ">" !; if (iseven(ikcalc)) sord = "<" ! Alternate shell ordering to reduce qcache misses.
+   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, sord=sord)
 
    self%nqibz_k = lgk%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))

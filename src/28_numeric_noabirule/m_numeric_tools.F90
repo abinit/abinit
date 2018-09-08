@@ -106,8 +106,8 @@ MODULE m_numeric_tools
  end interface arth
 
  interface reverse
-   module procedure arth_int
-   module procedure arth_rdp
+   module procedure reverse_int
+   module procedure reverse_rdp
  end interface reverse
 
  interface set2unit
