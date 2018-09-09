@@ -1084,13 +1084,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 		   klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=cplex_dij*(klmn-1)+1
 
 		   ro1r=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-		   if (cplex_dij==2.and.cplex_rhoij==2) then
-			 ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
-           end if
+		   ro1i=zero;if (cplex_rhoij==2) ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
            
 		   d1r=half*dijfock_vv(kklmn,ispden)+dijfock_cv(kklmn,ispden)
 		   etmp=ro1r*d1r
-		   if (cplex_dij==2.and.cplex_rhoij==2) then
+		   if (cplex_dij==2) then
 			 d1i=half*dijfock_vv(kklmn+1,ispden)+dijfock_cv(kklmn+1,ispden)
 			 etmp=etmp+ro1i*d1i
 		   end if
@@ -1098,7 +1096,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 		   d1r=half*dijfock_vv(kklmn,ispden)
 		   etmp=ro1r*d1r
-		   if (cplex_dij==2.and.cplex_rhoij==2) then
+		   if (cplex_dij==2) then
 			 d1i=half*dijfock_vv(kklmn+1,ispden)
 			 etmp=etmp+ro1i*d1i
 		   end if
