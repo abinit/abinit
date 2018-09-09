@@ -887,6 +887,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  fockcommon => fock%fock_common
  use_ACE_old=fockcommon%use_ACE
  fockcommon%use_ACE=0
+ fockcommon%e_fock0=zero
 
 !Initialize Hamiltonian (k- and spin-independent terms)
 
@@ -1060,6 +1061,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &         wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
          mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
+         fockcommon%e_fock0=fockcommon%e_fock0+half*weight(iblocksize)*fockcommon%eigen_ikpt(fockcommon%ieigen)
          if (fockcommon%optfor) then
            fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
          end if
@@ -1157,6 +1159,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !Parallel case: accumulate (n,k) contributions
  if (xmpi_paral==1) then
+   call xmpi_sum(fockcommon%e_fock0,spaceComm,ierr)
 !  Forces
    if (optfor==1) then
      call timab(65,2,tsec)
