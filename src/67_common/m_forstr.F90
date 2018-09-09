@@ -499,7 +499,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  if (stress_needed==1.and.dtset%usewvl==0) then
 !   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
    if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
+     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
        ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))

@@ -2597,7 +2597,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
+!&    +two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
+&     - energies%e_fock0 +&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 &     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
@@ -2608,7 +2609,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Compute total (free) energy by double-counting scheme
    if (optene==1) then
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
-&     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
+&     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc- energies%e_fock0 &
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
 &     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
