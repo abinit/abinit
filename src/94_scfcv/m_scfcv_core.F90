@@ -2601,6 +2601,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
+      energies%e_localpsp + energies%e_corepsp &
 !&    +two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
 &     - energies%e_fock0 +&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
