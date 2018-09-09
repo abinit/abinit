@@ -89,6 +89,7 @@ contains
 !!   | prtstm=print STM input variable
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
+!!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
 !!   | usepawu=0 if no LDA+U; 1 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
@@ -108,6 +109,8 @@ contains
 !!   iscf =6 => SCF cycle, CG based on true minimization of the energy
 !!   iscf =-3, although non-SCF, the energy is computed, so print it here.
 !!  istep=number of the SCF iteration (needed if choice=2)
+!!  istep_fock_outer=number of outer SCF iteration in the double loop approach
+!!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
@@ -148,7 +151,7 @@ contains
 
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fname_eig,filnam1,initGS,&
-&  iscf,istep,kpt,maxfor,moved_atm_inside,mpi_enreg,&
+&  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
@@ -165,7 +168,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,initGS,iscf,istep,moved_atm_inside,nkpt,nstep
+ integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
+ integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
  real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,maxfor,res2,residm
@@ -187,7 +191,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !scalars
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs
  integer,save :: ttolwfr
- integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
+ integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,nnsclohf
+ integer :: openexit,option,ishift,usefock
  integer :: tmagnet
 #if defined DEV_YP_VDWXC
  integer :: ivdw
@@ -209,6 +214,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  DBG_ENTER("COLL")
 
  quit=0; conv_retcode=0
+ usefock=dtset%usefock
+ nnsclohf=dtset%nnsclohf
 
  tmagnet=0
  if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
@@ -603,9 +610,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
        end if
        if(toldfe_ok==2 .and. (.not.noquit))then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', etot is converged : ',ch10,&
-&         '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         if(usefock==0 .or. nnsclohf<2)then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', etot is converged : ',ch10,&
+&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         else
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         endif
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
          quit=1

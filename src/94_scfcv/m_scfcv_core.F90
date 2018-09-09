@@ -630,7 +630,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
 
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-& dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+& dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 & maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 & occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 & psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode)
@@ -1172,9 +1172,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
        fock%fock_common%forces=zero
      end if
 
-     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
+     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf .or. &
+&        (fock%fock_common%nnsclo_hf>1 .and. fock%fock_common%scf_converged) ) then
 
        istep_updatedfock=1
+       fock%fock_common%scf_converged=.false.
 
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) )then
@@ -1668,7 +1670,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
      end if
      call scprqt(choice,cpus,deltae,diffor,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
@@ -1874,7 +1876,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
@@ -2121,7 +2123,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,&
+& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&

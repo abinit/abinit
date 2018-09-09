@@ -394,7 +394,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
- integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
+ integer :: istep,istep_fock_outer,istep_mix,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
  integer :: optene,optfr,option,optres,prtfor,quit,quit_sum,qzero
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
@@ -515,9 +515,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  choice=1 ; prtfor=0 ; diffor=zero ; res2=zero
  ABI_ALLOCATE(fcart,(3,dtset%natom))
 
+!At present, no double loop
+ istep_mix=1 ; istep_fock_outer=1
+
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 & etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-& 1,iscf_mod,istep,kpt_rbz,maxfor,&
+& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
@@ -1010,7 +1013,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-&     1,iscf_mod,istep,kpt_rbz,maxfor,&
+&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
@@ -1081,7 +1084,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call status(istep,dtfil%filstat,iexit,level,'print info    ')
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-&     1,iscf_mod,istep,kpt_rbz,maxfor,&
+&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
@@ -1090,7 +1093,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !     if(.not.kramers_deg) then
 !       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
 !&       etotal_mq,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-!&       1,iscf_mod,istep,kpt_rbz,maxfor,&
+!&       1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 !&       mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 !&       nstep,occ_rbz,0,prtfor,0,&
 !&       quit,res2_mq,resid_mq,residm_mq,response,&
@@ -1383,7 +1386,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  choice=3
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 & etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-& 1,iscf_mod,istep,kpt_rbz,maxfor,&
+& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&

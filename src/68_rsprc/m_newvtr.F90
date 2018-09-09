@@ -342,7 +342,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !potential that are associated with NO density change.
 !In general, only the global mean of the potential has
 !such an anomalous feature. However, in the spin
-!polarized cas with fixed occupancies, also the
+!polarized case with fixed occupancies, also the
 !mean of each spin-potential (independently of the other)
 !has such a behaviour. The trick is to remove these
 !variables before going in the predictive routines,
