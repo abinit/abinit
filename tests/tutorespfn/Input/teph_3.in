@@ -26,6 +26,6 @@ teph_1o_DS9_GKK3
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Verstraete 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description =  Input file for mrggkk
 #%%<END TEST_INFO>

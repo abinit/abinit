@@ -84,8 +84,8 @@ qph1l
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Unknown
-#%% keywords = EPH 
+#%% authors = M. Verstraete
+#%% keywords = EPH_OLD
 #%% description = 
 #%%   anaddb electron-phonon run: instead of using uniform grid of q-points, treat only a given list
 #%% topics = PhononWidth, ElPhonTransport

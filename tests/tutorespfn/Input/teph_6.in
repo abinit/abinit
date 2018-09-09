@@ -76,6 +76,6 @@ qph1l
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Verstraete 
-#%% keywords = EPH
+#%% keywords = EPH_OLD
 #%% description = anaddb input file for electron phonon calculations.
 #%%<END TEST_INFO>

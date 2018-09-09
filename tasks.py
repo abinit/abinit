@@ -83,7 +83,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
 
 
 @task
-def runemall(ctx, make=True, jobs="auto", touch=False, clean=False):
+def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=None):
     """
     Run all tests (sequential and parallel).
     Exit immediately if errors
@@ -92,16 +92,17 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False):
 
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+    kws = "" if keywords is None else "-k %s" % keywords
 
     with cd(os.path.join(top, "tests")):
-        cmd = "./runtests.py -j%d" % jobs
+        cmd = "./runtests.py -j%d %s" % (jobs, kws))
         cprint("Executing: %s" % cmd, "yellow")
         ctx.run(cmd, pty=True)
         # Now run the parallel tests.
         for n in [2, 4, 10]:
             j = jobs // n
             if j == 0: continue
-            cmd = "./runtests.py paral mpiio -j%d -n%d" % (j, n)
+            cmd = "./runtests.py paral mpiio -j%d -n%d %s" % (j, n, kws)
             cprint("Executing: %s" % cmd, "yellow")
             ctx.run(cmd, pty=True)
 

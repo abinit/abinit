@@ -85,7 +85,7 @@ iatprj_bs 1 2
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Xu
-#%% keywords = EPH
+#%% keywords = EPH_OLD
 #%% description = anaddb test electron phonon coupling with shifted fermi level of hcp Ti
 #%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>
