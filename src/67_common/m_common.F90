@@ -1533,14 +1533,14 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call wrtout(iout,msg,'COLL')
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
-         write(message, '(a,es21.14)' ) &
+         write(msg, '(a,es21.14)' ) &
 &         '    NL   psp  energy= ',energies%e_nonlocalpsp-energies%e_fock0
        else
-         write(message, '(a,es21.14)' ) &
+         write(msg, '(a,es21.14)' ) &
 &         '    NL(psp+X) energy= ',energies%e_nonlocalpsp-energies%e_fock0
        endif
      else
-       write(message, '(a,es21.14)' ) &
+       write(msg, '(a,es21.14)' ) &
 &       '    Spherical terms = ',energies%e_paw-energies%e_fock0
      end if
      call wrtout(iout,msg,'COLL')
@@ -1610,7 +1610,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
 &     eneName            ,enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
-&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
+&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc&
 &     -energies%e_fock0+&
 &     energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')

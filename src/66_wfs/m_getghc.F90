@@ -737,15 +737,15 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !  end if
 
 !DEBUG
-   e_eigen=zero
-   do ispinor=1,my_nspinor
-     do ig=1,npw_k2
-       igspinor=ig+npw_k2*(ispinor-1)
-       e_eigen= e_eigen + cwavef(re,igspinor)*ghc(re,igspinor) + cwavef(im,igspinor)*ghc(im,igspinor)
-     enddo
-   enddo
-   write(std_out,*)' e_fock_eig =',e_eigen-e_kin-e_vtrial-e_nl
-   write(std_out,*)' e_eigen =',e_eigen
+!  e_eigen=zero
+!  do ispinor=1,my_nspinor
+!    do ig=1,npw_k2
+!      igspinor=ig+npw_k2*(ispinor-1)
+!      e_eigen= e_eigen + cwavef(re,igspinor)*ghc(re,igspinor) + cwavef(im,igspinor)*ghc(im,igspinor)
+!    enddo
+!  enddo
+!  write(std_out,*)' e_fock_eig =',e_eigen-e_kin-e_vtrial-e_nl
+!  write(std_out,*)' e_eigen =',e_eigen
 !ENDDEBUG
 
 !  Structured debugging : if prtvol=-level, stop here.
