@@ -623,6 +623,28 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          call wrtout(std_out,message,'COLL')
          quit=1
        end if
+       if(usefock==1 .and. nnsclohf>1)then
+         if(istep_mix==1 .and. (.not.noquit))then
+!          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
+           if (abs(deltae)<toldfe) then
+             write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
+&             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
+             call wrtout(ab_out,message,'COLL')
+             call wrtout(std_out,message,'COLL')
+             fock%fock_common%fock_converged=.true.
+             quit=1
+           endif
+         endif
+         if(istep_mix==nnsclohf .and. quit==0)then
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
+&           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
+           call wrtout(ab_out,message,'COLL')
+           call wrtout(std_out,message,'COLL')
+         endif
+       endif
+
 !    Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
 !    calculations: If input vdw_df_threshold is lesss than toldfe
 !    then the vdW-DF is triggered once selfconsistency criteria is
