@@ -1240,6 +1240,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dt
 &         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &         dtset%nspinor,dtset%nsppol,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
+         energies%e_fock0=fock%fock_common%e_fock0
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop.
