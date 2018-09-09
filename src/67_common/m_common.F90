@@ -1497,9 +1497,16 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
      if (usepaw==0) then
-       write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nonlocalpsp
+       if(abs(energies%e_fock0)<tol8)then
+         write(message, '(a,es21.14)' ) &
+&         '    NL   psp  energy= ',energies%e_nonlocalpsp-energies%e_fock0
+       else
+         write(message, '(a,es21.14)' ) &
+&         '    NL(psp+X) energy= ',energies%e_nonlocalpsp-energies%e_fock0
+       endif
      else
-       write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
+       write(message, '(a,es21.14)' ) &
+&       '    Spherical terms = ',energies%e_paw-energies%e_fock0
      end if
      call wrtout(iout,msg,'COLL')
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
