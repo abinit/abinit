@@ -1793,8 +1793,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
- new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
- write(std_out, *)"imag_only:", new%imag_only, ", ;qint_method:", new%qint_method
+ ! DEcide default behaviour for Re-Im/Im
+ new%qint_method = dtset%eph_intmeth - 1
+ !new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
+ !write(std_out, *)"imag_only:", new%imag_only, ", ;qint_method:", new%qint_method
 
  ! Initialize object for the computation of integration weights (integration in q-space).
  ! Weights can be obtained in different ways:
@@ -2504,6 +2506,7 @@ subroutine sigmaph_print(self, dtset, unt)
 
 !Local variables-------------------------------
  integer :: ikc,is
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -2513,9 +2516,10 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
- write(unt, "(2a)")sjoin("Method for q-space integration:", itoa(self%qint_method))
+ msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
+ write(unt, "(2a)")sjoin("Method for q-space integration:", msg)
  if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma will be computed."
- if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imag part of Sigma will be computed."
+ if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imaginary part of Sigma will be computed."
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")

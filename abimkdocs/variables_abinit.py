@@ -395,18 +395,18 @@ Variable(
     mnemonics="BAND Per Processor",
     characteristics=['[[DEVELOP]]'],
     requires="[[paral_kgb]] == 1",
-    text="""
+    text=r"""
 Control the size of the block in the LOBPCG algorithm. This keyword works only
 with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
 
 With [[npband]] = 1:
 
 * 1 --> band-per-band algorithm
-* n --> The minimization is performed using [[nband]]/n blocks of n bands.
+* n --> The minimization is performed using [[nband]] blocks of n bands.
 
 !!! warning
 
-    [[nband]]/n has to be an integer.
+    [[nband]] has to be an integer.
 
 With [[npband]] $\\ne$ 1:
 
@@ -2083,7 +2083,8 @@ preconditioning scheme based on the dielectric matrix is used.
 NOTE: a negative [[diecut]] will define the same dielectric basis sphere as
 the corresponding positive value, but the FFT grid will be identical to the
 one used for the wavefunctions. The much smaller FFT grid, used when
-[[diecut]] is positive, gives exactly the same results.\n
+[[diecut]] is positive, gives exactly the same results.
+
 No meaning for RF calculations yet.
 """,
 ),
@@ -2102,7 +2103,8 @@ Gives a rough estimation of the dielectric gap between the highest energy
 level computed in the run, and the set of bands not represented. Used to
 extrapolate dielectric matrix when [[iprcel]] >= 21.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diegap]] has
-the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV).\n
+the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV).
+
 No meaning for RF calculations yet.
 """,
 ),
@@ -2118,7 +2120,8 @@ Variable(
     requires="[[iprcel]] >= 21",
     text="""
 Gives the amount of occupied states with mean energy given by the highest
-level computed in the run, included in the extrapolation of the dielectric matrix.\n
+level computed in the run, included in the extrapolation of the dielectric matrix.
+
 No meaning for RF calculations yet.
 """,
 ),
@@ -3593,13 +3596,23 @@ Variable(
     defaultval=2,
     mnemonics="Electron-Phonon: INTegration METHod",
     text="""
-This variable defines the technique for the integration on the Fermi surface
-of electron-phonon quantities.
+This variable defines the technique for the integration over the Brillouin zone.
 
-* 1 --> Gaussian technique with broadening factor [[eph_fsmear]].
+* 1 --> Gaussian technique with broadening factor
 * 2 --> Tetrahedron method.
 
-See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
+Note that the default value depends on the value of [[eph_task]] i.e. on the physical properties
+we are computing.
+
+Phonon linewidths in metals (**eph_task** = 1):
+
+:   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
+    When the gaussian method is used, the broadening is given by [[eph_fsmear]].
+    See also [[eph_fsewin]].
+
+Electron-phonon self-energy
+
+:   The default is gaussian method with broadening specified by [[zcut]].
 """,
 ),
 
@@ -4227,7 +4240,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Genetic Algorithm FITNESS function selection",
-    text="""
+    text=r"""
 Different methodologies to perform the roulette-wheel selection of parents.
 Even though, the objective function is the crystalline enthalpy (H_i), the
 weight of the population elements to be chosen from in a roulette-wheel
@@ -6564,7 +6577,7 @@ Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
 compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
 
-Additional note : The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
+Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
 The ETSF_IO library was indeed not maintained anymore.
 """,
 ),
@@ -8100,7 +8113,8 @@ the work: L-Gamma-X-W-K,U-L-W-X-K,U-Gamma with
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates:\n
+found using the conventional cartesian coordinates:
+
 $l$(L-Gamma)=$\sqrt{3}/4=$0.433... \n
 $l$(Gamma-X)=$1/2$=0.5 \n
 $l$(X-W)=$1/4$=0.25 \n
@@ -8132,7 +8146,8 @@ So, if you want to specify a typical circuit, the following might do the work: G
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates:\n
+found using the conventional cartesian coordinates:
+
 $l$(Gamma-H)=$1/2$=0.5 \n
 $l$(H-N)=$\sqrt{2}/4$=0.354... \n
 $l$(N-Gamma)=$\sqrt{2}/4$=0.354... \n
@@ -8167,7 +8182,8 @@ one needs to know the a and c lattice parameters. Also, in what follows, we
 omit the 2$\pi$ factor sometimes present in the definition of the reciprocal
 space vectors. The reciprocal vectors are $(1/a\: 1/(\sqrt{3}a)\: 0)$, $(0\: 2/(\sqrt{3}a)\: 0)$,
  $(0\: 0\: 1/c)$. The lengths of the above-mentioned segments can
-be computed as:\n
+be computed as:
+
 $l$(K-Gamma)=$2/(3a)$=0.666.../a \n
 $l$(Gamma-M)=$1/(\sqrt{3}a)$=0.577.../a \n
 $l$(M-K)=$1/(3a)$=0.333.../a \n
@@ -8233,7 +8249,8 @@ one needs to know the a and c lattice parameters. Also, in what follows, we
 omit the $2\pi$ factor sometimes present in the definition of the reciprocal
 space vectors. The reciprocal vectors are $( 2/(3a)\: 0\: 1/(3c) )$, $( -1/(3a)\:
 1/(\sqrt{3}a)\: 1/(3c) )$, $( -1/(3a)\: -1/(\sqrt{3}a)\: 1/(3c) )$. The lengths of the
-above-mentioned segments can be computed as:\n
+above-mentioned segments can be computed as:
+
 $l$(X-Gamma)=$2/(\sqrt{3}a)$=1.155.../a \n
 $l$(K-Gamma)=$4(1+(a/c)^2/4)/(3\sqrt{3}a)$ \n
 $l$(Gamma-T)=$1/(2c)$ \n
@@ -9605,7 +9622,7 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
-XG 20180813 : This algorithm seems to be BROKEN.
+XG 20180813: This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -11061,10 +11078,9 @@ Variable(
     mnemonics="Number of WaveFunctionS HISTory",
     text="""
 In the wavelet basis set, the ground state is found by direct minimisation.
-The algorithm used can be either the steepest descent or the DIIS (Direct
-Inversion of Iteration Space). \n
-When [[nwfshist]] = 0, the steepest descent is
-used ( _i.e._ there is no history storage of the previous iterations). \n
+The algorithm used can be either the steepest descent or the DIIS (Direct Inversion of Iteration Space).
+When [[nwfshist]] = 0, the steepest descent is used ( _i.e._ there is no history storage of the previous iterations).
+
 If [[nwfshist]] is strictly positive, a DIIS is used. A typical value is 6. Using
 a DIIS increases the memory required by the program since N previous
 wavefunctions are stored during the electronic minimisation.
@@ -11753,7 +11769,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="activate PARALelization over K-point, G-vectors and Bands",
-    text="""
+    text=r"""
 **If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
@@ -12948,7 +12964,7 @@ Electron-positron correlation functional is defined by [[ixcpositron]].
 Other relevant input parameter: [[posocc]] (occupation number for the
 positron).
 
-Positive values for [[positron]]:\n
+Positive values for [[positron]]:
 For [[positron]] = 1 or 2, will perform the calculation of positron
 lifetime (and annihilation rate).
 
@@ -14831,12 +14847,13 @@ Variable(
     vartype="real",
     topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful'],
     dimensions=['[[ntypat]]'],
-    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]' , 'defaultval': 2.0}),
+    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.0}),
     mnemonics="Radii of the ATomic SPHere(s)",
     text="""
 Relevant only when [[prtdos]] = 3 or [[prtdensph]] = 1.
 
-When [[prtdos]] = 3:\n
+When [[prtdos]] = 3:
+
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
 be analysed. The choice of this radius is quite arbitrary. In a plane-wave
@@ -14858,7 +14875,8 @@ given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
 the charge contained in the sphere...
 
-When [[prtdensph]] = 1:\n
+When [[prtdensph]] = 1:
+
 Provides the radius of the spheres around (all) atoms in which the total
 charge density will be integrated.
 
@@ -15727,9 +15745,11 @@ latter is employed, e.g. [[jellslab]]/=0). Often called $r_s$ (see for example
 [[cite:Lang1970]]), [[slabwsrad]] is the radius of a
 sphere which has the same volume as the average volume per particle in a
 homogeneous electron gas with density $n_{bulk}$, so:
+
 \begin{equation}
       1/n_{bulk} = 4/3\: \pi [[slabwsrad]]^3 \nonumber
 \end{equation}
+
 For example, the bulk aluminum fcc lattice constant is $a$=4.0495 Angstroms
 [WebElements](https://www.webelements.com/), each cubic centered cell includes 4 Al atoms and each atom
 has 3 valence electrons, so the average volume per electron is $a^3/12$=37.34
@@ -15936,9 +15956,14 @@ groups is for example: 15:c1, A2/a_c = C2/c where,
 
 How to determine which [[spgaxor]] you need:
 
-  1. check the reduced positions you have, for more symmetric positions, e.g. 1/2 1/4 3/4 etc... Let us say your symmetric positions are in the first coordinate (a axis) and you are using spgroup 62.
-  2. look up the raw space group Wyckoff positions on [ the Bilbao server ](http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list) to see where they put the corresponding symmetric positions. For spgroup 62 Bilbao puts the 1/4 3/4 in the second coordinate, ie along the b axis.
-  3. in this case you need to swap the axes from the original abc order to a new order where the Bilbao axis (b) is in the first position. In this case you have 2 possibilities, [[spgaxor]] 3 or 5. If you have more than one highly symmetric coordinate you may have only a single possibility.
+  1. check the reduced positions you have, for more symmetric positions, e.g. 1/2 1/4 3/4 etc...
+     Let us say your symmetric positions are in the first coordinate (a axis) and you are using spgroup 62.
+  2. look up the raw space group Wyckoff positions on
+     [the Bilbao server](http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list) to see where they put
+     the corresponding symmetric positions. For spgroup 62 Bilbao puts the 1/4 3/4 in the second coordinate, ie along the b axis.
+  3. in this case you need to swap the axes from the original abc order to a new order where the
+     Bilbao axis (b) is in the first position. In this case you have 2 possibilities, [[spgaxor]] 3 or 5.
+     If you have more than one highly symmetric coordinate you may have only a single possibility.
 """,
 ),
 
@@ -16930,7 +16955,8 @@ Variable(
     characteristics=['[[ENERGY]]'],
     text="""
 Gives, in Hartree, the physical temperature of the system, in case
-[[occopt]] = 4, 5, 6, or 7.\n
+[[occopt]] = 4, 5, 6, or 7.
+
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[tphysel]] has the
 '[[ENERGY]]' characteristics (0.001 Ha = 27.2113845 meV = 315.773 Kelvin). One
 has to specify an independent broadening [[tsmear]]. The combination of the

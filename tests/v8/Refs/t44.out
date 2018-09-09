@@ -106,6 +106,10 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              bdgw           1       8       1       8
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
+      eph_intmeth1          1
+      eph_intmeth2          1
+      eph_intmeth3          2
+      eph_intmeth4          1
          eph_task1          4
          eph_task2          4
          eph_task3          5
@@ -338,8 +342,8 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: 0
-Both Real and Imag part of Sigma will be computed.
+Method for q-space integration: Standard quadrature
+Both Real and Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
@@ -469,8 +473,8 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: 0
-Both Real and Imag part of Sigma will be computed.
+Method for q-space integration: Standard quadrature
+Both Real and Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
@@ -727,8 +731,8 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: 0
-Both Real and Imag part of Sigma will be computed.
+Method for q-space integration: Standard quadrature
+Both Real and Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
@@ -788,6 +792,10 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
              bdgw           1       8       1       8
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
+      eph_intmeth1          1
+      eph_intmeth2          1
+      eph_intmeth3          2
+      eph_intmeth4          1
          eph_task1          4
          eph_task2          4
          eph_task3          5
