@@ -1290,6 +1290,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
+!        For compatibility with old test, do not use for calculation
+         if(dtset%dmft_occnd_imag==0) paw_dmft%occnd(2,:,:,:,:)=zero
+
 !        call print_dmft(paw_dmft,dtset%pawprtvol)
 !         if(dtset%paral_kgb==1) then
 !           write(message,'(5a)')ch10,&

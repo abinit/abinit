@@ -116,6 +116,9 @@ MODULE m_paw_dmft
   ! CTQMC: Basis to perform the CTQMC calculation
   ! for historical reasons and tests
   ! 0 : Slm basis, 1 : diagonalise local Hamiltonian, 2: diago density matrix
+  !
+  integer :: dmft_blockdiag
+  !  Block diagonalize Hamiltonian in the local basis
 
   integer :: dmftctqmc_check
   ! CTQMC: perform a check on the impurity and/or bath operator
@@ -219,10 +222,10 @@ MODULE m_paw_dmft
 
   real(dp) :: edmft
 
-  real(dp) :: dmft_chpr
+  real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green) with newton method
 
-  real(dp) :: dmft_fepr
+  real(dp) :: dmft_fermi_prec
   ! Required precision on Fermi level (fermi_green) during the DMFT SCF cycle, (=> ifermie_cv)
   ! used also for self (new_self)  (=> iself_cv).
 
@@ -638,6 +641,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%prtdos = dtset%prtdos
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
+ paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
 
 !=======================
 !==  Fixed self for input
@@ -648,7 +652,13 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !=======================
 !==  Choose solver
 !=======================
+
  paw_dmft%dmft_solv=dtset%dmft_solv
+ paw_dmft%dmft_blockdiag=0
+ if(paw_dmft%dmft_solv==-2) then
+   paw_dmft%dmft_solv=2
+   paw_dmft%dmft_blockdiag=1
+ endif
 !  0: LDA, no solver
 !  1: LDA+U
 ! -1: LDA+U but LDA values are not renormalized !
