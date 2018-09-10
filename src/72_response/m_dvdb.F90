@@ -193,7 +193,7 @@ module m_dvdb
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name
 
-  real(dp) :: dielt(3,3)
+  real(dp) :: dielt(3,3) = zero
    ! Dielectric tensor
 
   integer,allocatable :: pos_dpq(:,:,:)
@@ -478,7 +478,7 @@ subroutine dvdb_init(db, path, comm)
  call hdr_free(hdr_ref)
 
  ! Init Born effective charges
- ABI_MALLOC(db%zeff, (3, 3, db%natom))
+ ABI_CALLOC(db%zeff, (3, 3, db%natom))
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(db%mpi_enreg)
@@ -1355,7 +1355,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
+   db%qcache_size = int((two * db%nqpt * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
@@ -2262,7 +2262,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 
    iqst = iqst + nqst
    nqsts(iq_ibz) = nqst
-
  end do
 
  ! Redo the mapping with the new IBZ
@@ -4661,7 +4660,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 
    if (db_iqpt /= -1) then
 
-     call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
+     if (dvdb%prtvol > 0) call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
      nqpt_read = nqpt_read + 1
      q_read(:,nqpt_read) = qpt(:)
      iq_read(nqpt_read) = db_iqpt
@@ -4675,7 +4674,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 
    else
 
-     call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
+     if (dvdb%prtvol > 0) call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
      nqpt_interpolate = nqpt_interpolate + 1
      q_interp(:,nqpt_interpolate) = qpt(:)
 
@@ -4697,6 +4696,8 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
    end if
  end do
 
+ call wrtout(std_out, sjoin("Number of q-points found in initial DVDB", itoa(nqpt_read)))
+ call wrtout(std_out, sjoin("Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate)))
 
  ! ================================================= !
  ! Open the new DVDB file and write preliminary info

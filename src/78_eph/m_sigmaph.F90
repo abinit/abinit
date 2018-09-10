@@ -280,6 +280,7 @@ module m_sigmaph
 
   logical :: has_nuq_terms
 
+  ! TODO: Remove
   complex(dpc),allocatable :: vals_nuq(:,:,:,:,:)
    ! vals(ntemp, max_nbcalc, natom*3, nqbz, 2)
    ! (nu, q)-resolved self-energy for given (k, spin)
@@ -570,6 +571,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
    ! Find IBZ(k) for q-point integration.
    call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol)
+   call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk)))
    call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
 
@@ -1002,6 +1004,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call wrtout(std_out, msg, do_flush=.True.)
      end do ! iq_ibz (sum over q-points)
 
+     ! Print cache stats
+     if (dvdb%qcache_size > 0) then
+       write(std_out, "(a)")"Qcache stats"
+       write(std_out, "(a, i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
+       write(std_out, "(a, i0, f4.1)")"Cache hit: ", dvdb%qcache_stats(2), (one * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1)
+       write(std_out, "(a, i0, f4.1)")"Cache miss: ", dvdb%qcache_stats(3), (one * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1)
+       dvdb%qcache_stats = 0
+     end if
+
      ABI_FREE(sigma%e0vals)
      ABI_FREE(sigma%deltaw_pm)
      ABI_FREE(sigma%cweights)
@@ -1045,12 +1056,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Integral over IBZ. Note that here we can use IBZ(k=0).
        ! TODO Bug if symsigma 0 ?
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
-       !if (sigma%symsigma == -1) nq = sigma%nqibz_k
+       if (sigma%symsigma == +1) nq = sigma%nqibz_k
        do iq_ibz=1,nq
          if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
          if (abs(sigma%symsigma) == 1) then
-           qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
-           !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
+           !qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
+           qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
          else
            qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
          end if
@@ -1158,7 +1169,7 @@ if (dtset%useria == 0) then
                end do
 
                !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
-               gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) /  (four * wqnu)
+               gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
                !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
                ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
              end do ! ibsum
@@ -1172,8 +1183,8 @@ end if
                eig0nk = ebands%eig(band, ik_ibz, spin)
                ! Handle n == m and degenerate states (either ignore or add broadening)
                cplx_ediff = (eig0nk - eig0mk)
-               !if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
                if (abs(cplx_ediff) < tol6) cycle
+               !if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
 
                ! accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
                ! - (2 n_{q\nu} + 1) * gdw2 / (e_{nk} - e_{mk})
@@ -1226,14 +1237,6 @@ end if
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10, ch10))
-
- ! Print cache stats
- if (dvdb%qcache_size > 0) then
-   write(std_out, "(a)")"Qcache stats"
-   write(std_out, "(a, i0)")"Total Number of calls", dvdb%qcache_stats(1)
-   write(std_out, "(a, i0, f4.1)")"Cache hit:", dvdb%qcache_stats(2), (one * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1)
-   write(std_out, "(a, i0, f4.1)")"Cache miss:", dvdb%qcache_stats(3), (one * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1)
- end if
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -1400,7 +1403,7 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_nu
      num_smallw = num_smallw + 1; cycle
    end if
 
-   ! Transform the gkk from atom, red_dir basis to phonon mode basis
+   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
    do ipc=1,3*natom
      gkk_nu(1,:,:,:,nu) = gkk_nu(1,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
