@@ -1033,6 +1033,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%nstep==0) usecprj=0
    if (dtset%usefock==1)  usecprj=1
  end if
+ if (usecprj==0) then
+   ABI_DATATYPE_ALLOCATE(cprj,(0,0))
+ end if
  if (usecprj==1) then
    mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
