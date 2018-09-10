@@ -947,6 +947,9 @@ The bibtex file is available [here](../abiref.bib).
                         new_lines.extend(self.dialogs_from_filenames(args).splitlines())
                     else:
                         new_lines.extend(self.dialog_from_filename(args[0]).splitlines())
+                elif action == "include":
+                    with io.open(args[0], "rt", encoding="utf-8") as f:
+                        new_lines.extend([l.rstrip() for l in f])
                 else:
                     raise ValueError("Don't know how to handle action: `%s` in token: `%s`" % (action, m.group(1)))
 
