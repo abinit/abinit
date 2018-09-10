@@ -708,8 +708,9 @@ if test "${enable_optim}" != "no" -a "${enable_optim}" != "yes"; then
   fi
 fi
 
-# FIXME: 20_datashare does not support optimizations
+# Disable optimization in directories containing big F90 files (efficiency is not critical here)
 fcflags_opt_20_datashare="-O0"
+fcflags_opt_43_ptgroups="-O0"
 
 # Set per-directory Fortran optimizations
 # Note: must be done only once FCFLAGS_OPTIM is set
