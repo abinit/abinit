@@ -1489,7 +1489,7 @@ elemental real(dp) function occ_fd(ee, kT, mu)
    ! Heaviside
    if (ee_mu > zero) then
      occ_fd = zero
-   else if (ee < zero) then
+   else if (ee_mu < zero) then
      occ_fd = one
    else
      occ_fd = half

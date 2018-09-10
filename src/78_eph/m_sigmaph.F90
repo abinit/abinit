@@ -1738,7 +1738,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: intp_kptrlatt(3,3)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),nkpt_dense(3),band_block(2)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
- real(dp):: params(3)
+ real(dp):: params(3), nelect
  integer,allocatable :: gtmp(:,:),degblock(:,:)
  real(dp) :: my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
  real(dp),pointer :: energies_dense(:,:,:)
@@ -2197,6 +2197,30 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
      new%mu_e(it) = tmp_ebands%fermie
+   end do
+   !
+   ! Check that the total number of electrons is correct
+   ! This is to flag potential problems as the routines that calculate the occupations in ebands_set_nelect
+   ! are different from the ones that will be used here: occ_fd
+   !
+   do it=1,new%ntemp
+     nelect = 0
+     !loop over spin
+     do spin=1,tmp_ebands%nsppol
+       !loop over kpoints
+       do ik=1,tmp_ebands%nkpt
+         !loop over bands
+         do ii=1,tmp_ebands%nband(ik)
+           nelect = nelect + 2*tmp_ebands%wtk(ik)*occ_fd(tmp_ebands%eig(ii,ik,spin),new%kTmesh(it),new%mu_e(it))
+         end do
+       end do
+     end do
+     !
+     write(msg,'(2(a,f10.6))')&
+       'Calculated number of electrons nelect = ',nelect,&
+       ' does not correspond with ebands%nelect = ',tmp_ebands%nelect
+     ABI_CHECK(abs(nelect-ebands%nelect) < tol6,msg)
+     !
    end do
    call ebands_free(tmp_ebands)
  else
