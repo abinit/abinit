@@ -76,7 +76,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_io_tools
@@ -90,7 +90,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_hmc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -107,7 +106,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
 !Local variables-------------------------------
 
- integer       :: seed                                   ! seed for rnd generator
+ integer,save  :: seed                                   ! seed for rnd generator
  integer       :: ii,jj,iacc                             ! dummy integers for loop indexes and acceptance decision flag
  real(dp)      :: etotal,epot,ekin,de                    ! total, potential (electronic), kinetic (ionic) energies and energy difference
  real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
@@ -216,6 +215,9 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      etotal = epot + ekin
      de = etotal - etotal_hmc_prev
      call metropolis_check(seed,de,kbtemp,iacc)
+!DEBUG
+     write(std_out,*)' m_pred_hmc, after metropolis_check : seed,de,kbtemp,iacc=',seed,de,kbtemp,iacc
+!ENDDEBUG
    end if
 
    if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates and energies

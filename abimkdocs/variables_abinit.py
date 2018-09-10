@@ -3005,7 +3005,7 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE alogorithm 
+It is also used in geometric relaxation calculation with the FIRE alogorithm
 ([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
@@ -3017,13 +3017,13 @@ Variable(
     topics=['PIMD_expert', 'TransPath_expert'],
     dimensions=['[[nimage]]'],
     defaultval=MultipleValue(number=None, value=1),
-    mnemonics="DYNamics of the IMAGE",
+    mnemonics="list of DYNamic IMAGEs",
     commentdefault="if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.",
     text="""
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case the
+impose that the extremal configurations of the string are fixed. In case
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -5958,6 +5958,34 @@ Variable(
 ),
 
 Variable(
+    abivarname="hmctt",
+    varset="rlx",
+    vartype="integer",
+    topics=['MolecularDynamics_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Hybrid Monte Carlo Trial Trajectory",
+    requires="[[ionmov]] == 25",
+    text="""
+Number of steps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+""",
+),
+
+Variable(
+    abivarname="hmcsst",
+    varset="rlx",
+    vartype="integer",
+    topics=['MolecularDynamics_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Hybrid Monte Carlo Strain Step Trajectory",
+    requires="[[ionmov]] == 25",
+    text="""
+Number of strain teps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+""",
+),
+
+Variable(
     abivarname="hyb_mixing",
     varset="gstate",
     vartype="real",
@@ -6300,16 +6328,16 @@ Variable(
     abivarname="imgmov",
     varset="rlx",
     vartype="integer",
-    topics=['PIMD_compulsory', 'TransPath_compulsory'],
+    topics=['CrossingBarriers_useful', 'PIMD_compulsory', 'TransPath_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="IMaGe MOVEs",
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-
-consistent calculations for different geometries is managed, while with
-[[ionmov]], only one geometry for self-consistent calculation is managed.
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent
+calculations for possibly different (evolving) geometries is managed, while with
+[[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
 [[ntimimage]], corresponding to the input variable [[ntime]] of the single
 geometry case. Also, the stopping criterion is governed by [[tolimg]],
@@ -6341,11 +6369,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     enddo
 ```
 
-  * = 0 --> simply **copy** images from previous timimage step.
+  * = 0 --> simply **copy** images from previous itimimage step.
   * = 1 --> move images according to **Steepest Descent** following the (scaled) forces,
     the scaling factor being [[fxcartfactor]].
-  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting to minima
-    (see [[cite:Weinan2002]]); the algorithm variant can be selected with the [[string_algo]] keyword
+  * = 2 --> **String Method** for finding Minimal Energy Path (MEP) connecting two minima
+    (see [[cite:Weinan2002]]), or even two configurations that are not local minima; the algorithm variant can be selected with the [[string_algo]] keyword
     (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE)
     can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.
   * = 3 --> (tentatively, not yet coded) **Metadynamics**.
@@ -6354,6 +6382,11 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
+  * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
+    and their total energies are combined linearly using the factors in [[mixesimgf]], giving the actual total energy of the ensemble
+    of constrained DFT images. The geometry is the same for all images, forces and stresses are computed, and all usual
+    algorithms for MD or geometry optimization are allowed, using [[ionmov]] (instead of [[imgmov]], this is the exception to the rule)
+    and related variables.
   * = 9 or 13 --> **Path-Integral Molecular Dynamics** (see e.g. [[cite:Marx1996]]).
     Will use 9 for **Langevin thermostat** (associated friction coefficient given by [[vis]])
     and 13 for **Nose-Hoover thermostat chains** (associated input variables are the number of thermostats in the chains,
@@ -6363,6 +6396,34 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]] = 0).
 
 No meaning for RF calculations.
+""",
+),
+
+Variable(
+    abivarname="imgwfstor",
+    varset="rlx",
+    vartype="integer",
+    topics=['CrossingBarriers_useful', 'PIMD_useful', 'TransPath_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="IMaGe WaveFunction STORage",
+    requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
+    text="""
+Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
+Possible values of [[imgwfstor]] are 0 or 1.
+If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
+size [[nimage]] more than the storage needed for one set of wavefunctions..
+When the specific computation (optimization/SCF cycle ...) for this image is started,
+the past wavefunctions are used, to speed up the computation. If [[imgwfstor]]==0,
+the wavefunctions are reinitialised, either at random or from the initial wavefunction file (so, without
+any modification to take into account the computations at the previous value of itimimage.
+
+If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
+are spread over many processors, which happens when [[paral_kgb]] == 1.
+For some algorithms, e.g. when some geometry optimization
+is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
+For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller.
+Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
 """,
 ),
 
@@ -6543,12 +6604,21 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], as worked out in [cite:Minary2003]]. The conservation of the kinetic energy is obtained within machine precision, at each step.
-~~Related parameters: the time step ([[dtion]]), the temperatures
-([[mdtemp]]), and the friction coefficient ([[friction]]).~~
+  * 12 --> Isokinetic ensemble molecular dynamics.
+The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
+as worked out in [cite:Minary2003]].
+The conservation of the kinetic energy is obtained within machine precision, at each step.
+As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
+microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
+minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
+related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
+total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
+albeit taking into account that the total momentum is not preserved
+anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+**Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case the velocities [[vel]] are not initialized, or all initialized to zero.
 
   * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
 If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in
@@ -8647,6 +8717,9 @@ Give the initial and final temperature of the Nose-Hoover thermostat
 ([[ionmov]] = 8) and Langevin dynamics ([[ionmov]] = 9), in Kelvin. This
 temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
+
+In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
 
@@ -8845,6 +8918,22 @@ characteristics can thus be considered, and can be made to evolve, e.g. with a
 genetic algorithm (not coded in v7.0.0 though). There is one restriction to
 this possibility: the value of [[ziontypat]] for the atoms that are mixed
 should be identical.
+""",
+),
+
+Variable(
+    abivarname="mixesimgf",
+    varset="rlx",
+    vartype="real",
+    topics=['CrossingBarriers_useful'],
+    dimensions=['[[nimage]]'],
+    mnemonics="MIXing Electronic Structure IMAGE Factors",
+    text="""
+Used in the algorithm Linear Combination of Constrained DFT Energies, that is, when [[imgmov]]==6.
+
+This array gives, for each one of the [[nimage]] images, the factor
+by which the total energies for systems with same geometry but different electronic structures (occupation numbers) are linearly combined.
+The sum of these factors must equal 1.
 """,
 ),
 
@@ -9463,6 +9552,7 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
+XG 20180813 : This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -11271,11 +11361,12 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points have the same number of bands and the same occupancies of bands.
-[[nband]] is given as a single number, and [[occ]]([[nband]]) is an array of
-[[nband]] elements, read in by the code.
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin
+(but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
+[[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
+[[nband]] * [[nsppol]] elements, read in by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
-the code to add to 1.
+the code to add to 1. They cannot differ for differing spins.
 
   * [[occopt]] = 1:
 Same as [[occopt]] = 0, except that the array [[occ]] is automatically generated
@@ -11288,18 +11379,18 @@ equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 
   * [[occopt]] = 2:
 k points may optionally have different numbers of bands and different
-occupancies. [[nband]]([[nkpt]]*[[nsppol]]) is given explicitly as an array of
-[[nkpt]]*[[nsppol]] elements. [[occ]]() is given explicitly for all bands at
+occupancies. [[nband]]([[nkpt]] * [[nsppol]]) is given explicitly as an array of
+[[nkpt]] * [[nsppol]] elements. [[occ]]() is given explicitly for all bands at
 each k point, and eventually for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
-  * [[occopt]] = 3, 4, 5, 6 and 7
+  * [[occopt]] = 3, 4, 5, 6 and 7:
 Metallic occupation of levels, using different occupation schemes (see below).
 The corresponding thermal broadening, or cold smearing, is defined by the
 input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
 divided by [[tsmear]])
-Like for [[occopt]] = 1, the variable [[occ]] is not read
+Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
 number, read by the code.
 The k point weights in array [[wtk]]([[nkpt]]) are automatically normalized by
@@ -13767,7 +13858,7 @@ Variable(
     mnemonics="PRint NABLA",
     requires="[[usepaw]] == 1",
     text="""
-  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]). 
+  * If set to 1, calculate the matrix elements <Psi_n|-inabla|Psi_m> and write it in file _OPT to be read by the code conducti (see [[cite:Mazevet2010]]).
 """,
 ),
 
@@ -15002,7 +15093,7 @@ cell parameters with the lowest energy. Forget all the history and start the
 calculation using those values. The original atomic coordinates and cell
 parameters are irrelevant in that case.
 
-**restartxf=-3 (New)**:Read **ONLY** the last require the atomic positions and cell parameters in the HIST file to restart the Molecular dynamics or structural optimization. 
+**restartxf=-3 (New)**:Read **ONLY** the last require the atomic positions and cell parameters in the HIST file to restart the Molecular dynamics or structural optimization.
 
 NOTES:
 * You can use **restartxf=-1, -2 or -3** for all predictiors that make no use of random numbers.
@@ -15085,7 +15176,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [[help:respfn|the response function help file]]).
+or stress type (see [the DFPT help file](../guide/respfn)).
 """,
 ),
 
@@ -16062,19 +16153,19 @@ Gives the variant of the String Method method used.
 Possible values can be:
 
   * 0 -->  **Original String Method**.
-NOT YET IMPLEMENTED
+NOT YET IMPLEMENTED.
 See [[cite:Weinan2002]]
 
   * 1 --> **Simplified String Method** with parametrization by **equal arc length**.
-Instead of using the normal force (wr the band), the full force is used; the
+Instead of using the normal force (wrt the band), the full force is used; the
 reparametrization is enforced by keeping the points of the string equally
 spaced.
 See [[cite:Weinan2007]]
 
   * 2 --> **Simplified String Method** with parametrization by **energy-weighted arc length**.
-A variant of the Simplified String Method (like 2-); the reparametrization is
+A variant of the Simplified String Method (like 1-); the reparametrization is
 done by using energy-weight arc-lengths, giving a finer distribution near the
-saddle point..
+saddle point.
 See [[cite:Weinan2007]] and [[cite:Goodrow2009]]
 """,
 ),
@@ -17250,7 +17341,7 @@ Variable(
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
 (see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
-while pseudopotential calculations are performed in ABINIT with norm-conserving 
+while pseudopotential calculations are performed in ABINIT with norm-conserving
 pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.
 """,
@@ -17271,11 +17362,14 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1 or 2, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
     * If [[usepawu]] = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
+
+    * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
+    polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
 If LDA+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
@@ -18875,4 +18969,32 @@ The first entry gives the initial temperature in Kelvin, the second entry the li
 the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
 """,
 ),
+
+Variable(
+    abivarname="prtkbff",
+    varset="files",
+    topics=['printing_prden'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[iomode]] == 3",
+    mnemonics="PRinT Kleynman-Bylander Form Factors",
+    text="""
+This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
+produced at the end of the ground-state calculation. Remember to set [[iomode]] to 3.
+
+The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
+of the non-local part of the (NC) pseudopotentials.
+This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+The option is ignored if PAW.
+
+!!! important
+
+    At the time of writing (|today|, [[istwfk]] must be set to 1 for all k-points in the IBZ
+    since external codes do not support wavefunctions given on the reduced G-sphere.
+    Moreover [[useylm]] must be 0 (default if NC pseudos).
+""",
+),
+
 ]
+

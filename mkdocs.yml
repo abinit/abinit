@@ -54,6 +54,7 @@ pages:
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
+    - topics/CrossingBarriers.md
     - topics/CRPA.md
     - topics/crystal.md
     - topics/DFT+U.md
@@ -62,8 +63,8 @@ pages:
     - topics/Dev.md
     - topics/DFPT.md
     - topics/DMFT.md
-    - topics/EffectiveMass.md
     - topics/DynamicsMultibinit.md
+    - topics/EffectiveMass.md
     - topics/EFG.md
     - topics/Elastic.md
     - topics/ElPhonInt.md
@@ -192,9 +193,9 @@ pages:
         - Images: tutorial/paral_images.md
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
-    - Multibinit:
-        - Lattice Model: tutorial/lattice_model.md
-        - Fit Process: tutorial/fit_process.md
+    #- Multibinit:
+        #- Lattice Model: tutorial/lattice_model.md
+        #- Fit Process: tutorial/fit_process.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md
@@ -217,7 +218,9 @@ pages:
 - Developers:
     - Abimkdocs: developers/abimkdocs.md
     - Markdown: developers/markdown.md
+    - Test Suite Howto: developers/testsuite_howto.md
     - Test Suite: developers/testsuite.md
+    - HowTo for developers: developers/developers_howto.md
     - Pseudos: 
         - psp1: developers/psp1_info.md
         - psp3: developers/psp3_info.md

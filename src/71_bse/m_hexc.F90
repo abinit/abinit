@@ -28,7 +28,7 @@
 MODULE m_hexc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -627,7 +627,6 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_build_hinterp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -27,7 +27,7 @@
 module m_multibinit_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_parser, only : intagm
@@ -500,7 +500,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars10'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

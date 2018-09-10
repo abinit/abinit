@@ -30,7 +30,7 @@ module m_mlwfovlp
  use defs_datatypes
  use defs_abitypes
  use defs_wannier90
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
@@ -61,6 +61,7 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -144,8 +145,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1490,7 +1489,6 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_seedname'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1690,7 +1688,6 @@ end subroutine mlwfovlp_seedname
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_setup'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1992,7 +1989,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_pw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2363,7 +2359,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_proj'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2890,7 +2885,6 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_projpaw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

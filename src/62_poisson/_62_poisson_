@@ -14,8 +14,7 @@
 !!
 !! CHILDREN
 !! interfaces_62_poisson.F90
-!! psolver_hartree.F90
-!! psolver_kernel.F90
-!! psolver_rhohxc.F90
+!! m_jellium.F90
+!! m_psolver.F90
 !!
 !!***

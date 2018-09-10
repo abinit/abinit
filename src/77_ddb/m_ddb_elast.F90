@@ -27,7 +27,7 @@
 module m_ddb_elast
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_crystal
  use m_ddb
@@ -106,7 +106,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_elast'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -749,6 +748,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 contains
 
  integer function vid(vname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -29,6 +29,7 @@ MODULE m_errors
  use defs_basis
  use m_profiling_abi
  use m_xmpi
+ use m_specialmsg, only : wrtout
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -84,6 +85,8 @@ include "fexcp.h"
  public :: xlf_set_sighandler
  public :: abinit_doctor         ! Perform checks on memory leaks and leaking file descriptors
                                  ! at the end of the run.
+ public :: abi_abort             ! Abort the code
+ public :: abi_cabort            ! C-interoperable version.
 
  ! This flag activate the output of the backtrace in msg_hndl
  ! Unfortunately, gcc4.9 seems to crash inside this routine
@@ -681,7 +684,6 @@ subroutine sentinel(level,mode_paral,file,func,line)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sentinel'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -775,8 +777,6 @@ subroutine die(message,file,line)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'die'
- use interfaces_14_hidewrite
- use interfaces_16_hideleave
 !End of the abilint section
 
  implicit none
@@ -810,7 +810,7 @@ subroutine die(message,file,line)
 & TRIM(message)
 
  call wrtout(std_out,msg,'PERS')
- call leave_new('PERS')
+ call abi_abort('PERS')
 
 end subroutine die
 !!***
@@ -854,8 +854,6 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'msg_hndl'
- use interfaces_14_hidewrite
- use interfaces_16_hideleave
 !End of the abilint section
 
  implicit none
@@ -930,7 +928,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
         call lock_and_write(ABI_MPIABORTFILE, sbuf, ierr)
      end if
      ! And now we die!
-     call leave_new(mode_paral,print_config=.FALSE.)
+     call abi_abort(mode_paral,print_config=.FALSE.)
    end if
 
  end select
@@ -1660,7 +1658,6 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit_doctor'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1749,6 +1746,109 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #endif
 
 end subroutine abinit_doctor
+!!***
+
+!!****f* m_errors/abi_abort
+!! NAME
+!!  abi_abort
+!!
+!! FUNCTION
+!!  Routine for clean exit of f90 code, taking into account possible parallelization.
+!!
+!!  Note the this routine is private and should never be called explicitly.
+!!  Please, use the macros:
+!!    MSG_ERROR, MSG_BUG
+!!  defined in abi_common.h to abort the execution.
+!!  XG : this is not true, in very rare cases, ABINIT has to exit without giving an error (e.g. for non-zero prtkpt )
+!!
+!! INPUTS
+!!  exit_status=(optional, default=1 or -1, see below) the return code of the routine
+!!  mode_paral=
+!!   'COLL' if all procs are calling the routine with the same message to be
+!!     written once only or
+!!   'PERS' if the procs are calling the routine with different mesgs
+!!     each to be written, or if one proc is calling the routine
+!!  print_config=(optional, default=true)
+!!       if true print out several information before leaving
+!!
+!! OUTPUT
+!!  (only writing, then stop)
+!!
+!! NOTES
+!!  By default, it uses "call exit(1)", that is not completely portable.
+!!
+!! PARENTS
+!!      m_errors,testkgrid,vtorho
+!!
+!! CHILDREN
+!!      dump_config,print_kinds,wrtout,xmpi_abort,xmpi_show_info
+!!
+!! SOURCE
+
+subroutine abi_abort(mode_paral,exit_status,print_config)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_abort'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=4),intent(in) :: mode_paral
+ integer,intent(in),optional :: exit_status
+ logical,intent(in),optional :: print_config
+
+!Local variables-------------------------------
+ logical :: print_config_
+
+! **********************************************************************
+
+ call wrtout(std_out,ch10//' abi_abort: decision taken to exit ...','PERS')
+
+! Caveat: Do not use MPI collective calls!
+ if (mode_paral == "COLL") then
+   call wrtout(std_out,"Why are you using COLL? Are you sure that ALL the processors are calling abi_abort?")
+ end if
+
+!Dump configuration before exiting
+ print_config_=.False.; if (present(print_config)) print_config_=print_config
+ if (print_config_) then
+   call print_kinds()
+   call xmpi_show_info()
+   call dump_config(std_out)
+ end if
+
+ if (present(exit_status)) then
+   call xmpi_abort(exit_status=exit_status)
+ else
+   call xmpi_abort()
+ end if
+
+end subroutine abi_abort
+!!***
+
+!!****f* m_errors/abi_cabort
+!! NAME
+!!  abi_cabort
+!!
+!! FUNCTION
+!!  C-interoperable version of abi_abort
+
+subroutine abi_cabort() bind(C, name='abi_cabort')
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_cabort'
+!End of the abilint section
+
+  call abi_abort("COLL", exit_status=1, print_config=.False.)
+
+end subroutine abi_cabort
 !!***
 
 END MODULE m_errors

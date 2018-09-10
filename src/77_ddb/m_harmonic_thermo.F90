@@ -29,7 +29,7 @@ module m_harmonic_thermo
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_sortph
  use m_xmpi
 
@@ -41,6 +41,7 @@ module m_harmonic_thermo
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_ifc,            only : ifc_type, ifc_fourq
  use m_kpts,           only : smpbz
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -98,8 +99,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none

@@ -35,7 +35,7 @@ module m_mklocl_realspace
  use defs_abitypes
  use defs_wvltypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,        only : timab
@@ -46,6 +46,8 @@ module m_mklocl_realspace
  use m_paw_numeric, only : paw_splint, paw_splint_der
  use m_psolver,     only : psolver_hartree, psolver_kernel
  use m_abi2big,     only : wvl_rhov_abi2big
+ use m_wvl_wfs,     only : derf_ab
+ use m_fft,         only : fourdp
 
 
  implicit none
@@ -120,7 +122,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_realspace'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -917,7 +918,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcVloc_mklocl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1252,7 +1252,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdVloc_mklocl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1458,7 +1457,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_wavelets'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1906,7 +1904,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdVloc_wvl'
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

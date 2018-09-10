@@ -46,7 +46,7 @@ use m_gwls_hamiltonian
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 use m_bandfft_kpt
 use m_cgtools

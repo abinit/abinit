@@ -35,7 +35,7 @@
 module m_spin_mover
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
   !use m_mathfuncs
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s

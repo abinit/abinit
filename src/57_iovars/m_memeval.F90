@@ -29,7 +29,7 @@ MODULE m_memeval
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
@@ -210,17 +210,19 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &   dtsets(idtset)%nimage,npsp,dtsets(idtset)%npspalch,ntypat,dtsets(idtset)%ntypalch,pspheads)
 
 !  Treatment of the effect of using a spin-orbit part
-!  Warning : mpspso is different for each dataset.
+!  Warning : mpspso is different for each dataset; not relevant for PAW
    mpspso=1
-   do ii=1,npsp
-     if(nspinor/=1)then
-       if(pspheads(ii)%pspso/=0)then
-         if(dtsets(idtset)%so_psp(ii)/=0)then
-           mpspso=2
+   if (dtsets(idtset)%usepaw==0) then
+     do ii=1,npsp
+       if(nspinor/=1)then
+         if(pspheads(ii)%pspso/=0)then
+           if(dtsets(idtset)%so_psp(ii)/=0)then
+             mpspso=2
+           end if
          end if
        end if
-     end if
-   end do
+     end do
+   end if
 !  In case of no spin-orbit
    if(mpspso==1)then
      mpssoang=mpsang ; lmnmax_eff =lmnmax; lnmax_eff =lnmax
@@ -508,7 +510,6 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1398,7 +1399,6 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memana'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1981,7 +1981,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memorf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2354,7 +2353,6 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getdim_nloc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2625,6 +2623,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
  use defs_wvltypes
  use m_abi2big, only : wvl_setBoxGeometry
+ use m_wvl_descr_psp,    only : wvl_descr_free, wvl_descr_atoms_set
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
@@ -2635,8 +2634,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_memory'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
   implicit none

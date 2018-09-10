@@ -24,7 +24,7 @@ MODULE m_paw_init
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use defs_abitypes,  only : dataset_type
@@ -140,6 +140,7 @@ CONTAINS  !=====================================================================
 !!     === only if pawspnorb==1 ==
 !!     %ls_ylm(2,l_max**2,l_max**2,4)=LS operator in the real spherical harmonics basis
 !!     %use_ls_ylm=flag activated if ls_ylm is allocated
+!!     %usespnorb=flag activated for spin-orbit coupling
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated data read at start:
 !!     %lcut_size_=max. value of l+1 leading to non zero Gaunt coeffs modified by lcutdens
 !!     %lmnmix_sz=number of (lmn,lmn_prime) verifying l<=lmix and l_prime<=lmix
@@ -164,12 +165,6 @@ CONTAINS  !=====================================================================
 !! CHILDREN
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
@@ -397,6 +392,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 !  ==================================================
 !  4- COMPUTE various FACTORS/SIZES (depending on (l,m,n))
 
+   pawtab(itypat)%usespnorb=pawspnorb
    pawtab(itypat)%lcut_size=min(l_size,lcutdens+1)
 
    if (allocated(pawtab(itypat)%dltij))  then
@@ -683,7 +679,7 @@ end subroutine pawinit
 !!
 !! SOURCE
 
-subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit) 
+subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
 
 !This section has been created automatically by the script Abilint (TD).

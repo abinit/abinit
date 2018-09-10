@@ -30,7 +30,7 @@
 module m_dynmat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
 
@@ -394,7 +394,6 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'asrprs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1177,7 +1176,6 @@ subroutine chkph3(carflg,idir,mpert,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkph3'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1281,7 +1279,6 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chneu9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3180,7 +3177,6 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'canat9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4126,7 +4122,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wght9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4782,7 +4777,7 @@ end subroutine d3sym
 subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5059,7 +5054,6 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symdm9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6110,7 +6104,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

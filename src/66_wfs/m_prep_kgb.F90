@@ -28,7 +28,7 @@ module m_prep_kgb
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -38,6 +38,7 @@ module m_prep_kgb
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
  use m_getghc,      only : multithreaded_getghc
+ use m_fft,         only : fourwf
 
  implicit none
 
@@ -934,7 +935,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_fourwf'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

@@ -23,7 +23,7 @@
 module m_io_redirect
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_xmpi,        only : xmpi_comm_rank, xmpi_barrier
@@ -75,7 +75,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'localfilnam'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

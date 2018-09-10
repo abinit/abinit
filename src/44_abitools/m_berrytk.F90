@@ -26,7 +26,7 @@
 module m_berrytk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_cgtools,   only : overlap_g
@@ -666,11 +666,10 @@ end subroutine smatrix
 !!               in atomic units
 !!
 !! NOTES
-!! The sum of the electronic and ionic Berry phase is folded into
-!! [-1,1] before it is transformed to cartesian coordinates.
-!! This means that in some cases, ptot_cart /= pel_cart + pion_cart
+!! - The sum of the electronic and ionic Berry phase is folded into
+!!   [-1,1] before it is transformed to cartesian coordinates.
+!!   This means that in some cases, ptot_cart /= pel_cart + pion_cart
 !!
-!! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol.
 !!   At the opposite, this factor is taken into account in
 !!   pel_cart and pion_cart
@@ -693,7 +692,6 @@ subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'polcart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

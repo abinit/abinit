@@ -1298,7 +1298,6 @@ subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_setngfft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1412,7 +1411,6 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_setBoxGeometry'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

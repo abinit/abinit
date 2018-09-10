@@ -28,7 +28,7 @@ module m_psp1
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use m_special_funcs,   only : besjm
@@ -125,7 +125,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp1in'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

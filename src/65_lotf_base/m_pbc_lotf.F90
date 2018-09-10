@@ -12,6 +12,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -19,14 +20,15 @@
 #include "abi_common.h"
 
 module pbc_lotf
+
  use defs_basis
- 
+
  implicit none
  private
 
- real(dp),private :: aa(3,3),bb(3,3) 
- real(dp),public :: rd(3)  ! these are pbc output  
- real(dp),public  :: r2  ! these are pbc output  
+ real(dp),private :: aa(3,3),bb(3,3)
+ real(dp),public :: rd(3)  ! these are pbc output
+ real(dp),public  :: r2  ! these are pbc output
 
  public ::           &
    dist_pbc,         &
@@ -46,20 +48,21 @@ module pbc_lotf
 
 contains
 !!***
- 
- !!****f* pbc_lotf/vecp
- !! NAME
- !! vecp
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+
+!!****f* pbc_lotf/vecp
+!! NAME
+!! vecp
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_pbc_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine vecp(a,b,c)
 
 
@@ -80,22 +83,21 @@ contains
  end subroutine vecp
  !!***
 
- !!****f* pbc_lotf/pbc_init
- !! NAME
- !! pbc_init
- !!
- !! FUNCTION
- !! 
- !! INPUTS
- !! 
- !! CHILDREN
- !!
+!!****f* pbc_lotf/pbc_init
+!! NAME
+!! pbc_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine pbc_init(rprimd)
 
 
@@ -109,7 +111,7 @@ contains
 
   !Arguments ------------------------
   real(dp),intent(in) :: rprimd(3,3)
-  !Local --------------------------- 
+  !Local ---------------------------
   real(dp) :: avol
 
   aa(:,:) =  rprimd(:,:)
@@ -118,21 +120,23 @@ contains
   call vecp(aa(1,1),aa(1,2),bb(1,3))     !--a^b
   avol = dot_product(aa(:,3),bb(:,3))    !--c.(a^b)
 
-  bb   = (one/avol)*bb 
+  bb   = (one/avol)*bb
  end subroutine pbc_init
  !!***
 
- !!****f* pbc_lotf/pbc_aa_contract
- !! NAME
- !! pbc_aa_contract
- !!
- !! FUNCTION
- !!  Compute the contraction of aa
- !! INPUTS
- !! 
- !! CHILDREN
- !!
- !! SOURCE
+!!****f* pbc_lotf/pbc_aa_contract
+!! NAME
+!! pbc_aa_contract
+!!
+!! FUNCTION
+!!  Compute the contraction of aa
+!!
+!! INPUTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
  function pbc_aa_contract()
 
 
@@ -151,17 +155,18 @@ contains
  end function pbc_aa_contract
  !!***
 
- !!****f* pbc_lotf/pbc_bb_contract
- !! NAME
- !! pbc_bb_contract
- !!
- !! FUNCTION
- !!  Compute the contraction of bb
- !! INPUTS
- !! 
- !! CHILDREN
- !!
- !! SOURCE
+!!****f* pbc_lotf/pbc_bb_contract
+!! NAME
+!! pbc_bb_contract
+!!
+!! FUNCTION
+!!  Compute the contraction of bb
+!! INPUTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
  function pbc_bb_contract()
 
 
@@ -184,17 +189,18 @@ contains
  !!***
 
 
- !!****f* pbc_lotf/pbc_bb_proj
- !! NAME
- !! pbc_bb_proj
- !!
- !! FUNCTION
- !!  Compute the application of a vector on bb 
- !! INPUTS
- !!  vi(3)=real vector
- !! CHILDREN
- !!
- !! SOURCE
+!!****f* pbc_lotf/pbc_bb_proj
+!! NAME
+!! pbc_bb_proj
+!!
+!! FUNCTION
+!!  Compute the application of a vector on bb
+!! INPUTS
+!!  vi(3)=real vector
+!! CHILDREN
+!!
+!! SOURCE
+
  function pbc_bb_proj(vi)
 
 
@@ -217,18 +223,19 @@ contains
  end function pbc_bb_proj
  !!***
 
- !!****f* pbc/dist_pbc_ext
- !! NAME
- !! dist_pbc_ext
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* pbc/dist_pbc_ext
+!! NAME
+!! dist_pbc_ext
 !!
- !! CHILDREN
+!! FUNCTION
 !!
- !! SOURCE
+!! INPUTS
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
  subroutine dist_pbc_ext(RI,RJ,r2,RD)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
 
@@ -250,17 +257,17 @@ contains
 
 ! *************************************************************************
 
-  !--at These are cartesian: 
+  !--at These are cartesian:
   rad = RI - RJ
 
-  !--at These are monoclinic:     
+  !--at These are monoclinic:
   radi(:) = matmul(rad,bb)
 
   do ii=1,3
     if(radi(ii) < -half) then
-      rad = rad + aa(:,ii) 
+      rad = rad + aa(:,ii)
     elseif(radi(ii) > half) then
-      rad = rad - aa(:,ii) 
+      rad = rad - aa(:,ii)
     endif
   enddo
 
@@ -270,18 +277,19 @@ contains
  !!***
 
 
- !!****f* pbc/dist_pbc_int
- !! NAME
- !! dist_pbc_int
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* pbc/dist_pbc_int
+!! NAME
+!! dist_pbc_int
 !!
- !! CHILDREN
+!! FUNCTION
 !!
- !! SOURCE
+!! INPUTS
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
  subroutine dist_pbc_int(RI,RJ)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
 
@@ -301,17 +309,17 @@ contains
 
 ! *************************************************************************
 
-  !--at These are cartesian: 
+  !--at These are cartesian:
   rad = RI - RJ
 
-  !--at These are monoclinic:     
+  !--at These are monoclinic:
   radi(:) = matmul(rad,bb)
 
   do ii=1,3
     if(radi(ii) < -half) then
-      rad = rad + aa(:,ii) 
+      rad = rad + aa(:,ii)
     elseif(radi(ii) > half) then
-      rad = rad - aa(:,ii) 
+      rad = rad - aa(:,ii)
     endif
   enddo
 

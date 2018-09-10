@@ -34,7 +34,7 @@ MODULE m_wffile
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #ifdef HAVE_MPI2
  use mpi

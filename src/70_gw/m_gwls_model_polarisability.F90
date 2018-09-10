@@ -36,7 +36,7 @@ use m_gwls_lineqsolver
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_bandfft_kpt
 use m_errors
 

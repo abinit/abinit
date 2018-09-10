@@ -55,7 +55,7 @@
 module libxc_functionals
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
 #ifdef HAVE_FC_ISO_C_BINDING
@@ -498,7 +498,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'libxc_functionals_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1055,7 +1054,7 @@ function libxc_functionals_ismgga(xc_functionals)
 !DEBUG
 ! write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
 !write(std_out,*)' libxc_functionals_ismgga : xc_func%abi_ixc=',xc_func%abi_ixc
-! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga 
+! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga
 !ENDDEBUG
 
 end function libxc_functionals_ismgga
@@ -1937,7 +1936,6 @@ end function libxc_functionals_gga_from_hybrid
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'libxc_functionals_set_tb09'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2109,6 +2107,5 @@ subroutine xc_char_to_f(c_string,f_string)
 
 !----------------------------------------------------------------------
 
-
-end module
+end module libxc_functionals
 !!***

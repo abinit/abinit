@@ -26,7 +26,7 @@
 module m_ab7_mixing
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
  use m_xmpi
@@ -1024,7 +1024,6 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcge'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1831,7 +1830,6 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfeig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2036,7 +2034,6 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfopt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2428,7 +2425,6 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'findminscf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

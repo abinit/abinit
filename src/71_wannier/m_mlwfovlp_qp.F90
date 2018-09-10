@@ -31,7 +31,7 @@ module m_mlwfovlp_qp
  use defs_abitypes
  use defs_wannier90
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
@@ -119,7 +119,6 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

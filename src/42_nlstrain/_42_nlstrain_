@@ -21,14 +21,14 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! contistr01.F90
-!! contistr03.F90
-!! contistr12.F90
-!! contstr21.F90
-!! contstr23.F90
-!! contstr25.F90
-!! contstr25a.F90
-!! contstr26.F90
 !! interfaces_42_nlstrain.F90
+!! m_contistr01.F90
+!! m_contistr03.F90
+!! m_contistr12.F90
+!! m_contstr21.F90
+!! m_contstr23.F90
+!! m_contstr25.F90
+!! m_contstr25a.F90
+!! m_contstr26.F90
 !!
 !!***

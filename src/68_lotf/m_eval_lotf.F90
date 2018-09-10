@@ -602,7 +602,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'upd_lis0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -851,7 +850,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tuneparms'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

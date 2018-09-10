@@ -29,7 +29,7 @@
 MODULE m_energies
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF

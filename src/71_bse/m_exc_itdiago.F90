@@ -31,7 +31,7 @@ MODULE m_exc_itdiago
  use defs_abitypes
  use m_bs_defs
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
  use m_xmpi
 #if defined HAVE_MPI2
@@ -120,7 +120,6 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_iterative_diago'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -674,7 +673,6 @@ subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_init_phi_block'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -844,7 +842,6 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_write_phi_block'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

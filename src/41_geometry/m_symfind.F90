@@ -28,7 +28,7 @@ module m_symfind
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_symlist
 
  use m_symtk,     only : chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim
@@ -500,7 +500,6 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symanal'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -999,7 +998,6 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symspgr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1435,7 +1433,6 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symlatt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

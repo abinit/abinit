@@ -21,7 +21,7 @@ sources = [
  "m_fstrings.F90",
  "m_io_tools.F90",
  "m_specialmsg.F90",
- "wrtout.F90",
+ "m_abicore.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
