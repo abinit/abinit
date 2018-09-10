@@ -164,8 +164,8 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
  check=paw_dmft%dmftcheck ! checks enabled
  !paw_dmft%dmft_fermi_prec=tol5
- paw_dmft%dmft_chpr=paw_dmft%dmft_fermi_prec/ten
-!paw_dmft%dmft_chpr=20_dp ! total number of electron.
+ paw_dmft%dmft_fermi_prec=paw_dmft%dmft_charge_prec*ten
+!paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0
  etot_var=.true.

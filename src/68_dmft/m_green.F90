@@ -3383,7 +3383,7 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !=========================================
  fermi_old=paw_dmft%fermie
  ierr_hh=0
- f_precision=paw_dmft%dmft_chpr
+ f_precision=paw_dmft%dmft_charge_prec
  !f_precision=0.01
  x_precision=tol5
 !if(option==1) then

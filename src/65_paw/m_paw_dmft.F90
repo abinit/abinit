@@ -220,7 +220,7 @@ MODULE m_paw_dmft
 
   real(dp) :: edmft
 
-  real(dp) :: dmft_chpr
+  real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green) with newton method
 
   real(dp) :: dmft_fermi_prec
@@ -627,7 +627,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%prtdos = dtset%prtdos
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
- paw_dmft%dmft_fermi_prec = dtset%dmft_fermi_prec
+ paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
 
 !=======================
 !==  Fixed self for input
@@ -641,7 +641,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 
  paw_dmft%dmft_solv=dtset%dmft_solv
  paw_dmft%dmft_blockdiag=0
- if(paw_dmft%dmft_solv==12) then
+ if(paw_dmft%dmft_solv==-2) then
    paw_dmft%dmft_solv=2
    paw_dmft%dmft_blockdiag=1
  endif
