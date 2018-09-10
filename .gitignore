@@ -102,7 +102,6 @@ tests/TestBot_MPI*/*
 /bindings/parser/ab7_invars_c.h
 /bindings/parser/ab7_invars_py.h
 /bindings/parser/bindings-ready
-/bindings/parser/dtset.pickle
 /config/dist/*.lst
 /config/gnu/abinit-info.sh
 /config/gnu/compile
@@ -214,6 +213,7 @@ mkdocs_plugins/dist
 /src/56_xc/.deps
 /src/57_iovars/ab7_invars_f90.inc
 /src/57_iovars/ab7_invars_f90_get.f90
+/src/57_iovars/dtset.pickle
 /src/57_iovars/is_input_variable.F90
 /src/98_main/abinetcdf
 /src/98_main/abinit
