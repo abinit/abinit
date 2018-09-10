@@ -1415,8 +1415,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
    if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
 
-   write(message,'(a,i0)')' invars1 : treat image number: ',iimage
-   call wrtout(std_out,message,'COLL')
+   !write(message,'(a,i0)')' invars1 : treat image number: ',iimage
+   !call wrtout(std_out,message,'COLL')
 
 !  Need to reset nsym to default value for each image
    dtset%nsym=0

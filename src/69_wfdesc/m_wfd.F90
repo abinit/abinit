@@ -5888,7 +5888,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  ! Output the header of the GS wavefunction file.
  !if (Wfd%prtvol>0)
  fform = 0
- if (wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
+ if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
 
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")

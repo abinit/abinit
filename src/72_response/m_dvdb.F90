@@ -795,7 +795,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
-   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND)
    write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
@@ -1355,7 +1355,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = int((two * db%nqpt * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
+   db%qcache_size = int(mbsize / (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND * b2Mb))
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
@@ -4576,7 +4576,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  nfft = product(ngfft(1:3))
 
  ! Generate the list of irreducible q-points in the grid
- qptrlatt = zero
+ qptrlatt = 0
  qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, 1, &
  &                           [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
@@ -4645,7 +4645,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  ABI_MALLOC(pinfo, (3,3*dvdb%mpert))
  rfpert = 0; rfpert(1:cryst%natom) = 1; rfdir = 1
 
- pertsy = zero
+ pertsy = 0
 
  nqpt_read = 0
  nperts_read = 0
