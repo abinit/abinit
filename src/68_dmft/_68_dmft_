@@ -13,18 +13,18 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
+!! interfaces_68_dmft.F90
 !! m_datafordmft.F90
 !! m_dmft.F90
-!! m_hubbard_one.F90
-!! interfaces_68_dmft.F90
-!! m_ldau_self.F90
 !! m_energy.F90
 !! m_entropyDMFT.F90
+!! m_forctqmc.F90
 !! m_green.F90
 !! m_hu.F90
+!! m_hubbard_one.F90
+!! m_ldau_self.F90
 !! m_matlu.F90
 !! m_oper.F90
 !! m_self.F90
-!! m_forctqmc.F90
 !!
 !!***

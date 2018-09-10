@@ -38,15 +38,6 @@ MODULE m_FFT_prof
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_oscillators,    only : rho_tw_g
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
- use interfaces_12_hide_mpi
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_56_recipspace
-!End of the abilint section
 
  implicit none
 

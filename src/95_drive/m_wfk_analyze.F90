@@ -96,12 +96,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  use defs_basis
@@ -126,6 +120,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free, esymm_failed
+ use m_ddk,             only : eph_ddk
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -435,6 +430,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    call xmpi_barrier(comm)
 
  !case ("pjdos")
+
+ case (WFK_TASK_DDK)
+    ! calculate the DDK matrix elements using a WFK file
+    call eph_ddk(wfk0_path,dtfil,dtset,psps,pawtab,dtset%inclvkb,ngfftc,mpi_enreg,comm) 
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.

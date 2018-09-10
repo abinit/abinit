@@ -48,7 +48,6 @@ MODULE m_wfd
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
  use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
- use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
@@ -6611,13 +6610,6 @@ end subroutine wfd_plot_ur
 !!!   use m_hamiltonian,    only : destroy_hamiltonian, init_hamiltonian, &
 !!!                                load_spin_hamiltonian,load_k_hamiltonian, gs_hamiltonian_type
 !!!
-!!!  !This section has been created automatically by the script Abilint (TD).
-!!!  !Do not modify the following lines by hand.
-!!!  #undef ABI_FUNC
-!!!  #define ABI_FUNC 'wfd_get_socpert'
-!!!   use interfaces_66_nonlocal
-!!!  !End of the abilint section
-!!!
 !!!   implicit none
 !!!
 !!!  !Arguments ------------------------------------
@@ -7164,7 +7156,6 @@ end subroutine test_charge
 !!***
 
 !!****f* m_wfd/wfd_pawrhoij
-!!
 !! NAME
 !! wfd_pawrhoij
 !!

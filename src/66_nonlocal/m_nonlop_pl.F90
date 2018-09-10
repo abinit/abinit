@@ -57,8 +57,6 @@ contains
 !!***
 
 !!****f* ABINIT/nonlop_pl
-!! nonlop_pl
-!!
 !! NAME
 !! nonlop_pl
 !!

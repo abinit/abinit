@@ -1137,8 +1137,6 @@ end module m_mkcore_wvl
 !%% !Do not modify the following lines by hand.
 !%% #undef ABI_FUNC
 !%% #define ABI_FUNC 'mkcore_paw'
-!%%  use interfaces_14_hidewrite
-!%%  use interfaces_67_common, except_this_one => mkcore_paw
 !%% !End of the abilint section
 !%%
 !%%  implicit none

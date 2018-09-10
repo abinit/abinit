@@ -7,7 +7,7 @@ This page gives hints on how to run a dynamics in Multibinit.
 
 ## Introduction
 
-TEST
+TO BE PROVIDED
   
 ## Related Input Variables
 

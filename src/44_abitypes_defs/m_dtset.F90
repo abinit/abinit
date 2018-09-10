@@ -834,6 +834,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtvdw             = dtin%prtvdw
  dtout%prtvha             = dtin%prtvha
  dtout%prtvhxc            = dtin%prtvhxc
+ dtout%prtkbff            = dtin%prtkbff
  dtout%prtvol             = dtin%prtvol
  dtout%prtvolimg          = dtin%prtvolimg
  dtout%prtvpsp            = dtin%prtvpsp
@@ -2514,7 +2515,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
- list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
+ list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q

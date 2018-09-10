@@ -107,12 +107,6 @@ contains
 !! SOURCE
 
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
 &  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&

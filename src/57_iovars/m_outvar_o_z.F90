@@ -161,10 +161,6 @@ contains
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
-!DEBUG
-!write(std_out,*)' outvar_o_z : enter '
-!ENDDEBUG
-!
  ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
  ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
  ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
@@ -235,10 +231,6 @@ contains
  ndtset_alloc_tmp=ndtset_alloc
  if(ncid<0)ndtset_alloc_tmp=1
  call prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc_tmp,nimagem,prtvol_glob,results_out,strimg)
-
-!DEBUG
-!stop
-!ENDEBUG
 
  intarr(1,:)=dtsets(:)%occopt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'occopt','INT',0)
@@ -607,6 +599,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtvhxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtvhxc','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtkbff
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtkbff','INT',0)
 
  intarr(1,:)=dtsets(:)%prtvol
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtvol','INT',0)
@@ -1535,12 +1530,6 @@ contains
  ABI_DEALLOCATE(xangst_)
  ABI_DEALLOCATE(xcart_)
 
-!DEBUG
-!write(std_out,*)' outvar_o_z : end of subroutine '
-!if(.true.)stop
-!ENDDEBUG
-!
-
 contains
 !!***
 
@@ -1615,10 +1604,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
 ! *************************************************************************
 
-!DEBUG
- write(std_out,*)' prtocc : enter '
-!ENDDEBUG
-
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it should be >= 1.'
    MSG_BUG(message)
@@ -1634,16 +1619,14 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  multi_occopt=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
-     if(dtsets(1)%occopt/=dtsets(idtset)%occopt .and. &
-&     dtsets(idtset)%iscf/=-2 )multi_occopt=1
+     if(dtsets(1)%occopt/=dtsets(idtset)%occopt .and. dtsets(idtset)%iscf/=-2 )multi_occopt=1
    end do
  end if
 
  multi_tsmear=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
-     if(dtsets(1)%tsmear/=dtsets(idtset)%tsmear .and. &
-&     dtsets(idtset)%iscf/=-2 )multi_tsmear=1
+     if(dtsets(1)%tsmear/=dtsets(idtset)%tsmear .and. dtsets(idtset)%iscf/=-2 )multi_tsmear=1
    end do
  end if
 
@@ -1658,8 +1641,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  multi_nsppol=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
-     if(dtsets(1)%nsppol/=dtsets(idtset)%nsppol .and. &
-&     dtsets(idtset)%iscf/=-2 )multi_nsppol=1
+     if(dtsets(1)%nsppol/=dtsets(idtset)%nsppol .and. dtsets(idtset)%iscf/=-2 )multi_nsppol=1
    end do
  end if
 
@@ -1678,21 +1660,19 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    multi_nband=1
  end if
 
-
 !DEBUG
- write(std_out,*)' prtocc : 1 '
+! write(std_out,*)' prtocc : 1 '
 !ENDDEBUG
 
  multi_nimage=0
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
-     if(dtsets(1)%nimage/=dtsets(idtset)%nimage .and. &
-&     dtsets(idtset)%iscf/=-2 )multi_nimage=1
+     if(dtsets(1)%nimage/=dtsets(idtset)%nimage .and. dtsets(idtset)%iscf/=-2 )multi_nimage=1
    end do
  end if
 
 !DEBUG
- write(std_out,*)' prtocc : 2, multi_nimage= ',multi_nimage
+! write(std_out,*)' prtocc : 2, multi_nimage= ',multi_nimage
 !ENDDEBUG
 
 !Test whether for this variable, the content of different images differ.
@@ -1714,10 +1694,10 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  if(nimagem(0)==0)test_multiimages(0)=.true.
 
 !DEBUG
- write(std_out,*)' prtocc : 3, test_multiimages= ',test_multiimages
- write(std_out,*)' prtocc : multi_occopt, multi_nband, multi_nimage=',multi_occopt, multi_nband, multi_nimage
- write(std_out,*)' prtocc : test_multiimages(1:ndtset_alloc)=',test_multiimages(1:ndtset_alloc)
- write(std_out,*)' prtocc : any(test_multiimages(1:ndtset_alloc))=',any(test_multiimages(1:ndtset_alloc))
+! write(std_out,*)' prtocc : 3, test_multiimages= ',test_multiimages
+! write(std_out,*)' prtocc : multi_occopt, multi_nband, multi_nimage=',multi_occopt, multi_nband, multi_nimage
+! write(std_out,*)' prtocc : test_multiimages(1:ndtset_alloc)=',test_multiimages(1:ndtset_alloc)
+! write(std_out,*)' prtocc : any(test_multiimages(1:ndtset_alloc))=',any(test_multiimages(1:ndtset_alloc))
 !ENDDEBUG
 
 !There is a possibility of a single generic occupation-number set (common to all datasets) if
@@ -1739,7 +1719,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !              agree within more than 6 digits
                if( abs(results_out(1)%occ(iban,iimage)-results_out(idtset)%occ(iban,iimage)) > tol8) multi=1
              end do
-           end if   
+           end if
          end do
        end if
      end do
@@ -1747,7 +1727,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
 !DEBUG
- write(std_out,*)' prtocc : 4, multi= ',multi
+! write(std_out,*)' prtocc : 4, multi= ',multi
 !ENDDEBUG
 
 !At this stage, if multi==1, the occ must be printed
@@ -1766,7 +1746,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end do
 
 !DEBUG
- write(std_out,*)' prtocc : 5, print= ',print
+! write(std_out,*)' prtocc : 5, print= ',print
 !ENDDEBUG
 
 !Now, print occ in the generic occupation-number set case (occ is independent of the dtset).
@@ -1780,7 +1760,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end if
 
 !DEBUG
- write(std_out,*)' prtocc : 6, do-loop over iimage '
+! write(std_out,*)' prtocc : 6, do-loop over iimage '
 !ENDDEBUG
 
    do iimage=1,nimagem(generic)
@@ -1801,14 +1781,12 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
              end if
              iban=iban+nban
            end do
-           if(tnkpt==1) write(iout,'(23x,a)' ) &
-&           'prtocc : prtvol=0, do not print more k-points.'
+           if(tnkpt==1) write(iout,'(23x,a)' ) 'prtocc : prtvol=0, do not print more k-points.'
          end do
        else
 !        The number of bands is identical for all k points and spin
          nban=dtsets(generic)%nband(1)
-         write(iout, '(1x,a16,1x,(t22,6f10.6))' )&
-&         trim(keywd),results_out(generic)%occ(1:nban,iimage)
+         write(iout, '(1x,a16,1x,(t22,6f10.6))' )trim(keywd),results_out(generic)%occ(1:nban,iimage)
 !        if occopt==1, the occ might differ with the spin
          if(dtsets(generic)%nsppol/=1)then
            write(iout,'((t22,6f10.6))')results_out(generic)%occ(nban*dtsets(generic)%nkpt+1:&
@@ -1820,7 +1798,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
 !DEBUG
- write(std_out,*)' prtocc : 7, finished do-loop over iimage '
+! write(std_out,*)' prtocc : 7, finished do-loop over iimage '
 !ENDDEBUG
 
 !Now, print occ in the other cases (occ depends on the dataset)
@@ -1854,8 +1832,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
                  end if
                  iban=iban+nban
                end do
-               if(tnkpt==1) write(iout,'(23x,a)' ) &
-&               'prtocc : prtvol=0, do not print more k-points.'
+               if(tnkpt==1) write(iout,'(23x,a)' ) 'prtocc : prtvol=0, do not print more k-points.'
              end do
            else
 !            The number of bands is identical for all k points and spin
@@ -1876,10 +1853,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  end if
 
  ABI_DEALLOCATE(test_multiimages)
-
-!DEBUG
- write(std_out,*)' prtocc : exit '
-!ENDDEBUG
 
 end subroutine prtocc
 !!***
