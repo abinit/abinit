@@ -95,7 +95,7 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
     kws = "" if keywords is None else "-k %s" % keywords
 
     with cd(os.path.join(top, "tests")):
-        cmd = "./runtests.py -j%d %s" % (jobs, kws))
+        cmd = "./runtests.py -j%d %s" % (jobs, kws)
         cprint("Executing: %s" % cmd, "yellow")
         ctx.run(cmd, pty=True)
         # Now run the parallel tests.

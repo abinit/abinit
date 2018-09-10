@@ -376,7 +376,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
+ integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in !,ib,nstates
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
@@ -401,7 +401,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: phfrq_ibz(3*cryst%natom)
@@ -414,7 +414,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:),gdw2_mn(:,:),gkk0_atm(:,:,:,:)
- complex(dpc),allocatable :: tpp(:,:),hka_mn(:,:,:),wmat1(:,:,:), zvals(:,:)
+ complex(dpc),allocatable :: tpp(:,:),tpp_red(:,:),hka_mn(:,:,:),wmat1(:,:,:), zvals(:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -894,6 +894,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          if (isqzero .and. .not. sigma%imag_only) then
            gkk0_atm(:, :, ibsum_kq, :) = gkk_atm
            dbwl_nu(:, :, ibsum_kq, :) = gkk_nu
+           !MSG_ERROR("hello gamma")
+           !dbwl_nu(:, :, ibsum_kq, :) = one
          end if
 
          ! Accumulate contribution to self-energy
@@ -1016,12 +1018,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call xmpi_sum(dbwl_nu, comm, ierr)
        call xmpi_sum(gkk0_atm, comm, ierr)
 
-       ! Debug section for DW
-       ABI_MALLOC(deg_ibk, (nbcalc_ks))
-       deg_ibk = 1; ndeg = 1
-
        ABI_MALLOC(gdw2_mn, (nbsum, nbcalc_ks))
        ABI_MALLOC(tpp, (natom3, natom3))
+       ABI_MALLOC(tpp_red, (natom3, natom3))
        ABI_MALLOC(hka_mn, (natom3, nbsum, nbcalc_ks))
 
        qpt = zero
@@ -1062,20 +1061,25 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
          !phfrq = phfrq_ibz
          !if (all(abs(qpt) < tol12)) cycle
-         ! TODO
-         !displ_cart = displ_red
 
          ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
          ! Needed for Giustino's equation.
          ! dbwl_nu(2, nbcalc_ks, nbsum, natom3)
+         !dbwl_nu = one !; dbwl_nu(:,:,:,1:3) = zero
+         !sqrt_phfrq0 = one
          do in=1,nbcalc_ks
            do im=1,nbsum
              cvec1 = dcmplx(sqrt_phfrq0(:) * dbwl_nu(1, in, im, :), &
                             sqrt_phfrq0(:) * dbwl_nu(2, in, im, :))
+             !cvec1 = cone * tol6
              do ii=1,natom3
+               !cvec2 = cone * tol6
                cvec2 = cmat(ii,:)
+               !cvec2 = real(cmat(ii,:)
                hka_mn(ii, im, in) = dot_product(dconjg(cvec2), cvec1)
                !hka_mn(ii, im, in) = dconjg(hka_mn(ii, im, in))
+               !hka_mn(ii, im, in) = cone
+               !write(std_out, *)"hka_mn(ii, im, in)", hka_mn(ii, im, in)
              end do
            end do
          end do
@@ -1101,6 +1105,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                tpp(ip1,ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
                !tpp(ip1,ip2) = dconjg(dka) * dkap + dconjg(dkpa) * dkpap
                !write(std_out,*)"tpp: ",tpp(ip1, ip2)
+
+               dka   = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
+               dkap  = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
+               dkpa  = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
+               dkpap = dcmplx(displ_red(1, idir2, ipert2, nu), displ_red(2, idir2, ipert2, nu))
+               tpp_red(ip1,ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
              end do
            end do
 
@@ -1122,13 +1132,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
            end do
            ABI_FREE(wmat1)
-           !gdw2_mn = zero
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
-#if 1
+if (dtset%useria == 0) then
            do ibsum=1,nbsum
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
@@ -1144,21 +1153,17 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      + gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
                    )
 
-                   !cfact = ( &
-                   !  + gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) &
-                   !  + gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2) &
-                   !)
-                   !cfact = tol3
-                   gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + real(tpp(ip1,ip2) * cfact)
+                   gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + real(tpp_red(ip1,ip2) * cfact)
                  end do
                end do
 
-               gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two / deg_ibk(ib_k)
+               !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
+               gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) /  (four * wqnu)
                !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
                ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
              end do ! ibsum
            end do ! ib_k
-#endif
+end if
 
            do ibsum=1,nbsum
              eig0mk = ebands%eig(ibsum, ik_ibz, spin)
@@ -1198,9 +1203,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          end do ! nu
        end do ! iq_ibz
 
-       ABI_FREE(deg_ibk)
        ABI_FREE(gdw2_mn)
        ABI_FREE(tpp)
+       ABI_FREE(tpp_red)
        ABI_FREE(hka_mn)
        ABI_FREE(dbwl_nu)
        ABI_FREE(gkk0_atm)
@@ -1400,9 +1405,11 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_nu
      gkk_nu(1,:,:,:,nu) = gkk_nu(1,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
        - gkk_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
+       !+ gkk_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
      gkk_nu(2,:,:,:,nu) = gkk_nu(2,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(2,ipc,nu) &
        + gkk_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
+       !- gkk_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
    end do
 
    gkk_nu(:,:,:,:,nu) = gkk_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
