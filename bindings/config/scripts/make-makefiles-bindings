@@ -49,7 +49,7 @@ all-local: bindings-ready
 
 EXTRA_DIST = @SOURCES@
 
-CLEANFILES = bindings-ready
+CLEANFILES = bindings-ready @PACKAGE@-*.tar.gz
 
 -include ../config.mk
 """ % (name,stamp,name,b_name)
@@ -77,8 +77,6 @@ def top_template(name,stamp,b_list):
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \\
   @bnd_ac_distcheck@
-
-CLEANFILES = libpaw-[0-9]*.tar.gz
 
 SUBDIRS =%s
 %s
@@ -171,6 +169,7 @@ for bnd in abinit_bindings:
   makefile = makefile_template(my_name,now,bnd)
   makefile = re.sub("@SOURCES@",sources,makefile)
   makefile = re.sub("@CLEANS@",cleans,makefile)
+  makefile = re.sub("@PACKAGE@",bnd,makefile)
 
   # Add hand-written makefile providing the bindings-ready target
   add = "config/makefiles/%s.am" % bnd
