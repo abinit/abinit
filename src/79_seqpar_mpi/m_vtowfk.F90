@@ -479,8 +479,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
-   !if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
-   if (((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)).and.paw_dmft%use_sc_dmft==0) then
+   if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
      if ( .not. newlobpcg ) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else
