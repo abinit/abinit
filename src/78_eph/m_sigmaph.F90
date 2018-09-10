@@ -2186,17 +2186,22 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e = ebands%fermie
 
- if (new%use_doublegrid) then
-   call ebands_copy(ebands_dense, tmp_ebands)
+ if (dtset%eph_fermie == zero) then 
+   if (new%use_doublegrid) then
+     call ebands_copy(ebands_dense, tmp_ebands)
+   else
+     call ebands_copy(ebands, tmp_ebands)
+   endif
+   !
+   do it=1,new%ntemp
+     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
+     call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
+     new%mu_e(it) = tmp_ebands%fermie
+   end do
+   call ebands_free(tmp_ebands)
  else
-   call ebands_copy(ebands, tmp_ebands)
+   new%mu_e(:) = ebands%fermie
  endif
- !
- do it=1,new%ntemp
-   call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
-   new%mu_e(it) = tmp_ebands%fermie
- end do
- call ebands_free(tmp_ebands)
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...

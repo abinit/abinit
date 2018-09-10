@@ -394,7 +394,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) + k could not be generated from a symmetrical one. dksqmax: ",dksqmax
+    "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
 
