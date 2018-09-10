@@ -340,7 +340,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout) :: tauresid(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
- type(pawcprj_type),allocatable,intent(inout) :: cprj(:,:)
+ type(pawcprj_type),pointer,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
@@ -380,8 +380,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
+ type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
+
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
@@ -550,15 +552,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
    iorder_cprj=0 ; mcprj_local=mcprj
    if (usecprj==0) then
+
      mcprj_local=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
      !This is a check but should always be true since scfcv allocated cprj anyway
-     if (allocated(cprj)) then
+     if (allocated(cprj_local)) then
        !Was allocated in scfcv so we just destroy and reconstruct it as desired
-       call pawcprj_free(cprj)
-       ABI_DATATYPE_DEALLOCATE(cprj)
+       call pawcprj_free(cprj_local)
+       ABI_DATATYPE_DEALLOCATE(cprj_local)
      end if
-     ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj_local))
-     call pawcprj_alloc(cprj,0,gs_hamk%dimcprj)
+     ABI_DATATYPE_ALLOCATE(cprj_local,(dtset%natom,mcprj_local))
+     call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
+     cprj=> cprj_local
    end if
  end if
 
