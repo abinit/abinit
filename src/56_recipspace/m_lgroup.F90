@@ -229,7 +229,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    new%weights(ik) = wtk_folded(ibz2bz(ik))
    new%ibz(:,ik) = kbz(:, ibz2bz(ik))
  end do
- ABI_CHECK(sum(new%weights) - one < tol12, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
+ ABI_CHECK(sum(new%weights) - one < tol6, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
 
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
