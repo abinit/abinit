@@ -1226,7 +1226,7 @@ end if
          call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart) ! TODO: Use ephgw
          do nu=1,natom3
            dargs = sigma%gfw_mesh - phfrq(nu)
-           dt_weights = dirac_delta(dargs, dtset%zcut)
+           dt_weights = dirac_delta(dargs, dtset%ph_smear)
            do ib_k=1,nbcalc_ks
              do ii=1,3
                sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
@@ -1808,8 +1808,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! Prepare calculation of generalized Eliashberg functions.
+ new%gfw_nomega = 200; ph_wstep = dtset%ph_wstep
  new%gfw_nomega = 0
- new%gfw_nomega = 200; ph_wstep = one / Ha_cmm1
  if (new%gfw_nomega /= 0) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
    ABI_MALLOC(new%gfw_mesh, (new%gfw_nomega))
