@@ -1793,6 +1793,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  call destroy_hamiltonian(gs_hamk)
 
+ if (psps%usepaw==1) then
+   if (usecprj==0) then
+     call pawcprj_free(cprj_local)
+     ABI_DATATYPE_DEALLOCATE(cprj_local)
+   end if
+ end if
+
  if(dtset%usewvl==0) then
    ABI_DEALLOCATE(EigMin)
    ABI_DEALLOCATE(doccde)

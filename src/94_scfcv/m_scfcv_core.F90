@@ -576,20 +576,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
   usecprj=1
  end if
 
-! usecprj=0 ; iorder_cprj=0
-! if (psps%usepaw==1) then
-!   if (associated(electronpositron)) then
-!     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
-!   end if
-!   if (dtset%prtnabla>0) usecprj=1
-!   if (dtset%extrapwf>0) usecprj=1
-!   if (dtset%usewvl==1)  usecprj=1
-!   if (dtset%pawfatbnd>0)usecprj=1
-!   if (dtset%prtdos==3)  usecprj=1
-!   if (nstep==0) usecprj=0
-!   if (usefock==1)  usecprj=1
-! end if
-
 !Stresses and forces flags
  forces_needed=0;prtfor=0
  if ((dtset%optforces==1.or.dtset%ionmov==4.or.abs(tollist(3))>tiny(0._dp))) then
@@ -674,12 +660,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !Allocations/initializations for PAW only
  lpawumax=-1
 
- !Allocate fake cprj -> valgrind is happier and so am I
-! ABI_DATATYPE_ALLOCATE(cprj,(1,1))
-! ABI_ALLOCATE(dimcprj,(1))
-! dimcprj(1) = 1
-! call pawcprj_alloc(cprj,0,dimcprj)
-! ABI_DEALLOCATE(dimcprj)
  if(psps%usepaw==1) then
 !  Variables/arrays related to the fine FFT grid
    ABI_ALLOCATE(nhat,(nfftf,dtset%nspden*psps%usepaw))
@@ -738,15 +718,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  Allocation of projected WF (optional)
    if (usecprj==1) then
      iorder_cprj=0
-!     mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
-!     mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
-!     !Was allocated above for valgrind sake so should always be true (safety)
-!     if (allocated(cprj)) then
-!       call pawcprj_free(cprj)
-!       ABI_DATATYPE_DEALLOCATE(cprj)
-!     end if
-!     ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-!     ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
        if (dtset%optforces == 1) then
@@ -756,7 +727,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !         ncpgr = 6 ; ctocprj_choice = 3
 !       end if
      end if
-!     call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+
 #if defined HAVE_BIGDFT
      if (dtset%usewvl==1) then
        mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
@@ -2096,8 +2067,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    usecprj=1
    mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
-!   call pawcprj_free(cprj_local)
-!   ABI_DATATYPE_DEALLOCATE(cprj_local) ! Was previously allocated (event if size = 0,0)
    ABI_DATATYPE_ALLOCATE(cprj_local,(dtset%natom,mcprj))
    ncpgr = 0 ; ctocprj_choice = 1
    if (finite_efield_flag) then
@@ -2262,9 +2231,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !   if (recompute_cprj.or.usecprj==1) then
    if (recompute_cprj) then
      usecprj=0;mcprj=0
-     if (recompute_cprj.or.dtset%mkmem/=0) then
-       call pawcprj_free(cprj)
-     end if
+     call pawcprj_free(cprj)
+     ABI_DATATYPE_DEALLOCATE(cprj_local)
    end if
    call paw_an_free(paw_an)
    call paw_ij_free(paw_ij)
@@ -2283,10 +2251,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(nhat)
  ABI_DEALLOCATE(dimcprj_srt)
  ABI_DEALLOCATE(dimcprj)
- if (recompute_cprj) then
-   call pawcprj_free(cprj_local)
-   ABI_DATATYPE_DEALLOCATE(cprj_local)
- end if
+
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then

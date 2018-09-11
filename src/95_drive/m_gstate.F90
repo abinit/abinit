@@ -1716,8 +1716,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(usecprj==1) then
    ABI_DEALLOCATE(dimcprj_srt)
    call pawcprj_free(cprj)
-   ABI_DATATYPE_DEALLOCATE(cprj)
  end if
+ ABI_DATATYPE_DEALLOCATE(cprj)
+
  ! deallocate efield
  call destroy_efield(dtefield)
 
