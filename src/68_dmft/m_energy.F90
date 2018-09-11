@@ -446,7 +446,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
    do iatom=1,natom
      lpawu=paw_dmft%lpawu(iatom)
      if(lpawu/=-1) then
-       if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5) then
+       if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
          energies_dmft%e_hu_qmc(iatom) = green%ecorr_qmc(iatom)
          energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_qmc_tot + green%ecorr_qmc(iatom)
        endif
@@ -468,9 +468,11 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
      energies_dmft%e_hu= energies_dmft%e_hu_mig
      energies_dmft%e_hu_tot= energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
-   else if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5) then
-     write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
-     call wrtout(std_out,message,'COLL')
+   else if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
+     if(paw_dmft%dmft_solv==8) then
+       write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
+       call wrtout(std_out,message,'COLL')
+     endif
      energies_dmft%e_hu= energies_dmft%e_hu_qmc
      energies_dmft%e_hu_tot= energies_dmft%e_hu_qmc_tot
    endif
