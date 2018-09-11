@@ -288,13 +288,13 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  complex(dpc),allocatable :: cweights(:,:,:,:,:)
-  ! (nz, 2, nbcalc_ks, natom3i, ndiv))
+  complex(dpc),allocatable :: cweights(:,:,:,:,:,:)
+  ! (nz, 2, nbcalc_ks, natom3, nq, ibsum))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  real(dp),allocatable :: deltaw_pm(:,:,:,:)
-  ! (nbcalc_ks, 2, natom3, ndiv))
+  real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
+  ! (nbcalc_ks, 2, natom3, nq, ibsum))
   ! Weights for the q-integration of the two delta (abs/emission) if imag_only
   ! This array is initialized inside the (ikcalc, spin) loop
 
@@ -358,7 +358,6 @@ module m_sigmaph
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
- private :: sigmaph_get_qweights      ! Compute weights for q-space integration.
  private :: sigmaph_gather_and_write  ! Compute the QP corrections.
  private :: sigmaph_print             ! Print results to main output file.
 
@@ -431,7 +430,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
+ integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,bcorr0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
@@ -467,10 +466,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: indkk_kq(1,6), nkpt_coarse(3), nkpt_dense(3)
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:), iqlk(:)
+ integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: phfrq_ibz(3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,emin,emax
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,emin,emax,eminmax(2)
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
@@ -485,7 +484,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:)
- real(dp),allocatable :: phfrq_dense(:,:)
+ real(dp),allocatable :: phfrq_dense(:,:), tmp_deltaw_pm(:,:,:)
+ real(dp),allocatable :: qpts(:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -720,22 +720,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
 
-     if (sigma%qint_method > 0) then
-       if (sigma%use_doublegrid) then
-          ! Weights for Re-Im with i.eta shift.
-          ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, sigma%ephwg%lgk%nibz*nbsum))
-          ! Weights for Im (tethraedron, eta --> 0)
-          ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, sigma%ephwg%lgk%nibz*nbsum))
-          sigma%deltaw_pm = -1
-       else
-          ! Weights for Re-Im with i.eta shift.
-          ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, 1))
-          ! Weights for Im (tethraedron, eta --> 0)
-          ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, 1))
-       endif
-     endif
-     ABI_MALLOC(zvals, (nz, nbcalc_ks))
-
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
 
@@ -752,6 +736,37 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
        end do
      end if
+
+     if (sigma%qint_method > 0) then
+       ! Weights for Re-Im with i.eta shift.
+       ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       ! Weights for Im (tethraedron, eta --> 0)
+       ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+     endif
+     ABI_MALLOC(zvals, (nz, nbcalc_ks))
+
+     ! Precompute the weights for tetrahedron
+     if (sigma%qint_method > 0) then
+       ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
+       ! loop over bands to sum
+       do ibsum_kq=1,nbsum
+         ! loop over phonon modes
+         do nu=1,natom3
+           ! loop over bands in the self-energy
+           do ib_k=1,nbcalc_ks
+             band = ib_k + bstart_ks - 1
+             eig0nk = ebands%eig(band,ik_ibz,spin)
+             eminmax(1) = eig0nk - 0.01 
+             eminmax(2) = eig0nk + 0.01
+             call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
+             ! we pay the efficiency here
+             sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) * sigma%ephwg%nbz )
+             sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) * sigma%ephwg%nbz )
+           enddo
+         enddo
+       enddo
+       ABI_FREE(tmp_deltaw_pm)
+     endif
 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
@@ -855,13 +870,25 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          enddo
        endif
  
-       !map q to qibz for tetrahedron
+       ! Map q to qibz for tetrahedron
        if (sigma%qint_method > 0) then
          if (sigma%use_doublegrid) then
+           ABI_MALLOC(indkk,(eph_dg%ndiv,6))
+           ABI_MALLOC(qpts,(3,eph_dg%ndiv))
+           ! set the qpoints to be mapped
            do jj=1,eph_dg%ndiv
-             iq_bz_fine = eph_dg_mapping(3,jj)
-             iqlk(jj) = lgroup_find_ibzimage(sigma%ephwg%lgk, eph_dg%kpts_dense(:,iq_bz_fine))
-             ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+               iq_bz_fine = eph_dg_mapping(3,jj)
+               qpts(:,jj) = eph_dg%kpts_dense(:,iq_bz_fine)
+           end do
+           ! single call to listkk to determine BZ->lgrpk%ibz mapping
+           call listkk(dksqmax, sigma%ephwg%lgk%gmet, indkk, sigma%ephwg%lgk%ibz, qpts, sigma%ephwg%lgk%nibz, eph_dg%ndiv, &
+                       sigma%ephwg%lgk%nsym_lg, 1, sigma%ephwg%lgk%symafm_lg, sigma%ephwg%lgk%symrec_lg, timrev0, use_symrec=.True.)
+           iqlk(:) = indkk(:,1)
+           ABI_FREE(indkk)
+           ABI_FREE(qpts)
+           ! check if all the q-points were was found
+           do jj=1,eph_dg%ndiv
+              ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpts(:,jj))))
            end do
          else
            iqlk(1) = iq_ibz
@@ -1030,13 +1057,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Precompute weigths with tetrahedron
          if (sigma%qint_method > 0) then
            if (sigma%use_doublegrid) then
-             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, xmpi_comm_self)
+             !call sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, xmpi_comm_self)
              ! We rescale the weight as the weights obtained above are scaled with 1/Nq 
              ! with Nq the number of points in the double grid.
              ! This factor is acounted for bellow when summing over the microzone
              weigth_q = weigth_q*sigma%ephwg%nbz
            else
-             call sigmaph_get_qweights(sigma, ikcalc, iqlk(1), ibsum_kq, spin, xmpi_comm_self)
+             !call sigmaph_get_qweights(sigma, ikcalc, iqlk(1), ibsum_kq, spin, xmpi_comm_self)
              ! The Nstar(q) / N_qbz factor is already included in the weigths produced
              ! by the above routines so weigth_q must be set to one here.
              weigth_q = one
@@ -1120,23 +1147,23 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) +  &
-                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) )*weight
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iqlk(jj)) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iqlk(jj)) )*weight
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) +  &
-                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, (iqlk(jj)-1)*nbsum+ibsum_kq) )*weight
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, ikq_ibz_fine) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, ikq_ibz_fine) )*weight
                      end if
                    end do
                  else
                    if (sigma%imag_only) then
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                       (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, 1) +  &
-                       (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, 1) )
+                       (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iqlk(1)) +  &
+                       (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iqlk(1)) )
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, 1) +  &
-                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, 1) )
+                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, ikq_ibz_fine) +  &
+                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, ikq_ibz_fine) )
                    endif
                  end if
                end if
@@ -1458,7 +1485,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 end subroutine sigmaph
 !!***
 
-
+#if 0
 subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, comm)
 
 
@@ -1490,7 +1517,7 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, 
     !iq_ibz_fine = eph_dg_mapping(6,jj)
     !iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
 
-    !if already computed, no need to recompute it 
+    !if already computed, no need to recompute it
     if (sigma%deltaw_pm(1,1,1,(iqlk(jj)-1)*sigma%nbsum+ibsum_kq)>=0) cycle
 
     if (sigma%imag_only) then
@@ -1588,6 +1615,7 @@ subroutine sigmaph_get_qweights(sigma, ikcalc, iqlk, ibsum_kq, spin, comm)
 
 end subroutine sigmaph_get_qweights
 !!***
+#endif
 
 !----------------------------------------------------------------------
 
