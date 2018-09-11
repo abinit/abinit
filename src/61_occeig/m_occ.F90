@@ -39,7 +39,8 @@ module m_occ
 
  implicit none
  
- real(dp) :: huge_tsmearinv = 1e50_dp
+ real(dp),parameter :: huge_tsmearinv = 1e50_dp
+ real(dp),parameter :: maxFDarg=500.0_dp
 
  private
 !!***
@@ -814,7 +815,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  integer :: nmaxFD,nminFD
  integer,parameter :: nptsdiv2_def=6000
  integer,save :: dblsmr,occopt_prev=-9999
- real(dp),parameter :: maxFDarg=500.0_dp
  real(dp),save :: convlim,incconv,limit_occ,tphysel_prev=-9999,tsmear_prev=-9999
  real(dp) :: aa,dsqrpi,encorr,factor
  real(dp) :: expinc,expx22,expxo2,gauss,increm
@@ -1484,7 +1484,13 @@ elemental real(dp) function occ_fd(ee, kT, mu)
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol6) then
    arg = ee_mu / kT
-   occ_fd = one / (exp(arg) + one)
+   if (arg > maxFDarg) then
+     occ_fd = zero
+   else if (arg < -maxFDarg) then
+     occ_fd = one
+   else 
+     occ_fd = one / (exp(arg) + one)
+   end if
  else
    ! Heaviside
    if (ee_mu > zero) then
