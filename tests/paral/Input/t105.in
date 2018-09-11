@@ -61,6 +61,7 @@ dmft_nwlo 100      # low: test
 dmftcheck 0
 dmft_rslf 1       # do not read self
 dmft_mxsf 0.7
+dmft_charge_prec 1e-10
 
 # Hubbard Correction
 usepawu    1
@@ -88,7 +89,7 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
-paral_kgb 0
+paral_kgb1 0
 paral_kgb2 1
 npkpt2 1
 npband2 4

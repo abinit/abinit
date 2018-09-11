@@ -65,6 +65,7 @@ dmftctqmc_order 50
 
 # == CTQMC
 dmft_solv 2 # CTQMC
+dmft_charge_prec 1e-10
 dmftqmc_l 50
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
@@ -92,7 +93,7 @@ bandpp2 8
 #%% [files]
 #%% files_to_test =
 #%%   t106.out, tolnlines = 50, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -easy
-#%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
+#%% psp_files = 23v.paw, 38sr.paw, 8o.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
