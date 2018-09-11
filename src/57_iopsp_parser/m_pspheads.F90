@@ -801,7 +801,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
  end do
  pspheads%nprojso=0
  pspheads%pspdat=27061961
- pspheads%pspso=0
+ pspheads%pspso=1
  pspheads%xccc=1
  pspheads%title=paw_setuploc%atom%symbol
 
