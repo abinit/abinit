@@ -89,6 +89,7 @@ MODULE m_vkbr
  public :: vkbr_init       ! vkbr_t Constructor
  public :: vkbr_free       ! Free memory
  public :: nc_ihr_comm     ! Compute matrix elements of the commutator i[H,r] for NC pseudos
+ public :: calc_vkb        ! Kleynman-Bylander form factors and derivatives.
 !!***
 
  interface vkbr_free
@@ -178,7 +179,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkbsign, (psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
- call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
+ call calc_vkb(cryst,psps,kpoint,npw,npw,gvec,vkbsign,vkb,vkbd)
 
  select case (inclvkb)
  case (2)
@@ -389,7 +390,6 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       do im=1,2*(il-1)+1
         ! Index of im and il
         ilm = im + (il-1)*(il-1)
-        !do ilm=1,vkbr%mpsang**2
         cta1 = czero_gw; cta2(:) = czero_gw
         cta4 = czero_gw; cta3(:) = czero_gw
         do ig=1,npw
@@ -452,7 +452,7 @@ end subroutine add_vnlr_commutator
 !!
 !! SOURCE
 
-subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
+subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -465,14 +465,14 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw_k
+ integer,intent(in) :: npw_k, mpw
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(out) :: vkb (npw_k,psps%lnmax,psps%ntypat)
- real(dp),intent(out) :: vkbd(npw_k,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkb (mpw,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkbd(mpw,psps%lnmax,psps%ntypat)
  real(dp),intent(out) :: vkbsign(psps%lnmax,psps%ntypat)
 
 !Local variables ------------------------------
@@ -654,6 +654,8 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
+ ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use
+ ! k+G.
 
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
@@ -665,7 +667,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
      spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
        c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
-       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp*gvec(:,ig)
+       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp * (kpoint + gvec(:,ig))
      end do
    end do
  else
@@ -822,14 +824,13 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
        il = 1 + psps%indlmn(1,ilmn,itypat)
        in = psps%indlmn(3,ilmn,itypat)
        iln = psps%indlmn(5,ilmn,itypat)
+       ! spin = 1 if scalar term (spin diagonal), 2 if SOC term.
+       !spin = psps%indlmn(6, ilmn, itypat)
        if (iln <= iln0) cycle
        iln0 = iln
        if (vkbsign(iln,itypat) == zero) cycle
-       !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-       !end do
-       !do il=1,psps%mpsang
+       !if (spin /= 1 .or. vkbsign(iln,itypat) == zero) cycle
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
-       !iln = il
        do im=1,2*(il-1)+1
          ! Index of im and il
          ilm = im + (il-1)*(il-1)

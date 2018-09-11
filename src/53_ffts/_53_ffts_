@@ -23,18 +23,11 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! ccfft.F90
 !! fftbox_ip_driver.finc
 !! fftbox_op_driver.finc
-!! fftpac.F90
 !! fftug_driver.finc
 !! fftur_driver.finc
-!! fourdp.F90
-!! fourdp_6d.F90
-!! fourwf.F90
 !! interfaces_53_ffts.F90
-!! kgindex.F90
 !! m_fft.F90
-!! zerosym.F90
 !!
 !!***

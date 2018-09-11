@@ -25,5 +25,6 @@
 !!
 !! CHILDREN
 !! defs_basis.F90
+!! defs_datatypes.F90
 !!
 !!***

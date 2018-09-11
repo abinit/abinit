@@ -71,7 +71,7 @@ class WildCard(object):
     def __str__(self):
         return "<%s, patterns = %s>" % (self.__class__.__name__, self.pats)
 
-    def filter(self, names): 
+    def filter(self, names):
         """
         Returns a list with the names matching the pattern.
         """
@@ -109,7 +109,7 @@ def robodoc_dheader(dirname):
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018 ABINIT group 
+!! Copyright (C) 2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,9 +119,9 @@ def robodoc_dheader(dirname):
 """ % locals()
 
 
-def mkrobodod_files(top):
+def mkrobodoc_files(top):
     """
-    Generate the ROBODOC files in all the ABINIT directories 
+    Generate the ROBODOC files in all the ABINIT directories
     located within the top level directory top.
 
     Returns:
@@ -137,9 +137,11 @@ def mkrobodod_files(top):
     wrong_dirpaths = []
 
     for dirpath, dirnames, filenames in os.walk(top):
-        robo_dfile = "_" + os.path.basename(dirpath)  + "_"
+        dirname = os.path.basename(dirpath)
+        if "dirname" in ("__pycache__", ): continue
+        robo_dfile = "_" + dirname  + "_"
 
-        if robo_dfile not in filenames: 
+        if robo_dfile not in filenames:
             # Not an abinit dir.
             wrong_dirpaths.append(os.path.abspath(dirpath))
             continue
@@ -152,7 +154,7 @@ def mkrobodod_files(top):
                 if line.startswith("!! CHILDREN"): break
             else:
                 raise ValueError("File %s does not have a valid '!! CHILDREN' section'" % robo_dfile)
-        
+
         # Get source files, sort them in alphabetical order and generate new robodoc file.
         src_files = wildcard.filter(os.listdir(dirpath))
         if not src_files: continue
@@ -184,7 +186,7 @@ def mkrobodod_files(top):
 
         if wrong_dirpaths:
             print("dirs_without_files")
-            for i, dirpath in enumerate(wrong_dirpaths): 
+            for i, dirpath in enumerate(wrong_dirpaths):
                 print("%d) %s" % (i, dirpath))
                 robodoc_dfile = os.path.join(dirpath, "_" + os.path.basename(dirpath) + "_")
                 assert not os.path.isfile(robodoc_dfile)
@@ -200,7 +202,7 @@ def main():
     except:
         raise ValueError("Top level directory must be specified.\nEx: mkrobodoc_dirs.py ./70_gw")
 
-    return mkrobodod_files(top)
+    return mkrobodoc_files(top)
 
 
 if __name__ == "__main__":

@@ -34,9 +34,6 @@ module m_ab7_invars
   use m_errors
   use m_abicore
   use m_xmpi
-  use interfaces_18_timing
-  use interfaces_32_util
-  use interfaces_57_iovars
 
   use m_time,     only : timab
   use m_fstrings, only : inupper

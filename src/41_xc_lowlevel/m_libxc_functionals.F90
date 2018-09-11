@@ -2107,6 +2107,5 @@ subroutine xc_char_to_f(c_string,f_string)
 
 !----------------------------------------------------------------------
 
-
-end module
+end module libxc_functionals
 !!***

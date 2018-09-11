@@ -135,7 +135,7 @@ MODULE m_ddk
    ! velocity on the FS in cartesian coordinates.
 
   logical :: use_ncddk(3)
-   ! True if we are readin DDK matrix elements from DDK.nc instead of WFK file
+   ! True if we are readin DDK matrix elements from EVK.nc instead of WFK file
 
   type(crystal_t) :: cryst
    ! Crystal structure read from file
@@ -147,6 +147,7 @@ MODULE m_ddk
  public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
+ public :: eph_ddk               ! calculate eph ddk
 !!***
 
 CONTAINS
@@ -207,7 +208,7 @@ subroutine ddk_init(ddk, paths, comm)
 
  ! In this calls everything is broadcast properly to the whole comm
  do ii=1,3
-   ddk%use_ncddk(ii) = endswith(paths(ii), "_DDK.nc")
+   ddk%use_ncddk(ii) = endswith(paths(ii), "_EVK.nc")
    call hdr_read_from_fname(hdrs(ii), paths(ii), fforms(ii), comm)
    if (ddk%debug) call hdr_echo(hdrs(ii), fforms(ii), 4, unit=std_out)
    ! check that 2 headers are compatible
@@ -232,6 +233,312 @@ subroutine ddk_init(ddk, paths, comm)
 
 end subroutine ddk_init
 !!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/eph_ddk
+!! NAME
+!!  eph_ddk
+!!
+!! FUNCTION
+!!  Calculate the DDK matrix elements using the commutator formulation.
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      wfk_analyse
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+
+subroutine eph_ddk(wfk_path,dtfil,dtset,&
+                   psps,pawtab,inclvkb,ngfftc,mpi_enreg,comm)
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_wfk
+ use m_wfd
+
+ use m_ebands,          only : ebands_ncwrite
+ use m_time,            only : cwtime, sec2str
+ use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa
+ use m_io_tools,        only : iomode_from_fname, get_unit
+ use m_cgtools,         only : dotprod_g
+ use m_fftcore,         only : get_kg, kpgsph, sphere
+ use m_crystal,         only : crystal_t
+ use m_crystal_io,      only : crystal_ncwrite
+ use m_pawtab,          only : pawtab_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_ddk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: wfk_path
+ integer,intent(in) :: comm
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(wfk_t),target :: in_wfk
+ type(wfd_t),target :: in_wfd
+ type(vkbr_t) :: vkbr
+ type(ebands_t) :: ebands
+ type(crystal_t) :: cryst
+ type(hdr_type) :: hdr_tmp
+ type(pseudopotential_type),intent(in) :: psps
+ type(mpi_type),intent(inout) :: mpi_enreg
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb=0, master=0
+ logical,parameter :: force_istwfk1=.True.
+ integer :: iomode, mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
+ integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
+ integer :: my_rank, nproc, ierr
+#ifdef HAVE_NETCDF
+ integer :: ncerr,ncid
+#endif
+!arrays
+ integer,intent(in) :: ngfftc(18)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ integer,allocatable :: task_distrib(:,:,:,:)
+ integer,allocatable :: nband(:,:)
+ integer,allocatable :: kg_k(:,:)
+ character(len=500) :: msg
+ character(len=fnlen) :: fname
+ real(dp) :: cpu,wall,gflops,ecut
+ real(dp) :: kbz(3)
+ real(dp),allocatable :: dipoles(:,:,:,:,:,:)
+ complex(gwpc),allocatable :: ihrc(:,:)
+ complex(dp)               :: vg(3), vr(3)
+ complex(gwpc),allocatable :: ug_c(:),ug_v(:)
+
+!************************************************************************
+
+ write(msg, '(2a)') "Computation of electron-photon coupling matrix elements (ddk)", ch10
+ call wrtout(ab_out, msg, "COLL", do_flush=.True.)
+ call wrtout(std_out, msg, "COLL", do_flush=.True.)
+
+ if (psps%usepaw == 1) then
+   MSG_ERROR("PAW not implemented")
+ end if
+
+#ifndef HAVE_NETCDF
+  MSG_ERROR("The matrix elements are only written in NETCDF format")
+#endif
+
+ ! paralelism
+ my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm)
+
+ ! Open input file, extract dimensions and allocate workspace arrays.
+ in_iomode = iomode_from_fname(wfk_path)
+ call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
+
+ !read crystal
+ call crystal_from_hdr(cryst, in_wfk%hdr, 2)
+
+ !read ebands
+ ebands = wfk_read_ebands(wfk_path,comm)
+
+ mpw     = maxval(in_wfk%Hdr%npwarr)
+ nkpt    = in_wfk%nkpt
+ nsppol  = in_wfk%nsppol
+ nspinor = in_wfk%nspinor
+ mband   = in_wfk%mband
+ ecut    = in_wfk%hdr%ecut
+
+ !TODO: hardcoded for now but should be an arugment
+ bandmin = 1
+ bandmax = mband
+ nbcalc  = bandmax-bandmin
+
+ ABI_MALLOC(ug_c,    (mpw*nspinor))
+ ABI_MALLOC(ug_v,    (mpw*nspinor))
+ ABI_MALLOC(kg_k,    (3,mpw))
+ ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
+ ABI_MALLOC(ihrc,    (3, nspinor**2))
+
+ ABI_MALLOC(nband,   (nkpt, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
+ ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
+
+ write(std_out,*) 'inclvkb: ', inclvkb
+ write(std_out,*) 'nkpoints:', nkpt
+ write(std_out,*) 'nbands:  ', mband
+ write(std_out,*) 'spin:    ', nsppol
+ write(std_out,*) 'spinor:  ', nspinor
+ write(std_out,*) 'ngfft:   ', in_wfk%hdr%ngfft
+ write(std_out,*) 'mpw:     ', mpw
+ write(std_out,*) 'ecut:    ', ecut
+
+ !create distribution of the wavefunctions mask
+ keep_ur = .false.
+ bks_mask = .false.
+ nband = mband
+
+ ! Distribute the k-points and bands over the processors
+ ABI_MALLOC(task_distrib,(bandmin:bandmax,bandmin:bandmax,nkpt,nsppol))
+ call xmpi_distab(nproc,task_distrib)
+
+ ! create bks_mask to load the wavefunctions
+ do spin=1,nsppol ! Loop over spins
+   do ik=1,nkpt ! Loop over kpoints
+     do ib_v=bandmin,bandmax ! Loop over v bands
+       do ib_c=bandmin,bandmax ! Loop over c bands
+         if (task_distrib(ib_c,ib_v,ik,spin) == my_rank) then
+           bks_mask(ib_v,ik,spin) = .true.
+           bks_mask(ib_c,ik,spin) = .true.
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ !initialize distributed wavefunctions object
+ call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,&
+   bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
+   ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+
+ ABI_FREE(bks_mask)
+ ABI_FREE(keep_ur)
+ ABI_FREE(nband)
+
+ call wfd_print(in_wfd,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+
+ !Read Wavefunctions
+ iomode = iomode_from_fname(wfk_path)
+ call wfd_read_wfk(in_wfd,wfk_path,iomode)
+
+do spin=1,nsppol ! Loop over spins
+
+   do ik=1,nkpt ! Loop over kpoints
+     ! Only do a subset a k-points
+     if (all(task_distrib(bandmin:bandmax,bandmin:bandmax,ik,spin) /= my_rank)) cycle
+     call cwtime(cpu,wall,gflops,"start")
+
+     nband_k  = in_wfk%nband(ik,spin)
+     istwf_k  = in_wfk%hdr%istwfk(ik)
+     kbz      = in_wfk%hdr%kptns(:,ik)
+     npw_k    = in_wfk%hdr%npwarr(ik)
+
+     ! Read WF
+     kg_k(:,1:npw_k) = in_wfd%kdata(ik)%kg_k
+
+     ! Allocate KB form factors
+     if (inclvkb/=0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
+       call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_k,npw_k,kbz,kg_k)
+     end if
+
+     ! Loop over bands
+     do ib_v=bandmin,bandmax
+       if (all(task_distrib(:,ib_v,ik,spin) /= my_rank)) cycle
+       ug_v(1:npw_k*nspinor) = in_wfd%wave(ib_v,ik,spin)%ug
+
+       ! Loop over bands
+       do ib_c=ib_v,bandmax
+         if (task_distrib(ib_c,ib_v,ik,spin) /= my_rank) cycle
+         ug_c(1:npw_k*nspinor) = in_wfd%wave(ib_c,ik,spin)%ug
+
+         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
+         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,&
+                            kbz,ug_c,ug_v,kg_k)
+
+         ! HM: 24/07/2018
+         ! Transform dipoles to be consistent with results from DFPT
+         ! Perturbations with DFPT are along the reciprocal lattice vectors
+         ! Perturbations with Commutator are along real space lattice vectors
+         ! dot(A, DFPT) = X
+         ! dot(B, COMM) = X
+         ! B = 2 pi (A^{-1})^T =>
+         ! dot(B^T B,COMM) = 2 pi DFPT
+         vr = (2*pi)*(2*pi)*sum(ihrc(:,:),2)
+         vg(1) = dot_product(Cryst%gmet(1,:),vr)
+         vg(2) = dot_product(Cryst%gmet(2,:),vr)
+         vg(3) = dot_product(Cryst%gmet(3,:),vr)
+
+         ! Save matrix elements of i*r in the IBZ
+         dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg)
+         dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg) ! Hermitian conjugate
+         if (ib_v == ib_c) then
+            dipoles(:,2,ib_c,ib_v,ik,spin) = 0
+            dipoles(:,2,ib_v,ib_c,ik,spin) = 0
+         else
+            dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(vg)
+            dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(vg) ! Hermitian conjugate
+         end if
+       end do
+     end do
+
+     ! Free KB form factors
+     call vkbr_free(vkbr)
+
+     ! loop over k-points
+     call cwtime(cpu,wall,gflops,"stop")
+     write(msg,'(2(a,i0),2(a,f8.2))')"k-point [",ik,"/",nkpt,"] completed. cpu:",cpu,", wall:",wall
+     call wrtout(std_out, msg, do_flush=.True.)
+
+   end do ! loop over k-points
+ end do ! loop over spin
+
+ ABI_FREE(ug_c)
+ ABI_FREE(ug_v)
+ ABI_FREE(kg_k)
+ ABI_FREE(ihrc)
+
+ ! Gather the k-points computed by all processes
+ call xmpi_sum_master(dipoles,master,comm,ierr)
+
+ !write the matrix elements
+#ifdef HAVE_NETCDF
+   ! Output DDK file in netcdf format.
+   if (my_rank == master) then
+
+     ! Have to build hdr on k-grid with info about perturbation.
+     call hdr_copy(in_wfk%hdr, hdr_tmp)
+     hdr_tmp%qptn = [0,0,0]
+
+     do ii=1,3
+         fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_EVK.nc")
+         NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
+         hdr_tmp%pertcase = (cryst%natom*3)+ii
+         NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+         NCF_CHECK(crystal_ncwrite(cryst, ncid))
+         NCF_CHECK(ebands_ncwrite(ebands, ncid))
+         ncerr = nctk_def_arrays(ncid, [ &
+           nctkarr_t('h1_matrix_elements', "dp", &
+            "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+         NCF_CHECK(ncerr)
+         NCF_CHECK(nctk_set_datamode(ncid))
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:) )
+         NCF_CHECK(ncerr)
+         NCF_CHECK(nf90_close(ncid))
+     end do
+     call hdr_free(hdr_tmp)
+
+   end if
+#endif
+
+ ABI_FREE(dipoles)
+
+end subroutine eph_ddk
+!!***
+
 
 !----------------------------------------------------------------------
 

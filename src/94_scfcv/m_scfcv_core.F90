@@ -2873,7 +2873,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !The reference is the cg+cprj output after the wf optimization at istep 1.
 !It comes as input to the present routine as cgcprj input at step 2, and is usually found at indh=1.
 
-!In the simple mixing case (wfmixalg==1), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
+!In the simple mixing case (wfmixalg==2), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
 !previous input (that was stored in indh=1), then generate the next input, which is stored again in indh=1
 
 !When the storage is not spared:

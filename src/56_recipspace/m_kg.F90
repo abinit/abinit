@@ -1158,12 +1158,6 @@ end subroutine mkkpg
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
 
@@ -1187,12 +1181,12 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   integer,intent(in) :: symrec(3,3,dtset%nsym)
   integer,intent(out) :: pwind_k1(dtset%mpw)
   real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
-  
+
   !Local variables -------------------------
   !scalars
   integer :: exchn2n3d,idum1,ikg1,ipw,istwf_k,isym,isym1,jpw,npw_k1
   real(dp) :: ecut_eff
- 
+
   !arrays
   integer,allocatable :: kg1_k(:,:)
   real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
@@ -1200,29 +1194,29 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ! ***********************************************************************
 
   ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
- 
+
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
 
-  ! Build basis sphere of plane waves for the nearest neighbour of the k-point 
+  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
 
   kg1_k(:,:) = 0
   kpt1(:) = dtset%kptns(:,ikpt1)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt1,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
 
-  !        
+  !
   !        Deal with symmetry transformations
-  !        
-  
+  !
+
   !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
   !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
   !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
-  !        
+  !
   !        For the ket k-point:
   !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
   !        where GBZ(k) takes k(k) to the BZ
-  !        
-  
+  !
+
   isym  = indkk_f2ibz(ikpt,2)
   isym1 = indkk_f2ibz(ikpt1,2)
 
@@ -1236,20 +1230,20 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
   dg(:) = iadum(:)
- 
+
   !        Construct S(k)^{t,-1} S(b)^{t}
 
   dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
 
   !        Construct alpha(k) alpha(b)
- 
+
   pwind_k1(:) = 0
   do ipw = 1, npw_k
 
      !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
      !          not for the FBZ k point
      iadum(:) = kg(:,kgindex(ikpt) + ipw)
-   
+
      !          to determine r.l.v. matchings, we transformed the bra vector
      !          Rotation
      iadum1(:)=0
@@ -1316,12 +1310,6 @@ end subroutine mkpwind_k
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
 
 
@@ -1337,12 +1325,12 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
   !scalars
   integer,intent(in) :: natom,npw
   real(dp),intent(in) :: ucvol
-  
+
   !arrays
   integer,intent(in) :: kg(3,npw)
   real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
   complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
- 
+
   !Local variables-------------------------------
   !scalars
   integer :: atom_nd_tot,col,iatom,ndp_index,row
@@ -1361,7 +1349,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
   permeability=5.325135453D-5
   ! will need 4*pi*i*(\mu_0/four\pi)
   cpermfac = CMPLX(zero,four_pi*permeability)
-  
+
   ! make list of atoms with non-zero nuclear magnetic dipoles
   atom_nd_tot = 0
   do iatom = 1, natom
@@ -1378,19 +1366,19 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
      gpk_red(1)=dble(kg(1,col))+kpt(1)
      gpk_red(2)=dble(kg(2,col))+kpt(2)
      gpk_red(3)=dble(kg(3,col))+kpt(3)
-     
+
      do row=col,npw ! enumerate lower diagonal from 1 to G
         ! index of the current matrix element, in lower triangular packed storage
         ! "packed sequentially, column by column"
         ndp_index = ndp_index + 1
         nucdipmom_k(ndp_index) = czero
-     
+
         ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
         ! in reduced coordinates
         dgp_red(1)=dble(kg(1,col)-kg(1,row))
         dgp_red(2)=dble(kg(2,col)-kg(2,row))
         dgp_red(3)=dble(kg(3,col)-kg(3,row))
-        
+
         ! compute |\Delta G|^2
         ! must use gmet metric because G's are in reduced coords in reciprocal space
         dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
@@ -1405,13 +1393,13 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
         cprod(1) = dgp_red(2)*gpk_red(3) - dgp_red(3)*gpk_red(2)
         cprod(2) = dgp_red(3)*gpk_red(1) - dgp_red(1)*gpk_red(3)
         cprod(3) = dgp_red(1)*gpk_red(2) - dgp_red(2)*gpk_red(1)
-        
+
         ! proper cross product must account for reduced coords as follows:
         ! gprimd*dgp \times gprimd*gpk = (det gprimd)*(gprimd^{-1,T})*(dgp \times gpk)
         ! = rprimd * (dgp \times gpk)/ucvol
         ! final vector also includes the division by |\Delta G|^2
         cprod_cart = MATMUL(rprimd,cprod)/(ucvol*dg2)
-        
+
         ! loop over the atoms with non-zero nuclear dipoles
         ! phase factors exp(i*\Delta G*I) where I is ion position,
         ! might be retrievable from ph1d, need to check
@@ -1423,7 +1411,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
         end do ! end loop over atoms with nonzero dipoles
 
      end do ! end loop over G' = G to npw
-     
+
   end do ! end loop over G = 1 to npw
 
 end subroutine mknucdipmom_k

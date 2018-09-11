@@ -8,7 +8,7 @@
 !! Module for int and real(dp) array which allocate memory dynamically
 !! real_array_type for real(dp) and int_array_type for integer.
 !! they have push (but no pop) and finalize methods.
-!! TODO hexu: Is this already implemented somewhere in abinit. 
+!! TODO hexu: Is this already implemented somewhere in abinit.
 !! If not, should this file  be moved to the place to make it more general usable?
 !!
 !!
@@ -26,6 +26,7 @@
 #include "config.h"
 #endif
 #include "abi_common.h"
+
 module m_dynmaic_array
   use defs_basis
   use m_abicore
@@ -111,7 +112,8 @@ subroutine real_array_type_push(self, val)
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
     self%data(self%size)=val
-end subroutine
+
+end subroutine real_array_type_push
 !!***
 
 !****f* m_dynarray/real_array_type_finalize
@@ -147,7 +149,8 @@ subroutine real_array_type_finalize(self)
   end if
   self%size=0
   self%capacity=0
-end subroutine
+
+end subroutine real_array_type_finalize
 !!***
 
 !****f* m_dynarray/int_array_type_push
@@ -192,12 +195,9 @@ subroutine int_array_type_push(self, val)
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
     self%data(self%size)=val
+
 end subroutine int_array_type_push
 !!***
-
-
-
-
 
 !****f* m_dynarray/int_array_type_finalize
 !!
@@ -232,7 +232,8 @@ subroutine int_array_type_finalize(self)
   end if
   self%size=0
   self%capacity=0
-end subroutine
+
+end subroutine int_array_type_finalize
 
 end module m_dynmaic_array
 !!***

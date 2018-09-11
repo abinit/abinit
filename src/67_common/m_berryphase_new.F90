@@ -57,7 +57,7 @@ module m_berryphase_new
  use m_paw_overlap,  only : expibi,qijb_kk,smatrix_k_paw
  use m_symtk,   only : symatm
  use m_time,    only : timab
- 
+
  implicit none
 
  private
@@ -1796,12 +1796,6 @@ end subroutine berryphase_new
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  efield_old_cart,gmet,gprimd,hdr,idir,kg,mcg,&
 &  mkmem,mpi_enreg,mpw,my_natom,natom,nattyp,ngfft,nkpt,npwarr,ntypat,&
@@ -1868,7 +1862,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
        & dtset%berryopt ==17 ) efield = .true.
   calc_epaw3_force = ( efield .and. dtset%optforces /= 0 .and. usepaw == 1 )
   calc_epaw3_stress = ( efield .and. dtset%optstress /= 0  .and. usepaw == 1 )
-  
+
   usecprj=1; if (psps%usepaw==0)  usecprj = 0
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
   mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
@@ -1916,9 +1910,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   end if ! end compute polarization and store cprj for efield
 
   if (efield .and. (scfcv_level == 0) ) then ! do this before scfcv loop
-     
+
      efield_old_cart(:)=dtset%efield(:)   !!HONG
-     
+
      !  save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar
      dtefield%efield2(:)=dtset%efield(:)
 
@@ -1931,24 +1925,24 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
      if (dtset%berryopt == 14 .and. scfcv_quit /=1) then
         !    ! Convert polarization to cartesian coords
-        
+
         ptot_cart(:)=zero
         do ii = 1,3
            ptot_cart(ii)=rprimd(ii,1)*red_ptot(1) + rprimd(ii,2)*red_ptot(2) + &
                 &       rprimd(ii,3)*red_ptot(3)
         end do
         ptot_cart(:)=ptot_cart(:)/ucvol
-        
+
         do ii=1,3
            dtefield%efield_dot(ii) = dot_product(dtset%efield(:),rprimd(:,ii))
         end do
 
         !    !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
         write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar-field:'
-        
+
         call wrtout(std_out,message,'COLL')
         call prtefield(dtset,dtefield,std_out,rprimd)
-        
+
         if(dtset%prtvol>=10)then
            call wrtout(ab_out,message,'COLL')
            call prtefield(dtset,dtefield,ab_out,rprimd)
@@ -1992,20 +1986,20 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
      end if ! end prtvol >= 10 output
-     
+
      ptot_cart(:)=zero
      do ii = 1,3
         ptot_cart(ii)=rprimd(ii,1)*red_ptot(1) + rprimd(ii,2)*red_ptot(2) + &
              &     rprimd(ii,3)*red_ptot(3)
      end do
      ptot_cart(:)=ptot_cart(:)/ucvol
-     
+
      !  !===================================================================================================
      !  !                                       OUTPUT  for fixed E
      !  !===================================================================================================
 
      if (dtset%berryopt == 4) then
-        
+
         !    !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
         write(message,'(a,a)')   ch10, 'scfcv: Constant unreduced E-field:'
         call wrtout(std_out,message,'COLL')
@@ -2015,30 +2009,30 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            call prtefield(dtset,dtefield,ab_out,rprimd)
         end if
      end if ! end berryopt 4 output
-     
+
      !  =====================================================================================
      !  !                                      fixed D calculation
      !  !====================================================================================
      if (dtset%berryopt == 6) then
         if (scfcv_step > 1) then
-           
+
            !      ! update efield taking damping into account dfield is in cartesian in dtset structure (contains input value)
            !      ! same goes for efield - update the dtset%efield value
            efield_test_cart(:)=dtset%ddamp*(dtset%dfield(:)-4.0d0*pi*ptot_cart(:))+&
                 &       (1.0d0-dtset%ddamp)*efield_old_cart(:)
-           
+
            !      ! test whether change in efield in any direction exceed maxestep, if so, set the
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
-              
+
              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
-                 
+
                write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
                write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
 &               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
 &               ",    maxestep=",dtset%maxestep
-                 
-                 
+
+
                if (efield_test_cart(ii) > efield_old_cart(ii)) then
                  efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
                else
@@ -2062,9 +2056,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            dtefield%efield_dot(1) = dot_product(dtset%efield(:),rprimd(:,1))
            dtefield%efield_dot(2) = dot_product(dtset%efield(:),rprimd(:,2))
            dtefield%efield_dot(3) = dot_product(dtset%efield(:),rprimd(:,3))
-           
+
         else
-           
+
            write(message,'(a,a)')   ch10, 'scfcv: Constant unreduced D-field  - Pre E-field:'
            call wrtout(std_out,message,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
@@ -2081,27 +2075,27 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
      !  !                                      fixed reduced d calculation
      !  !===================================================================================================
      if (dtset%berryopt == 16) then
-        
+
         if (scfcv_step > 1) then
            !      ! update efield taking damping into account reduced red_dfield
            !      red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
-           
+
            red_efield2(:)=dtset%ddamp*(dtset%red_dfield(:)-red_ptot(:))+ (1.0d0-dtset%ddamp)*red_efield2_old(:)
-           
+
            !      to calculate unreduced E
            efield_test_cart(:)=(4*pi/ucvol)*(rprimd(:,1)*red_efield2(1)+rprimd(:,2)*red_efield2(2)+rprimd(:,3)*red_efield2(3))
-           
+
            !      ! test whether change in efield in any direction exceed maxestep, if so, set the
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
-              
+
              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
-                 
+
                write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
                write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
 &               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
 &               ",    maxestep=",dtset%maxestep
-                 
+
                if (efield_test_cart(ii) > efield_old_cart(ii)) then
                  efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
                else
@@ -2109,9 +2103,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
                end if
              end if
            end do
-           
+
            dtset%efield(:) = efield_test_cart(:)
-           
+
            !      !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
            write(message,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - updating E-field:'
            call wrtout(std_out,message,'COLL')
@@ -2120,15 +2114,15 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
               call wrtout(ab_out,message,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
-           
+
            !      ! need to update dtset%efield_dot(:) with new value
            !      ! This needs to be deleted  when efield_dot is deleted
            dtefield%efield_dot(1) = dot_product(dtset%efield(:),rprimd(:,1))
            dtefield%efield_dot(2) = dot_product(dtset%efield(:),rprimd(:,2))
            dtefield%efield_dot(3) = dot_product(dtset%efield(:),rprimd(:,3))
-           
+
         else
-           
+
            write(message,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - Pre E-field:'
            call wrtout(std_out,message,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
@@ -2136,94 +2130,94 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
               call wrtout(ab_out,message,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
-           
+
         end if  ! scfcv_step > 1
-        
+
         efield_old_cart(:)=dtset%efield(:)
         red_efield2_old(:)=red_efield2(:)
      end if  ! berryopt ==16
-     
-     
+
+
      !  !===================================================================================================
      !  !                                      fixed reduced d and ebar calculation (mixed BC)
      !  !===================================================================================================
      if (dtset%berryopt == 17) then
-        
+
         if (scfcv_step > 1) then
            !      ! update efield taking damping into account reduced red_dfield
            !      red_efield1 and red_efield2 is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel1999]]
            !      red_efield1 for fixed ebar, red_efield2 for fixed d calculation
-           
+
            !      save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar
            dtefield%efield2(:)=dtset%efield(:)
-           
+
            !      write(*,'(a,3i4)') "jfielddir=", (dtset%jfielddir(ii),ii=1,3)
-           
+
            do ii=1,3
               if (dtset%jfielddir(ii) ==2 ) then    ! direction under fixed d
                  dtset%red_efieldbar(ii) = dot_product(dtset%efield(:),rprimd(:,ii)) !  update ebar which is not fixed
                  dtefield%efield_dot(ii) = dot_product(dtset%efield(:),rprimd(:,ii))
                  red_efield2(ii)=dtset%ddamp*(dtset%red_dfield(ii) - red_ptot(ii)) +  &
                       &           (1.0d0-dtset%ddamp)*red_efield2_old(ii)         ! d(ii) is fixed, update e(ii)  may need ddamping here
-                 
+
                  !          write(message,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed d, value is (2)  ', dtset%jfielddir(ii)
                  !          call wrtout(ab_out,message,'COLL')
                  !          call wrtout(std_out,message,'COLL')
-                 
+
               else if (dtset%jfielddir(ii) ==1 ) then   ! direction under fixed ebar
                  red_efield2(ii)= (ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,ii)) !  update e which is not fixed
                  dtset%red_dfield(ii)=red_ptot(ii) +  (ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,ii))  ! update d
-                 
+
                  !          write(message,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed ebar, value is (1)  ', dtset%jfielddir(ii)
                  !          call wrtout(ab_out,message,'COLL')
                  !          call wrtout(std_out,message,'COLL')
-                 
+
               end if
            end do
-           
+
            do ii=1,3
               red_efield1(ii)  =(ucvol/(4*pi))*dot_product(dtset%red_efieldbar(:),gmet(:,ii))
            end do
-           
-           
+
+
            dtset%red_efield(:)=(red_efield1(:) + red_efield2(:))/2.0d0 ! average reduced efield,
            !      one is from fixed ebar part,
            !      the other is from fixed d part.
            !      This may need to be optimized !!
-           
+
            write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed ebar:', ch10, &
                 &       '       e:  ', (red_efield1(ii),ii=1,3), ch10
-           
+
            !      call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
-           
+
            write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed d:', ch10, &
                 &       '       e:  ', (red_efield2(ii),ii=1,3), ch10
-           
+
            !      call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
-           
+
            write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Average reduced efield:', ch10, &
                 &       '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10
-           
+
            !      call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
-           
+
            !      to calculate unreduced E
            do ii=1,3
               efield_test_cart(ii)  = (4*pi/ucvol)* dot_product(dtset%red_efield(:),rprimd(:,ii))
            end do
-           
+
            !      ! test whether change in efield in any direction exceed maxestep, if so, set the
            !      ! change to maxestep instead   ! need optimized !
            do ii = 1,3
              if (dabs(efield_test_cart(ii)-efield_old_cart(ii)) > dabs(dtset%maxestep)) then
-                 
+
                write(std_out,'(a,a,i5)') "JH - ","  E-field component:",ii
                write(std_out,'(a,es13.5,a,es13.5,a,es13.5,a,es13.5)') " E(n)=",efield_test_cart(ii), &
 &               ",    E(n-1)=",efield_old_cart(ii), ",    E(n)-E(n-1)=", efield_test_cart(ii)-efield_old_cart(ii), &
 &               ",    maxestep=",dtset%maxestep
-                 
+
                if (efield_test_cart(ii) > efield_old_cart(ii)) then
                  efield_test_cart(ii) = efield_old_cart(ii) + dabs(dtset%maxestep)
                else
@@ -2231,9 +2225,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
                end if
              end if
            end do
-           
+
            dtset%efield(:) = efield_test_cart(:)
-           
+
            !      !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
            write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - updating E-field:'
            call wrtout(std_out,message,'COLL')
@@ -2242,16 +2236,16 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
               call wrtout(ab_out,message,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
-           
-           
+
+
            !      ! need to update dtset%efield_dot(:) with new value
            !      ! This needs to be deleted  when efield_dot is deleted
            dtefield%efield_dot(1) = dot_product(dtset%efield(:),rprimd(:,1))
            dtefield%efield_dot(2) = dot_product(dtset%efield(:),rprimd(:,2))
            dtefield%efield_dot(3) = dot_product(dtset%efield(:),rprimd(:,3))
-           
+
         else
-           
+
            write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - Pre E-field:'
            call wrtout(std_out,message,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
@@ -2259,22 +2253,22 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
               call wrtout(ab_out,message,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
-           
+
         end if  ! scfcv_step > 1
-        
+
         efield_old_cart(:)=dtset%efield(:)
         red_efield2_old(:)=red_efield2(:)
-        
+
      end if  ! berryopt ==17
-     
+
   end if ! end efield .and. scfcv_level 1 tasks
-  
+
   !deallocate cprj
   if ( efield .and. psps%usepaw == 1) then
      call pawcprj_free(cprj)
   end if
   ABI_DATATYPE_DEALLOCATE(cprj)
-  
+
 end subroutine update_e_field_vars
 !!***
 
@@ -2318,13 +2312,6 @@ end subroutine update_e_field_vars
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
 
 
@@ -2362,7 +2349,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
   !ENDDEBUG
 
   !write here
-  
+
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 
@@ -2400,7 +2387,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
           &  '    pbar:  ', (red_pbar(ii),ii=1,3)
@@ -2410,7 +2397,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
           &   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &
           &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
@@ -2434,7 +2421,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      do idir=1,3
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
-     
+
      !  to calculate red_dbar
      do idir=1,3
         red_dbar(idir)  = dot_product(dtset%dfield(:),rprimd(:,idir))
@@ -2451,7 +2438,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
           &  '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
@@ -2465,18 +2452,18 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
           &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
 &     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
 &     '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10,&
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3),ch10,&
-&     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10 
+&     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
         ! eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))=8.854187817620*5.14220652*1d-1
      call wrtout(iunit,message,'COLL')
-     
+
      !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
-     
+
   end if  ! berryopt ==6
 
 
@@ -2490,40 +2477,40 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      do idir=1,3
         dtset%red_efield(idir)  =(ucvol/(4*pi))*dot_product(dtefield%efield2(:),gprimd(:,idir))
      end do
-     
+
      !  to calculate pbar
      do idir=1,3
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
-     
+
      write(message,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))')  ' (a. u.)', ch10,&
           &   '   ebar0:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &
           &   '    ebar:  ', (red_efieldbar_lc(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtefield%efield2(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
           &   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &
           &   '-      E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
           &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10
      call wrtout(iunit,message,'COLL')
-     
-     
+
+
   end if  ! berryopt ==14
-  
-  
+
+
   if (dtset%berryopt == 16) then
-     
+
      !  to calculate e Eq.(25)
      do idir=1,3
         dtset%red_efield(idir)  =(ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,idir))
@@ -2533,17 +2520,17 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      do idir=1,3
         dtset%red_efieldbar(idir)  = dot_product(dtset%efield(:),rprimd(:,idir))
      end do
-     
+
      !  to calculate pbar
      do idir=1,3
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
-     
+
      !  to calculate dbar
      do idir=1,3
         red_dfieldbar(idir)  = (4*pi/ucvol)*dot_product(dtset%red_dfield(:),rmet(:,idir))
      end do
-     
+
      !  to calculate D
      do idir=1,3
         dtset%dfield(idir)  =(4*pi/ucvol)*dot_product(dtset%red_dfield(:),rprimd(:,idir))
@@ -2555,14 +2542,14 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
           &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
           &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3), ch10, &
@@ -2577,25 +2564,25 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
      call wrtout(iunit,message,'COLL')
-     
+
   end if  ! berryopt ==16
-  
+
   if (dtset%berryopt == 17) then
-     
+
      do idir=1,3   ! ebar local
         red_efieldbar_lc(idir)=dot_product(dtefield%efield2(:),rprimd(:,idir))
      end do
-     
+
      do idir=1,3
         dtset%red_efield(idir)  =(ucvol/(4*pi))*dot_product(dtefield%efield2(:),gprimd(:,idir))
      end do
-     
+
      !  to calculate pbar
      do idir=1,3
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
-     
-     
+
+
      !  do idir=1,3
      !  if (dtset%rfdir(idir)==1) then   ! fixed ebar
      !  red_efieldbar_lc(idir)=dot_product(dtefield%efield2(:),rprimd(:,idir))  ! local efieldbar
@@ -2618,16 +2605,16 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
      !  ebar_lc(idir)=dtset%red_efieldbar(idir)
      !  end if
      !  enddo
-     
-     
-     
+
+
+
      do idir=1,3
         red_efield_lc(idir)= (ucvol/(4*pi))*dot_product(dtefield%efield2(:),gprimd(:,idir))
         red_efieldbar_lc(idir)=dot_product(dtefield%efield2(:),rprimd(:,idir))  ! local efieldbar
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
         red_dfieldbar(idir)  = (4*pi/ucvol)*dot_product(dtset%red_dfield(:),rmet(:,idir))
         dtset%dfield(idir)  =(4*pi/ucvol)*dot_product(dtset%red_dfield(:),rprimd(:,idir))
-        
+
      end do
 
      do idir=1,3
@@ -2646,28 +2633,28 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (red_efield_lc(ii)+dtefield%red_ptot1(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       e:  ', (red_efield_lc(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (red_efield_lc(ii)+dtefield%red_ptot1(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '    ebar:  ', (red_efieldbar_lc(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
           &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
           &   ' eba+pba:  ', (red_efieldbar_lc(ii)+red_pbar(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtefield%efield2(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3), ch10, &
           &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
           &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
      call wrtout(iunit,message,'COLL')
-     
+
      write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)')  ch10, &
 &     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
 &     '       E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
@@ -2675,9 +2662,9 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &     'eps0*E+P:  ', (dtefield%efield2(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
      call wrtout(iunit,message,'COLL')
-     
+
   end if  ! berryopt ==17
-  
+
 end subroutine prtefield
 !!***
 
@@ -2691,7 +2678,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group 
+!! Copyright (C) 2004-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2734,12 +2721,6 @@ end subroutine prtefield
 !!      initberry
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
@@ -2788,9 +2769,9 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
   dtefield%has_rij = 0
   dtefield%usecprj = 0
   dtefield%berryopt = 0
-  
+
   if ((dtset%berryopt < 0).or.(dtset%berryopt == 4) .or. (dtset%berryopt == 6) .or.(dtset%berryopt == 7) .or. &
-       & (dtset%berryopt == 14) .or.(dtset%berryopt == 16) .or.(dtset%berryopt == 17)) then 
+       & (dtset%berryopt == 14) .or.(dtset%berryopt == 16) .or.(dtset%berryopt == 17)) then
      nullify(pwind,pwnsfac)
      call initberry(dtefield,dtset,gmet,gprimd,kg,&
           &   dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw,&
@@ -2894,12 +2875,6 @@ end subroutine init_e_field_vars
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              mkmem,mpi_enreg,mpw,natom,nkpt,npwarr,nsppol,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
@@ -2933,7 +2908,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   real(dp),pointer :: pwnsfac(:,:)
   type(pawrad_type),intent(in) :: pawrad(ntypat)
   type(pawtab_type),intent(in) :: pawtab(ntypat)
-  
+
   !Local variables-------------------------------
   !scalars
   integer :: exchn2n3d,flag,flag_kpt,fnkpt_computed,iband,icg,icprj
@@ -2952,7 +2927,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   ! rmetlcl(3,3)=real-space metric (same as rmet in metric.F90)
   ! gmetlcl(3,3)= same as gmet in metric.F90
   ! ucvol = volume of the unit cell in Bohr**3
-  
+
   character(len=500) :: message
   logical :: calc_epaw3_force,calc_epaw3_stress,fieldflag
   !arrays
@@ -2963,19 +2938,19 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   real(dp) :: delta_str3(2), dstr(2),dk_str(2,2,3)
   real(dp) :: tsec(2)
   real(dp),allocatable :: calc_expibi(:,:),calc_qijb(:,:,:),spkpt(:,:)
-  
+
   ! *************************************************************************
-  
+
   DBG_ENTER("COLL")
-  
+
   call timab(1001,1,tsec)
   call timab(1002,1,tsec)
-  
+
   !save the current value of berryopt
   dtefield%berryopt = dtset%berryopt
   !save the current value of nspinor
   dtefield%nspinor = dtset%nspinor
-  
+
   !----------------------------------------------------------------------------
   !-------------------- Obtain k-point grid in the full BZ --------------------
   !----------------------------------------------------------------------------
@@ -2988,7 +2963,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
           &   -dtset%kptrlatt(1,2)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,3) &
           &   -dtset%kptrlatt(1,3)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,1) &
           &   -dtset%kptrlatt(1,1)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,2)
-     
+
      !  Call smpbz to obtain the list of k-point in the full BZ - without symmetry reduction
      option = 0
      brav = 1
@@ -3012,30 +2987,30 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         call wrtout(std_out,message,'PERS')
      end if
   end if
-  
+
   !call listkk to get mapping from FBZ to IBZ
   rdum=1.0d-5  ! cutoff distance to decide when two k points match
   ABI_ALLOCATE(dtefield%indkk_f2ibz,(dtefield%fnkpt,6))
-  
+
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-  
+
   !ji: The following may need modification in the future
   !**** no spin-polarization doubling ; allow use of time reversal symmetry ****
-  
+
   !Here is original call
   !
   !call listkk(rdum,gmet,dtefield%indkk_f2ibz,dtset%kptns,dtefield%fkptns,nkpt,&
   !& dtefield%fnkpt,dtset%nsym,1,dtset%symafm,dtset%symrel,1)
-  
+
   call timab(1002,2,tsec)
   call timab(1003,1,tsec)
-  
+
   call listkk(rdum,gmet,dtefield%indkk_f2ibz,dtset%kptns,dtefield%fkptns,nkpt,&
        & dtefield%fnkpt,dtset%nsym,1,dtset%symafm,symrec,1,use_symrec=.True.)
-  
+
   call timab(1003,2,tsec)
   call timab(1004,1,tsec)
-  
+
   !Construct i2fbz and f2ibz
   ABI_ALLOCATE(dtefield%i2fbz,(nkpt))
   idum=0
@@ -3051,7 +3026,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      message = ' Found wrong number of k-points in IBZ'
      MSG_ERROR(message)
   end if
-  
+
   !set flags for fields, forces, stresses
   fieldflag = ( (dtset%berryopt== 4) .or. (dtset%berryopt== 6) .or. (dtset%berryopt== 7)  &
        & .or. (dtset%berryopt==14) .or. (dtset%berryopt==16) .or. (dtset%berryopt==17) )
@@ -3059,42 +3034,42 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   ! stress in finite field PAW calculations
   calc_epaw3_force = (fieldflag .and. usepaw == 1 .and. dtset%optforces /= 0)
   calc_epaw3_stress = (fieldflag .and. usepaw == 1 .and. dtset%optstress /= 0)
-  
+
 
 
   !----------------------------------------------------------------------------
   !------------- Allocate PAW space if necessary ------------------------------
   !----------------------------------------------------------------------------
-  
+
   if (usepaw == 1) then
-     
+
      dtefield%usepaw   = usepaw
      dtefield%natom    = natom
      dtefield%my_natom = mpi_enreg%my_natom
-     
+
      ABI_ALLOCATE(dtefield%lmn_size,(ntypat))
      ABI_ALLOCATE(dtefield%lmn2_size,(ntypat))
      do itypat = 1, ntypat
         dtefield%lmn_size(itypat) = pawtab(itypat)%lmn_size
         dtefield%lmn2_size(itypat) = pawtab(itypat)%lmn2_size
      end do
-     
+
      lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
      dtefield%lmn2max = lmn2_size_max
-     
+
      ! expibi and qijb_kk are NOT parallelized over atoms
      ! this may change in the future (JZwanziger 18 March 2014)
      ABI_ALLOCATE(dtefield%qijb_kk,(2,lmn2_size_max,dtefield%natom,3))
      ABI_ALLOCATE(dtefield%expibi,(2,dtefield%natom,3))
      dtefield%has_expibi = 1
      dtefield%has_qijb = 1
-     
+
      if ( fieldflag .and. dtefield%has_rij==0) then
         lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
         ABI_ALLOCATE(dtefield%rij,(lmn2_size_max,ntypat,3))
         dtefield%has_rij = 1
      end if
-     
+
      ! additional F3-type force term for finite electric field with PAW. Same term
      ! might also apply for other displacement-type field calculations, but not sure yet
      ! JZwanziger 4 April 2014
@@ -3106,7 +3081,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         ABI_ALLOCATE(dtefield%epaws3,(dtefield%natom,3,6))
         dtefield%has_epaws3 = 1
      end if
-     
+
      ncpgr = 0
      if ( fieldflag .and. dtefield%usecprj == 0) then
         ABI_ALLOCATE(dimlmn,(natom))
@@ -3121,10 +3096,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         dtefield%usecprj = 1
         ABI_DEALLOCATE(dimlmn)
      end if
-     
+
      ABI_ALLOCATE(dtefield%cprjindex,(nkpt,nsppol))
      dtefield%cprjindex(:,:) = 0
-     
+
      if (dtset%kptopt /= 3) then
         ABI_ALLOCATE(dtefield%atom_indsym,(4,nsym,natom))
         call symatm(dtefield%atom_indsym,natom,nsym,symrec,dtset%tnons,tol8,typat,xred)
@@ -3135,16 +3110,16 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         dtefield%lmax = lmax
         dtefield%lmnmax = psps%lmnmax
      end if
-     
+
   end if
-  
+
   !------------------------------------------------------------------------------
   !------------------- Compute variables related to MPI // ----------------------
   !------------------------------------------------------------------------------
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
   me=xmpi_comm_rank(spaceComm)
-  
+
   if (nproc==1) then
      dtefield%fmkmem = dtefield%fnkpt
      dtefield%fmkmem_max = dtefield%fnkpt
@@ -3165,7 +3140,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      mkmem_ = mkmem
      call xmpi_max(mkmem_,dtefield%mkmem_max,spaceComm,ierr)
   end if
-  
+
   ABI_ALLOCATE(mpi_enreg%kpt_loc2fbz_sp,(0:nproc-1,1:dtefield%fmkmem_max*nsppol, 1:2))
   ABI_ALLOCATE(mpi_enreg%kpt_loc2ibz_sp,(0:nproc-1,1:dtefield%mkmem_max*nsppol, 1:2))
   ABI_ALLOCATE(mpi_enreg%kptdstrb,(nproc,6,dtefield%fmkmem_max*nsppol*2))
@@ -3174,21 +3149,21 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   mpi_enreg%kpt_loc2ibz_sp(:,:,:) = 0
   mpi_enreg%kptdstrb(:,:,:)       = 0
   mpi_enreg%mkmem(:)              = 0
-  
+
   if (fieldflag) then
      ABI_ALLOCATE(dtefield%cgqindex,(3,6,nkpt*nsppol))
      ABI_ALLOCATE(dtefield%nneigh,(nkpt))
      dtefield%cgqindex(:,:,:) = 0 ; dtefield%nneigh(:) = 0
   end if
-  
+
   pwind_alloc = mpw*dtefield%fmkmem_max
   ABI_ALLOCATE(pwind,(pwind_alloc,2,3))
   ABI_ALLOCATE(pwnsfac,(2,pwind_alloc))
-  
+
   !------------------------------------------------------------------------------
   !---------------------- Compute efield_type variables -------------------------
   !------------------------------------------------------------------------------
-  
+
   !Initialization of efield_type variables
   mult=dtset%useria+1
   dtefield%efield_dot(:) = zero
@@ -3205,35 +3180,35 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
   dtefield%kgindex(:) = 0
   dtefield%fkgindex(:) = 0
-  
+
   if (fieldflag) then
      dtset%rfdir(1:3) = 1
   end if
-  
-  
+
+
   !Compute spin degeneracy
   if (nsppol == 1 .and. dtset%nspinor == 1) then
      dtefield%sdeg = two
   else if (nsppol == 2 .or. my_nspinor == 2) then
      dtefield%sdeg = one
   end if
-  
+
   !Compute the number of occupied bands and check that
   !it is the same for each k-point
-  
+
   index = 0
   do isppol = 1, nsppol
      dtefield%nband_occ(isppol) = 0
      do ikpt = 1, nkpt
-        
+
         mband_occ_k = 0
         nband_k = dtset%nband(ikpt + (isppol - 1)*nkpt)
-        
+
         do iband = 1, nband_k
            index = index + 1
            if (abs(occ(index) - dtefield%sdeg) < tol8) mband_occ_k = mband_occ_k + 1
         end do
-        
+
         if (fieldflag) then
            if (nband_k /= mband_occ_k) then
               write(message,'(a,a,a)')&
@@ -3242,7 +3217,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               MSG_ERROR(message)
            end if
         end if
-        
+
         if (ikpt > 1) then
            if (dtefield%nband_occ(isppol) /= mband_occ_k) then
               message = "The number of valence bands is not the same for every k-point of present spin channel"
@@ -3252,91 +3227,91 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            dtefield%mband_occ         = max(dtefield%mband_occ, mband_occ_k)
            dtefield%nband_occ(isppol) = mband_occ_k
         end if
-        
+
      end do                ! close loop over ikpt
   end do                ! close loop over isppol
-  
+
   if (fieldflag) then
      ABI_ALLOCATE(dtefield%smat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt*nsppol,2,3))
-     
+
      dtefield%smat(:,:,:,:,:,:) = zero
   end if
-  
+
   ABI_ALLOCATE(dtefield%sflag,(dtefield%mband_occ,nkpt*nsppol,2,3))
   dtefield%sflag(:,:,:,:) = 0
-  
+
   !Compute the location of each wavefunction
-  
+
   icg = 0
   icprj = 0
   !ikg = 0
   do isppol = 1, nsppol
      do ikpt = 1, nkpt
-        
+
         nband_k = dtset%nband(ikpt + (isppol-1)*nkpt)
-        
+
         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-        
+
         dtefield%cgindex(ikpt,isppol) = icg
         npw_k = npwarr(ikpt)
         icg = icg + npw_k*dtefield%nspinor*nband_k
-        
+
         if (usepaw == 1) then
            dtefield%cprjindex(ikpt,isppol) = icprj
            icprj = icprj + dtefield%nspinor*nband_k
         end if
-        
+
      end do
   end do
-  
+
   ikg = 0
   do ikpt = 1, nkpt
      if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,1,me)).and.&
           &   (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,nsppol,me))) cycle
-     
+
      npw_k = npwarr(ikpt)
      dtefield%kgindex(ikpt) = ikg
      ikg = ikg + npw_k
   end do
-  
+
   !Need to use dtset%red_efieldbar in the whole code
   !Compute the reciprocal lattice coordinates of the electric field
   if (fieldflag) then
-     
+
      call  metric(gmetllc,gprimdlc,-1,rmetllc,rprimd,ucvol_local)
-     
+
      if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7) then
-        
+
         do ii=1,3
            dtset%red_efieldbar(ii) = dot_product(dtset%efield(:),rprimd(:,ii))
            dtefield%efield_dot(ii) =  dtset%red_efieldbar(ii)
         end do
-        
+
         !    dtefield%efield_dot(1) = dot_product(dtset%efield(:),rprimd(:,1))
         !    dtefield%efield_dot(2) = dot_product(dtset%efield(:),rprimd(:,2))
         !    dtefield%efield_dot(3) = dot_product(dtset%efield(:),rprimd(:,3))
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
      end if
-     
+
      if (dtset%berryopt == 6 .or. dtset%berryopt ==7 ) then
-        
+
         do ii=1,3
            dtset%red_dfield(ii)= (dot_product(dtset%dfield(:),gprimdlc(:,ii)))*ucvol_local/(4.d0*pi)
         end do
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric displacement field',ch10,&
              &     '  red_dfield(1:3) = ',dtset%red_dfield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
      end if
-     
-     
+
+
      if (  dtset%berryopt == 14 ) then
         !    transfer to unreduced electric field.
         do idir=1,3
@@ -3344,116 +3319,116 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
            !      dtefield%efield2(idir)=dtset%red_efieldbar(idir)
         end do
-        
+
         !    dtefield%efield_dot(1) = dtset%red_efieldbar(1)
         !    dtefield%efield_dot(2) = dtset%red_efieldbar(2)
         !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
      end if
-     
-     
+
+
      if ( dtset%berryopt == 16 ) then
-        
+
         !    to calculate D
         do ii=1,3
            dtset%dfield(ii)  =(4*pi/ucvol_local)*dot_product(dtset%red_dfield(:),rprimd(:,ii))
         end do
-        
+
         do idir=1,3
            dtset%efield(idir)= (4*pi/ucvol_local)*dot_product(dtset%red_efield(:),rprimd(:,idir))
         end do
-        
+
         do idir=1,3
            dtset%red_efieldbar(idir)= (4*pi/ucvol_local)*dot_product(dtset%red_efield(:),rmetllc(:,idir))
            dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
         end do
-        
+
         !    dtefield%efield_dot(1) = dtset%red_efieldbar(1)
         !    dtefield%efield_dot(2) = dtset%red_efieldbar(2)
         !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
-        
-        
+
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric displacement field (a.u.)',ch10,&
              &     '  dfield(1:3) = ',dtset%dfield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
      end if
-     
+
      if ( dtset%berryopt ==17) then
-        
+
         !    to calculate D
-        
+
         do idir=1,3
            dtset%efield(idir)= dot_product(dtset%red_efieldbar(:),gprimdlc(:,idir))  ! from ebar
            dtset%dfield(idir)  =(4*pi/ucvol_local)*dot_product(dtset%red_dfield(:),rprimd(:,idir))
            !      dtset%red_efield(idir) = (ucvol_local/(4*pi))*dot_product(dtset%red_efieldbar(:),gmetllc(:,idir))
            dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
         end do
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
-        
+
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric displacement field (a.u.)',ch10,&
              &     '  red_dfield(1:3) = ',dtset%red_dfield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
+
         write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric displacement field (a.u.)',ch10,&
              &     '  dfield(1:3) = ',dtset%dfield(1:3),ch10
         call wrtout(std_out,message,'COLL')
-        
-        
+
+
      end if
-     
-     
+
+
 
   end if
-  
+
   call timab(1004,2,tsec)
-  
+
   !------------------------------------------------------------------------------
   !---------------------- Compute dk --------------------------------------------
   !------------------------------------------------------------------------------
-  
+
   call timab(1005,1,tsec)
-  
+
   do idir = 1, 3
-     
+
      if (dtset%rfdir(idir) == 1) then
-        
+
         !    Compute dk(:), the vector between a k-point and its nearest
         !    neighbour along the direction idir
-        
+
         dk(:) = zero
         dk(idir) = 1._dp   ! 1 mean there is no other k-point un the direction idir
         do ikpt = 2, dtefield%fnkpt
@@ -3465,12 +3440,12 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         !    DEBUG
         !    write(std_out,*)' initberry : idir, dk', idir, dk
         !    ENDDEBUG
-        
+
         !    For each k point, find k_prim such that k_prim= k + dk mod(G)
         !    where G is a vector of the reciprocal lattice
-        
+
         do ikpt = 1, dtefield%fnkpt
-           
+
            !      First k+dk, then k-dk
            do isign=-1,1,2
               kpt_shifted1=dtefield%fkptns(1,ikpt)- isign*dk(1)
@@ -3489,7 +3464,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                  exit
               end do   ! ikpt1
            end do     ! isign
-           
+
            !      OLD CODING
            !      First: k + dk
            !      do ikpt1 = 1, dtefield%fnkpt
@@ -3500,7 +3475,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            !      exit
            !      end if
            !      end do
-           
+
            !      Second: k - dk
            !      do ikpt1 = 1, dtefield%fnkpt
            !      diffk(:) = abs(dtefield%fkptns(:,ikpt1) - &
@@ -3510,12 +3485,12 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            !      exit
            !      end if
            !      end do
-           
+
         end do     ! ikpt
-        
+
         !    Find the string length, starting from k point 1
         !    (all strings must have the same number of points)
-        
+
         nkstr = 1
         ikpt1 = 1
         do ikpt = 1, dtefield%fnkpt
@@ -3523,7 +3498,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            if (ikpt1 == 1) exit
            nkstr = nkstr + 1
         end do
-        
+
         !    Check that the string length is a divisor of nkpt
         if(mod(dtefield%fnkpt,nkstr) /= 0) then
            write(message,'(a,i5,a,i7)')&
@@ -3531,28 +3506,28 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                 &       ', is not a divisor of fnkpt =',dtefield%fnkpt
            MSG_BUG(message)
         end if
-        
+
         dtefield%nkstr(idir) = nkstr
         dtefield%nstr(idir)  = dtefield%fnkpt/nkstr
-        
+
      end if      ! dtset%rfdir(idir) == 1
-     
+
      write(message,'(a,i1,a,i3,a,i6)')&
           &   '  initberry: for direction ',idir,', nkstr = ',dtefield%nkstr(idir),&
           &   ', nstr = ',dtefield%nstr(idir)
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
-     
+
   end do     ! close loop over idir
-  
+
   call timab(1005,2,tsec)
   call timab(1006,1,tsec)
-  
+
   dtefield%maxnstr  = maxval(dtefield%nstr(:))
   dtefield%maxnkstr = maxval(dtefield%nkstr(:))
   ABI_ALLOCATE(dtefield%idxkstr,(dtefield%maxnkstr,dtefield%maxnstr,3))
   dtefield%idxkstr(:,:,:) = 0
-  
+
   !for the geometry of the string space :
   ABI_ALLOCATE(dtefield%coord_str,(2,dtefield%maxnstr,3))
   ABI_ALLOCATE(dtefield%str_neigh,(-2:2,dtefield%maxnstr,3))
@@ -3561,20 +3536,20 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   dtefield%str_neigh(:,:,:)=0
   dtefield%strg_neigh(:,:,:,:)=0
   dtefield%gmet_str(:,:,:)=0.d0
-  
+
   !------------------------------------------------------------------------------
   !---------------------- Build the strings -------------------------------------
   !------------------------------------------------------------------------------
-  
+
   ABI_ALLOCATE(kpt_mark,(dtefield%fnkpt))
   do idir = 1, 3
-     
+
      if (dtset%rfdir(idir) == 1) then
-        
+
         iunmark = 1
         kpt_mark(:) = 0
         do istr = 1, dtefield%nstr(idir)
-           
+
            do while(kpt_mark(iunmark) /= 0)
               iunmark = iunmark + 1
            end do
@@ -3586,9 +3561,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               dtefield%idxkstr(ikstr,istr,idir) = ikpt2
               kpt_mark(ikpt2) = 1
            end do
-           
+
         end do    ! istr
-        
+
         !    compute distance between strings
         !    compute the metric matrix of the strings space in the direction idir
         do ii = 1,3
@@ -3619,14 +3594,14 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               if (ii>idir) dtefield%coord_str(ii-1,istr,idir)=dtefield%fkptns(ii,dtefield%idxkstr(1,istr,idir))
            end do
         end do
-        
+
         !    the following is very similar to getshell
         dist_ = 0._dp
         do ii = 1,2
            dist_ = dist_ + dtefield%gmet_str(ii,ii,idir)
         end do
         max_dist = 2._dp * dist_ * 2._dp
-        
+
         dk_str(:,:,idir) = 0._dp
         last_dist = 0._dp
         !    ishell = 0
@@ -3635,7 +3610,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         do while (dk_flag /= 2)
            !      Advance shell counter
            !      ishell = ishell + 1
-           
+
            !      Search the smallest distance between two strings
            dist = max_dist
            do istr = 1,dtefield%nstr(idir)
@@ -3657,9 +3632,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                  end do
               end do
            end do
-           
+
            last_dist = dist
-           
+
            !      search the connecting vectors for that distance
            do istr = 1,dtefield%nstr(idir)
               delta_str3(:) = dtefield%coord_str(:,istr,idir) - dtefield%coord_str(:,1,idir)
@@ -3695,9 +3670,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               end do
               if (dk_flag == 2) exit
            end do
-           
+
         end do ! do while
-        
+
         !    search the two neighbours for each string
         do istr = 1,dtefield%nstr(idir)
            dtefield%str_neigh(0,istr,idir) = istr
@@ -3725,7 +3700,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               end do
            end do
         end do
-        
+
         !    DEBUG
         !    write(std_out,'(a,e15.4,e15.4,e15.4,e15.4)')'dk_str',dk_str(1,1,idir),dk_str(2,1,idir),dk_str(1,2,idir),dk_str(2,2,idir)
         !    write(std_out,*)'istr, neigh1, strg(1,:), neigh2, strg(2,:),neigh-1, strg(-1,:), neigh-2, strg(-2,:)'
@@ -3737,21 +3712,21 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         !    &       dtefield%str_neigh(-2,istr,idir), dtefield%strg_neigh(-2,istr,:,idir)
         !    end do
         !    ENDDEBUG
-        
-        
+
+
      end if         ! rfdir(idir) == 1
-     
+
   end do           ! close loop over idir
-  
+
   ABI_DEALLOCATE(kpt_mark)
-  
+
   call timab(1006,2,tsec)
   call timab(1007,1,tsec)
-  
+
   !------------------------------------------------------------------------------
   !------------ Compute PAW on-site terms if necessary --------------------------
   !------------------------------------------------------------------------------
-  
+
   if (usepaw == 1 .and. dtefield%has_expibi == 1) then
      ABI_ALLOCATE(calc_expibi,(2,natom))
      do idir = 1, 3
@@ -3764,10 +3739,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      dtefield%has_expibi = 2
      ABI_DEALLOCATE(calc_expibi)
   end if
-  
+
   if (usepaw == 1 .and. dtefield%has_qijb == 1) then
      ABI_ALLOCATE(calc_qijb,(2,dtefield%lmn2max,natom))
-     
+
      do idir = 1, 3
         dk = dtefield%dkvecs(1:3,idir)
         calc_qijb = zero
@@ -3800,63 +3775,63 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   !------------ Build the array pwind that is needed to compute the -------------
   !------------ overlap matrices at k +- dk                         -------------
   !------------------------------------------------------------------------------
-  
+
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
   pwind(:,:,:) = 0
   pwnsfac(1,:) = 1.0_dp
   pwnsfac(2,:) = 0.0_dp
   ABI_ALLOCATE(kg1_k,(3,mpw))
-  
+
   ipwnsfac = 0
-  
+
   do idir = 1, 3
-     
+
      if (dtset%rfdir(idir) == 1) then
-        
+
         dk(:) = dtefield%dkvecs(:,idir)
-        
+
         do ifor = 1, 2
-           
+
            if (ifor == 2) dk(:) = -1._dp*dk(:)
-           
+
            !      Build pwind and kgindex
            !      NOTE: The array kgindex is important for parallel execution.
            !      In case nsppol = 2, it may happent that a particular processor
            !      treats k-points at different spin polarizations.
            !      In this case, it is not possible to address the elements of
            !      pwind correctly without making use of the kgindex array.
-           
+
            ikg = 0 ; ikpt_loc = 0 ; isppol = 1
            do ikpt = 1, dtefield%fnkpt
-              
+
               ikpti = dtefield%indkk_f2ibz(ikpt,1)
               nband_k = dtset%nband(ikpti)
               ikpt1f = dtefield%ikpt_dk(ikpt,ifor,idir)
               ikpt1i = dtefield%indkk_f2ibz(ikpt1f,1)
-              
+
               if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,1,me)).and.&
                    &         (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,nsppol,me))) cycle
-              
+
               ikpt_loc = ikpt_loc + 1
-              
+
               !        Build basis sphere of plane waves for the nearest neighbour of
               !        the k-point (important for MPI //)
-              
+
               kg1_k(:,:) = 0
               kpt1(:) = dtset%kptns(:,ikpt1i)
               call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,&
                    &         1,mpi_enreg,mpw,npw_k1)
               me_g0=mpi_enreg%me_g0
-              
-              
+
+
               !        ji: fkgindex is defined here !
               dtefield%fkgindex(ikpt) = ikg
-              
+
               !
               !        Deal with symmetry transformations
               !
-              
+
               !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
               !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
               !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
@@ -3865,56 +3840,56 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
               !        where GBZ(k) takes k(k) to the BZ
               !
-              
+
               isym  = dtefield%indkk_f2ibz(ikpt,2)
               isym1 = dtefield%indkk_f2ibz(ikpt1f,2)
-              
+
               !        Construct transformed G vector that enters the matching condition:
               !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
-              
+
               dg(:) = -dtefield%indkk_f2ibz(ikpt,3:5) &
                    &         -nint(-dtefield%fkptns(:,ikpt) - dk(:) - tol10 + &
                    &         dtefield%fkptns(:,ikpt1f)) &
                    &         +dtefield%indkk_f2ibz(ikpt1f,3:5)
-              
+
               !        old code
               !        iadum(:)=0
               !        do idum=1,3
               !        iadum(:)=iadum(:)+ symrec(:,idum,isym1)*dg(idum)
               !        end do
-              
+
               !        new code
               iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
-              
+
               dg(:) = iadum(:)
-              
+
               if ( dtefield%indkk_f2ibz(ikpt1f,6) == 1 ) dg(:) = -dg(:)
-              
+
               !        Construct S(k)^{t,-1} S(b)^{t}
-              
+
               dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
-              
+
               !        Construct alpha(k) alpha(b)
-              
+
               if (dtefield%indkk_f2ibz(ikpt,6) == dtefield%indkk_f2ibz(ikpt1f,6)) then
                  itrs=0
               else
                  itrs=1
               end if
-              
-              
+
+
               npw_k  = npwarr(ikpti)
               !        npw_k1 = npwarr(ikpt1i)
-              
+
               !        loop over bra G vectors
               do ipw = 1, npw_k
-                 
+
                  !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
                  !          not for the FBZ k point
                  iadum(:) = kg(:,dtefield%kgindex(ikpti) + ipw)
-                 
+
                  !          Store non-symmorphic operation phase factor exp[i2\pi \alpha G \cdot t]
-                 
+
                  if ( ipwnsfac == 0 ) then
                     !            old code
                     rdum=0.0_dp
@@ -3932,9 +3907,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                     !            if ( dtefield%indkk_f2ibz(ikpt,6) == 1 ) rdum=-rdum
                     !            pwnsfac(1,ikg+ipw) = cos(rdum)
                     !            pwnsfac(2,ikg+ipw) = sin(rdum)
-                    
+
                  end if
-                 
+
                  !          to determine r.l.v. matchings, we transformed the bra vector
                  !          Rotation
                  iadum1(:)=0
@@ -3946,7 +3921,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                  if (itrs==1) iadum(:)=-iadum(:)
                  !          Translation
                  iadum(:) = iadum(:) + dg(:)
-                 
+
                  do jpw = 1, npw_k1
                     iadum1(1:3) = kg1_k(1:3,jpw)
                     if ( (iadum(1) == iadum1(1)).and. &
@@ -3958,23 +3933,23 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                     end if
                  end do
               end do
-              
+
               ikg  = ikg + npw_k
-              
+
            end do    ! close loop over ikpt
-           
+
            ipwnsfac = 1
-           
+
         end do    ! close loop over ifor
-        
+
      end if      ! rfdir(idir) == 1
-     
+
   end do        ! close loop over idir
-  
-  
+
+
   call timab(1008,2,tsec)
   call timab(1009,1,tsec)
-  
+
   !Build mpi_enreg%kptdstrb
   !array required to communicate the WFs between cpus in berryphase_new.f
   !(MPI // over k-points)
@@ -3982,79 +3957,79 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      do idir = 1, 3
         if (dtset%rfdir(idir) == 1) then
            do ifor = 1, 2
-              
+
               ikpt_loc = 0
               do isppol = 1, nsppol
-                 
+
                  do ikpt = 1, dtefield%fnkpt
-                    
+
                     ikpti = dtefield%indkk_f2ibz(ikpt,1)
                     nband_k = dtset%nband(ikpti)
                     ikpt1f = dtefield%ikpt_dk(ikpt,ifor,idir)
                     ikpt1i = dtefield%indkk_f2ibz(ikpt1f,1)
-                    
+
                     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-                    
+
                     ikpt_loc = ikpt_loc + 1
                     mpi_enreg%kptdstrb(me + 1,ifor+2*(idir-1),ikpt_loc) = &
                          &             ikpt1i + (isppol - 1)*nkpt
-                    
+
                     mpi_enreg%kptdstrb(me+1,ifor+2*(idir-1),&
                          &             ikpt_loc+dtefield%fmkmem_max*nsppol) = &
                          &             ikpt1f + (isppol - 1)*dtefield%fnkpt
-                    
+
                  end do   ! ikpt
               end do     ! isppol
            end do       ! ifor
         end if         ! dtset%rfdir(idir) == 1
      end do           ! idir
   end if             ! nproc>1
-  
+
   !build mpi_enreg%kpt_loc2fbz_sp
   ikpt_loc = 0
   do isppol = 1, nsppol
      do ikpt = 1, dtefield%fnkpt
-        
+
         ikpti = dtefield%indkk_f2ibz(ikpt,1)
         nband_k = dtset%nband(ikpti)
-        
+
         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-        
+
         ikpt_loc = ikpt_loc + 1
-        
+
         mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 1) = ikpt
         mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 2) = isppol
-        
+
      end do
   end do
-  
-  
+
+
   !parallel case only :
   !build mpi_enreg%kpt_loc2ibz_sp, dtefield%cgqindex and dtefield%nneigh
   if ((fieldflag).and.(nproc>1)) then
      ikpt_loc = 0
      do isppol = 1, nsppol
         do ikpt = 1, nkpt
-           
+
            ikptf = dtefield%i2fbz(ikpt)
            nband_k = dtset%nband(ikpti)
-           
+
            neigh(:) = 0 ; icg = 0 ; ikg = 0 ; flag_kpt = 0; icprj = 0
            do idir=1, 3
-              
+
               !        skip idir values for which efield_dot(idir) = 0
               if (abs(dtefield%efield_dot(idir)) < tol12) cycle
-              
+
               do ifor = 1, 2
-                 
+
                  flag = 0
-                 
+
                  ikpt1f = dtefield%ikpt_dk(ikptf,ifor,idir)
                  ikpt1i = dtefield%indkk_f2ibz(ikpt1f,1)
-                 
+
                  dtefield%cgqindex(3,ifor+2*(idir-1),ikpt+(isppol-1)*nkpt) = ikg
                  ikg = ikg + npwarr(ikpt1i)
-                 
+
                  !          check if this neighbour is also a previous neighbour
                  do ineigh = 1, (ifor+2*(idir-1))
                     if (neigh(ineigh) == ikpt1i) then
@@ -4076,52 +4051,52 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                  end if
               end do !ifor
            end do !idir
-           
+
            if (.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))) then
               !        ikpt is one of my kpt_loc
               ikpt_loc = ikpt_loc + 1
               mpi_enreg%kpt_loc2ibz_sp(me, ikpt_loc, 1) = ikpt
               mpi_enreg%kpt_loc2ibz_sp(me, ikpt_loc, 2) = isppol
            end if
-           
+
         end do !ikpt
      end do !isppol
   end if !nproc>1
-  
+
   !should be temporary
   !unassigned mpi_enreg%kpt_loc2fbz_sp are empty ; inform other cpu (there are better ways...)
   mpi_enreg%mkmem(me) = mkmem
   !do ii=ikpt_loc+1,dtefield%fmkmem_max
   !mpi_enreg%kpt_loc2fbz_sp(me, ii, 1) = -1
   !end do
-  
-  
+
+
   !(same as mpi_enreg%kptdstrb but for k-points in the iBZ),
   !dtefield%cgqindex and dtefield%nneigh
-  
+
   if ((fieldflag).and.(nproc>1)) then
-     
+
      ikpt_loc = 1
      do isppol = 1, nsppol
         do ikpt = 1, nkpt
-           
+
            nband_k = dtset%nband(ikpt)
            ikptf = dtefield%i2fbz(ikpt)
-           
+
            neigh(:) = 0 ; icg = 0 ; ikg = 0 ; flag_kpt = 0; icprj = 0
            do idir = 1, 3
-              
+
               !        Skip idir values for which efield_dot(idir) = 0
               if (abs(dtefield%efield_dot(idir)) < tol12 .and. (fieldflag)) cycle
-              
+
               do ifor = 1, 2
-                 
+
                  ikpt1f = dtefield%ikpt_dk(ikptf,ifor,idir)
                  ikpt1i = dtefield%indkk_f2ibz(ikpt1f,1)
-                 
+
                  !          dtefield%cgqindex(3,ifor+2*(idir-1),ikpt+(isppol-1)*nkpt) = ikg
                  ikg = ikg + npwarr(ikpt1i)
-                 
+
                  flag = 0
                  do ineigh = 1, (ifor+2*(idir-1))
                     if (neigh(ineigh) == ikpt1i) then
@@ -4140,50 +4115,50 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
                     !            if (isppol == 1) dtefield%nneigh(ikpt) = dtefield%nneigh(ikpt) + 1
                     !            icg = icg + npwarr(ikpt1i)*dtset%nspinor*nband_k
                  end if
-                 
+
                  if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-                 
+
                  flag_kpt = 1
-                 
+
                  !          MVeithen: the if condition allows to avoid that the same wavefunction
                  !          is send several times to a particular cpu
-                 
+
               end do    ! ifor
            end do    ! idir
-           
+
            if (flag_kpt == 1) ikpt_loc = ikpt_loc + 1
-           
+
         end do    ! ikpt
      end do    ! isppol
-     
+
   end if   ! fieldflag
-  
+
   call xmpi_sum(mpi_enreg%kptdstrb,spaceComm,ierr)
   call xmpi_sum(mpi_enreg%kpt_loc2fbz_sp,spaceComm,ierr)
   if (fieldflag) then
      call xmpi_sum(mpi_enreg%kpt_loc2ibz_sp,spaceComm,ierr)
      call xmpi_sum(mpi_enreg%mkmem,spaceComm,ierr)
   end if
-  
+
   !------------------------------------------------------------------------------
   !------------------------ Estimate critical field -----------------------------
   !------------------------------------------------------------------------------
-  
+
   !Compute the minimal value of the bandgap required to be below
   !the critical field as defined by the relation
   !| E_i*a_i | < E_g/n_i
-  
+
   if (fieldflag) then
-     
+
      do idir = 1, 3
         !    eg_dir(idir) = abs(dtefield%efield_dot(idir))*dtefield%nkstr(idir)
         eg_dir(idir) = abs(dtset%red_efieldbar(idir))*dtefield%nkstr(idir)
      end do
-     
-     
+
+
      eg = maxval(eg_dir)
      eg_ev = eg*Ha_eV
-     
+
      if (dtset%optcell ==0 .and. (dtset%berryopt == 4 .or. dtset%berryopt == 14)) then
         write(message,'(a,a,a,a,a,a,a,a,f7.2,a,a)')ch10,&
              &     ' initberry: COMMENT - ',ch10,&
@@ -4192,28 +4167,28 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
              &     '  should be larger than ',eg_ev,' eV.',ch10
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
-        
+
      else
-        
+
         write(message,'(a,a,a,a,a,a,a)') ch10,&
              &     ' initberry: COMMENT - ',ch10,&
              &     '  The estimation of critical electric field should be checked after calculation.',ch10,&
              &     '  It is printed out just after total energy.' ,ch10
-        
+
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
-        
+
      end if
-     
+
   end if
-  
+
   ABI_DEALLOCATE(kg1_k)
-  
+
   call timab(1009,2,tsec)
   call timab(1001,2,tsec)
-  
+
   DBG_EXIT("COLL")
-  
+
 end subroutine initberry
 !!***
 

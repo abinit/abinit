@@ -63,7 +63,6 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xorthonormalize'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -165,7 +164,6 @@ subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vect
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ortho_reim'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -248,7 +246,6 @@ subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'zorthonormalize'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

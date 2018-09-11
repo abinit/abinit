@@ -21,10 +21,10 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 
 #include "abi_common.h"
 
@@ -1056,11 +1056,6 @@ end subroutine datafordmft
 !!      checkdiag_matlu,loc_oper,print_matlu,sym_matlu,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 
  subroutine compute_levels(cryst_struc,energy_level,hdc,pawang,paw_dmft,nondiag)
 

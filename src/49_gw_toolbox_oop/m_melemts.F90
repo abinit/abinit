@@ -1066,7 +1066,6 @@ end subroutine melements_zero
 !!Do not modify the following lines by hand.
 !#undef ABI_FUNC
 !#define ABI_FUNC 'mels_get_exene_core'
-! use interfaces_14_hidewrite
 !!End of the abilint section
 !
 ! implicit none
