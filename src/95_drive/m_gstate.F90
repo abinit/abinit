@@ -1030,6 +1030,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%extrapwf>0) usecprj=1
    if (dtset%pawfatbnd>0)usecprj=1
    if (dtset%prtdos==3)  usecprj=1
+   if (dtset%usewvl==1)  usecprj=1
    if (dtset%nstep==0) usecprj=0
    if (dtset%usefock==1)  usecprj=1
  end if

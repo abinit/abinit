@@ -577,18 +577,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
 ! usecprj=0 ; iorder_cprj=0
- if (psps%usepaw==1) then
+! if (psps%usepaw==1) then
 !   if (associated(electronpositron)) then
 !     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
 !   end if
 !   if (dtset%prtnabla>0) usecprj=1
 !   if (dtset%extrapwf>0) usecprj=1
-   if (dtset%usewvl==1)  usecprj=1
+!   if (dtset%usewvl==1)  usecprj=1
 !   if (dtset%pawfatbnd>0)usecprj=1
 !   if (dtset%prtdos==3)  usecprj=1
 !   if (nstep==0) usecprj=0
 !   if (usefock==1)  usecprj=1
- end if
+! end if
 
 !Stresses and forces flags
  forces_needed=0;prtfor=0
@@ -2096,8 +2096,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    usecprj=1
    mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
-   call pawcprj_free(cprj_local)
-   ABI_DATATYPE_DEALLOCATE(cprj_local) ! Was previously allocated (event if size = 0,0)
+!   call pawcprj_free(cprj_local)
+!   ABI_DATATYPE_DEALLOCATE(cprj_local) ! Was previously allocated (event if size = 0,0)
    ABI_DATATYPE_ALLOCATE(cprj_local,(dtset%natom,mcprj))
    ncpgr = 0 ; ctocprj_choice = 1
    if (finite_efield_flag) then
@@ -2283,8 +2283,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(nhat)
  ABI_DEALLOCATE(dimcprj_srt)
  ABI_DEALLOCATE(dimcprj)
-! call pawcprj_free(cprj)
-! ABI_DATATYPE_DEALLOCATE(cprj)
+ if (recompute_cprj) then
+   call pawcprj_free(cprj_local)
+   ABI_DATATYPE_DEALLOCATE(cprj_local)
+ end if
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then

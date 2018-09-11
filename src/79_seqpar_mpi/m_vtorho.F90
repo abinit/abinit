@@ -552,7 +552,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
    iorder_cprj=0 ; mcprj_local=mcprj
    if (usecprj==0) then
-
      mcprj_local=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
      !This is a check but should always be true since scfcv allocated cprj anyway
      if (allocated(cprj_local)) then
