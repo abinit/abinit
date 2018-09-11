@@ -559,6 +559,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    eph_dg = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
    ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
+   ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
    nkpt_coarse = eph_dg%nkpt_coarse
    nkpt_dense  = eph_dg%nkpt_dense
    ebands_dense = eph_dg%ebands_dense
@@ -742,6 +743,24 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
        ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+
+       if (sigma%use_doublegrid) then
+           ! single call to listkk to determine BZ->lgrpk%ibz mapping
+           call listkk(dksqmax, sigma%ephwg%lgk%gmet, indkk, sigma%ephwg%lgk%ibz, eph_dg%kpts_dense, sigma%ephwg%lgk%nibz, &
+                       eph_dg%dense_nbz, sigma%ephwg%lgk%nsym_lg, 1, sigma%ephwg%lgk%symafm_lg, sigma%ephwg%lgk%symrec_lg, &
+                       timrev0, use_symrec=.True.)
+           if (dksqmax > tol12) then
+             write(msg, '(2a,es16.6,7a)' )&
+              "Error mapping the points for the double grid when using the tetrahedron integration.", ch10,&
+              "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+              "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10
+             MSG_ERROR(msg)
+           end if
+           ! check if all the q-points were was found
+           do jj=1,eph_dg%dense_nbz
+              ABI_CHECK(indkk(jj,1) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(eph_dg%kpts_dense(:,jj))))
+           end do
+       endif
      endif
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
@@ -873,22 +892,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Map q to qibz for tetrahedron
        if (sigma%qint_method > 0) then
          if (sigma%use_doublegrid) then
-           ABI_MALLOC(indkk,(eph_dg%ndiv,6))
-           ABI_MALLOC(qpts,(3,eph_dg%ndiv))
            ! set the qpoints to be mapped
            do jj=1,eph_dg%ndiv
                iq_bz_fine = eph_dg_mapping(3,jj)
-               qpts(:,jj) = eph_dg%kpts_dense(:,iq_bz_fine)
-           end do
-           ! single call to listkk to determine BZ->lgrpk%ibz mapping
-           call listkk(dksqmax, sigma%ephwg%lgk%gmet, indkk, sigma%ephwg%lgk%ibz, qpts, sigma%ephwg%lgk%nibz, eph_dg%ndiv, &
-                       sigma%ephwg%lgk%nsym_lg, 1, sigma%ephwg%lgk%symafm_lg, sigma%ephwg%lgk%symrec_lg, timrev0, use_symrec=.True.)
-           iqlk(:) = indkk(:,1)
-           ABI_FREE(indkk)
-           ABI_FREE(qpts)
-           ! check if all the q-points were was found
-           do jj=1,eph_dg%ndiv
-              ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpts(:,jj))))
+               iqlk(jj) = indkk(iq_bz_fine,1)
            end do
          else
            iqlk(1) = iq_ibz
@@ -1472,6 +1479,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (sigma%use_doublegrid) then
    ABI_FREE(eph_dg_mapping)
    ABI_FREE(phfrq_dense)
+   ABI_FREE(indkk)
  endif
 
 
