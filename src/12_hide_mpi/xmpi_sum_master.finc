@@ -82,6 +82,7 @@ subroutine xmpi_sum_master_int(xval,master,spaceComm,ier)
 #endif
 end subroutine xmpi_sum_master_int
 !!***
+
 !!****f* ABINIT/xmpi_sum_master_dp
 !! NAME
 !!  xmpi_sum_master_p
