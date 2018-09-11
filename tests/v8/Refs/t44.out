@@ -223,12 +223,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =          12.4735 [km/s]
+ Average speed of sound partial sums:     0.5483362867E-02 (at units)
+-                                   =          11.9959 [km/s]
 
- Debye frequency from partial sums:     0.5262667706E-02 (Ha)
--                                 =     0.3462669009E+02 (THz)
--Debye temperature from partial sums:     0.1661817053E+04 (K)
+ Debye frequency from partial sums:     0.5061172087E-02 (Ha)
+-                                 =     0.3330091260E+02 (THz)
+-Debye temperature from partial sums:     0.1598189844E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -282,7 +282,7 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Number of frequencies along the real axis: 201 , Step: 5.000000E-02 [eV]
+Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -369,12 +369,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =          12.4735 [km/s]
+ Average speed of sound partial sums:     0.5483362867E-02 (at units)
+-                                   =          11.9959 [km/s]
 
- Debye frequency from partial sums:     0.5262667706E-02 (Ha)
--                                 =     0.3462669009E+02 (THz)
--Debye temperature from partial sums:     0.1661817053E+04 (K)
+ Debye frequency from partial sums:     0.5061172087E-02 (Ha)
+-                                 =     0.3330091260E+02 (THz)
+-Debye temperature from partial sums:     0.1598189844E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -410,7 +410,7 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
-Number of frequencies along the real axis: 201 , Step: 5.000000E-02 [eV]
+Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
