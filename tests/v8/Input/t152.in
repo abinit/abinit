@@ -16,7 +16,7 @@ t150o_DS5_POT1
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = ln -s t153o_DS20_DVDB t154o_DS20_DVDB && ln -s t153o_DS20_DVDB t155o_DS20_DVDB && ln -s t153o_DS20_DVDB t156o_DS20_DVDB
+#%% post_commands = ww_cp t153o_DS20_DVDB t154o_DS20_DVDB; ww_cp t153o_DS20_DVDB t155o_DS20_DVDB; ww_cp t153o_DS20_DVDB t156o_DS20_DVDB
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

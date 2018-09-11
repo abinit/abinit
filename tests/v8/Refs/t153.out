@@ -61,7 +61,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -73,7 +73,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            ecutsm      5.00000000E-01 Hartree
          eph_task           4
         ddb_ngqpt        2    2    2
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
        gw_qprange           2
@@ -211,7 +211,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -249,8 +249,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 6c.pspnc
-- pspatm: opening atomic psp file    6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -437,7 +437,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -629,7 +629,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
        gw_qprange           2
@@ -804,5 +804,5 @@ P           mkmem           8
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.8  wall=          7.8
+.Delivered   4 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.8  wall=         14.1

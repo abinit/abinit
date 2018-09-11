@@ -1,6 +1,6 @@
 
 .Version 8.9.2 of MRGDDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
