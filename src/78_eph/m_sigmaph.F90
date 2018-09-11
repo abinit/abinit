@@ -2200,8 +2200,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end do
    !
    ! Check that the total number of electrons is correct
-   ! This is to flag potential problems as the routines that calculate the occupations in ebands_set_nelect
-   ! are different from the ones that will be used here: occ_fd
+   ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
+   ! are different from the occ_fd that will be used in the rest of the subroutine
    !
    do it=1,new%ntemp
      nelect = 0
@@ -2216,10 +2216,18 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        end do
      end do
      !
-     write(msg,'(2(a,f10.6))')&
+     write(msg,'(3(a,f10.6))')&
        'Calculated number of electrons nelect = ',nelect,&
-       ' does not correspond with ebands%nelect = ',tmp_ebands%nelect
-     ABI_CHECK(abs(nelect-ebands%nelect) < tol6,msg)
+       ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,&
+       ' for T = ',new%kTmesh(it)
+     ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
+     ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+     ! in this case we print a warning
+     if (new%kTmesh(it) == 0) then
+       MSG_WARNING(msg)
+     else
+       ABI_CHECK(abs(nelect-ebands%nelect) < tol6,msg)
+     end if
      !
    end do
    call ebands_free(tmp_ebands)
