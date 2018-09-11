@@ -1293,7 +1293,11 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  end if
 
  if (abs(tphysel)<tol12) then
-   tsmearinv=one/tsmear
+   if (tsmear == zero) then
+     tsmearinv = huge_tsmearinv
+   else
+     tsmearinv=one/tsmear
+   end if
  else
    tsmearinv=one/tphysel
  end if

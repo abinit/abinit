@@ -368,7 +368,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -406,8 +406,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 6c.pspnc
-- pspatm: opening atomic psp file    6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -500,7 +500,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -618,7 +618,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -738,7 +738,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -857,7 +857,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -969,7 +969,7 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446054E-02 (at units)
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
 -                                   =          11.9939 [km/s]
 
  Debye frequency from partial sums:     0.5060325864E-02 (Ha)
@@ -1085,7 +1085,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
        getwfkfine1          0
@@ -1336,5 +1336,5 @@ P           mkmem           8
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.8  wall=         19.8
+.Delivered   7 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         28.9  wall=         29.4
