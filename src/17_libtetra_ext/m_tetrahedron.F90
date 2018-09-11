@@ -2049,54 +2049,6 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
 
  weights = zero
 
-#if 0
- ! For each tetrahedron
- do itetra=1,tetra%ntetra
-   ! Here we need the original ordering to reference the correct irred kpoints
-   ind_ibz(:) = tetra%tetra_full(:,1,itetra)
-   ! Cycle if this tetra does not contribute to this k-point.
-   if (all(ind_ibz /= ik_ibz)) cycle
-
-   ! Sort energies before calling get_onetetra_
-   eigen_1tetra(:) = eig_ibz(ind_ibz(:))
-   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
-
-   ! Loop over frequency points
-   do iw=1,nw
-     samew = .False.
-     if (present(wtol)) then
-       if (iw > 1) samew = abs(wvals(iw) - wvals(iw - 1)) < wtol
-     end if
-     if (.not. samew) then
-         enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
-         ie = nene / 2 + 1
-         call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
-            theta_tmp, delta_tmp)
-     else
-        !write(*,*)"Got same omega"
-     end if
-
-     !if (iw == 5 .and. ik_ibz /= 1 .and. wvals(iw) > eigen_1tetra(2) .and. wvals(iw) < eigen_1tetra(3)) then
-     !  done = done + 1
-     !  if (done == 10) then
-     !    write(*, *)"Got it with delta_tmp ", maxval(delta_tmp(ie, :))
-     !    do ii=1,nene
-     !      write(777, *)delta_tmp(ii, :)
-     !    end do
-     !    stop
-     !  end if
-     !end if
-
-     ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
-     do ii=1,4
-       if (ind_ibz(ii) == ik_ibz) then
-         weights(iw, 1) = weights(iw, 1) + delta_tmp(ie, ii)
-         weights(iw, 2) = weights(iw, 2) + theta_tmp(ie, ii)
-       end if
-     end do
-   end do ! iw
- end do ! itetra
-#else
  ! For each tetrahedron
  do jj=1,tetra%ibz_tetra_count(ik_ibz)
    itetra = tetra%ibz_tetra_mapping(ik_ibz,jj)
@@ -2109,10 +2061,16 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
    call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
    do iw=1,nw
-     enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
-     ie = nene / 2 + 1
-     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
-        theta_tmp, delta_tmp)
+     samew = .False.
+     if (present(wtol)) then
+       if (iw > 1) samew = abs(wvals(iw) - wvals(iw - 1)) < wtol
+     end if
+     if (.not. samew) then
+         enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
+         ie = nene / 2 + 1
+         call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
+            theta_tmp, delta_tmp)
+     end if
 
      ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
      do ii=1,4
@@ -2123,7 +2081,6 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
      end do
    end do ! iw
  end do ! itetra
-#endif
 
 end subroutine tetra_get_onewk_wvals
 !!***

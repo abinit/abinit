@@ -1024,8 +1024,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
          ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ibsum_kq,ikq_ibz,spin)
-         f_mkq = ebands%occ(ibsum_kq,ikq_ibz,spin)
-         if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
          ! q-weigths for naive integration
          weigth_q = sigma%wtq_k(iq_ibz)
 
