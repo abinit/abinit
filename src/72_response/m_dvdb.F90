@@ -76,11 +76,11 @@ module m_dvdb
  !real(dp),public,parameter :: DDB_QTOL=2.0d-8
  ! Tolerance for the identification of two wavevectors
 
- integer,private,parameter :: FPOS_EOF = -1
+ !integer,private,parameter :: FPOS_EOF = -1
 
- integer,private,parameter :: QCACHE_KIND = dp
- ! Uncomment this line and recompile to use single precision cache
- !integer,private,parameter :: QCACHE_KIND = sp
+ ! Uncomment this line and recompile to use double or single precision cache
+ !integer,private,parameter :: QCACHE_KIND = dp
+ integer,private,parameter :: QCACHE_KIND = sp
 
  type, private :: qcache_t
 
@@ -1244,7 +1244,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
         ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
         ABI_CHECK(ierr == 0, "OOM in v1scf")
-        v1scf = db%qcache(db_iqpt)%v1scf
+        v1scf = real(db%qcache(db_iqpt)%v1scf, kind=QCACHE_KIND)
         db%qcache_stats(2) = db%qcache_stats(2) + 1
         incache = .True.
         !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
@@ -1292,7 +1292,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
    ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
-   db%qcache(db_iqpt)%v1scf = v1scf
+   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    db%prev_db_iqpt = db_iqpt
  end if
 
@@ -1363,6 +1363,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (db%qcache_size == 0) db%qcache_size = 1
 
  call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f6.1"), "[Mb]"))
+ call wrtout(std_out, sjoin("QCACHE_KIND:", itoa(QCACHE_KIND)))
  call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
