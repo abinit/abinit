@@ -51,7 +51,8 @@ dmft_nwlo 32
 dmftcheck 0
 dmft_rslf 1
 dmft_mxsf 0.3
-dmft_occnd_imag2 0
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 # LDA+U
 usepawu    1
