@@ -3115,6 +3115,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
              cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
  ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
  eph_dg%bz2ibz_dense(:) = indqq(:,1)
+ ABI_FREE(indqq)
 
 #if 0
  open (unit = 2, file = "ibz.dat")
@@ -3194,6 +3195,7 @@ subroutine eph_double_grid_free(self)
  
  ABI_FREE(self%weights_dense)
  ABI_FREE(self%bz2ibz_dense)
+ ABI_FREE(self%bz2ibz_coarse)
  ABI_FREE(self%kpts_coarse)
  ABI_FREE(self%kpts_dense)
  ABI_FREE(self%kpts_dense_ibz)
