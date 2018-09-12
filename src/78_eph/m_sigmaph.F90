@@ -435,7 +435,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
- integer :: isym
+ integer :: isym, this_calc
  integer :: ibsum_stop, ibsum_start
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
@@ -467,7 +467,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: indkk_kq(1,6), nkpt_coarse(3), nkpt_dense(3)
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:,:)
+ integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
  real(dp) :: phfrq_ibz(3*cryst%natom)
@@ -561,7 +561,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    eph_dg = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
    ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
-   ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
+   ABI_MALLOC(indkk,(eph_dg%dense_nbz))
    nkpt_coarse = eph_dg%nkpt_coarse
    nkpt_dense  = eph_dg%nkpt_dense
    ebands_dense = eph_dg%ebands_dense
@@ -744,54 +744,41 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Weights for Re-Im with i.eta shift.
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
-       ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
-
-       if (sigma%use_doublegrid) then
-#if 0
-           ! single call to listkk to determine BZ->lgrpk%ibz mapping
-           call listkk(dksqmax, sigma%ephwg%lgk%gmet, indkk, sigma%ephwg%lgk%ibz, eph_dg%kpts_dense, sigma%ephwg%lgk%nibz, &
-                       eph_dg%dense_nbz, sigma%ephwg%lgk%nsym_lg, 1, sigma%ephwg%lgk%symafm_lg, sigma%ephwg%lgk%symrec_lg, &
-                       timrev0, use_symrec=.True.)
-           if (dksqmax > tol12) then
-             write(msg, '(2a,es16.6,7a)' )&
-              "Error mapping the points for the double grid when using the tetrahedron integration.", ch10,&
-              "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-              "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10
-             MSG_ERROR(msg)
-           end if
-           ! check if all the q-points were was found
-           do jj=1,eph_dg%dense_nbz
-              ABI_CHECK(indkk(jj,1) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(eph_dg%kpts_dense(:,jj))))
-           end do
-#else
-           ! Need to map eph_dg%dense -> ephwg%lgk%ibz
-           indkk = 0
-           do ikq_ibz=1,sigma%ephwg%lgk%nibz
-             ! get coordinates of ephwg%lgk%ibz point
-             kq(:) = sigma%ephwg%lgk%ibz(:,ikq_ibz)
-             ! Loop over the star of q
-             do isym=1,sigma%ephwg%lgk%nsym_lg
-               ! Get the symmetric of q
-               do ii=1,3
-                 kq_sym(ii)=kq(1)*sigma%ephwg%lgk%symrec_lg(ii,1,isym)&
-                           +kq(2)*sigma%ephwg%lgk%symrec_lg(ii,2,isym)&
-                           +kq(3)*sigma%ephwg%lgk%symrec_lg(ii,3,isym)
-               end do
-               ! get the index of the ibz point in bz
-               ikq_bz = eph_dg%indexes_to_dense(&
-                         mod(nint((kq_sym(1)+1)*nkpt_dense(1)),nkpt_dense(1))+1,&
-                         mod(nint((kq_sym(2)+1)*nkpt_dense(2)),nkpt_dense(2))+1,&
-                         mod(nint((kq_sym(3)+1)*nkpt_dense(3)),nkpt_dense(3))+1)
-               indkk(ikq_bz,1) = ikq_ibz
-             end do
-           end do
-#endif
-       endif
+       ABI_CALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
      endif
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
-     ! Precompute the weights for tetrahedron
      if (sigma%qint_method > 0) then
+       ! Map eph_dg%dense -> ephwg%lgk%ibz
+       if (sigma%use_doublegrid) then
+         call cwtime(cpu,wall,gflops,"start")
+         indkk = 0
+         do ikq_ibz=1,sigma%ephwg%lgk%nibz
+           ! get coordinates of ephwg%lgk%ibz point
+           kq(:) = sigma%ephwg%lgk%ibz(:,ikq_ibz)
+           ! Loop over the star of q
+           do isym=1,sigma%ephwg%lgk%nsym_lg
+             ! Get the symmetric of q
+             do ii=1,3
+               kq_sym(ii)=kq(1)*sigma%ephwg%lgk%symrec_lg(ii,1,isym)&
+                         +kq(2)*sigma%ephwg%lgk%symrec_lg(ii,2,isym)&
+                         +kq(3)*sigma%ephwg%lgk%symrec_lg(ii,3,isym)
+             end do
+             ! get the index of the ibz point in bz
+             ikq_bz = eph_dg%indexes_to_dense(&
+                       mod(nint((kq_sym(1)+1)*nkpt_dense(1)),nkpt_dense(1))+1,&
+                       mod(nint((kq_sym(2)+1)*nkpt_dense(2)),nkpt_dense(2))+1,&
+                       mod(nint((kq_sym(3)+1)*nkpt_dense(3)),nkpt_dense(3))+1)
+             indkk(ikq_bz) = ikq_ibz
+           end do
+         end do
+         call cwtime(cpu,wall,gflops,"stop")
+         write(msg,'(2(a,f8.2))') "little group of k mapping cpu:",cpu,", wall:",wall
+         call wrtout(std_out, msg, do_flush=.True.)
+       endif
+
+       ! Precompute the weights for tetrahedron
+       call cwtime(cpu,wall,gflops,"start")
        ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
        ! loop over bands to sum
        do ibsum_kq=1,nbsum
@@ -799,6 +786,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          do nu=1,natom3
            ! loop over bands in the self-energy
            do ib_k=1,nbcalc_ks
+             this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
+             if (mod(this_calc,nprocs) /= my_rank) cycle
              band = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band,ik_ibz,spin)
              eminmax(1) = eig0nk - 0.01 
@@ -811,6 +800,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          enddo
        enddo
        ABI_FREE(tmp_deltaw_pm)
+       call xmpi_sum(sigma%deltaw_pm, comm, ierr)
+       call cwtime(cpu,wall,gflops,"stop")
+       write(msg,'(2(a,f8.2))') "weights with tetrahedron cpu:",cpu,", wall:",wall
+       call wrtout(std_out, msg, do_flush=.True.)
      endif
 
      ! Integrations over q-points in the IBZ(k)
@@ -921,7 +914,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! set the qpoints to be mapped
            do jj=1,eph_dg%ndiv
                iq_bz_fine = eph_dg_mapping(3,jj)
-               iqlk(jj) = indkk(iq_bz_fine,1)
+               iqlk(jj) = indkk(iq_bz_fine)
            end do
          else
            iqlk(1) = iq_ibz
