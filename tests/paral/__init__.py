@@ -71,7 +71,7 @@ inp_files = [
 "t101.in",
 "t102.in",
 "t103.in",
-"t104.in",
+"-t104.in", # disabled for now
 "t105.in",
 "t106.in"
 ]
