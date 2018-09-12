@@ -435,6 +435,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
+ integer :: isym
  integer :: ibsum_stop, ibsum_start
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
@@ -468,6 +469,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
+ real(dp) :: kq_sym(3)
  real(dp) :: phfrq_ibz(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,emin,emax,eminmax(2)
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
@@ -745,6 +747,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
 
        if (sigma%use_doublegrid) then
+#if 0
            ! single call to listkk to determine BZ->lgrpk%ibz mapping
            call listkk(dksqmax, sigma%ephwg%lgk%gmet, indkk, sigma%ephwg%lgk%ibz, eph_dg%kpts_dense, sigma%ephwg%lgk%nibz, &
                        eph_dg%dense_nbz, sigma%ephwg%lgk%nsym_lg, 1, sigma%ephwg%lgk%symafm_lg, sigma%ephwg%lgk%symrec_lg, &
@@ -760,6 +763,29 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do jj=1,eph_dg%dense_nbz
               ABI_CHECK(indkk(jj,1) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(eph_dg%kpts_dense(:,jj))))
            end do
+#else
+           ! Need to map eph_dg%dense -> ephwg%lgk%ibz
+           indkk = 0
+           do ikq_ibz=1,sigma%ephwg%lgk%nibz
+             ! get coordinates of ephwg%lgk%ibz point
+             kq(:) = sigma%ephwg%lgk%ibz(:,ikq_ibz)
+             ! Loop over the star of q
+             do isym=1,sigma%ephwg%lgk%nsym_lg
+               ! Get the symmetric of q
+               do ii=1,3
+                 kq_sym(ii)=kq(1)*sigma%ephwg%lgk%symrec_lg(ii,1,isym)&
+                           +kq(2)*sigma%ephwg%lgk%symrec_lg(ii,2,isym)&
+                           +kq(3)*sigma%ephwg%lgk%symrec_lg(ii,3,isym)
+               end do
+               ! get the index of the ibz point in bz
+               ikq_bz = eph_dg%indexes_to_dense(&
+                         mod(nint((kq_sym(1)+1)*nkpt_dense(1)),nkpt_dense(1))+1,&
+                         mod(nint((kq_sym(2)+1)*nkpt_dense(2)),nkpt_dense(2))+1,&
+                         mod(nint((kq_sym(3)+1)*nkpt_dense(3)),nkpt_dense(3))+1)
+               indkk(ikq_bz,1) = ikq_ibz
+             end do
+           end do
+#endif
        endif
      endif
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
