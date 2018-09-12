@@ -3195,7 +3195,6 @@ subroutine eph_double_grid_free(self)
  
  ABI_FREE(self%weights_dense)
  ABI_FREE(self%bz2ibz_dense)
- ABI_FREE(self%bz2ibz_coarse)
  ABI_FREE(self%kpts_coarse)
  ABI_FREE(self%kpts_dense)
  ABI_FREE(self%kpts_dense_ibz)
