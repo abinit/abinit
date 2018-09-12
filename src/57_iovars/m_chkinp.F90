@@ -2789,6 +2789,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'rfatpol(2)',dt%rfatpol(2),natom,iout)
 
+!  rfmeth
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)
+
 !  rprimd
 !  With optcell beyond 4, one has constraints on rprimd.
    if(dt%optcell==4 .or. dt%optcell==7 )then

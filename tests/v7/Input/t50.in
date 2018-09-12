@@ -100,7 +100,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond.
 #%%  Test temperature-dependent of the electronic structure, with

@@ -933,6 +933,7 @@ end subroutine print_efmas
  subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
 &   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1230,6 +1231,7 @@ end subroutine print_efmas
 !! SOURCE
 
  subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

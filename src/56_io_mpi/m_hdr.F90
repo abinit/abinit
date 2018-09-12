@@ -2071,6 +2071,9 @@ end subroutine hdr_io_int
 !! OUTPUT
 !!  Only writing
 !!
+!! TODO
+!!   Activate new header, avoid printing tons of lines with occupations.
+!!
 !! PARENTS
 !!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!

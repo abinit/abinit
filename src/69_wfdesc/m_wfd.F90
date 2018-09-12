@@ -5879,7 +5879,6 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  comm = Wfd%comm; my_rank = Wfd%my_rank; master = Wfd%master
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
-
  call wrtout(std_out," wfd_read_wfk: reading "//TRIM(wfk_fname))
 
  wfk_unt = get_unit()
@@ -5887,7 +5886,9 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
  ! TODO: Perform consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
- if (Wfd%prtvol>0) call hdr_echo(hdr, fform, 4, unit=std_out)
+ !if (Wfd%prtvol>0)
+ fform = 0
+ if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
 
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
@@ -5908,7 +5909,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    end do
  end do
 
- write(msg,'(3a,i0,a)')" ",ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
+ write(msg,'(a,i0,a)')" Will read ",COUNT(my_readmask)," (b,k,s) states"
  call wrtout(std_out, msg)
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu,wall,gflops,"start")

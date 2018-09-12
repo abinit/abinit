@@ -55,7 +55,7 @@ module m_phgamma
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_fft_mesh,       only : rotate_fft_mesh
- use m_cgtools,        only : dotprod_g !set_istwfk
+ use m_cgtools,        only : dotprod_g
  use m_cgtk,           only : cgtk_rotate
  use m_kg,             only : getph
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
@@ -66,19 +66,13 @@ module m_phgamma
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
- use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_pawfgr,          only : pawfgr_type
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
+                              wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+ use m_pawang,         only : pawang_type
+ use m_pawrad,         only : pawrad_type
+ use m_pawtab,         only : pawtab_type
+ use m_pawfgr,         only : pawfgr_type
 
  implicit none
 
@@ -1966,11 +1960,11 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
      NCF_CHECK(ncerr)
 
      NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, vid("qpath"), qpath%points))
-     NCF_CHECK(nf90_put_var(ncid, vid("phfreq_qpath"), all_phfreq))
-     NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart_qpath"), all_displ_cart))
-     NCF_CHECK(nf90_put_var(ncid, vid("phgamma_qpath"), all_gammaq))
-     NCF_CHECK(nf90_put_var(ncid, vid("phlambda_qpath"), all_lambdaq))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpath"), qpath%points))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qpath"), all_phfreq))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phdispl_cart_qpath"), all_displ_cart))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phgamma_qpath"), all_gammaq))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phlambda_qpath"), all_lambdaq))
 #endif
    end if
  end if ! master
@@ -1983,19 +1977,6 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
  call kpath_free(qpath)
 
  DBG_EXIT("COLL")
-
-contains
- integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
 
 end subroutine phgamma_linwid
 !!***
@@ -2132,9 +2113,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  integer,parameter :: bcorr0=0,master=0
  integer :: my_qptopt,iq_ibz,nqibz,ount,ii,my_rank,nproc,cnt
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
- integer :: iene, jene
- integer :: itemp, ntemp, jene_jump
-
+ integer :: iene, jene, itemp, ntemp, jene_jump
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,omega_min,omega_max,ww,mustar,tc_macmill
  real(dp) :: temp_el, min_temp, delta_temp, chempot, ene1, ene2, G0
@@ -2316,7 +2295,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
        do iene= 1, gams%nene
          do jene= 1, gams%nene
            tmp_a2f = zero
-! TODO: following block is just a GEMM
+           ! TODO: following block is just a GEMM
            do mu=1,natom3
              do iw=1,nomega
                tmp_a2f(iw) = tmp_a2f(iw) + tmp_gaussian(iw,mu) * gamma_ph_ee(jene,iene,mu,spin) * invphfrq(mu)
@@ -2324,19 +2303,18 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
            end do
 
            a2f%vals_ee(jene, iene, :, spin) = a2f%vals_ee(jene, iene, :, spin) + tmp_a2f(:) * wtq(iq_ibz)
-if (iene == gams%nene/2 .and. jene == gams%nene/2) then
-  write (900, '(a,E20.10,2x,2x,I6,3E20.10)') '#', wtq(iq_ibz), iq_ibz, invphfrq(1:3)
-  do iw=1,nomega
-    write (900, '(i6,2x,E20.10,2x,3E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), &
-&        gamma_ph_ee(jene,iene,:,spin), tmp_gaussian(iw,1:3)
-  end do
-  write (900,*)
-end if
+           if (iene == gams%nene/2 .and. jene == gams%nene/2) then
+             write (900, '(a,E20.10,2x,2x,I6,3E20.10)') '#', wtq(iq_ibz), iq_ibz, invphfrq(1:3)
+             do iw=1,nomega
+               write (900, '(i6,2x,E20.10,2x,3E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), &
+                   gamma_ph_ee(jene,iene,:,spin), tmp_gaussian(iw,1:3)
+             end do
+             write (900,*)
+           end if
          end do
        end do
 #endif
        ABI_DEALLOCATE(tmp_gaussian)
-
 
      case (2)
        ! Tetra: store data.
@@ -2347,6 +2325,7 @@ end if
 
    end do ! iq_ibz
  end do ! spin
+
 #ifdef DEV_MJV
  close(900)
 #endif
@@ -3216,7 +3195,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, vid("temperatures"), tmesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "temperatures"), tmesh))
  end if
 #endif
 
@@ -3264,9 +3243,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
 
    conv = 0
    do istep=1,nstep
-
      !where (din < zero) din = zero
-
      do iwn=1,nwm
        summ = zero
        do jj=1,nwm
@@ -3341,21 +3318,6 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
-
-
-contains
- integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
 
 end subroutine a2fw_solve_gap
 !!***
@@ -3664,7 +3626,8 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    ! workspace for tetra.
    ABI_MALLOC(wdt, (nomega, 2))
 
-! TODO: with the tetra_get_onewk call we can integrate this above and avoid allocating all of lambda_in_tetra and phfreq_tetra!!!
+   ! TODO: with the tetra_get_onewk call we can integrate this above
+   ! and avoid allocating all of lambda_in_tetra and phfreq_tetra!!!
    ! For each mode get its contribution
    cnt = 0
    do spin=1,nsppol
@@ -3778,10 +3741,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
          end if
        end do
        call simpson_int(nomega,wstep,a2f_tr_logmom,a2f_tr_logmom_int)
-!DEBUG
-!      write(std_out,*)' iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)=',&
-!          & iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)
-!ENDDEBUG
+       !write(std_out,*)' iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)=',& iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)
        if(abs(a2f_tr_logmom_int(nomega))<log(greatest_real*tol6))then
          omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
        else
@@ -3790,8 +3750,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
      end do
    end do
 
-
-! TODO: make output only for irred values xx yy zz and top half of matrix
+   ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
      write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
      write(ount,'(a,3(3es10.3,2x))') ' lambda = ',lambda_iso
@@ -4042,6 +4001,7 @@ end subroutine a2fw_tr_write
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4196,7 +4156,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  end if
 
  gamma_ngqpt = ifc%ngqpt
- ! TODO might this next condition not be any instead of all?
  if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  ! TODO: Support nsig in phgamma_init
@@ -4409,7 +4368,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  usecprj = 0
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
-
  ! Prepare call to getgh1c
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
@@ -4453,8 +4411,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! Allocate work space arrays.
  ABI_MALLOC(tgam, (2,natom3,natom3,nsig))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
-! TODO: if we remove the nsig dependency we can remove this intermediate array
-! and save a lot of memory
+ ! TODO: if we remove the nsig dependency we can remove this intermediate array
+ ! and save a lot of memory
  ABI_STAT_MALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
  ABI_CHECK(ierr==0, 'out of memory in gvals_qibz')
 
@@ -4538,7 +4496,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ABI_CALLOC(wt_k, (nsig, mnb))
      ABI_CALLOC(wt_kq, (nsig, mnb))
 
-!TODO: add flag around this
+     !TODO: add flag around this
      ABI_CALLOC(wt_k_en, (nsig, mnb, gams%nene))
      ABI_CALLOC(wt_kq_en, (nsig, mnb, gams%nene))
 
@@ -4610,8 +4568,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          end do
        else
          ! Reconstruct u_k(G) from the IBZ image.
-         !istwf_k = set_istwfk(kk); if (.not. have_ktimerev) istwf_k = 1
-         !call change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
          istwf_k = 1
          call get_kg(kk,istwf_k,ecut,cryst%gmet,npw_k,gtmp)
          ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
@@ -4642,8 +4598,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          end do
        else
          ! Reconstruct u_kq(G) from the IBZ image.
-         !istwf_kq = set_istwfk(kq); if (.not. have_ktimerev) istwf_kq = 1
-         !call change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
          istwf_kq = 1
          call get_kg(kq,istwf_kq,ecut,cryst%gmet,npw_kq,gtmp)
          ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
@@ -4762,15 +4716,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          end do
        end do
 
-!TODO: put a flag around this, in case it takes a lot of time
+       !TODO: put a flag around this, in case it takes a lot of time
        do jene = 1, gams%nene
          call fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wt_k_en(:,:,jene), iene=jene)
          call fstab_weights_ibz(fs, ebands, ikq_ibz, spin, sigmas, wt_kq_en(:,:,jene), iene=jene)
        end do
 
 #ifdef DEV_MJV
-write (800,*) wt_kq_en
-write (801,*) wt_k_en
+       write (800,*) wt_kq_en
+       write (801,*) wt_k_en
        do ib2=1,nband_k
          do ib1=1,nband_kq
            do ipc2=1,natom3
@@ -4779,9 +4733,9 @@ write (801,*) wt_k_en
                rg = gkk_atm(:, ib1, ib2, ipc2)
                res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-if (sum(abs(res)) < tol6) then
-  write (802,*) 'res small ib2,ib1,ipc2,ipc1, res ', ib2,ib1,ipc2,ipc1, res
-end if
+               if (sum(abs(res)) < tol6) then
+                 write (802,*) 'res small ib2,ib1,ipc2,ipc1, res ', ib2,ib1,ipc2,ipc1, res
+               end if
                do jene = 1, gams%nene
                  do iene = 1, gams%nene
                    gams%vals_ee(:,iene,jene,ipc1,ipc2,iq_ibz,spin) = &
@@ -4844,7 +4798,7 @@ end if
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
 
-!TODO: add flag around this deallocation
+     !TODO: add flag around this deallocation
      ABI_FREE(wt_k_en)
      ABI_FREE(wt_kq_en)
 
@@ -4882,9 +4836,9 @@ end if
  end do ! iq_ibz
 
 #ifdef DEV_MJV
-close(800)
-close(801)
-close(802)
+ close(800)
+ close(801)
+ close(802)
 #endif
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.

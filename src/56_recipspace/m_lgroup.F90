@@ -391,16 +391,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
     1, self%symafm_lg, self%symrec_lg, timrev0, use_symrec=.True.)
 
  iq_ibz = indkk(1)
- !if (dksqmax > tol12) iq_ibz = -1
-
- !if (dksqmax > tol12) then
- !  write(msg, '(3a,es16.6,7a)' )&
- !   "The WFK file cannot be used to compute phonon linewidths.",ch10,&
- !   "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax,ch10,&
- !   "Q-mesh: ",ltoa(gamma_ngqpt),", K-mesh (from kptrlatt) ",ltoa(get_diag(dtset%kptrlatt)), &
- !   'Action: check your WFK file and (k,q) point input variables'
- !   MSG_ERROR(msg)
- !end if
+ if (dksqmax > tol12) iq_ibz = -1
 
 end function lgroup_find_ibzimage
 !!***

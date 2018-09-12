@@ -193,7 +193,7 @@ module m_dvdb
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name
 
-  real(dp) :: dielt(3,3)
+  real(dp) :: dielt(3,3) = zero
    ! Dielectric tensor
 
   integer,allocatable :: pos_dpq(:,:,:)
@@ -478,7 +478,7 @@ subroutine dvdb_init(db, path, comm)
  call hdr_free(hdr_ref)
 
  ! Init Born effective charges
- ABI_MALLOC(db%zeff, (3, 3, db%natom))
+ ABI_CALLOC(db%zeff, (3, 3, db%natom))
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(db%mpi_enreg)
@@ -795,7 +795,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
-   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND)
    write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
@@ -1193,6 +1193,7 @@ end subroutine dvdb_readsym_allv1
 
 subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1332,6 +1333,7 @@ end subroutine dvdb_readsym_qbz
 
 subroutine dvdb_set_qcache_mb(db, mbsize)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1355,7 +1357,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = nint((two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3) * QCACHE_KIND * b2Mb / mbsize)
+   db%qcache_size = int(mbsize / (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND * b2Mb))
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
@@ -2262,7 +2264,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 
    iqst = iqst + nqst
    nqsts(iq_ibz) = nqst
-
  end do
 
  ! Redo the mapping with the new IBZ
@@ -4514,6 +4515,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, &
 &          ngqpt, qptopt, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4577,7 +4579,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  nfft = product(ngfft(1:3))
 
  ! Generate the list of irreducible q-points in the grid
- qptrlatt = zero
+ qptrlatt = 0
  qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, 1, &
  &                           [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
@@ -4646,7 +4648,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  ABI_MALLOC(pinfo, (3,3*dvdb%mpert))
  rfpert = 0; rfpert(1:cryst%natom) = 1; rfdir = 1
 
- pertsy = zero
+ pertsy = 0
 
  nqpt_read = 0
  nperts_read = 0
@@ -4661,7 +4663,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 
    if (db_iqpt /= -1) then
 
-     call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
+     if (dvdb%prtvol > 0) call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
      nqpt_read = nqpt_read + 1
      q_read(:,nqpt_read) = qpt(:)
      iq_read(nqpt_read) = db_iqpt
@@ -4675,7 +4677,7 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 
    else
 
-     call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
+     if (dvdb%prtvol > 0) call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
      nqpt_interpolate = nqpt_interpolate + 1
      q_interp(:,nqpt_interpolate) = qpt(:)
 
@@ -4697,6 +4699,8 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
    end if
  end do
 
+ call wrtout(std_out, sjoin("Number of q-points found in initial DVDB", itoa(nqpt_read)))
+ call wrtout(std_out, sjoin("Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate)))
 
  ! ================================================= !
  ! Open the new DVDB file and write preliminary info

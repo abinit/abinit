@@ -1282,8 +1282,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
- write(message, '(a,a)' )&
-& '--ingeobld: echo values of variables connected to objects --------',ch10
+ write(message, '(a,a)' )'--ingeobld: echo values of variables connected to objects --------',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
