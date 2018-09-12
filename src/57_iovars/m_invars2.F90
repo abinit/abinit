@@ -586,8 +586,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
 
-!RESPFN integer input variables (needed here to get the value of response
-!Presently, rfmeth is not used.
+!RESPFN integer input variables (needed here to get the value of response)
 !Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)

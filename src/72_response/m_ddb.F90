@@ -1261,7 +1261,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      tmpval(2,:,:,:,:,1,1) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
 
      ! Then apply symmetry operations
-     call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev)
+     call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,1)
 
      ! Transform the dynamical matrix in cartesian coordinates
      ABI_MALLOC(carflg,(3,mpert,3,mpert))

@@ -15346,8 +15346,16 @@ Variable(
     defaultval=1,
     mnemonics="Response Function METHod",
     text="""
-Selects method used in response function calculations. Presently, only [[rfmeth]] = 1 is
-allowed.
+Selects method used in response function calculations. Presently, only abs([[rfmeth]]) = 1 is
+allowed. This corresponds to storing matrix elements of the 2DTE computed using non-stationary expressions,
+instead of stationary ones.
+
+The difference between positive and negative values is rather technical. Very often, the symmetries can be used in such a way that
+some matrix elements can be proven to be zero even without doing any computation. Positive values of [[rfmeth]] activate
+this use of symmetries, while it is denied when [[rfmeth]] is negative. There is an indirect additional outcome of this,
+as a symmetrization of the whole 2DTE is sometimes rendered possible when the additional knowledge of the zero matrix elements
+is available. Thus, the results obtained for positive and negative values of [[rfmeth]] might slightly differ for non-zero elements of the 2DTE,
+if they are computed in both cases. 
 """,
 ),
 
