@@ -1931,12 +1931,6 @@ end subroutine prtrhomxmn
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 &                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
 
@@ -2181,12 +2175,6 @@ end subroutine read_atomden
 !!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
 &                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)

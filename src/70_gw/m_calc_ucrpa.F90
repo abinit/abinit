@@ -20,6 +20,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,7 +33,7 @@ MODULE m_calc_ucrpa
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: calc_ucrpa
 !!***
@@ -83,12 +84,6 @@ contains
 !!      xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
 & npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname)

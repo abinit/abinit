@@ -177,7 +177,6 @@
 
 
 CONTAINS
-!========================================================================================
 !!***
 
 !!****f* m_green/init_green
@@ -386,8 +385,6 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 end subroutine init_green_tau
 !!***
 
-!!      m_green
-!!      loc_oper,print_matlu,sym_matlu,wrtout
 !!****f* m_green/destroy_green
 !! NAME
 !! destroy_green
@@ -1871,8 +1868,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  DBG_EXIT("COLL")
 
 end subroutine integrate_green
-
-!!      m_green
 !!***
 
 !!****f* m_green/icip_green
@@ -2486,10 +2481,8 @@ end subroutine compa_occup_ks
 !!  proct= for parallelism
 !!
 !! SIDE EFFECTS
-!!  integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
-!!
-!! SIDE EFFECTS
-!!  ft= function is time space
+!!  * integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
+!!  * ft= function is time space
 !!
 !! PARENTS
 !!      m_green
@@ -2884,6 +2877,7 @@ end subroutine fourier_fct
 !!      loc_oper,print_matlu,sym_matlu,wrtout
 !!
 !! SOURCE
+
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
  use defs_basis
@@ -3193,10 +3187,7 @@ end subroutine occup_green_tau
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -3314,9 +3305,6 @@ end subroutine occup_green_tau
 !! OUTPUT
 !! fermie: output value
 !!
-!! CHILDREN
-!!  wrtout, spline_c,invfourier, nfourier
-!!
 !! PARENTS
 !!      m_dmft
 !!
@@ -3324,13 +3312,6 @@ end subroutine occup_green_tau
 !!      compute_green,integrate_green,newton,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 
@@ -3494,14 +3475,6 @@ end subroutine fermi_green
 !!      compute_green,integrate_green
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
@@ -3725,6 +3698,7 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!      compute_green,integrate_green
 !!
 !! SOURCE
+
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
@@ -3908,8 +3882,6 @@ end subroutine newton
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      m_dmft
 !!
@@ -3917,13 +3889,6 @@ end subroutine newton
 !!      fourier_fct,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
 

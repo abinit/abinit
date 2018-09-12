@@ -6611,13 +6611,6 @@ end subroutine wfd_plot_ur
 !!!   use m_hamiltonian,    only : destroy_hamiltonian, init_hamiltonian, &
 !!!                                load_spin_hamiltonian,load_k_hamiltonian, gs_hamiltonian_type
 !!!
-!!!  !This section has been created automatically by the script Abilint (TD).
-!!!  !Do not modify the following lines by hand.
-!!!  #undef ABI_FUNC
-!!!  #define ABI_FUNC 'wfd_get_socpert'
-!!!   use interfaces_66_nonlocal
-!!!  !End of the abilint section
-!!!
 !!!   implicit none
 !!!
 !!!  !Arguments ------------------------------------
@@ -7164,7 +7157,6 @@ end subroutine test_charge
 !!***
 
 !!****f* m_wfd/wfd_pawrhoij
-!!
 !! NAME
 !! wfd_pawrhoij
 !!

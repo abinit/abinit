@@ -159,7 +159,6 @@ contains
 !!        = Sum_(mu1,mu2,mu3,mu4) [ Gprim(mu1,mu) Gprim(mu2,nu) Gprim(mu1,mu3) Gprim(mu2,mu4) d2ffnl_mu3,mu4 ]
 !!   --------------------------
 !!
-!! NOTES
 !!  1) l may be 0, 1, 2, or 3 in this version.
 !!
 !!  2) Norm-conserving psps : only FFNL for which ekb is not zero are calculated.

@@ -26,6 +26,7 @@
 !! m_paw_ij.F90
 !! m_paw_io.F90
 !! m_paw_numeric.F90
+!! m_paw_onsite.F90
 !! m_paw_sphharm.F90
 !! m_pawang.F90
 !! m_pawcprj.F90

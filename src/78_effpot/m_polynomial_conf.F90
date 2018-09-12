@@ -35,7 +35,7 @@ module m_polynomial_conf
 
  public :: polynomial_conf_init
  public :: polynomial_conf_free
-!AM_2017Need to debug this routine 
+!AM_2017Need to debug this routine
  public :: polynomial_conf_evaluate
 !!***
 
@@ -52,7 +52,7 @@ module m_polynomial_conf
 
    integer :: ndisp = 0
 !  Number of displacement (atoms) for the cut off
-   
+
    integer :: power_disp = 0
 !  Power of the polynome related to the displacement
 
@@ -72,7 +72,7 @@ module m_polynomial_conf
 !  Cutoff array for the atomic displacement
 
    logical :: need_confinement =.FALSE.
-!  Logical related to the necessity of the confinement 
+!  Logical related to the necessity of the confinement
 
  end type polynomial_conf_type
 !!***
@@ -97,11 +97,11 @@ CONTAINS  !=====================================================================
 !! ndisp = Number of displacement (atoms) for the cut off
 !! power_disp = Power of the polynome related to the displacement
 !! power_strain = Power of the polynome related to the strain
-!! need_confinement = optional,Logical related to the necessity of the confinement 
+!! need_confinement = optional,Logical related to the necessity of the confinement
 !!
 !! OUTPUT
-!! polynomial_conf <type(polynomial_conf)> = datatype with the information for the confinement 
-!!                                           polynomial 
+!! polynomial_conf <type(polynomial_conf)> = datatype with the information for the confinement
+!!                                           polynomial
 !!
 !! PARENTS
 !!      m_effective_potential
@@ -151,7 +151,7 @@ subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_str
  polynomial_conf%power_disp    = power_disp
  polynomial_conf%power_strain  = power_strain
  polynomial_conf%factor_disp   = factor_disp
- polynomial_conf%factor_strain = factor_strain 
+ polynomial_conf%factor_strain = factor_strain
  polynomial_conf%need_confinement = .FALSE.
 
  polynomial_conf%ndisp   = ndisp
@@ -234,7 +234,7 @@ end subroutine polynomial_conf_free
 !!   disp_ref(natom_uc) = Cutoff array for the atomic displacement
 !!   factor_disp = Factor to appy to the polynomial term of the confinement (displacement)
 !!   factor_strain = Factor to appy to the polynomial term of the confinement (strain)
-!!   strain(6) =   strain of a specific structure wrt to reference 
+!!   strain(6) =   strain of a specific structure wrt to reference
 !!   strain_ref(6) = Cutoff array for the strain
 !!   power_disp = Power of the polynome related to the displacement
 !!   power_strain = Power of the polynome related to the strain
@@ -249,11 +249,6 @@ end subroutine polynomial_conf_free
 !!   energy = contribution to the ifc to the energy
 !!   fcart(3,natom) = contribution to the ifc to the forces
 !!   strten(6) = contribution to the stress tensor
-!!
-!! PARENT
-!!   effective_potential_evaluate
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!      m_effective_potential

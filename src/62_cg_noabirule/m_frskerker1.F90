@@ -36,12 +36,9 @@ module m_frskerker1
   use defs_basis
   use defs_abitypes
   use m_abicore
-  use interfaces_32_util        ! THIS IS MANDATORY TO CALL dotproduct
-  use interfaces_54_spacepar
-  use interfaces_56_recipspace  ! THIS IS MANDATORY TO CALL LAPLACIAN
 
   use m_spacepar,  only : laplacian
- use m_numeric_tools, only : dotproduct
+  use m_numeric_tools, only : dotproduct
 
   implicit none
   !! common variables copied from input
