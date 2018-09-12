@@ -1046,10 +1046,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
        -0.01158   0.01158   0.00049   0.90250   0.00086
        -0.00000  -0.00086  -0.00000   0.00086   0.82955
 
-
- Parallelization over bands is not yet compatible with self-consistency in DMFT 
- Calculation of density does not taken into account non diagonal occupations
-
  ETOT  1  -370.69861112926    -3.71E+02 2.10E-22 1.62E-01 0.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
