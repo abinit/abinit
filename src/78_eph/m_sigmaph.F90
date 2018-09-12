@@ -3075,6 +3075,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
  !3.
+ ABI_MALLOC(eph_dg%kpts_dense_ibz,(3,ebands_dense%nkpt))
  eph_dg%kpts_dense_ibz = ebands_dense%kptns
  eph_dg%dense_nibz = ebands_dense%nkpt
 
@@ -3195,6 +3196,7 @@ subroutine eph_double_grid_free(self)
  ABI_FREE(self%bz2ibz_dense)
  ABI_FREE(self%kpts_coarse)
  ABI_FREE(self%kpts_dense)
+ ABI_FREE(self%kpts_dense_ibz)
  ABI_FREE(self%coarse_to_dense)
  ABI_FREE(self%dense_to_indexes)
  ABI_FREE(self%indexes_to_dense)
