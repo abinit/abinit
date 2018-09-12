@@ -1193,6 +1193,7 @@ end subroutine dvdb_readsym_allv1
 
 subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1331,6 +1332,7 @@ end subroutine dvdb_readsym_qbz
 !! SOURCE
 
 subroutine dvdb_set_qcache_mb(db, mbsize)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4512,6 +4514,7 @@ end subroutine dvdb_v1r_long_range
 subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, &
 &          ngqpt, qptopt, comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
