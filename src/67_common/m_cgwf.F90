@@ -117,9 +117,9 @@ contains
 !! OUTPUT
 !!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
-!!  subham(nband*(nband+1))=Hamiltonian expressed in sthe WFs subspace
-!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in sthe WFs subspace
+!!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
+!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in the WFs subspace
+!!  subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in the WFs subspace (also Fock part when present)
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)

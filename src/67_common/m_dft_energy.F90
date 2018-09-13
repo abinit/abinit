@@ -94,6 +94,7 @@ contains
 !! enl=nonlocal pseudopotential energy
 !! Also, compute new density from provided wfs, after the evaluation
 !! of ehart, enxc, and eei.
+!! WARNING XG180913 : At present, Fock energy not computed !
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -589,7 +590,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      ABI_DEALLOCATE(vlocal_tmp)
    end if
 
-!  Continue Hamlitonian initializaton
+!  Continue Hamiltonian initialization
    call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
    if (with_vxctau) then
      call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)

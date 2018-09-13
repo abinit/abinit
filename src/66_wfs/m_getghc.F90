@@ -109,6 +109,7 @@ contains
 !!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
 !!  gvnlc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal|C> (if sij_opt>=0)
 !!                                            or <G|Vnonlocal-lambda.S|C> (if sij_opt=-1)
+!!                               also include non-local Fock if associated(gs_ham%fockcommon)
 !!  if (sij_opt=1)
 !!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
 !!

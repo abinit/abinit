@@ -1843,6 +1843,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  nsppol
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nsppol',nsppol,2,(/1,2/),iout)
 
+!  nstep
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'nstep',dt%nstep,0,iout)
+   if(dt%nstep==0)then
+!    nstep==0 computation of energy not yet implemented with Fock term, see m_energy.F90
+     cond_string(1)='usefock' ; cond_values(1)=dt%usefock
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usefock',dt%usefock,1,(/0/),iout)
+   endif
+
 !  nsym
    call chkint_ge(0,0,cond_string,cond_values,ierr,'nsym',dt%nsym,1,iout)
 !  check if nsym=1 in phonon calculation in finite electric field
@@ -3058,6 +3066,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'lexexch',dt%lexexch(itypat),5,(/-1,0,1,2,3/),iout)
      end do
    end if
+
+!  usefock and restrictions
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usefock',dt%usefock,2,(/0,1/),iout)
 
 !  usekden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usekden',dt%usekden,2,(/0,1/),iout)
