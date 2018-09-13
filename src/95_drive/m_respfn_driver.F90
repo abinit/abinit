@@ -257,7 +257,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
- integer :: usexcnhat,use_sym,vloc_method
+ integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -1424,6 +1424,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
    if (psps%usepaw==1) d2nfr(:,:,:,:,:)=d2nfr(:,:,:,:,:)+d2ovl(:,:,:,:,:)
 
+   zero_by_symm=1
+   if(dtset%rfmeth<0)zero_by_symm=0
+
 !  In case of bbb decomposition
    if(prtbbb==1)then
      ABI_ALLOCATE(blkflg1,(3,mpert,3,mpert))
@@ -1442,7 +1445,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        blkflg1(:,:,:,:) = blkflg2(:,:,:,:)
        d2tmp(:,:,natom+2,:,:) = d2bbb(:,:,:,:,iband,iband)
        call d2sym3(blkflg1,d2tmp,indsym,mpert,natom,dtset%nsym,qphon,symq,&
-&       symrec,dtset%symrel,timrev)
+&       symrec,dtset%symrel,timrev,zero_by_symm)
        d2bbb(:,:,:,:,iband,iband) = d2tmp(:,:,natom+2,:,:)
      end do
      ABI_DEALLOCATE(blkflg1)
@@ -1452,21 +1455,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
    !write(std_out,*)"blkflg before d2sym3: ", blkflg
-   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
    !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
-     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
    end if
 
-!  Note that there is a bug in d2sym3 which will set some elements of
-!  blkflg to 1 even when no corresponding symmetry-related element
-!  has been computed.  This has the effect of producing spurious extra
-!  output lines in the 2nd-order matrix listing in the .out file
-!  and in the DDB file. The suprious matrix elements are all zero,
-!  so this is primarily an annoyance.(DRH)
-
+!  Note that d2sym3 usually complete the 2nd-order matrix
+!  with elements that are zero by symmetry, automatically,
+!  unless it has been explicitly asked not to do so.
+!  blkflg is then set to 1 for these matrix elements, even if there has be no calculation.
 
 !  Add the frozen-wf (dyfrwf) part to the ewald part (dyew),
 !  the part 1 of the frozen wf part of the xc core correction
