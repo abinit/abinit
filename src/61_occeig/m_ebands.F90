@@ -79,6 +79,7 @@ MODULE m_ebands
  public :: put_eneocc_vect         ! Put (ene|occ|doccde) in vectorial form into the data type doing a reshape.
  public :: get_bandenergy          ! Returns the band energy of the system.
  public :: get_valence_idx         ! Gives the index of the (valence|bands at E_f).
+ public :: get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
  public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
@@ -1507,6 +1508,61 @@ pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
  end do
 
 end function get_valence_idx
+!!***
+
+!!****f* m_ebands/get_bands_from_erange
+!! NAME
+!!  get_bands_from_erange
+!!
+!! FUNCTION
+!! Return the indices of the mix and max band within an energy window.
+!!
+!! INPUTS
+!!  elow, ehigh: Min and max energy
+!!
+!! OUTPUT
+!!  bstart, bstop: Min and max band index. Initialized to bstart = huge(1); bstop = -huge(1)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_bands_from_erange'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: ebands
+ real(dp),intent(in) :: elow, ehigh
+ integer,intent(out) :: bstart, bstop
+
+!Local variables-------------------------------
+ integer :: band, ik, spin
+
+! *************************************************************************
+
+ bstart = huge(1); bstop = -huge(1)
+ do spin=1,ebands%nsppol
+   do ik=1,ebands%nkpt
+     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+       if (ebands%eig(band, ik , spin) >= elow .and. ebands%eig(band, ik , spin) <= ehigh) then
+          bstart = min(bstart, band)
+          bstop = max(bstop, band)
+       end if
+     end do
+   end do
+ end do
+
+end subroutine get_bands_from_erange
 !!***
 
 !----------------------------------------------------------------------
