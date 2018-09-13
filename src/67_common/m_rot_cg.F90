@@ -163,11 +163,13 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 
   if (info > 0) then
     message=""
-    write(message, "(a,i5)") " something wrong happened with the diagonalisation of the occupation matrix (did't converge), info=",info
+    write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
+&the occupation matrix (did't converge), info=",info
     MSG_ERROR(message)
   else if (info < 0) then
     message=""
-    write(message, "(a,i5)") " something wrong happened with the diagonalisation of the occupation matrix (bad input argument), info=",info
+    write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
+&the occupation matrix (bad input argument), info=",info
     MSG_ERROR(message)
   end if
   
