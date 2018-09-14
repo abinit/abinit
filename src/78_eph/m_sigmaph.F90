@@ -795,15 +795,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              eminmax(2) = eig0nk + 0.01
              call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
              ! we pay the efficiency here
-             sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) * sigma%ephwg%nbz )
-             sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) * sigma%ephwg%nbz )
+             sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
+             sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )
            enddo
          enddo
        enddo
        ABI_FREE(tmp_deltaw_pm)
        call xmpi_sum(sigma%deltaw_pm, comm, ierr)
        call cwtime(cpu,wall,gflops,"stop")
-       write(msg,'(2(a,f8.2))') "weights with tetrahedron cpu:",cpu,", wall:",wall
+       write(msg,'(2(a,f8.2))') "weights with tetrahedron  cpu:",cpu,", wall:",wall
        call wrtout(std_out, msg, do_flush=.True.)
      endif
 
@@ -1080,22 +1080,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          eig0mkq = ebands%eig(ibsum_kq,ikq_ibz,spin)
          ! q-weigths for naive integration
          weigth_q = sigma%wtq_k(iq_ibz)
-
-         ! Precompute weigths with tetrahedron
-         if (sigma%qint_method > 0) then
-           if (sigma%use_doublegrid) then
-             !call sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, xmpi_comm_self)
-             ! We rescale the weight as the weights obtained above are scaled with 1/Nq 
-             ! with Nq the number of points in the double grid.
-             ! This factor is acounted for bellow when summing over the microzone
-             weigth_q = weigth_q*sigma%ephwg%nbz
-           else
-             !call sigmaph_get_qweights(sigma, ikcalc, iqlk(1), ibsum_kq, spin, xmpi_comm_self)
-             ! The Nstar(q) / N_qbz factor is already included in the weigths produced
-             ! by the above routines so weigth_q must be set to one here.
-             weigth_q = one
-           end if
-         end if
 
          do nu=1,natom3
            ! Ignore acoustic or unstable modes.
