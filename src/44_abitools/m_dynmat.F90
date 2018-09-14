@@ -33,6 +33,7 @@ module m_dynmat
  use m_abicore
  use m_errors
  use m_linalg_interfaces
+ use m_xmpi
 
  use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
@@ -3708,10 +3709,11 @@ end subroutine dist9
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!           These coordinates are normalized (=> * acell(3)!!)
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
+!! comm=MPI communicator.
 !!
 !! OUTPUT
-!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
-!!  We used the imaginary part just for debugging !
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space.
+!!  We used the imaginary part just for debugging!
 !!
 !! PARENTS
 !!      m_ifc
@@ -3720,7 +3722,7 @@ end subroutine dist9
 !!
 !! SOURCE
 
-subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
+subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3733,7 +3735,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom,nqpt,nrpt
+ integer,intent(in) :: natom,nqpt,nrpt,comm
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(out) :: atmfrc(3,natom,3,natom,nrpt)
@@ -3741,7 +3743,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,iqpt,irpt,mu,nu
+ integer :: ia,ib,iqpt,irpt,mu,nu,nprocs,my_rank,ierr
  real(dp) :: im,kr,re
 !arrays
  real(dp) :: kk(3)
@@ -3750,9 +3752,12 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
  DBG_ENTER("COLL")
 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
 !Interatomic Forces from Dynamical Matrices
  atmfrc = zero
  do irpt=1,nrpt
+   if (mod(irpt, nprocs) /= my_rank) cycle ! mpi-parallelism
    do iqpt=1,nqpt
 
 !    Calculation of the k coordinates in Normalized Reciprocal coordinates
@@ -3789,6 +3794,8 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
    end do
  end do
+
+ call xmpi_sum(atmfrc, comm, ierr)
 
 !The sumifc has to be weighted by a normalization factor of 1/nqpt
  atmfrc = atmfrc/nqpt

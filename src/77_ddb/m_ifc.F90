@@ -618,7 +618,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
- call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
+ call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz, comm)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
  if (Ifc%asr>0) then
@@ -629,6 +629,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  write(message, '(2a)')ch10,' The interatomic forces have been obtained '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
+
+ call cwtime(cpu, wall, gflops, "stop")
+ write(message,"(2(a,f8.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Apply cutoff on ifc if needed
  if (nsphere > 0 .or. abs(rifcsph) > tol10) then
@@ -725,7 +729,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f8.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
