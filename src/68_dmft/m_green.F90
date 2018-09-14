@@ -1358,7 +1358,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !       ! ok
 !     endif
 ! call flush(std_out)
-     call sym_matlu(cryst_struc,green_temp%matlu,pawang)
+     call sym_matlu(cryst_struc,green_temp%matlu,pawang,paw_dmft)
      call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
 !       write(std_out,*) ifreq,nproc,'after sym'
@@ -1640,14 +1640,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>2) then
        write(message,'(a,a,i10,a)') ch10,&
 &       "  = green%occup%matlu from int(gloc(w)) with symetrization"
        call wrtout(std_out,message,'COLL')
        call print_matlu(green%occup%matlu,natom,prtopt=3,opt_diag=-1)
      endif
-     call sym_matlu(cryst_struc,matlu_temp,pawang)
+     call sym_matlu(cryst_struc,matlu_temp,pawang,paw_dmft)
 
 !  - Post-treatment for summation over negative and positive frequencies:
 !    necessary in the case of nspinor==2 AND nspinor==1, but valid anywhere
@@ -1830,7 +1830,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>=2) then
 !       write(message,'(a,a,i10,a)') ch10,&
 !&        "  = green%occup%matlu from projection of int(gks(w)) with symetrization"
@@ -2187,7 +2187,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
        enddo ! ikpt
      enddo ! isppol
      call loc_oper(green%occup_tau,paw_dmft,1)
-     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang,paw_dmft)
      write(message,'(a,a,i10,a)') ch10,"  green%occup_tau%matlu from green_occup_tau%ks"
      call wrtout(std_out,message,'COLL')
      call print_matlu(green%occup_tau%matlu,natom,prtopt=3)
@@ -3344,7 +3344,7 @@ end subroutine occup_green_tau
 !======================================================================
 ! Symetrize
 !======================================================================
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
    
  enddo
  write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"

@@ -1107,35 +1107,36 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      if(paw_dmft%dmft_solv>=5) opt_imagonly=1
 
 
+     ! Compute k-resolved spectral function in DMFT.
      if(dtset%iscf<0) then
-      write(6,*) "datafordmft done"
+      !write(6,*) "datafordmft done"
        call initialize_self(selfr,paw_dmft,wtype='real')
-      write(6,*) "init self done"
+      !write(6,*) "init self done"
        call initialize_self(self,paw_dmft)
-      write(6,*) "init self done"
+      !write(6,*) "init self done"
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
-      write(6,*) "init green done with allocation of green%oper"
+      !write(6,*) "init green done with allocation of green%oper"
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
-     write(6,*) "self%hdc outscfcv",self%hdc%matlu(1)%mat(1,1,1,1,1)
-     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
-     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
-     write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
-      write(6,*) "init green done with allocation of green%oper"
-      write(6,*) "opt_imagonly",opt_imagonly
+     !write(6,*) "self%hdc outscfcv",self%hdc%matlu(1)%mat(1,1,1,1,1)
+     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
+     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
+     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
+      !write(6,*) "init green done with allocation of green%oper"
+      !write(6,*) "opt_imagonly",opt_imagonly
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &                
      &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
-     write(6,*) "self2r",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
-     write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
-      write(6,*) "read self done"
+     !!write(6,*) "self2r",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
+     !write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
+      !write(6,*) "read self done"
        call selfreal2imag_self(selfr,self)
-      write(6,*) "selfreal2imag_self done"
+      !write(6,*) "selfreal2imag_self done"
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
 &       opt_self=1,opt_nonxsum=0)
-      write(6,*) "compute green done"
+      !write(6,*) "compute green done"
        if(me==master) then
          call print_green("forspectralfunction",greenr,5,paw_dmft,&
 &         pawprtvol=3,opt_wt=1)
-        write(6,*) "print green done"
+        !write(6,*) "print green done"
        endif
 
        call destroy_green(greenr)

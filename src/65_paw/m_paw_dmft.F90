@@ -158,6 +158,8 @@ MODULE m_paw_dmft
   real(dp) :: dmftqmc_n
   ! qmc number of sweeps
 
+  integer :: dmftqmc_x2m2y
+  ! for doing qmc with x2m2y only (for testing purposes)
 
   integer :: dmftqmc_t2g
   ! for doing qmc with t2g only (for testing purposes)
@@ -701,6 +703,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
+ paw_dmft%dmftqmc_x2m2y=dtset%dmft_x2m2y
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl
@@ -745,6 +748,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  do iatom=1,paw_dmft%natom
    paw_dmft%lpawu(iatom)=pawtab(typat(iatom))%lpawu
    if(paw_dmft%dmftqmc_t2g==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=1
+   if(paw_dmft%dmftqmc_x2m2y==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=0
  enddo
  paw_dmft%maxlpawu=maxval(paw_dmft%lpawu(:))
  maxlpawu = paw_dmft%maxlpawu
@@ -760,10 +764,10 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
 !=======================
 
  iexist2=1
- if(dtset%iscf<0.and.paw_dmft%dmft_solv==5) then
+ if(dtset%iscf<0.and.(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8)) then
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
-     write(6,*) "inquire",lexist
+   !  write(6,*) "inquire",lexist
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&

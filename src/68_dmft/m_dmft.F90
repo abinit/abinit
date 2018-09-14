@@ -269,7 +269,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
  ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
- call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g)
+ call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2m2y)
  call initialize_self(self,paw_dmft)
 
  ! Set Hu in density representation for calculation of entropy if needed...
@@ -544,7 +544,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
 !printout 
- call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g)
+ call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2m2y)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
 

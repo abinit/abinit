@@ -203,6 +203,7 @@ type dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_x2m2y
  integer :: dmftbandi
  integer :: dmftbandf
  integer :: dmftcheck
