@@ -612,7 +612,7 @@ end subroutine print_matlu
 !Local variables-------------------------------
 !scalars
  integer :: at_indx,iatom,irot,ispinor,ispinor1,isppol,lpawu,m1,m2,m3,m4,mu
- integer :: natom,ndim,nsppol,nspinor,nu,t2g,m1s,m2s,m3s,m4s,lpawu_zarot,x2m2y
+ integer :: natom,ndim,nsppol,nspinor,nu,t2g,m1s,m2s,m3s,m4s,lpawu_zarot,x2my2d
  complex(dpc) :: sumrho,summag(3),rotmag(3),ci
  real(dp) :: zarot2
 !arrays
@@ -622,13 +622,13 @@ end subroutine print_matlu
  type(matlu_type),allocatable :: glocnms(:)
  type(matlu_type),allocatable :: glocsym(:)
  real(dp),allocatable :: symrec_cart(:,:,:)
- integer :: mt2g(3),mx2m2y
+ integer :: mt2g(3),mx2my2d
  mt2g(1)=1
  mt2g(2)=2
  mt2g(3)=4
- mx2m2y=5
+ mx2my2d=5
  t2g=paw_dmft%dmftqmc_t2g
- x2m2y=paw_dmft%dmftqmc_x2m2y
+ x2my2d=paw_dmft%dmftqmc_x2my2d
 
 ! DBG_ENTER("COLL")
 
@@ -666,11 +666,11 @@ end subroutine print_matlu
            m3s=mt2g(m3)
            m4s=mt2g(m4)
            lpawu_zarot=2
-          else if (x2m2y==1) then
-           m1s=mx2m2y
-           m2s=mx2m2y
-           m3s=mx2m2y
-           m4s=mx2m2y
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
            lpawu_zarot=2
           else
            m1s=m1
@@ -752,11 +752,11 @@ end subroutine print_matlu
            m3s=mt2g(m3)
            m4s=mt2g(m4)
            lpawu_zarot=2
-          else if (x2m2y==1) then
-           m1s=mx2m2y
-           m2s=mx2m2y
-           m3s=mx2m2y
-           m4s=mx2m2y
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
            lpawu_zarot=2
           else
            m1s=m1

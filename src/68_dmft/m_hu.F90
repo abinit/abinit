@@ -120,7 +120,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2m2y)
+subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -139,7 +139,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2m2y)
  type(crystal_t),intent(in) :: cryst_struc
  type(pawtab_type), target, intent(in)  :: pawtab(cryst_struc%ntypat)
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- integer, intent(in) :: t2g,x2m2y
+ integer, intent(in) :: t2g,x2my2d
 !Local variables ------------------------------------
  integer :: itypat,i,ij,ij1,ij2,j,lpawu,ms,ms1,m,m1,ndim
  integer :: ns,ns1,n,n1
@@ -160,7 +160,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2m2y)
    hu(itypat)%lpawu=pawtab(itypat)%lpawu
    hu(itypat)%jmjbasis=.false.
    if(t2g==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=1
-   if(x2m2y==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=0
+   if(x2my2d==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=0
    lpawu=hu(itypat)%lpawu
    if(lpawu.ne.-1) then
      hu(itypat)%upawu=pawtab(itypat)%upawu
@@ -204,7 +204,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2m2y)
      ABI_ALLOCATE(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
      ABI_ALLOCATE(hu(itypat)%udens,(2*ndim,2*ndim))
      ABI_ALLOCATE(xij,(2*ndim,2*ndim))
-     if(t2g==0.and.x2m2y==0) then
+     if(t2g==0.and.x2my2d==0) then
        hu(itypat)%vee => pawtab(itypat)%vee
 !   t2g case begin
      else if(t2g==1.and.hu(itypat)%lpawu==1) then
@@ -231,12 +231,12 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2m2y)
          enddo
        enddo
 !   t2g case end
-!   x2m2y case begin
-     else if(x2m2y==1.and.hu(itypat)%lpawu==0) then
+!   x2my2d case begin
+     else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
        ABI_ALLOCATE(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
        hu(itypat)%vee(1,1,1,1)=pawtab(itypat)%upawu
      endif
-!   x2m2y case end
+!   x2my2d case end
 
      hu(itypat)%udens=zero
      ij=0
@@ -333,7 +333,7 @@ end subroutine init_hu
 !!
 !! SOURCE
 
-subroutine destroy_hu(hu,ntypat,t2g,x2m2y)
+subroutine destroy_hu(hu,ntypat,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -350,7 +350,7 @@ subroutine destroy_hu(hu,ntypat,t2g,x2m2y)
 !scalars
  integer, intent(in) :: ntypat
  type(hu_type),intent(inout) :: hu(ntypat)
- integer, intent(in) :: t2g,x2m2y
+ integer, intent(in) :: t2g,x2my2d
 
 !Local variables-------------------------------
  integer :: itypat
@@ -367,7 +367,7 @@ subroutine destroy_hu(hu,ntypat,t2g,x2m2y)
   end if
   if(t2g==1.and.hu(itypat)%lpawu==1) then
     ABI_DEALLOCATE(hu(itypat)%vee)
-  else if(x2m2y==1.and.hu(itypat)%lpawu==0) then
+  else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
     ABI_DEALLOCATE(hu(itypat)%vee)
   else
     hu(itypat)%vee => null()

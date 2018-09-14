@@ -163,7 +163,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  integer :: iat,iatom,ib,iband,ibandc,ibg,icat,icount_proj_ilmn,idijeff,ierr,ierrr,ikpt
  integer :: ilmn,im,im1,iorder_cprj,ispinor,ispinor1,isppol,itypat,ilmn1
  integer :: jj1,ldim,lmn_size,lpawu
- integer :: m1,m1_x2m2y,m1_x2m2y_mod,m1_t2g,m1_t2g_mod,maxnproju,me,natom,nband_k,nband_k_cprj
+ integer :: m1,m1_x2my2d,m1_x2my2d_mod,m1_t2g,m1_t2g_mod,maxnproju,me,natom,nband_k,nband_k_cprj
  integer :: nbandi,nbandf,nnn,nprocband,nsploop,option,opt_renorm,spaceComm,unt
  real(dp) :: ph0phiint_used
  character(len=500) :: message
@@ -175,7 +175,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  type(matlu_type), allocatable :: xocc_check(:)
  type(matlu_type), allocatable :: xnorm_check(:)
  type(matlu_type), allocatable :: matlu_temp(:)
- logical :: lprojchi,t2g,x2m2y
+ logical :: lprojchi,t2g,x2my2d
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -229,7 +229,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  lprojchi=.false.
  lprojchi=.true.
  t2g=(paw_dmft%dmftqmc_t2g==1)
- x2m2y=(paw_dmft%dmftqmc_x2m2y==1)
+ x2my2d=(paw_dmft%dmftqmc_x2my2d==1)
  natom=cryst_struc%natom
 
 !if(mpi_enreg%me==0) write(7886,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
@@ -387,21 +387,21 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
                end if
              end if
 !            ----------   t2g case
-!            ----------   x2m2y case
-             if(paw_dmft%dmftqmc_x2m2y==1.and.lpawu/=-1) then
+!            ----------   x2my2d case
+             if(paw_dmft%dmftqmc_x2my2d==1.and.lpawu/=-1) then
                if(lpawu==2) then
 !                lpawu==2 must be chosen in input and thus in
 !                pawtab. On the contrary, paw_dmft now has
 !                lpawu=1
-                 m1_x2m2y=0 ! index for psichi which has a dimension 3
+                 m1_x2my2d=0 ! index for psichi which has a dimension 3
                else
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
-&                 '  Wrong use of dmftqmc_x2m2y',paw_dmft%dmftqmc_x2m2y,lpawu,ch10,&
-&                 ' Action: desactivate dmftqmc_x2m2y or use lpawu=1'
+&                 '  Wrong use of dmftqmc_x2my2d',paw_dmft%dmftqmc_x2my2d,lpawu,ch10,&
+&                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=1'
                  MSG_ERROR(message)
                end if
              end if
-!            ----------   x2m2y case
+!            ----------   x2my2d case
 !            if(isppol==2) write(std_out,*) "ee",size(cprj(iatom,ibsp)%cp(:,:))
 
              iat=iat+1
@@ -466,14 +466,14 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 &                          cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&  ! t2g case
 &                          cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)  ! t2g case
                          end if  !t2g case
-                       else if(paw_dmft%dmftqmc_x2m2y==1) then ! x2m2y case
-                         if(m1==5) then ! x2m2y case
-                           m1_x2m2y=1  ! x2m2y case1
-                           paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2m2y)=&      ! x2m2y case
-&                          paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2m2y)+&      ! x2m2y case
-&                          cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&       ! x2m2y case
-&                          cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)      ! x2m2y case
-                         end if  !x2m2y case
+                       else if(paw_dmft%dmftqmc_x2my2d==1) then ! x2my2d case
+                         if(m1==5) then ! x2my2d case
+                           m1_x2my2d=1  ! x2my2d case1
+                           paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d)=&      ! x2my2d case
+&                          paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d)+&      ! x2my2d case
+&                          cmplx(cwaveprj(iatom,ispinor)%cp(1,ilmn)*ph0phiint_used,&       ! x2my2d case
+&                          cwaveprj(iatom,ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)      ! x2my2d case
+                         end if  !x2my2d case
                        else
                          paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)=&
 &                         paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1)+&
@@ -601,7 +601,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 !==========================================================================
  if(me.eq.0) then
    call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
-&   nsppol,paw_dmft,pawtab,psps,t2g,x2m2y)
+&   nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
  end if ! proc=me
 !==========================================================================
 !********************* Check normalization  and occupations ***************
@@ -746,7 +746,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
      if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2
      call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
      call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
-&     nsppol,paw_dmft,pawtab,psps,t2g,x2m2y)
+&     nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
    end if ! proc=me
  end if
 !!***
@@ -785,7 +785,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 !! SOURCE
 
 subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
-&nsppol,paw_dmft,pawtab,psps,t2g,x2m2y)
+&nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
 
  use m_profiling_abi
  use m_io_tools,  only : open_file
@@ -805,13 +805,13 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
  integer, intent(in) :: nattyp(ntypat)
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
- logical t2g,x2m2y
+ logical t2g,x2my2d
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ------------------------------------
  integer :: ibg,isppol,ikpt,iband,ibandc,ispinor,icat,itypat,lmn_size
  integer :: iat,iatom,jj1,ilmn,m1,nband_k,unt
- integer :: m1_t2g,ll,m1_x2m2y
+ integer :: m1_t2g,ll,m1_x2my2d
  real(dp) :: chinorm
  character(len=500) :: msg
 
@@ -828,7 +828,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
      do  itypat=1,ntypat
        if(t2g) then
          if(pawtab(itypat)%lpawu.ne.-1) write(unt,*) "l= ",ll,itypat
-       else if(x2m2y) then
+       else if(x2my2d) then
          if(pawtab(itypat)%lpawu.ne.-1) write(unt,*) "l= ",ll-1,itypat
        else
          if(pawtab(itypat)%lpawu.ne.-1) write(unt,*) "l= ",pawtab(itypat)%lpawu,itypat
@@ -867,7 +867,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                  chinorm=1.d0
 !                write(std_out,*) isppol,ikpt,iband,ispinor,iat
                  m1_t2g=0
-                 m1_x2m2y=0
+                 m1_x2my2d=0
                  do ilmn=1,lmn_size
 !                  write(std_out,*) ilmn
 !                  ------------ Select l=lpawu.  ---------------------------------------
@@ -897,12 +897,12 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 &                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g))/chinorm,&
 &                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g))/chinorm
                          end if
-                       else if(x2m2y) then
+                       else if(x2my2d) then
                          if(m1==5) then
-                           m1_x2m2y=1
+                           m1_x2my2d=1
                            write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
-&                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2m2y))/chinorm,&
-&                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2m2y))/chinorm
+&                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm,&
+&                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm
                          end if
                        else
                          write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
