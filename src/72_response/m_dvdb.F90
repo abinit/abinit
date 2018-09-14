@@ -267,6 +267,7 @@ module m_dvdb
  public :: dvdb_readsym_qbz       ! Reconstruct the DFPT potential for a q-point in the BZ starting
                                   ! from its symmetrical image in the IBZ.
  public :: dvdb_set_qcache_mb     ! Allocate internal cache for potentials.
+ public :: dvdb_qcache_read       ! Read potentials and store them in cache.
  public :: dvdb_list_perts        ! Check if all the (phonon) perts are available taking into account symmetries.
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
@@ -1370,6 +1371,66 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  ABI_MALLOC(db%qcache, (db%nqpt))
 
 end subroutine dvdb_set_qcache_mb
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_qcache_read
+!! NAME
+!!  dvdb_qcache_read
+!!
+!! FUNCTION
+!!  Read potentials and store them in cache
+!!
+!! INPUTS
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_qcache_read'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,comm
+ type(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfft(18)
+
+!Local variables-------------------------------
+!scalars
+ integer :: db_iqpt, cplex
+!arrays
+ real(dp),allocatable :: v1scf(:,:,:,:)
+
+! *************************************************************************
+
+ if (db%qcache_size == 0) return
+
+ do db_iqpt=1,db%nqpt
+   if (db_iqpt > db%qcache_size) exit
+   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   ABI_FREE(v1scf)
+ end do
+
+end subroutine dvdb_qcache_read
 !!***
 
 !----------------------------------------------------------------------

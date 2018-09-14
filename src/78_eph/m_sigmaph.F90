@@ -592,9 +592,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! When we need to remove a cache item because we've reached the dvdb_qcache_mb limit, we select the q-point
  ! which the largest number of operations in the little group (e.g. Gamma) while trying to keep the previous qibz in cache
  ! The cache is built dynamically so it depends on the way we loop over q-points in the caller.
- ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells*  to minimise cache misses.
+ ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
  call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
+ call dvdb_qcache_read(dvdb, nfftf, ngfftf, comm)
 
  ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
