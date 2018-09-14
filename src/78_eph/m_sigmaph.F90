@@ -902,7 +902,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                             npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-           !bra_kq = zero
          end if
 
          ! h1kets_kq is the main responsible for the symmetry breaking
