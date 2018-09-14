@@ -43,6 +43,7 @@ module m_sigmaph
  use m_lgroup
  use m_ephwg
  use m_nctk
+ use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -90,7 +91,7 @@ module m_sigmaph
    real(dp),allocatable :: kpts_dense(:,:)
    real(dp),allocatable :: kpts_dense_ibz(:,:)
    integer :: coarse_nbz, dense_nbz, dense_nibz
-   
+
    real(dp),allocatable :: weights_dense(:)
    !weights in the dense grid
 
@@ -127,8 +128,8 @@ module m_sigmaph
    integer,allocatable :: coarse_to_dense(:,:)
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
- end type eph_double_grid_t 
- 
+ end type eph_double_grid_t
+
  ! Tables for degenerated KS states.
  type bids_t
    integer, allocatable :: vals(:)
@@ -219,7 +220,7 @@ module m_sigmaph
    ! Defines the method used to integrate in q-space
    ! 0 --> Standard quadrature (one point per small box)
    ! 1 --> Use tetrahedron method
- 
+
   logical :: use_doublegrid
    ! whether to use double grid or not
 
@@ -875,7 +876,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
                    mod(nint((kk(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
- 
+
          ikq_bz = eph_dg%indexes_to_coarse(&
                    mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
@@ -885,7 +886,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
                    mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
- 
+
          ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
          ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
          !fine grid around kq
@@ -925,7 +926,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end if
          endif
        end if
- 
+
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
@@ -1117,7 +1118,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! Here we have to handle 3 different logical values
                ! leading to 9 different cases:
                !
-               ! qint_method         0      1  
+               ! qint_method         0      1
                !   use_doublegrid   .true. .false.
                !     imag_only      .true. .false.
                !
@@ -1140,7 +1141,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      wqnu = phfrq_dense(nu,jj)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
-                     
+
                      cfact = cfact + &
                             ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
                              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
@@ -1170,7 +1171,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      wqnu = phfrq_dense(nu,jj)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
-                     
+
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iqlk(jj)) +  &
@@ -1201,7 +1202,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    ! Have to rescale gkk2 before computing derivative (HM: why?)
                  !  gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
                  !end if
- 
+
                  ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
                  !old derivative
                  ! This to avoid numerical instability
@@ -1786,7 +1787,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: changed,found
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
- type(hdr_type) :: hdr_wfk_dense 
+ type(hdr_type) :: hdr_wfk_dense
 !arrays
  integer :: intp_kptrlatt(3,3)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),nkpt_dense(3),band_block(2)
@@ -2124,8 +2125,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! values of energies in a fine grid
  !
  ! -------------------
- ! |. . .|. . .|. . .| 
- ! |. x .|. x .|. x .| 
+ ! |. . .|. . .|. . .|
+ ! |. x .|. x .|. x .|
  ! |. . .|. . .|. . .|
  ! -------------------
  ! . = double grid
@@ -2142,7 +2143,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
  ! 4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
  ! 5. Create a scatter array between the points in the fine grid
- ! 
+ !
 
  new%use_doublegrid = .False.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
@@ -2157,10 +2158,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
    ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+   ABI_FREE(energies_dense)
 
    !TODO add a check for consistency
    ! number of bands and kpoints (comensurability)
    ABI_CHECK(hdr_wfk_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
+   call hdr_free(hdr_wfk_dense)
 
    new%use_doublegrid = .True.
 
@@ -2189,7 +2192,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (new%qint_method > 0) then
    ! bstart and new%bsum select the band range.
    bstart = 1
-   if (new%use_doublegrid) then 
+   if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
      !if (dtset% dtftil% ....) then
      !  tmp_ebands = wfk_read_ebands(filepath, comm)
@@ -2229,7 +2232,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
      end if
    end if
- else 
+ else
    if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
    endif
@@ -2239,7 +2242,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e = ebands%fermie
 
- if (dtset%eph_fermie == zero) then 
+ if (dtset%eph_fermie == zero) then
    if (new%use_doublegrid) then
      call ebands_copy(ebands_dense, tmp_ebands)
    else
@@ -2287,6 +2290,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  else
    new%mu_e(:) = ebands%fermie
  endif
+
+ call ebands_free(ebands_dense)
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2410,8 +2415,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Now reopen the file in parallel.
  call xmpi_barrier(comm)
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
@@ -2541,7 +2546,7 @@ subroutine sigmaph_free(self)
     ABI_DT_FREE(self%degtab)
  end if
  call ephwg_free(self%ephwg)
- 
+
  if (self%use_doublegrid) then
    call eph_double_grid_free(self%eph_doublegrid)
  end if
@@ -2995,7 +3000,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
 !End of the abilint section
 
  type(crystal_t), intent(in) :: cryst
- type(ebands_t), intent(in) :: ebands_dense 
+ type(ebands_t), intent(in) :: ebands_dense
  integer, intent(in) :: kptrlatt_coarse(3,3), kptrlatt_dense(3,3)
 
  integer,parameter :: sppoldbl1=1,timrev1=1
@@ -3003,7 +3008,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  integer :: nkpt_coarse(3), nkpt_dense(3), interp_kmult(3), interp_side(3)
  integer,allocatable :: indqq(:,:)
  real(dp) :: dksqmax
- 
+
  nkpt_coarse(1) = kptrlatt_coarse(1,1)
  nkpt_coarse(2) = kptrlatt_coarse(2,2)
  nkpt_coarse(3) = kptrlatt_coarse(3,3)
@@ -3018,7 +3023,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%nkpt_coarse = nkpt_coarse
  eph_dg%nkpt_dense = nkpt_dense
  eph_dg%ebands_dense = ebands_dense
- 
+
  ! microzone is the set of points in the fine grid belonging to a certain coarse point
  ! we have to consider a side of a certain size around the coarse point
  ! to make sure the microzone is centered around it point.
@@ -3061,7 +3066,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  write(std_out,*) 'dense:       ', nkpt_dense
  write(std_out,*) 'interp_kmult:', interp_kmult
  write(std_out,*) 'ndiv:        ', eph_dg%ndiv
- ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'dense mesh is smaller than coarse mesh.') 
+ ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'dense mesh is smaller than coarse mesh.')
 
  ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
  ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
@@ -3112,7 +3117,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
        eph_dg%coarse_to_indexes(:,i_coarse) = [ii,jj,kk]
      enddo
    enddo
- enddo 
+ enddo
 
  ! here we need to iterate again because we can have points of the dense grid
  ! belonging to multiple coarse points
@@ -3141,9 +3146,9 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
        enddo
      enddo
    enddo
- enddo 
+ enddo
 
- ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete') 
+ ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete')
 
  !calculate the weights of each fine point
  !different methods to distribute the weights might lead to better convergence
@@ -3160,6 +3165,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
  !3.
+ ABI_MALLOC(eph_dg%kpts_dense_ibz,(3,ebands_dense%nkpt))
  eph_dg%kpts_dense_ibz = ebands_dense%kptns
  eph_dg%dense_nibz = ebands_dense%nkpt
 
@@ -3188,8 +3194,8 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
 #endif
  ABI_FREE(displ_cart)
 #endif
- 
- !4. 
+
+ !4.
  write(std_out,*) 'map bz -> ibz'
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
  ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
@@ -3199,6 +3205,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
              cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
  ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
  eph_dg%bz2ibz_dense(:) = indqq(:,1)
+ ABI_FREE(indqq)
 
 #if 0
  open (unit = 2, file = "ibz.dat")
@@ -3232,9 +3239,9 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
      dksqmean = dksqmean + error
    enddo
  end do
- write(*,*) 'bz2ibz phonon error min: ', dksqmin
- write(*,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
- write(*,*) 'bz2ibz phonon error mean:', dksqmean/eph_dg%dense_nbz, &
+ write(std_out,*) 'bz2ibz phonon error min: ', dksqmin
+ write(std_out,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
+ write(std_out,*) 'bz2ibz phonon error mean:', dksqmean/eph_dg%dense_nbz, &
                                          dksqmean/eph_dg%dense_nbz/maxfreq
  ABI_FREE(displ_cart)
 
@@ -3275,16 +3282,21 @@ subroutine eph_double_grid_free(self)
 !End of the abilint section
 
  type(eph_double_grid_t) :: self
- 
+
  ABI_FREE(self%weights_dense)
  ABI_FREE(self%bz2ibz_dense)
  ABI_FREE(self%kpts_coarse)
  ABI_FREE(self%kpts_dense)
+ ABI_FREE(self%kpts_dense_ibz)
  ABI_FREE(self%coarse_to_dense)
  ABI_FREE(self%dense_to_indexes)
  ABI_FREE(self%indexes_to_dense)
  ABI_FREE(self%coarse_to_indexes)
  ABI_FREE(self%indexes_to_coarse)
+
+ !ABI_FREE(self%bz2ibz_coarse)
+
+ !call ebands_free(ebands_dense)
 
 end subroutine eph_double_grid_free
 

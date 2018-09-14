@@ -1,6 +1,6 @@
 
-.Version 8.7.6 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.9.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  9 Mar 2018.
-- ( at 06h52 )
+.Starting date : Mon 10 Sep 2018.
+- ( at 15h06 )
   
-- input  file    -> t44.in
-- output file    -> t44.out
-- root for input  files -> t44i
-- root for output files -> t44o
+- input  file    -> t153.in
+- output file    -> t153.out
+- root for input  files -> t153i
+- root for output files -> t153o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -31,12 +31,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =          54        mffmem =           1         mkmem =           8
+-    mband =           8        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.134 Mbytes of memory.
+P This job should need less than                       3.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -48,12 +48,12 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =          54        mffmem =           1         mkmem =           8
+-    mband =           8        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.134 Mbytes of memory.
+P This job should need less than                       3.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -69,18 +69,14 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
-             bdgw           1       8       1       8
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
          eph_task           4
-         ph_wstep      3.67493254E-06 Hartree
-         ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        2    2    2
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
 -          fftalg         312
            getddb          20
            getwfk          20
+       gw_qprange           2
            istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -91,28 +87,18 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
-            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      1.89602709E+01
 P           mkmem           8
             natom           2
-            nband          54
+            nband           8
            ndtset           2
             ngfft          20      20      20
              nkpt           8
-           nkptgw           2
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver           7
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -169,7 +155,9 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-16
+            tmesh      5.00000000E+00  2.95000000E+02  2.00000000E+00
             typat      1  1
+           useria          23
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -199,9 +187,9 @@ P           mkmem           8
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t44o_DS20_WFK
-- Reading DDB from file: t44o_DS20_DDB
-- Reading DVDB from file: t44o_DS20_DVDB
+- Reading GS states from WFK file: t153o_DS20_WFK
+- Reading DDB from file: t153o_DS20_DDB
+- Reading DVDB from file: t153o_DS20_DVDB
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -209,7 +197,7 @@ P           mkmem           8
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t153o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -223,14 +211,14 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5483362867E-02 (at units)
--                                   =          11.9959 [km/s]
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
+-                                   =          11.9939 [km/s]
 
- Debye frequency from partial sums:     0.5061172087E-02 (Ha)
--                                 =     0.3330091260E+02 (THz)
--Debye temperature from partial sums:     0.1598189844E+04 (K)
+ Debye frequency from partial sums:     0.5060325864E-02 (Ha)
+-                                 =     0.3329534472E+02 (THz)
+-Debye temperature from partial sums:     0.1597922629E+04 (K)
 
-- Writing phonon DOS to file: t44o_DS1_PHDOS
+- Writing phonon DOS to file: t153o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -261,8 +249,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -279,17 +267,23 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy: 54
+Number of bands in e-ph self-energy: 8
 Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
-Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 List of K-points for self-energy corrections:
-   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
-   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    7
+   2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   2    7
+   3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   2    7
+   4     1  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]   2    7
+   5     1  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]   2    7
+   6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    7
+   7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   2    7
+   8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   2    7
 ================================================================================
 Final results in eV.
 Notations:
@@ -303,33 +297,107 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -8.789   -8.821   -0.032   -0.033   -0.001    0.994   -0.088    0.055    0.000    0.000
-   2  12.800   13.192    0.392    1.024   -0.333    0.383    0.053    0.970   21.589   22.014
-   3  12.800   13.124    0.324    0.845   -0.333    0.383    0.053    0.792    0.000   -0.068
-   4  12.800   13.193    0.392    1.024   -0.333    0.383    0.053    0.970    0.000    0.068
-   5  18.426   18.406   -0.020   -0.056   -0.316    0.364   -0.802    0.746    5.626    5.213
-   6  18.426   18.447    0.021    0.058   -0.316    0.364   -0.802    0.860    0.000    0.042
-   7  18.426   18.406   -0.020   -0.056   -0.316    0.364   -0.802    0.746    0.000   -0.041
-   8  26.686   26.382   -0.304   -0.328   -0.008    0.928   -0.371    0.043    8.260    7.976
+   2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   3  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   4  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   5  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    5.626    5.626
+   6  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
+   7  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.213 (adiabatic:    4.546)
- QP_gap - KS_gap:   -0.413 (adiabatic:   -1.080)
+ QP gap:    5.626 (adiabatic:    5.626)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   6.210    6.210    0.000    0.000   -0.225    1.000    0.000    0.000    0.000    0.000
+   3  11.056   11.056    0.000    0.000   -0.438    1.000    0.000    0.000    4.846    4.846
+   4  11.056   11.056    0.000    0.000   -0.438    1.000    0.000    0.000    0.000    0.000
+   5  20.688   20.688    0.000    0.000   -0.753    1.000    0.000    0.000    9.632    9.632
+   6  20.688   20.688    0.000    0.000   -0.753    1.000    0.000    0.000    0.000    0.000
+   7  21.208   21.208    0.000    0.000   -0.162    1.000    0.000    0.000    0.520    0.520
+ 
+ KS gap:    9.632 (assuming bval:4 ==> bcond:5)
+ QP gap:    9.632 (adiabatic:    9.632)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.827   -2.764    0.063    0.093   -0.115    0.677   -0.011    0.104    0.000    0.000
-   2  -0.746   -0.658    0.088    0.136   -0.102    0.651   -0.195    0.331    2.081    2.106
-   3   9.967   10.334    0.366    1.047   -0.476    0.350    0.162    0.885   10.714   10.991
-   4   9.967   10.282    0.315    0.900   -0.476    0.350    0.163    0.738    0.000   -0.051
-   5  21.328   21.104   -0.224   -1.159   -1.029    0.193   -2.078    0.919   11.360   10.822
-   6  21.328   21.088   -0.240   -1.244   -1.029    0.193   -2.078    0.834    0.000   -0.016
-   7  22.066   22.209    0.143    0.238   -0.079    0.602    0.178    0.060    0.738    1.121
-   8  28.462   28.299   -0.163   -0.357   -0.275    0.456   -0.973    0.617    6.396    6.091
+   2  -0.746   -0.746    0.000    0.000   -0.102    1.000    0.000    0.000    0.000    0.000
+   3   9.967    9.967    0.000    0.000   -0.475    1.000    0.000    0.000   10.714   10.714
+   4   9.967    9.967    0.000    0.000   -0.475    1.000    0.000    0.000    0.000    0.000
+   5  21.328   21.328    0.000    0.000   -1.028    1.000    0.000    0.000   11.360   11.360
+   6  21.328   21.328    0.000    0.000   -1.028    1.000    0.000    0.000    0.000    0.000
+   7  22.066   22.066    0.000    0.000   -0.078    1.000    0.000    0.000    0.738    0.738
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.822 (adiabatic:    9.301)
- QP_gap - KS_gap:   -0.538 (adiabatic:   -2.059)
+ QP gap:   11.360 (adiabatic:   11.360)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   8.403    8.403    0.000    0.000   -0.606    1.000    0.000    0.000    0.000    0.000
+   3   8.627    8.627    0.000    0.000   -0.199    1.000    0.000    0.000    0.224    0.224
+   4   8.627    8.627    0.000    0.000   -0.199    1.000    0.000    0.000    0.000    0.000
+   5  17.318   17.318    0.000    0.000   -0.016    1.000    0.000    0.000    8.690    8.690
+   6  23.137   23.137    0.000    0.000   -1.857    1.000    0.000    0.000    5.820    5.820
+   7  24.586   24.586    0.000    0.000   -0.241    1.000    0.000    0.000    1.449    1.449
+ 
+ KS gap:    8.690 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.690 (adiabatic:    8.690)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   1.990    1.990    0.000    0.000   -0.243    1.000    0.000    0.000    0.000    0.000
+   3   6.030    6.030    0.000    0.000   -0.731    1.000    0.000    0.000    4.040    4.040
+   4   7.856    7.856    0.000    0.000   -0.243    1.000    0.000    0.000    1.826    1.826
+   5  18.930   18.930    0.000    0.000   -0.298    1.000    0.000    0.000   11.074   11.074
+   6  24.324   24.324    0.000    0.000   -0.681    1.000    0.000    0.000    5.394    5.394
+   7  25.809   25.809    0.000    0.000   -0.745    1.000    0.000    0.000    1.484    1.484
+ 
+ KS gap:   11.074 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.074 (adiabatic:   11.074)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   4.137    4.137    0.000    0.000   -0.502    1.000    0.000    0.000    0.000    0.000
+   3   5.103    5.103    0.000    0.000   -0.054    1.000    0.000    0.000    0.966    0.966
+   4   9.771    9.771    0.000    0.000   -0.245    1.000    0.000    0.000    4.668    4.668
+   5  20.822   20.822    0.000    0.000   -0.206    1.000    0.000    0.000   11.050   11.050
+   6  22.959   22.959    0.000    0.000   -0.533    1.000    0.000    0.000    2.137    2.137
+   7  25.352   25.352    0.000    0.000   -0.873    1.000    0.000    0.000    2.394    2.394
+ 
+ KS gap:   11.050 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.050 (adiabatic:   11.050)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   0.073    0.073    0.000    0.000   -0.251    1.000    0.000    0.000    0.000    0.000
+   3   6.408    6.408    0.000    0.000   -0.073    1.000    0.000    0.000    6.335    6.335
+   4   6.408    6.408    0.000    0.000   -0.073    1.000    0.000    0.000    0.000    0.000
+   5  17.595   17.595    0.000    0.000   -0.273    1.000    0.000    0.000   11.187   11.187
+   6  17.595   17.595    0.000    0.000   -0.273    1.000    0.000    0.000    0.000    0.000
+   7  29.920   29.920    0.000    0.000   -0.501    1.000    0.000    0.000   12.325   12.325
+ 
+ KS gap:   11.187 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.187 (adiabatic:   11.187)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   0.933    0.933    0.000    0.000   -0.119    1.000    0.000    0.000    0.000    0.000
+   3   4.309    4.309    0.000    0.000   -0.091    1.000    0.000    0.000    3.376    3.376
+   4   4.309    4.309    0.000    0.000   -0.091    1.000    0.000    0.000    0.000    0.000
+   5  23.418   23.418    0.000    0.000   -0.530    1.000    0.000    0.000   19.109   19.109
+   6  23.418   23.418    0.000    0.000   -0.530    1.000    0.000    0.000    0.000    0.000
+   7  25.435   25.435    0.000    0.000   -1.438    1.000    0.000    0.000    2.016    2.016
+ 
+ KS gap:   19.109 (assuming bval:4 ==> bcond:5)
+ QP gap:   19.109 (adiabatic:   19.109)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
  
 
 ================================================================================
@@ -345,9 +413,9 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t44o_DS20_WFK
-- Reading DDB from file: t44o_DS20_DDB
-- Reading DVDB from file: t44o_DS20_DVDB
+- Reading GS states from WFK file: t153o_DS20_WFK
+- Reading DDB from file: t153o_DS20_DDB
+- Reading DVDB from file: t153o_DS20_DVDB
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -355,7 +423,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t153o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -369,14 +437,14 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5483362867E-02 (at units)
--                                   =          11.9959 [km/s]
+ Average speed of sound partial sums:     0.5482446053E-02 (at units)
+-                                   =          11.9939 [km/s]
 
- Debye frequency from partial sums:     0.5061172087E-02 (Ha)
--                                 =     0.3330091260E+02 (THz)
--Debye temperature from partial sums:     0.1598189844E+04 (K)
+ Debye frequency from partial sums:     0.5060325864E-02 (Ha)
+-                                 =     0.3329534472E+02 (THz)
+-Debye temperature from partial sums:     0.1597922629E+04 (K)
 
-- Writing phonon DOS to file: t44o_DS2_PHDOS
+- Writing phonon DOS to file: t153o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -407,17 +475,23 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy: 54
+Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
-Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 List of K-points for self-energy corrections:
-   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
-   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    7
+   2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   2    7
+   3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   2    7
+   4     1  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]   2    8
+   5     1  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]   2    7
+   6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    7
+   7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    8
+   8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    8
 ================================================================================
 Final results in eV.
 Notations:
@@ -431,33 +505,112 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -8.789   -8.821   -0.032   -0.033   -0.001    0.994   -0.088    0.055    0.000    0.000
-   2  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911   21.589   21.991
-   3  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911    0.000    0.000
-   4  12.800   13.170    0.370    0.964   -0.333    0.383    0.053    0.911    0.000    0.000
-   5  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    5.626    5.250
-   6  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
-   7  18.426   18.419   -0.007   -0.018   -0.316    0.364   -0.802    0.784    0.000    0.000
-   8  26.686   26.382   -0.304   -0.328   -0.008    0.928   -0.371    0.043    8.260    7.962
+   2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   3  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   4  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000    0.000    0.000
+   5  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    5.626    5.626
+   6  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
+   7  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.250 (adiabatic:    4.644)
- QP_gap - KS_gap:   -0.376 (adiabatic:   -0.982)
+ QP gap:    5.626 (adiabatic:    5.626)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   6.210    6.210    0.000    0.000   -0.225    1.000    0.000    0.000    0.000    0.000
+   3  11.056   11.056    0.000    0.000   -0.438    1.000    0.000    0.000    4.846    4.846
+   4  11.056   11.056    0.000    0.000   -0.438    1.000    0.000    0.000    0.000    0.000
+   5  20.688   20.688    0.000    0.000   -0.753    1.000    0.000    0.000    9.632    9.632
+   6  20.688   20.688    0.000    0.000   -0.753    1.000    0.000    0.000    0.000    0.000
+   7  21.208   21.208    0.000    0.000   -0.162    1.000    0.000    0.000    0.520    0.520
+ 
+ KS gap:    9.632 (assuming bval:4 ==> bcond:5)
+ QP gap:    9.632 (adiabatic:    9.632)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.827   -2.764    0.063    0.093   -0.115    0.677   -0.011    0.104    0.000    0.000
-   2  -0.746   -0.658    0.088    0.136   -0.102    0.651   -0.195    0.331    2.081    2.106
-   3   9.967   10.308    0.340    0.974   -0.476    0.350    0.163    0.811   10.714   10.966
-   4   9.967   10.308    0.340    0.974   -0.476    0.350    0.163    0.811    0.000    0.000
-   5  21.328   21.096   -0.232   -1.202   -1.029    0.193   -2.078    0.876   11.360   10.788
-   6  21.328   21.096   -0.232   -1.202   -1.029    0.193   -2.078    0.876    0.000    0.000
-   7  22.066   22.209    0.143    0.238   -0.079    0.602    0.178    0.060    0.738    1.113
-   8  28.462   28.299   -0.163   -0.357   -0.275    0.456   -0.973    0.617    6.396    6.091
+   2  -0.746   -0.746    0.000    0.000   -0.102    1.000    0.000    0.000    0.000    0.000
+   3   9.967    9.967    0.000    0.000   -0.475    1.000    0.000    0.000   10.714   10.714
+   4   9.967    9.967    0.000    0.000   -0.475    1.000    0.000    0.000    0.000    0.000
+   5  21.328   21.328    0.000    0.000   -1.028    1.000    0.000    0.000   11.360   11.360
+   6  21.328   21.328    0.000    0.000   -1.028    1.000    0.000    0.000    0.000    0.000
+   7  22.066   22.066    0.000    0.000   -0.078    1.000    0.000    0.000    0.738    0.738
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.788 (adiabatic:    9.185)
- QP_gap - KS_gap:   -0.572 (adiabatic:   -2.175)
+ QP gap:   11.360 (adiabatic:   11.360)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   8.403    8.403    0.000    0.000   -0.606    1.000    0.000    0.000    0.000    0.000
+   3   8.627    8.627    0.000    0.000   -0.199    1.000    0.000    0.000    0.224    0.224
+   4   8.627    8.627    0.000    0.000   -0.199    1.000    0.000    0.000    0.000    0.000
+   5  17.318   17.318    0.000    0.000   -0.016    1.000    0.000    0.000    8.690    8.690
+   6  23.137   23.137    0.000    0.000   -1.857    1.000    0.000    0.000    5.820    5.820
+   7  24.586   24.586    0.000    0.000   -0.241    1.000    0.000    0.000    1.449    1.449
+   8  24.586   24.586    0.000    0.000   -0.241    1.000    0.000    0.000    0.000    0.000
+ 
+ KS gap:    8.690 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.690 (adiabatic:    8.690)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   1.990    1.990    0.000    0.000   -0.243    1.000    0.000    0.000    0.000    0.000
+   3   6.030    6.030    0.000    0.000   -0.731    1.000    0.000    0.000    4.040    4.040
+   4   7.856    7.856    0.000    0.000   -0.243    1.000    0.000    0.000    1.826    1.826
+   5  18.930   18.930    0.000    0.000   -0.298    1.000    0.000    0.000   11.074   11.074
+   6  24.324   24.324    0.000    0.000   -0.681    1.000    0.000    0.000    5.394    5.394
+   7  25.809   25.809    0.000    0.000   -0.745    1.000    0.000    0.000    1.484    1.484
+ 
+ KS gap:   11.074 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.074 (adiabatic:   11.074)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2   4.137    4.137    0.000    0.000   -0.502    1.000    0.000    0.000    0.000    0.000
+   3   5.103    5.103    0.000    0.000   -0.054    1.000    0.000    0.000    0.966    0.966
+   4   9.771    9.771    0.000    0.000   -0.245    1.000    0.000    0.000    4.668    4.668
+   5  20.822   20.822    0.000    0.000   -0.206    1.000    0.000    0.000   11.050   11.050
+   6  22.959   22.959    0.000    0.000   -0.533    1.000    0.000    0.000    2.137    2.137
+   7  25.352   25.352    0.000    0.000   -0.873    1.000    0.000    0.000    2.394    2.394
+ 
+ KS gap:   11.050 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.050 (adiabatic:   11.050)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1   0.073    0.073    0.000    0.000   -0.251    1.000    0.000    0.000    0.000    0.000
+   2   0.073    0.073    0.000    0.000   -0.251    1.000    0.000    0.000    0.000    0.000
+   3   6.408    6.408    0.000    0.000   -0.073    1.000    0.000    0.000    6.335    6.335
+   4   6.408    6.408    0.000    0.000   -0.073    1.000    0.000    0.000    0.000    0.000
+   5  17.595   17.595    0.000    0.000   -0.273    1.000    0.000    0.000   11.187   11.187
+   6  17.595   17.595    0.000    0.000   -0.273    1.000    0.000    0.000    0.000    0.000
+   7  29.920   29.920    0.000    0.000   -0.501    1.000    0.000    0.000   12.325   12.325
+   8  29.920   29.920    0.000    0.000   -0.501    1.000    0.000    0.000    0.000    0.000
+ 
+ KS gap:   11.187 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.187 (adiabatic:   11.187)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
+ 
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1   0.933    0.933    0.000    0.000   -0.119    1.000    0.000    0.000    0.000    0.000
+   2   0.933    0.933    0.000    0.000   -0.119    1.000    0.000    0.000    0.000    0.000
+   3   4.309    4.309    0.000    0.000   -0.091    1.000    0.000    0.000    3.376    3.376
+   4   4.309    4.309    0.000    0.000   -0.091    1.000    0.000    0.000    0.000    0.000
+   5  23.418   23.418    0.000    0.000   -0.530    1.000    0.000    0.000   19.109   19.109
+   6  23.418   23.418    0.000    0.000   -0.530    1.000    0.000    0.000    0.000    0.000
+   7  25.435   25.435    0.000    0.000   -1.438    1.000    0.000    0.000    2.016    2.016
+   8  25.435   25.435    0.000    0.000   -1.438    1.000    0.000    0.000    0.000    0.000
+ 
+ KS gap:   19.109 (assuming bval:4 ==> bcond:5)
+ QP gap:   19.109 (adiabatic:   19.109)
+ QP_gap - KS_gap:    0.000 (adiabatic:    0.000)
  
 
 == END DATASET(S) ==============================================================
@@ -466,15 +619,10 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
  -outvars: echo values of variables after computation  --------
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
-             bdgw           1       8       1       8
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
          eph_task           4
-         ph_wstep      3.67493254E-06 Hartree
-         ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        2    2    2
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -484,6 +632,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 -          fftalg         312
            getddb          20
            getwfk          20
+       gw_qprange           2
            istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -494,28 +643,18 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
-            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      1.89602709E+01
 P           mkmem           8
             natom           2
-            nband          54
+            nband           8
            ndtset           2
             ngfft          20      20      20
              nkpt           8
-           nkptgw           2
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver           7
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -576,7 +715,9 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-16
+            tmesh      5.00000000E+00  2.95000000E+02  2.00000000E+00
             typat      1  1
+           useria          23
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -620,7 +761,7 @@ P           mkmem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
+- B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
@@ -658,10 +799,10 @@ P           mkmem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          7.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=          9.2
+.Delivered   4 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.8  wall=         14.1

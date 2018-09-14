@@ -76,5 +76,13 @@ inp_files = [
 "t104.in",
 "t105.in",
 "t106.in",
-"t107.in"
+"t107.in",
+#Electron-phonon
+"t150.in",
+"t151.in",
+"t152.in",
+"t153.in",
+"t154.in",
+"t155.in",
+"t156.in"
 ]
