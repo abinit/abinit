@@ -84,14 +84,14 @@ bandpp2 4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t104.out, tolnlines =  0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%%   t104.out, tolnlines =  0, tolabs = 0, tolrel = 0, fld_options=-medium ;
 #%% psp_files = 23v.paw
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
 #%% files_to_test =
-#%%   t104_MPI10.out, tolnlines =  0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%%   t104_MPI10.out, tolnlines =  0, tolabs = 0, tolrel = 0, fld_options=-medium ;
 #%%   t104_MPI10o_DS2_atom_01_Gtau_offdiag_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac

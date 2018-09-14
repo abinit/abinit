@@ -101,14 +101,14 @@ bandpp2 11
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t105.out, tolnlines = 50, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -easy
+#%%   t105.out, tolnlines = 1, tolabs = 2.0e-5, tolrel = 2.0e-5, fld_options = -medium;
 #%% psp_files = 64gd.paw 
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t105_MPI4.out, tolnlines = 50, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -easy;
+#%%   t105_MPI4.out, tolnlines = 1, tolabs = 2.0e-5, tolrel = 2.0e-5, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI
