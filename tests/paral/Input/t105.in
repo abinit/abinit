@@ -108,7 +108,7 @@ bandpp2 11
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t105_MPI4.out, tolnlines = 1, tolabs = 2.0e-5, tolrel = 2.0e-5, fld_options = -medium;
+#%%   t105_MPI4.out, tolnlines = 1, tolabs = 2.0e-2, tolrel = 2.0e-2, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI

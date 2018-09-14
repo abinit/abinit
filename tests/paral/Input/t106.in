@@ -64,7 +64,7 @@ dmftctqmc_gmove 0
 dmftctqmc_order 50
 
 # == CTQMC
-dmft_solv 2 # CTQMC
+dmft_solv 8 # CTQMC
 dmft_charge_prec 1e-10
 dmftqmc_l 50
 dmftqmc_n 1.d6
