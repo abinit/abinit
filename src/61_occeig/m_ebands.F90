@@ -1531,6 +1531,7 @@ end function get_valence_idx
 
 pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
