@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -54,7 +54,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
               amu      1.20110000E+01
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-         eph_task           4
+         eph_task          -4
    eph_ngqpt_fine        4    4    4
         ddb_ngqpt        2    2    2
 -          fftalg         312
@@ -140,8 +140,6 @@ P           mkmem           8
            tolwfr      1.00000000E-16
             tmesh      5.00000000E+00  2.95000000E+02  2.00000000E+00
             typat      1  1
-           useria          23
-           userib          23
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -252,6 +250,8 @@ All the independent perturbations are available
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
+Method for q-space integration: tetrahedron method
+Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
 Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
@@ -395,7 +395,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
               amu      1.20110000E+01
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-         eph_task           4
+         eph_task          -4
    eph_ngqpt_fine        4    4    4
         ddb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
@@ -486,8 +486,6 @@ P           mkmem           8
            tolwfr      1.00000000E-16
             tmesh      5.00000000E+00  2.95000000E+02  2.00000000E+00
             typat      1  1
-           useria          23
-           userib          23
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -536,6 +534,7 @@ P           mkmem           8
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] ABINIT : First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
@@ -548,6 +547,7 @@ P           mkmem           8
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
@@ -560,6 +560,7 @@ P           mkmem           8
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
@@ -568,6 +569,7 @@ P           mkmem           8
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
 - Proc.   0 individual time (sec): cpu=          5.1  wall=          5.2
 
