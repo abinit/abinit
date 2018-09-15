@@ -1043,7 +1043,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  if (db%version > 1) read(db%fh, err=10, iomsg=msg)
 
  db%current_fpos = db%current_fpos + 1
- write(std_out, *)"incr current_fpos", db%current_fpos
+ !write(std_out, *)"incr current_fpos", db%current_fpos
 
  return
 
@@ -1445,8 +1445,9 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    ABI_FREE(v1scf)
  end do
 
- call wrtout(std_out, "qcache_read completed", do_flush=.True.)
- call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10, ch10))
+ call cwtime(cpu, wall, gflops, "stop")
+ call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10, ch10), &
+            do_flush=.True.)
 
 end subroutine dvdb_qcache_read
 !!***

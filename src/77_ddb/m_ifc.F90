@@ -561,7 +561,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      ! TODO: check dipdip option and phase, but I think this is correct!
      call ifc_fourq(Ifc_coarse,Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
      Ifc%dynmat(:,:,:,:,:,iq_bz) = out_d2cart
-
    end do
 
    ABI_FREE(qmissing)
@@ -632,6 +631,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  call cwtime(cpu, wall, gflops, "stop")
  write(message,"(2(a,f8.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
  call cwtime(cpu, wall, gflops, "start")
 
  ! Apply cutoff on ifc if needed

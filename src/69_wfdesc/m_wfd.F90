@@ -5909,7 +5909,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    end do
  end do
 
- write(msg,'(a,i0,a)')" Will read ",COUNT(my_readmask)," (b,k,s) states"
+ write(msg,'(a,i0,a)')" Will read ",COUNT(my_readmask)," (b,k,s) states ..."
  call wrtout(std_out, msg)
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu,wall,gflops,"start")
@@ -6100,7 +6100,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f9.2))')" cpu_time = ",cpu,", wall_time = ",wall
+ write(msg,'(2(a,f9.2),2a)')"WFK IO completed in cpu_time = ",cpu,", wall_time = ",wall,ch10,ch10
  call wrtout(std_out, msg, do_flush=.True.)
 
  call wfk_close(Wfk)

@@ -2316,6 +2316,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_adb,qpe_adb_val,qpe_adb_cond
+ real(dp) :: cpu, wall, gflops
  real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
@@ -2512,7 +2513,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  !  end do
  !end if
 
-
+ call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
  ! **Only master writes**
  ! Write self-energy matrix elements for this (kpt, spin)
@@ -2567,6 +2568,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), self%gfw_vals, start=[1, 1, 1, ikcalc, spin]))
  end if
 #endif
+
+ call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10, ch10), &
+             do_flush=.True.)
 
 end subroutine sigmaph_gather_and_write
 !!***
