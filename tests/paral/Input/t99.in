@@ -79,7 +79,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_TRIQS
+#%% need_cpp_vars = HAVE_TRIQS_v1_4
 #%% [files]
 #%% files_to_test =
 #%%                  t01.out,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;

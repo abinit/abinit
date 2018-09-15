@@ -20,7 +20,7 @@ coefficients =  4.57647e-02 -2.02737e-03 -4.88691e-02 2.09467e-03
 #Monte carlo / molecular dynamics
 #--------------------------------------------------------------
 dynamics =  13
-n_cell =   3 3 3
+ncell =   3 3 3
 temperature = 1000
 ntime  = 50
 optcell = 2
@@ -43,4 +43,5 @@ optcell = 2
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml and generate effective potential and run NPT simulation
+#%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

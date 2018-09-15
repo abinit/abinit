@@ -29,7 +29,7 @@ MODULE m_self
  use defs_basis
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_oper,     only : oper_type
  use m_matlu,    only : matlu_type
@@ -212,7 +212,7 @@ end subroutine alloc_self
 !! 
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -284,7 +284,7 @@ end subroutine initialize_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -350,7 +350,7 @@ end subroutine destroy_self
 !!  self <type(self_type)>= variables related to self-energy
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -368,7 +368,6 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -424,7 +423,7 @@ end subroutine print_self
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -550,7 +549,7 @@ end subroutine dc_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,spectral_function
+!!      m_dmft,spectral_function
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -571,7 +570,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rw_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1087,7 +1085,7 @@ end subroutine rw_self
 !!  self <type(self_type)>= variables related to mixed self-energy
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      shift_matlu,wrtout
@@ -1106,7 +1104,6 @@ subroutine new_self(self,self_new,paw_dmft,opt_mix)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'new_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1219,7 +1216,6 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_qmcshift_self'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

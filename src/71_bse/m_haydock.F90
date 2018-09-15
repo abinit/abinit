@@ -26,7 +26,7 @@
 MODULE m_haydock
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -44,8 +44,8 @@ MODULE m_haydock
  use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
- use m_blas,              only : xdotc, xgemv
- use m_abilasi,           only : matrginv
+ use m_hide_blas,         only : xdotc, xgemv
+ use m_hide_lapack,       only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
  use m_kpts,              only : listkk
@@ -53,7 +53,7 @@ MODULE m_haydock
  use m_crystal_io,        only : crystal_ncwrite
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_pawhr,             only : pawhur_t
+ use m_paw_hr,            only : pawhur_t
  use m_wfd,               only : wfd_t, wfd_sym_ur, wfd_get_ur, wfd_change_ngfft, wfd_wave_free
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme
  use m_pawtab,            only : pawtab_type
@@ -62,6 +62,7 @@ MODULE m_haydock
 &                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
  use m_eprenorms,         only : eprenorms_t, renorm_bst
+ use m_wfd_optic,         only : calc_optical_mels
 
  implicit none
 
@@ -112,8 +113,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_haydock_driver'
- use interfaces_14_hidewrite
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none
@@ -645,7 +644,6 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_herm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -937,7 +935,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_herm_algo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1121,7 +1118,6 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_restart'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1382,7 +1378,6 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_psherm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1647,7 +1642,6 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_psherm_optalgo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1951,7 +1945,6 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_bilanczos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2269,7 +2262,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_bilanczos_optalgo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

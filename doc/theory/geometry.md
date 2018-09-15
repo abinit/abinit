@@ -9,9 +9,11 @@ authors: M. Giantomassi, X. Gonze, Y. Suzukawa, M. Mikami
 The three primitive translation vectors are $\RR_1$, $\RR_2$, $\RR_3$.
 Their representation in Cartesian coordinates (atomic units) is:
 
-$$ \RR_1 \rightarrow {rprimd(:, 1)} $$
-$$ \RR_2 \rightarrow {rprimd(:, 2)} $$
-$$ \RR_3 \rightarrow {rprimd(:, 3)} $$
+$$ \RR_1 \rightarrow {rprimd(:, 1)} \,, $$
+
+$$ \RR_2 \rightarrow {rprimd(:, 2)} \,, $$
+
+$$ \RR_3 \rightarrow {rprimd(:, 3)} \,. $$
 
 Related input variables: [[acell]], [[rprim]], [[angdeg]].
 
@@ -23,20 +25,21 @@ Representation in reduced coordinates:
 \begin{eqnarray*}
 {\bf x}_{\tau} &=& x^{red}_{1\tau} \cdot {\bf R}_{1}
  + x^{red}_{2\tau} \cdot {\bf R}_{2}
- + x^{red}_{3\tau} \cdot {\bf R}_{3} \\
- \tau &\rightarrow& {iatom} \\
- N_{atom} &\rightarrow& {natom} \\
- x^{red}_{1\tau} &\rightarrow& {xred(1,iatom)} \\
- x^{red}_{2\tau} &\rightarrow& {xred(2,iatom)} \\
- x^{red}_{3\tau} &\rightarrow& {xred(3,iatom)}
+ + x^{red}_{3\tau} \cdot {\bf R}_{3}  \,, \\ 
+\text{where} \,  
+  \tau &\rightarrow& {iatom} \,, \\
+ N_{atom} &\rightarrow& {natom} \,, \\
+ x^{red}_{1\tau} &\rightarrow& {xred(1,iatom)} \,, \\
+ x^{red}_{2\tau} &\rightarrow& {xred(2,iatom)} \,, \\
+ x^{red}_{3\tau} &\rightarrow& {xred(3,iatom)} \,.
 \end{eqnarray*}
 
-Related input variables: [[xangst]], [[xcart]], [[xred]]
+Related input variables: [[xangst]], [[xcart]], [[xred]].
 
 The volume of the primitive unit cell (called *ucvol* in the code) is
 
 \begin{eqnarray*}
-\Omega &=& {\bf R}_1 \cdot ({\bf R}_2 \times {\bf R}_3)
+\Omega &=& {\bf R}_1 \cdot ({\bf R}_2 \times {\bf R}_3) \,.
 \end{eqnarray*}
 
 The scalar products in the reduced representation are valuated thanks to
@@ -63,16 +66,16 @@ r^{red \prime}_{1} \\
 r^{red \prime}_{2} \\
 r^{red \prime}_{3}
 \end{array}
-\right) 
+\right) \,,
 $$
 
 that is
 
-$$ {\bf r} \cdot {\bf r'} = \sum_{ij} r^{red}_{i} {\bf R}^{met}_{ij} r^{red \prime}_{j} $$
+$$ {\bf r} \cdot {\bf r'} = \sum_{ij} r^{red}_{i} {\bf R}^{met}_{ij} r^{red \prime}_{j} \,, $$
 
 where ${\bf R}^{met}_{ij}$ is the metric tensor in real space stored in `rmet` array:
 
-$$ {\bf R}^{met}_{ij} \rightarrow {rmet(i,j)} $$
+$$ {\bf R}^{met}_{ij} \rightarrow {rmet(i,j)} \,. $$
 
 ## Reciprocal space
 
@@ -80,12 +83,12 @@ The three primitive translation vectors in reciprocal space are
 $\GG_1$, $\GG_2$,$\GG_3$
 
 \begin{eqnarray*}
-{\bf G}_{1}&=&\frac{2\pi}{\Omega}({\bf R}_{2}\times{\bf R}_{3}) \rightarrow {2\pi\, gprimd(:,1)} \\
-{\bf G}_{2}&=&\frac{2\pi}{\Omega}({\bf R}_{3}\times{\bf R}_{1}) \rightarrow {2\pi\, gprimd(:,2)} \\
-{\bf G}_{3}&=&\frac{2\pi}{\Omega}({\bf R}_{1}\times{\bf R}_{2}) \rightarrow {2\pi\, gprimd(:,3)}
+{\bf G}_{1}&=&\frac{2\pi}{\Omega}({\bf R}_{2}\times{\bf R}_{3}) \rightarrow {2\pi\, gprimd(:,1)} \,, \\
+{\bf G}_{2}&=&\frac{2\pi}{\Omega}({\bf R}_{3}\times{\bf R}_{1}) \rightarrow {2\pi\, gprimd(:,2)} \,, \\
+{\bf G}_{3}&=&\frac{2\pi}{\Omega}({\bf R}_{1}\times{\bf R}_{2}) \rightarrow {2\pi\, gprimd(:,3)} \,.
 \end{eqnarray*}
 
-This definition is such that $\GG_i \cdot \RR_j = 2\pi\delta_{ij}$
+This definition is such that $\GG_i \cdot \RR_j = 2\pi\delta_{ij}$ .
 
 !!! warning
     For historical reasons, the internal implementation uses the convention 
@@ -132,31 +135,31 @@ K^{red \prime}_{1} \\
 K^{red \prime}_{2} \\
 K^{red \prime}_{3}
 \end{array}
-\right) 
+\right)   \,,
 $$
 
 that is 
 
-$$ {\bf K} \cdot {\bf K'} = \sum_{ij} K^{red}_{i}{\bf G}^{met}_{ij}K^{red \prime}_{j} $$
+$$ {\bf K} \cdot {\bf K'} = \sum_{ij} K^{red}_{i}{\bf G}^{met}_{ij}K^{red \prime}_{j}  \,, $$
 
 where ${\bf G}^{met}_{ij}$ is the metric tensor in reciprocal space called `gmet` inside the code.
 Taking into account the internal conventions used by the code, we have the correspondence:
 
-$$ {\bf G}^{met}_{ij} \rightarrow {2\pi\,gmet(i,j)} $$
+$$ {\bf G}^{met}_{ij} \rightarrow {2\pi\,gmet(i,j)} \,. $$
 
 ## Fourier series for periodic lattice quantities
 
-Any function with the periodicity of the lattice i.e any function fullfilling the property:
+Any function with the periodicity of the lattice i.e. any function fullfilling the property
 
 $$ u(\rr + \RR) = u(\rr) $$
 
 can be represented with the discrete Fourier series:
 
-$$  u(\rr)= \sum_\GG u(\GG)e^{i\GG\cdot\rr} $$ 
+$$  u(\rr)= \sum_\GG u(\GG)e^{i\GG\cdot\rr} \,, $$ 
 
 where the Fourier coefficient, $u(\GG)$, is given by:
 
-$$ u(\GG) = \frac{1}{\Omega} \int_\Omega u(\rr)e^{-i\GG\cdot\rr}\dd\rr $$
+$$ u(\GG) = \frac{1}{\Omega} \int_\Omega u(\rr)e^{-i\GG\cdot\rr}\dd\rr \,. $$
 
 <!--
 This appendix reports the conventions used in this work for the Fourier 

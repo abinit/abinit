@@ -1,0 +1,18 @@
+!!****d* ABINIT/_67_triqs_ext_
+!!
+!! NAME
+!!  _67_triqs_ext_
+!!
+!! DESCRIPTION
+!!  This directory contains wrappers to TRIQS routines.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (Yann Pouillon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!! CHILDREN
+!! interfaces_67_triqs_ext.F90
+!! triqs_interface_ctqmc.F90
+!!
+!!***

@@ -25,7 +25,7 @@ module m_ptgroups
  use defs_basis
  use m_defs_ptgroups
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
@@ -529,7 +529,6 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'point_group_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

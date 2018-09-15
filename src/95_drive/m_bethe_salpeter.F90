@@ -33,7 +33,7 @@ module m_bethe_salpeter
  use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_screen
@@ -48,10 +48,11 @@ module m_bethe_salpeter
  use m_fstrings,        only : strcat, sjoin, endswith
  use m_io_tools,        only : file_exists, iomode_from_fname
  use m_geometry,        only : mkrdim, metric, normv
- use m_abilasi,         only : matrginv
+ use m_hide_lapack,     only : matrginv
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
+ use m_fft,             only : fourdp
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
  use m_crystal_io,      only : crystal_ncwrite, crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
@@ -81,9 +82,17 @@ module m_bethe_salpeter
 &                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
+ use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_denpot,      only : pawdenpot
+ use m_paw_init,        only : pawinit,paw_gencond
+ use m_paw_onsite,      only : pawnabla_init
  use m_paw_dmft,        only : paw_dmft_type
+ use m_paw_mkrho,       only : denfgr
+ use m_paw_nhat,        only : nhatgrid,pawmknhat
+ use m_paw_tools,       only : chkpawovlp,pawprt
+ use m_paw_correlations,only : pawpuxinit
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
  use m_mkrho,           only : prtrhomxmn
@@ -172,7 +181,7 @@ contains
 !!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
 !!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
 !!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
-!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      screen_free,screen_init,screen_nullify,setsym_ylm,setup_bse
 !!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
 !!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
 !!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
@@ -186,9 +195,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bethe_salpeter'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -409,7 +415,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
@@ -1118,7 +1124,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1594,7 +1599,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
          jj=jj+1
          eigen  (jj)=energies_p(ib,ik_ibz,isppol)
          if (occ_from_dtset) then
-           occfact(jj)=Dtset%occ_orig(ibtot)
+           !Not occupations must be the same for different images
+           occfact(jj)=Dtset%occ_orig(ibtot,1)
          else
            occfact(jj)=Hdr_wfk%occ(ibtot)
          end if
@@ -2078,7 +2084,6 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse_interp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

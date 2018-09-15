@@ -30,7 +30,7 @@ module m_screening_driver
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
  use m_errors
@@ -66,6 +66,7 @@ module m_screening_driver
  use m_spectra,       only : spectra_t, spectra_write, spectra_repr, spectra_free, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
                              wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
@@ -83,10 +84,18 @@ module m_screening_driver
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_sphharm,   only : setsym_ylm
+ use m_paw_onsite,    only : pawnabla_init
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_denpot,    only : pawdenpot
+ use m_paw_init,      only : pawinit,paw_gencond
+ use m_paw_tools,     only : chkpawovlp,pawprt
  use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
+
+ use m_paw_correlations, only : pawpuxinit
 
  implicit none
 
@@ -161,7 +170,7 @@ contains
 !!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
 !!      pawrhoij_free,pawtab_get_lsize,pawtab_print,print_arr,print_ngfft
 !!      prtrhomxmn,pspini,random_stopping_power,rdgw,rdqps,rotate_fft_mesh
-!!      setsymrhoij,setup_screening,setvtr,spectra_free,spectra_repr
+!!      setsym_ylm,setup_screening,setvtr,spectra_free,spectra_repr
 !!      spectra_write,symdij,symdij_all,test_charge,timab,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_init,wfd_mkrho,wfd_print
 !!      wfd_read_wfk,wfd_rotate,wfd_test_ortho,write_screening,wrtout
@@ -176,9 +185,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'screening'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -401,7 +407,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft
@@ -1608,7 +1614,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_screening'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2388,7 +2393,6 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'random_stopping_power'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit  none
@@ -2534,7 +2538,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
  if (iqibz == Qmesh%nibz ) then
 
    ! Multiply by the prefactors
-   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10309 (1998).
+   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10307 (1998) [[cite:Campillo1998]].
    ! A factor one half is missing in the paper.
    rspower(:) = - zp**2 / ( Cryst%ucvol * Qmesh%nbz * pvel_norm(:) ) * rspower(:)
 
@@ -2610,13 +2614,12 @@ end subroutine random_stopping_power
 
 subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
 
- use m_abilasi,       only : xginv, xheev
+ use m_hide_lapack, only : xginv, xheev
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_rpa_functional'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -33,7 +33,7 @@ MODULE m_ebands
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_tetrahedron
  use m_bspline
@@ -474,7 +474,6 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaps_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1028,7 +1027,6 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2219,7 +2217,6 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_update_occ'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2401,7 +2398,6 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_set_scheme'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2646,7 +2642,6 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_report_gap'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3134,7 +3129,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        do ikpt=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
-         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
@@ -4712,7 +4707,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
          do ik_ibz=1,ebands%nkpt
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
-           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
            call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
            jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
          end do
@@ -4814,7 +4809,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 ! *************************************************************************
 
  !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
- ! See http://forum.abinit.org/viewtopic.php?f=19&t=3339
+ ! See https://forum.abinit.org/viewtopic.php?f=19&t=3339
 
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol
@@ -5593,7 +5588,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_interpolate_kpath'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -1,7 +1,7 @@
 # C in diamond structure.  Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
  ndtset 5
 
- istwfk *1
+ #istwfk *1
  ecut 20
  ecutsm 0.5
  #nband 50

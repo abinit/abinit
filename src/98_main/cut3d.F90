@@ -53,7 +53,7 @@ program cut3d
  use m_build_info
  use m_xmpi
  use m_nctk
- use m_profiling_abi
+ use m_abicore
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -79,7 +79,6 @@ program cut3d
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

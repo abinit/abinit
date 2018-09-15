@@ -40,11 +40,15 @@ module m_lgroup
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal
  use m_copy
+ use m_symkpt
+ use m_sort
 
  use m_fstrings,   only : ftoa, ktoa, sjoin
+ use m_numeric_tools, only : wrap2_pmhalf
+ use m_geometry,   only : normv
  use m_kpts,       only : listkk
  use m_symtk,      only : chkgrp, littlegroup_q
 
@@ -134,7 +138,8 @@ contains  !=====================================================
 !!  lgroup_new
 !!
 !! FUNCTION
-!!  Build the little group of the k-point.
+!!  Build the little group of the k-point. Return IBZ(k) points packed in shells.
+!!  to facilitate optimization of loops.
 !!
 !! INPUTS
 !!  cryst(crystal_t)=Crystalline structure
@@ -144,6 +149,8 @@ contains  !=====================================================
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
 !!  kibz(3,nkibz)=Irreducible zone.
+!!  sord=Defines how to order the points in %ibz.
+!!   ">" for increasing norm. "<" decreasing. Default: ">"
 !!
 !! PARENTS
 !!
@@ -151,14 +158,13 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz) result(new)
+type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lgroup_new'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -167,17 +173,20 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !scalars
  integer,intent(in) :: timrev,nkibz,nkbz
  type(crystal_t),intent(in) :: cryst
+ character(len=1),optional,intent(in) :: sord
 !arrays
  real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
- integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik
+ integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik_ibz,ik_bz
+ real(dp) :: ksign
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: wtk(:),wtk_folded(:)
+ real(dp) :: kred(3),shift(3)
+ integer,allocatable :: ibz2bz(:), iperm(:)
+ real(dp),allocatable :: wtk(:),wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
 
@@ -225,23 +234,53 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_MALLOC(new%weights, (new%nibz))
 
- do ik=1,new%nibz
-   new%weights(ik) = wtk_folded(ibz2bz(ik))
-   new%ibz(:,ik) = kbz(:, ibz2bz(ik))
+ do ik_ibz=1,new%nibz
+   ik_bz = ibz2bz(ik_ibz)
+   new%ibz(:,ik_ibz) = kbz(:, ik_bz)
+   new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
- ABI_CHECK(sum(new%weights) - one < tol6, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
 
+ ! Here I repack the IBZ points. In principle, the best would be
+ ! to pack stars using crystal%symrec. For the time being we pack shells (much easier).
+ ! Use wtk as workspace to store the norm.
+ ksign = + one
+ if (present(sord)) then
+   if (sord == "<") ksign = - one
+ end if
+
+ do ik_ibz=1,new%nibz
+   call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
+   wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
+ end do
+ ABI_MALLOC(kord, (3, new%nibz))
+ ABI_MALLOC(iperm, (new%nibz))
+ iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+ call sort_dp(new%nibz, wtk, iperm, tol12)
+
+ ! Trasfer data.
+ !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+ do ik_ibz=1,new%nibz
+   kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
+   wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
+ end do
+ new%ibz = kord(:, 1:new%nibz)
+ new%weights = wtk_folded(1:new%nibz)
+
+ ABI_FREE(iperm)
+ ABI_FREE(kord)
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)
 
  ! Debug section.
+ ABI_CHECK(sum(new%weights) - one < tol12, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
+
  if (debug /= 0) then
-   do ik=1,new%nibz
-     if (ik <= nkibz) then
-       write(std_out,"(a)")sjoin(ktoa(new%ibz(:,ik)), ktoa(new%ibz(:,ik) - kibz(:,ik)), ftoa(new%weights(ik)))
+   do ik_ibz=1,new%nibz
+     if (ik_ibz <= nkibz) then
+       write(std_out,"(a)")sjoin(ktoa(new%ibz(:,ik_ibz)), ktoa(new%ibz(:,ik_ibz) - kibz(:,ik_ibz)), ftoa(new%weights(ik_ibz)))
      else
-       write(std_out,"(a)")sjoin(ktoa(new%ibz(:,ik)), "[---]", ftoa(new%weights(ik)))
+       write(std_out,"(a)")sjoin(ktoa(new%ibz(:,ik_ibz)), "[---]", ftoa(new%weights(ik_ibz)))
      end if
    end do
  end if
@@ -352,16 +391,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
     1, self%symafm_lg, self%symrec_lg, timrev0, use_symrec=.True.)
 
  iq_ibz = indkk(1)
- !if (dksqmax > tol12) iq_ibz = -1
-
- !if (dksqmax > tol12) then
- !  write(msg, '(3a,es16.6,7a)' )&
- !   "The WFK file cannot be used to compute phonon linewidths.",ch10,&
- !   "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax,ch10,&
- !   "Q-mesh: ",ltoa(gamma_ngqpt),", K-mesh (from kptrlatt) ",ltoa(get_diag(dtset%kptrlatt)), &
- !   'Action: check your WFK file and (k,q) point input variables'
- !   MSG_ERROR(msg)
- !end if
+ if (dksqmax > tol12) iq_ibz = -1
 
 end function lgroup_find_ibzimage
 !!***
@@ -396,7 +426,6 @@ subroutine lgroup_print(self, title, unit, prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lgroup_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

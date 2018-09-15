@@ -39,9 +39,11 @@ program ujdet
  use defs_abitypes
  use defs_datatypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
+
+ use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det
 
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
@@ -53,8 +55,6 @@ program ujdet
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ujdet'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none

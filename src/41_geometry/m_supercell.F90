@@ -28,7 +28,7 @@ module m_supercell
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_symtk,    only : matr3inv
  use m_copy,     only : alloc_copy
@@ -65,6 +65,8 @@ module m_supercell
    integer, allocatable :: uc_indexing(:,:)         ! (3, natom) indexes unit cell atom is in:
    integer, allocatable :: typat(:)                 ! (3, natom) positions of atoms
    real(dp), allocatable :: znucl(:)                ! (ntypat) nuclear charges of species
+   integer, allocatable :: rvecs(:,:)               ! supercell vectors
+
  end type supercell_type
 
  public :: init_supercell_for_qpt
@@ -234,7 +236,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
 !local
 !scalars
- integer :: iatom_supercell, i1,i2,i3, iatom
+ integer :: iatom_supercell, i1,i2,i3, iatom, icell
 
 !arrays
 
@@ -247,7 +249,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
  scell%ntypat = size(znucl)
  ABI_ALLOCATE(scell%znucl,(scell%ntypat))
- scell%znucl = znucl
+ scell%znucl(:) = znucl(:)
 
 !number of atoms in full supercell
  scell%natom= natom_primcell*scell%ncells
@@ -256,11 +258,18 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  ABI_ALLOCATE(scell%typat,(scell%natom))
  ABI_ALLOCATE(scell%atom_indexing,(scell%natom))
  ABI_ALLOCATE(scell%uc_indexing,(3,scell%natom))
+ ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
 
  iatom_supercell = 0
+ icell =0
  do i1 = 1, rlatt(1,1)
    do i2 = 1, rlatt(2,2)
      do i3 = 1, rlatt(3,3)
+
+       icell=icell+1
+       scell%rvecs(:,icell)=(/i1-1, i2-1, i3-1/)
+
+
        do iatom = 1, natom_primcell
          iatom_supercell = iatom_supercell + 1
          scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
@@ -274,6 +283,11 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  end do
 
  ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
+ if(iatom_supercell /= scell%natom) then
+    print *, "iatom_supercell /= scell%natom"
+ endif
+
+
 
  scell%xcart = scell%xcart_ref
  scell%qphon = zero
@@ -673,14 +687,14 @@ end subroutine copy_supercell
 !!
 !! INPUTS
 !! index  = index of the cell into the supercell
-!! n_cell = number of total cell
+!! ncell = number of total cell
 !!
 !! OUTPUT
 !! index  = index of the cell into the supercell with PBC
 !!
 !! SOURCE
 
-subroutine getPBCIndexes_supercell(index,n_cell)
+subroutine getPBCIndexes_supercell(index,ncell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -693,17 +707,17 @@ subroutine getPBCIndexes_supercell(index,n_cell)
 
 !Arguments ---------------------------------------------
   integer, intent(inout)  :: index(3)
-  integer, intent(in) :: n_cell(3)
+  integer, intent(in) :: ncell(3)
 !Local variables ---------------------------------------
   integer :: ii
 ! *********************************************************************
 
   do ii=1,3
-    do while (index(ii) > n_cell(ii))
-      index(ii) = index(ii) - n_cell(ii)
+    do while (index(ii) > ncell(ii))
+      index(ii) = index(ii) - ncell(ii)
     end do
     do while (index(ii) <= 0)
-      index(ii) = index(ii) + n_cell(ii)
+      index(ii) = index(ii) + ncell(ii)
     end do
   end do
 
@@ -720,7 +734,7 @@ end subroutine getPBCIndexes_supercell
 !!  for example: (4 4 4) => min = -1 and max = 2
 !!
 !! INPUTS
-!! n_cell(3) = size of the supercell (for example 3 3 3)
+!! ncell(3) = size of the supercell (for example 3 3 3)   
 !!
 !! OUTPUT
 !! min = minimun of the range
@@ -733,7 +747,7 @@ end subroutine getPBCIndexes_supercell
 !!
 !! SOURCE
 
-subroutine findBound_supercell(min,max,n_cell)
+subroutine findBound_supercell(min,max,ncell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -746,12 +760,12 @@ subroutine findBound_supercell(min,max,n_cell)
 
 !Arguments ---------------------------------------------
   integer, intent(inout) :: min,max
-  integer, intent(in) :: n_cell
+  integer, intent(in) :: ncell
 !Local variables ---------------------------------------
   if(abs(max)>abs(min)) then
-    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
+    max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
   else
-    min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
+    min=-(ncell)/2; max=-min; if(mod(ncell,2)==0)  min= min +1
   end if
 
 ! *********************************************************************
@@ -865,6 +879,10 @@ subroutine destroy_supercell (scell)
   if(allocated(scell%znucl))  then
     ABI_DEALLOCATE(scell%znucl)
   end if
+   if(allocated(scell%rvecs))  then
+    ABI_DEALLOCATE(scell%rvecs)
+  end if
+ 
 
 end subroutine destroy_supercell
 !!***

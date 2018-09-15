@@ -8,16 +8,16 @@ module m_tdep_qpt
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_tdep_readwrite,   only : Input_Variables_type
  use m_tdep_latt,        only : Lattice_Variables_type
 
  implicit none
 
   type QptBound_type
-  
+
     integer :: ihol,center
-    character (len=2) :: letter
+    character (len=5) :: letter
     double precision :: x,y,z
 
   end type QptBound_type
@@ -28,14 +28,14 @@ module m_tdep_qpt
     integer, allocatable :: lgth_segments(:)
     double precision, allocatable :: qpt_red(:,:),qpt_cart(:,:)
     double precision, allocatable :: special_red(:,:),special_cart(:,:)
-    character (len=2), allocatable :: special_qpt(:)
+    character (len=5), allocatable :: special_qpt(:)
 
   end type Qpoints_type
 
   public :: tdep_make_qptpath
   public :: tdep_make_specialqpt
 
-contains 
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_specialqpt(InVar,Lattice,Qpt,QptBound)
@@ -76,7 +76,7 @@ contains
 ! center=3        C-face centered
 
 ! Define the special Q points IN GENERAL
-! Here we use the definitions of special Q points in reduced coordinates 
+! Here we use the definitions of special Q points in reduced coordinates
 ! as defined in the article: Setyawan and Curtarolo CMS 49, 299 (2010)
   if ((InVar%bravais(1).eq.2).and.(InVar%bravais(2).eq.0)) then
 !FB    qptbound_tot=16
@@ -85,120 +85,120 @@ contains
     eta=(1.-Lattice%acell_unitcell(2)*dcos(angle_alpha*pi/180.d0)/Lattice%acell_unitcell(3))/(2.*dsin(angle_alpha*pi/180.d0)**2)
     nu = 1./2.-eta*Lattice%acell_unitcell(3)*dcos(angle_alpha*pi/180.d0)/Lattice%acell_unitcell(2)
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (2, 0,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (2, 0,'A ', 0.500, 0.500, 0.000),&
-&                  QptBound_type (2, 0,'C ', 0.000, 0.500, 0.500),&
-&                  QptBound_type (2, 0,'D ', 0.500, 0.000, 0.500),&
-&                  QptBound_type (2, 0,'D1', 0.500, 0.000,-0.500),&
-&                  QptBound_type (2, 0,'E ', 0.500, 0.500, 0.500),&
+    QptBound(:)=(/ QptBound_type (2, 0,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (2, 0,'A    ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (2, 0,'C    ', 0.000, 0.500, 0.500),&
+&                  QptBound_type (2, 0,'D    ', 0.500, 0.000, 0.500),&
+&                  QptBound_type (2, 0,'D1   ', 0.500, 0.000,-0.500),&
+&                  QptBound_type (2, 0,'E    ', 0.500, 0.500, 0.500),&
 !FB&                  QptBound_type (2, 0,'H ', 0.000, eta  , 1-nu ),&
 !FB&                  QptBound_type (2, 0,'H1', 0.000, 1-eta, nu   ),&
 !FB&                  QptBound_type (2, 0,'H2', 0.000, eta  , -nu  ),&
 !FB&                  QptBound_type (2, 0,'M ', 0.500, eta  , 1-nu ),&
 !FB&                  QptBound_type (2, 0,'M1', 0.500, 1-eta, nu   ),&
 !FB&                  QptBound_type (2, 0,'M2', 0.500, eta  , -nu  ),&
-&                  QptBound_type (2, 0,'X ', 0.000, 0.500, 0.000),&
-&                  QptBound_type (2, 0,'Y ', 0.000, 0.000, 0.500),&
-&                  QptBound_type (2, 0,'Y1', 0.000, 0.000,-0.500),&
-&                  QptBound_type (2, 0,'Z ', 0.500, 0.000, 0.000) /)
+&                  QptBound_type (2, 0,'X    ', 0.000, 0.500, 0.000),&
+&                  QptBound_type (2, 0,'Y    ', 0.000, 0.000, 0.500),&
+&                  QptBound_type (2, 0,'Y1   ', 0.000, 0.000,-0.500),&
+&                  QptBound_type (2, 0,'Z    ', 0.500, 0.000, 0.000) /)
   else if ((InVar%bravais(1).eq.3).and.(InVar%bravais(2).eq.0)) then
     qptbound_tot=8
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (3, 0,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (3, 0,'R ', 0.500, 0.500, 0.500),&
-&                  QptBound_type (3, 0,'S ', 0.500, 0.500, 0.000),&
-&                  QptBound_type (3, 0,'T ', 0.000, 0.500, 0.500),&
-&                  QptBound_type (3, 0,'U ', 0.500, 0.000, 0.500),&
-&                  QptBound_type (3, 0,'X ', 0.500, 0.000, 0.000),&
-&                  QptBound_type (3, 0,'Y ', 0.000, 0.500, 0.000),&
-&                  QptBound_type (3, 0,'Z ', 0.000, 0.000, 0.500) /)
+    QptBound(:)=(/ QptBound_type (3, 0,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (3, 0,'R    ', 0.500, 0.500, 0.500),&
+&                  QptBound_type (3, 0,'S    ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (3, 0,'T    ', 0.000, 0.500, 0.500),&
+&                  QptBound_type (3, 0,'U    ', 0.500, 0.000, 0.500),&
+&                  QptBound_type (3, 0,'X    ', 0.500, 0.000, 0.000),&
+&                  QptBound_type (3, 0,'Y    ', 0.000, 0.500, 0.000),&
+&                  QptBound_type (3, 0,'Z    ', 0.000, 0.000, 0.500) /)
   else if ((InVar%bravais(1).eq.3).and.(InVar%bravais(2).eq.3)) then
     zeta=(1.d0+Lattice%acell_unitcell(1)**2/Lattice%acell_unitcell(2)**2)/4.d0
     qptbound_tot=13
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (3, 3,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (3, 3,'Gp', 1.000, 0.000, 0.000),&
-&                  QptBound_type (3, 3,'A ', zeta , zeta , 0.500),&
-&                  QptBound_type (3, 3,'A1',-zeta ,1-zeta, 0.500),&
-&                  QptBound_type (3, 3,'R ', 0.000, 0.500, 0.500),&
-&                  QptBound_type (3, 3,'S ', 0.000, 0.500, 0.000),&
-&                  QptBound_type (3, 3,'T ',-0.500, 0.500, 0.500),&
-&                  QptBound_type (3, 3,'X ', zeta , zeta , 0.000),&
-&                  QptBound_type (3, 3,'X1',-zeta ,1-zeta, 0.000),&
-&                  QptBound_type (3, 3,'Y ',-0.500, 0.500, 0.000),&
-&                  QptBound_type (3, 3,'Yp', 0.500, 0.500, 0.000),&
-&                  QptBound_type (3, 3,'Z ', 0.000, 0.000, 0.500),&
-&                  QptBound_type (3, 3,'Zp', 1.000, 0.000, 0.500) /)
+    QptBound(:)=(/ QptBound_type (3, 3,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (3, 3,'Gp   ', 1.000, 0.000, 0.000),&
+&                  QptBound_type (3, 3,'A    ', zeta , zeta , 0.500),&
+&                  QptBound_type (3, 3,'A1   ',-zeta ,1-zeta, 0.500),&
+&                  QptBound_type (3, 3,'R    ', 0.000, 0.500, 0.500),&
+&                  QptBound_type (3, 3,'S    ', 0.000, 0.500, 0.000),&
+&                  QptBound_type (3, 3,'T    ',-0.500, 0.500, 0.500),&
+&                  QptBound_type (3, 3,'X    ', zeta , zeta , 0.000),&
+&                  QptBound_type (3, 3,'X1   ',-zeta ,1-zeta, 0.000),&
+&                  QptBound_type (3, 3,'Y    ',-0.500, 0.500, 0.000),&
+&                  QptBound_type (3, 3,'Yp   ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (3, 3,'Z    ', 0.000, 0.000, 0.500),&
+&                  QptBound_type (3, 3,'Zp   ', 1.000, 0.000, 0.500) /)
   else if ((InVar%bravais(1).eq.4).and.(InVar%bravais(2).eq.-1)) then
     if (Lattice%acell_unitcell(3).lt.Lattice%acell_unitcell(1)) then
       qptbound_tot=7
       eta=(1.d0+Lattice%acell_unitcell(3)**2/Lattice%acell_unitcell(1)**2)/4.d0
       ABI_MALLOC(QptBound,(qptbound_tot))
-      QptBound(:)=(/ QptBound_type (4,-1,'G ', 0.000, 0.000, 0.000),&
-&                    QptBound_type (4,-1,'M ',-0.500, 0.500, 0.500),&
-&                    QptBound_type (4,-1,'N ', 0.000, 0.500, 0.500),&
-&                    QptBound_type (4,-1,'P ', 0.250, 0.250, 0.250),&
-&                    QptBound_type (4,-1,'X ', 0.000, 0.000, 0.500),&
-&                    QptBound_type (4,-1,'Z ', eta  , eta  ,-eta  ),&
-&                    QptBound_type (4,-1,'Z1',-eta  ,1.-eta, eta  ) /)
+      QptBound(:)=(/ QptBound_type (4,-1,'Gamma', 0.000, 0.000, 0.000),&
+&                    QptBound_type (4,-1,'M    ',-0.500, 0.500, 0.500),&
+&                    QptBound_type (4,-1,'N    ', 0.000, 0.500, 0.500),&
+&                    QptBound_type (4,-1,'P    ', 0.250, 0.250, 0.250),&
+&                    QptBound_type (4,-1,'X    ', 0.000, 0.000, 0.500),&
+&                    QptBound_type (4,-1,'Z    ', eta  , eta  ,-eta  ),&
+&                    QptBound_type (4,-1,'Z1   ',-eta  ,1.-eta, eta  ) /)
     else
       qptbound_tot=9
       eta=(1.d0+Lattice%acell_unitcell(1)**2/Lattice%acell_unitcell(3)**2)/4.d0
       zeta=Lattice%acell_unitcell(1)**2/Lattice%acell_unitcell(3)**2/2.d0
       ABI_MALLOC(QptBound,(qptbound_tot))
-      QptBound(:)=(/ QptBound_type (4,-1,'G ', 0.000, 0.000, 0.000),&
-&                    QptBound_type (4,-1,'N ', 0.000, 0.500, 0.000),&
-&                    QptBound_type (4,-1,'P ', 0.250, 0.250, 0.250),&
-&                    QptBound_type (4,-1,'S ',-eta  , eta  , eta  ),&
-&                    QptBound_type (4,-1,'S1', eta  ,1.-eta,-eta  ),&
-&                    QptBound_type (4,-1,'X ', 0.000, 0.000, 0.500),&
-&                    QptBound_type (4,-1,'Y ',-zeta , zeta , 0.500),&
-&                    QptBound_type (4,-1,'Y1', 0.500, 0.500,-zeta ),&
-&                    QptBound_type (4,-1,'Z ', 0.500, 0.500,-0.500) /)
+      QptBound(:)=(/ QptBound_type (4,-1,'Gamma', 0.000, 0.000, 0.000),&
+&                    QptBound_type (4,-1,'N    ', 0.000, 0.500, 0.000),&
+&                    QptBound_type (4,-1,'P    ', 0.250, 0.250, 0.250),&
+&                    QptBound_type (4,-1,'S    ',-eta  , eta  , eta  ),&
+&                    QptBound_type (4,-1,'S1   ', eta  ,1.-eta,-eta  ),&
+&                    QptBound_type (4,-1,'X    ', 0.000, 0.000, 0.500),&
+&                    QptBound_type (4,-1,'Y    ',-zeta , zeta , 0.500),&
+&                    QptBound_type (4,-1,'Y1   ', 0.500, 0.500,-zeta ),&
+&                    QptBound_type (4,-1,'Z    ', 0.500, 0.500,-0.500) /)
     end if
   else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
     qptbound_tot=6
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (6, 0,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (6, 0,'A ', 0.000, 0.000, 0.500),&
-&                  QptBound_type (6, 0,'H ', 0.333, 0.333, 0.500),&
-&                  QptBound_type (6, 0,'K ', 0.333, 0.333, 0.000),&
-&                  QptBound_type (6, 0,'L ', 0.500, 0.000, 0.500),&
-&                  QptBound_type (6, 0,'M ', 0.500, 0.000, 0.000) /)
+    QptBound(:)=(/ QptBound_type (6, 0,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (6, 0,'A    ', 0.000, 0.000, 0.500),&
+&                  QptBound_type (6, 0,'H    ', 0.333, 0.333, 0.500),&
+&                  QptBound_type (6, 0,'K    ', 0.333, 0.333, 0.000),&
+&                  QptBound_type (6, 0,'L    ', 0.500, 0.000, 0.500),&
+&                  QptBound_type (6, 0,'M    ', 0.500, 0.000, 0.000) /)
   else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.0)) then
     qptbound_tot=8
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (7, 0,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (7, 0,'M ', 0.500, 0.500, 0.000),&
-&                  QptBound_type (7, 0,'R ', 0.500, 0.500, 0.500),&
-&                  QptBound_type (7, 0,'X ', 0.000, 0.500, 0.000),&
+    QptBound(:)=(/ QptBound_type (7, 0,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (7, 0,'M    ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (7, 0,'R    ', 0.500, 0.500, 0.500),&
+&                  QptBound_type (7, 0,'X    ', 0.000, 0.500, 0.000),&
 ! For testing purpose only!!!!!!!!
-&                  QptBound_type (7, 0,'A ', 0.000, 1.000, 0.000),&
-&                  QptBound_type (7, 0,'B ', 0.500, 1.000, 0.000),&
-&                  QptBound_type (7, 0,'C ', 1.000, 1.000, 0.000),&
-&                  QptBound_type (7, 0,'D ', 0.750, 0.750, 0.000) /)
+&                  QptBound_type (7, 0,'A    ', 0.000, 1.000, 0.000),&
+&                  QptBound_type (7, 0,'B    ', 0.500, 1.000, 0.000),&
+&                  QptBound_type (7, 0,'C    ', 1.000, 1.000, 0.000),&
+&                  QptBound_type (7, 0,'D    ', 0.750, 0.750, 0.000) /)
   else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.-1)) then
     qptbound_tot=4
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (7,-1,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (7,-1,'H ', 0.500,-0.500, 0.500),&
-&                  QptBound_type (7,-1,'P ', 0.250, 0.250, 0.250),&
-&                  QptBound_type (7,-1,'N ', 0.000, 0.000, 0.500) /)
+    QptBound(:)=(/ QptBound_type (7,-1,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (7,-1,'H    ', 0.500,-0.500, 0.500),&
+&                  QptBound_type (7,-1,'P    ', 0.250, 0.250, 0.250),&
+&                  QptBound_type (7,-1,'N    ', 0.000, 0.000, 0.500) /)
   else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.-3)) then
     qptbound_tot=7
     ABI_MALLOC(QptBound,(qptbound_tot))
-    QptBound(:)=(/ QptBound_type (7,-3,'G ', 0.000, 0.000, 0.000),&
-&                  QptBound_type (7,-3,'K ', 0.375, 0.375, 0.750),&
-&                  QptBound_type (7,-3,'L ', 0.500, 0.500, 0.500),&
-&                  QptBound_type (7,-3,'U ', 0.625, 0.250, 0.625),&
-&                  QptBound_type (7,-3,'W ', 0.500, 0.250, 0.750),&
-&                  QptBound_type (7,-3,'X ', 0.500, 0.000, 0.500),&
-&                  QptBound_type (7,-3,'Xp', 0.500, 0.500, 1.000) /)
+    QptBound(:)=(/ QptBound_type (7,-3,'Gamma', 0.000, 0.000, 0.000),&
+&                  QptBound_type (7,-3,'K    ', 0.375, 0.375, 0.750),&
+&                  QptBound_type (7,-3,'L    ', 0.500, 0.500, 0.500),&
+&                  QptBound_type (7,-3,'U    ', 0.625, 0.250, 0.625),&
+&                  QptBound_type (7,-3,'W    ', 0.500, 0.250, 0.750),&
+&                  QptBound_type (7,-3,'X    ', 0.500, 0.000, 0.500),&
+&                  QptBound_type (7,-3,'Xp   ', 0.500, 0.500, 1.000) /)
   end if
   Qpt%qptbound_tot=qptbound_tot
 
 ! Define the special Q points USED IN THE CALCULATIONS
-! Two cases of generation: default (0) or by hand (>=1)   
+! Two cases of generation: default (0) or by hand (>=1)
   if (InVar%BZpath.eq.0) then
     write(InVar%stdout,*) 'Generate the BZ path using the Q points defined by default'
     write(40,*)           'Generate the BZ path using the Q points defined by default'
@@ -207,11 +207,11 @@ contains
 !FB      qpt_tot=9
       qpt_tot=5
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="X "
-      Qpt%special_qpt(2)="G "
-      Qpt%special_qpt(3)="Y "
-      Qpt%special_qpt(4)="G "
-      Qpt%special_qpt(5)="Z "
+      Qpt%special_qpt(1)="X    "
+      Qpt%special_qpt(2)="Gamma"
+      Qpt%special_qpt(3)="Y    "
+      Qpt%special_qpt(4)="Gamma"
+      Qpt%special_qpt(5)="Z    "
 !FB      Qpt%special_qpt(1)="G "
 !FB      Qpt%special_qpt(2)="Y "
 !FB      Qpt%special_qpt(3)="H "
@@ -225,91 +225,91 @@ contains
 !     ORTH: G-X-S-Y-G-Z
       qpt_tot=6
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="G "
-      Qpt%special_qpt(2)="X "
-      Qpt%special_qpt(3)="S "
-      Qpt%special_qpt(4)="Y "
-      Qpt%special_qpt(5)="G "
-      Qpt%special_qpt(6)="Z "
+      Qpt%special_qpt(1)="Gamma"
+      Qpt%special_qpt(2)="X    "
+      Qpt%special_qpt(3)="S    "
+      Qpt%special_qpt(4)="Y    "
+      Qpt%special_qpt(5)="Gamma"
+      Qpt%special_qpt(6)="Z    "
     else if ((InVar%bravais(1).eq.3).and.(InVar%bravais(2).eq.3)) then
 !     ORTH-C: G-Yp-Gp-Z
       qpt_tot=4
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1) ="G "
-      Qpt%special_qpt(2) ="Yp"
-      Qpt%special_qpt(3) ="Gp"
-      Qpt%special_qpt(4) ="Zp"
+      Qpt%special_qpt(1) ="Gamma"
+      Qpt%special_qpt(2) ="Yp   "
+      Qpt%special_qpt(3) ="Gp   "
+      Qpt%special_qpt(4) ="Zp   "
     else if ((InVar%bravais(1).eq.4).and.(InVar%bravais(2).eq.-1)) then
       if (Lattice%acell_unitcell(3).lt.Lattice%acell_unitcell(1)) then
 !       BCT1: G-X-M-G-Z-P-N-Z1-M
         qpt_tot=9
         ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-        Qpt%special_qpt(1) ="G "
-        Qpt%special_qpt(2) ="X "
-        Qpt%special_qpt(3) ="M "
-        Qpt%special_qpt(4) ="G "
-        Qpt%special_qpt(5) ="Z "
-        Qpt%special_qpt(6) ="P "
-        Qpt%special_qpt(7) ="N "
-        Qpt%special_qpt(8) ="Z1"
-        Qpt%special_qpt(9) ="M "
+        Qpt%special_qpt(1) ="Gamma"
+        Qpt%special_qpt(2) ="X    "
+        Qpt%special_qpt(3) ="M    "
+        Qpt%special_qpt(4) ="Gamma"
+        Qpt%special_qpt(5) ="Z    "
+        Qpt%special_qpt(6) ="P    "
+        Qpt%special_qpt(7) ="N    "
+        Qpt%special_qpt(8) ="Z1   "
+        Qpt%special_qpt(9) ="M    "
       else
 !       BCT2: G-X-Y-S-G-Z-S1-N-P-Y1-Z
         qpt_tot=11
         ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-        Qpt%special_qpt(1) ="G "
-        Qpt%special_qpt(2) ="X "
-        Qpt%special_qpt(3) ="Y "
-        Qpt%special_qpt(4) ="S "
-        Qpt%special_qpt(5) ="G "
-        Qpt%special_qpt(6) ="Z "
-        Qpt%special_qpt(7) ="S1"
-        Qpt%special_qpt(8) ="N "
-        Qpt%special_qpt(9) ="P "
-        Qpt%special_qpt(10)="Y1"
-        Qpt%special_qpt(11)="Z "
+        Qpt%special_qpt(1) ="Gamma"
+        Qpt%special_qpt(2) ="X    "
+        Qpt%special_qpt(3) ="Y    "
+        Qpt%special_qpt(4) ="S    "
+        Qpt%special_qpt(5) ="Gamma"
+        Qpt%special_qpt(6) ="Z    "
+        Qpt%special_qpt(7) ="S1   "
+        Qpt%special_qpt(8) ="N    "
+        Qpt%special_qpt(9) ="P    "
+        Qpt%special_qpt(10)="Y1   "
+        Qpt%special_qpt(11)="Z    "
       end if
     else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
 !     HEX: G-M-K-G-A-L-H-A
       qpt_tot=8
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="G "
-      Qpt%special_qpt(2)="M "
-      Qpt%special_qpt(3)="K "
-      Qpt%special_qpt(4)="G "
-      Qpt%special_qpt(5)="A "
-      Qpt%special_qpt(6)="L "
-      Qpt%special_qpt(7)="H "
-      Qpt%special_qpt(8)="A "
+      Qpt%special_qpt(1)="Gamma"
+      Qpt%special_qpt(2)="M    "
+      Qpt%special_qpt(3)="K    "
+      Qpt%special_qpt(4)="Gamma"
+      Qpt%special_qpt(5)="A    "
+      Qpt%special_qpt(6)="L    "
+      Qpt%special_qpt(7)="H    "
+      Qpt%special_qpt(8)="A    "
     else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.0)) then
-!     SC: G-X-M-G-R  
+!     SC: G-X-M-G-R
       qpt_tot=5
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="G "
-      Qpt%special_qpt(2)="X "
-      Qpt%special_qpt(3)="M "
-      Qpt%special_qpt(4)="G "
-      Qpt%special_qpt(5)="R "
+      Qpt%special_qpt(1)="Gamma"
+      Qpt%special_qpt(2)="X    "
+      Qpt%special_qpt(3)="M    "
+      Qpt%special_qpt(4)="Gamma"
+      Qpt%special_qpt(5)="R    "
     else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.-1)) then
 !     BCC: G-P-H-G-N
       qpt_tot=5
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="G "
-      Qpt%special_qpt(2)="P "
-      Qpt%special_qpt(3)="H "
-      Qpt%special_qpt(4)="G "
-      Qpt%special_qpt(5)="N "
+      Qpt%special_qpt(1)="Gamma"
+      Qpt%special_qpt(2)="P    "
+      Qpt%special_qpt(3)="H    "
+      Qpt%special_qpt(4)="Gamma"
+      Qpt%special_qpt(5)="N    "
     else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.-3)) then
 !     FCC: G-X-W-Xp-K-G-L
       qpt_tot=7
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
-      Qpt%special_qpt(1)="G "
-      Qpt%special_qpt(2)="X "
-      Qpt%special_qpt(3)="W "
-      Qpt%special_qpt(4)="Xp"
-      Qpt%special_qpt(5)="K "
-      Qpt%special_qpt(6)="G "
-      Qpt%special_qpt(7)="L "
+      Qpt%special_qpt(1)="Gamma"
+      Qpt%special_qpt(2)="X    "
+      Qpt%special_qpt(3)="W    "
+      Qpt%special_qpt(4)="Xp   "
+      Qpt%special_qpt(5)="K    "
+      Qpt%special_qpt(6)="Gamma"
+      Qpt%special_qpt(7)="L    "
     end if
   else if (InVar%BZpath.ge.1) then
     write(InVar%stdout,*) 'Generate the BZ path using the Q points given in the input file'
@@ -320,7 +320,7 @@ contains
   end if
   Qpt%qpt_tot=qpt_tot
 
- end subroutine
+ end subroutine tdep_make_specialqpt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_qptpath(InVar,Lattice,Qpt)
 
@@ -340,16 +340,16 @@ contains
   type(QptBound_type), allocatable :: QptBound(:)
 
   nqpt=0
-  open(unit=40,file='qpt.dat')
+  open(unit=40,file=trim(InVar%output_prefix)//'qpt.dat')
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) '########################## Q points generation  #############################'
   write(InVar%stdout,*) '#############################################################################'
-! Define the special Q points 
+! Define the special Q points
   call tdep_make_specialqpt(InVar,Lattice,Qpt,QptBound)
 
 ! Define the path in the BZ
-! Two cases of generation: default (0) or by hand (>=1)   
+! Two cases of generation: default (0) or by hand (>=1)
   qpt_tot     =Qpt%qpt_tot
   ABI_MALLOC(Qpt%special_red ,(qpt_tot,3)); Qpt%special_red (:,:)=zero
   ABI_MALLOC(Qpt%special_cart,(qpt_tot,3)); Qpt%special_cart(:,:)=zero
@@ -368,14 +368,14 @@ contains
             Qpt%special_red(jj,2)=QptBound(ii)%y
             Qpt%special_red(jj,3)=QptBound(ii)%z
             write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(jj),Qpt%special_red(jj,1),Qpt%special_red(jj,2),Qpt%special_red(jj,3)
-          end if  
+          end if
         end if
-      end do  
+      end do
       if (.not.IsThisAllowed) then
         MSG_ERROR('One of the Qpt bound (letter) is not allowed.')
       end if
-    end do  
-!   Compute the cartesian coordinates of the special Q points in the reciprocical lattice     
+    end do
+!   Compute the cartesian coordinates of the special Q points in the reciprocical lattice
     write(40,*) ' '
     write(40,*) '  In cartesian coordinates:'
     do ii=1,qpt_tot
@@ -386,10 +386,10 @@ contains
           else if (Lattice%line==0.or.Lattice%line==1) then
             Qpt%special_cart(ii,jj)=Qpt%special_cart(ii,jj)+Lattice%gprimt(kk,jj)*Qpt%special_red(ii,kk)/Lattice%acell_unitcell(kk)
           end if
-        end do 
+        end do
       end do
       write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(ii),Qpt%special_cart(ii,1),Qpt%special_cart(ii,2),Qpt%special_cart(ii,3)
-    end do  
+    end do
     write(40,*) ' '
     write(40,*) '  Using gprimt='
     write(40,'(3(f10.5,1x))') Lattice%gprimt(1,1),Lattice%gprimt(1,2),Lattice%gprimt(1,3)
@@ -405,16 +405,16 @@ contains
 &                                       (Qpt%special_cart(ii,2)-Qpt%special_cart(ii+1,2))**2+&
 &                                       (Qpt%special_cart(ii,3)-Qpt%special_cart(ii+1,3))**2)*100*2*pi)
       end do
-      
+
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (InVar%firstqptseg.gt.0) then
           Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*InVar%firstqptseg)
-        else 
+        else
           Qpt%lgth_segments(ii)=100
         end if
         write(40,'(a2,a,a2,1x,i4)') Qpt%special_qpt(ii),'-',Qpt%special_qpt(ii+1),Qpt%lgth_segments(ii)
-      end do        
+      end do
 
 !     Allocate and define the qpt points along the segments
       do ii=1,qpt_tot-1
@@ -435,7 +435,7 @@ contains
       end do
       Qpt%qpt_red (:,nqpt)=Qpt%special_red (qpt_tot,:)
       Qpt%qpt_cart(:,nqpt)=Qpt%special_cart(qpt_tot,:)
-    else if (qpt_tot.eq.1) then  
+    else if (qpt_tot.eq.1) then
       nqpt=1
       ABI_MALLOC(Qpt%qpt_red ,(3,nqpt)); Qpt%qpt_red (:,:)=zero
       ABI_MALLOC(Qpt%qpt_cart,(3,nqpt)); Qpt%qpt_cart(:,:)=zero
@@ -458,9 +458,9 @@ contains
           else if (Lattice%line==0.or.Lattice%line==1) then
             Qpt%qpt_cart(ii,jj)=Qpt%qpt_cart(ii,jj)+Lattice%gprimt(kk,jj)*Qpt%qpt_red(ii,kk)/Lattice%acell_unitcell(kk)
           end if
-        end do 
+        end do
       end do
-    end do  
+    end do
   end if  !BZpath>=0
   write(InVar%stdout,*) 'See the qpt.dat file'
 
@@ -474,7 +474,7 @@ contains
   close(40)
 
   Qpt%nqpt=nqpt
- end subroutine
+ end subroutine tdep_make_qptpath
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module m_tdep_qpt

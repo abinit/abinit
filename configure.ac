@@ -24,7 +24,7 @@
 #
 
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.9.2],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.9.4],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -708,8 +708,9 @@ if test "${enable_optim}" != "no" -a "${enable_optim}" != "yes"; then
   fi
 fi
 
-# FIXME: 20_datashare does not support optimizations
+# Disable optimization in directories containing big F90 files (efficiency is not critical here)
 fcflags_opt_20_datashare="-O0"
+fcflags_opt_43_ptgroups="-O0"
 
 # Set per-directory Fortran optimizations
 # Note: must be done only once FCFLAGS_OPTIM is set

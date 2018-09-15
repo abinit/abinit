@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -397,14 +397,14 @@ P           mkmem          64
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  17.5812   0.0000  14.5696   0.0000  16.4068   0.0000
+   0.0000  17.5812  -0.0000  14.5696  -0.0000  16.4068   0.0000
    0.0200  17.5817   0.0081  14.5699   0.0043  16.4072   0.0063
-   0.0400  17.5833   0.0162  14.5707   0.0086  16.4085   0.0126
+   0.0400  17.5834   0.0162  14.5708   0.0086  16.4085   0.0126
    0.0600  17.5860   0.0243  14.5722   0.0129  16.4106   0.0189
    0.0800  17.5898   0.0325  14.5742   0.0171  16.4135   0.0253
    0.1000  17.5946   0.0406  14.5767   0.0214  16.4173   0.0316
-   0.1200  17.6005   0.0488  14.5798   0.0257  16.4219   0.0380
-   0.1400  17.6075   0.0569  14.5835   0.0300  16.4273   0.0443
+   0.1200  17.6005   0.0488  14.5799   0.0257  16.4219   0.0380
+   0.1400  17.6075   0.0569  14.5836   0.0300  16.4273   0.0443
    0.1600  17.6156   0.0651  14.5878   0.0344  16.4336   0.0507
    0.1800  17.6247   0.0734  14.5927   0.0387  16.4407   0.0571
   
@@ -593,7 +593,7 @@ P           mkmem          64
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

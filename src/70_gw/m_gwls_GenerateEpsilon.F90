@@ -41,7 +41,7 @@ use m_gwls_polarisability
 use m_gwls_model_polarisability
 use m_gwls_GWlanczos
 ! Abinit modules
-use m_profiling_abi
+use m_abicore
 use defs_basis
 use defs_datatypes
 use defs_abitypes

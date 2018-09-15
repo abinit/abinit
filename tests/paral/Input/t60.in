@@ -89,7 +89,7 @@
 #%%  files_to_test = t60_MPI4.out, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure. 

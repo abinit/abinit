@@ -35,7 +35,7 @@
 module m_fftcore
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
@@ -498,7 +498,6 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_ngfft'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -799,7 +798,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getng'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1527,7 +1525,7 @@ end subroutine sphereboundary
 !!
 !! TODO
 !! 1) Order arguments
-!! 2) Split the two cases: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
+!! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!
@@ -3618,7 +3616,7 @@ end subroutine mpifft_fg2dbox
 !----------------------------------------------------------------------
 
 !!****f* m_fftcore/mpifft_fg2dbox_dpc
-!! NAME_
+!! NAME
 !!  mpifft_fg2dbox_dpc
 !!
 !! FUNCTION
@@ -4319,7 +4317,6 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpgsph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -49,7 +49,7 @@
 program tdep
 
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_phonons
   use m_xmpi,             only : xmpi_init, xmpi_end
   use m_ifc,              only : ifc_type
@@ -69,6 +69,7 @@ program tdep
 #ifdef HAVE_NETCDF
   use netcdf
 #endif
+  use m_io_tools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -141,7 +142,10 @@ program tdep
  ABI_MALLOC(ucart,(3,natom,InVar%nstep))    ; ucart(:,:,:)=0.d0
  ABI_MALLOC(Forces_MD,(3*natom*InVar%nstep)); Forces_MD(:)=0.d0
 
+ write(InVar%stdout,*) "Matching structure"
+ call flush_unit(InVar%stdout)
  call tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,Rlatt_cart,Rlatt4Abi,Sym,ucart)
+ call flush_unit(InVar%stdout)
 
 !==========================================================================================
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
@@ -162,6 +166,7 @@ program tdep
  write(InVar%stdout,*) '################ Now, find the number of coefficients for ###################'
  write(InVar%stdout,*) '########################## a reference interaction ##########################'
  write(InVar%stdout,*) '#############################################################################'
+ call flush_unit(InVar%stdout)
  
 !==========================================================================================
 !============== Initialize the Shell2at datatype ==========================================
@@ -218,9 +223,9 @@ program tdep
  write(stdout,*) '#############################################################################'
  write(stdout,*) '######################## Dynamical matrix ###################################'
  write(stdout,*) '#############################################################################'
- open(unit=53,file='omega.dat')
- open(unit=52,file='dij.dat')
- open(unit=51,file='eigenvectors.dat')
+ open(unit=53,file=trim(InVar%output_prefix)//'omega.dat')
+ open(unit=52,file=trim(InVar%output_prefix)//'dij.dat')
+ open(unit=51,file=trim(InVar%output_prefix)//'eigenvectors.dat')
  ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
  ABI_MALLOC(omega,(3*InVar%natom_unitcell))
@@ -239,7 +244,7 @@ program tdep
  close(53)
  close(52)
  close(51)
- call tdep_write_yaml(Eigen2nd,Qpt)
+ call tdep_write_yaml(Eigen2nd,Qpt,InVar%output_prefix)
  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
 !==========================================================================================
 !===================== Compute the elastic constants ======================================

@@ -30,7 +30,7 @@ module m_dft_energy
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_hamiltonian
  use m_errors
  use m_xmpi
@@ -43,7 +43,7 @@ module m_dft_energy
  use m_kg,               only : mkkin
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
- use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, &
+ use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
                                 bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
@@ -54,8 +54,9 @@ module m_dft_energy
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
- use m_cgtools,          only : dotprod_vn
- use m_fft,              only : fftpac
+ use m_paw_nhat,         only : pawmknhat
+ use m_paw_occupancies,  only : pawaccrhoij
+ use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
  use m_dens,             only : mag_constr
  use m_mkrho,            only : mkrho
@@ -64,6 +65,9 @@ module m_dft_energy
  use m_rhotoxc,          only : rhotoxc
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_fourier_interpol, only : transgrid
+ use m_prep_kgb,         only : prep_getghc, prep_nonlop
+ use m_psolver,          only : psolver_rhohxc
 
  implicit none
 
@@ -226,10 +230,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
- use interfaces_53_ffts
- use interfaces_62_poisson
- use interfaces_65_paw
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -959,7 +959,6 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkresi'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

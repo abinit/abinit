@@ -10,7 +10,7 @@ This file describes how to install ABINIT on Mac OS X:
  - Using the MacPorts package manager
  - Compiling from source 
 
-## Using [homebreq](http://brew.sh)
+## Using [homebrew](http://brew.sh)
 
 Tested with mac OS X v10.9 (Mavericks), v10.10 (Yosemite), 10.11 (El Capitan).
 A Homebrew official formula for ABINIT is available (authors: D. Davydov + M. Torrent).

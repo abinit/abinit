@@ -87,7 +87,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Y. Gillet 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  O2
 #%%  Oxygen spin-temperature-dependent of the band energies

@@ -33,7 +33,7 @@ t55o_DS11_EIG.nc
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Ponc\'e, Y. Gillet
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure using the temperature.py python script. 

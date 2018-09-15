@@ -8,7 +8,7 @@ This document explains the i/o parameters and format needed for the main code (a
 
 The new user is advised to read first the [new user's guide](..),
 before reading the present file. 
-It will be easier to discover the present file with the help of the [[lesson:index|tutorial]].
+It will be easier to discover the present file with the help of the [[tutorial:index|tutorial]].
 
 When the user will be sufficiently familiarized with ABINIT, reading the
 ~abinit/doc/users/tuning.txt file might be useful (this file, as many
@@ -104,7 +104,7 @@ Note that this paper does NOT reflect the present status of the code.
 ABINIT is closer in spirit to the [[cite:Kresse1996|paper]] of Kresse and Furthmuller.
 If you have never used another electronic structure code or a Quantum
 Chemistry package, you should browse through the Chaps. 1 to 13, and
-appendices L and M of [[cite:Martin2008|this book]] by R. M. Martin
+appendices L and M of [[cite:Martin2004|this book]] by R. M. Martin
 
 <a id="input"></a>
 ## 3 The input file
@@ -867,7 +867,7 @@ vacuum in the same supercell.
   * Next is the stress tensor, (1/ucvol) d(Etot)/d(strain(a,b))
     for Etot=total energy per unit cell and **a**, **b** are **x**, **y**, or **z** components of strain.
     The stress tensor is given in cartesian coordinates in Hartree/Bohr 3 and GPa.
-    The basics of the stress tensor are described in [[cite:Nielsen1985]].
+    The basics of the stress tensor are described in [[cite:Nielsen1985]] and [[cite:Nielsen1985a]]. 
 
 Having finished all the calculations for the different datasets, the code
 echoes the parameters listed in the input file, using the latest values e.g.
@@ -907,7 +907,7 @@ at fixed atomic positions, these subroutines are:
 1. **abinit**: the main routine 
 2. **driver**: select ground state or response calculations 
 3. **gstate**: the driver of the ground state calculations 
-4. **scfcv**: the SCF cycle driver 
+4. **scfcv_core**: the SCF cycle driver 
 5. **vtorho**: compute the density from the potential (it includes a loop over spins and k-points) 
 6. **vtowfk**: compute the wavefunctions at one particular k-point (includes a non self consistent loop, and a loop over bands) 
 7. **cgwf**: optimize one wavefunction in a fixed potential 

@@ -16,3 +16,5 @@ py_w3c
 pytest
 #pytest-cov
 #pytest-xdist
+
+abimkdocs_plugin/.

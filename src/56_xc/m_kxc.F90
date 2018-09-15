@@ -43,7 +43,7 @@
 MODULE m_kxc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_crystal
@@ -57,7 +57,7 @@ MODULE m_kxc
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
- use m_fft,           only : fourdp_6d
+ use m_fft,           only : fourdp_6d, fourdp
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_spacepar,      only : hartre
  use m_rhotoxc,       only : rhotoxc
@@ -71,7 +71,7 @@ MODULE m_kxc
  public :: kxc_rpa         ! Hartree kernel
  public :: kxc_local       ! Compute local xc kernel in G space.
  public :: kxc_alda        ! AL(S)DA kernel in reciprocal space, on the FFT grid.
- public :: kxc_pgg         ! Compute the PGG-exchange kernel in reciprocal space (Phys. Rev. Lett. 76, 1212 (1996)).
+ public :: kxc_pgg         ! Compute the PGG-exchange kernel in reciprocal space (Phys. Rev. Lett. 76, 1212 (1996) [[cite:Petersilka1996]]).
  public :: kxc_eok         ! linear or non-linear (ixceok = 2) energy optimized kernel of Dobson and Wang.
  public :: kxc_driver      ! Driver routine (TODO)
  public :: kxc_ADA         ! Adiabatic density approximation
@@ -421,7 +421,6 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_alda'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -637,7 +636,7 @@ end subroutine kxc_alda
 !!
 !! FUNCTION
 !! Compute the PGG-exchange kernel in reciprocal space
-!! (Phys. Rev. Lett. 76, 1212 (1996)).
+!! (Phys. Rev. Lett. 76, 1212 (1996) [[cite:Petersilka1996]]).
 !!
 !! INPUTS
 !!  gmet=reciprocal space metrix (bohr**-2)
@@ -875,7 +874,7 @@ end subroutine kxc_pgg
 !!  Compute the linear (ixceok = 1) or non-linear (ixceok = 2)
 !!  energy optimized kernel of Dobson and Wang, in reciprocal
 !!  space, on the FFT grid.
-!!  [see J. Dobson and J. Wang, Phys. Rev. B 62, 10038 (2000)].
+!!  See J. Dobson and J. Wang, Phys. Rev. B 62, 10038 (2000) [[cite:Dobson2000]].
 !!
 !! INPUTS
 !!  ixceok = 1 linear energy optimized kernel.
@@ -911,7 +910,6 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_eok'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1078,8 +1076,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_driver'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1340,8 +1336,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kxc_ADA'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

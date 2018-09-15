@@ -26,7 +26,7 @@
 module m_band2eps_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_parser,    only : intagm
@@ -217,7 +217,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  jdtset=1
 
 ! Need to get the number of atom
- band2eps_dtset%natom = zero
+ band2eps_dtset%natom = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
  if(tread==1) band2eps_dtset%natom=intarr(1)
  if (band2eps_dtset%natom <= tol10) then
@@ -228,7 +228,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%nlines = zero
+ band2eps_dtset%nlines = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nlines',tread,'INT')
  if(tread==1) band2eps_dtset%nlines=intarr(1)
  if (band2eps_dtset%nlines <= tol10) then
@@ -239,7 +239,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%cunit = zero
+ band2eps_dtset%cunit = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cunit',tread,'INT')
  if(tread==1) band2eps_dtset%cunit=intarr(1)
  if (band2eps_dtset%cunit < 1 .or. band2eps_dtset%cunit > 2) then
@@ -250,7 +250,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  end if
 
 ! Need to get the number of lines
- band2eps_dtset%ngrad = zero
+ band2eps_dtset%ngrad = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ngrad',tread,'INT')
  if(tread==1) band2eps_dtset%ngrad=intarr(1)
  if (band2eps_dtset%ngrad < 0) then
@@ -273,12 +273,12 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  ABI_ALLOCATE(band2eps_dtset%red,(band2eps_dtset%natom))
  ABI_ALLOCATE(band2eps_dtset%blue,(band2eps_dtset%natom))
  ABI_ALLOCATE(band2eps_dtset%green,(band2eps_dtset%natom))
- band2eps_dtset%red(:) = zero
- band2eps_dtset%blue(:) = zero
- band2eps_dtset%green(:) = zero
+ band2eps_dtset%red(:) = 0
+ band2eps_dtset%blue(:) = 0
+ band2eps_dtset%green(:) = 0
 
 ! Read prtout
- band2eps_dtset%prtout = zero
+ band2eps_dtset%prtout = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtout',tread,'INT')
  if(tread==1) band2eps_dtset%prtout=intarr(1)
  if (band2eps_dtset%prtout < 0 .or. band2eps_dtset%prtout > 1) then
@@ -308,7 +308,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !nlines dimenstion
  ABI_ALLOCATE(band2eps_dtset%nqline,(band2eps_dtset%nlines))
  ABI_ALLOCATE(band2eps_dtset%scale,(band2eps_dtset%nlines))
- band2eps_dtset%nqline(:) = zero
+ band2eps_dtset%nqline(:) = 0
  band2eps_dtset%scale(:) = zero
 
  if(band2eps_dtset%nlines > marr)then

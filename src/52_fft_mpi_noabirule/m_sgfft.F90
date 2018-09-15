@@ -24,7 +24,7 @@
 MODULE m_sgfft
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_fftcore
 
@@ -2377,8 +2377,6 @@ end subroutine sg_fftx
 !! OUTPUT
 !!  zbr(2,nd1,nd2,nd3)=OUTPUT transformed array; no scaling applied
 !!
-!! SIDE EFFECTS
-!!
 !! TODO
 !! Use latex for the equation above
 !!
@@ -4084,6 +4082,9 @@ end subroutine sg_fftrisc
 !! Note however that no blocking is used, in both 1D z-transform
 !! or subsequent 2D transform. This should be improved.
 !!
+!! * This routine is not thread-safe due to the presence of variables with the save attribute!
+!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
+!!
 !! INPUTS
 !!  cplex= if 1 , denpot is real, if 2 , denpot is complex
 !!     (cplex=2 only allowed for option=2 when istwf_k=1)
@@ -4133,10 +4134,6 @@ end subroutine sg_fftrisc
 !!  for option==3, fofr(2,n4,n5,n6) contains the real space wavefunction;
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
-!!
-!! NOTES
-!! * This routine is not thread-safe due to the presence of variables with the save attribute!
-!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
 !! PARENTS
 !!      m_sgfft
@@ -4998,13 +4995,16 @@ end subroutine fftrisc_one_nothreadsafe
 !! non-diagonal occupations.
 !!
 !! NOTES
-!! Specifically uses rather sophisticated algorithms, based on S Goedecker
-!! routines, specialized for superscalar RISC architecture.
-!! Zero padding : saves 7/12 execution time
-!! Bi-dimensional data locality in most of the routine : cache reuse
-!! For k-point (0 0 0) : takes advantage of symmetry of data.
-!! Note however that no blocking is used, in both 1D z-transform
-!! or subsequent 2D transform. This should be improved.
+!! * Specifically uses rather sophisticated algorithms, based on S Goedecker
+!!   routines, specialized for superscalar RISC architecture.
+!!   Zero padding : saves 7/12 execution time
+!!   Bi-dimensional data locality in most of the routine : cache reuse
+!!   For k-point (0 0 0) : takes advantage of symmetry of data.
+!!   Note however that no blocking is used, in both 1D z-transform
+!!   or subsequent 2D transform. This should be improved.
+!!
+!! * This routine is not thread-safe due to the presence of variables with the save attribute!
+!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
 !! INPUTS
 !!  cplex= if 1 , denpot is real, if 2 , denpot is complex
@@ -5066,10 +5066,6 @@ end subroutine fftrisc_one_nothreadsafe
 !!
 !! TODO
 !! Complete input and output list.
-!!
-!! NOTES
-!! * This routine is not thread-safe due to the presence of variables with the save attribute!
-!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
 !! PARENTS
 !!      fourwf

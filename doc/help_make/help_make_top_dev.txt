@@ -3,7 +3,6 @@
 Additional keywords for developers
 
 robodoc      makes compressed tar file with ROBODOC-processed sources
-infos_html   makes the tar.gz file for the Web site
 run_abilint  run abilint - needed to recompile after change of args
 check_list   echoes the check list
 dist         prepares a tar.gz package with all sources + prepared makefiles

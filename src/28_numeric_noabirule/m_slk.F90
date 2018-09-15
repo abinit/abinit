@@ -25,7 +25,7 @@ module m_slk
  use defs_basis
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_fstrings,      only : firstchar, toupper
  use m_numeric_tools, only : print_arr
@@ -3125,7 +3125,6 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'slk_pzheevx'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3416,7 +3415,6 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'slk_pzhegvx'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4074,7 +4072,6 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'slk_read'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

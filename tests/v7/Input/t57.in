@@ -75,7 +75,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond. The wtq variable is introduced to be able to reproduce the q-point 
 #%%  weight obtained with ngqpt and qptopt.

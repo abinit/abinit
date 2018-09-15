@@ -27,7 +27,7 @@
 module m_inkpts
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,      only : timab
@@ -35,7 +35,7 @@ module m_inkpts
  use m_symfind,   only : symfind, symlatt
  use m_cgtools,   only : set_istwfk
  use m_parser,    only : intagm
- use m_kpts,      only : getkgrid, testkgrid
+ use m_kpts,      only : getkgrid, testkgrid, mknormpath
 
  implicit none
 
@@ -138,8 +138,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inkpts'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

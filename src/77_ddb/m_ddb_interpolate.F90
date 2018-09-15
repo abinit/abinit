@@ -30,7 +30,7 @@ module m_ddb_interpolate
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -89,7 +89,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_interpolate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -162,9 +161,9 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  ddb_new%nblok = nblok
  call ddb_malloc(ddb_new,msize,nblok,natom,ntypat)
- ddb_new%flg = zero
+ ddb_new%flg = 0
  ddb_new%amu = ddb%amu
- ddb_new%typ = one
+ ddb_new%typ = 1
  ddb_new%qpt = zero
  ddb_new%nrm = one
 
@@ -172,7 +171,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ABI_MALLOC(d2red,(2,3,mpert,3,mpert))
  ABI_MALLOC(blkflg,(3,mpert,3,mpert))
 
- blkflg = one
+ blkflg = 1
 
  rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
  qpt_padded = zero
@@ -247,7 +246,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
          do idir1=1,3
            ii=ii+1
            if (ipert1<=natom.and.ipert2<=natom) then
-             ddb_new%flg(ii,jblok) = one
+             ddb_new%flg(ii,jblok) = 1
            end if
          end do
        end do

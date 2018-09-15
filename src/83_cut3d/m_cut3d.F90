@@ -24,7 +24,7 @@ MODULE m_cut3d
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
  use m_hdr
@@ -51,6 +51,7 @@ MODULE m_cut3d
  use m_kg,               only : kpgio, ph1d3d, getph
  use m_fftcore,          only : sphereboundary
  use m_initylmg,         only : initylmg
+ use m_fft,              only : fourwf
 
  implicit none
 
@@ -1814,7 +1815,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

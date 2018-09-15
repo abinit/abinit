@@ -14,7 +14,7 @@ certain symmetry-related variables used in the input file of the ABINIT code.
 The table entries are as follows:
 
 SPGROUP
-:   *SPace GROUP number* as found in the International Tables of Crystallography, 1986 edition.
+:   *SPace GROUP number* as found in the International Tables of Crystallography, 1983 edition [[cite:Hahn1983]].
 
 SPGAXOR
 :   *SPace Group AXis ORientation*, the orientation of the unit cell axis. The allowed values are: 

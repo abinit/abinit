@@ -145,12 +145,11 @@ znucl        13
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Verstraete 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%   the sequence of datasets makes the ground states and
 #%%    all of the explicit perturbations of the single
 #%%    Al atom in all directions, for the irreducible
 #%%    qpoints in a 2x2x2 grid.
-#%% 
 #%%   Note that the q-point grid must be a sub-grid of the k-point grid (here 4x4x4)
 #%%<END TEST_INFO>

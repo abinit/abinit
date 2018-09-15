@@ -31,7 +31,7 @@ module m_atomdata
     
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -79,7 +79,7 @@ contains
 !! Return atomic data : symbol, covalent radius, atomic mass
 !! Atomic masses are those recommended by the commission on Atomic Weights and
 !! Isotopic Abundances, Inorganic Chemistry Division, IUPAC, in
-!! Pure Appl. Chem. 60, 841 (1988). For Tc, Pm, Po to Ac, Pa and beyond U,
+!! Pure Appl. Chem. 60, 841 (1988) [[cite:IUPAC1988]]. For Tc, Pm, Po to Ac, Pa and beyond U,
 !! none of the isotopes has a half-life greater than 3.0d10 years, and
 !! the values provided here do not come from that source.
 !!

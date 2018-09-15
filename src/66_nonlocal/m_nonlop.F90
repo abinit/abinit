@@ -28,7 +28,7 @@ module m_nonlop
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
@@ -107,7 +107,8 @@ contains
 !!  hamk <type(gs_hamiltonian_type)>=data defining the Hamiltonian at a given k (NL part involved here)
 !!     | atindx1(natom)=index table for atoms, inverse of atindx
 !!     | dimekb1,dimekb2=dimensions of ekb (see ham%ekb)
-!!     | ekb(dimekb1,dimekb2,nspinor**2)=
+!!     | dimekbq=1 if enl factors do not contain a exp(-iqR) phase, 2 is they do
+!!     | ekb(dimekb1,dimekb2,nspinor**2,dimekbq)=
 !!     |   ->NC psps (paw_opt=0) : Kleinman-Bylander energies (hartree)
 !!     |                           dimekb1=lmnmax, dimekb2=ntypat
 !!     |   ->PAW (paw_opt=1 or 4): Dij coefs connecting projectors (ij symmetric)
@@ -337,7 +338,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
  real(dp),intent(in) :: lambda(ndat)
- real(dp),intent(in),target,optional :: enl(:,:,:)
+ real(dp),intent(in),target,optional :: enl(:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
  real(dp),intent(inout),target :: vectout(:,:)
@@ -345,23 +346,24 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Local variables-------------------------------
 !scalars
- integer :: dimenl1,dimenl2,dimenl2_,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
- integer :: ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
+ integer :: dimenl1,dimenl2,dimenl2_,dimekbq,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
+ integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
- logical :: atom_pert,force_recompute_ph3d,hermdij,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
+ logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
  character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
  integer,pointer :: kgin(:,:),kgout(:,:)
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
- real(dp),pointer :: enl_ptr(:,:,:)
+ real(dp),pointer :: enl_ptr(:,:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:)
  real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
+ real(dp), pointer :: enl_(:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
   integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
@@ -374,7 +376,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  only_SO_=0; if (present(only_SO)) only_SO_=only_SO
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
- hermdij=(any(abs(hamk%nucdipmom)>tol8))
 
  force_recompute_ph3d=.false.
 
@@ -386,13 +387,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (cpopt/=-1) then
      MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
-   if (hermdij) then
-     MSG_BUG('If useylm=0, ie no PAW, nucdipmom/=0 is not allowed !')
+   if (hamk%dimekbq/=1) then
+     MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
      msg = 'When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.'
      MSG_BUG(msg)
    end if
+ end if
+ if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
+   msg = 'GPU version of nonlop not compatible with a exp(-iqR) phase!'
+   MSG_BUG(msg)
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
    MSG_BUG('kg_k/kg_kp should be associated!')
@@ -533,10 +538,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !If enl is present in the arg list, use it; instead use hamk%ebk
  if (present(enl)) then
    enl_ptr => enl
-   dimenl1=size(enl,1);dimenl2=size(enl,2)
+   dimenl1=size(enl,1);dimenl2=size(enl,2);dimekbq=size(enl,4)
  else
    enl_ptr => hamk%ekb
-   dimenl1=hamk%dimekb1;dimenl2=hamk%dimekb2
+   dimenl1=hamk%dimekb1;dimenl2=hamk%dimekb2;dimekbq=1
  end if
 
 !In the case of a derivative with respect to an atomic displacement,
@@ -591,18 +596,20 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end do
    end if
    if (size(enl_ptr)>0) then
-     ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2))
-     do ispden=1,hamk%nspinor**2
-       if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
-         enl_(:,1,ispden)=enl_ptr(:,iatom_only_,ispden)
-       else if (dimenl2==hamk%ntypat) then
-         enl_(:,1,ispden)=enl_ptr(:,itypat,ispden)
-       else
-         enl_(:,1,ispden)=enl_ptr(:,1,ispden)
-       end if
+     ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
+     do ii=1,size(enl_ptr,4)
+       do ispden=1,hamk%nspinor**2
+         if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
+           enl_(:,1,ispden,ii)=enl_ptr(:,iatom_only_,ispden,ii)
+         else if (dimenl2==hamk%ntypat) then
+           enl_(:,1,ispden,ii)=enl_ptr(:,itypat,ispden,ii)
+         else
+           enl_(:,1,ispden,ii)=enl_ptr(:,1,ispden,ii)
+         end if
+       end do
      end do
    else
-     ABI_ALLOCATE(enl_,(0,0,0))
+     ABI_ALLOCATE(enl_,(0,0,0,0))
    end if
    if (allocated(hamk%sij)) then
      dimsij=size(hamk%sij,1)
@@ -649,7 +656,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 & cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
  if(use_gemm_nonlop) then
-   call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,&
+   call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
 &   idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
 &   hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
@@ -716,13 +723,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
      else if (hamk%use_gpu_cuda==0) then
-       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,&
+       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
 &       dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),hermdij=hermdij)
+&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
 !    GPU version
      else
        call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&

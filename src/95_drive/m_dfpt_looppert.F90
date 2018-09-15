@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
-!!  m_dfpt_looper
+!!  m_dfpt_loopert
 !!
 !! FUNCTION
 !!
@@ -31,7 +31,7 @@ module m_dfpt_loopert
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -60,7 +60,8 @@ module m_dfpt_loopert
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_efmas,      only : efmas_main, efmas_analysis
+ use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
+ use m_fft,        only : fourdp
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -75,6 +76,7 @@ module m_dfpt_loopert
                           pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
+ use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
  use m_inwffil,    only : inwffil
@@ -86,6 +88,11 @@ module m_dfpt_loopert
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs
+ use m_fourier_interpol, only : transgrid
+ use m_mkcore,     only : dfpt_mkcore
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
+ use m_cgprj,      only : ctocprj
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -93,6 +100,7 @@ module m_dfpt_loopert
 !!***
 
  public :: dfpt_looppert
+ public :: eigen_meandege
 !!***
 
 contains
@@ -200,17 +208,11 @@ contains
 !!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
-!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
+!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsym_ylm,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
 !!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
@@ -229,13 +231,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_ffts
- use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -308,7 +303,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
- integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
+ integer :: unitout,useylmgr,useylmgr1,use_rhoijim,vrsddb,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
@@ -885,7 +880,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
      call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
-     call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+     call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
 !  Initialize k+q array
@@ -1419,8 +1414,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call pawrhoij_nullify(pawrhoij1)
      cplex_rhoij=max(cplex,dtset%pawcpxocc)
      nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+     use_rhoijim = 1
+!    use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&     dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&     dtset%typat,use_rhoijim=use_rhoijim,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,&
+&     mpi_atmtab=mpi_enreg%my_atmtab)
      if (cplex_rhoij/=hdr%pawrhoij(1)%cplex) then
 !      Eventually reallocate hdr%pawrhoij
        call pawrhoij_free(hdr%pawrhoij)
@@ -2074,8 +2072,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #ifdef HAVE_NETCDF
   ! Output DDK file in netcdf format.
    if (me == master .and. ipert == dtset%natom + 1) then
-     fname = strcat(dtfil%filnam_ds(4), "_DDK.nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
+     fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
@@ -2412,6 +2410,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
+   if(dtset%prtefmas==1)then
+     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
+     write(std_out,*)' dfpt_looppert : will write ',fname
+#ifdef HAVE_NETCDF
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
+     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     NCF_CHECK(nf90_close(ncid))
+#endif
+   endif
+
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
 
    ABI_DEALLOCATE(kpt_rbz_pert)
@@ -2542,7 +2552,6 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getcgqphase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2730,7 +2739,7 @@ end subroutine getcgqphase
 !! enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !! enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
 !! eovl1=1st-order change of wave-functions overlap, part of 2nd-order energy
-!!       PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008)
+!!       PAW only - Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
 !! epaw1=1st-order PAW on-site part of 2nd-order total energy.
 !! evdw=DFT-D semi-empirical part of 2nd-order total energy
 !! exc1=1st-order exchange-correlation part of 2nd-order total energy
@@ -2763,7 +2772,6 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtene'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3046,6 +3054,227 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  end if
 
 end subroutine dfpt_prtene
+!!***
+
+!!****f* ABINIT/eigen_meandege
+!! NAME
+!! eigen_meandege
+!!
+!! FUNCTION
+!! This routine takes the mean values of the responses
+!! for the eigenstates that are degenerate in energy.
+!!
+!! INPUTS
+!!  eigenresp((3-option)*mband**(3-option)*nkpt*nsppol)= input eigenresp
+!!       eigenrep(2*mband**2*nkpt*nsppol) for first-order derivatives of the eigenvalues
+!!       eigenrep(mband*nkpt*nsppol) for Fan or Debye-Waller second-order derivatives of the eigenvalues
+!!  mband= maximum number of bands
+!!  natom= number of atoms in the unit cell
+!!  nkpt= number of k-points
+!!  nsppol= 1 for unpolarized, 2 for spin-polarized
+!!  option= 1 for eigen(1), 2 for eigen(2) - Fan or Debye-Waller
+!!
+!! OUTPUT
+!!  eigenresp_mean(mband*nkpt*nsppol)= eigenresp, averaged over degenerate states
+!!
+!! PARENTS
+!!      dfpt_looppert,respfn
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eigen_meandege'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mband,nkpt,nsppol,option
+ integer,intent(in) :: nband(nkpt*nsppol)
+
+!arrays
+ real(dp),intent(in) :: eigen0(mband*nkpt*nsppol)
+ real(dp),intent(in) :: eigenresp((3-option)*mband**(3-option)*nkpt*nsppol)
+ real(dp),intent(out) :: eigenresp_mean(mband*nkpt*nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: bdtot_index,bd2tot_index,iband,ii,ikpt,isppol,nband_k
+ real(dp) :: eig0,mean
+ character(len=500) :: message
+!arrays
+
+! *********************************************************************
+
+ if(option/=1 .and. option/=2)then
+   write(message, '(a,i0)' )' The argument option should be 1 or 2, while it is found that option=',option
+   MSG_BUG(message)
+ end if
+
+ bdtot_index=0 ; bd2tot_index=0
+ do isppol=1,nsppol
+   do ikpt=1,nkpt
+     nband_k=nband(ikpt+(isppol-1)*nkpt)
+     if(option==1)then
+       do iband=1,nband_k
+         eigenresp_mean(iband+bdtot_index)=&
+&         eigenresp(2*iband-1 + (iband-1)*2*nband_k + bd2tot_index)
+       end do
+     else if(option==2)then
+       do iband=1,nband_k
+         eigenresp_mean(iband+bdtot_index)=eigenresp(iband+bdtot_index)
+       end do
+     end if
+
+!    Treat the case of degeneracies : take the mean of degenerate states
+     if(nband_k>1)then
+       eig0=eigen0(1+bdtot_index)
+       ii=1
+       do iband=2,nband_k
+         if(eigen0(iband+bdtot_index)-eig0<tol8)then
+           ii=ii+1
+         else
+           mean=sum(eigenresp_mean(iband-ii+bdtot_index:iband-1+bdtot_index))/ii
+           eigenresp_mean(iband-ii+bdtot_index:iband-1+bdtot_index)=mean
+           ii=1
+         end if
+         eig0=eigen0(iband+bdtot_index)
+         if(iband==nband_k)then
+           mean=sum(eigenresp_mean(iband-ii+1+bdtot_index:iband+bdtot_index))/ii
+           eigenresp_mean(iband-ii+1+bdtot_index:iband+bdtot_index)=mean
+         end if
+       end do
+     end if
+
+     bdtot_index=bdtot_index+nband_k
+     bd2tot_index=bd2tot_index+2*nband_k**2
+   end do
+ end do
+
+end subroutine eigen_meandege
+!!***
+
+!!****f* ABINIT/dfpt_init_mag1
+!! NAME
+!!  dfpt_init_mag1
+!!
+!! FUNCTION
+!!  Initial guess of the first order magnetization/density for magnetic field perturbation.
+!!  The first order magnetization is set so as to zero out the first order XC magnetic field, which
+!!  should minimize the second order XC energy (without taking self-consistency into account).
+!!
+!! INPUTS
+!!  ipert = perturbtation type (works only for ipert==natom+5)
+!!  idir  = direction of the applied magnetic field
+!!  cplex = complex or real first order density and magnetization
+!!  nfft  = dimension of the fft grid
+!!  nspden= number of density matrix components
+!!  nkxc  = number of kxc components
+!!  vxc0(nfft,nspden)  = GS XC potential
+!!  kxc0(nfft,nspden)  = GS XC derivatives
+!!  rhor0(nfft,nspden) = GS density matrix
+!!
+!! OUTPUT
+!!  rhor1(cplex*nfft) = first order density magnetization guess
+!!
+!! PARENTS
+!!      dfpt_looppert
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_init_mag1'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
+ real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
+ real(dp), intent(in)    :: kxc0(nfft,nkxc)
+ real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)
+
+!Local variables-------------------------------
+ integer  :: ipt
+ real(dp) :: bxc0,bxc1
+ real(dp) :: m1_norm,m0_norm
+ real(dp) :: f_dot_m
+ real(dp) :: mdir(3),fdir(3)
+
+! *************************************************************************
+
+ if (nspden==2) then
+
+   if(cplex==1) then
+     do ipt=1,nfft
+       bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2)) ! d/dm Bxc
+       !this overestimates the first order magnetization because of n1 not taken into account
+       m1_norm=-half*(1/bxc1)
+       rhor1(ipt,1)=zero             ! rho_up+rho_dwn    => charge density
+       rhor1(ipt,2)=half*m1_norm     ! rho_up=1/2(rho+m) => half*m
+     end do
+   else
+     do ipt=1,cplex*nfft
+       rhor1(ipt,:)=zero
+     end do
+   end if
+
+ else if(nspden==4) then
+
+   fdir=zero
+   fdir(idir)= 1.0d0
+   do ipt=1,nfft
+     m0_norm=sqrt(rhor0(ipt,2)**2+rhor0(ipt,3)**2+rhor0(ipt,4)**2)
+     mdir(1)=rhor0(ipt,2)/m0_norm
+     mdir(2)=rhor0(ipt,3)/m0_norm
+     mdir(3)=rhor0(ipt,4)/m0_norm
+     f_dot_m=fdir(1)*mdir(1)+fdir(2)*mdir(2)+fdir(3)*mdir(3) ! projection of the field direction on m0
+
+     bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2))  ! d/dm Bxc
+     m1_norm=(-half/bxc1)*f_dot_m                            ! get an estimate of the norm of m1
+
+     bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
+     if(cplex==1) then
+       rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
+       rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+       rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
+       rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
+       rhor1(ipt,:)=zero
+     else
+       rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
+       rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+       rhor1(2*ipt-1,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
+       rhor1(2*ipt-1,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
+       rhor1(2*ipt  ,1)=zero       ! Im rho_up+rho_dwn
+       rhor1(2*ipt  ,2)=zero
+       rhor1(2*ipt  ,3)=zero
+       rhor1(2*ipt  ,4)=zero
+
+       rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
+       rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero
+       rhor1(2*ipt-1,3)=zero; rhor1(2*ipt,3)=zero
+       rhor1(2*ipt-1,4)=zero; rhor1(2*ipt,4)=zero
+
+     end if
+   end do
+ end if
+
+end subroutine dfpt_init_mag1
 !!***
 
 end module m_dfpt_loopert

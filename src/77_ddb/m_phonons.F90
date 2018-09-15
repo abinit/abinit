@@ -28,7 +28,7 @@ module m_phonons
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
@@ -155,7 +155,7 @@ module m_phonons
   real(dp),allocatable :: msqd_dos_atom(:,:,:,:)
    ! msqd_dos_atom(nomega,3,3,natom)
    ! mean square displacement matrix, frequency dependent like a DOS, tensor in cartesian coords.
-   ! allows to calculate Debye Waller factors by integration with 1/omega
+   ! allows one to calculate Debye Waller factors by integration with 1/omega
    ! and the Bose Einstein factor
 
  end type phonon_dos_type
@@ -203,7 +203,6 @@ subroutine phdos_print(PHdos,fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -344,7 +343,6 @@ subroutine phdos_print_debye(PHdos, ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_debye'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -467,7 +465,6 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_thermo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -536,7 +533,7 @@ implicit none
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
-     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
      energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
      spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
@@ -701,7 +698,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphdos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -783,7 +779,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    phdos%omega_min = ifc%omega_minmax(1)
    phdos%omega_max = ifc%omega_minmax(2)
  end if
- ! Must be consistent with mesh computed in tethra routines!
+ ! Must be consistent with mesh computed in tetra routines!
  phdos%nomega = nint((phdos%omega_max - phdos%omega_min) / phdos%omega_step) + 1
  ! Ensure Simpson integration will be ok
  phdos%nomega = max(6, phdos%nomega)
@@ -902,7 +898,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        phdos%phdos(:) = phdos%phdos(:) + gvals_wtq
 
        ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
-       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108
+       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
        ! In principle there's a phase due to nonsymmorphic translations
        ! but we here need |e(Sq)_iatom|**2
        syme2_xyza = zero
@@ -1190,7 +1186,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016)
+!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1368,9 +1364,21 @@ end subroutine zacharias_supercell_make
 !! INPUTS
 !!   Crystal = crystal object with rprim etc...
 !!   Ifc = interatomic force constants object from anaddb
+!!   option = option to deal with negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+!!      several philosophies to be implemented for the unstable modes:
+!!      option == 1 =>  ignore
+!!      option == 2 =>  populate them according to a default amplitude
+!!      option == 3 =>  populate according to their modulus squared
+!!      option == 4 =>  USER defined value(s), require namplitude and amplitude
 !!   nconfig = numer of requested configurations
 !!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
 !!   temperature_K =  temperature in Kelvin
+!!   nqpt = number of q-point 
+!!   namplitude = number of amplitude provided by the user
+!!   amplitudes(namplitude) = list of the amplitudes of the unstable phonons
+!!                            amplitudes(1:3,iamplitude) = qpt
+!!                            amplitudes(4,iamplitude)   = mode
+!!                            amplitudes(5,iamplitude)   = amplitude
 !!
 !! OUTPUT
 !!   thm_scells = array of configurations with thermalized supercells
@@ -1385,8 +1393,8 @@ end subroutine zacharias_supercell_make
 !!
 !! SOURCE
 
-subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
-&    rlatt, temperature_K, thm_scells)
+subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
+&                                 rlatt, temperature_K, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1399,19 +1407,19 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: nconfig
+ integer, intent(in) :: option,nconfig
  integer, intent(in) :: rlatt(3,3)
  real(dp), intent(in) :: temperature_K
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
  type(supercell_type), intent(out) :: thm_scells(nconfig)
-
+ integer,intent(in) :: namplitude
 !Local variables-------------------------------
 !scalars
- integer :: iq, nqibz, nqbz, qptopt1, imode, ierr, iconfig,option
+ integer :: iq, nqibz, nqbz, qptopt1, iampl ,imode, ierr, iconfig
  real(dp) :: temperature, sigma, freeze_displ
  real(dp) :: rand !, rand1, rand2
-
+ real(dp),intent(in):: amplitudes(5,namplitude)
  !arrays
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
  real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
@@ -1421,10 +1429,8 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
  character (len=500) :: msg
 
 ! *************************************************************************
-
- ! check inputs
+! check inputs
 ! TODO: add check that all rlatt are the same on input
-
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
@@ -1509,8 +1515,6 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
          sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq))
        else
          !Treat negative frequencies
-         !AM_2018 To do: move this option in argument
-         option = 1
          select case (option)
          case(1)
            !Do not populate
@@ -1519,13 +1523,30 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
            !Default amplitude for all the frequencies
            sigma = 100._dp
          case(3)
-           !absolute value of the frequencie
+           !Absolute value of the frequencie 
            sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
 &                abs(phfrq_allq(imode,iq)))
          case(4)
-           !USER defined value(s)
+           sigma = 0._dp
+           !Search if the amplitude of this unstable phonon is in the input argument amplitudes
+           do iampl=1,namplitude
+             if(abs(thm_scells(iconfig)%qphon(1) - amplitudes(1,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(2) - amplitudes(2,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(3) - amplitudes(3,iampl)) < tol8.and.&
+&               abs(imode - amplitudes(4,iampl)) < tol8) then
+               sigma = amplitudes(5,iampl)
+             end if
+           end do
+           !If not, the amplitude is zero
+           if(abs(sigma) < tol8)then
+             write (msg, '(a,I0,a,3es12.5,2a,I0)') ' The amplitude of the unstable mode ',&
+&                int(imode),' of the qpt ',thm_scells(iconfig)%qphon(:), ch10,&
+&                'is set to zero for the configuration ',iconfig
+             MSG_WARNING(msg)
+           end if
          end select
        end if
+
        ! add displacement for this mode to supercell positions eq 5 of Zacharias
        call RANDOM_NUMBER(rand)
        rand = two * rand - one
@@ -1543,7 +1564,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
        freeze_displ =  rand * sigma
 
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))       
      end do !iconfig
    end do !imode
  end do !iq
@@ -1872,7 +1893,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2272,7 +2292,6 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_vsound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3558,7 +3577,6 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_symph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

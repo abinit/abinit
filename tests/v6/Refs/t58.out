@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.8.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h01 )
+.Starting date : Mon  4 Jun 2018.
+- ( at 13h51 )
   
 - input  file    -> t58.in
 - output file    -> t58.out
@@ -34,7 +34,7 @@
 -    mband =          32        mffmem =           1         mkmem =           1
        mpw =         185          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.592 Mbytes of memory.
+P This job should need less than                       2.587 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.092 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -62,7 +62,7 @@ _ WF disk file :      0.183 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -114,6 +114,8 @@ P          mk1mem           1
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          smdelta1          0
+          smdelta2          1
           spgroup           1
            tolvrs1     1.00000000E-18
            tolvrs2     1.00000000E-08
@@ -170,8 +172,8 @@ P          mk1mem           1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11434
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -186,7 +188,7 @@ P          mk1mem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    3.14159265
+  pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -384,7 +386,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -434,7 +435,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -484,7 +484,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -534,7 +533,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -584,7 +582,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -634,7 +631,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -684,7 +680,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -734,7 +729,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -784,7 +778,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -834,7 +827,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -884,7 +876,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -934,7 +925,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -984,7 +974,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1034,7 +1023,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1084,7 +1072,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1134,7 +1121,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1184,7 +1170,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1234,7 +1219,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1284,7 +1268,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1334,7 +1317,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1384,7 +1366,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1434,7 +1415,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1484,7 +1464,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1534,7 +1513,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 -inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2812,7 +2790,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
    3    8   1    8         0.0000000040         0.0000000000
    3    8   2    8         0.0000000180         0.0000000000
    3    8   3    8         0.1230673748         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.329012E-06 -1.300320E-06 -1.277330E-06  3.080795E-03  3.080796E-03
@@ -2936,6 +2914,8 @@ P          mk1mem           1
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          smdelta1          0
+          smdelta2          1
           spgroup           1
            strten1    -1.6139545438E-03 -1.6139545439E-03 -1.6139545439E-03
                        2.7019003646E-13  0.0000000000E+00 -2.7029348882E-13
@@ -2990,34 +2970,62 @@ P          mk1mem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- [1] Verification of first-principles codes: Comparison of total energies, phonon frequencies,
+- electron--phonon coupling and zero-point motion correction to the gap between ABINIT and QE/Yambo
+- S. Ponce, G. Antonius, P. Boulanger, E. Cannuccia, A. Marini, M. Cote and X. Gonze. Computational Material Science 83, 341 (2014)
+- Comment : the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
+- Strong suggestion to cite this paper in your publications.
+-
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
+- Comment : the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
+- Strong suggestion to cite this paper in your publications.
+-
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [4] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
 - Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 -
-- [2] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [5] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
 - Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [6] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [4] A brief introduction to the ABINIT software package.
+- [7] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -3025,18 +3033,10 @@ P          mk1mem           1
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.0
+- Proc.   0 individual time (sec): cpu=         20.7  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  98 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          9.0
+.Delivered  50 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.7  wall=         21.4

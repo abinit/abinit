@@ -21,8 +21,6 @@
 !!
 !! CHILDREN
 !! interfaces_77_suscep.F90
-!! suscep_stat.F90
-!! susk.F90
-!! suskmm.F90
+!! m_suscep_stat.F90
 !!
 !!***

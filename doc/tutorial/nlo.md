@@ -2,11 +2,11 @@
 authors: PhG,  MVeithen,  XG
 ---
 
-# Lesson on static non-linear properties  
+# Tutorial on static non-linear properties  
 
 ## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.  
 
-This lesson aims at showing how to get the following non-linear physical properties, for an insulator:
+This tutorial aims at showing how to get the following non-linear physical properties, for an insulator:
 
   * The non-linear optical susceptibilities 
   * The Raman tensor of TO and LO modes 
@@ -22,23 +22,25 @@ non-linear properties, one will also obtain several linear response properties:
 Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor) thanks to finite differences.
 
-The user should have already passed through several advanced lessons of the
-tutorial: the [lesson Response-Function 1](rf1), the [lesson Response-Function 2](rf2), 
-the [lesson on Polarization and finite electric field](ffield), and the 
-[lesson on Elastic properties](elastic)
+The user should have already passed through several advanced tutorials of the
+tutorial: the [tutorial Response-Function 1](rf1), the [tutorial Response-Function 2](rf2), 
+the [tutorial on Polarization and finite electric field](ffield), and the 
+[tutorial on Elastic properties](elastic)
 
-This lesson should take about 1 hour and 30 minutes.
+[TUTORIAL_README]
+
+This tutorial should take about 1 hour and 30 minutes.
 
 
 ## 1 Ground-state properties of AlAs and general parameters
   
-*Before beginning, you might consider to work in a different subdirectory as for the other lessons. 
-Why not create "Work-NLO" in ~abinit/tests/tutorespfn/Input?*
+*Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
+Why not create Work-NLO in \$ABI_TUTORESPFN/Input?*
 
 In order to save some time, you might immediately start running a calculation.
-Copy the file ~abinit/tests/tutorespfn/Input/tnlo_2.in in Work-NLO. Copy also
-~abinit/tests/tutorespfn/Input/tnlo_x.files in Work-NLO, and modify it so that
-all occurrences of tnlo_x are replaced by tnlo_2 , then run abinit with these
+Copy the file *tnlo_2.in* from *\$ABI_TUTORESPFN/Input* to *Work-NLO*. Copy also
+*tnlo_x.files* in *Work-NLO*, and modify it so that
+all occurrences of tnlo_x are replaced by tnlo_2, then run abinit with these
 data. This calculation might be one or two minutes on a PC 3GHz.
 
 In this tutorial we will assume that the ground-state properties of AlAs have
@@ -53,7 +55,7 @@ proper convergence on the total energy, and to use them blindly for non-linear
 properties)
 
 We will adopt the following set of generic parameters (the same than in the
-[lesson on Polarization and finite electric field](ffield)):
+[tutorial on Polarization and finite electric field](ffield)):
     
        acell               10.53
        ixc                 3
@@ -81,21 +83,17 @@ this tutorial, in order to limit the duration of the runs, we have to work at
 an unusually low cutoff of 2.8 Ha for which the optimized lattice constant is
 unrealistic and equal to 7.45 Bohr (instead of the converged value of 10.64).
 In what follows, the lattice constant has been arbitrarily fixed to 10.53
-Bohr. For comparison, results with [[ecut]]=5 are also reported and, in that
+Bohr. For comparison, results with [[ecut]] = 5 are also reported and, in that
 case, were obtained at the optimized lattice constant of 10.64 Bohr. For those
 who would like to try later, convergence tests and structural optimizations
-can be done using the file ~abinit/tests/tutorespfn/Input/tnlo_1.in. Before
-going further, you might refresh your mind concerning the other variables :
+can be done using the file *\$ABI_TUTORESPFN/Input/tnlo_1.in*. Before
+going further, you might refresh your mind concerning the other variables:
 [[ixc]], [[ecutsm]], [[dilatmx]], [[nbdbuf]].
 
 ## 2 Linear and non-linear responses from density functional perturbation theory (DFPT)
   
 As a theoretical support to this section of the tutorial, you might consider
-reading the following article:  
-M. Veithen, X. Gonze, and Ph. Ghosez,  
-Nonlinear optical susceptibilities, Raman efficiencies, and electro-optic
-tensors from first-principles density functional perturbation theory  
-Phys. Rev. B 71, 125107 (2005).
+reading [[cite:Veithen2005]]:
 
 In the first part of this tutorial, we will describe how to compute various
 linear and non-linear responses directly connected to second-order and third-
@@ -129,7 +127,7 @@ clarity we have decomposed the calculation into individual inputs that are now d
 
 **Responses to electric fields and atomic displacements.**
 
-Let us examine the file tnlo_2.in . Its purpose is to build databases for
+Let us examine the file *tnlo_2.in*. Its purpose is to build databases for
 second and third energy derivatives with respect to electric fields and atomic
 displacements. You can edit it. It is made of 5 datasets. The first four data
 sets are nearly the same as for a usual linear response calculation : (1)
@@ -170,18 +168,18 @@ free boundary conditions, thanks to a further finite difference calculation on
 top of linear response calculations. The DFPT implementation of the
 computation of this correction is not available at present.
 
-You can now copy the file ~abinit/tests/tutorespfn/Input/tnlo_3.in in Work-
-NLO, and modify the tnlo_x.files accordingly (or create a file tnlo_3.files -
+You can now copy the file *\$ABI_TUTORESPFN/Input/tnlo_3.in* in *Work-NLO*,
+and modify the *tnlo_x.files* accordingly (or create a file *tnlo_3.files* -
 in any case, this new file should contain tnlo_3 instead of tnlo_x or tnlo_2).
 You can launch the calculation, it might last about 1 minute on a PC 3 GHz.
 The purpose of this run is to build databases for second energy derivatives
-with respect to strains. You can edit tnlo_3.in . It is made of 4 datasets :
+with respect to strains. You can edit tnlo_3.in . It is made of 4 datasets:
 (1) self-consistent calculation in the IBZ; (2) non self-consistent
 calculations to get the wave-functions over the full BZ; (3) ddk calculation;
 (4) strain perturbation. The ddk calculations has been included in order to
 access to the piezoelectric tensor.
 
-You can have a quick look to the output tnlo_3.out, when it is ready. It
+You can have a quick look to the output *tnlo_3.out*, when it is ready. It
 contains rigid ions elastic and piezoelectric constants as well as the
 internal strain coupling parameters. This information is also stored in a
 database file (DDB) for further convenient analysis with ANADDB.
@@ -190,20 +188,20 @@ database file (DDB) for further convenient analysis with ANADDB.
 
 At this stage, all the relevant energy derivatives have been obtained and are
 stored in individual databases. These must be combined with the MRGDDB merge
-utility in order to get a unique database tnlo_4.ddb.out. Explicitely, you
-should merge the files tnlo_2o_DS4_DDB, tnlo_3o_DS4_DDB, and tnlo_2o_DS5_DDB .
-You might have a look at the input file for MRGDDB named tnlo_4.in , and use
+utility in order to get a unique database *tnlo_4.ddb.out*. Explicitely, you
+should merge the files *tnlo_2o_DS4_DDB*, *tnlo_3o_DS4_DDB*, and *tnlo_2o_DS5_DDB*.
+You might have a look at the input file for MRGDDB named *tnlo_4.in*, and use
 it to perform the merge. You already used MRGDDB previously. It might be
-located in ~abinit/src/98_main or another (build) directory. 
+located in *\$ABI_HOME/src/98_main* or another (build) directory. 
 You might copy it, or make an alias.
 
 **Analysis of the DDB.**
 
 We are now ready for the analysis of the results using ANADDB. You can copy
-the files ~abinit/tests/tutorespfn/Input/tnlo_5.in and
-~abinit/tests/tutorespfn/Input/tnlo_5.files in Work-NLO. You already used
-ANADDB previously. It is located in ~abinit/src/98_main or another (build)
-directory. You might copy it, or make an alias. The present input is in
+the files *\$ABI_TUTORESPFN/Input/tnlo_5.in* and
+*\$ABI_TUTORESPFN/Input/tnlo_5.files* in *Work-NLO*. You already used
+ANADDB previously. It is located in the same directory as *abinit*.
+You might copy it, or make an alias. The present input is in
 principle very similar to the one you have used for the analysis of dynamical
 and dielectric responses except that some new flags need to be activated.
 
@@ -222,7 +220,7 @@ For the non-linear responses you need
 
 [[anaddb:nlflag]]=1 activates the non-linear response.
 
-[[anaddb:ramansr]]=1 will impose the sum rule on the first-order change of the
+[[anaddb:ramansr]] = 1 will impose the sum rule on the first-order change of the
 electronic dielectric susceptibility under atomic displacement, hereafter
 referred to as dchi/dtau. It is a condition of invariance of chi under
 translation of the whole crystal, similar to the acoustic sum rules for
@@ -333,11 +331,11 @@ the system (1/mu = 1/m_Al + 1/m_As). From the previous data, we get :
 For comparison with the DPFT calculation, we can compute dchi/dtau for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
-This is done with the file ~abinit/tests/tutorespfn/Input/tnlo_6.in, however
+This is done with the file *\$ABI_TUTORESPFN/Input/tnlo_6.in*, however
 with the unrealistic cutoff of 2.8 Ha. The calculation is about 2 or 3 minutes
 on a PC 3 GHz). For those who want to do it you anyway, you can copy
-~abinit/tests/tutorespfn/Input/tnlo_6.in in your working directory. If you
-have time, you should modify the cutoff to [[ecut]]=5 Ha, in order to obtain
+*\$ABI_TUTORESPFN/Input/tnlo_6.in* in your working directory. If you
+have time, you should modify the cutoff to [[ecut]] = 5 Ha, in order to obtain
 realistic results. So, you might as well start the run after this modification
 (the run is about two times more time-consuming than with 2.8 Ha).
 

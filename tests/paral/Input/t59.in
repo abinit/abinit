@@ -75,7 +75,7 @@ qpt2   0.0 0.0 0.0
 #%% [NCPU_10]
 #%%  files_to_test  = t59_MPI10.out,          tolnlines=    9,   tolabs=  2.0e-6,      tolrel= 3.0e-4
 #%% [extra_info]
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% authors = Unknown
 #%% description = 
 #%%   Calculation of the electron-phonon band structure renormalisation for Diamond,

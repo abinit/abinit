@@ -28,7 +28,7 @@
 MODULE m_hexc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -42,7 +42,7 @@ MODULE m_hexc
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : ebands_t, pseudopotential_type
- use m_blas,              only : xdotc, xgemv
+ use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
@@ -627,7 +627,6 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_build_hinterp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

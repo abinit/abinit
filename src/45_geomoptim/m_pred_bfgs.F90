@@ -26,7 +26,7 @@
 module m_pred_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xfpack
@@ -72,7 +72,7 @@ contains
 !! Conduct structural optimization using the Broyden-Fletcher-
 !! Goldfarb-Shanno minimization (BFGS), modified to take into
 !! account the total energy as well as the gradients (as in usual
-!! BFGS). See the paper by Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! BFGS). See the paper by Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !! Might be better than ionmov=2 for few degrees of freedom (less than 3 or 4)
 !!
 !! INPUTS

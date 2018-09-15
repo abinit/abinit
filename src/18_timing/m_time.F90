@@ -23,7 +23,7 @@
 MODULE m_time
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use iso_c_binding
 #if defined HAVE_MPI2
@@ -826,7 +826,7 @@ end function time_get_papiopt
 !!      dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_looppert,dfpt_mkrho
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_newvtr,dfpt_nstdy
 !!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_rhotov,dfpt_scfcv,dfpt_vtorho
-!!      dfpt_vtowfk,dfpt_wfkfermi,dfptnl_loop,dielmt,dieltcel,dmft_solve
+!!      dfpt_vtowfk,dfpt_wfkfermi,dfptnl_loop,dielmt,dieltcel,m_dmft
 !!      dotprodm_v,dotprodm_vn,driver,dyson,eig2stern,eig2tot,elt_ewald
 !!      eltxccore,energy,entropyrec,etotfor,exc_build_block,exc_build_ham
 !!      fermisolverec,first_rec,fock2ACE,fock_getghc,forces,forstr,forstrnps

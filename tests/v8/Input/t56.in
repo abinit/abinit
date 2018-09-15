@@ -48,6 +48,7 @@
               0 1 1
               1 0 1
               1 1 0
+     prtefmas3     1
    
 #######################################################################   
 acell 3*9.136
@@ -67,7 +68,6 @@ nband 12
 nbdbuf 2
 diemac 6
 ecut 30               # Underconverged ecut. 
-#ecut 50               # ecut used in Nery2018.
 nstep 100
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -77,7 +77,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t56.out, tolnlines = 5, tolabs = 1.1e-6, tolrel = 2.0e-4
+#%%   t56.out, tolnlines = 6, tolabs = 1.1e-6, tolrel = 2.0e-4
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -85,6 +85,6 @@ nstep 100
 #%% authors = X. Gonze
 #%% keywords = DFPT
 #%% description =
-#%%  CaO effective mass tensor at \Gamma and X. 
-#%% topics = EffMass
+#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass.
+#%% topics = EffectiveMass
 #%%<END TEST_INFO>

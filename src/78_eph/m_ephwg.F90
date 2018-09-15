@@ -32,8 +32,8 @@
 module m_ephwg
 
  use defs_basis
+ use m_abicore
  use m_errors
- use m_profiling_abi
  use m_xmpi
  use m_copy
  use m_tetrahedron
@@ -845,7 +845,6 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ephwg_test'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

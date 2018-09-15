@@ -47,7 +47,7 @@
 module defs_abitypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
 
  use m_pawrhoij, only : pawrhoij_type
@@ -189,6 +189,7 @@ type dataset_type
  integer :: chksymbreak
  integer :: cineb_start
  integer :: delayperm
+ integer :: densfor_pred
  integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
@@ -242,11 +243,13 @@ type dataset_type
  integer :: ga_n_rules
  integer :: getcell
  integer :: getddb
+ integer :: getdvdb = 0
  integer :: getddk
  integer :: getdelfd
  integer :: getdkdk
  integer :: getdkde
  integer :: getden
+ integer :: getefmas
  integer :: getgam_eig2nkq
  integer :: getocc
  integer :: getpawden
@@ -307,16 +310,18 @@ type dataset_type
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
+ integer :: imgwfstor
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
- integer :: densfor_pred
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
+ integer :: irddvdb = 0
  integer :: irdddk
  integer :: irdden
+ integer :: irdefmas
  integer :: irdhaydock
  integer :: irdpawden
  integer :: irdqps
@@ -490,6 +495,7 @@ type dataset_type
  integer :: prtdosm
  integer :: prtebands=1
  integer :: prtefg
+ integer :: prtefmas
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
@@ -518,6 +524,7 @@ type dataset_type
  integer :: prtvdw
  integer :: prtvha
  integer :: prtvhxc
+ integer :: prtkbff=0
  integer :: prtvol
  integer :: prtvolimg
  integer :: prtvpsp
@@ -547,6 +554,7 @@ type dataset_type
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: signperm
+ integer :: slk_rankpp
  integer :: smdelta
  integer :: spgaxor
  integer :: spgorig
@@ -627,7 +635,6 @@ type dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
- integer :: supercell(3)
  integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
@@ -684,6 +691,7 @@ type dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dvdb_qcache_mb = 512.0_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx
@@ -845,8 +853,9 @@ type dataset_type
  real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
+ real(dp), allocatable :: mixesimgf(:)        !SET2NULL  ! mixesimgf(nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
- real(dp), allocatable :: occ_orig(:)         !SET2NULL  ! occ_orig(mband*nkpt*nsppol)
+ real(dp), allocatable :: occ_orig(:,:)       !SET2NULL  ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           !SET2NULL  ! pimass(ntypat)
  real(dp), allocatable :: ptcharge(:)         !SET2NULL  ! ptcharge(ntypat)
  real(dp), allocatable :: qmass(:)            !SET2NULL  ! qmass(nnos)
@@ -906,10 +915,16 @@ type dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
+ integer :: ph_
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)
@@ -920,6 +935,7 @@ type dataset_type
  integer :: eph_intmeth ! = 1
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
@@ -1327,6 +1343,11 @@ type dataset_type
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
 
+  character(len=fnlen) :: fildvdbin
+   ! if no dataset mode             : abi//'DVDB'
+   ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
@@ -1450,22 +1471,23 @@ type dataset_type
 !The following filenames do not depend on itimimage, iimage and itime loops.
 !Note the following convention:
 !  fnameabo_* are filenames used for ouput results (writing)
-!  fnameabi_* are filenames used for data the should be read by the code.
+!  fnameabi_* are filenames used for data that should be read by the code.
 !  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
 !
 !If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
 !that particular file is only used for writing or for reading results, respectively.
 
+  character(len=fnlen) :: fnameabi_efmas
   character(len=fnlen) :: fnameabi_hes
   character(len=fnlen) :: fnameabi_phfrq
   character(len=fnlen) :: fnameabi_phvec
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_dos
+  character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
   character(len=fnlen) :: fnameabo_eig
   character(len=fnlen) :: fnameabo_eigi2d
