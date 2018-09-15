@@ -144,6 +144,7 @@ contains
 
 subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -253,7 +254,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm/=1)
- use_dg = .false.
 
  if(dtset%eph_frohlichm/=1)then
    efmas_path = dtfil%fnameabi_efmas

@@ -37,7 +37,7 @@ gw_qprange 2
 ###########
 # Use of the tetrahedron integration
 ###########
-userib 23
+eph_intmethod 2
 
 # Structure 
 acell 3*6.70346805

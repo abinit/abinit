@@ -447,7 +447,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,cpu_dvscf,wall_dvscf,gflops_all
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,weight
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,ediff,weight
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
@@ -465,9 +465,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:)
- integer :: indkk_kq(1,6)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
- integer,allocatable :: eph_dg_mapping(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
@@ -1967,10 +1964,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
            "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),bstop
          MSG_COMMENT(msg)
-         write(msg,'(2(a,i0),2a)') "The number of included states ",ibstop,&
+         write(msg,'(2(a,i0),2a)') "The number of included states ",bstop,&
                       " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
                       "Please increase nband."
-         ABI_CHECK( ibstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg )
+         ABI_CHECK( bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg )
        end if
        ! Store band indices used for averaging (shifted by bstart_ks)
        ndeg = size(degblock, dim=2)

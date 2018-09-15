@@ -1,8 +1,6 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
 
-useria 23
-
 ndtset 2
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
@@ -28,7 +26,7 @@ symsigma  1
 
 optdriver  7
 nband      8
-eph_task   4
+eph_task   -4
 tmesh 5 295 2
 
 gw_qprange 2
