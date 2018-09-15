@@ -251,6 +251,11 @@ module m_dvdb
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
 
+  type(hdr_type) :: hdr_ref
+  ! Header associated to the first potential. Used to backspace.
+  ! Gives the number of Fortran records required to backspace the header
+  ! Assume headers with same headform and same basic dimensions e.g. npsp
+
   type(mpi_type) :: mpi_enreg
   ! Internal object used to call fourdp
 
@@ -355,23 +360,23 @@ subroutine dvdb_init(db, path, comm)
    read(unt, err=10, iomsg=msg) db%numv1
 
    ! Get important dimensions from the first header and rewind the file.
-   call hdr_fort_read(hdr_ref, unt, fform)
+   call hdr_fort_read(db%hdr_ref, unt, fform)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
      MSG_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
-   if (db%debug) call hdr_echo(hdr_ref,fform,4,unit=std_out)
+   if (db%debug) call hdr_echo(db%hdr_ref,fform,4,unit=std_out)
 
    rewind(unt)
    read(unt, err=10, iomsg=msg)
    read(unt, err=10, iomsg=msg)
 
    ! The code below must be executed by the other procs if MPI.
-   db%natom = hdr_ref%natom
-   db%natom3 = 3 * hdr_ref%natom
-   db%nspden = hdr_ref%nspden
-   db%nsppol = hdr_ref%nsppol
-   db%nspinor = hdr_ref%nspinor
-   db%usepaw = hdr_ref%usepaw
+   db%natom = db%hdr_ref%natom
+   db%natom3 = 3 * db%hdr_ref%natom
+   db%nspden = db%hdr_ref%nspden
+   db%nsppol = db%hdr_ref%nsppol
+   db%nspinor = db%hdr_ref%nspinor
+   db%usepaw = db%hdr_ref%usepaw
    ABI_CHECK(db%usepaw == 0, "PAW not yet supported")
 
    ! TODO: Write function that returns mpert from natom!
@@ -448,14 +453,14 @@ subroutine dvdb_init(db, path, comm)
    call xmpi_bcast(db%version, master, comm, ierr)
    call xmpi_bcast(db%numv1, master, comm, ierr)
    call xmpi_bcast(db%nqpt, master, comm, ierr)
-   call hdr_bcast(hdr_ref, master, my_rank, comm)
+   call hdr_bcast(db%hdr_ref, master, my_rank, comm)
 
-   db%natom = hdr_ref%natom
-   db%natom3 = 3 * hdr_ref%natom
-   db%nspden = hdr_ref%nspden
-   db%nsppol = hdr_ref%nsppol
-   db%nspinor = hdr_ref%nspinor
-   db%usepaw = hdr_ref%usepaw
+   db%natom = db%hdr_ref%natom
+   db%natom3 = 3 * db%hdr_ref%natom
+   db%nspden = db%hdr_ref%nspden
+   db%nsppol = db%hdr_ref%nsppol
+   db%nspinor = db%hdr_ref%nspinor
+   db%usepaw = db%hdr_ref%usepaw
    db%mpert = db%natom + 6
 
    if (my_rank /= master) then
@@ -476,8 +481,7 @@ subroutine dvdb_init(db, path, comm)
  end if
 
  ! Init crystal_t from the hdr read from file.
- call crystal_from_hdr(db%cryst,hdr_ref,timrev2)
- call hdr_free(hdr_ref)
+ call crystal_from_hdr(db%cryst, db%hdr_ref, timrev2)
 
  ! Init Born effective charges
  ABI_CALLOC(db%zeff, (3, 3, db%natom))
@@ -708,6 +712,7 @@ subroutine dvdb_free(db)
  end if
 
  ! types
+ call hdr_free(db%hdr_ref)
  call crystal_free(db%cryst)
  call destroy_mpi_enreg(db%mpi_enreg)
 
@@ -1033,6 +1038,12 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    ABI_FREE(v1r_file)
    call destroy_mpi_enreg(MPI_enreg_seq)
  end if
+
+ ! Skip record with rhog1_g0 (if present)
+ if (db%version > 1) read(db%fh, err=10, iomsg=msg)
+
+ db%current_fpos = db%current_fpos + 1
+ write(std_out, *)"incr current_fpos", db%current_fpos
 
  return
 
@@ -3289,7 +3300,7 @@ end function dvdb_findq
 !!   idir,ipert,iqpt = (direction, perturbation, q-point) indices
 !!
 !! SIDE EFFECTS
-!!   db<type(dvdb_t)> : modifies db%f90_fptr and the internal F90 file pointer.
+!!   db<type(dvdb_t)>: modifies db%current_fpos.
 !!
 !! PARENTS
 !!      m_dvdb
@@ -3317,21 +3328,48 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
  type(dvdb_t),intent(inout) :: db
 
 !Local variables-------------------------------
- integer :: pos_wanted,ii,ispden
+ integer :: pos_now,pos_wanted,ii,ispden,nn,ierr
  real(dp),parameter :: fake_qpt(3)=zero
  character(len=500) :: msg
 
 ! *************************************************************************
 
  if (db%iomode == IO_MODE_FORTRAN) then
-   ! Numb code: rewind the file and read it from the beginning
-   ! TODO: Here I need a routine to backspace the hdr!
-   if (dvdb_rewind(db, msg) /= 0) then
-     MSG_ERROR(msg)
-   end if
+   pos_now = db%current_fpos
    pos_wanted = db%pos_dpq(idir,ipert,iqpt)
+   ABI_CHECK(pos_wanted /= 0, "pos_wanted cannot be zero!")
 
-   do ii=1,pos_wanted-1
+   ! Optimal access.
+   if (pos_now == pos_wanted) return
+
+   if (pos_wanted < pos_now) then
+     ! Backspace previous records and header
+     ! but only if nn <= pos_wanted else rewind file and skip pos_wanted potentials (should be faster)
+     nn = pos_now - pos_wanted
+     if (nn <= pos_wanted) then
+       do ii=1,nn
+         !write(std_out, *)"backspacing"
+         if (db%version > 1) backspace(unit=db%fh, err=10, iomsg=msg)
+         do ispden=1,db%nspden
+           backspace(unit=db%fh, err=10, iomsg=msg)
+         end do
+         ierr = hdr_backspace(db%hdr_ref, db%fh, msg)
+         if (ierr /= 0) goto 10
+       end do
+       db%current_fpos = pos_wanted; return
+     else
+       ! rewind the file and read it from the beginning
+       if (dvdb_rewind(db, msg) /= 0) then
+         MSG_ERROR(msg)
+       end if
+       nn = pos_wanted
+     end if
+
+   else
+     nn = pos_wanted - pos_now + 1
+   end if
+
+   do ii=1,nn-1
      !write(std_out,*)"in seek with ii: ",ii,"pos_wanted: ",pos_wanted
      if (my_hdr_skip(db%fh, -1, -1, fake_qpt, msg) /= 0) then
        MSG_ERROR(msg)
@@ -3343,6 +3381,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      ! Skip record with rhog1_g0 (if present)
      if (db%version > 1) read(db%fh, err=10, iomsg=msg)
    end do
+
    db%current_fpos = pos_wanted
 
  else
@@ -3353,7 +3392,6 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
 
  ! Handle Fortran IO error
 10 continue
- !ierr = 1
  msg = sjoin("Error while reading", db%path, ch10, msg)
 
 end subroutine dvdb_seek

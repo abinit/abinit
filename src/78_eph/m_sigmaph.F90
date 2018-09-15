@@ -1058,9 +1058,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (dvdb%qcache_size > 0) then
        write(std_out, "(a)")"Qcache stats"
        write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
-       write(std_out, "(a,i0,f5.1,a)")&
+       write(std_out, "(a,i0,2x,f5.1,a)")&
          "Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
-       write(std_out, "(a,i0,f5.1,a)")&
+       write(std_out, "(a,i0,2x,f5.1,a)")&
          "Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
        dvdb%qcache_stats = 0
      end if

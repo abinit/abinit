@@ -93,6 +93,7 @@ MODULE m_hdr
  public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
  public :: hdr_ncread              ! Reads the header from a Netcdf file.
  public :: hdr_fort_write          ! Writes the header and fform to unformatted file
+ public :: hdr_backspace           ! Backspace the header (Fortran IO).
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
@@ -3324,6 +3325,57 @@ end subroutine hdr_fort_write
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_hdr/hdr_backspace
+!! NAME
+!! hdr_backspace
+!!
+!! FUNCTION
+!!  Backspace the header. Return exit status and error message
+!!  The file is supposed to be open already
+!!
+!! INPUTS
+!!  Hdr<hdr_type>=The header of the file.
+!!  unit=unit number of the unformatted file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function hdr_backspace(hdr, unit, msg) result(ierr)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: unit
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: irec
+
+!*************************************************************************
+
+ ierr = 0
+ do irec=1,5 + hdr%npsp
+   backspace(unit=unit, err=10, iomsg=msg)
+ end do
+
+ if (hdr%usepaw == 1) then
+   do irec=1,2
+     backspace(unit=unit, err=10, iomsg=msg)
+   end do
+ end if
+
+ return
+
+ ! Handle IO-error
+10 ierr = 1
+
+end function hdr_backspace
+!!***
 
 !!****f* m_hdr/hdr_ncwrite
 !! NAME
