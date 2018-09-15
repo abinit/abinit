@@ -2569,6 +2569,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  end if
 #endif
 
+ call cwtime(cpu, wall, gflops, "stop")
  call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10, ch10), &
              do_flush=.True.)
 

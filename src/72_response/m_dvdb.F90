@@ -1375,9 +1375,9 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f9.1"), "[Mb]"))
- call wrtout(std_out, sjoin("QCACHE_KIND:", itoa(QCACHE_KIND)))
+ call wrtout(std_out, sjoin("Activating cache for Vscf(q) with input size:", ftoa(mbsize, fmt="f9.1"), "[Mb]"))
  call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
+ call wrtout(std_out, sjoin("QCACHE_KIND:", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
 

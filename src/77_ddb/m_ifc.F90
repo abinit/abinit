@@ -532,7 +532,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
 &    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
-&    Crystal%symrec,Crystal%symrel)
+&    Crystal%symrec, Crystal%symrel, comm)
 
  else
    ! Symmetrize the qpts in the BZ using the q-points in the ddb.
@@ -548,7 +548,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
 &    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
-&    Crystal%symrec,Crystal%symrel,qmissing=qmissing)
+&    Crystal%symrec,Crystal%symrel,comm, qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
    write(message,"(a,i0,a)")"Will use Fourier interpolation to construct D(q) for ",size(qmissing)," q-points"
