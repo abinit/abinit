@@ -7492,7 +7492,7 @@ and there are 41 three-dimensional GGA (23 for X, 8 for C, 10 for combined
 XC). Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 
-(S)LDA functionals (do not forget to add a minus sign, as discussed above)
+==(S)LDA functionals== (do not forget to add a minus sign, as discussed above)
 
   * 001 --> XC_LDA_X  [[cite:Dirac1930]], [[cite:Bloch1929]]
   * 002 --> XC_LDA_C_WIGNER  Wigner parametrization [[cite:Wigner1938]]
@@ -7520,36 +7520,36 @@ This means having [[usekden]] = 1.
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
-GGA functionals (do not forget to add a minus sign, as discussed above)
+==GGA functionals== (do not forget to add a minus sign, as discussed above)
 
-  * 84 --> XC_GGA_C_OP_XALPHA  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
-  * 85 --> XC_GGA_C_OP_G96  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
-  * 86 --> XC_GGA_C_OP_PBE  one-parameter progressive functional (PBE version) [[cite:Tsuneda1999]]
-  * 87 --> XC_GGA_C_OP_B88  one-parameter progressive functional (B88 version) [[cite:Tsuneda1999]]
-  * 88 --> XC_GGA_C_FT97  Filatov & Thiel correlation [[cite:Filatov1997a]]  [[cite:Filatov1997]]
+  * 084 --> XC_GGA_C_OP_XALPHA  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 085 --> XC_GGA_C_OP_G96  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 086 --> XC_GGA_C_OP_PBE  one-parameter progressive functional (PBE version) [[cite:Tsuneda1999]]
+  * 087 --> XC_GGA_C_OP_B88  one-parameter progressive functional (B88 version) [[cite:Tsuneda1999]]
+  * 088 --> XC_GGA_C_FT97  Filatov & Thiel correlation [[cite:Filatov1997a]]  [[cite:Filatov1997]]
 
 !!! warning
     this functional is not tested. Use at your own risks.
 
-  * 89 --> XC_GGA_C_SPBE  PBE correlation to be used with the SSB exchange [[cite:Swart2009]]
-  * 90 --> XC_GGA_X_SSB_SW  Swart, Sola and Bickelhaupt correction to PBE [[cite:Swart2009a]]
-  * 91 --> XC_GGA_X_SSB  [[cite:Swart2009]]
+  * 089 --> XC_GGA_C_SPBE  PBE correlation to be used with the SSB exchange [[cite:Swart2009]]
+  * 090 --> XC_GGA_X_SSB_SW  Swart, Sola and Bickelhaupt correction to PBE [[cite:Swart2009a]]
+  * 091 --> XC_GGA_X_SSB  [[cite:Swart2009]]
 
 !!! warning
     This functional gives NaN on IBM (XG20130608).
 
-  * 92 -->  XC_GGA_X_SSB_D  [[cite:Swart2009]]
+  * 092 -->  XC_GGA_X_SSB_D  [[cite:Swart2009]]
 
 !!! warning
     This functional gives NaN on IBM (XG20130608).
 
-  * 93 -->  XC_GGA_XC_HCTH_407P  HCTH/407+ [[cite:Boese2003]]
-  * 94 -->  XC_GGA_XC_HCTH_P76  HCTH p=7/6 [[cite:Menconi2001]]
-  * 95 -->  XC_GGA_XC_HCTH_P14  HCTH p=1/4 [[cite:Menconi2001]]
-  * 96 -->  XC_GGA_XC_B97_GGA1  Becke 97 GGA-1 [[cite:Cohen2000]]
-  * 97 -->  XC_GGA_XC_HCTH_A  HCTH-A [[cite:Hamprecht1998]]
-  * 98 -->  XC_GGA_X_BPCCAC  BPCCAC (GRAC for the energy) [[cite:Bremond2012]]
-  * 99 -->  XC_GGA_C_REVTCA  Tognetti, Cortona, Adamo (revised) [[cite:Tognetti2008]]
+  * 093 -->  XC_GGA_XC_HCTH_407P  HCTH/407+ [[cite:Boese2003]]
+  * 094 -->  XC_GGA_XC_HCTH_P76  HCTH p=7/6 [[cite:Menconi2001]]
+  * 095 -->  XC_GGA_XC_HCTH_P14  HCTH p=1/4 [[cite:Menconi2001]]
+  * 096 -->  XC_GGA_XC_B97_GGA1  Becke 97 GGA-1 [[cite:Cohen2000]]
+  * 097 -->  XC_GGA_XC_HCTH_A  HCTH-A [[cite:Hamprecht1998]]
+  * 098 -->  XC_GGA_X_BPCCAC  BPCCAC (GRAC for the energy) [[cite:Bremond2012]]
+  * 099 -->  XC_GGA_C_REVTCA  Tognetti, Cortona, Adamo (revised) [[cite:Tognetti2008]]
   * 100 -->  XC_GGA_C_TCA  Tognetti, Cortona, Adamo [[cite:Tognetti2008a]]
   * 101 -->  XC_GGA_X_PBE  Perdew, Burke & Ernzerhof exchange [[cite:Perdew1996]]  [[cite:Perdew1997]]
   * 102 -->  XC_GGA_X_PBE_R  Perdew, Burke & Ernzerhof exchange (revised) [[cite:Zhang1998]]
@@ -7648,6 +7648,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 198 -->  XC_GGA_XC_TH_FCFO  Tozer and Handy v. FCFO [[cite:Tozer1997]]
   * 199 -->  XC_GGA_XC_TH_FCO  Tozer and Handy v. FCO [[cite:Tozer1997]]
   * 200 -->  XC_GGA_C_OPTC  Optimized correlation functional of Cohen and Handy [[cite:Cohen2001]]
+  * (for MetaGGA and Hybrid functionals, with indices in the 200-499 range, see the later sections)
   * 524 -->  XC_GGA_X_WPBEH  short-range version of the PBE [[cite:Heyd2003]]
   * 525 -->  XC_GGA_X_HJS_PBE  HJS screened exchange PBE version [[cite:Henderson2008]]
   * 526 -->  XC_GGA_X_HJS_PBE_SOL  HJS screened exchange PBE_SOL version [[cite:Henderson2008]]
@@ -7663,7 +7664,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
     This functional is not tested. Use at your own risks.
 
 
-MetaGGA functionals (do not forget to add a minus sign, as discussed above).
+==MetaGGA functionals== (do not forget to add a minus sign, as discussed above).
 See [[cite:Sun2011]] for the formulas.
 
   * 202 -->  XC_MGGA_X_TPSS  Tao, Perdew, Staroverov & Scuseria [[cite:Tao2003]]  [[cite:Perdew2004]]
@@ -7687,30 +7688,34 @@ See [[cite:Sun2011]] for the formulas.
 
   * 232 -->  XC_MGGA_C_VSXC  VSxc from Van Voorhis and Scuseria (correlation part) [[cite:Voorhis1998]]
 
-Hybrid functionals (do not forget to add a minus sign, as discussed above).
+==Hybrid functionals== (do not forget to add a minus sign, as discussed above).
 
   * 402 -->  XC_HYB_GGA_XC_B3LYP  The (in)famous B3LYP [[cite:Stephens1994]]
   * 406 -->  XC_HYB_GGA_XC_PBEH  PBEH (PBE0) [[cite:Adamo1999]]  [[cite:Ernzerhof1999]]
   * 427 -->  XC_HYB_GGA_XC_HSE03  The 2003 version of the screened hybrid HSE
-                                  (in this case one should use $\omega^{HF} = 0.15/\sqrt{2}$
-                                  and $\omega^{PBE} = 0.15*(2.0)^{1/3}$ )
+                                  (this case corresponds to [[hyb_range_fock]]=$\omega^{HF} = 0.15/\sqrt{2}$
+                                  and [[hyb_range_dft]]=$\omega^{PBE} = 0.15*(2.0)^{1/3}$ )
   * 428 -->  XC_HYB_GGA_XC_HSE06  The 2006 version of the screened hybrid HSE
-                                  (in this case one should use $\omega^{HF} = \omega^{PBE} = 0.11$)
-                                  (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
-                                  Note that there is an enormous mess in the literature
-                                  concerning the values of omega in HSE. This is due to an error in the original
-                                  paper that stated that they had used $\omega=0.15$. This was in fact not true,
-                                  and the real value used was $\omega^{HF} = 0.15 / \sqrt{2} \sim 0.1061$
-                                  and $\omega^{PBE} = 0.15 * (2.0)^{1/3} \sim 0.1890$.
-                                  In 2006 Krukau et al [[cite:Krukau2006]] tried
-                                  to clarify the situation, and called HSE03 to the above choice of parameters,
-                                  and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
-                                  several properties for atoms they reached the conclusion that the best value
-                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
-                                  HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
-                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
-                                  and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
+                                  (this case corresponds to [[hyb_range_fock]]=[[hyb_range_dft]]=$\omega^{HF} = \omega^{PBE} = 0.11$)
                                   [[cite:Heyd2003]] [[cite:Heyd2006]] [[cite:Krukau2006]]
+
+!!! warning
+    (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+
+    Note that there is an enormous mess in the literature
+    concerning the values of omega in HSE. This is due to an error in the original
+    paper that stated that they had used $\omega=0.15$. This was in fact not true,
+    and the real value used was $\omega^{HF} = 0.15 / \sqrt{2} \sim 0.1061$
+    and $\omega^{PBE} = 0.15 * (2.0)^{1/3} \sim 0.1890$.
+
+    In 2006 Krukau et al [[cite:Krukau2006]] tried
+    to clarify the situation, called HSE03 the above choice of parameters,
+    and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
+    several properties for atoms they reached the conclusion that the best value
+    for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
+    HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
+    same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
+    and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
 
   * 456 -->  XC_HYB_GGA_XC_PBE0_13  PBE0-1/3 [[cite:Cortona2012]]
 """,
