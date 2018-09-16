@@ -11,7 +11,7 @@ is required for the execution of the test.
 
 The purpose of the test suite is two-fold: developers use the test farm
 to validate their code before pushing their developments to the trunk whereas 
-users can use the test suite to validate the executables that will used for their production calculations.
+users can use the test suite to validate the executable before using it for production calculations.
 
 The code that drives the execution of the tests and the validation of the final results 
 in mainly written in python (version >= 2.7 is required) and relies on the following principles:
@@ -34,7 +34,7 @@ The configuration parameters of the test suite are defined in the `__init__.py`
 files located in the test suite directories.
 These files are standard python files and the parameters are specified with the standard python syntax.
 
-tests/__init__.py is the top level configuration file.
+`tests/__init__.py` is the top level configuration file.
 This file defines the list of directories containing the ABINIT tests:
 
 ```python
@@ -77,29 +77,29 @@ inp_files = [
 
 *inp_files* is the list with the names of the input files contained in the Input directory.
 One can prepend a dash to the name of file (e.g. “-t11.in”) to signal to the python code 
-that this test has been disabled and should not be executed on the test farm.
+that this test has been disabled and should not be executed.
 
 The variable `need_cpp_vars` is a list of CPP variables that must be defined 
-in the include file *config.h* in order to enable the tests in this directory.
+in the include file *config.h* in order to activate the tests in **this directory**.
 In this case, for example, the *libxc* tests are executed only if *HAVE_LIBXC* is defined in *config.h*.
 Note that one can prepend the character `!` to the name of the variable to specify that the tests 
 should not be executed if the variable is not defined in the build.
 
 Each input file contains all the information needed to run the test and to analyze the 
-final results. These meta-variables are gathered in the so-called *TEST_INFO* section.
+final results. These meta-variables are gathered in the *TEST_INFO* section.
 
 ## Conventions
 
 This paragraph summarizes the conventions used for the names of the tests.
-The ABINIT tests are grouped in suites whose name is given by the name of the directory
-(as specified in *tests/__init__.py*). 
-Each suite can be optionally divided in sub-suites whose names must be registered in *dirname/__init__.py*
+The ABINIT tests are grouped in suites whose name is given by the name of the 
+directory as specified in *tests/\_\_init\__.py*.
+Each suite can be optionally divided into sub-suites whose names must be registered in *dirname/\_\_init\_\_.py*
 
 !!! important
 
     The name of the suite/subsuite must be unique. 
 
-To each test is therefore assigned a suite, a sub-suite and an integer number (>= 0) 
+To each test is therefore assigned a *suite*, a *sub-suite* and an integer number (>= 0) 
 
 The organization in terms of suites/sub-suites allows one to select easily the tests
 with the command line interface `runtests.py`.
@@ -118,7 +118,7 @@ that only the tests in that particular sub-suite should be executed.
 
 For example, the command:
   
-   runtests.py gw1[1:3]
+    runtests.py gw1[1:3]
 
 will run the tests *tgw1_1.in*, *tgw1_2.in*.
 
@@ -149,8 +149,8 @@ A simple example of TEST_INFO section is reported in the figure below:
 
 ![](testsuite_howto_assets/simple_testinfo.png)
 
-Note that tokens are separated by a comma (e.g. *tolabs=1.0, tolrel=0.0*), while
-fields are separated by a colon
+Note that tokens are separated by a comma (e.g. *tolabs=1.0, tolrel=0.0*), while fields
+are separated by a colon
 
 !!! tip
     Use *testlint.py* to validate a new TEST_INFO section
@@ -161,13 +161,13 @@ This paragraph discusses in more detail the most important options present in th
 For the complete documentation of the options, one can execute the script tests/pymods/testsuite.py.
 
 executable
-:    the name of the binary file e.g. abinit (mandatory)
+:    The name of the binary file e.g. abinit (mandatory)
 
 max_nprocs 
 :    the maximum number of MPI processes that can be used (mandatory)
 
-pre_commands and post_commands ([shell] section)
-:    list of shell commands that are executed before and after running
+pre_commands and post_commands 
+:    List of shell commands ([shell] section) that are executed before and after running 
      `executable`. At present only the commands `cp`, `mv`, and `touch` are supported.
      Since the python code uses absolute pathnames to deal with files, one has 
      to specify where the files are located
@@ -181,7 +181,7 @@ pre_commands and post_commands ([shell] section)
      *iw_cp twan.in wannier.in* corresponds to *cp Input/twan.in workdir/wannier.in*
 
 keywords
-:    list of keywords that can be used to select the tests.
+:    List of keywords that can be used to select the tests.
      Note that the name of executable is always added to the list 
      of keywords, hence `runtests.py -k cut3d` run all the tests
      associated to the executable `cut3d`
@@ -205,8 +205,8 @@ execute the tests starting from the first item of the list.
 
 !!! note
 
-   All the input files belonging to a test chain must contain
-   the *test_chain* option (obviously with the same list of tests)
+    All the input files belonging to a test chain must contain
+    the *test_chain* option (obviously with the same list of tests)
 
 During the execution of a test chain, one usually has to perform basic operations 
 such as file renaming or file copying in order to connect the different steps 
@@ -218,7 +218,7 @@ A typical example is shown below:
 
 ![](testsuite_howto_assets/test_chain.png)
 
-Note that we use a peculiar syntax for the shell commands
+Note the peculiar syntax for the shell commands:
 
 ![](testsuite_howto_assets/rshell_syntax.png)
 
@@ -242,16 +242,18 @@ A simplified example of *TEST_INFO* section for a multi-parallel test is reporte
 ![](testsuite_howto_assets/multipara.png)
 
 
+<!--
 ## A more complicate example: a chain of multi parallel tests
 
 !!! warning
 
-   You cannot change the number of MPI processes inside a test chain
+    You cannot change the number of MPI processes inside a test chain
+-->
 
 
 ## How to run the tests
 
-The script abinit/tests/runtests.py provides a user-friendly interface
+The script *abinit/tests/runtests.py* script provides a user-friendly interface
 that allows the user to select tests by keywords, authors, suite name, input variables etc. 
 It also provides options for controlling the number of MPI processes, 
 the number of OpenMP threads and the number of python threads (task parallelism).
@@ -261,12 +263,11 @@ The syntax is:
     runtests.py [suite_args] [options]. 
 
 where `suite_args` is a list of suite names that can be optionally selected (sliced) using python syntax
-
 For example:
 
     runtests v3[:4] v4[45:] v5[3] 
 
-execute all the tests in *v3* from 0 up to 4 (excluded), all the tests in *v4* starting from 45 and *v5/t3*
+executes all the tests in *v3* from 0 up to 4 (excluded), all the tests in *v4* starting from 45 and *v5/t3*
 
 !!! warning
 
@@ -281,7 +282,7 @@ The most useful options are:
 : specifies the number of MPI nodes
 
 -o
-: specifies the number of OMP threads
+: specifies the number of OpenMP threads
 
 -k
 : selects tests by keywords
@@ -295,20 +296,20 @@ The most useful options are:
 
 ## How to run tests with MPI
 
-In the simplest case, one can run MPI tests by just using:
+In the simplest case, one can run MPI tests by just issuing:
 
     runtests.py -n 2 paral
 
 where *n* specifies the number of MPI processes.
-*runtests.py* employs very simple rules for guessing the MPI implementation that must be invoked. 
+*runtests.py* employs very simple rules to guess the MPI implementation to be invoked. 
 In particular, it assumes that:
 
 1. The environment is properly setup (*PATH*, *LD_LIBRARY_PATH*)
 
-2. MPI Demons (e.g. mpd) are already running in the background 
+2. MPI demons (e.g. *mpd*) are already running in the background 
    (you have to initialize the demon manually before launching the tests)
 
-3. It uses the mpiruner in *PATH* (default: mpirun) and assumes 
+3. It uses the *mpiruner* in *PATH* (default: *mpirun*) and assumes 
    the standard syntax for specifying the number of processors 
    (i.e. mpirun -n 4 exe < stdin > stdout)
 
@@ -317,7 +318,7 @@ via a configuration file in the INI format (-c options):
 
     runtests.py -n 2 -c mpi.cfg
 
-    $ cat mpi.cfg
+    cat mpi.cfg
 
         [mpi]
           mpi_prefix = /usr/local/openmpi-gcc47/
@@ -332,7 +333,7 @@ to use. The option used to specifying the number of MPI nodes that must be added
 
 ## How to run testbot.py on a buildbot slave 
 
-This section is intended for developers who might want to run interactively 
+This section is intended for developers who may want to run interactively 
 the entire test suite on a slave builder (example: one or more tests 
 are failing on a slave. You have already modified the source code to fix the problem
 and you want avoid to launch a full buildbot build just to check that your changes are OK)
@@ -369,48 +370,51 @@ In order to add the new test, one has to follow the following steps:
 
 3. Add the input files to *v5/Input* and the reference files to *v5/Refs*
 
-!! warning
+!!! warning
 
        The code uses a pickle file (*test_suite.cpkl*) to store the set of objects
        representing the tests of the test suite.
        Remember to regenerate the database after any change to the TEST_INFO section
-       or any modification of the configuration parameters of the test suite (*__init__.py* files).
+       or any modification of the configuration parameters of the test suite (*\_\_init\_\_.py* files).
        *runtests.py* provides the handy option -r (regenerate) to automatically regenerate the database
        before running the tests.
 
+
+<!--
 ## How to add a chain of tests
 
 TODO
 
 ## How to add a parallel test
 TODO
+-->
 
 ## How to add support for a new executable
 
 Let's assume that you have a new executable named *foo.x*
-and you want to change the python code so that the results of foo.x are automatically tested.
+and you want to change the python code so that the results of *foo.x* are automatically tested.
 What are the modifications needed to integrate foo.x in the ABINIT test suite?
 
-First you have to provide an input file for foo.x with a
-`<TEST_INFO>` section that provides ALL the information needed to run the executable. 
-If foo.x requires some kind of input data or extra rules that are not supported, 
+First you have to provide an input file for *foo.x* with a
+`<TEST_INFO>` section that provides **all the information** needed to run the executable. 
+If **foo.x** requires some kind of input data or extra rules that are not supported, 
 you will have to modify the parser so that the new options are stored in *BaseTest*.
 
-Then you have to tell the code how to construct the standard input that will be passed to foo.x. 
+Then you have to tell the code how to construct the standard input that will be passed to *foo.x*. 
 This is the most complicated part as it requires some understanding of the internal implementation.
 
 The code uses three different objects:
  
-1. BaseTest
-2. ChainOfTests
-3. TestSuite
+1. *BaseTest*
+2. *ChainOfTests*
+3. *TestSuite*
 
-to represent the tests of the testsuite.
+to represent the tests of the test suite.
 
 *BaseTest* is the base class that provides methods to run and analyze the results
 of the test (you should try to reuse this piece of code as much as possible).
 
-*ChainOfTests* is a list of BaseTest instances that cannot be executed separately. 
+*ChainOfTests* is a list of *BaseTest* instances that cannot be executed separately. 
 Typical example: t1.in produces an output result that is used as the input of tests *t2.in*.
 
 *TestSuite* is a list of (*BaseTest*, *ChainOfTests*) instances and provides
@@ -420,5 +424,5 @@ and to run these tests with Python threads.
 The *BaseTest* class provides the *make_stdin* method that returns 
 a string with the standard input that should be passed to the Fortran executable.
 Since each executable has its own format for the input file, the *BaseTest* is not able to handle all the different cases.
-Hopefully, you only have to replace the *make_stdin* method of *BaseTest*
+Hopefully, you only need to replace the *make_stdin* method of *BaseTest*
 so that the appropriate standard input is constructed from the values specified in the `<TEST_INFO>` section.  

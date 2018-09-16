@@ -118,7 +118,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_paw_numeric, only : jbessel=>paw_jbessel
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
 
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
  use ISO_C_BINDING
@@ -189,7 +189,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
@@ -1571,7 +1571,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            levels_ptr     = C_LOC( levels_ctqmc )
 
          !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
            call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
 &           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
 &           paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &

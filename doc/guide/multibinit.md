@@ -81,7 +81,7 @@ To learn the procedure to compute the **harmonic** part of the potential, you ca
 
 To compute the anharmonic part of the model, MULTIBINIT requires a training set containing several DFT calculations. Such training set will contain an ensemble of atomic configurations sampling the potential energy surface. This file will be used to fit a polynomial following the method developed by [[cite:Escorihuela-Sayalero2017]]. To generate the training set, the user requieres to get some experience in [[topic:MolecularDynamics|molecular dynamics]] simulation within ABINIT. Alternatively, the user can generate the training set configurations by means of phonon population procedure at fixed temperature (DDB file mandatory) activated by imposing [[abinit:ionmov]]=27.
 
-### 3.3 How to bind a model
+### 3.3 How to bound a model
 
 MULTIBINIT includes an automatic binding process.
 In this [[lesson:fit_process | tutorial]], you can get the basic knowlegde to bind a model.

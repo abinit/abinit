@@ -1,14 +1,14 @@
 ---
-description: How to build a lattice model in Multibinit
+description: How to run a dynamics in Multibinit
 authors: AM
 ---
 
-This page gives hints on how to build a lattice model in multibinit.
+This page gives hints on how to run a dynamics in Multibinit.
 
 ## Introduction
 
-TO BE PROVIDED
-
+TEST
+  
 ## Related Input Variables
 
 {{ related_variables }}

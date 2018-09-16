@@ -886,7 +886,8 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    MSG_ERROR("netcdf without MPI-IO support with nprocs > 1!")
  end if
 
- if (xmpi_comm_size(comm) > 1) then
+ !if (xmpi_comm_size(comm) > 1) then
+ if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
