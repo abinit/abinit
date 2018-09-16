@@ -7,7 +7,7 @@ This page gives hints on how to build a lattice model in multibinit.
 
 ## Introduction
 
-TO BE PROVIDED
+The MULTIBINIT software is using a second-principles approach for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations [[cite:Wojdel2013]].
 
 ## Related Input Variables
 
