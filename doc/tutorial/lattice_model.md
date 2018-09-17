@@ -138,7 +138,7 @@ We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomu
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
 
-you can visualize your simulation with agate software:
+you can visualize your dynamic with the agate software:
 
     agate < multi1_3.out_HIST.nc
    
