@@ -4030,7 +4030,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      write(msg,'(a,F7.4,a,F7.4)')&
 &     'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
 &     'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
      tgrid = 1
    end if
  end if
@@ -4081,7 +4081,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  if (hdr%nkpt/=hdr0%nkpt) then
    if (abifile%class == "wf_planewave") then
      write(msg,'(a,i0,a,i0)' )'input nkpt=',hdr%nkpt,' not equal disk file nkpt=',hdr0%nkpt
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
    end if
    tkpt=1; twfk=1
  end if
@@ -4174,10 +4174,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (istart<=100) then
        write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
        call wrtout(std_out,msg,mode_paral)
-       if (istop>100) then
-         write(msg,'(a)') '=> stop printing nband after 100 values'
-         call wrtout(std_out,msg,mode_paral)
-       end if
+       if (istop>100) call wrtout(std_out, '=> stop printing nband after 100 values', mode_paral)
      end if
    end do
 
@@ -4306,8 +4303,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
        write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
        call wrtout(std_out,msg,mode_paral)
        if (istop>100) then
-         write(msg,'(a)') '=> stop printing istwfk after 100 values'
-         call wrtout(std_out,msg,mode_paral)
+         call wrtout(std_out, '=> stop printing istwfk after 100 values' ,mode_paral)
        end if
      end if
    end do
@@ -4315,7 +4311,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
 &       'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
-       MSG_WARNING(msg)
+       MSG_COMMENT(msg)
        twfk=1
      end if
    end do
@@ -4324,10 +4320,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
     write(msg,"(2(a,9(i0,1x)))")"input kptrlatt= ",hdr%kptrlatt," /= disk file kptrlatt=",hdr0%kptrlatt
-    MSG_WARNING(msg)
+    MSG_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_WARNING(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
+    MSG_COMMENT(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
     MSG_WARNING(sjoin("input pawcpxocc=",itoa(hdr%pawcpxocc)," /= disk file pawcpxocc=",itoa(hdr0%pawcpxocc)))
@@ -4356,8 +4352,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    write(msg,'(a,34x,a,a)') '  kpt:','|','  kpt:'
    call wrtout(std_out,msg,mode_paral)
    do ii = 1,min(nkpt,nkpt_max)
-     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')&
-&     hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
+     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
      call wrtout(std_out,msg,mode_paral)
      if(ii>nkpt_max)then
        call wrtout(std_out,'The number of printed k points is sufficient... stop writing them.',mode_paral)
@@ -4563,8 +4558,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
 
    if (itest==1) then
-     msg = 'input psp header does not agree perfectly with disk file psp header.'
-     MSG_WARNING(msg)
+     MSG_WARNING('input psp header does not agree perfectly with disk file psp header.')
      tpseu=1
    end if
  end if

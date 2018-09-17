@@ -1375,9 +1375,9 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin("Activating cache for Vscf(q) with input size:", ftoa(mbsize, fmt="f9.1"), "[Mb]"))
- call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
- call wrtout(std_out, sjoin("QCACHE_KIND:", itoa(QCACHE_KIND)))
+ call wrtout(std_out, strcat(" Activating cache for Vscf(q) with input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, strcat(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
+ call wrtout(std_out, strcat(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
 
@@ -1436,7 +1436,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  if (db%qcache_size == 0) return
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, "Loading Vscf(q) in cache...")
+ call wrtout(std_out, "Loading Vscf(q) in cache...", do_flush=.True.)
  do db_iqpt=1,db%nqpt
    if (db_iqpt > db%qcache_size) exit
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1446,7 +1446,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  end do
 
  call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10, ch10), &
+ call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10), &
             do_flush=.True.)
 
 end subroutine dvdb_qcache_read

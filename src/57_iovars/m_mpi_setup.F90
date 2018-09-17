@@ -265,8 +265,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%npkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     message = 'For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1'
-     MSG_WARNING(message)
+     MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
 !  Read again some input data to take into account a possible change of paral_kgb

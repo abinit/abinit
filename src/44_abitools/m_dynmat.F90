@@ -5009,7 +5009,6 @@ end subroutine sytens
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/symdm9
-!!
 !! NAME
 !! symdm9
 !!
@@ -5127,6 +5126,8 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 
 !Q points coming from the DDB
 !write(std_out,*)' Nbr. of Blocks -> ',nblok
+! TODO: This part scales badly with nblock/nqpt
+! One could use listkk or rearrange the loop so that iqpt comes first and then MPI-parallelize.
 
  do iblok=1,nblok
 
@@ -5186,11 +5187,11 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
            end if
          end if
 
-       end do ! End of the loop on the q points of the sampling
-     end do ! End of the loop on the symmetries
+       end do ! iqpt
+     end do ! isym
 
    end if
- end do !  End of the loop on the q points of the DDB
+ end do ! iblok
 
 ! Check if all the information relatives to the q points sampling are found in the DDB;
 ! if not => stop message
@@ -5199,8 +5200,8 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
    if (qtest(iqpt,1)==0) then
      nqmiss = nqmiss + 1
      qmiss_(nqmiss) = iqpt
-     write(message, '(a,a,a)' )&
-&     ' symdm9 : the bloks found in the DDB are characterized',ch10,&
+     write(message, '(3a)' )&
+&     ' symdm9: the bloks found in the DDB are characterized',ch10,&
 &     '  by the following wavevectors :'
      call wrtout(std_out,message,'COLL')
      do iblok=1,nblok
