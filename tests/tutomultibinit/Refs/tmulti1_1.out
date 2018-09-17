@@ -1,5 +1,5 @@
 
-.Version 8.9.0 of MULTIBINIT 
+.Version 8.9.4 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.2 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  2 Sep 2018.
-- ( at 18h08 )
+.Starting date : Tue  4 Sep 2018.
+- ( at 19h54 )
   
 -  nproc =    1
 
@@ -413,6 +413,6 @@
 
 ================================================================================
 
-+Total cpu time      0.361  and wall time      0.361 sec
++Total cpu time      0.364  and wall time      0.364 sec
 
  multibinit : the run completed succesfully.
