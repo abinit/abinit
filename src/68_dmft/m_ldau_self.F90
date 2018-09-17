@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_ldau_self
@@ -34,7 +33,7 @@ MODULE m_ldau_self
 
  implicit none
 
- private 
+ private
 
  public :: ldau_self
 !!***
@@ -74,13 +73,6 @@ contains
 !!      pawpupot,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 

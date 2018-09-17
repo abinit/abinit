@@ -2040,8 +2040,6 @@ end subroutine paw_ij_gather
 !! paw_ij_redistribute
 !!
 !! FUNCTION
-!!
-!! FUNCTION
 !!   Redistribute an array of paw_ij datastructures
 !!   Input paw_ij is given on a MPI communicator
 !!   Output paw_ij is redistributed on another MPI communicator

@@ -30,10 +30,6 @@
 !!      1WF header = hdr1
 !!      1st order eigenvalues = eigen1
 !!
-!! CHILDREN
-!!      abi_io_redirect,destroy_mpi_enreg,flush_unit,hdr_free,herald
-!!      initmpi_seq,rwwf,wrtout,xmpi_end,xmpi_init
-!!
 !! PARENTS
 !!
 !! CHILDREN

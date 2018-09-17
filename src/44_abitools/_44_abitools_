@@ -14,7 +14,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
+!! interfaces_44_abitools.F90
 !! m_berrytk.F90
+!! m_cgtools.F90
+!! m_dynmat.F90
 !! m_macroave.F90
 !! m_optic_tools.F90
 !! m_wfutils.F90

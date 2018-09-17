@@ -256,5 +256,5 @@ subroutine atprj_destroy(t_atprj)
 
 end subroutine atprj_destroy
 
-end module
+end module m_atprj
 !!***

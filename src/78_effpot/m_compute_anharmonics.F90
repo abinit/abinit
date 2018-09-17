@@ -66,12 +66,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  use defs_basis

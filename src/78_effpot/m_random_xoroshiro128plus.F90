@@ -100,7 +100,7 @@ module m_random_xoroshiro128plus
   public :: rand_poisson
   public :: rand_circle
   public :: rand_sphere
- 
+
 
 contains
 
@@ -329,7 +329,7 @@ contains
     do i=1, asize
         a(i)=rand_normal(self)
     enddo
-  end subroutine
+  end subroutine rand_normal_array
 
 
   !> Return Poisson random variate with rate lambda. Works well for lambda < 30
