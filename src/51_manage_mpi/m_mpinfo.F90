@@ -2525,6 +2525,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
  if (nproc==0) return
 
 !Some checks
+ !if (mpi_enreg%paralbd==0 .and. any(dtset%optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
  if (mpi_enreg%paralbd==0) then
 !  Check if nkpt and nproc_kpt match
    if(nproc_kpt>nkpt*nsppol) then
@@ -2723,12 +2724,6 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      nband_k=nband(iikpt+(iisppol-1)*nkpt)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,1,nband_k,iisppol,mpi_enreg%me_kpt)) cycle
      ikpt_this_proc=ikpt_this_proc+1
-!    This test should be done when dataset are read and slipt of work do between processor
-!    If this test is not good for one proc then other procs fall in deadlock->so PERS and MPI_ABORT
-!    if (ikpt_this_proc > mkmem) then
-!    message = ' this bandfft tab cannot be allocated !'
-!    MSG_BUG(message)
-!    end if
      mpi_enreg%my_kpttab(iikpt)=ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
    end do

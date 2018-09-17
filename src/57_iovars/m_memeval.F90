@@ -580,7 +580,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- call wrtout(std_out,'memory : analysis of memory needs ','COLL')
+ call wrtout(std_out,'memory: analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
    write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&

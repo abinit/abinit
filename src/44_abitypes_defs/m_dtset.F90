@@ -249,10 +249,12 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        write(message, '(a,i0,a,a)' ) &
 &       ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
        call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-         call wrtout(std_out,message,'COLL')
-       end do
+       if (dtset%prtvol > 0) then
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,message,'COLL')
+         end do
+       end if
      else
        write(message, '(a,i0,2a)' ) &
         ' dtset_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'

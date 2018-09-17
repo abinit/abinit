@@ -384,7 +384,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
- real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
+ real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,ediff
  real(dp) :: elow,ehigh,wmax
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
@@ -511,7 +511,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    call xmpi_split_work(sigma%nbsum, comm, my_bstart, my_bstop, msg, ierr)
    call wrtout(std_out, sjoin("Allocating and treating bands from bstart: ", itoa(my_bstart), &
      " up to my_bstop:", itoa(my_bstop)))
-   write(std_out,*)my_bstart, my_bstop
    if (my_bstart == sigma%nbsum + 1) then
      MSG_ERROR("sigmaph with idle processes should be tested! Decrease ncpus or increase nband")
    end if
@@ -616,6 +615,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
+   call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
    kk = sigma%kcalc(:, ikcalc)
 
    ! Find IBZ(k) for q-point integration.
@@ -1077,7 +1077,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_FREE(v1scf)
        ABI_FREE(vlocal1)
 
-       if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0)) then
+       if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
          call cwtime(cpu, wall, gflops,"stop")
          write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
          call wrtout(std_out, msg, do_flush=.True.)
@@ -1299,8 +1299,10 @@ end if
      end if ! not %imag_only
 
      if (sigma%gfw_nomega /= 0) then
-       ! Accumulate DW Eliashberg function with gaussian.
-       call wrtout(std_out, strcat("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega)))
+       ! Compute Eliashberg function (useful but cost is not negligible.
+       ! May need to deactivate this part for HTC.
+       call wrtout(std_out, sjoin("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega), &
+           "Use prtphdos 0 to disable this part"))
        call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
        ABI_MALLOC(dargs, (sigma%gfw_nomega))
@@ -1324,9 +1326,9 @@ end if
        ABI_FREE(dt_weights)
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
 
-       call cwtime(cpu, wall, gflops, "start")
-       call wrtout(std_out, "Eliashberg function completed", do_flush=.True.)
-       call wrtout(std_out, strcat("wall-time:", sec2str(cpu_all), ",cpu time:", sec2str(wall_all)))
+       call cwtime(cpu, wall, gflops, "stop")
+       call wrtout(std_out, sjoin("Eliashberg function completed. wall-time:", sec2str(cpu), &
+           ",cpu time:", sec2str(wall)), do_flush=.True.)
 
        ! For tetrahedron method.
        !do nu=1,natom3
@@ -1352,10 +1354,14 @@ end if
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
+
+   call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
+   call wrtout(std_out, sjoin("Computation of Sigma_nk completed. wall-time:", sec2str(cpu_ks), &
+           ",cpu time:", sec2str(wall_ks)), do_flush=.True.)
  end do !ikcalc
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
+ call wrtout(std_out, "Computation of Sigma_eph completed")
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10))
 
  ! Free memory
@@ -1817,7 +1823,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
    !kk_ibz = ebands%kptns(:,ik_ibz)
    if (.not. isirr_k) then
-     MSG_WARNING(strcat("For the time being the k-point must be in the IBZ but got", ktoa(kk)))
+     MSG_WARNING(sjoin("For the time being the k-point must be in the IBZ but got", ktoa(kk)))
      ierr = ierr + 1
    end if
 
@@ -2387,7 +2393,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  call cwtime(cpu, wall, gflops, "stop", comm=comm)
  call wrtout(std_out, sjoin("Sigma_{nk} gather completed. Average wall-time:", sec2str(cpu), &
-     ", Total Average cpu time:", sec2str(wall), ch10, ch10), do_flush=.True.)
+     ", Total Average cpu time:", sec2str(wall), ch10), do_flush=.True.)
 
  ! Only master writes
  if (my_rank /= master) return
@@ -2623,7 +2629,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
  call wrtout(std_out, sjoin("Sigma_{nk} netcdf output completed. wall-time:", sec2str(cpu), &
-     ", Total cpu time:", sec2str(wall), ch10, ch10), do_flush=.True.)
+     ", Total cpu time:", sec2str(wall), ch10), do_flush=.True.)
 
 end subroutine sigmaph_gather_and_write
 !!***

@@ -738,8 +738,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call status(jdtset_status,filstat,iexit,level,'call bethe_salpeter')
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case(RUNL_GWLS) ! For running G0W0 calculations with Lanczos basis for dielectric operator and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
-
+   case(RUNL_GWLS)
+     ! For running G0W0 calculations with Lanczos basis for dielectric operator
+     ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(etotal_img,(nimage))
@@ -764,7 +765,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call status(jdtset_status,filstat,iexit,level,'call eph      ')
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case default ! Bad value for optdriver
+   case default
+     ! Bad value for optdriver
      write(message,'(a,i0,4a)')&
 &     'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
 &     'This is not allowed. ',ch10,&

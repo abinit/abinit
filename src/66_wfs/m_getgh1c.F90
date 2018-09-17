@@ -218,29 +218,24 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   msg='wrong size for cwave!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwave!')
  end if
  if (size(gh1c)<2*npw1*my_nspinor) then
-   msg='wrong size for gh1c!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gh1c!')
  end if
  if (usevnl/=0) then
    if (size(gvnl1)<2*npw1*my_nspinor) then
-     msg='wrong size for gvnl1!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gvnl1!')
    end if
  end if
  if (sij_opt==1) then
    if (size(gs1c)<2*npw1*my_nspinor) then
-     msg='wrong size for gs1c!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gs1c!')
    end if
  end if
  if (berryopt>=4) then
    if (size(grad_berry)<2*npw1*my_nspinor) then
-     msg='wrong size for grad_berry!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for grad_berry!')
    end if
  end if
 
@@ -252,20 +247,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-       msg='wrong size for cwaveprj!'
-       MSG_BUG(msg)
+       MSG_BUG('wrong size for cwaveprj!')
      end if
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
-         msg='Projected WFs (cprj) derivatives are not correctly stored !'
-         MSG_BUG(msg)
+         MSG_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
        end if
      end if
    end if
  else
    if(usecprj==1)then
-     msg='usecprj==1 not allowed for NC psps !'
-     MSG_BUG(msg)
+     MSG_BUG('usecprj==1 not allowed for NC psps !')
    end if
  end if
 
@@ -413,8 +405,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(cwavef1)
        ABI_DEALLOCATE(cwavef2)
      else
-       msg='nspinor/=1 for Non-collinear calculations!'
-       MSG_BUG(msg)
+       MSG_BUG('nspinor/=1 for Non-collinear calculations!')
      end if
    end if ! nvloc
 
@@ -740,14 +731,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.usevnl2.or.has_kin) then
-   msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   MSG_BUG('need kinpw1 allocated!')
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
-   msg='need dkinpw allocated!'
-   MSG_BUG(msg)
+   MSG_BUG('need dkinpw allocated!')
  end if
 
  if (has_kin) then

@@ -4068,9 +4068,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
  if ( ANY(hdr%ngfft/=hdr0%ngfft) ) then
 !  For sensible rho(r) or V(r) data, fft grid must be identical
-!  MG TODO one should perform an FFT interpolation when the two ngfft differ!
+!  Note, however, that we allow for different FFT meshes and we interpolate the density in the
+!  caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(a,a,a,a,a)' )&
+     write(msg, '(5a)' )&
 &     'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
 &     'Action: change your fft grid or your restart file.'
      MSG_ERROR(msg)
@@ -4202,8 +4203,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Compare symmetry arrays (integers) symafm(nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symafm(nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4224,8 +4225,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tsym=1
  end if
 
-!Compare symmetry arrays (integers) symrel(3,3,nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symrel(3,3,nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4494,7 +4495,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !Should perform some checks related to pertcase and qptn,
 !that have been introduced in the header in v4.1
-!Warning : a GS file might be read, while the hdr corresponds
+!Warning: a GS file might be read, while the hdr corresponds
 !to a RF file (to initialize k+q), and vice-versa (in nonlinear).
 
 !Now check agreement of psp headers too
@@ -4503,7 +4504,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    itest=0
 
    do ipsp=1,npsp
-
      write(msg,'(a,i3,a,9x,a,a,i3,a)')&
 &     '  pseudopotential atom type',ipsp,':','|','  pseudopotential atom type',ipsp,':'
      call wrtout(std_out,msg,mode_paral)
@@ -4546,8 +4546,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      end if
 
 !    Second, test
-!    NOTE, XG 000719 : should do something about pspso
-!    NOTE, XG 020716 : znucl and zion are not written
+!    NOTE, XG 000719: should do something about pspso
+!    NOTE, XG 020716: znucl and zion are not written
      if (abs(hdr%znuclpsp(ipsp)-hdr0%znuclpsp(ipsp))>tol6) itest=1
      if (abs(hdr%zionpsp(ipsp)-hdr0%zionpsp(ipsp))>tol6) then
        itest=1; tpsch=1
@@ -4565,7 +4565,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !Finally, read residm and etotal ("current value" not known), and check xred.
  if (hdr%natom==hdr0%natom) then
-
    natom=hdr%natom
    write(msg,'(a,33x,a,a)') '  xred:','|','  xred:'
    call wrtout(std_out,msg,mode_paral)
@@ -4611,12 +4610,11 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
    if (abifile%class == "wf_planewave") then
      restart=2
-     msg = 'Restart of self-consistent calculation need translated wavefunctions.'
+     MSG_COMMENT('Restart of self-consistent calculation need translated wavefunctions.')
    else if (abifile%class == "density") then
      restart=0
-     msg = 'Illegal restart of non-self-consistent calculation'
+     MSG_WARNING('Illegal restart of non-self-consistent calculation')
    end if
-   MSG_WARNING(msg)
 
    write(msg,'(a,a1,a)') &
 &   '  Indeed, critical differences between current calculation and',ch10,&

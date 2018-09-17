@@ -56,8 +56,7 @@ module m_kpts
  public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
                                      ! Duplicates work in getkgrid, but need all outputs of kpt_fullbz, and indkpt
 
- ! FIXME: Deprecated. Used in invars2 but call is commented
- !public :: get_kpt_fullbz            ! Create full grid of kpoints from kptrlatt and shiftk
+ private :: get_kpt_fullbz          ! Create full grid of kpoints from kptrlatt and shiftk
 
  public :: smpbz                      ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
  public :: testkgrid                  ! Test different grids of k points.

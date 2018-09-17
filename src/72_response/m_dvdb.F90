@@ -3769,7 +3769,6 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  ! Read the headers
  ABI_DT_MALLOC(hdr1_list, (nfiles))
-
  nperts = size(hdr1_list)
 
  ! Write dvdb file (we only support fortran binary format)
