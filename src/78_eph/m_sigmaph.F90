@@ -464,7 +464,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:), iqlk(:)
+ integer,allocatable :: eph_dg_mapping(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
@@ -574,15 +574,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
 !ENCAPSULATE
  ! Double grid stuff
- ndiv = 1
  if (sigma%use_doublegrid) then
    eph_dg       = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
-   ndiv = eph_dg%ndiv
  end if
-
- ! Mapping of q point to IBZ
- ABI_MALLOC(iqlk,(ndiv))
 !ENCAPSULATE
 
  ! TODO FOR PAW
@@ -930,18 +925,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  
        ! Map q to qibz for tetrahedron
        if (sigma%qint_method > 0) then
-         if (sigma%use_doublegrid) then
-           ! set the qpoints to be mapped
-           do jj=1,eph_dg%ndiv
-               iq_bz_fine = eph_dg_mapping(3,jj)
-               iqlk(jj) = eph_dg%bz2lgkibz(iq_bz_fine)
-           end do
-         else
-           iqlk(1) = iq_ibz
-           if (sigma%symsigma == 0) iqlk(1) = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
-           ABI_CHECK(iqlk(1) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+         if (.not.sigma%use_doublegrid) then
+           iq_ibz_fine = iq_ibz
+           if (sigma%symsigma == 0) iq_ibz_fine = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
+           ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
            if (sigma%symsigma == 1) then
-             ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz) - sigma%ephwg%lgk%ibz(:, iqlk(1))) < tol12), "Mismatch in qpoints.")
+             ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz_fine) - sigma%ephwg%lgk%ibz(:, iq_ibz_fine)) < tol12), "Mismatch in qpoints.")
            end if
          endif
        end if
@@ -1193,25 +1182,29 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
+                     ! Map bz to lgk
+                     iq_bz_fine = eph_dg_mapping(3,jj)
+                     iq_ibz_fine = eph_dg%bz2lgkibz(iq_bz_fine)
+
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                         (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iqlk(jj)) +  &
-                         (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iqlk(jj)) )*weight
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iq_ibz_fine) )*weight
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, ikq_ibz_fine) +  &
-                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, ikq_ibz_fine) )*weight
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, iq_ibz_fine) )*weight
                      end if
                    end do
                  else
                    if (sigma%imag_only) then
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
-                       (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iqlk(1)) +  &
-                       (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iqlk(1)) )
+                       (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
+                       (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iq_ibz_fine) )
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
-                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, ikq_ibz_fine) +  &
-                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, ikq_ibz_fine) )
+                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
+                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, iq_ibz_fine) )
                    endif
                  end if
                end if
@@ -1554,7 +1547,6 @@ end if
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
  ABI_FREE(nqnu_tlist)
- ABI_FREE(iqlk)
  if (sigma%nwr > 0) then
    ABI_FREE(cfact_wr)
  end if
