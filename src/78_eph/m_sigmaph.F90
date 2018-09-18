@@ -446,7 +446,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: ik_bz, ikq_bz, iq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu,ndiv
+ integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
@@ -773,18 +773,17 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end if
 
 !ENCAPSULATE
+     ABI_MALLOC(zvals, (nz, nbcalc_ks))
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
        ABI_CALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
-     endif
-     ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
-     if (sigma%qint_method > 0) then
        ! Map eph_dg%dense -> ephwg%lgk%ibz
        if (sigma%use_doublegrid) then
-         call cwtime(cpu,wall,gflops,"start")
+#if 0 
+        call cwtime(cpu,wall,gflops,"start")
          eph_dg%bz2lgkibz = 0
          do ikq_ibz=1,sigma%ephwg%lgk%nibz
            ! get coordinates of ephwg%lgk%ibz point
@@ -805,6 +804,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call cwtime(cpu,wall,gflops,"stop")
          write(msg,'(2(a,f8.2))') "little group of k mapping cpu:",cpu,", wall:",wall
          call wrtout(std_out, msg, do_flush=.True.)
+#else
+         call eph_double_grid_bz2ibz(eph_dg, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
+                                     sigma%ephwg%lgk%symrec_lg, sigma%ephwg%lgk%nsym_lg, &
+                                     eph_dg%bz2lgkibz)
+#endif
        endif
 
        ! Precompute the weights for tetrahedron
@@ -3103,7 +3107,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
 
  !4.
  write(std_out,*) 'map bz -> ibz'
- ! TODO: this is slow for large grids, improve!
+#if 1
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
  ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
  call listkk(dksqmax,cryst%gmet,    indqq,&
@@ -3113,7 +3117,10 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
  eph_dg%bz2ibz_dense(:) = indqq(:,1)
  ABI_FREE(indqq)
-
+#else
+ call eph_double_grid_bz2ibz(eph_dg, eph_dg%kpts_dense_ibz, eph_dg%dense_nibz,&
+                             cryst%symrec, cryst%nsym, eph_dg%bz2ibz_dense)
+#endif
 
 end function eph_double_grid_new
 !!***
@@ -3198,6 +3205,40 @@ type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
  endif    
 
 end function eph_double_grid_get_index
+
+subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
+
+ type(eph_double_grid_t) :: self
+ integer,intent(in) :: nibz, nsym
+ integer :: isym, ii, ik_ibz, ik_bz
+ real(dp),intent(in) :: kpt_ibz(3,nibz)
+ integer,intent(in) :: symrec(:,:,:)
+ integer,intent(out):: bz2ibz(self%dense_nbz)
+ real(dp) :: kpt(3), kpt_sym(3)
+ 
+ !call cwtime(cpu,wall,gflops,"start")
+ bz2ibz = 0
+ do ik_ibz=1,nibz
+   ! get coordinates of k point
+   kpt(:) = kpt_ibz(:,ik_ibz)
+   ! Loop over the star of q
+   do isym=1,nsym
+     ! Get the symmetric of q
+     do ii=1,3
+       kpt_sym(ii)=kpt(1)*symrec(ii,1,isym)&
+                  +kpt(2)*symrec(ii,2,isym)&
+                  +kpt(3)*symrec(ii,3,isym)
+     end do
+     ! get the index of the ibz point in bz
+     ik_bz = eph_double_grid_get_index(self,kpt_sym,2)
+     bz2ibz(ik_bz) = ik_ibz
+   end do
+ end do
+ !call cwtime(cpu,wall,gflops,"stop")
+ !write(msg,'(2(a,f8.2))') "little group of k mapping cpu:",cpu,", wall:",wall
+ !call wrtout(std_out, msg, do_flush=.True.)
+
+end subroutine eph_double_grid_bz2ibz
 
 !!****f* m_sigmaph/eph_double_grid_debug
 !! NAME
