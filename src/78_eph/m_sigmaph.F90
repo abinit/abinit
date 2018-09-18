@@ -480,7 +480,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
- real(dp),allocatable :: phfrq_dense(:,:), tmp_deltaw_pm(:,:,:)
+ real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -575,7 +575,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (sigma%use_doublegrid) then
    eph_dg       = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
-   ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
    ABI_MALLOC(indkk,(eph_dg%dense_nbz))
    ndiv = eph_dg%ndiv
  end if
@@ -924,9 +923,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            eph_dg_mapping(:, jj) = &
              [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
               ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
-
-           !calculate phonon frequencies
-           call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense(:,jj), displ_cart )
          enddo
        endif
  
@@ -1159,7 +1155,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     wqnu = phfrq_dense(nu,jj)
+                     iq_ibz_fine = eph_dg_mapping(6, jj)
+                     wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
@@ -1189,7 +1186,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     wqnu = phfrq_dense(nu,jj)
+                     iq_ibz_fine = eph_dg_mapping(6, jj)
+                     wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
@@ -1561,7 +1559,6 @@ end if
 
  if (sigma%use_doublegrid) then
    ABI_FREE(eph_dg_mapping)
-   ABI_FREE(phfrq_dense)
    ABI_FREE(indkk)
  endif
 
