@@ -432,9 +432,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
+ integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in !,ib,nstates
  integer :: isym, this_calc
- integer :: ibsum_stop, ibsum_start
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
@@ -448,7 +447,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,cpu_dvscf,wall_dvscf,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,ediff,weight
- complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
+ complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -461,14 +460,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
- integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
- real(dp) :: phfrq_ibz(3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,emin,emax,eminmax(2)
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,eminmax(2)
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
@@ -484,7 +481,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
  real(dp),allocatable :: phfrq_dense(:,:), tmp_deltaw_pm(:,:,:)
- real(dp),allocatable :: qpts(:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -1709,7 +1705,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop,band
- integer :: nk_found,ifo,jj,bstart,nbcount
+ integer :: nk_found,ifo,jj,bstart
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -1724,7 +1720,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  type(hdr_type) :: hdr_wfk_dense
 !arrays
  integer :: intp_kptrlatt(3,3)
- integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),nkpt_dense(3),band_block(2)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  real(dp):: params(3), nelect
  integer,allocatable :: gtmp(:,:),degblock(:,:)
@@ -2605,7 +2601,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_adb,qpe_adb_val,qpe_adb_cond
- real(dp) :: smrt,alpha,beta,e0pde(9)
+ real(dp) :: smrt,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
 !arrays
