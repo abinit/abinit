@@ -123,6 +123,9 @@ module m_sigmaph
    integer,allocatable :: coarse_to_dense(:,:)
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
+   integer,allocatable :: bz2lgkibz(:)
+   ! map full brillouin zone of dense grid to a little group of k
+
  end type eph_double_grid_t
 
  ! Tables for degenerated KS states.
@@ -461,7 +464,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:)
+ integer,allocatable :: eph_dg_mapping(:,:), iqlk(:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
@@ -575,7 +578,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (sigma%use_doublegrid) then
    eph_dg       = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
-   ABI_MALLOC(indkk,(eph_dg%dense_nbz))
    ndiv = eph_dg%ndiv
  end if
 
@@ -787,7 +789,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Map eph_dg%dense -> ephwg%lgk%ibz
        if (sigma%use_doublegrid) then
          call cwtime(cpu,wall,gflops,"start")
-         indkk = 0
+         eph_dg%bz2lgkibz = 0
          do ikq_ibz=1,sigma%ephwg%lgk%nibz
            ! get coordinates of ephwg%lgk%ibz point
            kq(:) = sigma%ephwg%lgk%ibz(:,ikq_ibz)
@@ -801,7 +803,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
              ! get the index of the ibz point in bz
              ikq_bz = eph_double_grid_get_index(eph_dg,kq_sym,2)
-             indkk(ikq_bz) = ikq_ibz
+             eph_dg%bz2lgkibz(ikq_bz) = ikq_ibz
            end do
          end do
          call cwtime(cpu,wall,gflops,"stop")
@@ -932,7 +934,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! set the qpoints to be mapped
            do jj=1,eph_dg%ndiv
                iq_bz_fine = eph_dg_mapping(3,jj)
-               iqlk(jj) = indkk(iq_bz_fine)
+               iqlk(jj) = eph_dg%bz2lgkibz(iq_bz_fine)
            end do
          else
            iqlk(1) = iq_ibz
@@ -1559,7 +1561,6 @@ end if
 
  if (sigma%use_doublegrid) then
    ABI_FREE(eph_dg_mapping)
-   ABI_FREE(indkk)
  endif
 
  call destroy_hamiltonian(gs_hamkq)
@@ -3018,6 +3019,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
  ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
+ ABI_MALLOC(eph_dg%bz2lgkibz,(eph_dg%dense_nbz))
  ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
 
  write(std_out,*) 'create dense to coarse mapping'
@@ -3161,10 +3163,7 @@ subroutine eph_double_grid_free(self)
  ABI_FREE(self%indexes_to_dense)
  ABI_FREE(self%coarse_to_indexes)
  ABI_FREE(self%indexes_to_coarse)
-
- !ABI_FREE(self%bz2ibz_coarse)
-
- !call ebands_free(ebands_dense)
+ ABI_FREE(self%bz2lgkibz)
 
 end subroutine eph_double_grid_free
 
