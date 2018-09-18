@@ -80,7 +80,7 @@ module m_sigmaph
 
  ! Double grid datatype for electron-phonon
  type,public :: eph_double_grid_t
-   type(ebands_t)       :: ebands_dense
+   type(ebands_t) :: ebands_dense
 
    real(dp),allocatable :: kpts_coarse(:,:)
    real(dp),allocatable :: kpts_dense(:,:)
@@ -106,9 +106,9 @@ module m_sigmaph
    ! interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
 
    ! the integer indexes for the coarse grid are calculated for kk(3) with:
-   ! [nint(kk(1)*nkpt_coarse(1))+1,
-   !  nint(kk(2)*nkpt_coarse(2))+1,
-   !  nint(kk(3)*nkpt_coarse(3))+1]
+   ! [mod(nint((kpt(1)+1)*self%nkpt_coarse(1)),self%nkpt_coarse(1))+1,
+   !  mod(nint((kpt(2)+1)*self%nkpt_coarse(2)),self%nkpt_coarse(2))+1,
+   !  mod(nint((kpt(3)+1)*self%nkpt_coarse(3)),self%nkpt_coarse(3))+1]
 
    integer,allocatable :: indexes_to_coarse(:,:,:)
    ! given integer indexes get the array index of the kpoint (coarse)
@@ -455,13 +455,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
- type(ebands_t) :: ebands_dense
  type(eph_double_grid_t) :: eph_dg
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
- integer :: indkk_kq(1,6), nkpt_coarse(3), nkpt_dense(3)
+ integer :: indkk_kq(1,6)
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  integer,allocatable :: eph_dg_mapping(:,:), iqlk(:), indkk(:)
@@ -574,20 +573,20 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
 
+!ENCAPSULATE
  ! Double grid stuff
+ ndiv = 1
  if (sigma%use_doublegrid) then
-   eph_dg = sigma%eph_doublegrid
+   eph_dg       = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
    ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
    ABI_MALLOC(indkk,(eph_dg%dense_nbz))
-   nkpt_coarse = eph_dg%nkpt_coarse
-   nkpt_dense  = eph_dg%nkpt_dense
-   ebands_dense = eph_dg%ebands_dense
+   ndiv = eph_dg%ndiv
  end if
 
- ndiv = 1; if (sigma%use_doublegrid) ndiv = eph_dg%ndiv
  ! Mapping of q point to IBZ
  ABI_MALLOC(iqlk,(ndiv))
+!ENCAPSULATE
 
  ! TODO FOR PAW
  usecprj = 0
@@ -780,6 +779,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end do
      end if
 
+!ENCAPSULATE
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
@@ -805,10 +805,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                          +kq(3)*sigma%ephwg%lgk%symrec_lg(ii,3,isym)
              end do
              ! get the index of the ibz point in bz
-             ikq_bz = eph_dg%indexes_to_dense(&
-                       mod(nint((kq_sym(1)+1)*nkpt_dense(1)),nkpt_dense(1))+1,&
-                       mod(nint((kq_sym(2)+1)*nkpt_dense(2)),nkpt_dense(2))+1,&
-                       mod(nint((kq_sym(3)+1)*nkpt_dense(3)),nkpt_dense(3))+1)
+             ikq_bz = eph_double_grid_get_index(eph_dg,kq_sym,2)
              indkk(ikq_bz) = ikq_ibz
            end do
          end do
@@ -845,6 +842,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        write(msg,'(2(a,f8.2))') "weights with tetrahedron  cpu:",cpu,", wall:",wall
        call wrtout(std_out, msg, do_flush=.True.)
      endif
+!ENCAPSULATE
 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
@@ -907,22 +905,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
+!ENCAPSULATE
        ! Double grid stuff
        if (sigma%use_doublegrid) then
-         ik_bz  = eph_dg%indexes_to_coarse(&
-                   mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
-                   mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
-                   mod(nint((kk(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
-
-         ikq_bz = eph_dg%indexes_to_coarse(&
-                   mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
-                   mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
-                   mod(nint((kq(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
-
-         iq_bz = eph_dg%indexes_to_coarse(&
-                   mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
-                   mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
-                   mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+         ik_bz  = eph_double_grid_get_index(eph_dg,kk,1)
+         ikq_bz = eph_double_grid_get_index(eph_dg,kq,1)
+         iq_bz  = eph_double_grid_get_index(eph_dg,qpt,1)
 
          ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
          ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
@@ -963,7 +951,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end if
          endif
        end if
-       !
+!ENCAPSULATE
        
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
@@ -1151,6 +1139,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
+!ENCAPSULATE
                ! Here we have to handle 3 different logical values
                ! leading to 9 different cases:
                !
@@ -1170,7 +1159,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                      ! Electronic eigenvalue
                      ikq_ibz_fine = eph_dg_mapping(5, jj)
-                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
@@ -1200,7 +1189,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                      ! Electronic eigenvalue
                      ikq_ibz_fine = eph_dg_mapping(5, jj)
-                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
@@ -1230,6 +1219,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    endif
                  end if
                end if
+!ENCAPSULATE
 
                ! Derivative of sigma
                ! TODO: should calculate this with the double grid as well
@@ -1297,9 +1287,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (dvdb%qcache_size > 0) then
        write(std_out, "(a)")"Qcache stats"
        write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
-       write(std_out, "(a,i0,f4.1,a)")&
-         "Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
-       write(std_out, "(a,i0,f4.1,a)")&
+       write(std_out, "(a,i6,f6.1,a)")&
+         "Cache hit:  ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
+       write(std_out, "(a,i6,f6.1,a)")&
          "Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
        dvdb%qcache_stats = 0
      end if
@@ -2088,35 +2078,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
- ! =======================================
- ! === Prepare Double grid integration ===
- ! =======================================
-
- ! 1. Read kpoints and eig from a WFK/EIG/GSR file
- ! 2. Initialize a double grid object for the calculations
- ! of the integration weights on a coarse grid using the
- ! values of energies in a fine grid
- !
- ! -------------------
- ! |. . .|. . .|. . .|
- ! |. x .|. x .|. x .|
- ! |. . .|. . .|. . .|
- ! -------------------
- ! . = double grid
- ! x = coarse grid
- !
- ! The fine grid is used to evaluate the weights on the coarse grid
- ! The points of the fine grid are associated to the points of the
- ! coarse grid according to proximity
- ! The integration weights are returned on the coarse grid.
- !
- ! Steps of the implementation
- ! 1. Load the fine k grid from file or interpolation
- ! 2. Find the matching between the k_coarse and k_dense using the double_grid object
- ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
- ! 4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
- ! 5. Create a scatter array between the points in the fine grid
- !
 
  new%use_doublegrid = .False.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
@@ -2179,19 +2140,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !end if
      new%ephwg          = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
-#if 0
-     open(unit=5,file='tetra_ibz.dat')
-     do ii=1,new%ephwg%nibz
-       write(5,*) new%ephwg%ibz(:,ii)
-     end do
-     close(unit=5)
-
-     open(unit=5,file='dg_ibz.dat')
-     do ii=1,ebands_dense%nkpt
-       write(5,*) ebands_dense%kptns(:,ii)
-     end do
-#endif
-
      !call ebands_free(tmp_ebands)
    else
      downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
@@ -2208,6 +2156,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  else
    if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
+     new%ephwg          = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
    endif
  end if
 
@@ -2956,6 +2905,62 @@ subroutine sigmaph_print(self, dtset, unt)
 end subroutine sigmaph_print
 !!***
 
+
+
+
+!!****f* m_sigmaph/eph_double_grid_new
+!! NAME
+!!
+!! FUNCTION
+!!   Prepare Double grid integration
+!!
+!!   double grid:
+!!   ----------------- interp_kmult 2
+!!   |. .|.|.|.|. . .| side 1
+!!   |. x|.|x|.|. x .| size 3 (2*side+1)
+!!   |. .|.|.|.|. . .|
+!!   -----------------
+!!
+!!   triple grid:
+!!   ------------------- interp_kmult 3
+!!   |. . .|. . .|. . .| side 1
+!!   |. x .|. x .|. x .| size 3 (2*side+1)
+!!   |. . .|. . .|. . .|
+!!   -------------------
+!!
+!!   quadruple grid:
+!!   --------------------------- interp_kmult 4
+!!   |. . . .|.|. . .|.|. . . .| side 2
+!!   |. . . .|.|. . .|.|. . . .| size 5  (2*side+1)
+!!   |. . x .|.|. x .|.|. x . .|
+!!   |. . . .|.|. . .|.|. . . .|
+!!   |. . . .|.|. . .|.|. . . .|
+!!   ---------------------------
+!!
+!!   . = double grid
+!!   x = coarse grid
+!!
+!!   The fine grid is used to evaluate the weights on the coarse grid
+!!   The points of the fine grid are associated to the points of the
+!!   coarse grid according to proximity
+!!   The integration weights are returned on the coarse grid.
+!!
+!!   Steps of the implementation
+!!   1. Get the fine k grid from file or interpolation (ebands_dense)
+!!   2. Find the matching between the k_coarse and k_dense using the double_grid object
+!!   3. Calculate the phonon frequencies on the dense mesh and store them on a array
+!!   4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
+!!   5. Create a scatter array between the points in the fine grid
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
 
 
@@ -2990,36 +2995,12 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%nkpt_dense = nkpt_dense
  eph_dg%ebands_dense = ebands_dense
 
- ! microzone is the set of points in the fine grid belonging to a certain coarse point
+ ! A microzone is the set of points in the fine grid belonging to a certain coarse point
  ! we have to consider a side of a certain size around the coarse point
- ! to make sure the microzone is centered around it point.
+ ! to make sure the microzone is centered around its point.
  ! The fine points shared by multiple microzones should have weights
  ! according to in how many microzones they appear
  !
- ! double grid:
- ! ----------------- interp_kmult 2
- ! |. .|.|.|.|. . .| side 1
- ! |. x|.|x|.|. x .| size 3 (2*side+1)
- ! |. .|.|.|.|. . .|
- ! -----------------
- !
- ! triple grid:
- ! ------------------- interp_kmult 3
- ! |. . .|. . .|. . .| side 1
- ! |. x .|. x .|. x .| size 3 (2*side+1)
- ! |. . .|. . .|. . .|
- ! -------------------
- !
- ! quadruple grid:
- ! --------------------------- interp_kmult 4
- ! |. . . .|.|. . .|.|. . . .| side 2
- ! |. . . .|.|. . .|.|. . . .| size 5  (2*side+1)
- ! |. . x .|.|. x .|.|. x . .|
- ! |. . . .|.|. . .|.|. . . .|
- ! |. . . .|.|. . .|.|. . . .|
- ! ---------------------------
- !
- ! and so on
  ! this is integer division
  interp_side = interp_kmult/2
 
@@ -3135,34 +3116,9 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%kpts_dense_ibz = ebands_dense%kptns
  eph_dg%dense_nibz = ebands_dense%nkpt
 
-#if 0
- write(std_out,*) 'calculate phonon frequencies'
- !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
- ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
-#if 1
- !ibz version
- ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
- !     for low q-point sampling
- ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nibz))
- do ii=1,eph_dg%dense_nibz
-   qpt = eph_dg%kpts_dense_ibz(:,ii)
-   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-   call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
- enddo
-#else
- !bz version
- ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nbz))
- do ii=1,eph_dg%dense_nbz
-   qpt = eph_dg%kpts_dense(:,ii)
-   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-   call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
- enddo
-#endif
- ABI_FREE(displ_cart)
-#endif
-
  !4.
  write(std_out,*) 'map bz -> ibz'
+ ! TODO: this is slow for large grids, improve!
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
  ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
  call listkk(dksqmax,cryst%gmet,    indqq,&
@@ -3173,70 +3129,23 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%bz2ibz_dense(:) = indqq(:,1)
  ABI_FREE(indqq)
 
-#if 0
- open (unit = 2, file = "ibz.dat")
- do ii=1,eph_dg%dense_nibz
-   write(2,*) eph_dg%kpts_dense_ibz(:,ii)
- end do
-
- open (unit = 2, file = "bz.dat")
- do ii=1,eph_dg%dense_nbz
-   write(2,*) eph_dg%kpts_dense(:,ii), eph_dg%bz2ibz_dense(ii)
- end do
-
- ABI_MALLOC(phfreq_bz,(cryst%natom*3))
- ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
- ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
- open (unit = 2, file = "phbz.dat")
- open (unit = 3, file = "phibz.dat")
- dksqmax = 0
- dksqmin = 1e8
- maxfreq = 0
- do ii=1,eph_dg%dense_nbz
-   call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,ii), phfreq_bz, displ_cart )
-   call ifc_fourq(ifc, cryst, eph_dg%kpts_dense_ibz(:,eph_dg%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
-   write(2,*) phfreq_bz
-   write(3,*) phfreq_ibz
-   do jj=1,cryst%natom*3
-     error = abs(phfreq_bz(jj)-phfreq_ibz(jj))
-     if (dksqmax < error) dksqmax = error
-     if (dksqmin > error) dksqmin = error
-     if (maxfreq < phfreq_bz(jj)) maxfreq = phfreq_bz(jj)
-     dksqmean = dksqmean + error
-   enddo
- end do
- write(std_out,*) 'bz2ibz phonon error min: ', dksqmin
- write(std_out,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
- write(std_out,*) 'bz2ibz phonon error mean:', dksqmean/eph_dg%dense_nbz, &
-                                         dksqmean/eph_dg%dense_nbz/maxfreq
- ABI_FREE(displ_cart)
-
- open (unit = 2, file = "coarse2dense.dat")
- do ii=1,eph_dg%coarse_nbz
-   write(2,*)
-   write(2,*)
-   write(2,*) eph_dg%kpts_coarse(:,ii)
-   do jj=1,eph_dg%ndiv
-     i_dense = eph_dg%coarse_to_dense(ii,jj)
-     write(2,*) eph_dg%kpts_dense(:,i_dense), eph_dg%weights_dense(i_dense)
-   end do
- end do
-
- open (unit = 2, file = "coarse.dat")
- do ii=1,eph_dg%coarse_nbz
-   write(2,*) eph_dg%kpts_coarse(:,ii)
- end do
- close(2)
-
- open (unit = 2, file = "dense.dat")
- do ii=1,eph_dg%dense_nbz
-   write(2,*) eph_dg%kpts_dense(:,ii)
- end do
- close(2)
-#endif
 
 end function eph_double_grid_new
 !!***
+
+!!****f* m_sigmaph/eph_double_grid_free
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine eph_double_grid_free(self)
 
@@ -3265,6 +3174,153 @@ subroutine eph_double_grid_free(self)
  !call ebands_free(ebands_dense)
 
 end subroutine eph_double_grid_free
+
+!------------------------------------------------------------------------
+
+!!****f* m_sigmaph/eph_double_grid_get_index
+!! NAME
+!!
+!! FUNCTION
+!!   Get the indeex of a certain k-point in the double grid
+!!
+!! INPUTS
+!!   kpt=kpoint to be mapped (reduced coordinates)
+!!   opt=Map to the coarse (1) or dense grid (2)
+!! 
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
+
+ type(eph_double_grid_t) :: self
+ integer :: opt
+ real(dp) :: kpt(3)
+
+ if (opt==1) then
+   ikpt = self%indexes_to_coarse(&
+             mod(nint((kpt(1)+1)*self%nkpt_coarse(1)),self%nkpt_coarse(1))+1,&
+             mod(nint((kpt(2)+1)*self%nkpt_coarse(2)),self%nkpt_coarse(2))+1,&
+             mod(nint((kpt(3)+1)*self%nkpt_coarse(3)),self%nkpt_coarse(3))+1)
+ else if (opt==2) then
+   ikpt = self%indexes_to_dense(&
+             mod(nint((kpt(1)+1)*self%nkpt_dense(1)),self%nkpt_dense(1))+1,&
+             mod(nint((kpt(2)+1)*self%nkpt_dense(2)),self%nkpt_dense(2))+1,&
+             mod(nint((kpt(3)+1)*self%nkpt_dense(3)),self%nkpt_dense(3))+1)
+ else
+   MSG_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
+ endif    
+
+end function eph_double_grid_get_index
+
+!!****f* m_sigmaph/eph_double_grid_debug
+!! NAME
+!!
+!! FUNCTION
+!!   Write different files to disk for debugging of the double grid calculation
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine eph_double_grid_debug(self,cryst,ifc)
+
+ type(eph_double_grid_t) :: self
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+ integer  :: ii, jj, i_dense
+ real(dp) :: maxfreq, error, dksqmin, dksqmean, dksqmax
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: phfreq_bz(:), phfreq_ibz(:), phfrq_dense(:,:)
+ real(dp) :: qpt(3)
+
+ write(std_out,*) 'calculate phonon frequencies'
+ !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
+ !ibz version
+ ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
+ !     for low q-point sampling
+ ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nibz))
+ do ii=1,self%dense_nibz
+   qpt = self%kpts_dense_ibz(:,ii)
+   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+   call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
+ enddo
+ !bz version
+ ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nbz))
+ do ii=1,self%dense_nbz
+   qpt = self%kpts_dense(:,ii)
+   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+   call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
+ enddo
+
+ open (unit = 2, file = "ibz.dat")
+ do ii=1,self%dense_nibz
+   write(2,*) self%kpts_dense_ibz(:,ii)
+ end do
+
+ open (unit = 2, file = "bz.dat")
+ do ii=1,self%dense_nbz
+   write(2,*) self%kpts_dense(:,ii), self%bz2ibz_dense(ii)
+ end do
+
+ ABI_MALLOC(phfreq_bz,(cryst%natom*3))
+ ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
+ open (unit = 2, file = "phbz.dat")
+ open (unit = 3, file = "phibz.dat")
+ dksqmax = 0
+ dksqmin = 1e8
+ maxfreq = 0
+ do ii=1,self%dense_nbz
+   call ifc_fourq(ifc, cryst, self%kpts_dense(:,ii), phfreq_bz, displ_cart )
+   call ifc_fourq(ifc, cryst, self%kpts_dense_ibz(:,self%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
+   write(2,*) phfreq_bz
+   write(3,*) phfreq_ibz
+   do jj=1,cryst%natom*3
+     error = abs(phfreq_bz(jj)-phfreq_ibz(jj))
+     if (dksqmax < error) dksqmax = error
+     if (dksqmin > error) dksqmin = error
+     if (maxfreq < phfreq_bz(jj)) maxfreq = phfreq_bz(jj)
+     dksqmean = dksqmean + error
+   enddo
+ end do
+ write(std_out,*) 'bz2ibz phonon error min: ', dksqmin
+ write(std_out,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
+ write(std_out,*) 'bz2ibz phonon error mean:', dksqmean/self%dense_nbz, &
+                                         dksqmean/self%dense_nbz/maxfreq
+
+ open (unit = 2, file = "coarse2dense.dat")
+ do ii=1,self%coarse_nbz
+   write(2,*)
+   write(2,*)
+   write(2,*) self%kpts_coarse(:,ii)
+   do jj=1,self%ndiv
+     i_dense = self%coarse_to_dense(ii,jj)
+     write(2,*) self%kpts_dense(:,i_dense), self%weights_dense(i_dense)
+   end do
+ end do
+
+ open (unit = 2, file = "coarse.dat")
+ do ii=1,self%coarse_nbz
+   write(2,*) self%kpts_coarse(:,ii)
+ end do
+ close(2)
+
+ open (unit = 2, file = "dense.dat")
+ do ii=1,self%dense_nbz
+   write(2,*) self%kpts_dense(:,ii)
+ end do
+ close(2)
+
+end subroutine eph_double_grid_debug
+
 
 end module m_sigmaph
 !!***
