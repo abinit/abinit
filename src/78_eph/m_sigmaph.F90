@@ -115,7 +115,7 @@ module m_sigmaph
   integer :: nwr
    ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
    ! Odd number so that the mesh is centered on the KS energy.
-   ! The spectral function is computed only if nwr > 0 (taken from dtser%nfreqsp)
+   ! The spectral function is computed only if nwr > 0 (taken from dtset%nfreqsp)
 
   integer :: ntemp
    ! Number of temperatures.
@@ -680,12 +680,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
 
-     ! Prepare spectral function.
+     ! Prepare computation of Sigma_{nk}(w) and spectral function.
      if (sigma%nwr > 0) then
        sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band = ib_k + bstart_ks - 1
-         ! Build linear mesh centered on KS energy.
+         ! Build linear mesh **centered** on KS energy.
          eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
        end do
@@ -1345,7 +1345,7 @@ end if
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
-     call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, comm)
+     call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
    end do ! spin
 
    ABI_FREE(indq2dvdb)
@@ -1654,13 +1654,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: Use GW variables but change default
  !dtset%freqspmin;
  new%nwr = dtset%nfreqsp
+ new%wr_step = zero
  if (new%nwr > 0) then
    if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
- end if
- if (dtset%freqspmax == zero) then
-   new%wr_step = 0.05 * eV_Ha
- else
-   new%wr_step = dtset%freqspmax / new%nwr
+   new%wr_step = two * eV_Ha / (new%nwr - 1)
+   if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
  end if
 
  ! Define q-mesh for integration of the self-energy.
@@ -2339,6 +2337,7 @@ end subroutine sigmaph_setup_kcalc
 !!  ebands<ebands_t>=KS band energies.
 !!  ikcalc=Index of the computed k-point
 !!  spin=Spin index.
+!!  prtvol= Verbosity level
 !!  comm=MPI communicator.
 !!
 !! PARENTS
@@ -2348,7 +2347,7 @@ end subroutine sigmaph_setup_kcalc
 !!
 !! SOURCE
 
-subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
+subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2360,13 +2359,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: ikcalc, spin, comm
+ integer,intent(in) :: ikcalc, spin, prtvol, comm
  type(sigmaph_t),target,intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
  integer,parameter :: master=0
- integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
+ integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_adb,qpe_adb_val,qpe_adb_cond
  real(dp) :: cpu, wall, gflops
  real(dp) :: smrt,alpha,beta,e0pde(9)
@@ -2547,29 +2546,35 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end if
  end do ! it
 
- !if (self%nwr >= 3) then
- !  write(ab_out, "(2a)")ch10,"Sigma_nk(omega, T=1) for testing purposes:"
- !  it = 1; iw = (self%nwr / 2)
- !  do ib=1,self%nbcalc_ks(ikcalc, spin)
- !    band = self%bstart_ks(ikcalc, spin) + ib - 1
- !    write(ab_out, "(a, i0)")"For band:", band
- !    do ii=0,1
- !      write(ab_out, "(3(es16.6,2x))")self%wrmesh_b(iw+ii, ib), self%vals_wr(iw+ii, it, ib)
- !    end do
- !  end do
- !  write(ab_out, "(a)")ch10
- !end if
+ if (prtvol > 0 .and. (ikcalc == 1 .and. spin == 1)) then
+   if (self%gfw_nomega > 0) then
+     write(ab_out, "(2a)")"omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
+     iw = (self%gfw_nomega / 2)
+     !iw = self%gfw_nomega
+     do ib=1,min(self%nbcalc_ks(ikcalc, spin), 5)
+       band = self%bstart_ks(ikcalc, spin) + ib - 1
+       write(ab_out, "(a, i0)")"For band:", band
+       !write(ab_out, "(4(f8.3,2x))")self%gfw_mesh(1), (self%gfw_vals(1, ii, ib), ii=1,3)
+       do jj=0,1
+         write(ab_out, "(4(f8.3,2x))")self%gfw_mesh(iw+jj), (self%gfw_vals(iw+jj, ii, ib), ii=1,3)
+       end do
+     end do
+     write(ab_out, "(a)")ch10
+   end if
 
- !if (self%gfw_nomega > 0) then
- !  write(ab_out, "(2a)")"Eliashberg function gf(omega) for testing purposes:"
- !  iw = (self%gfw_nomega / 2)
- !  do ib=1,self%nbcalc_ks(ikcalc, spin)
- !    band = self%bstart_ks(ikcalc, spin) + ib - 1
- !    write(ab_out, "(a, i0)")"For band:", band
- !    write(ab_out, "(4(es16.6,2x))")self%gfw_mesh(iw), (self%gfw_vals(iw, ii, ib), ii=1,3)
- !  end do
- !  write(ab_out, "(a)")ch10
- !end if
+   if (self%nwr >= 3) then
+     write(ab_out, "(2a)")ch10,"omega and Sigma_nk(omega, T=1) in eV for testing purposes:"
+     it = 1; iw = (self%nwr / 2)
+     do ib=1,min(self%nbcalc_ks(ikcalc, spin), 5)
+       band = self%bstart_ks(ikcalc, spin) + ib - 1
+       write(ab_out, "(a, i0)")"For band:", band
+       do ii=0,1
+         write(ab_out, "(3(f8.3,2x))")self%wrmesh_b(iw+ii, ib) * Ha_eV, self%vals_wr(iw+ii, it, ib) * Ha_eV
+       end do
+     end do
+     write(ab_out, "(a)")ch10
+   end if
+ end if
 
  call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
@@ -2684,8 +2689,9 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(2a)")sjoin("Method for q-space integration:", msg)
  if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma will be computed."
  if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imaginary part of Sigma will be computed."
- write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
- !write(unt, "(a)")sjoin("Number of frequency in Eliashberg functions:", itoa(self.gfw_nomega)
+ write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), &
+    ", Step:", ftoa(self%wr_step*Ha_eV, fmt="f5.3"), "[eV]")
+ write(unt, "(a)")sjoin("Number of frequency in generalized Eliashberg functions:", itoa(self%gfw_nomega))
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin("Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
