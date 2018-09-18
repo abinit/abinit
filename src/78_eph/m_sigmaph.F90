@@ -126,6 +126,9 @@ module m_sigmaph
    integer,allocatable :: bz2lgkibz(:)
    ! map full brillouin zone of dense grid to a little group of k
 
+   integer,allocatable :: mapping(:,:)
+   ! map k, k+q and q in the IBZ and FBZ of the double grid structure
+
  end type eph_double_grid_t
 
  ! Tables for degenerated KS states.
@@ -464,7 +467,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: kq_sym(3)
@@ -576,7 +578,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! Double grid stuff
  if (sigma%use_doublegrid) then
    eph_dg       = sigma%eph_doublegrid
-   ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
  end if
 !ENCAPSULATE
 
@@ -917,7 +918,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            iq_bz_fine = eph_dg%coarse_to_dense(iq_bz,jj)
            iq_ibz_fine = eph_dg%bz2ibz_dense(iq_bz_fine)
 
-           eph_dg_mapping(:, jj) = &
+           eph_dg%mapping(:, jj) = &
              [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
               ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
          enddo
@@ -1137,16 +1138,16 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    cfact = 0
                    do jj=1,eph_dg%ndiv
                      ! Double Grid shared points weights
-                     ikq_bz_fine  = eph_dg_mapping(2, jj)
+                     ikq_bz_fine  = eph_dg%mapping(2, jj)
                      weight = eph_dg%weights_dense(ikq_bz_fine)
 
                      ! Electronic eigenvalue
-                     ikq_ibz_fine = eph_dg_mapping(5, jj)
+                     ikq_ibz_fine = eph_dg%mapping(5, jj)
                      eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     iq_ibz_fine = eph_dg_mapping(6, jj)
+                     iq_ibz_fine = eph_dg%mapping(6, jj)
                      wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
@@ -1168,22 +1169,22 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  if (sigma%use_doublegrid) then
                    do jj=1,eph_dg%ndiv
                      ! Double Grid shared points weights
-                     ikq_bz_fine  = eph_dg_mapping(2, jj)
+                     ikq_bz_fine  = eph_dg%mapping(2, jj)
                      weight = eph_dg%weights_dense(ikq_bz_fine)
 
                      ! Electronic eigenvalue
-                     ikq_ibz_fine = eph_dg_mapping(5, jj)
+                     ikq_ibz_fine = eph_dg%mapping(5, jj)
                      eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     iq_ibz_fine = eph_dg_mapping(6, jj)
+                     iq_ibz_fine = eph_dg%mapping(6, jj)
                      wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
                      ! Map bz to lgk
-                     iq_bz_fine = eph_dg_mapping(3,jj)
+                     iq_bz_fine = eph_dg%mapping(3,jj)
                      iq_ibz_fine = eph_dg%bz2lgkibz(iq_bz_fine)
 
                      if (sigma%imag_only) then
@@ -1550,10 +1551,6 @@ end if
  if (sigma%nwr > 0) then
    ABI_FREE(cfact_wr)
  end if
-
- if (sigma%use_doublegrid) then
-   ABI_FREE(eph_dg_mapping)
- endif
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
@@ -3012,6 +3009,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
  ABI_MALLOC(eph_dg%bz2lgkibz,(eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%mapping,(6,eph_dg%ndiv))
  ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
 
  write(std_out,*) 'create dense to coarse mapping'
@@ -3156,6 +3154,7 @@ subroutine eph_double_grid_free(self)
  ABI_FREE(self%coarse_to_indexes)
  ABI_FREE(self%indexes_to_coarse)
  ABI_FREE(self%bz2lgkibz)
+ ABI_FREE(self%mapping)
 
 end subroutine eph_double_grid_free
 
