@@ -433,13 +433,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,bcorr0=0,timrev0=0
+ integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in !,ib,nstates
- integer :: this_calc
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
@@ -469,7 +468,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq,eminmax(2)
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
@@ -484,7 +483,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
- real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -771,7 +769,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end do
      end if
 
-!ENCAPSULATE
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
@@ -787,34 +784,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        endif
 
        ! Precompute the weights for tetrahedron
-       call cwtime(cpu,wall,gflops,"start")
-       ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
-       ! loop over bands to sum
-       do ibsum_kq=1,nbsum
-         ! loop over phonon modes
-         do nu=1,natom3
-           ! loop over bands in the self-energy
-           do ib_k=1,nbcalc_ks
-             this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
-             if (mod(this_calc,nprocs) /= my_rank) cycle
-             band = ib_k + bstart_ks - 1
-             eig0nk = ebands%eig(band,ik_ibz,spin)
-             eminmax(1) = eig0nk - 0.01 
-             eminmax(2) = eig0nk + 0.01
-             call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
-             ! we pay the efficiency here
-             sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
-             sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )
-           enddo
-         enddo
-       enddo
-       ABI_FREE(tmp_deltaw_pm)
-       call xmpi_sum(sigma%deltaw_pm, comm, ierr)
-       call cwtime(cpu,wall,gflops,"stop")
-       write(msg,'(2(a,f8.2))') "weights with tetrahedron  cpu:",cpu,", wall:",wall
-       call wrtout(std_out, msg, do_flush=.True.)
+       call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
      endif
-!ENCAPSULATE
 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
@@ -3202,6 +3173,86 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
 
 end subroutine eph_double_grid_bz2ibz
 
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/sigmaph_get_qweights
+!! NAME
+!!  sigmaph_get_qweights
+!!
+!! FUNCTION
+!! Compute all the weights for q-space integration using the tetrahedron method
+!!
+!! INPUTS
+!!  ikcalc: Index of the self-energy k-point in the kcalc array.
+!!  iq_ibz: Index of the q-points in the IBZ(k) if symsigma == 1 or in the full BZ if symsigma == 0
+!!  ibsum_kq: Band index in self-energy sum.
+!!  spin: Spin index
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!asdff
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(sigmaph_t),intent(inout) :: sigma
+ type(ebands_t),intent(in) :: ebands
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: ikcalc, spin, comm
+!Variable -------------------------------------
+ integer,parameter :: bcorr0=0
+ integer :: nu, band, ibsum_kq, ik_ibz, ib_k, nbsum, bstart_ks, nbcalc_ks, my_rank, natom3, natom, ierr
+ integer :: nprocs,this_calc
+ real(dp) :: eig0nk, eminmax(2)
+ real(dp) :: cpu,wall,gflops
+ real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
+ character(len=500) :: msg
+
+ nprocs = xmpi_comm_size(comm)
+ ik_ibz = sigma%kcalc2ibz(ikcalc,1)
+ nbcalc_ks = sigma%nbcalc_ks(ikcalc,spin)
+ bstart_ks = sigma%bstart_ks(ikcalc,spin)
+ natom = cryst%natom; natom3 = 3 * natom;
+ nbsum = sigma%nbsum
+
+ call cwtime(cpu,wall,gflops,"start")
+ ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
+ ! loop over bands to sum
+ do ibsum_kq=1,nbsum
+  ! loop over phonon modes
+  do nu=1,natom3
+    ! loop over bands in the self-energy
+    do ib_k=1,nbcalc_ks
+      this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
+      if (mod(this_calc,nprocs) /= my_rank) cycle
+      band = ib_k + bstart_ks - 1
+      eig0nk = ebands%eig(band,ik_ibz,spin)
+      eminmax(1) = eig0nk - 0.01 
+      eminmax(2) = eig0nk + 0.01
+      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
+      ! we pay the efficiency here
+      sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
+      sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )
+    enddo
+  enddo
+ enddo
+ ABI_FREE(tmp_deltaw_pm)
+ call xmpi_sum(sigma%deltaw_pm, comm, ierr)
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2))') "weights with tetrahedron  cpu:",cpu,", wall:",wall
+ call wrtout(std_out, msg, do_flush=.True.)
+
+end subroutine sigmaph_get_all_qweights
+
+
 !!****f* m_sigmaph/eph_double_grid_debug
 !! NAME
 !!
@@ -3230,15 +3281,17 @@ subroutine eph_double_grid_debug(self,cryst,ifc)
 
  write(std_out,*) 'calculate phonon frequencies'
  !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
- !ibz version
  ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
  !     for low q-point sampling
+#if 0
+ !ibz version
  ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nibz))
  do ii=1,self%dense_nibz
    qpt = self%kpts_dense_ibz(:,ii)
    ! Get phonon frequencies and displacements in reduced coordinates for this q-point
    call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
  enddo
+#else
  !bz version
  ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nbz))
  do ii=1,self%dense_nbz
@@ -3246,6 +3299,7 @@ subroutine eph_double_grid_debug(self,cryst,ifc)
    ! Get phonon frequencies and displacements in reduced coordinates for this q-point
    call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
  enddo
+#endif
 
  open (unit = 2, file = "ibz.dat")
  do ii=1,self%dense_nibz
