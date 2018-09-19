@@ -712,7 +712,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Weights for Re-Im with i.eta shift.
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
-       ABI_CALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
 
        ! Map sigma%eph_doublegrid%dense -> ephwg%lgk%ibz
        if (sigma%use_doublegrid) then
@@ -2757,9 +2757,9 @@ end subroutine sigmaph_print
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_get_qweights
+!!****f* m_sigmaph/sigmaph_get_all_qweights
 !! NAME
-!!  sigmaph_get_qweights
+!!  sigmaph_get_all_qweights
 !!
 !! FUNCTION
 !!  Compute all the weights for q-space integration using the tetrahedron method
@@ -2805,12 +2805,14 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
  character(len=500) :: msg
 
- nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  ik_ibz = sigma%kcalc2ibz(ikcalc,1)
  nbcalc_ks = sigma%nbcalc_ks(ikcalc,spin)
  bstart_ks = sigma%bstart_ks(ikcalc,spin)
  natom = cryst%natom; natom3 = 3 * natom;
  nbsum = sigma%nbsum
+
+ sigma%deltaw_pm = 0
 
  call cwtime(cpu,wall,gflops,"start")
  ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
