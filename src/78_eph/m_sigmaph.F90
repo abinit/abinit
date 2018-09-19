@@ -3088,6 +3088,13 @@ end subroutine eph_double_grid_free
 
 type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_double_grid_get_index'
+!End of the abilint section
+
  type(eph_double_grid_t) :: self
  integer :: opt
  real(dp) :: kpt(3)
@@ -3109,6 +3116,13 @@ type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 end function eph_double_grid_get_index
 
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_double_grid_bz2ibz'
+!End of the abilint section
 
  type(eph_double_grid_t) :: self
  integer,intent(in) :: nibz, nsym
@@ -3167,6 +3181,13 @@ end subroutine eph_double_grid_bz2ibz
 !! SOURCE
 
 subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_get_all_qweights'
+!End of the abilint section
 
  implicit none
 
@@ -3244,6 +3265,12 @@ end subroutine sigmaph_get_all_qweights
 
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_double_grid_get_mapping'
+!End of the abilint section
+
  implicit none
 
 !Arguments --------------------------------
@@ -3277,116 +3304,7 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
       ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
  enddo
 
-end subroutine 
-
-!!****f* m_sigmaph/eph_double_grid_debug
-!! NAME
-!!
-!! FUNCTION
-!!   Write different files to disk for debugging of the double grid calculation
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine eph_double_grid_debug(self,cryst,ifc)
-
- type(eph_double_grid_t) :: self
- type(ifc_type),intent(in) :: ifc
- type(crystal_t),intent(in) :: cryst
- integer  :: ii, jj, i_dense
- real(dp) :: maxfreq, error, dksqmin, dksqmean, dksqmax
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp),allocatable :: phfreq_bz(:), phfreq_ibz(:), phfrq_dense(:,:)
- real(dp) :: qpt(3)
-
- write(std_out,*) 'calculate phonon frequencies'
- !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
- ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
- !     for low q-point sampling
-#if 0
- !ibz version
- ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nibz))
- do ii=1,self%dense_nibz
-   qpt = self%kpts_dense_ibz(:,ii)
-   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-   call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
- enddo
-#else
- !bz version
- ABI_MALLOC(phfrq_dense,(3*cryst%natom,self%dense_nbz))
- do ii=1,self%dense_nbz
-   qpt = self%kpts_dense(:,ii)
-   ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-   call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
- enddo
-#endif
-
- open (unit = 2, file = "ibz.dat")
- do ii=1,self%dense_nibz
-   write(2,*) self%kpts_dense_ibz(:,ii)
- end do
-
- open (unit = 2, file = "bz.dat")
- do ii=1,self%dense_nbz
-   write(2,*) self%kpts_dense(:,ii), self%bz2ibz_dense(ii)
- end do
-
- ABI_MALLOC(phfreq_bz,(cryst%natom*3))
- ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
- open (unit = 2, file = "phbz.dat")
- open (unit = 3, file = "phibz.dat")
- dksqmax = 0
- dksqmin = 1e8
- maxfreq = 0
- do ii=1,self%dense_nbz
-   call ifc_fourq(ifc, cryst, self%kpts_dense(:,ii), phfreq_bz, displ_cart )
-   call ifc_fourq(ifc, cryst, self%kpts_dense_ibz(:,self%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
-   write(2,*) phfreq_bz
-   write(3,*) phfreq_ibz
-   do jj=1,cryst%natom*3
-     error = abs(phfreq_bz(jj)-phfreq_ibz(jj))
-     if (dksqmax < error) dksqmax = error
-     if (dksqmin > error) dksqmin = error
-     if (maxfreq < phfreq_bz(jj)) maxfreq = phfreq_bz(jj)
-     dksqmean = dksqmean + error
-   enddo
- end do
- write(std_out,*) 'bz2ibz phonon error min: ', dksqmin
- write(std_out,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
- write(std_out,*) 'bz2ibz phonon error mean:', dksqmean/self%dense_nbz, &
-                                         dksqmean/self%dense_nbz/maxfreq
-
- open (unit = 2, file = "coarse2dense.dat")
- do ii=1,self%coarse_nbz
-   write(2,*)
-   write(2,*)
-   write(2,*) self%kpts_coarse(:,ii)
-   do jj=1,self%ndiv
-     i_dense = self%coarse_to_dense(ii,jj)
-     write(2,*) self%kpts_dense(:,i_dense), self%weights_dense(i_dense)
-   end do
- end do
-
- open (unit = 2, file = "coarse.dat")
- do ii=1,self%coarse_nbz
-   write(2,*) self%kpts_coarse(:,ii)
- end do
- close(2)
-
- open (unit = 2, file = "dense.dat")
- do ii=1,self%dense_nbz
-   write(2,*) self%kpts_dense(:,ii)
- end do
- close(2)
-
-end subroutine eph_double_grid_debug
-
+end subroutine eph_double_grid_get_mapping 
 
 end module m_sigmaph
 !!***
