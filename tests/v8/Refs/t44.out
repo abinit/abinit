@@ -361,11 +361,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -380,8 +381,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.368   -0.318   -0.343   -0.008    0.928   -0.371    0.028    8.260    8.047
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.272 (adiabatic:    4.688)
- QP_gap - KS_gap:   -0.354 (adiabatic:   -0.938)
+ QP gap:    5.272 (OTMS:    4.688)
+ QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
 omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
@@ -432,8 +433,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    8  28.462   28.232   -0.230   -0.504   -0.275    0.456   -0.973    0.469    6.396    6.023
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.832 (adiabatic:    9.161)
- QP_gap - KS_gap:   -0.528 (adiabatic:   -2.199)
+ QP gap:   10.832 (OTMS:    9.161)
+ QP_gap - KS_gap:   -0.528 (OTMS:   -2.199)
  
 
 ================================================================================
@@ -530,11 +531,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -549,8 +551,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.368   -0.318   -0.343   -0.008    0.928   -0.371    0.028    8.260    8.047
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.272 (adiabatic:    4.688)
- QP_gap - KS_gap:   -0.354 (adiabatic:   -0.938)
+ QP gap:    5.272 (OTMS:    4.688)
+ QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
 omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
@@ -826,11 +828,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -845,8 +848,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.869    0.183    0.505   -0.363    0.363    0.473    0.032    8.260    8.659
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.279 (adiabatic:    5.127)
- QP_gap - KS_gap:   -0.347 (adiabatic:   -0.499)
+ QP gap:    5.279 (OTMS:    5.127)
+ QP_gap - KS_gap:   -0.347 (OTMS:   -0.499)
  
 omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
@@ -897,8 +900,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    8  28.462   28.540    0.078    0.102   -0.050    0.766   -0.427    0.529    6.396    6.599
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.397 (adiabatic:   11.154)
- QP_gap - KS_gap:   -0.963 (adiabatic:   -0.206)
+ QP gap:   10.397 (OTMS:   11.154)
+ QP_gap - KS_gap:   -0.963 (OTMS:   -0.206)
  
 
 == END DATASET(S) ==============================================================

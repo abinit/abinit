@@ -247,7 +247,7 @@ module m_sigmaph
   !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
   !  Debye-Waller term (static).
 
-  !real(dp),allocatable :: qpadb_enes(:,:)
+  !real(dp),allocatable :: qpoms_enes(:,:)
   ! qp_adbenes(ntemp, max_nbcalc)
   ! (Real) QP energies computed with the adiabatic formalism.
 
@@ -2029,12 +2029,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qpadb_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qpoms_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qp_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ze0_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
-     nctkarr_t("qpadb_gaps", "dp", "ntemp, nkcalc, nsppol"), &
+     nctkarr_t("qpoms_gaps", "dp", "ntemp, nkcalc, nsppol"), &
      nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
@@ -2366,7 +2366,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 !Local variables-------------------------------
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond,jj
- real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_adb,qpe_adb_val,qpe_adb_cond
+ real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops
  real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
@@ -2375,11 +2375,11 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
  real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
- real(dp) :: qp_gaps(self%ntemp),qpadb_gaps(self%ntemp)
+ real(dp) :: qp_gaps(self%ntemp),qpoms_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:)
  real(dp) :: ks_enes(self%max_nbcalc),ze0_vals(self%ntemp, self%max_nbcalc)
  real(dp) :: gfw_avg(self%gfw_nomega, 3)
- complex(dpc),target :: qpadb_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
+ complex(dpc),target :: qpoms_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
 
 ! *************************************************************************
 
@@ -2462,9 +2462,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  ! Compute QP energies and Gaps.
  ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
  kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
- qp_enes = huge(one) * tol6; qpadb_enes = huge(one) * tol6
+ qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6
  ks_enes = huge(one) * tol6; ze0_vals = huge(one) * tol6
- ks_gap = -one; qpadb_gaps = -one; qp_gaps = -one
+ ks_gap = -one; qpoms_gaps = -one; qp_gaps = -one
 
  ! Write legend.
  if (ikcalc == 1 .and. spin == 1) then
@@ -2472,11 +2472,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    write(ab_out,"(a)")"Final results in eV."
    write(ab_out,"(a)")"Notations:"
    write(ab_out,"(a)")"   eKS: Kohn-Sham energy. eQP: quasi-particle energy."
-   write(ab_out,"(a)")"   eQP-eKS: Difference between the QP and the KS energy."
+   write(ab_out,"(a)")"   eQP - eKS: Difference between the QP and the KS energy."
    write(ab_out,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
    write(ab_out,"(a)")"   Z(eKS): Renormalization factor."
    write(ab_out,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
    write(ab_out,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
+   write(ab_out,"(a)")"   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
@@ -2498,20 +2499,21 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      sig0c = self%vals_e0ks(it, ibc)
      dw = self%dw_vals(it, ibc)
      fan0 = real(sig0c) - dw
+     ! Compute QP energies with On-the-Mass-Shell approx and first renormalization i.e. Z(eKS)
      ! TODO: Note that here I use the full Sigma including the imaginary part
      !zc = one / (one - self%dvals_de0ks(it, ibc))
      zc = one / (one - real(self%dvals_de0ks(it, ibc)))
      ze0_vals(it, ibc) = real(zc)
      qpe = kse + real(zc) * real(sig0c)
-     qpe_adb = kse + real(sig0c)
+     qpe_oms = kse + real(sig0c)
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
      if (band == ib_val) then
-       kse_val = kse; qpe_val = qpe; qpe_adb_val = qpe_adb
+       kse_val = kse; qpe_val = qpe; qpe_oms_val = qpe_oms
      end if
      if (band == ib_cond) then
-       kse_cond = kse; qpe_cond = qpe; qpe_adb_cond = qpe_adb
+       kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
      end if
      ! FIXME
      if (it == 1) then
@@ -2524,12 +2526,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-     qpadb_enes(it, ibc) = qpe_adb
+     qpoms_enes(it, ibc) = qpe_oms
      qp_enes(it, ibc) = qpe
      if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
        ! We have enough states to compute the gap.
        if (it == 1) ks_gap = kse_cond - kse_val
-       qpadb_gaps(it) = qpe_adb_cond - qpe_adb_val
+       qpoms_gaps(it) = qpe_oms_cond - qpe_oms_val
        qp_gaps(it) = real(qpe_cond - qpe_val)
      end if
    end do ! ibc
@@ -2539,9 +2541,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      write(ab_out, "(a)")" "
      write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
        "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-     write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (adiabatic: ",qpadb_gaps(it) * Ha_eV, ")"
+     write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
      write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
-         " (adiabatic: ",(qpadb_gaps(it) - ks_gap) * Ha_eV, ")"
+         " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
      write(ab_out, "(a)")" "
    end if
  end do ! it
@@ -2593,15 +2595,15 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
 
  ! Dump QP energies and gaps for this (kpt, spin)
- !shape3(2:) = shape(qpadb_enes); call c_f_pointer(c_loc(qpadb_enes), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), c2r(qpadb_enes), start=[1,1,1,ikcalc,spin]))
+ !shape3(2:) = shape(qpoms_enes); call c_f_pointer(c_loc(qpoms_enes), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_enes"), c2r(qpoms_enes), start=[1,1,1,ikcalc,spin]))
 
  !shape3(2:) = shape(qp_enes); call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ze0_vals"), ze0_vals, start=[1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_enes"), ks_enes, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), ks_gap, start=[ikcalc,spin]))
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), qpadb_gaps, start=[1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_gaps"), qpoms_gaps, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
 
  ! Write frequency dependent data.
