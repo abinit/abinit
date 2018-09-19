@@ -441,8 +441,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in !,ib,nstates
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
- integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
- integer :: ik_bz, ikq_bz, iq_bz
+ integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -459,7 +458,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
- type(eph_double_grid_t) :: eph_dg
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
@@ -570,13 +568,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
-
-!ENCAPSULATE
- ! Double grid stuff
- if (sigma%use_doublegrid) then
-   eph_dg       = sigma%eph_doublegrid
- end if
-!ENCAPSULATE
 
  ! TODO FOR PAW
  usecprj = 0
@@ -776,11 +767,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! Weights for Im (tethraedron, eta --> 0)
        ABI_CALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
 
-       ! Map eph_dg%dense -> ephwg%lgk%ibz
+       ! Map sigma%eph_doublegrid%dense -> ephwg%lgk%ibz
        if (sigma%use_doublegrid) then
-         call eph_double_grid_bz2ibz(eph_dg, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
+         call eph_double_grid_bz2ibz(sigma%eph_doublegrid, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
                                      sigma%ephwg%lgk%symrec_lg, sigma%ephwg%lgk%nsym_lg, &
-                                     eph_dg%bz2lgkibz)
+                                     sigma%eph_doublegrid%bz2lgkibz)
        endif
 
        ! Precompute the weights for tetrahedron
@@ -848,30 +839,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
-!ENCAPSULATE
        ! Double grid stuff
        if (sigma%use_doublegrid) then
-         ik_bz  = eph_double_grid_get_index(eph_dg,kk,1)
-         ikq_bz = eph_double_grid_get_index(eph_dg,kq,1)
-         iq_bz  = eph_double_grid_get_index(eph_dg,qpt,1)
-
-         ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
-         ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
-         !fine grid around kq
-         do jj=1,eph_dg%ndiv
-
-           !kq
-           ikq_bz_fine = eph_dg%coarse_to_dense(ikq_bz,jj)
-           ikq_ibz_fine = eph_dg%bz2ibz_dense(ikq_bz_fine)
-
-           !qq
-           iq_bz_fine = eph_dg%coarse_to_dense(iq_bz,jj)
-           iq_ibz_fine = eph_dg%bz2ibz_dense(iq_bz_fine)
-
-           eph_dg%mapping(:, jj) = &
-             [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
-              ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
-         enddo
+         call eph_double_grid_get_mapping(sigma%eph_doublegrid,kk,kq,qpt)
        endif
  
        ! Map q to qibz for tetrahedron
@@ -885,7 +855,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end if
          endif
        end if
-!ENCAPSULATE
        
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
@@ -1073,7 +1042,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
-!ENCAPSULATE
                ! Here we have to handle 3 different logical values
                ! leading to 9 different cases:
                !
@@ -1083,21 +1051,22 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !
                ! we will write this with nested conditionals using the order above
 
+               ! zcut mode
                if (sigma%qint_method == 0) then
                  if (sigma%use_doublegrid) then
                    cfact = 0
-                   do jj=1,eph_dg%ndiv
+                   do jj=1,sigma%eph_doublegrid%ndiv
                      ! Double Grid shared points weights
-                     ikq_bz_fine  = eph_dg%mapping(2, jj)
-                     weight = eph_dg%weights_dense(ikq_bz_fine)
+                     ikq_bz_fine  = sigma%eph_doublegrid%mapping(2, jj)
+                     weight = sigma%eph_doublegrid%weights_dense(ikq_bz_fine)
 
                      ! Electronic eigenvalue
-                     ikq_ibz_fine = eph_dg%mapping(5, jj)
-                     eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
+                     eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     iq_ibz_fine = eph_dg%mapping(6, jj)
+                     iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
                      wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
@@ -1115,27 +1084,28 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  else
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
                  end if
+               ! Tetrahedron method
                else
                  if (sigma%use_doublegrid) then
-                   do jj=1,eph_dg%ndiv
+                   do jj=1,sigma%eph_doublegrid%ndiv
                      ! Double Grid shared points weights
-                     ikq_bz_fine  = eph_dg%mapping(2, jj)
-                     weight = eph_dg%weights_dense(ikq_bz_fine)
+                     ikq_bz_fine  = sigma%eph_doublegrid%mapping(2, jj)
+                     weight = sigma%eph_doublegrid%weights_dense(ikq_bz_fine)
 
                      ! Electronic eigenvalue
-                     ikq_ibz_fine = eph_dg%mapping(5, jj)
-                     eig0mkq = eph_dg%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                     ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
+                     eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                      f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                      ! Phonon frequency
-                     iq_ibz_fine = eph_dg%mapping(6, jj)
+                     iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
                      wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
                      !if (wqnu < tol6) cycle
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
                      ! Map bz to lgk
-                     iq_bz_fine = eph_dg%mapping(3,jj)
-                     iq_ibz_fine = eph_dg%bz2lgkibz(iq_bz_fine)
+                     iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
+                     iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
 
                      if (sigma%imag_only) then
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
@@ -1159,7 +1129,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    endif
                  end if
                end if
-!ENCAPSULATE
 
                ! Derivative of sigma
                ! TODO: should calculate this with the double grid as well
@@ -3192,7 +3161,7 @@ end subroutine eph_double_grid_bz2ibz
 !! OUTPUT
 !!
 !! PARENTS
-!!asdff
+!!
 !! CHILDREN
 !!
 !! SOURCE
@@ -3252,6 +3221,63 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
 end subroutine sigmaph_get_all_qweights
 
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/eph_double_grid_mapping
+!! NAME
+!!  eph_double_grid_mapping
+!!
+!! FUNCTION
+!!  Campute mapping of k, k+q and q to the indexes in the double grid structure
+!!
+!! INPUTS
+!!  kk, kq, qpt: reduced coordinates of k, k+q and q to be mapped
+!!
+!! OUTPUT
+!!  mapping: array with the mapping of k, k+q and q to the BZ and IBZ of the double grid structure
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
+
+ implicit none
+
+!Arguments --------------------------------
+ type(eph_double_grid_t) :: self
+ real(dp) :: kk(3), kq(3), qpt(3) 
+!Variables --------------------------------
+ integer :: jj
+ integer :: ik_bz, ikq_bz, iq_bz
+ integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
+
+ ik_bz  = eph_double_grid_get_index(self,kk,1)
+ ikq_bz = eph_double_grid_get_index(self,kq,1)
+ iq_bz  = eph_double_grid_get_index(self,qpt,1)
+
+ ik_bz_fine  = self%coarse_to_dense(ik_bz,1)
+ ik_ibz_fine = self%bz2ibz_dense(ik_bz_fine)
+
+ !fine grid around kq
+ do jj=1,self%ndiv
+
+   !kq
+   ikq_bz_fine = self%coarse_to_dense(ikq_bz,jj)
+   ikq_ibz_fine = self%bz2ibz_dense(ikq_bz_fine)
+
+   !qq
+   iq_bz_fine = self%coarse_to_dense(iq_bz,jj)
+   iq_ibz_fine = self%bz2ibz_dense(iq_bz_fine)
+
+   self%mapping(:, jj) = &
+     [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
+      ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
+ enddo
+
+end subroutine 
 
 !!****f* m_sigmaph/eph_double_grid_debug
 !! NAME
