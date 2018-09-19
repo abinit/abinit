@@ -704,4 +704,121 @@ See [[abinit:restartxf]]
 """,
 ),
 
+Variable(
+    abivarname="spin_dipdip@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN DIPole DIPole interaction",
+    text="""
+    * 0 --> Switch off spin dipole-dipole interaction.
+    * 1 --> Switch on spin dipole-dipole interaction.
+    (Not yet implemented.)
+    """,
+),
+
+Variable(
+    abivarname="spin_dt@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1e-16,
+    mnemonics="SPIN Delta Time",
+    text="""
+    Time step for spin dynamics. Unit: second
+    """,
+),
+
+
+
+Variable(
+    abivarname="spin_dynamics@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN DYNAMICS",
+    text="""
+    Flag to run spin dynamics.
+    * 0 --> Do not run spin dynamics.
+    * 1 --> Run spin dynamics.
+    """,
+),
+
+Variable(
+    abivarname="spin_mag_field@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN Magnetic Field",
+    text="""
+    External magnetic field. Unit: Tesla.
+    """,
+),
+
+
+Variable(
+    abivarname="spin_nctime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN NetCdf write per number of TIME steps",
+    text="""
+    Write spin into netcdf file in every spin_nctime of spin dynamics time steps.
+    """,
+),
+
+Variable(
+    abivarname="spin_ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN dynamics total Number of TIME steps",
+    text="""
+    Total number of spin dynamics time  steps.
+    """,
+),
+
+
+Variable(
+    abivarname="spin_qpoint@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN QPOINT",
+    text="""
+    Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i \vec{q} \cdot \vec{R_i})$. The unit is the reciprocal lattice vectors of the unitcell.
+    """,
+),
+
+
+
+Variable(
+    abivarname="spin_temperature@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=325,
+    mnemonics="SPIN TEMPERATURE",
+    text="""
+    Temperature of spin for spin dynamics. Unit: Kelvin.
+    """,
+),
+
 ]
+
+
+
