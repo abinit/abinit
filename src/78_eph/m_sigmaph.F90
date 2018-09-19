@@ -2808,8 +2808,6 @@ end subroutine sigmaph_print
 !!***
 
 
-
-
 !!****f* m_sigmaph/eph_double_grid_new
 !! NAME
 !!
@@ -2871,6 +2869,8 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_double_grid_new'
 !End of the abilint section
+
+ implicit none
 
  type(crystal_t), intent(in) :: cryst
  type(ebands_t), intent(in) :: ebands_dense
@@ -3050,6 +3050,8 @@ subroutine eph_double_grid_free(self)
 #define ABI_FUNC 'eph_double_grid_free'
 !End of the abilint section
 
+ implicit none
+
  type(eph_double_grid_t) :: self
 
  ABI_FREE(self%weights_dense)
@@ -3086,7 +3088,7 @@ end subroutine eph_double_grid_free
 !!
 !! SOURCE
 
-type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
+integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3095,8 +3097,10 @@ type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 #define ABI_FUNC 'eph_double_grid_get_index'
 !End of the abilint section
 
- type(eph_double_grid_t) :: self
- integer :: opt
+ implicit none
+
+ type(eph_double_grid_t),intent(in) :: self
+ integer,intent(in) :: opt
  real(dp) :: kpt(3)
 
  if (opt==1) then
@@ -3115,6 +3119,32 @@ type (integer) function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 
 end function eph_double_grid_get_index
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/eph_double_grid_bz2ibz
+!! NAME
+!!  eph_double_grid_bz2ibz
+!!
+!! FUNCTION
+!!  Map the points of the Full to the irreducible Brillouin zone using the
+!!  indexes grid used in the double grid
+!!
+!! INPUTS
+!!  kpt_ibz: list of kpoints coordinated in the irreducible Brillouin zone
+!!  nibz: number of points in the irreducible Brillouin zone
+!!  symrec: symmetry operations of the reciprocal lattice
+!!  nsym: number of symmetry operations
+!!  bz2ibz: indexes mapping bz to ibz
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
 
 
@@ -3123,6 +3153,8 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_double_grid_bz2ibz'
 !End of the abilint section
+
+ implicit none
 
  type(eph_double_grid_t) :: self
  integer,intent(in) :: nibz, nsym
@@ -3163,13 +3195,13 @@ end subroutine eph_double_grid_bz2ibz
 !!  sigmaph_get_qweights
 !!
 !! FUNCTION
-!! Compute all the weights for q-space integration using the tetrahedron method
+!!  Compute all the weights for q-space integration using the tetrahedron method
 !!
 !! INPUTS
+!!  cryst<crystal_t>=Crystalline structure
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  spin: Spin index 
 !!  ikcalc: Index of the self-energy k-point in the kcalc array.
-!!  iq_ibz: Index of the q-points in the IBZ(k) if symsigma == 1 or in the full BZ if symsigma == 0
-!!  ibsum_kq: Band index in self-energy sum.
-!!  spin: Spin index
 !!  comm: MPI communicator
 !!
 !! OUTPUT
@@ -3264,6 +3296,7 @@ end subroutine sigmaph_get_all_qweights
 !! SOURCE
 
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
