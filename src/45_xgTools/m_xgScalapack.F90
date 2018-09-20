@@ -162,6 +162,10 @@ module m_xgScalapack
     if ( maxProc == 1 .or. M__CONFIG == SLK_DISABLED) then
       usable = .false.
       return
+    else if ( nthread > 1 ) then ! disable scalapack with threads since it is not threadsafe
+      ! This should be check with new elpa version en MPI+OpenMP
+      usable = .false.
+      return
     else
       usable = .true.
       maxProc = 2*((maxProc+1)/2) ! Round to next even number
