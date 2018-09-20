@@ -3023,7 +3023,7 @@ Variable(
 This input variable is relevant when sets of images are activated (see
 [[imgmov]]). Not all images might be required to evolve from one time step to
 the other. Indeed, in the String Method or the Nudged Elastic Band, one might
-impose that the extremal configurations of the string are fixed. In case 
+impose that the extremal configurations of the string are fixed. In case
 [[dynimage]](iimage)=0, the image with index "iimage" will be consider as
 fixed. Thus, there is no need to compute forces and stresses for this image at
 each time step. The purpose of defining extremal images is to make the input/output easier.
@@ -6335,7 +6335,7 @@ Variable(
     text="""
 Control the collective changes of images (see [[nimage]],[[npimage]],
 [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-Similar to [[ionmov]] in spirit, although here, a population of self-consistent 
+Similar to [[ionmov]] in spirit, although here, a population of self-consistent
 calculations for possibly different (evolving) geometries is managed, while with
 [[ionmov]], only self-consistent calculation for one (evolving) geometry is managed.
 In this respect the maximal number of time step for image propagation is
@@ -6410,7 +6410,7 @@ Variable(
     requires="[[extrapwf]] == 0 and [[ntimimage]] > 0",
     text="""
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
-Possible values of [[imgwfstor]] are 0 or 1. 
+Possible values of [[imgwfstor]] are 0 or 1.
 If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
 size [[nimage]] more than the storage needed for one set of wavefunctions..
 When the specific computation (optimization/SCF cycle ...) for this image is started,
@@ -6419,10 +6419,10 @@ the wavefunctions are reinitialised, either at random or from the initial wavefu
 any modification to take into account the computations at the previous value of itimimage.
 
 If [[nimage]] is large, the increase of memory need can be problematic, unless the wavefunctions
-are spread over many processors, which happens when [[paral_kgb]] == 1. 
+are spread over many processors, which happens when [[paral_kgb]] == 1.
 For some algorithms, e.g. when some geometry optimization
 is performed, [[imgmov]]==2 or 5, the gain in speed of choosing [[imgwfstor]]=1 can be quite large, e.g. two to four.
-For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller. 
+For algorithms of the molecular dynamics type, [[imgmov]]==9 or 13, the expected gain is smaller.
 Of course, with adequate memory resources, [[imgwfstor]]==1 should always be preferred.
 """,
 ),
@@ -6604,16 +6604,16 @@ friction coefficient ([[friction]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 12 --> Isokinetic ensemble molecular dynamics. 
-The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]], 
-as worked out in [cite:Minary2003]]. 
+  * 12 --> Isokinetic ensemble molecular dynamics.
+The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
+as worked out in [cite:Minary2003]].
 The conservation of the kinetic energy is obtained within machine precision, at each step.
-As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the 
+As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
 microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
 minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
 total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly, 
+e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
 **Purpose:** Molecular dynamics
@@ -7492,7 +7492,7 @@ and there are 41 three-dimensional GGA (23 for X, 8 for C, 10 for combined
 XC). Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 
-(S)LDA functionals (do not forget to add a minus sign, as discussed above)
+==(S)LDA functionals== (do not forget to add a minus sign, as discussed above)
 
   * 001 --> XC_LDA_X  [[cite:Dirac1930]], [[cite:Bloch1929]]
   * 002 --> XC_LDA_C_WIGNER  Wigner parametrization [[cite:Wigner1938]]
@@ -7520,36 +7520,36 @@ This means having [[usekden]] = 1.
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
-GGA functionals (do not forget to add a minus sign, as discussed above)
+==GGA functionals== (do not forget to add a minus sign, as discussed above)
 
-  * 84 --> XC_GGA_C_OP_XALPHA  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
-  * 85 --> XC_GGA_C_OP_G96  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
-  * 86 --> XC_GGA_C_OP_PBE  one-parameter progressive functional (PBE version) [[cite:Tsuneda1999]]
-  * 87 --> XC_GGA_C_OP_B88  one-parameter progressive functional (B88 version) [[cite:Tsuneda1999]]
-  * 88 --> XC_GGA_C_FT97  Filatov & Thiel correlation [[cite:Filatov1997a]]  [[cite:Filatov1997]]
+  * 084 --> XC_GGA_C_OP_XALPHA  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 085 --> XC_GGA_C_OP_G96  one-parameter progressive functional (G96 version) [[cite:Tsuneda1999]]
+  * 086 --> XC_GGA_C_OP_PBE  one-parameter progressive functional (PBE version) [[cite:Tsuneda1999]]
+  * 087 --> XC_GGA_C_OP_B88  one-parameter progressive functional (B88 version) [[cite:Tsuneda1999]]
+  * 088 --> XC_GGA_C_FT97  Filatov & Thiel correlation [[cite:Filatov1997a]]  [[cite:Filatov1997]]
 
 !!! warning
     this functional is not tested. Use at your own risks.
 
-  * 89 --> XC_GGA_C_SPBE  PBE correlation to be used with the SSB exchange [[cite:Swart2009]]
-  * 90 --> XC_GGA_X_SSB_SW  Swart, Sola and Bickelhaupt correction to PBE [[cite:Swart2009a]]
-  * 91 --> XC_GGA_X_SSB  [[cite:Swart2009]]
+  * 089 --> XC_GGA_C_SPBE  PBE correlation to be used with the SSB exchange [[cite:Swart2009]]
+  * 090 --> XC_GGA_X_SSB_SW  Swart, Sola and Bickelhaupt correction to PBE [[cite:Swart2009a]]
+  * 091 --> XC_GGA_X_SSB  [[cite:Swart2009]]
 
 !!! warning
     This functional gives NaN on IBM (XG20130608).
 
-  * 92 -->  XC_GGA_X_SSB_D  [[cite:Swart2009]]
+  * 092 -->  XC_GGA_X_SSB_D  [[cite:Swart2009]]
 
 !!! warning
     This functional gives NaN on IBM (XG20130608).
 
-  * 93 -->  XC_GGA_XC_HCTH_407P  HCTH/407+ [[cite:Boese2003]]
-  * 94 -->  XC_GGA_XC_HCTH_P76  HCTH p=7/6 [[cite:Menconi2001]]
-  * 95 -->  XC_GGA_XC_HCTH_P14  HCTH p=1/4 [[cite:Menconi2001]]
-  * 96 -->  XC_GGA_XC_B97_GGA1  Becke 97 GGA-1 [[cite:Cohen2000]]
-  * 97 -->  XC_GGA_XC_HCTH_A  HCTH-A [[cite:Hamprecht1998]]
-  * 98 -->  XC_GGA_X_BPCCAC  BPCCAC (GRAC for the energy) [[cite:Bremond2012]]
-  * 99 -->  XC_GGA_C_REVTCA  Tognetti, Cortona, Adamo (revised) [[cite:Tognetti2008]]
+  * 093 -->  XC_GGA_XC_HCTH_407P  HCTH/407+ [[cite:Boese2003]]
+  * 094 -->  XC_GGA_XC_HCTH_P76  HCTH p=7/6 [[cite:Menconi2001]]
+  * 095 -->  XC_GGA_XC_HCTH_P14  HCTH p=1/4 [[cite:Menconi2001]]
+  * 096 -->  XC_GGA_XC_B97_GGA1  Becke 97 GGA-1 [[cite:Cohen2000]]
+  * 097 -->  XC_GGA_XC_HCTH_A  HCTH-A [[cite:Hamprecht1998]]
+  * 098 -->  XC_GGA_X_BPCCAC  BPCCAC (GRAC for the energy) [[cite:Bremond2012]]
+  * 099 -->  XC_GGA_C_REVTCA  Tognetti, Cortona, Adamo (revised) [[cite:Tognetti2008]]
   * 100 -->  XC_GGA_C_TCA  Tognetti, Cortona, Adamo [[cite:Tognetti2008a]]
   * 101 -->  XC_GGA_X_PBE  Perdew, Burke & Ernzerhof exchange [[cite:Perdew1996]]  [[cite:Perdew1997]]
   * 102 -->  XC_GGA_X_PBE_R  Perdew, Burke & Ernzerhof exchange (revised) [[cite:Zhang1998]]
@@ -7648,6 +7648,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 198 -->  XC_GGA_XC_TH_FCFO  Tozer and Handy v. FCFO [[cite:Tozer1997]]
   * 199 -->  XC_GGA_XC_TH_FCO  Tozer and Handy v. FCO [[cite:Tozer1997]]
   * 200 -->  XC_GGA_C_OPTC  Optimized correlation functional of Cohen and Handy [[cite:Cohen2001]]
+  * (for MetaGGA and Hybrid functionals, with indices in the 200-499 range, see the later sections)
   * 524 -->  XC_GGA_X_WPBEH  short-range version of the PBE [[cite:Heyd2003]]
   * 525 -->  XC_GGA_X_HJS_PBE  HJS screened exchange PBE version [[cite:Henderson2008]]
   * 526 -->  XC_GGA_X_HJS_PBE_SOL  HJS screened exchange PBE_SOL version [[cite:Henderson2008]]
@@ -7663,7 +7664,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
     This functional is not tested. Use at your own risks.
 
 
-MetaGGA functionals (do not forget to add a minus sign, as discussed above).
+==MetaGGA functionals== (do not forget to add a minus sign, as discussed above).
 See [[cite:Sun2011]] for the formulas.
 
   * 202 -->  XC_MGGA_X_TPSS  Tao, Perdew, Staroverov & Scuseria [[cite:Tao2003]]  [[cite:Perdew2004]]
@@ -7687,30 +7688,34 @@ See [[cite:Sun2011]] for the formulas.
 
   * 232 -->  XC_MGGA_C_VSXC  VSxc from Van Voorhis and Scuseria (correlation part) [[cite:Voorhis1998]]
 
-Hybrid functionals (do not forget to add a minus sign, as discussed above).
+==Hybrid functionals== (do not forget to add a minus sign, as discussed above).
 
   * 402 -->  XC_HYB_GGA_XC_B3LYP  The (in)famous B3LYP [[cite:Stephens1994]]
   * 406 -->  XC_HYB_GGA_XC_PBEH  PBEH (PBE0) [[cite:Adamo1999]]  [[cite:Ernzerhof1999]]
   * 427 -->  XC_HYB_GGA_XC_HSE03  The 2003 version of the screened hybrid HSE
-                                  (in this case one should use $\omega^{HF} = 0.15/\sqrt{2}$
-                                  and $\omega^{PBE} = 0.15*(2.0)^{1/3}$ )
+                                  (this case corresponds to [[hyb_range_fock]]=$\omega^{HF} = 0.15/\sqrt{2}$
+                                  and [[hyb_range_dft]]=$\omega^{PBE} = 0.15*(2.0)^{1/3}$ )
   * 428 -->  XC_HYB_GGA_XC_HSE06  The 2006 version of the screened hybrid HSE
-                                  (in this case one should use $\omega^{HF} = \omega^{PBE} = 0.11$)
-                                  (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
-                                  Note that there is an enormous mess in the literature
-                                  concerning the values of omega in HSE. This is due to an error in the original
-                                  paper that stated that they had used $\omega=0.15$. This was in fact not true,
-                                  and the real value used was $\omega^{HF} = 0.15 / \sqrt{2} \sim 0.1061$
-                                  and $\omega^{PBE} = 0.15 * (2.0)^{1/3} \sim 0.1890$.
-                                  In 2006 Krukau et al [[cite:Krukau2006]] tried
-                                  to clarify the situation, and called HSE03 to the above choice of parameters,
-                                  and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
-                                  several properties for atoms they reached the conclusion that the best value
-                                  for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
-                                  HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
-                                  same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
-                                  and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
+                                  (this case corresponds to [[hyb_range_fock]]=[[hyb_range_dft]]=$\omega^{HF} = \omega^{PBE} = 0.11$)
                                   [[cite:Heyd2003]] [[cite:Heyd2006]] [[cite:Krukau2006]]
+
+!!! warning
+    (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+
+    Note that there is an enormous mess in the literature
+    concerning the values of omega in HSE. This is due to an error in the original
+    paper that stated that they had used $\omega=0.15$. This was in fact not true,
+    and the real value used was $\omega^{HF} = 0.15 / \sqrt{2} \sim 0.1061$
+    and $\omega^{PBE} = 0.15 * (2.0)^{1/3} \sim 0.1890$.
+
+    In 2006 Krukau et al [[cite:Krukau2006]] tried
+    to clarify the situation, called HSE03 the above choice of parameters,
+    and called HSE06 to the functional where $\omega^{HF}=\omega^{PBE}$. By testing
+    several properties for atoms they reached the conclusion that the best value
+    for $\omega=0.11$. Of course, codes are just as messy as the papers. In Quantum Espresso
+    HSE06 has the value $\omega=0.106.$ VASP, on the other hand, uses for HSE03 the
+    same value $\omega^{HF} = \omega^{PBE} = 0.3 (A^{-1}) \sim 0.1587$,
+    and for HSE06 $\omega^{HF} = \omega^{PBE} = 0.2 (A^{-1}) \sim 0.1058$.
 
   * 456 -->  XC_HYB_GGA_XC_PBE0_13  PBE0-1/3 [[cite:Cortona2012]]
 """,
@@ -8719,7 +8724,7 @@ temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
 
 In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
-to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run. 
+to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
 
@@ -11361,7 +11366,7 @@ Variable(
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 
   * [[occopt]] = 0:
-All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin 
+All k points and spins have the same number of bands. All k points have the same occupancies of bands for a given spin
 (but these occupancies may differ for spin up and spin down - typical for ferromagnetic insulators).
 [[nband]] is given as a single number, and [[occ]]([[nband]] * [[nsppol]]) is an array of
 [[nband]] * [[nsppol]] elements, read in by the code.
@@ -15275,8 +15280,16 @@ Variable(
     defaultval=1,
     mnemonics="Response Function METHod",
     text="""
-Selects method used in response function calculations. Presently, only [[rfmeth]] = 1 is
-allowed.
+Selects method used in response function calculations. Presently, only abs([[rfmeth]]) = 1 is
+allowed. This corresponds to storing matrix elements of the 2DTE computed using non-stationary expressions,
+instead of stationary ones.
+
+The difference between positive and negative values is rather technical. Very often, the symmetries can be used in such a way that
+some matrix elements can be proven to be zero even without doing any computation. Positive values of [[rfmeth]] activate
+this use of symmetries, while it is denied when [[rfmeth]] is negative. There is an indirect additional outcome of this,
+as a symmetrization of the whole 2DTE is sometimes rendered possible when the additional knowledge of the zero matrix elements
+is available. Thus, the results obtained for positive and negative values of [[rfmeth]] might slightly differ for non-zero elements of the 2DTE,
+if they are computed in both cases. 
 """,
 ),
 
@@ -17341,7 +17354,7 @@ Variable(
     text="""
 This variable is determined by the pseudopotentials files. PAW calculations
 (see [[tutorial:paw1]]) can only be performed with PAW atomic data input files,
-while pseudopotential calculations are performed in ABINIT with norm-conserving 
+while pseudopotential calculations are performed in ABINIT with norm-conserving
 pseudopotential input files. Most functionalities in ABINIT are
 available with either type of calculation.
 """,
@@ -17362,11 +17375,14 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1 or 2, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
     * If [[usepawu]] = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
+
+    * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
+    polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
 If LDA+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
@@ -18978,7 +18994,18 @@ Variable(
     mnemonics="PRinT Kleynman-Bylander Form Factors",
     text="""
 This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
-produced by the GS code.
+produced at the end of the ground-state calculation. Remember to set [[iomode]] to 3.
+
+The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
+of the non-local part of the (NC) pseudopotentials.
+This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+The option is ignored if PAW.
+
+!!! important
+
+    At the time of writing (|today|, [[istwfk]] must be set to 1 for all k-points in the IBZ
+    since external codes do not support wavefunctions given on the reduced G-sphere.
+    Moreover [[useylm]] must be 0 (default if NC pseudos).
 """,
 ),
 

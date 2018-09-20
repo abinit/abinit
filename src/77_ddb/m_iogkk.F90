@@ -1428,8 +1428,7 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
 
        ! matrix is symmetrized like a dynamical matrix. No change of band or k
        !  in here. This should be checked (if we have to restrict further the symmetry operations)
-       call d2sym3(tmpflg,tmpval,Cryst%indsym,mpert,natom,Cryst%nsym,qpt,symq,Cryst%symrec,Cryst%symrel,qtimrev)
-
+       call d2sym3(tmpflg,tmpval,Cryst%indsym,mpert,natom,Cryst%nsym,qpt,symq,Cryst%symrec,Cryst%symrel,qtimrev,1)
        if (sum(tmpflg(:,1:natom,:,1:natom)) /= 3*natom*3*natom) then
          write(msg,'(3a,4i0)')&
 &         'A perturbation is missing after completion with d2sym3',ch10,&

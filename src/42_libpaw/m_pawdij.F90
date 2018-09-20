@@ -4270,7 +4270,11 @@ end subroutine pawdijfr
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
          if (ndij/=4.or.option_interaction==2) then
-           vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
+           if(pawtab%usepawu/=4) then
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
+           else
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
+           endif
          else if (ndij==4.and.option_interaction==1) then
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
          else if (ndij==4.and.option_interaction==3) then
