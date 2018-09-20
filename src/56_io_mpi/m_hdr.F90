@@ -3346,6 +3346,13 @@ end subroutine hdr_fort_write
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'hdr_backspace'
+!End of the abilint section
+
  implicit none
 
 !Arguments ------------------------------------
@@ -3722,6 +3729,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
 contains
  integer function vid(vname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

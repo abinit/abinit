@@ -273,7 +273,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ABI_FREE(wtk)
 
  ! Debug section.
- ABI_CHECK(sum(new%weights) - one < tol12, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
+ ABI_CHECK(sum(new%weights) - one < tol6, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
 
  if (debug /= 0) then
    do ik_ibz=1,new%nibz
