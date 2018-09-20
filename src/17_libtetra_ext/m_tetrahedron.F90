@@ -94,6 +94,9 @@ type, public :: t_tetrahedron
   !(3,4,ntetra)
   ! flag to wrap tetrahedron summit into IBZ
 
+  integer,allocatable :: ibz_tetra_count(:)
+  integer,allocatable :: ibz_tetra_mapping(:,:)
+
 end type t_tetrahedron
 
 public :: init_tetra               ! Initialize the object
@@ -150,6 +153,12 @@ subroutine destroy_tetra (tetra)
  end if
  if (allocated(tetra%tetra_wrap))  then
    TETRA_DEALLOCATE(tetra%tetra_wrap)
+ end if
+ if (allocated(tetra%ibz_tetra_count)) then
+   TETRA_DEALLOCATE(tetra%ibz_tetra_count)
+ end if
+ if (allocated(tetra%ibz_tetra_mapping)) then
+   TETRA_DEALLOCATE(tetra%ibz_tetra_mapping)
  end if
 
 end subroutine destroy_tetra
@@ -211,6 +220,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 !Local variables-------------------------------
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
+ integer :: ii,jj,maxibz,ind_ibz(4),ikibz,nkpt_ibz
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp_) :: shift1,shift2,shift3, rcvol,hashfactor
  type(kptrank_type) :: kptrank_t
@@ -475,6 +485,48 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  TETRA_DEALLOCATE(tetra_full_)
  TETRA_DEALLOCATE(tetra_mult_)
  TETRA_DEALLOCATE(tetra_wrap_)
+
+ !
+ ! Create a mapping between the irreducible k-points
+ ! and all the tetrahedron contributing with some weight
+ !
+ nkpt_ibz = maxval(indkpt)
+
+ ! 1. First we count what is the maximum number of distinct tetrahedra
+ ! that each k-point contains
+ TETRA_ALLOCATE(tetra%ibz_tetra_count,(nkpt_ibz))
+ tetra%ibz_tetra_count(:) = 0
+ ! Count max tetra contrubuting
+ do ii=1,tetra%ntetra
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ind_ibz(:) = tetra%tetra_full(:,1,ii)
+   ! count max tetra contributing
+   do jj=1,4
+     ikibz = ind_ibz(jj)
+     if (ikibz > nkpt_ibz) cycle
+     tetra%ibz_tetra_count(ikibz) = tetra%ibz_tetra_count(ikibz) + 1
+   end do
+   !
+ end do
+
+ ! 2. Then we build mapping of ikbz to tetra
+ TETRA_ALLOCATE(tetra%ibz_tetra_mapping,(nkpt_ibz,maxval(tetra%ibz_tetra_count)))
+ tetra%ibz_tetra_count(:) = 0
+ do ii=1,tetra%ntetra
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ind_ibz(:) = tetra%tetra_full(:,1,ii)
+   ! Use the counter to move pointer and then fill index
+   do jj=1,4
+     ikibz = ind_ibz(jj)
+     if (ikibz > nkpt_ibz) cycle
+     ! avoid putting the same index twice
+     if (tetra%ibz_tetra_count(ikibz) > 0) then
+       if (tetra%ibz_tetra_mapping(ikibz,tetra%ibz_tetra_count(ikibz)) == ii) cycle
+     end if
+     tetra%ibz_tetra_count(ikibz) = tetra%ibz_tetra_count(ikibz) + 1
+     tetra%ibz_tetra_mapping(ikibz,tetra%ibz_tetra_count(ikibz)) = ii
+   end do
+ end do
 
 end subroutine init_tetra
 !!***
@@ -1985,7 +2037,7 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
 !scalars
  !integer,save :: done = 0
  integer,parameter :: nene=3
- integer :: itetra,ii,iw,ie
+ integer :: itetra,ii,jj,iw,ie
  logical :: samew
  real(dp_),parameter :: max_occ1 = one
  real(dp_) :: enemin, enemax
@@ -1998,17 +2050,16 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
  weights = zero
 
  ! For each tetrahedron
- do itetra=1,tetra%ntetra
+ do jj=1,tetra%ibz_tetra_count(ik_ibz)
+   itetra = tetra%ibz_tetra_mapping(ik_ibz,jj)
+
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(:) = tetra%tetra_full(:,1,itetra)
-   ! Cycle if this tetra does not contribute to this k-point.
-   if (all(ind_ibz /= ik_ibz)) cycle
 
    ! Sort energies before calling get_onetetra_
    eigen_1tetra(:) = eig_ibz(ind_ibz(:))
    call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
-   ! Loop over frequency points
    do iw=1,nw
      samew = .False.
      if (present(wtol)) then
@@ -2019,20 +2070,7 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
          ie = nene / 2 + 1
          call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
             theta_tmp, delta_tmp)
-     else
-        !write(*,*)"Got same omega"
      end if
-
-     !if (iw == 5 .and. ik_ibz /= 1 .and. wvals(iw) > eigen_1tetra(2) .and. wvals(iw) < eigen_1tetra(3)) then
-     !  done = done + 1
-     !  if (done == 10) then
-     !    write(*, *)"Got it with delta_tmp ", maxval(delta_tmp(ie, :))
-     !    do ii=1,nene
-     !      write(777, *)delta_tmp(ii, :)
-     !    end do
-     !    stop
-     !  end if
-     !end if
 
      ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
      do ii=1,4

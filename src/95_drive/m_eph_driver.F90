@@ -167,9 +167,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: ii
+ integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
@@ -181,7 +182,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,efmas_path,path
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,efmas_path,path,wfk_fname_dense
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -197,9 +198,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  integer :: count_wminmax(2)
- real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp) :: wminmax(2)
+ integer,allocatable :: indqq(:,:)
+ real(dp),parameter :: k0(3)=zero
+ real(dp) :: dksqmax, dksqmin, dksqmean, maxfreq, error
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  real(dp),allocatable :: kpt_efmas(:,:)
@@ -409,11 +412,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      !NOT_IMPLEMENTED_ERROR()
      ! TODO: Be careful with the trick used in elphon for passing the concentration
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-     call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+     call ebands_set_nelect(ebands, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
      call wrtout(ab_out,msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-       call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
+       call ebands_set_nelect(ebands_kq, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
        call wrtout(ab_out,msg)
      end if
    end if

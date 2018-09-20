@@ -394,7 +394,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) + k could not be generated from a symmetrical one. dksqmax: ",dksqmax
+    "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
 
@@ -598,7 +598,7 @@ subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_p
  end do
 
  ! Rescale weights so that caller can sum over the full BZ.
- if (use_bzsum_) deltaw_pm = deltaw_pm / (self%lgk%weights(iqlk) * self%nbz)
+ if (use_bzsum_) deltaw_pm = deltaw_pm / ( self%lgk%weights(iqlk) * self%nbz )
 
 end subroutine ephwg_get_dweights
 !!***
@@ -727,7 +727,7 @@ subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweigh
  end do ! itetra
 
  ! Rescale weights so that the caller can sum over the full BZ.
- if (use_bzsum_) cweights = cweights / (self%lgk%weights(iqlk) * self%nbz)
+ if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
  call xmpi_sum(cweights, comm, ierr)
 
