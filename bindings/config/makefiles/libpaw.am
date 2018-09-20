@@ -20,7 +20,7 @@ LIBPAW_VERSION = @libpaw_version@
 LIBPAW_TAR_NAME = libpaw-$(LIBPAW_VERSION)
 
 #Abilint interfaces
-DO_COPY_INTERFACES="$(GREP) -s -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces_*.F90 2>/dev/null"
+DO_COPY_INTERFACES=''`$(GREP) -s -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces_*.F90 2>/dev/null`
 
 bindings-ready: dist
 
