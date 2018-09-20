@@ -845,7 +845,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        if (sigma%use_doublegrid) then
          call eph_double_grid_get_mapping(sigma%eph_doublegrid,kk,kq,qpt)
        endif
- 
+
        ! Map q to qibz for tetrahedron
        if (sigma%qint_method > 0) then
          if (.not.sigma%use_doublegrid) then
@@ -857,7 +857,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end if
          endif
        end if
-       
+
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
@@ -2860,7 +2860,7 @@ end subroutine sigmaph_print
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!!  spin: Spin index 
+!!  spin: Spin index
 !!  ikcalc: Index of the self-energy k-point in the kcalc array.
 !!  comm: MPI communicator
 !!
@@ -2919,7 +2919,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
       if (mod(this_calc,nprocs) /= my_rank) cycle
       band = ib_k + bstart_ks - 1
       eig0nk = ebands%eig(band,ik_ibz,spin)
-      eminmax(1) = eig0nk - 0.01 
+      eminmax(1) = eig0nk - 0.01
       eminmax(2) = eig0nk + 0.01
       call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
       ! we pay the efficiency here
