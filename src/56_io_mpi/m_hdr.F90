@@ -93,6 +93,7 @@ MODULE m_hdr
  public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
  public :: hdr_ncread              ! Reads the header from a Netcdf file.
  public :: hdr_fort_write          ! Writes the header and fform to unformatted file
+ public :: hdr_backspace           ! Backspace the header (Fortran IO).
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
@@ -3325,6 +3326,64 @@ end subroutine hdr_fort_write
 
 !----------------------------------------------------------------------
 
+!!****f* m_hdr/hdr_backspace
+!! NAME
+!! hdr_backspace
+!!
+!! FUNCTION
+!!  Backspace the header. Return exit status and error message
+!!  The file is supposed to be open already
+!!
+!! INPUTS
+!!  Hdr<hdr_type>=The header of the file.
+!!  unit=unit number of the unformatted file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function hdr_backspace(hdr, unit, msg) result(ierr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'hdr_backspace'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: unit
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: irec
+
+!*************************************************************************
+
+ ierr = 0
+ do irec=1,5 + hdr%npsp
+   backspace(unit=unit, err=10, iomsg=msg)
+ end do
+
+ if (hdr%usepaw == 1) then
+   do irec=1,2
+     backspace(unit=unit, err=10, iomsg=msg)
+   end do
+ end if
+
+ return
+
+ ! Handle IO-error
+10 ierr = 1
+
+end function hdr_backspace
+!!***
+
 !!****f* m_hdr/hdr_ncwrite
 !! NAME
 !! hdr_ncwrite
@@ -3979,7 +4038,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      write(msg,'(a,F7.4,a,F7.4)')&
 &     'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
 &     'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
      tgrid = 1
    end if
  end if
@@ -4017,9 +4076,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
  if ( ANY(hdr%ngfft/=hdr0%ngfft) ) then
 !  For sensible rho(r) or V(r) data, fft grid must be identical
-!  MG TODO one should perform an FFT interpolation when the two ngfft differ!
+!  Note, however, that we allow for different FFT meshes and we interpolate the density in the
+!  caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(a,a,a,a,a)' )&
+     write(msg, '(5a)' )&
 &     'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
 &     'Action: change your fft grid or your restart file.'
      MSG_ERROR(msg)
@@ -4030,7 +4090,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  if (hdr%nkpt/=hdr0%nkpt) then
    if (abifile%class == "wf_planewave") then
      write(msg,'(a,i0,a,i0)' )'input nkpt=',hdr%nkpt,' not equal disk file nkpt=',hdr0%nkpt
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
    end if
    tkpt=1; twfk=1
  end if
@@ -4123,10 +4183,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (istart<=100) then
        write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
        call wrtout(std_out,msg,mode_paral)
-       if (istop>100) then
-         write(msg,'(a)') '=> stop printing nband after 100 values'
-         call wrtout(std_out,msg,mode_paral)
-       end if
+       if (istop>100) call wrtout(std_out, '=> stop printing nband after 100 values', mode_paral)
      end if
    end do
 
@@ -4154,8 +4211,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Compare symmetry arrays (integers) symafm(nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symafm(nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4176,8 +4233,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tsym=1
  end if
 
-!Compare symmetry arrays (integers) symrel(3,3,nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symrel(3,3,nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4255,8 +4312,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
        write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
        call wrtout(std_out,msg,mode_paral)
        if (istop>100) then
-         write(msg,'(a)') '=> stop printing istwfk after 100 values'
-         call wrtout(std_out,msg,mode_paral)
+         call wrtout(std_out, '=> stop printing istwfk after 100 values' ,mode_paral)
        end if
      end if
    end do
@@ -4264,7 +4320,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
 &       'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
-       MSG_WARNING(msg)
+       MSG_COMMENT(msg)
        twfk=1
      end if
    end do
@@ -4273,10 +4329,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
     write(msg,"(2(a,9(i0,1x)))")"input kptrlatt= ",hdr%kptrlatt," /= disk file kptrlatt=",hdr0%kptrlatt
-    MSG_WARNING(msg)
+    MSG_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_WARNING(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
+    MSG_COMMENT(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
     MSG_WARNING(sjoin("input pawcpxocc=",itoa(hdr%pawcpxocc)," /= disk file pawcpxocc=",itoa(hdr0%pawcpxocc)))
@@ -4305,8 +4361,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    write(msg,'(a,34x,a,a)') '  kpt:','|','  kpt:'
    call wrtout(std_out,msg,mode_paral)
    do ii = 1,min(nkpt,nkpt_max)
-     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')&
-&     hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
+     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
      call wrtout(std_out,msg,mode_paral)
      if(ii>nkpt_max)then
        call wrtout(std_out,'The number of printed k points is sufficient... stop writing them.',mode_paral)
@@ -4448,7 +4503,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !Should perform some checks related to pertcase and qptn,
 !that have been introduced in the header in v4.1
-!Warning : a GS file might be read, while the hdr corresponds
+!Warning: a GS file might be read, while the hdr corresponds
 !to a RF file (to initialize k+q), and vice-versa (in nonlinear).
 
 !Now check agreement of psp headers too
@@ -4457,7 +4512,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    itest=0
 
    do ipsp=1,npsp
-
      write(msg,'(a,i3,a,9x,a,a,i3,a)')&
 &     '  pseudopotential atom type',ipsp,':','|','  pseudopotential atom type',ipsp,':'
      call wrtout(std_out,msg,mode_paral)
@@ -4500,8 +4554,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      end if
 
 !    Second, test
-!    NOTE, XG 000719 : should do something about pspso
-!    NOTE, XG 020716 : znucl and zion are not written
+!    NOTE, XG 000719: should do something about pspso
+!    NOTE, XG 020716: znucl and zion are not written
      if (abs(hdr%znuclpsp(ipsp)-hdr0%znuclpsp(ipsp))>tol6) itest=1
      if (abs(hdr%zionpsp(ipsp)-hdr0%zionpsp(ipsp))>tol6) then
        itest=1; tpsch=1
@@ -4512,15 +4566,13 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
 
    if (itest==1) then
-     msg = 'input psp header does not agree perfectly with disk file psp header.'
-     MSG_WARNING(msg)
+     MSG_WARNING('input psp header does not agree perfectly with disk file psp header.')
      tpseu=1
    end if
  end if
 
 !Finally, read residm and etotal ("current value" not known), and check xred.
  if (hdr%natom==hdr0%natom) then
-
    natom=hdr%natom
    write(msg,'(a,33x,a,a)') '  xred:','|','  xred:'
    call wrtout(std_out,msg,mode_paral)
@@ -4566,12 +4618,11 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
    if (abifile%class == "wf_planewave") then
      restart=2
-     msg = 'Restart of self-consistent calculation need translated wavefunctions.'
+     MSG_COMMENT('Restart of self-consistent calculation need translated wavefunctions.')
    else if (abifile%class == "density") then
      restart=0
-     msg = 'Illegal restart of non-self-consistent calculation'
+     MSG_WARNING('Illegal restart of non-self-consistent calculation')
    end if
-   MSG_WARNING(msg)
 
    write(msg,'(a,a1,a)') &
 &   '  Indeed, critical differences between current calculation and',ch10,&

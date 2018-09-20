@@ -2963,8 +2963,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
      call wrtout(iout,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
-   write(message,*)' No Ewald or frozen-wf contrib.:',&
-&   ' the relaxation energy is the total one'
+   write(message,*)' No Ewald or frozen-wf contrib.:',' the relaxation energy is the total one'
    if(berry_activated) then
      numb='10';
      write(message,'(3a,es20.10)')' ',trim(numb),' Berry phase energy :',eberry
@@ -2984,8 +2983,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+3 .or. ipert==natom+4) then
    numb='11,12,13';if (usepaw==1) numb='12,13,14'
    write(message, '(4a)' )&
-&   ' ',trim(numb),' Non-relaxation  contributions : ',&
-&   'frozen-wavefunctions and Ewald'
+&   ' ',trim(numb),' Non-relaxation  contributions : ','frozen-wavefunctions and Ewald'
    call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
    write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
@@ -2995,8 +2993,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 
    numb='14,15,16';if (usepaw==1) numb='15,16,17'
    write(message, '(4a)' )&
-&   ' ',trim(numb),' Non-relaxation  contributions : ',&
-&   'frozen-wavefunctions and Ewald'
+&   ' ',trim(numb),' Non-relaxation  contributions : ','frozen-wavefunctions and Ewald'
    call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
    write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
@@ -3006,12 +3003,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 
    numb='17';if (usepaw==1) numb='18'
    write(message, '(4a)' )&
-&   ' ',trim(numb),' Non-relaxation  contributions : ',&
-&   'pseudopotential core energy'
+&   ' ',trim(numb),' Non-relaxation  contributions : ','pseudopotential core energy'
    call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8)' ) &
-&   '  pspcore=',eii
+   write(message, '(a,es17.8)' ) '  pspcore=',eii
    call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
    if (usepaw==1) then

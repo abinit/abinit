@@ -127,7 +127,9 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
    dvdb_qcache_mb4     5.12000000E+02
         ph_nqpath           3
          ph_ngqpt       16   16   16
--          fftalg         312
+-          fftalg         112
+        freqspmax      3.67493254E-02 Hartree
+        freqspmin     -3.67493254E-02 Hartree
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -152,6 +154,7 @@ P           mkmem           8
             natom           2
             nband          54
            ndtset           4
+          nfreqsp         100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
@@ -167,6 +170,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
+           prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -344,7 +348,8 @@ Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
+Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
+Number of frequency in generalized Eliashberg functions: 1749
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -356,11 +361,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -375,9 +381,46 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.368   -0.318   -0.343   -0.008    0.928   -0.371    0.028    8.260    8.047
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.272 (adiabatic:    4.688)
- QP_gap - KS_gap:   -0.354 (adiabatic:   -0.938)
+ QP gap:    5.272 (OTMS:    4.688)
+ QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
+omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+For band:1
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:2
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:3
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:4
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:5
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+
+
+
+omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+For band:1
+  -8.799    -0.051    -0.001
+  -8.789    -0.052    -0.001
+For band:2
+  12.790     0.668    -0.364
+  12.800     0.652    -0.333
+For band:3
+  12.790     0.668    -0.364
+  12.800     0.652    -0.333
+For band:4
+  12.790     0.667    -0.364
+  12.800     0.651    -0.333
+For band:5
+  18.416    -0.269    -0.295
+  18.426    -0.287    -0.316
+
+
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.782    0.045    0.066   -0.115    0.677   -0.011    0.077    0.000    0.000
@@ -390,8 +433,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    8  28.462   28.232   -0.230   -0.504   -0.275    0.456   -0.973    0.469    6.396    6.023
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.832 (adiabatic:    9.161)
- QP_gap - KS_gap:   -0.528 (adiabatic:   -2.199)
+ QP gap:   10.832 (OTMS:    9.161)
+ QP_gap - KS_gap:   -0.528 (OTMS:   -2.199)
  
 
 ================================================================================
@@ -475,7 +518,8 @@ Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
+Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
+Number of frequency in generalized Eliashberg functions: 1749
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -487,11 +531,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -506,9 +551,46 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.368   -0.318   -0.343   -0.008    0.928   -0.371    0.028    8.260    8.047
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.272 (adiabatic:    4.688)
- QP_gap - KS_gap:   -0.354 (adiabatic:   -0.938)
+ QP gap:    5.272 (OTMS:    4.688)
+ QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
+omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+For band:1
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:2
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:3
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:4
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+For band:5
+   0.003     0.000    -0.000     0.000
+   0.003     0.000    -0.000     0.000
+
+
+
+omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+For band:1
+  -8.799    -0.051    -0.001
+  -8.789    -0.052    -0.001
+For band:2
+  12.790     0.668    -0.364
+  12.800     0.652    -0.333
+For band:3
+  12.790     0.668    -0.364
+  12.800     0.652    -0.333
+For band:4
+  12.790     0.668    -0.364
+  12.800     0.652    -0.333
+For band:5
+  18.416    -0.269    -0.295
+  18.426    -0.286    -0.316
+
+
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.782    0.045    0.066   -0.115    0.677   -0.011    0.077    0.000    0.000
@@ -733,7 +815,8 @@ Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 5.000000E-02 [eV]
+Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
+Number of frequency in generalized Eliashberg functions: 1749
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
@@ -745,11 +828,12 @@ List of K-points for self-energy corrections:
 Final results in eV.
 Notations:
    eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP-eKS: Difference between the QP and the KS energy.
+   eQP - eKS: Difference between the QP and the KS energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -764,9 +848,46 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.869    0.183    0.505   -0.363    0.363    0.473    0.032    8.260    8.659
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.279 (adiabatic:    5.127)
- QP_gap - KS_gap:   -0.347 (adiabatic:   -0.499)
+ QP gap:    5.279 (OTMS:    5.127)
+ QP_gap - KS_gap:   -0.347 (OTMS:   -0.499)
  
+omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+For band:1
+   0.003     0.000    -2.746     0.335
+   0.003     0.000    -3.182     0.388
+For band:2
+   0.003     0.000    -5.059     5.501
+   0.003     0.000    -5.862     6.375
+For band:3
+   0.003     0.000    -5.059     5.501
+   0.003     0.000    -5.862     6.375
+For band:4
+   0.003     0.000    -5.059     5.501
+   0.003     0.000    -5.862     6.375
+For band:5
+   0.003     0.000    -5.234     4.743
+   0.003     0.000    -6.066     5.496
+
+
+
+omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+For band:1
+  -8.799    -0.063    -0.001
+  -8.789    -0.063    -0.001
+For band:2
+  12.790     0.167    -0.051
+  12.800     0.165    -0.047
+For band:3
+  12.790     0.167    -0.051
+  12.800     0.165    -0.047
+For band:4
+  12.790     0.167    -0.051
+  12.800     0.165    -0.047
+For band:5
+  18.416    -0.329    -0.071
+  18.426    -0.334    -0.074
+
+
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.647    0.180   -0.198   -0.378   -0.906   -0.285    0.087    0.000    0.000
@@ -779,8 +900,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    8  28.462   28.540    0.078    0.102   -0.050    0.766   -0.427    0.529    6.396    6.599
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.397 (adiabatic:   11.154)
- QP_gap - KS_gap:   -0.963 (adiabatic:   -0.206)
+ QP gap:   10.397 (OTMS:   11.154)
+ QP_gap - KS_gap:   -0.963 (OTMS:   -0.206)
  
 
 == END DATASET(S) ==============================================================
@@ -825,7 +946,9 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         112
+        freqspmax      3.67493254E-02 Hartree
+        freqspmin     -3.67493254E-02 Hartree
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -850,6 +973,7 @@ P           mkmem           8
             natom           2
             nband          54
            ndtset           4
+          nfreqsp         100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
@@ -865,6 +989,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
+           prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

@@ -29,6 +29,11 @@ symsigma2  1
 dvdb_qcache_mb1 -1.0
 dvdb_qcache_mb2 0.0
 
+# Test computation of Sigma_nk(w)
+prtvol 1
+nfreqsp 100
+freqspmax 1 eV
+
 optdriver  7
 nband     54
 eph_task   4

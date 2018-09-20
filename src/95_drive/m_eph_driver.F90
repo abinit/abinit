@@ -465,9 +465,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
-   if (use_wfk) then
-     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
-   end if
+   if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")

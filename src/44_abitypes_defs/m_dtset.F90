@@ -246,29 +246,31 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 
 !    Now print the values (only the first image, since they are all the same)
      if(dtset%nsppol==1)then
-
        write(message, '(a,i0,a,a)' ) &
 &       ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
        call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-         call wrtout(std_out,message,'COLL')
-       end do
-
+       if (dtset%prtvol > 0) then
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,message,'COLL')
+         end do
+       end if
      else
        write(message, '(a,i0,2a)' ) &
-&       ' chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
+        ' dtset_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
        call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-         call wrtout(std_out,message,'COLL')
-       end do
-       call wrtout(std_out,'    spin down values:','COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') &
-&         dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
-         call wrtout(std_out,message,'COLL')
-       end do
+       if (dtset%prtvol > 0) then
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,message,'COLL')
+         end do
+         call wrtout(std_out,'    spin down values:','COLL')
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') &
+             dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
+           call wrtout(std_out,message,'COLL')
+         end do
+       end if
 
      end if
 
@@ -324,7 +326,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &         ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(message, '(a,a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+         write(message, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
        end if
        MSG_WARNING(message)
 
@@ -340,10 +342,9 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end if
 
      end if
-
    end do
 
- end if !  End the condition dtset%iscf>0 or -1 or -3 .
+ end if ! condition dtset%iscf>0 or -1 or -3 .
 
 end subroutine dtset_chkneu
 !!***

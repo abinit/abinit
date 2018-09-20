@@ -3004,9 +3004,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
      end if
    end if
    call xmpi_bcast(eigen,master,comm,ierr)
-   if (present(occ)) then
-     call xmpi_bcast(occ,master,comm,ierr)
-   end if
+   if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
  end if
 
 end subroutine wfk_read_eigenvalues
@@ -3266,9 +3264,7 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
    !
    ! Find the position inside the file.
    if (ALL(Wfk%f90_fptr==FPTR_EOF)) then ! handle the EOF condition
-     if (Wfk%debug) then
-       call wrtout(std_out,"EOF condition","PERS")
-     end if
+     if (Wfk%debug) call wrtout(std_out,"EOF condition","PERS")
      recn_fpt = Wfk%recn_eof
    else
      ik_fpt   = Wfk%f90_fptr(1)

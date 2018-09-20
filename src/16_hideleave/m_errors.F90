@@ -805,11 +805,10 @@ subroutine die(message,file,line)
  if (PRESENT(file)) f90name= basename(file)
  msg=TRIM(f90name)//':'//TRIM(lnum)//' P'//TRIM(strank)
 
- write(msg,'(a,2x,2a,2x,a)')ch10,&
-& TRIM(msg),ch10,&
-& TRIM(message)
+ write(msg,'(a,2x,2a,2x,a)')ch10,TRIM(msg),ch10,TRIM(message)
 
  call wrtout(std_out,msg,'PERS')
+ !if is_connected(ab_out)) call wrtout(ab_out,msg,'PERS')
  call abi_abort('PERS')
 
 end subroutine die

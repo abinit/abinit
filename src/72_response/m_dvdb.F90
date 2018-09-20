@@ -43,7 +43,7 @@ module m_dvdb
 
  use defs_abitypes,   only : hdr_type, mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
- use m_time,          only : cwtime
+ use m_time,          only : cwtime, sec2str
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_symtk,         only : mati3inv, littlegroup_q
@@ -76,11 +76,11 @@ module m_dvdb
  !real(dp),public,parameter :: DDB_QTOL=2.0d-8
  ! Tolerance for the identification of two wavevectors
 
- integer,private,parameter :: FPOS_EOF = -1
+ !integer,private,parameter :: FPOS_EOF = -1
 
- integer,private,parameter :: QCACHE_KIND = dp
- ! Uncomment this line and recompile to use single precision cache
- !integer,private,parameter :: QCACHE_KIND = sp
+ ! Uncomment this line and recompile to use double or single precision cache
+ !integer,private,parameter :: QCACHE_KIND = dp
+ integer,private,parameter :: QCACHE_KIND = sp
 
  type, private :: qcache_t
 
@@ -251,6 +251,11 @@ module m_dvdb
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
 
+  type(hdr_type) :: hdr_ref
+  ! Header associated to the first potential. Used to backspace.
+  ! Gives the number of Fortran records required to backspace the header
+  ! Assume headers with same headform and same basic dimensions e.g. npsp
+
   type(mpi_type) :: mpi_enreg
   ! Internal object used to call fourdp
 
@@ -267,6 +272,7 @@ module m_dvdb
  public :: dvdb_readsym_qbz       ! Reconstruct the DFPT potential for a q-point in the BZ starting
                                   ! from its symmetrical image in the IBZ.
  public :: dvdb_set_qcache_mb     ! Allocate internal cache for potentials.
+ public :: dvdb_qcache_read       ! Read potentials and store them in cache.
  public :: dvdb_list_perts        ! Check if all the (phonon) perts are available taking into account symmetries.
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
@@ -281,6 +287,7 @@ module m_dvdb
  public :: dvdb_test_v1rsym       ! Check symmetries of the DFPT potentials.
  public :: dvdb_test_v1complete   ! Debugging tool used to test the symmetrization of the DFPT potentials.
  public :: dvdb_test_ftinterp     ! Test Fourier interpolation of DFPT potentials.
+ public :: dvdb_qdownsample       ! Downsample q-mesh, produce new DVDB file
 !!***
 
 CONTAINS
@@ -353,23 +360,23 @@ subroutine dvdb_init(db, path, comm)
    read(unt, err=10, iomsg=msg) db%numv1
 
    ! Get important dimensions from the first header and rewind the file.
-   call hdr_fort_read(hdr_ref, unt, fform)
+   call hdr_fort_read(db%hdr_ref, unt, fform)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
      MSG_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
-   if (db%debug) call hdr_echo(hdr_ref,fform,4,unit=std_out)
+   if (db%debug) call hdr_echo(db%hdr_ref,fform,4,unit=std_out)
 
    rewind(unt)
    read(unt, err=10, iomsg=msg)
    read(unt, err=10, iomsg=msg)
 
    ! The code below must be executed by the other procs if MPI.
-   db%natom = hdr_ref%natom
-   db%natom3 = 3 * hdr_ref%natom
-   db%nspden = hdr_ref%nspden
-   db%nsppol = hdr_ref%nsppol
-   db%nspinor = hdr_ref%nspinor
-   db%usepaw = hdr_ref%usepaw
+   db%natom = db%hdr_ref%natom
+   db%natom3 = 3 * db%hdr_ref%natom
+   db%nspden = db%hdr_ref%nspden
+   db%nsppol = db%hdr_ref%nsppol
+   db%nspinor = db%hdr_ref%nspinor
+   db%usepaw = db%hdr_ref%usepaw
    ABI_CHECK(db%usepaw == 0, "PAW not yet supported")
 
    ! TODO: Write function that returns mpert from natom!
@@ -446,14 +453,14 @@ subroutine dvdb_init(db, path, comm)
    call xmpi_bcast(db%version, master, comm, ierr)
    call xmpi_bcast(db%numv1, master, comm, ierr)
    call xmpi_bcast(db%nqpt, master, comm, ierr)
-   call hdr_bcast(hdr_ref, master, my_rank, comm)
+   call hdr_bcast(db%hdr_ref, master, my_rank, comm)
 
-   db%natom = hdr_ref%natom
-   db%natom3 = 3 * hdr_ref%natom
-   db%nspden = hdr_ref%nspden
-   db%nsppol = hdr_ref%nsppol
-   db%nspinor = hdr_ref%nspinor
-   db%usepaw = hdr_ref%usepaw
+   db%natom = db%hdr_ref%natom
+   db%natom3 = 3 * db%hdr_ref%natom
+   db%nspden = db%hdr_ref%nspden
+   db%nsppol = db%hdr_ref%nsppol
+   db%nspinor = db%hdr_ref%nspinor
+   db%usepaw = db%hdr_ref%usepaw
    db%mpert = db%natom + 6
 
    if (my_rank /= master) then
@@ -474,8 +481,7 @@ subroutine dvdb_init(db, path, comm)
  end if
 
  ! Init crystal_t from the hdr read from file.
- call crystal_from_hdr(db%cryst,hdr_ref,timrev2)
- call hdr_free(hdr_ref)
+ call crystal_from_hdr(db%cryst, db%hdr_ref, timrev2)
 
  ! Init Born effective charges
  ABI_CALLOC(db%zeff, (3, 3, db%natom))
@@ -706,6 +712,7 @@ subroutine dvdb_free(db)
  end if
 
  ! types
+ call hdr_free(db%hdr_ref)
  call crystal_free(db%cryst)
  call destroy_mpi_enreg(db%mpi_enreg)
 
@@ -1032,6 +1039,12 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    call destroy_mpi_enreg(MPI_enreg_seq)
  end if
 
+ ! Skip record with rhog1_g0 (if present)
+ if (db%version > 1) read(db%fh, err=10, iomsg=msg)
+
+ db%current_fpos = db%current_fpos + 1
+ !write(std_out, *)"incr current_fpos", db%current_fpos
+
  return
 
  ! Handle Fortran IO error
@@ -1244,7 +1257,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
         ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
         ABI_CHECK(ierr == 0, "OOM in v1scf")
-        v1scf = db%qcache(db_iqpt)%v1scf
+        v1scf = real(db%qcache(db_iqpt)%v1scf, kind=QCACHE_KIND)
         db%qcache_stats(2) = db%qcache_stats(2) + 1
         incache = .True.
         !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
@@ -1292,7 +1305,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
    ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
-   db%qcache(db_iqpt)%v1scf = v1scf
+   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    db%prev_db_iqpt = db_iqpt
  end if
 
@@ -1362,12 +1375,81 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin("Activating cache for Vscf(q) with size:", ftoa(mbsize, fmt="f6.1"), "[Mb]"))
- call wrtout(std_out, sjoin("Number of q-points stored in memory:", itoa(db%qcache_size)))
+ call wrtout(std_out, strcat(" Activating cache for Vscf(q) with input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, strcat(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
+ call wrtout(std_out, strcat(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
 
 end subroutine dvdb_set_qcache_mb
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_qcache_read
+!! NAME
+!!  dvdb_qcache_read
+!!
+!! FUNCTION
+!!  Read potentials and store them in cache
+!!
+!! INPUTS
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_qcache_read'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,comm
+ type(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfft(18)
+
+!Local variables-------------------------------
+!scalars
+ integer :: db_iqpt, cplex
+ real(dp) :: cpu, wall, gflops
+!arrays
+ real(dp),allocatable :: v1scf(:,:,:,:)
+
+! *************************************************************************
+
+ if (db%qcache_size == 0) return
+
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(std_out, "Loading Vscf(q) in cache...", do_flush=.True.)
+ do db_iqpt=1,db%nqpt
+   if (db_iqpt > db%qcache_size) exit
+   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+   ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
+   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   ABI_FREE(v1scf)
+ end do
+
+ call cwtime(cpu, wall, gflops, "stop")
+ call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10), &
+            do_flush=.True.)
+
+end subroutine dvdb_qcache_read
 !!***
 
 !----------------------------------------------------------------------
@@ -3219,7 +3301,7 @@ end function dvdb_findq
 !!   idir,ipert,iqpt = (direction, perturbation, q-point) indices
 !!
 !! SIDE EFFECTS
-!!   db<type(dvdb_t)> : modifies db%f90_fptr and the internal F90 file pointer.
+!!   db<type(dvdb_t)>: modifies db%current_fpos.
 !!
 !! PARENTS
 !!      m_dvdb
@@ -3247,21 +3329,48 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
  type(dvdb_t),intent(inout) :: db
 
 !Local variables-------------------------------
- integer :: pos_wanted,ii,ispden
+ integer :: pos_now,pos_wanted,ii,ispden,nn,ierr
  real(dp),parameter :: fake_qpt(3)=zero
  character(len=500) :: msg
 
 ! *************************************************************************
 
  if (db%iomode == IO_MODE_FORTRAN) then
-   ! Numb code: rewind the file and read it from the beginning
-   ! TODO: Here I need a routine to backspace the hdr!
-   if (dvdb_rewind(db, msg) /= 0) then
-     MSG_ERROR(msg)
-   end if
+   pos_now = db%current_fpos
    pos_wanted = db%pos_dpq(idir,ipert,iqpt)
+   ABI_CHECK(pos_wanted /= 0, "pos_wanted cannot be zero!")
 
-   do ii=1,pos_wanted-1
+   ! Optimal access.
+   if (pos_now == pos_wanted) return
+
+   if (pos_wanted < pos_now) then
+     ! Backspace previous records and header
+     ! but only if nn <= pos_wanted else rewind file and skip pos_wanted potentials (should be faster)
+     nn = pos_now - pos_wanted
+     if (nn <= pos_wanted) then
+       do ii=1,nn
+         !write(std_out, *)"backspacing"
+         if (db%version > 1) backspace(unit=db%fh, err=10, iomsg=msg)
+         do ispden=1,db%nspden
+           backspace(unit=db%fh, err=10, iomsg=msg)
+         end do
+         ierr = hdr_backspace(db%hdr_ref, db%fh, msg)
+         if (ierr /= 0) goto 10
+       end do
+       db%current_fpos = pos_wanted; return
+     else
+       ! rewind the file and read it from the beginning
+       if (dvdb_rewind(db, msg) /= 0) then
+         MSG_ERROR(msg)
+       end if
+       nn = pos_wanted
+     end if
+
+   else
+     nn = pos_wanted - pos_now + 1
+   end if
+
+   do ii=1,nn-1
      !write(std_out,*)"in seek with ii: ",ii,"pos_wanted: ",pos_wanted
      if (my_hdr_skip(db%fh, -1, -1, fake_qpt, msg) /= 0) then
        MSG_ERROR(msg)
@@ -3273,6 +3382,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      ! Skip record with rhog1_g0 (if present)
      if (db%version > 1) read(db%fh, err=10, iomsg=msg)
    end do
+
    db%current_fpos = pos_wanted
 
  else
@@ -3283,7 +3393,6 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
 
  ! Handle Fortran IO error
 10 continue
- !ierr = 1
  msg = sjoin("Error while reading", db%path, ch10, msg)
 
 end subroutine dvdb_seek
@@ -3660,7 +3769,6 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  ! Read the headers
  ABI_DT_MALLOC(hdr1_list, (nfiles))
-
  nperts = size(hdr1_list)
 
  ! Write dvdb file (we only support fortran binary format)
@@ -4549,7 +4657,6 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  integer :: nfft,nfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
- logical :: i_am_master
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -4569,7 +4676,6 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
  call wrtout(std_out, msg, do_flush=.True.)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
- i_am_master = (my_rank == master)
 
  ! ======================= !
  ! Setup fine q-point grid
@@ -4849,4 +4955,217 @@ subroutine dvdb_interpolate_and_write(new_dvdb_fname, ngfft, ngfftf, cryst, dvdb
 end subroutine dvdb_interpolate_and_write
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_qdownsample
+!! NAME
+!!  dvdb_qdownsample
+!!
+!! FUNCTION
+!!  Downsample the q-mesh. Produce new DVDB file
+!!
+!! INPUTS
+!!  in_dvdb_fname=Path of input DVDB
+!!  new_dvdb_fname=Path of output DVDB
+!!  ngqpt(3)=Division of coarse Q-mesh
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_qdownsample'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: in_dvdb_fname, new_dvdb_fname
+!arrays
+ integer,intent(in) :: ngqpt(3)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master=0, qptopt1=1, timrev1=1
+ integer :: fform_pot=111
+ integer :: ierr,my_rank,nproc,idir,ipert,iat,ipc,ispden
+ integer :: cplex, db_iqpt, npc
+ integer :: nqbz, nqibz, iq, ifft, nperts_read, nfftf
+ integer :: ount, unt, fform
+ !real(dp) :: dksqmax
+ character(len=500) :: msg
+ type(dvdb_t), target :: dvdb
+ type(crystal_t),pointer :: cryst
+ type(hdr_type) :: hdr_ref
+!arrays
+ integer :: ngfftf(18), qptrlatt(3,3)
+ integer,allocatable :: iq_read(:), pinfo(:,:) !indkk(:,:),
+ real(dp) :: rhog1_g0(2)
+ real(dp),allocatable :: v1scf(:,:,:), v1(:)
+ real(dp),allocatable :: wtq(:), qibz(:,:), qbz(:,:)
+
+!************************************************************************
+
+ write(std_out,"(a)")sjoin("Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
+ write(std_out,"(a)")trim(in_dvdb_fname), " --> ", trim(new_dvdb_fname)
+
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ if (my_rank /= master) goto 20
+
+ call dvdb_init(dvdb, in_dvdb_fname, xmpi_comm_self)
+ call dvdb_print(dvdb)
+ call dvdb_list_perts(dvdb, [-1,-1,-1], unit=std_out)
+ call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
+ call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ nfftf = product(ngfftf(1:3))
+ cryst => dvdb%cryst
+
+ ! =======================
+ ! Setup fine q-point grid
+ ! =======================
+ ! Generate the list of irreducible q-points in the coarse grid
+ qptrlatt = 0
+ qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, 1, &
+                             [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+
+ ! Correspondence IBZ_coarse --> DVDB
+ !ABI_MALLOC(indkk, (nqibz, 6))
+ !call listkk(dksqmax, cryst%gmet, indkk, dvdb%qpts, qibz, dvdb%nqpt, nqibz, cryst%nsym, &
+ !   1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !ABI_FREE(indkk)
+ !if (dksqmax > tol12) then
+ !  MSG_ERROR("Coarse q-mesh is not a submesh of the DVDB file.")
+ !end if
+
+ ! ==========================================
+ ! Prepare the header to write the potentials
+ ! ==========================================
+
+ ! Read the first header
+ if (open_file(dvdb%path, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ read(unt, err=10, iomsg=msg) dvdb%version
+ read(unt, err=10, iomsg=msg) dvdb%numv1
+
+ call hdr_fort_read(hdr_ref, unt, fform)
+ if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
+   MSG_ERROR(sjoin("While reading:", dvdb%path, ch10, msg))
+ end if
+ close(unt)
+
+ ! =======================================
+ ! Open DVDB and copy important dimensions
+ ! =======================================
+
+ ABI_MALLOC(iq_read, (nqibz))
+ ABI_MALLOC(pinfo, (3,3*dvdb%mpert))
+ nperts_read = 0
+
+ do iq=1,nqibz
+   ! Find the index of the q-point in the DVDB.
+   db_iqpt = dvdb_findq(dvdb, qibz(:, iq))
+   if (db_iqpt == -1) then
+     MSG_ERROR(sjoin("Q-point:", ktoa(qibz(:, iq)), "not found in DVDB!"))
+   end if
+   iq_read(iq) = db_iqpt
+
+   ! Count the perturbations
+   npc = dvdb_get_pinfo(dvdb, db_iqpt, cplex, pinfo)
+   do ipc=1,npc
+     idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
+     if (iat <= cryst%natom) nperts_read = nperts_read + 1
+   end do
+ end do
+
+ ! ================================================= !
+ ! Open the new DVDB file and write preliminary info
+ ! ================================================= !
+ !nperts = nperts_read + nperts_interpolate
+ if (open_file(new_dvdb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ write(ount, err=10, iomsg=msg) dvdb_last_version
+ write(ount, err=10, iomsg=msg) nperts_read
+
+ ! Read all perturbations on the coarse Q-mesh and write them to the new DVDB
+ rhog1_g0 = zero
+
+ do iq=1,nqibz
+   db_iqpt = iq_read(iq)
+
+   ! Read each irreducible perturbation potentials
+   npc = dvdb_get_pinfo(dvdb, db_iqpt, cplex, pinfo)
+   ABI_CHECK(npc /= 0, "npc == 0!")
+
+   ABI_MALLOC(v1scf, (cplex, nfftf, dvdb%nspden))
+   ABI_MALLOC(v1, (cplex*nfftf))
+
+   do ipc=1,npc
+     idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
+     if (dvdb_read_onev1(dvdb, idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf, msg) /= 0) then
+       MSG_ERROR(msg)
+     end if
+
+     hdr_ref%qptn = qibz(:, iq)
+     hdr_ref%pertcase = ipert
+
+     ! Write header
+     call hdr_fort_write(hdr_ref, ount, fform_pot, ierr)
+     ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
+
+     do ispden=1,dvdb%nspden
+       v1 = reshape(v1scf(:,:,ispden), [cplex*nfftf])
+       write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfftf)
+     end do
+
+     if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
+   end do
+
+   ABI_FREE(v1scf)
+   ABI_FREE(v1)
+ end do
+
+ close(ount)
+
+ ! Free memory
+ ABI_FREE(qbz)
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(iq_read)
+ ABI_FREE(pinfo)
+
+ call hdr_free(hdr_ref)
+ call dvdb_free(dvdb)
+
+ write(msg, '(2a)') "Downsampling of the electron-phonon coupling potential completed", ch10
+ call wrtout(std_out, msg, do_flush=.True.)
+
+20 continue
+ call xmpi_barrier(comm)
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ MSG_ERROR(msg)
+
+end subroutine dvdb_qdownsample
+!!***
+
 end module m_dvdb
+!!***

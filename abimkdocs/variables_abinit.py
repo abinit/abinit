@@ -13979,6 +13979,9 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text="""
 Print the phonon density of states. It is activated by default when [[optdriver]] == 7.
+
+Note also that this variable activates the computation of the generalized Eliashberg function
+associated to the electron-phonon self-energy when [[eph_task]] in [-4, 4].
 """,
 ),
 
@@ -15355,7 +15358,7 @@ some matrix elements can be proven to be zero even without doing any computation
 this use of symmetries, while it is denied when [[rfmeth]] is negative. There is an indirect additional outcome of this,
 as a symmetrization of the whole 2DTE is sometimes rendered possible when the additional knowledge of the zero matrix elements
 is available. Thus, the results obtained for positive and negative values of [[rfmeth]] might slightly differ for non-zero elements of the 2DTE,
-if they are computed in both cases. 
+if they are computed in both cases.
 """,
 ),
 
