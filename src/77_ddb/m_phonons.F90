@@ -2006,7 +2006,7 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
 &           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
-   imode_acoustic = imode_acoustic + 1
+   imode_acoustic = min(imode_acoustic + 1, 3)
 
 !   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
 !   call wrtout(std_out,msg,'COLL')

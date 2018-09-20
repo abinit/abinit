@@ -17,7 +17,7 @@ module m_tdep_abitypes
   use m_tdep_phij,        only : tdep_build_phij33
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
-  use m_ifc,              only : ifc_type, ifc_init, ifc_print 
+  use m_ifc,              only : ifc_type, ifc_init, ifc_write 
   use m_crystal_io,       only : crystal_ncwrite
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
@@ -292,6 +292,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
   read(40,*) string
   read(40,*) string
   read(40,*) string
+  read(40,*) string
   if (InVar%loto) then
     read(40,*) string
     read(40,*) string
@@ -360,7 +361,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 
   integer,intent(in) :: natom_unitcell,unitfile
   type(Input_Variables_type),intent(in) :: InVar
-  type(ifc_type),intent(in) :: Ifc
+  type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
 
   integer :: ifcana,ifcout,ncid,prt_ifc
@@ -388,6 +389,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
 !JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
 #else  
   if (unitfile.eq.0) then
@@ -395,7 +397,8 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   else  
     write(InVar%stdout,'(a)') ' Write in ifc.out the IFC read previously'
   end if  
-  call ifc_print(Ifc,"TDEP",7,prt_ifc)
+!FB  call ifc_print(Ifc,"TDEP",7,prt_ifc)
+  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc)
 #endif
   close(7)
 
