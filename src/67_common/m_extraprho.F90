@@ -1121,5 +1121,153 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 end subroutine extrapwf
 !!***
 
+
+!!****f* ABINIT/extrapwf_biortho
+!!
+!! NAME
+!! extrapwf_biortho
+!!
+!! FUNCTION
+!! Extrapolate wavefunctions for new ionic positions
+!! from values of wavefunctions of previous SCF cycle.
+!! Use biorthogonal algorithm proposed XG
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms
+!!  atindx1(natom)=index table for atoms, inverse of atindx
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!  istep=number of call the routine
+!!  kg(3,mpw*mkmem)=reduced planewave coordinates.
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mgfft=maximum size of 1D FFTs
+!!  mpi_enreg=information about MPI parallelization
+!!  nattyp(ntypat)=number of atoms of each type in cell.
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  npwarr(nkpt)=number of planewaves in basis at this k point
+!!  ntypat=number of types of atoms in cell
+!!  pawtab(ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  psps<type(pseudopotential_type)>=variables related to pseudopotentials
+!!  rprimd(3,3)=dimensional primitive translation vectors (bohr)
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  xred_old(3,natom)=old reduced coordinates for atoms in unit cell
+!!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)= plane wave wavefunction coefficient
+!!                          Value from previous SCF cycle is input
+!!                          Extrapolated value is output
+!!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
+!!
+!! NOTES
+!!  THIS ROUTINE IS NOT USEABLE AT PRESENT.
+!!  SHOULD BE CAREFULY TESTED AND DEBUGGED (ESPECIALLY WITHIN PAW).
+!!
+!! PARENTS
+!!      extraprho
+!!
+!! CHILDREN
+!!      ctocprj,dotprod_g,getph,hermit,metric,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_lincom,pawcprj_put
+!!      pawcprj_zaxpby,xmpi_allgather,xmpi_alltoallv,zgemm,zhpev
+!!
+!! SOURCE
+
+subroutine extrapwf_biortho(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
+& nattyp,ngfft,npwarr,pawtab,psps,rprimd,scf_history,xred_old,ylm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'extrapwf_biortho'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istep,mcg,mgfft
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
+ type(scf_history_type),intent(inout) :: scf_history
+ type(pseudopotential_type),intent(in) :: psps
+!arrays
+ integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: npwarr(dtset%nkpt)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp), intent(inout) :: cg(2,mcg)
+ real(dp),intent(in) :: xred_old(3,dtset%natom)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia,iat,iatom,iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1,icgb2
+ integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,ind1,ind2,iorder_cprj
+ integer :: isize,isppol,istep1,istwf_k,itypat,klmn,me_distrb,my_nspinor
+ integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,option,spaceComm_band, usepaw
+ real(dp) :: dotr,dotr1,doti,doti1,eigval
+ !character(len=500) :: message
+!arrays
+ real(dp) :: alpha(2),beta(2),gmet(3,3),gprimd(3,3),rmet(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom),ucvol
+ integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:),dimcprj(:),npw_block(:),npw_disp(:)
+ real(dp),allocatable :: al(:,:),anm(:),cwavef(:,:),cwavef1(:,:),cwavef_tmp(:,:),deltawf1(:,:),deltawf2(:,:)
+ real(dp),allocatable :: eig(:),evec(:,:)
+ real(dp),allocatable :: unm(:,:,:)
+ real(dp),allocatable :: work(:,:),work1(:,:),wf1(:,:),ylmgr_k(:,:,:),zhpev1(:,:),zhpev2(:)
+ complex(dpc),allocatable :: unm_tmp(:,:),anm_tmp(:,:)
+ type(pawcprj_type),allocatable :: cprj(:,:),cprj_k(:,:),cprj_k1(:,:),cprj_k2(:,:),cprj_k3(:,:),cprj_k4(:,:)
+!complex(dpc) :: aa
+
+! *************************************************************************
+
+ if (istep==0) return
+ usepaw=dtset%usepaw
+ ntypat=dtset%ntypat
+ option =1
+!Useful array
+ if (usepaw==1) then
+   ABI_ALLOCATE(dimcprj,(dtset%natom))
+   call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
+ end if
+
+!Metric
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!History indexes
+ ind1=1;ind2=2
+
+!First step
+ if (istep==1) then
+   scf_history%cg(:,:,ind1)=cg(:,:)
+!  scf_history%cg(:,:,ind2)=zero
+   scf_history%cg(:,:,ind2)= cg(:,:)
+   if(usepaw==1) then
+!    WARNING: THIS SECTION IS USELESS; NOW crpj CAN BE READ FROM SCFCV
+     call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred_old)
+     iatom=0 ; iorder_cprj=0
+     call pawcprj_alloc(scf_history%cprj(:,:,ind1),0,dimcprj)
+     call pawcprj_alloc(scf_history%cprj(:,:,ind2),0,dimcprj)
+     ABI_ALLOCATE(ylmgr_k,(dtset%mpw,3,0))
+     call ctocprj(atindx,cg,1,scf_history%cprj(:,:,ind1),gmet,gprimd,&
+&     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,&
+&     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+&     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
+&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
+&     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,&
+&     xred_old,ylm,ylmgr_k)
+     ABI_DEALLOCATE(ylmgr_k)
+!    call pawcprj_set_zero(scf_history%cprj(:,:,ind2))
+     call pawcprj_copy(scf_history%cprj(:,:,ind1),scf_history%cprj(:,:,ind2))
+   end if
+ end if
+
+
+! call wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
+!&         nattyp,npwarr,pawtab,scf_history,option)
+
+
+end subroutine extrapwf_biortho
+!!***
 end module m_extraprho
 !!***
