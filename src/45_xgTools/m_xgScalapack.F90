@@ -164,6 +164,9 @@ module m_xgScalapack
       return
     else if ( nthread > 1 ) then ! disable scalapack with threads since it is not threadsafe
       ! This should be check with new elpa version en MPI+OpenMP
+      if ( M__CONFIG > 0 ) then
+        MSG_WARNING("xgScalapack turned off because you have threads")
+      end if
       usable = .false.
       return
     else
