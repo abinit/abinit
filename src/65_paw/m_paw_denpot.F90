@@ -52,6 +52,7 @@ MODULE m_paw_denpot
 !public procedures.
  public :: pawdenpot    ! Compute different (PAW) energies, densities and potentials inside PAW spheres
  public :: pawdensities ! Compute PAW on-site densities (all-electron ,pseudo and compensation)
+ public :: pawaccenergy ! Accumulate the atomic contribution of a PAW on-site energy
  public :: paw_mknewh0  ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
 
 CONTAINS  !========================================================================================
@@ -1631,6 +1632,167 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
  DBG_EXIT("COLL")
 
 end subroutine pawdensities
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_denpot/pawaccenergy
+!! NAME
+!! pawaccenergy
+!!
+!! FUNCTION
+!! Accumulate an on-site PAW energy by adding the contribution of the current atom.
+!! This contribution has the form: Sum_ij[Rhoij.Dij]
+!!
+!! INPUTS
+!!  dij(cplex_dij*qphase*lmn2_size,ndij)= array containing D_ij values
+!!  pawrhoij<type(pawrhoij_type)>= datastructure containing Rho_ij values
+!!  cplex_dij= 2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
+!!  qphase= 2 if dij/rhoij have a exp(iqR) phase, 1 if not
+!!  lmn2_size= number of klmn=(ilmn,jlmn) channels
+!!  nspden_dij= number of spin components for dij
+!!  nspden_rhoij= number of spin density components for rhoij
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  [epaw]= PAW on-site energy. At output, the contribution of the current atom
+!!          has been added to epaw.
+!!  [epawdc]= PAW on-site energy. At output, the contribution of the current atom
+!!            has been added to epawdc.
+!!
+!! PARENTS
+!!      m_paw_denpot
+!!
+!! NOTES
+!! * The general form for Dij is:
+!!   D^{s1,s2}_ij = D1^{s1,s2}_ij.cos(qr) + i.D2^{s1,s2}_ij.sin(qr)
+!!       =   [D1re^{s1,s2}_ij + i.D1im^{s1,s2}_ij).cos(qr)]
+!!       + i.[D2re^{s1,s2}_ij + i.D2im^{s1,s2}_ij).sin(qr)]
+!!    where
+!!      ij are the partial waves channels
+!!      s1,s2 are spin/spinor components
+!!      q is the wave vector of the phase
+!!   D1^{s1,s2}_ij.cos(qr) is stored in the the first half of paw_ij%dij and corresponds to iq=1
+!!   D2^{s1,s2}_ij.sin(qr) is stored in the the 2nd half of paw_ij%dij and corresponds to iq=2
+!!   D1^{s1,s2}_ij.cos(qr) and D2^{s1,s2}_ij.sin(qr) are complex if cplex_dij=2
+!!
+!! * The same for Rho_ij
+!!
+!! * The contribution to the PAW on-site energy is:
+!!     Sum_ij_s1s2[Rho^{s2,s1}_ij * D^{s1,s2}_ij]
+!!   Note the order of s1/s2 indices, especially for Rho_ij.
+!!   The present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+!!     rho^{s1,s2}^_ij = Sum[<Psi^s2|pi><pj|Psi^s1]  (s1 and s2 exponents inverted)
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine pawaccenergy(dij,rhoij,cplex_dij,qphase,lmn2_size,nspden_dij,nspden_rhoij, &
+&                       epaw,epawdc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawaccenergy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: cplex_dij,cplex_rhoij,qphase,lmn2_size,nspden_dij,nspden_rhoij
+ real(dp),intent(inout),optional :: epaw,epawdc
+ type(pawrhoij_type),intent(inout) :: pawrhoij
+!arrays
+ real(dp),intent(in) :: dij(cplex_dij*qphase*lmn2_size,nspden_dij)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: cplex_rhoij_,iq,iq0_dij,iq0_rhoij,irhoij,jrhoij
+ integer :: klmn,kklmn,krhoij,nspden_rhoij
+ logical :: compute_imaginary
+ real(dp) ::
+ character(len=500) :: msg
+!arrays
+ real(dp),pointer :: rhoij_
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Compatibility tests
+ if (pawrhoij%qphase/=qphase) then
+   msg='pawaccenergy: pawrhoij%qphase/=qphase!'
+   MSG_BUG(msg)
+ end if
+
+!Useful variables
+ compute_imaginary=((cplex_dij==2).and.(pawrhoij%cplex_rhoij==2))
+ nspden_rhoij=pawrhoij%nspden_rhoij
+ if (nspden_rhoij==4) then
+   cplex_rhoij_=2
+   ABI_ALLOCATE(rhoij_,(2*lmn2_size,4))
+ else
+   cplex_rhoij_=pawrhoij%cplex_rhoij
+   rhoij_ => pawrhoij%rhoijp
+ end if
+
+!Loop over qphase components
+ do iq=1,qphase
+   iq0_rhoij=(iq-1)*lmn2_size*cplex_rhoij_
+   iq0_dij=(iq-1)*lmn2_size*cplex_dij
+
+!  Non-collinear case
+   if (nspden_rhoij==4) then
+     rhoij_(:,:)=zero
+     jrhoij=(iq-1)*lmn2_size*cplex_rhoij+1 ; krhoij=1
+     do irhoij=1,pawrhoij(iatom)%nrhoijsel
+       klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+       rhoij_(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,1))
+       rhoij_(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,1))
+       rhoij_(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij,2)
+       rhoij_(krhoij+1,3)=-half*pawrhoij%rhoijp(jrhoij,3)
+       rhoij_(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij,2)
+       rhoij_(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij,3)
+       if (cplex_rhoij==2) then
+		 rhoij_(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
+		 rhoij_(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
+		 rhoij_(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij+1,3)
+		 rhoij_(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
+		 rhoij_(krhoij  ,4)=-half*pawrhoij%rhoijp(jrhoij+1,3)
+		 rhoij_(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
+       end if
+       jrhoij=krhoij+cplex_rhoij ; krhoij=krhoij+2
+     end do
+     iq0_rhoij=0
+   end if
+
+!  Loop over non-zero rhoij components
+   jrhoij=iq0_rhoij+1
+   do irhoij=1,pawrhoij(iatom)%nrhoijsel
+     klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+     kklmn=iq0_dij+klmn
+
+
+manque dltij (pawtab)
+
+
+     jrhoij=krhoij+cplex_rhoij_
+   end do
+
+ end do ! qphase
+ 
+ if (nspden_rhoij==4) then
+   ABI_DEALLOCATE(rhoij_)
+ end if
+ 
+ DBG_EXIT("COLL")
+
+end subroutine pawaccenergy
 !!***
 
 !----------------------------------------------------------------------
