@@ -29,7 +29,7 @@ module m_setvtr
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_xmpi
@@ -54,6 +54,9 @@ module m_setvtr
  use m_mklocl,            only : mklocl
  use m_xchybrid,          only : xchybrid_ncpp_cc
  use m_mkcore,            only : mkcore, mkcore_alt
+ use m_psolver,           only : psolver_rhohxc
+ use m_wvl_psi,          only : wvl_psitohpsi
+ use m_mkcore_wvl,       only : mkcore_wvl
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -192,12 +195,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
@@ -210,9 +207,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
- use interfaces_62_poisson
- use interfaces_62_wvl_wfs
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

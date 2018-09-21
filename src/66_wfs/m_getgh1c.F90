@@ -27,7 +27,7 @@
 module m_getgh1c
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_abitypes, only : MPI_type, dataset_type
@@ -37,7 +37,7 @@ module m_getgh1c
  use m_kg,          only : kpgstr, mkkin, mkkpg
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
- use m_fft,         only : fftpac
+ use m_fft,         only : fftpac, fourwf
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian, load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian
@@ -133,7 +133,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh1c'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -191,14 +190,14 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Compatibility tests
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
+&      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
      MSG_BUG(msg)
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
+&      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert=natom+2 !'
      MSG_BUG(msg)
    end if
@@ -443,8 +442,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  else
    ABI_ALLOCATE(gvnl1_,(2,npw1*my_nspinor))
  end if
- usevnl2=(gs_hamkq%usepaw==1.and.optnl>=2.and.&
-& ((ipert>0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4)).or.(ipert==natom+2)))
 
 !Phonon perturbation
 !-------------------------------------------
@@ -467,26 +464,28 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      paw_opt=1;if (sij_opt/=0) paw_opt=sij_opt+3
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
+
 !    2- Compute derivatives due to frozen part of D_ij^(1) (independent of VHxc^(1))
 !    All atoms contribute
      if (optnl>=1) then
-       ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
+       ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
        cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbfr)
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gvnl1_(:,ipw)=gvnl1_(:,ipw)+gvnl2(:,ipw)
+         gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
        end do
+       ABI_DEALLOCATE(nonlop_out)
      end if
-!    3- Compute derivatives due to part of D_ij^(1) depending on VHxc^(1)
+
+!    3- Compute derivatives due to self-consistent part of D_ij^(1) (depending on VHxc^(1))
 !    All atoms contribute
-     if (optnl>=2) then
+     if (optnl==2) then
+       ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
-     else if (optnl==1) then
-       ABI_DEALLOCATE(gvnl2)
      end if
 
      if (usecprj==0) then
@@ -513,7 +512,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  -------------------------------------------
  else if (ipert==natom+1.and.(optnl>0.or.sij_opt/=0)) then
 
-!  Remember, q=0, so can take all RF data...
    tim_nonlop=8 ; signs=2 ; choice=5
    if (gs_hamkq%usepaw==1) then
      if (usecprj==1) then
@@ -572,7 +570,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        cpopt=4*usecprj ; choice=51 ; paw_opt=3 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,nonlop_out,tim_nonlop,cwave,vectout_dum)
-
        if(compute_conjugate) then
 !$OMP PARALLEL DO
          do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
@@ -607,6 +604,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
+
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
@@ -643,8 +641,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  -------------------------------------------
  else if ((ipert==natom+3.or.ipert==natom+4).and.(optnl>0.or.sij_opt/=0)) then
 
-!  Remember, q=0, so can take all RF data
-   signs=2 ; istr=idir;if(ipert==natom+4) istr=istr+3
+   istr=idir;if(ipert==natom+4) istr=istr+3
 
 !  PAW:
    if (gs_hamkq%usepaw==1) then
@@ -659,34 +656,34 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !    1- Compute derivatives due to projectors |p_i>^(1)
 !    All atoms contribute
-     cpopt=-1+5*usecprj ; choice=3
+     cpopt=-1+5*usecprj ; choice=3 ; signs=2
      paw_opt=1;if (sij_opt/=0) paw_opt=sij_opt+3
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_)
+
 !    2- Compute derivatives due to frozen part of D_ij^(1) (independent of VHxc^(1))
 !    All atoms contribute
      if (optnl>=1) then
-       ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
-       gvnl2 = zero
-       cpopt=1+3*usecprj ; choice=1 ; paw_opt=1
+       ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+       cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,&
-&       enl=rf_hamkq%e1kbfr)
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gvnl1_(:,ipw)=gvnl1_(:,ipw)+gvnl2(:,ipw)
+         gvnl1_(:,ipw)=gvnl1_(:,ipw)+nonlop_out(:,ipw)
        end do
+       ABI_DEALLOCATE(nonlop_out)
      end if
+
 !    3- Compute derivatives due to part of D_ij^(1) depending on VHxc^(1)
 !    All atoms contribute
      if (optnl>=2) then
-       cpopt=4 ; choice=1 ; paw_opt=1
+       ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
+       cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
-
-     else if (optnl==1) then
-       ABI_DEALLOCATE(gvnl2)
      end if
+
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
@@ -696,7 +693,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    Norm-conserving psps:
    else
 !    Compute only derivatives due to projectors |p_i>^(1)
-     choice=3 ; cpopt=-1 ; paw_opt=0
+     choice=3 ; cpopt=-1 ; signs=2 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1_)
      if (sij_opt==1) then
@@ -738,6 +735,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !k-point perturbation or Strain perturbation
 !-------------------------------------------
 
+ usevnl2=allocated(gvnl2)
  has_kin=(ipert==natom+1.or.ipert==natom+3.or.ipert==natom+4)
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp

@@ -17,6 +17,11 @@ The user should be familiarized with the four basic tutorials of ABINIT and the 
 
 This tutorial should take about one hour to be completed.
 
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 ## Preparatory steps (WFK and the SCR file)
   
 *Before starting, you might consider to work in a different subdirectory as

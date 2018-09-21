@@ -25,7 +25,7 @@ module m_abi_etsf
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_atomdata
@@ -315,7 +315,6 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abi_etsf_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

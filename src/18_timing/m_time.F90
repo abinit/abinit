@@ -23,7 +23,7 @@
 MODULE m_time
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use iso_c_binding
 #if defined HAVE_MPI2

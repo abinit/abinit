@@ -31,7 +31,7 @@
 MODULE m_per_cond
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 

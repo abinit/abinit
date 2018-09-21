@@ -16,7 +16,7 @@ Both of them can be found either on the Web, or in the doc subdirectory of the p
 -->
 
 Any comment or suggestion to improve the procedure will be welcome! 
-Simply contact the ABINIT group <http://forum.abinit.org/>
+Simply contact the ABINIT group <https://forum.abinit.org/>
 
 ## Short Howto
 
@@ -91,7 +91,7 @@ If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.
 If it is only very occasional, you might as well rely on the [ABINIT Github Web site](https://github.com/abinit).
 
-It is strongly advised to subscribe to the [ABINIT forum](http://forum.abinit.org/) 
+It is strongly advised to subscribe to the [ABINIT forum](https://forum.abinit.org/) 
 if you want to be able to get the latest information concerning the autotools development mode.
 
 After having installed git, and obtained a branch on the ABINIT worldwide

@@ -24,7 +24,7 @@ module m_sigc
  use defs_datatypes
  use defs_abitypes
  use m_gwdefs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
  use m_defs_ptgroups
@@ -32,8 +32,8 @@ module m_sigc
  use m_time
  use m_splines
 
- use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
-                      Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+ !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
+ !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
@@ -185,7 +185,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_sigc_me'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1396,7 +1395,6 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_coh_comp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -29,7 +29,7 @@ module m_psp9
  use defs_basis
  use m_splines
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_PSML
  use m_psml
 #endif
@@ -126,7 +126,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp9in'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

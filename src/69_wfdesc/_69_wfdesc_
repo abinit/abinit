@@ -14,16 +14,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! calc_optical_mels.F90
-!! classify_bands.F90
 !! interfaces_69_wfdesc.F90
 !! m_io_kss.F90
 !! m_oscillators.F90
-!! m_shirley.F90
 !! m_wfd.F90
-!! outkss.F90
-!! wfd_mkrho.F90
-!! wfd_pawrhoij.F90
-!! wfd_vnlpsi.F90
+!! m_wfd_optic.F90
 !!
 !!***

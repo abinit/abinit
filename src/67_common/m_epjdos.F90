@@ -26,7 +26,7 @@ module m_epjdos
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_tetrahedron
@@ -55,7 +55,7 @@ module m_epjdos
  use m_kg,             only : ph1d3d, getph
  use m_gsphere,        only : getkpgnorm
  use m_fftcore,        only : sphereboundary
- use m_fft,            only : fftpac
+ use m_fft,            only : fftpac, fourwf, fourdp
  use m_pawrad,         only : pawrad_type, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
@@ -374,7 +374,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_calcnwrite'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -941,7 +940,6 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recip_ylm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1298,7 +1296,6 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dens_in_sph'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1579,7 +1576,6 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtfatbands'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1823,7 +1819,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fatbands_ncwrite'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2032,7 +2027,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -31,7 +31,7 @@ module m_gstate
  use defs_rectypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use libxc_functionals
  use m_exit
  use m_crystal
@@ -60,11 +60,13 @@ module m_gstate
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
  use m_kg,               only : kpgio, getph
+ use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
+ use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_abi2big,          only : wvl_occ_abi2big
+ use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
  use m_energies,         only : energies_type, energies_init
  use m_args_gs,          only : args_gs_type
  use m_results_gs,       only : results_gs_type
@@ -74,7 +76,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
- use m_paw_orbmag,       only : orbmag_type,destroy_orbmag
+ use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
@@ -94,6 +96,14 @@ module m_gstate
  use m_mpinfo,           only : proc_distrb_cycle
  use m_common,           only : setup1, prteigrs, prtene
  use m_fourier_interpol, only : transgrid
+ use m_psolver,          only : psolver_kernel
+ use m_paw2wvl,          only : paw2wvl, wvl_paw_free
+ use m_berryphase_new,   only : init_e_field_vars,prtefield
+ use m_wvl_wfs,          only : wvl_wfs_set, wvl_wfs_free, wvl_wfs_lr_copy
+ use m_wvl_rho,          only : wvl_initro, wvl_mkrho
+ use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
+ use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
+ use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -230,11 +240,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
- use interfaces_53_ffts
- use interfaces_62_poisson
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -274,11 +279,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
- integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,nfftf,nfftot,npwmin
+ integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
+ integer :: nblok,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt,usecg
+ integer :: cnt,spin,band,ikpt,usecg,usecprj
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -304,20 +309,21 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(scfcv_t) :: scfcv_args
 !arrays
  integer :: ngfft(18),ngfftf(18)
- integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:)
+ integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),dimcprj_srt(:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
  integer,pointer :: npwarr_(:),pwind(:,:,:)
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
- real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
- real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: doccde(:)
+ real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
+ type(pawcprj_type),allocatable :: cprj(:,:)
 
 ! ***********************************************************************
 
@@ -402,8 +408,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call energies_init(results_gs%energies)
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(dtset%natom))
- call setup1(acell,amass,args_gs%amu,bantot,dtset,&
+ call setup1(acell,bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,rprim,rprimd,ucvol,psps%usepaw)
@@ -460,13 +465,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !SCF history management (allocate it at first call)
- has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
    usecg=0
-   if(dtset%extrapwf>0)usecg=1
+   if(dtset%extrapwf>0 .or. dtset%imgwfstor==1)usecg=1
    call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
+ has_to_init=(initialized==0.or.scf_history%history_size<0)
 
  call timab(33,2,tsec)
  call timab(701,3,tsec)
@@ -702,10 +707,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out of memory in cg")
+ if (dtset%imgwfstor==1) then
+   cg => scf_history%cg(:,:,1)
+   eigen => scf_history%eigen(:,1)
+ else
+   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+   ABI_CHECK(ierr==0, "out of memory in cg")
+   ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ end if
 
- ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
 !mpi_enreg%paralbd=0 ; ask_accurate=0
@@ -717,7 +727,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  Create access arrays for wavefunctions and allocate wvl%wfs%psi (other arrays are left unallocated).
    call wvl_wfs_set(dtset%strprecon,dtset%spinmagntarget, dtset%kpt, mpi_enreg%me_wvl,&
 &   dtset%natom, sum(dtset%nband), &
-&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, dtset%occ_orig, &
+&   dtset%nkpt, mpi_enreg%nproc_wvl, dtset%nspinor, dtset%nsppol, dtset%nwfshist, occ, &
 &   psps, rprimd, wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, &
 &   xred)
 !  We transfer wavelets information to the hdr structure.
@@ -751,7 +761,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
 
 !Initialize wavefunctions.
- if(dtset%tfkinfunc /=2) then
+ if(dtset%imgwfstor==1 .and. initialized==1)then
+   cg(:,:)=scf_history%cg(:,:,1) 
+   eigen(:)=scf_history%eigen(:,1) 
+ else if(dtset%tfkinfunc /=2) then
+!if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
@@ -1006,6 +1020,48 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !###########################################################
+! Initialisation of cprj
+ usecprj=0; mcprj=0;mband_cprj=0
+ if (dtset%usepaw==1) then
+   if (associated(electronpositron)) then
+     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+   end if
+   if (dtset%prtnabla>0) usecprj=1
+   if (dtset%extrapwf>0) usecprj=1
+   if (dtset%pawfatbnd>0)usecprj=1
+   if (dtset%prtdos==3)  usecprj=1
+   if (dtset%usewvl==1)  usecprj=1
+   if (dtset%nstep==0) usecprj=0
+   if (dtset%usefock==1)  usecprj=1
+ end if
+ if (usecprj==0) then
+   ABI_DATATYPE_ALLOCATE(cprj,(0,0))
+ end if
+ if (usecprj==1) then
+   mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
+   mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
+!Was allocated above for valgrind sake so should always be true (safety)
+   if (allocated(cprj)) then
+     call pawcprj_free(cprj)
+     ABI_DATATYPE_DEALLOCATE(cprj)
+   end if
+   ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
+   ncpgr=0
+   if (dtset%usefock==1) then
+     if (dtset%optforces == 1) then
+       ncpgr = 3 
+     end if
+!       if (dtset%optstress /= 0) then
+!         ncpgr = 6 ; ctocprj_choice = 3
+!       end if
+   end if
+   ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
+   call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
+   call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+ end if
+
+
+!###########################################################
 !### 12. Operations dependent of iscf value
 
 !Get starting charge density : rhor as well as rhog
@@ -1206,7 +1262,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
     call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                   rprimd,symrec,xred)
  end if
 
@@ -1238,7 +1294,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (iexit==0) then
 
 !  ###########################################################
-!  ### 14. Move atoms and acell acording to ionmov value
+!  ### 14. Move atoms and acell according to ionmov value
 
 
 !  Eventually symmetrize atomic coordinates over space group elements:
@@ -1250,9 +1306,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call timab(35,3,tsec)
 
-   call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
+   call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
-&   indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
+&   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &   resid,results_gs,scf_history,fatvshift,&
@@ -1264,7 +1320,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   if (dtset%ionmov==0) then
+   if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
@@ -1285,7 +1341,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if (dtset%ionmov>50.or.dtset%ionmov<=27) then
 
      ! TODO: return conv_retcode
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
+     call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
 &     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
 
 !    Compute rprim from rprimd and acell
@@ -1553,12 +1609,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%strten,results_gs%synlgr,xred)
  end if
 
+ if(dtset%imgwfstor==1)then
+   scf_history%cg(:,:,1)=cg(:,:)  
+   scf_history%eigen(:,1)=eigen(:)  
+ endif
+
 !Deallocate arrays
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(eigen)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(npwarr)
  ABI_DEALLOCATE(nattyp)
@@ -1569,6 +1627,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_DEALLOCATE(taug)
  ABI_DEALLOCATE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
+
+ if(dtset%imgwfstor==0)then
+   ABI_DEALLOCATE(cg)
+   ABI_DEALLOCATE(eigen)
+ else 
+   nullify(cg,eigen)
+ endif
 
  if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
@@ -1647,6 +1712,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_DEALLOCATE(mpi_enreg%mkmem)
    end if
  end if
+ ! deallocate cprj
+ if(usecprj==1) then
+   ABI_DEALLOCATE(dimcprj_srt)
+   call pawcprj_free(cprj)
+ end if
+ ABI_DATATYPE_DEALLOCATE(cprj)
 
  ! deallocate efield
  call destroy_efield(dtefield)
@@ -1736,7 +1807,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1883,7 +1953,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2081,7 +2150,6 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2258,7 +2326,6 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2519,7 +2586,7 @@ end subroutine clnup2
 !!
 !! SOURCE
 
-subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
+subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2532,7 +2599,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
 !Arguments ------------------------------------
 !scalars
- type(scfcv_t), intent(inout) :: scfcv
+ type(scfcv_t), intent(inout) :: scfcv_args
  type(dataset_type),intent(inout) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  !type(wffile_type),intent(inout) :: wffnew,wffnow
@@ -2559,14 +2626,14 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
  end if
 
  ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
- ABI_ALLOCATE(cgstart,(2,scfcv%mcg))
+ ABI_ALLOCATE(cgstart,(2,scfcv_args%mcg))
 
 !DEBUG
 !write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
 !END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv%cg
+ cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
@@ -2580,7 +2647,7 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 !allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
 
  do iuj=1,2
-   if (iuj>1) scfcv%cg(:,:)=cgstart(:,:)
+   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
 
 !  DEBUG
 !  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
@@ -2588,18 +2655,18 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 
    dtpawuj(iuj*2-1)%iuj=iuj*2-1
 
-   scfcv%ndtpawuj=>ndtpawuj
-   scfcv%dtpawuj=>dtpawuj
+   scfcv_args%ndtpawuj=>ndtpawuj
+   scfcv_args%dtpawuj=>dtpawuj
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
-   scfcv%fatvshift=scfcv%fatvshift*(-one)
+   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations
@@ -2661,7 +2728,7 @@ end subroutine pawuj_drive
 subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_xmpi
  use m_wffile

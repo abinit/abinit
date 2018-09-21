@@ -29,7 +29,7 @@ module m_inwffil
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_wffile
  use m_wfk
  use m_errors
@@ -53,6 +53,7 @@ module m_inwffil
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc
  use m_rwwf,     only : rwwf, WffReadSkipK
+ use m_wvl_wfsinp, only : wvl_wfsinp_disk, wvl_wfsinp_scratch
 
  implicit none
 
@@ -187,8 +188,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inwffil'
- use interfaces_14_hidewrite
- use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none
@@ -1139,7 +1138,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfsinp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1870,7 +1868,6 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initwf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2117,7 +2114,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newkpt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2721,7 +2717,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -32,7 +32,7 @@ module m_elphon
  use defs_datatypes
  use defs_abitypes
  use defs_elphon
- use m_profiling_abi
+ use m_abicore
  use m_kptrank
  use m_errors
  use m_xmpi
@@ -57,6 +57,7 @@ module m_elphon
  use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -147,8 +148,6 @@ contains
 !!      printvtk,rchkgsheader,read_el_veloc,symkpt,timein,wrap2_pmhalf,wrtout
 !!      xmpi_bcast
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
@@ -158,8 +157,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -1433,7 +1430,6 @@ subroutine outelph(elph_ds,enunit,fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outelph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1886,7 +1882,6 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkFSkgrid'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2099,7 +2094,6 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2653,7 +2647,6 @@ subroutine mka2fQgrid(elph_ds,fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2fQgrid'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2958,8 +2951,6 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_setupqpt'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -3164,7 +3155,6 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkph_linwid'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3516,7 +3506,6 @@ subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_fs_bands'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4032,7 +4021,6 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkq'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4679,7 +4667,6 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_nv_fs_en'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5193,7 +5180,6 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_nv_fs_temp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5312,6 +5298,7 @@ end subroutine get_nv_fs_temp
 !!  kphon_full2irr = mapping of full FS kpts to irreducible ones
 !!   FSfullpqtofull = mapping of k + q to k
 !!   FSirredtoGS = mapping of irreducible kpoints to GS set
+!!
 !! OUTPUT
 !! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
 !!
@@ -5410,7 +5397,6 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_gamma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5547,7 +5533,6 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_gamma_tr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5722,7 +5707,6 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_gamma_tr_lova'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

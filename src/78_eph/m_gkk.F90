@@ -25,7 +25,7 @@ module m_gkk
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_ifc
@@ -120,8 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_gkk'
- use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -583,7 +581,6 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ncwrite_v1qnu'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -749,7 +746,7 @@ end subroutine ncwrite_v1qnu
 subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_fftcore,         only : get_kg

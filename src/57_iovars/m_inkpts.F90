@@ -27,7 +27,7 @@
 module m_inkpts
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,      only : timab
@@ -138,7 +138,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inkpts'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

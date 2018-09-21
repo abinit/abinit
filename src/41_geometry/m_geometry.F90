@@ -23,7 +23,7 @@
 MODULE m_geometry
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
@@ -546,7 +546,6 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wigner_seitz'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1051,7 +1050,6 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotmat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1204,7 +1202,7 @@ end subroutine fixsym
 !!***
 
 !!****f* m_geometry/metric
-!! NAME metric
+!! NAME
 !! metric
 !!
 !! FUNCTION
@@ -1258,7 +1256,6 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'metric'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2008,7 +2005,6 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bonds_lgth_angles'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2593,7 +2589,6 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shellstruct'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2742,7 +2737,6 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ioniondist'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3004,7 +2998,6 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'remove_inversion'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3474,7 +3467,7 @@ end subroutine strconv
 !! littlegroup_pert
 !!
 !! FUNCTION
-!! If syuse==0 and rfmeth==2, determines the set of symmetries that leaves a perturbation invariant.
+!! If syuse==0 and abs(rfmeth)==2, determines the set of symmetries that leaves a perturbation invariant.
 !! (Actually, all symmetries that leaves a q-wavevector invariant should be used to reduce the number
 !! of k-points for all perturbations. Unfortunately, one has to take into account the sign reversal of the
 !! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code.
@@ -3491,9 +3484,10 @@ end subroutine strconv
 !! natom= number of atoms
 !! nsym=number of space group symmetries
 !! rfmeth =
-!!   1 if non-stationary block
-!!   2 if stationary block
-!!   3 if third order derivatives
+!!   1 or -1 if non-stationary block
+!!   2 or -2 if stationary block
+!!   3 or -3 if third order derivatives
+!!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
 !! symq(4,2,nsym)= Table computed by littlegroup_q.
 !!   three first numbers define the G vector;
 !!   fourth number is zero if the q-vector is not preserved, is 1 otherwise
@@ -3531,7 +3525,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_pert'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3561,7 +3554,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  ount = std_out; if (present(unit)) ount = unit
 
  nsym1=0
- if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. rfmeth==2) then
+ if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. abs(rfmeth)==2) then
 !  Strain perturbation section
 !  Use ground state routine which symmetrizes cartesian stress as a quick
 !  and dirty test for the invariance of the strain (ipert,idir) under
@@ -3592,7 +3585,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
      end if
    end do
 
- else if(ipert>natom .or. syuse/=0 .or. rfmeth/=2)then
+ else if(ipert>natom .or. syuse/=0 .or. abs(rfmeth)/=2)then
 
 !  Not yet coded for d/dk or electric field perturbations
    nsym1=1

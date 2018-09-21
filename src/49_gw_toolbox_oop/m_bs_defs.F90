@@ -28,7 +28,7 @@
 MODULE m_bs_defs
 
  use defs_basis 
- use m_profiling_abi
+ use m_abicore
  use m_errors 
 
  implicit none
@@ -394,7 +394,6 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_bs_parameters'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -873,7 +872,6 @@ subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_bs_files'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none 

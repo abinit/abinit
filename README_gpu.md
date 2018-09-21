@@ -22,7 +22,7 @@ parameters and testing purposes.
 
 Full descriptions of all these options can be found in the
 ~abinit/doc/config/build-config.ac file. Do not hesitate to ask
-questions on http://forum.abinit.org/.
+questions on https://forum.abinit.org/.
 
 In addition, the permitted GPU-related preprocessiong options are:
 

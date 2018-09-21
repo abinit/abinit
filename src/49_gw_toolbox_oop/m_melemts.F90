@@ -49,7 +49,7 @@ MODULE m_melemts
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
 
  use m_fstrings,       only : tolower, sjoin
  use m_numeric_tools,  only : print_arr
@@ -811,7 +811,6 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'melements_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1067,7 +1066,6 @@ end subroutine melements_zero
 !!Do not modify the following lines by hand.
 !#undef ABI_FUNC
 !#define ABI_FUNC 'mels_get_exene_core'
-! use interfaces_14_hidewrite
 !!End of the abilint section
 !
 ! implicit none

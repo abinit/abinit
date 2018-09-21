@@ -42,6 +42,7 @@ topics/BSE.md
 topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
+topics/CrossingBarriers.md
 topics/CRPA.md
 topics/crystal.md
 topics/DFT+U.md
@@ -50,8 +51,8 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffectiveMass.md
 topics/DynamicsMultibinit.md
+topics/EffectiveMass.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md

@@ -48,13 +48,13 @@ MODULE m_pawtab
  type,public :: wvlpaw_rholoc_type
 
   integer :: msz
-! mesh size 
+! mesh size
 
   real(dp),allocatable :: d(:,:)
 ! local rho and derivatives
 
   real(dp),allocatable :: rad(:)
-! radial mesh 
+! radial mesh
 
  end type wvlpaw_rholoc_type
 
@@ -69,7 +69,7 @@ MODULE m_pawtab
 !! wvlpaw_type
 !!
 !! FUNCTION
-!! Objects for WVL+PAW 
+!! Objects for WVL+PAW
 !!
 !! SOURCE
 
@@ -84,12 +84,12 @@ MODULE m_pawtab
    ! This is for the PAW-WVL case, only for the initial guess
 
   integer :: ptotgau
-   ! total number of complex gaussians 
-   ! for tproj 
+   ! total number of complex gaussians
+   ! for tproj
 
   integer,allocatable :: pngau(:)
    ! number of complex gaussians per basis element
-   ! for tproj 
+   ! for tproj
 
 !Real pointers
 
@@ -112,7 +112,7 @@ MODULE m_pawtab
 
  public :: wvlpaw_allocate  ! Allocate memory
  public :: wvlpaw_free   ! Free memory
- public :: wvlpaw_nullify  
+ public :: wvlpaw_nullify
 !!***
 
 !----------------------------------------------------------------------
@@ -145,7 +145,7 @@ MODULE m_pawtab
    ! if 1, onsite matrix elements of the kinetic operator are allocated
    ! if 2, onsite matrix elements of the kinetic operator are computed and stored
 
- 
+
   integer :: has_shapefncg
    ! if 1, the spherical Fourier transforms of the radial shape functions are allocated
    ! if 2, the spherical Fourier transforms of the radial shape functions are computed and stored
@@ -179,7 +179,7 @@ MODULE m_pawtab
   integer :: has_wvl
    ! if 1, data for wavelets (pawwvl) are allocated
    ! if 2, data for wavelets (pawwvl) are computed and stored
-   
+
   integer :: ij_proj
    ! Number of (i,j) elements for the orbitals on which U acts (PAW+U only)
    ! on the considered atom type (ij_proj=1 (1 projector), 3 (2 projectors)...)
@@ -244,6 +244,10 @@ MODULE m_pawtab
   integer :: mqgrid_shp
    ! Number of points in the reciprocal space grid on which
    ! the radial shape functions (shapefncg) are given
+
+  integer :: usespnorb
+   ! usespnorb=0 ; no spin-orbit coupling
+   ! usespnorb=1 ; spin-orbit coupling
 
   integer :: shape_lambda
    ! Lambda parameter in gaussian shapefunction (shape_type=2)
@@ -342,7 +346,7 @@ MODULE m_pawtab
    ! Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
 
-  integer, allocatable :: indlmn(:,:) 
+  integer, allocatable :: indlmn(:,:)
    ! indlmn(6,lmn_size)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=lmn (if useylm=1)
@@ -396,6 +400,20 @@ MODULE m_pawtab
    ! eijkl_sr(lmn2_size,lmn2_size)
    ! Screened Hartree kernel for the on-site terms (E_hartree=Sum_ijkl[rho_ij rho_kl e_ijkl_sr])
    ! Used for screened Fock contributions
+
+  real(dp), allocatable :: euijkl(:,:,:,:,:,:)
+   ! euijkl(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
+   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_s1s2 Sum_ijkl [rho_ij^s1 rho_kl^s2 euijkl^s1s2] )
+   ! Contrary to eijkl and eijkl_sr, euijkl is not invariant with respect to the permutations i <--> j or k <--> l
+   ! However, it is still invariant with respect to the permutation i,k <--> j,l, see pawpuxinit.F90
+   ! Also, it depends on two spin indexes
+   ! Used for PAW+U contributions
+
+  real(dp), allocatable :: euij_fll(:)
+   ! euij_fll(lmn2_size)
+   ! Double counting part of the PAW+U kernel in the "fully localized limit".This term is only linear with respect to rho_ij,
+   ! while euijkl is quadratic.
+   ! Used for PAW+U contributions
 
   real(dp), allocatable :: ex_cvij(:)
   ! ex_cvij(lmn2_size))
@@ -483,7 +501,7 @@ MODULE m_pawtab
    ! tcoredens(core_mesh_size,1)
    ! Gives the pseudo core density of the atom
    ! In PAW+WVL:
-   !  tcoredens(core_mesh_size,2:6) 
+   !  tcoredens(core_mesh_size,2:6)
    !  are the first to the fifth derivatives of the pseudo core density.
 
   real(dp), allocatable :: tcorespl(:,:)
@@ -625,6 +643,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%useexexch=0
  Pawtab%usepawu=0
  Pawtab%usepotzero=0
+ Pawtab%usespnorb=0
  Pawtab%mqgrid=0
  Pawtab%mqgrid_shp=0
 
@@ -769,6 +788,12 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%eijkl_sr))  then
    LIBPAW_DEALLOCATE(Pawtab%eijkl_sr)
  end if
+ if (allocated(Pawtab%euijkl))  then
+   LIBPAW_DEALLOCATE(Pawtab%euijkl)
+ end if
+ if (allocated(Pawtab%euij_fll))  then
+   LIBPAW_DEALLOCATE(Pawtab%euij_fll)
+ end if
  if (allocated(Pawtab%fk))  then
    LIBPAW_DEALLOCATE(Pawtab%fk)
  end if
@@ -887,6 +912,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%useexexch=0
  Pawtab%usepawu=0
  Pawtab%usepotzero=0
+ Pawtab%usespnorb=0
  Pawtab%mqgrid=0
  Pawtab%mqgrid_shp=0
 
@@ -907,7 +933,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
- 
+
 end subroutine pawtab_free_0D
 !!***
 
@@ -1112,7 +1138,6 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawtab_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1210,6 +1235,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Use spin-orbit coupling ........................ ',Pawtab(ityp)%usespnorb
   call wrtout(my_unt,msg,my_mode)
 
   ! "Has" flags
@@ -1428,8 +1455,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !scalars
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
- integer :: siz_coredens,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_fk,siz_gammaij,siz_gnorm
- integer :: siz_fock,siz_kij,siz_nabla_ij,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
+ integer :: siz_coredens,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij
+ integer :: siz_gnorm,siz_fock,siz_kij,siz_nabla_ij,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
  integer :: siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0,siz_shape_alpha
  integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcorespl
  integer :: siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
@@ -1449,7 +1476,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  full_broadcast=.true.;if (present(only_from_file)) full_broadcast=(.not.only_from_file)
 
  nn_int=0 ; nn_int_arr=0 ; nn_dpr=0 ; nn_dpr_arr=0
- 
+
 !=========================================================================
 !Compute the amount of data to communicate
 !=========================================================================
@@ -1466,8 +1493,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero
-   if (full_broadcast) nn_int=nn_int+10
+!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,usespnorb
+   if (full_broadcast) nn_int=nn_int+11
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
@@ -1523,7 +1550,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
-   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0  ; siz_fock=0  
+   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0  ; siz_fock=0
    siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
    siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0
    siz_tcorespl=0 ; siz_tphi=0     ; siz_tproj=0
@@ -1622,14 +1649,15 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-   siz_dltij=0    ; siz_dshpfunc=0 ; siz_eijkl=0    ; siz_eijkl_sr=0
+   siz_dltij=0    ; siz_dshpfunc=0
+   siz_eijkl=0    ; siz_eijkl_sr=0 ; siz_euijkl=0   ; siz_euij_fll=0
    siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0    ; siz_nabla_ij=0
    siz_phiphj=0   ; siz_phiphjint=0; siz_ph0phiint=0
    siz_qgrid_shp=0; siz_qijl=0     ; siz_rad_for_spline=0
    siz_shapefncg=0; siz_sij=0      ; siz_tphitphj=0
    siz_vee=0      ; siz_vex=0      ; siz_zioneff=0
    if (full_broadcast) then
-     nn_int=nn_int+18
+     nn_int=nn_int+22
      if (allocated(pawtab%dltij)) then
        siz_dltij=size(pawtab%dltij)                   !(lmn2_size)
        if (siz_dltij/=pawtab%lmn2_size) msg=trim(msg)//' dltij'
@@ -1649,6 +1677,16 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        siz_eijkl_sr=size(pawtab%eijkl_sr)             !(lmn2_size,lmn2_size)
        if (siz_eijkl_sr/=pawtab%lmn2_size*pawtab%lmn2_size) msg=trim(msg)//' eijkl_sr'
        nn_dpr=nn_dpr+siz_eijkl_sr
+     end if
+     if (allocated(pawtab%euijkl)) then
+       siz_euijkl=size(pawtab%euijkl)                 !(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
+       if (siz_euijkl/=4*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
+       nn_dpr=nn_dpr+siz_euijkl
+     end if
+     if (allocated(pawtab%euij_fll)) then
+       siz_euij_fll=size(pawtab%euij_fll)             !(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
+       if (siz_euij_fll/=4*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euij_fll'
+       nn_dpr=nn_dpr+siz_euij_fll
      end if
      if (allocated(pawtab%fk)) then
        siz_fk=size(pawtab%fk)                         !(6,4)
@@ -1781,7 +1819,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !  Are the sizes OK ?
    if (trim(msg)/='') then
      write(msg0,'(3a)') &
-&     'There is a problem with the size of the following array(s):',ch10,trim(msg) 
+&     'There is a problem with the size of the following array(s):',ch10,trim(msg)
      MSG_BUG(msg0)
    end if
 
@@ -1898,6 +1936,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=siz_dshpfunc  ;ii=ii+1
      list_int(ii)=siz_eijkl  ;ii=ii+1
      list_int(ii)=siz_eijkl_sr  ;ii=ii+1
+     list_int(ii)=siz_euijkl  ;ii=ii+1
+     list_int(ii)=siz_euij_fll  ;ii=ii+1
      list_int(ii)=siz_fk  ;ii=ii+1
      list_int(ii)=siz_gammaij ;ii=ii+1
      list_int(ii)=siz_gnorm  ;ii=ii+1
@@ -1925,6 +1965,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%useexexch  ;ii=ii+1
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
+     list_int(ii)=pawtab%usespnorb ;ii=ii+1
 !Integer arrays
      if (siz_indklmn>0) then
        list_int(ii:ii+siz_indklmn-1)=reshape(pawtab%indklmn,(/siz_indklmn/))
@@ -2063,6 +2104,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_dshpfunc=list_int(ii)  ;ii=ii+1
      siz_eijkl=list_int(ii)  ;ii=ii+1
      siz_eijkl_sr=list_int(ii)  ;ii=ii+1
+     siz_euijkl=list_int(ii)  ;ii=ii+1
+     siz_euij_fll=list_int(ii)  ;ii=ii+1
      siz_fk=list_int(ii)  ;ii=ii+1
      siz_gammaij=list_int(ii)  ;ii=ii+1
      siz_gnorm=list_int(ii)  ;ii=ii+1
@@ -2090,6 +2133,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%useexexch=list_int(ii)  ;ii=ii+1
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
+     pawtab%usespnorb=list_int(ii) ;ii=ii+1
 !Integer arrays
      if (allocated(pawtab%indklmn)) then
        LIBPAW_DEALLOCATE(pawtab%indklmn)
@@ -2133,7 +2177,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
  end if ! me/=0
  LIBPAW_DEALLOCATE(list_int)
- 
+
 !Broadcast all the reals
 !=========================================================================
 
@@ -2274,6 +2318,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        list_dpr(ii:ii+siz_eijkl_sr-1)=reshape(pawtab%eijkl_sr,(/siz_eijkl_sr/))
        ii=ii+siz_eijkl_sr
      end if
+     if (siz_euijkl>0) then
+       list_dpr(ii:ii+siz_euijkl-1)=reshape(pawtab%euijkl,(/siz_euijkl/))
+       ii=ii+siz_euijkl
+     end if
+     if (siz_euij_fll>0) then
+       list_dpr(ii:ii+siz_euij_fll-1)=reshape(pawtab%euij_fll,(/siz_euij_fll/))
+       ii=ii+siz_euij_fll
+     end if
      if (siz_fk>0) then
        list_dpr(ii:ii+siz_fk-1)=reshape(pawtab%fk,(/siz_fk/))
        ii=ii+siz_fk
@@ -2347,7 +2399,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
 
  end if ! me=0
- 
+
 !Perfom the communication
 !-------------------------------------------------------------------------
 
@@ -2592,6 +2644,22 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_ALLOCATE(pawtab%eijkl_sr,(pawtab%lmn2_size,pawtab%lmn2_size))
        pawtab%eijkl_sr=reshape(list_dpr(ii:ii+siz_eijkl_sr-1),(/pawtab%lmn2_size,pawtab%lmn2_size/))
        ii=ii+siz_eijkl_sr
+     end if
+     if (allocated(pawtab%euijkl)) then
+       LIBPAW_DEALLOCATE(pawtab%euijkl)
+     end if
+     if (siz_euijkl>0) then
+       LIBPAW_ALLOCATE(pawtab%euijkl,(2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
+       ii=ii+siz_euijkl
+     end if
+     if (allocated(pawtab%euij_fll)) then
+       LIBPAW_DEALLOCATE(pawtab%euij_fll)
+     end if
+     if (siz_euij_fll>0) then
+       LIBPAW_ALLOCATE(pawtab%euij_fll,(pawtab%lmn2_size))
+       pawtab%euij_fll=reshape(list_dpr(ii:ii+siz_euij_fll-1),(/pawtab%lmn2_size/))
+       ii=ii+siz_euij_fll
      end if
      if (allocated(pawtab%fk)) then
        LIBPAW_DEALLOCATE(pawtab%fk)
@@ -2885,9 +2953,9 @@ subroutine wvlpaw_nullify(wvlpaw)
 
  wvlpaw%npspcode_init_guess=0
  wvlpaw%ptotgau=0
- 
+
  call wvlpaw_rholoc_nullify(wvlpaw%rholoc)
- 
+
 end subroutine wvlpaw_nullify
 !!***
 

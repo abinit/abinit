@@ -30,7 +30,7 @@
 module m_dynmat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
 
@@ -394,7 +394,6 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'asrprs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1177,7 +1176,6 @@ subroutine chkph3(carflg,idir,mpert,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkph3'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1281,7 +1279,6 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chneu9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1518,6 +1515,9 @@ end subroutine chneu9
 !!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
 !!  timrev=1 if the time-reversal symmetry preserves the wavevector,
 !!     modulo a reciprocal lattice vector, timrev=0 otherwise
+!!  zero_by_symm= if 1, set blkflg to 1 for the elements that must be zero by symmetry, and zero them.
+!!    This has the indirect effect of being able to resymmetrize the whole matrix, thus
+!!    enforcing better the symmetry for the 2DTE.
 !!
 !! SIDE EFFECTS
 !!  Input/Output
@@ -1543,7 +1543,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1556,7 +1556,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,nsym,timrev
+ integer,intent(in) :: mpert,natom,nsym,timrev,zero_by_symm
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symq(4,2,nsym)
  integer,intent(in),target :: symrec(3,3,nsym),symrel(3,3,nsym)
@@ -1569,7 +1569,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical, parameter :: do_final_sym=.true.
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
- integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,noccur,nsym_used,quit,quit1
+ integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
  real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
@@ -1753,11 +1753,13 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      sumr=zero
                      sumi=zero
                      noccur=0
+                     nblkflg_is_one=0
                      quit=0
                      do idisy1=1,3
                        do idisy2=1,3
                          if(sym1_(idir1,idisy1,isym)/=0 .and. sym2_(idir2,idisy2,isym)/=0 )then
                            if(blkflg(idisy1,ipesy1,idisy2,ipesy2)==1)then
+                             nblkflg_is_one=nblkflg_is_one+1
                              sumr=sumr+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
 &                             d2(1,idisy1,ipesy1,idisy2,ipesy2)
                              sumi=sumi+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
@@ -1808,7 +1810,12 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  Now, if still found, put the correct value into array d2
+!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+                   if(zero_by_symm==0 .and. nblkflg_is_one==0)then
+                     found=0
+                   endif
+
+!                  Now, if still found and associated to at least one really computed matrix element, put the correct value into array d2
                    if(found==1)then
 
 !                    In case of phonons, need to take into account the
@@ -1883,7 +1890,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
 !MT oct. 20, 2014:
 !Once the matrix has been built, it does not necessarily fulfill the correct symmetries.
-!It has just been filled up from rows or columns that only fulfill symmetries perserving
+!It has just been filled up from rows or columns that only fulfill symmetries preserving
 !one particular perturbation.
 !An additional symmetrization might solve this (do not consider TR-symmetry)
  if (do_final_sym) then
@@ -1912,6 +1919,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
          if (symq(4,1,isym)==1) then
            ipesy1=ipert1;if (ipert1<=natom) ipesy1=indsym(4,isym,ipert1)
            ipesy2=ipert2;if (ipert2<=natom) ipesy2=indsym(4,isym,ipert2)
+!          The condition on next line is too severe, since some elements of sym1_ or sym2_ might be zero,
+!          which means not all blkflg(:,ipesy1,:,ipesy2) would need to be 1 to symmetrize the matrix.
+!          However, coding something more refined is really more difficult.
+!          This condition then has the side effect that more symmetries can be applied when zero_by_symm==1,
+!          since blkflg can be set to 1 when the symmetries guarantee the matrix element to be zero.
            if (all(blkflg(:,ipesy1,:,ipesy2)==1)) then
              nsym_used=nsym_used+1
              re=one;im=zero
@@ -3173,7 +3185,6 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'canat9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4119,7 +4130,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wght9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4775,7 +4785,7 @@ end subroutine d3sym
 subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5016,9 +5026,11 @@ end subroutine sytens
 !! nblok=number of blocks in the DDB
 !! nqpt=number of special q points
 !! nsym=number of space group symmetries
-!! rfmeth = 1 if non-stationary block
-!!  2 if stationary block
-!!  3 if third order derivatives
+!! rfmeth =
+!!   1 or -1 if non-stationary block
+!!   2 or -2 if stationary block
+!!   3 or -3 if third order derivatives
+!!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
 !! rprim(3,3)=dimensionless primitive translations in real space
 !! spqpt(3,nqpt)=set of special q points generated by the Monkhorst & Pack Method
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
@@ -5052,7 +5064,6 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symdm9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5108,7 +5119,7 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 
  do iblok=1,nblok
 
-   if (blktyp(iblok)==rfmeth) then
+   if (abs(blktyp(iblok))==abs(rfmeth)) then
      qq(1)=blkqpt(1,iblok)/blknrm(1,iblok)
      qq(2)=blkqpt(2,iblok)/blknrm(1,iblok)
      qq(3)=blkqpt(3,iblok)/blknrm(1,iblok)
@@ -6103,7 +6114,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_prtph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

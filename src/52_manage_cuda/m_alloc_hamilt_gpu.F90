@@ -28,7 +28,7 @@ module m_alloc_hamilt_gpu
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #if defined HAVE_GPU_CUDA
  use m_initcuda

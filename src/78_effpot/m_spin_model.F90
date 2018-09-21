@@ -42,8 +42,9 @@
 #include "abi_common.h"
 
 module m_spin_model
+
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xmpi
 
@@ -233,7 +234,7 @@ contains
   !! INPUTS
   !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
   !!
   !! PARENTS
@@ -270,9 +271,9 @@ contains
   !! set parameters for spin dynamics from input.
   !!
   !! INPUTS
-  !! 
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
   !! Most are already done in initialize. (should be moved to here or remove this function)
   !! PARENTS
@@ -291,7 +292,7 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     real(dp):: mfield(3, self%nmatoms)
-    integer ::  i 
+    integer ::  i
     ! params -> mover
     ! params -> calculator
     do i=1, self%nmatoms
@@ -299,11 +300,9 @@ contains
     end do
     call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
     ! params -> hist
-          
-  end subroutine
+
+  end subroutine spin_model_t_set_params
   !!***
-
-
 
   !!****f* m_spin_model/spin_model_t_read_xml
   !!
@@ -314,11 +313,11 @@ contains
   !! read xml file and set primitive cell parameters.
   !!
   !! INPUTS
-  !! 
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
-  !! 
+  !!
   !! PARENTS
   !!
   !! CHILDREN
@@ -352,9 +351,9 @@ contains
   !! INPUTS
   !!  sc_mat(3,3) = supercell matrix
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
-  !! 
+  !!
   !! PARENTS
   !!
   !! CHILDREN
@@ -387,9 +386,9 @@ contains
   !! INPUTS
   !!  mode= 0 : all along z. 1: random
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
-  !! 
+  !!
   !! PARENTS
   !!
   !! CHILDREN
@@ -402,7 +401,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_set_initial_spin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
@@ -448,9 +446,9 @@ contains
   !!  run one spin dynamics step
   !!
   !! INPUTS
-  !!  
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
   !!  This is not called by run_time. insted run_time call mover%run_time
   !!  (in the spirit that this module should do nothing in detail!)
@@ -485,11 +483,11 @@ contains
   !!  run all spin time step
   !!
   !! INPUTS
-  !!  
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
-  !!  
+  !!
   !! PARENTS
   !!
   !! CHILDREN
@@ -519,9 +517,9 @@ contains
   !!  run spin vs temperature
   !!
   !! INPUTS
-  !!  
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
   !!  Not yet implemented.
   !! PARENTS
@@ -553,9 +551,9 @@ contains
   !!  run spin vs external magnetic field
   !!
   !! INPUTS
-  !!  
+  !!
   !! OUTPUT
-  !! 
+  !!
   !! NOTES
   !!  Not yet implemented.
   !! PARENTS

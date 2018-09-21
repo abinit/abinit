@@ -29,7 +29,7 @@ module m_odamix
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xcdata
@@ -49,6 +49,7 @@ module m_odamix
  use m_energies,   only : energies_type
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -194,7 +195,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -286,7 +286,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      message = ' dijhat variable must be allocated in odamix ! '
      MSG_ERROR(message)
    end if
-   if(paw_ij(1)%cplex==2)then
+   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%cplex_rf==2)then
      message = ' complex dij not allowed in odamix! '
      MSG_ERROR(message)
    end if

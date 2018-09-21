@@ -86,14 +86,19 @@ To learn the procedure to compute the  harmonic part of the potential, you can f
 
 ### 3.2 How to compute the anharmonic part from a training set
 
-To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. Such training set will contain an ensemble of atomic configurations into the potential energy surface. This file will be used to fit a polynomial following the method developed in [[cite:Escorihuela-Sayalero2017]]. To generate the training set, the user requieres to get some experience in molecular dynamics simulation within abinit. 
+To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. 
+Such training set will contain an ensemble of atomic configurations into the potential energy surface. 
+This file will be used to fit a polynomial following the method developed in [[cite:Escorihuela-Sayalero2017]]. 
+To generate the training set, the user requires to get some experience in molecular dynamics simulation within abinit. 
 
 ### 3.3 How to bound a model
 
 Multibinit includes an automatic bounding process.
-In this [[lesson:fit_process | tutorial]], you can get the basic knowlegde to bound a model in multibinit.
+The tutorial is to be set up.
+<!---- In this [[lesson:fit_process | tutorial]], you can get the basic knowledge to bound a model in multibinit. ---->
 
 ### 3.4 How to bound run a dynamics
 
 Multibinit takes advantage of the mover routine of ABINIT which allows the users to perform atomic relaxation, molecular dynamics, and monte Carlo simulations.
-In this [[lesson:lattice_model | tutorial]], you can get the basic knowlegde to perform a dynamics into multibinit.
+The tutorial is to be set up.
+<!----- In this [[lesson:lattice_model | tutorial]], you can get the basic knowledge to perform a dynamics into multibinit. ---->

@@ -18,15 +18,14 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "lobpcgwf.F90",
+ "m_lobpcgwf_old.F90",
  "m_inwffil.F90",
  "m_lobpcgwf.F90",
  "m_lobpcg.F90",
- "pead_nl_mv.F90",
  "m_tddft.F90",
  "m_vtowfk.F90",
  "m_vtorho.F90",
- "wvl_wfsinp_disk.F90",
+ "m_wvl_wfsinp.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

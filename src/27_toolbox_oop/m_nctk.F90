@@ -32,7 +32,7 @@
 MODULE m_nctk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
  use iso_c_binding
@@ -538,7 +538,6 @@ subroutine nctk_test_mpiio()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_test_mpiio'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -800,7 +799,6 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_open_create'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -888,7 +886,8 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    MSG_ERROR("netcdf without MPI-IO support with nprocs > 1!")
  end if
 
- if (xmpi_comm_size(comm) > 1) then
+ !if (xmpi_comm_size(comm) > 1) then
+ if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
@@ -2207,7 +2206,6 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nctk_write_datar'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

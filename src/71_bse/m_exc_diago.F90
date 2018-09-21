@@ -27,7 +27,7 @@ MODULE m_exc_diago
  use defs_datatypes
  use m_slk
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 #if defined HAVE_MPI2
@@ -243,7 +243,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_resonant'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -741,7 +740,6 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_print_eig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -906,7 +904,6 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_coupling'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1191,7 +1188,6 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_coupling_hegv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
