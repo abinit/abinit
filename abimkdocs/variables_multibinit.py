@@ -713,10 +713,10 @@ Variable(
     defaultval=0,
     mnemonics="SPIN DIPole DIPole interaction",
     text="""
-    * 0 --> Switch off spin dipole-dipole interaction.
-    * 1 --> Switch on spin dipole-dipole interaction.
+* 0 --> Switch off spin dipole-dipole interaction.
+* 1 --> Switch on spin dipole-dipole interaction.
     (Not yet implemented.)
-    """,
+""",
 ),
 
 Variable(
@@ -728,8 +728,8 @@ Variable(
     defaultval=1e-16,
     mnemonics="SPIN Delta Time",
     text="""
-    Time step for spin dynamics. Unit: second
-    """,
+Time step for spin dynamics. Unit: second
+""",
 ),
 
 
@@ -743,10 +743,10 @@ Variable(
     defaultval=0,
     mnemonics="SPIN DYNAMICS",
     text="""
-    Flag to run spin dynamics.
-    * 0 --> Do not run spin dynamics.
-    * 1 --> Run spin dynamics.
-    """,
+Flag to run spin dynamics.
+* 0 --> Do not run spin dynamics.
+* 1 --> Run spin dynamics.
+""",
 ),
 
 Variable(
@@ -758,8 +758,8 @@ Variable(
     defaultval=[0,0,0],
     mnemonics="SPIN Magnetic Field",
     text="""
-    External magnetic field. Unit: Tesla.
-    """,
+External magnetic field. Unit: Tesla.
+""",
 ),
 
 
@@ -772,8 +772,8 @@ Variable(
     defaultval=0,
     mnemonics="SPIN NetCdf write per number of TIME steps",
     text="""
-    Write spin into netcdf file in every spin_nctime of spin dynamics time steps.
-    """,
+Write spin into netcdf file in every spin_nctime of spin dynamics time steps.
+""",
 ),
 
 Variable(
@@ -785,8 +785,8 @@ Variable(
     defaultval=0,
     mnemonics="SPIN dynamics total Number of TIME steps",
     text="""
-    Total number of spin dynamics time  steps.
-    """,
+Total number of spin dynamics time  steps.
+""",
 ),
 
 
@@ -799,8 +799,8 @@ Variable(
     defaultval=[0,0,0],
     mnemonics="SPIN QPOINT",
     text="""
-    Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i \vec{q} \cdot \vec{R_i})$. The unit is the reciprocal lattice vectors of the unitcell.
-    """,
+Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i q \cdot R_i)$. The unit is the reciprocal lattice vectors of the unitcell.
+""",
 ),
 
 
@@ -814,8 +814,8 @@ Variable(
     defaultval=325,
     mnemonics="SPIN TEMPERATURE",
     text="""
-    Temperature of spin for spin dynamics. Unit: Kelvin.
-    """,
+Temperature of spin for spin dynamics. Unit: Kelvin.
+""",
 ),
 
 ]

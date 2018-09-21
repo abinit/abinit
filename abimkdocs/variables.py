@@ -235,6 +235,7 @@ ABI_TOPICS = [
     "SelfEnergy",
     "SmartSymm",
     "spinpolarisation",
+    "SpinDynamicsMultibinit",
     "STM",
     "Susceptibility",
     "TDDFT",
