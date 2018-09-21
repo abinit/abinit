@@ -1595,7 +1595,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(enlnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
-   if(iscf<=0)then
+   if(iscf<=0 .and. me_distrb==0)then
      option=2 ; enunit=1 ; vxcavg_dum=zero
      call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
 &     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
