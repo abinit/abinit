@@ -1184,7 +1184,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
          call cwtime(cpu, wall, gflops,"stop")
-         write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
+         write(msg,'(4(a,i0),2(a,f8.2))') "k-point [",ikcalc,"/",sigma%nkcalc, &
+                                          "] q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
          call wrtout(std_out, msg, do_flush=.True.)
        end if
      end do ! iq_ibz (sum over q-points)
