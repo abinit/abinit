@@ -85,7 +85,7 @@
 #%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
 #%% [files]
 #%% files_to_test = 
-#%%   t150.out, tolnlines = 26, tolabs = 1.1e-3, tolrel = 0.9
+#%%   t150.out, tolnlines = 26, tolabs = 1.1e-3, tolrel = 1.1
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
