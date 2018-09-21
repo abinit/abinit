@@ -3954,7 +3954,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
  integer :: jj,mu,natom,nelm,nkpt,npsp,nsppol,nsym,ntypat,tatty,tband,tdg
  integer :: tecut,tgrid,tkpt,tlmn,tng,tpaw,tprim,tpsch,tpseu,tspinor,tsym,twfk
- integer :: twvl,txred
+ integer :: twvl,txred,enough
  real(dp) :: rms
  logical :: tfform2,tfform52
  character(len=26) :: typfmt
@@ -4187,14 +4187,21 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      end if
    end do
 
+   enough = 0
    do isppol=1,nsppol
      do ii=1,nkpt
        if (hdr%nband(ii)/=hdr0%nband(ii)) then
          tband=1
+         enough = enough + 1
          if (abifile%class == "wf_planewave") then
-           write(msg,'(a,i0,a,i0,a,i0)' )&
-&           'kpt num',ii,' input nband=',hdr%nband(ii),' not equal disk file nband=',hdr0%nband(ii)
-           MSG_WARNING(msg)
+           if (enough > 5) then
+              write(std_out, "(a)")"Stop writing warnings after 5 values"
+              exit
+           else
+             write(msg,'(a,i0,a,i0,a,i0)' )&
+              'kpt num ',ii,' input nband= ',hdr%nband(ii),' not equal disk file nband=',hdr0%nband(ii)
+             MSG_WARNING(msg)
+           end if
          end if
        end if
      end do

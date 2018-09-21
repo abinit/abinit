@@ -691,7 +691,7 @@ type dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
- real(dp) :: dvdb_qcache_mb = 512.0_dp
+ real(dp) :: dvdb_qcache_mb = 1024.0_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx

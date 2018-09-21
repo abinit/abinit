@@ -106,6 +106,7 @@ program mrgddb
  call herald(codename,abinit_version,std_out)
 
  ABI_CHECK(xmpi_comm_size(comm)==1, "mrgddb not programmed for parallel execution")
+ !ABI_MALLOC(filnam, (mddb+1))
 
  nargs = command_argument_count()
 
@@ -240,6 +241,8 @@ program mrgddb
    ! Speed optimized routine
    call mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,DDB_VERSION)
  end if
+
+ !ABI_FREE(filnam)
 
 !**********************************************************************
 

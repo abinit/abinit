@@ -435,7 +435,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
+ write(msg,'(2(a,f8.2))')" eph%init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
@@ -469,7 +469,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
+ write(msg,'(2(a,f8.2))')" eph%edos: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
@@ -579,7 +579,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"eph%ifc: cpu:",cpu,", wall: ",wall
+ write(msg,'(2(a,f8.2))')" eph%ifc: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 

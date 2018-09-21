@@ -310,8 +310,6 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    7  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.626 (OTMS:    5.626)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -323,8 +321,6 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
    7  21.208   21.208    0.000    0.000   -0.162    1.000    0.000    0.000    0.520    0.520
  
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
- QP gap:    9.632 (OTMS:    9.632)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -336,8 +332,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    7  22.066   22.066    0.000    0.000   -0.078    1.000    0.000    0.000    0.738    0.738
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   11.360 (OTMS:   11.360)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -349,8 +343,6 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
    7  24.586   24.586    0.000    0.000   -0.241    1.000    0.000    0.000    1.449    1.449
  
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
- QP gap:    8.690 (OTMS:    8.690)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -362,8 +354,6 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
    7  25.809   25.809    0.000    0.000   -0.745    1.000    0.000    0.000    1.484    1.484
  
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
- QP gap:   11.074 (OTMS:   11.074)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -375,8 +365,6 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
    7  25.352   25.352    0.000    0.000   -0.873    1.000    0.000    0.000    2.394    2.394
  
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
- QP gap:   11.050 (OTMS:   11.050)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -388,8 +376,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    7  29.920   29.920    0.000    0.000   -0.501    1.000    0.000    0.000   12.325   12.325
  
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
- QP gap:   11.187 (OTMS:   11.187)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -401,8 +387,6 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
    7  25.435   25.435    0.000    0.000   -1.438    1.000    0.000    0.000    2.016    2.016
  
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
- QP gap:   19.109 (OTMS:   19.109)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 
 ================================================================================
@@ -523,8 +507,6 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    7  18.426   18.426    0.000    0.000   -0.315    1.000    0.000    0.000    0.000    0.000
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.626 (OTMS:    5.626)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -536,8 +518,6 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
    7  21.208   21.208    0.000    0.000   -0.162    1.000    0.000    0.000    0.520    0.520
  
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
- QP gap:    9.632 (OTMS:    9.632)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -549,8 +529,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
    7  22.066   22.066    0.000    0.000   -0.078    1.000    0.000    0.000    0.738    0.738
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   11.360 (OTMS:   11.360)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -563,8 +541,6 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
    8  24.586   24.586    0.000    0.000   -0.241    1.000    0.000    0.000    0.000    0.000
  
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
- QP gap:    8.690 (OTMS:    8.690)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -576,8 +552,6 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
    7  25.809   25.809    0.000    0.000   -0.745    1.000    0.000    0.000    1.484    1.484
  
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
- QP gap:   11.074 (OTMS:   11.074)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -589,8 +563,6 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00]
    7  25.352   25.352    0.000    0.000   -0.873    1.000    0.000    0.000    2.394    2.394
  
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
- QP gap:   11.050 (OTMS:   11.050)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -604,8 +576,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    8  29.920   29.920    0.000    0.000   -0.501    1.000    0.000    0.000    0.000    0.000
  
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
- QP gap:   11.187 (OTMS:   11.187)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -619,8 +589,6 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01]
    8  25.435   25.435    0.000    0.000   -1.438    1.000    0.000    0.000    0.000    0.000
  
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
- QP gap:   19.109 (OTMS:   19.109)
- QP_gap - KS_gap:    0.000 (OTMS:    0.000)
  
 
 == END DATASET(S) ==============================================================

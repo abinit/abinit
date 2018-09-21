@@ -3560,6 +3560,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: enough=50
  integer :: tot_miss,tot_weird,miss_q,idir,ipert,iv1,psy,weird_q
  integer :: iq_ibz,nqibz,iq_file,qptopt,nshiftq,ii,timerev_q,unt,nqbz
  character(len=500) :: msg,ptype,found
@@ -3607,6 +3608,9 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  !   `tot_weird` is the number of redundant perturbations found in the DVDB (not critical)
  tot_miss = 0; tot_weird = 0
  do iq_ibz=1,nqibz
+   if (iq_ibz == enough)  then
+     call wrtout(unt,' More than 50 q-points. Only important messages will be printed...')
+   end if
    qq = qibz(:,iq_ibz)
    iq_file = dvdb_findq(db, qq)
 
@@ -3622,8 +3626,10 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
    if (iq_file /= -1) then
      ! This q-point is in the DVDB. Test if all the independent perturbations are available.
-     call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is present in the DVDB file"))
-     call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
+     if (iq_ibz <= enough)  then
+       call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is present in the DVDB file"))
+       call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
+     end if
      ii = 0; weird_q = 0; miss_q = 0
      do ipert=1,db%mpert
        do idir=1,3
@@ -3637,8 +3643,10 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
          if (psy == -1 .and. iv1 /= 0) weird_q = weird_q + 1
 
          ii=ii+1
-         write(msg,'(i5,a,i2,a,i4,4a)')ii,')  idir=',idir,', ipert=',ipert,", type=",trim(ptype),", found=",trim(found)
-         call wrtout(unt, msg)
+         if (iq_ibz <= enough)  then
+           write(msg,'(i5,a,i2,a,i4,4a)')ii,')  idir=',idir,', ipert=',ipert,", type=",trim(ptype),", found=",trim(found)
+           call wrtout(unt, msg)
+         end if
        end do
      end do
 

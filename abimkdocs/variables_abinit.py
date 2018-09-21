@@ -1651,14 +1651,14 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_useful'],
     dimensions="scalar",
-    defaultval=512,
+    defaultval=1024,
     mnemonics="DVDB Q-CACHE size in Megabytes",
     text="""
 This variable activates a caching mechanism for the DFPT potentials.
 The code will store in memory multiple q-points up to this size in Megabytes in order
 to reduce the number of IO operations required to read the potentials from the DVDB file.
 
-This option leads to a significant speedup of calculations requiring integrations
+This option leads to a **significant speedup** of calculations requiring integrations
 in q-space ([[eph_task]] == 4) at the price of an increase of the memory requirements.
 The speedup is important especially if the QP corrections are computed for several k-points.
 

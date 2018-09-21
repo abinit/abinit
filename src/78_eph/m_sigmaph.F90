@@ -394,7 +394,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: wall_dvscf, cpu_dvscf
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,ediff,weight
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight
  real(dp) :: elow,ehigh,wmax
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
@@ -1958,8 +1958,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! Decide default behaviour for Re-Im/Im
  new%qint_method = dtset%eph_intmeth - 1
- !new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
- !write(std_out, *)"imag_only:", new%imag_only, ", ;qint_method:", new%qint_method
 
  ! Initialize object for the computation of integration weights (integration in q-space).
  ! Weights can be obtained in different ways:
@@ -1978,7 +1976,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
-   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
+   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
 
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      MSG_ERROR(msg)
@@ -2000,10 +1998,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
           dtset%bs_interp_kmult(2) /= 0 .or.&
           dtset%bs_interp_kmult(3) /= 0 ) then
 
-   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation","COLL")
-
+   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation")
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
+   !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
+   write(msg, "(a, 3(f5.2, 2x))")"Parameters:", params
+   call wrtout(std_out, msg)
+
    !TODO: mband should be min of nband
    band_block = [1, ebands%mband]
    intp_kptrlatt(:,1) = [ebands%kptrlatt(1,1)*dtset%bs_interp_kmult(1), 0, 0]
@@ -2500,7 +2501,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops
- real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
 !arrays
@@ -2530,28 +2530,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  if (my_rank /= master) return
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
-
-#if 0
- ! This to compute derivative of Re Sigma with 9 points.
- write(ab_out, *)"Using finite derivative"
- iw = 1 + (self%nwr / 2) - 4
- e0pde = arth(zero, self%wr_step, 9)
- do ibc=1,self%nbcalc_ks(ikcalc,spin)
-   do it=1,self%ntemp
-     smrt = linfit(9, e0pde, real(self%vals_wr(iw:iw+8, it, ibc)), alpha, beta)
-     self%dvals_de0ks(it, ibc) = alpha
-     if (smrt > 0.1 / Ha_eV) then
-       write(msg,'(3a,i0,a,i0,2a,2(f22.15,2a))')&
-         'Values of Re Sig_c are not linear ',ch10,&
-         'band index ibc = ',ibc,' spin component = ',spin,ch10,&
-         'root mean square= ',smrt,ch10,&
-         'estimated slope = ',alpha,ch10,&
-         'Omega [eV] SigC [eV]'
-       MSG_WARNING(msg)
-     end if
-   end do
- end do
-#endif
 
  if (self%symsigma == +1) then
    ! Average self-energy matrix elements in the degenerate subspace.
@@ -2610,6 +2588,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    write(ab_out,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
    write(ab_out,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
    write(ab_out,"(a)")"   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
+   !write(ab_out,"(a)")"   TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
@@ -2621,7 +2600,11 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      else
        write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)), ", spin:", itoa(spin))
      end if
-     write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+     !if (self%imag_only) then
+     !  write(ab_out,"(a)")"   B    eKS     SE2(eKS)  TAU(fms)  DeKS"
+     !else
+       write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+     !end if
    end if
 
    do ibc=1,self%nbcalc_ks(ikcalc,spin)
@@ -2649,11 +2632,16 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      end if
      ! FIXME
      if (it == 1) then
-       !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-       write(ab_out, "(i4,10(f8.3,1x))") &
-         band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
-         real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
-         fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+       !if (self%imag_only) then
+       !  write(ab_out, "(i4,10(f8.3,1x))") &
+       !    band, kse * Ha_eV, aimag(sig0c) * Ha_eV, one / (two_pi * abs(aimag(sig0c))) * Time_Sec * tol15
+       !else
+         !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+         write(ab_out, "(i4,10(f8.3,1x))") &
+           band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+           real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
+           fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+       !end if
      end if
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
@@ -2668,15 +2656,24 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      end if
    end do ! ibc
 
-   ! Print KS and QP gap
-   if (it == 1 .and. kse_val /= huge(one) .and. kse_cond /= huge(one)) then
-     write(ab_out, "(a)")" "
-     write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
-       "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-     write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
-     write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
-         " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
-     write(ab_out, "(a)")" "
+   ! Print KS and QP gaps.
+   if (.not. self%imag_only) then
+     if (it == 1 .and. kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+       write(ab_out, "(a)")" "
+       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
+         "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+       write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
+       write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
+           " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
+       write(ab_out, "(a)")" "
+     end if
+   else
+     if (it == 1 .and. kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+       write(ab_out, "(a)")" "
+       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
+         "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+       write(ab_out, "(a)")" "
+     end if
    end if
  end do ! it
 
