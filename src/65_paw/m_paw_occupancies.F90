@@ -618,6 +618,8 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
+               !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+               ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpi0(1,2)*cpj0(2,1)-cpi0(2,2)*cpj0(1,1)
                ro21_im=cpi0(1,1)*cpj0(2,2)-cpi0(2,1)*cpj0(1,2)
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
@@ -731,8 +733,10 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
-               ro12_im=cpj0(1,1)*cpi1(2,2)-cpi1(1,1)*cpj0(2,2)+cpi0(1,2)*cpj1(2,1)-cpj1(1,2)*cpi0(2,1)
-               ro21_im=cpj0(1,2)*cpi1(2,1)-cpi1(1,2)*cpj0(2,1)+cpi0(1,1)*cpj1(2,2)-cpj1(1,1)*cpi0(2,2)
+               !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+               ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
+               ro12_im=cpj0(2,1)*cpi1(1,2)-cpi1(2,2)*cpj0(1,1)+cpi0(1,2)*cpj1(2,1)-cpj1(1,1)*cpi0(2,2)
+               ro21_im=cpj0(2,2)*cpi1(1,1)-cpi1(2,1)*cpj0(1,2)+cpi0(1,1)*cpj1(2,2)-cpj1(1,2)*cpi0(2,1)
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
@@ -740,12 +744,12 @@ end subroutine pawmkrhoij
              klmn_im=klmn_re+1
              if (nspden_rhoij>1) pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro12_re-ro21_re)
              if (cplex==2) then
-               ro11_im=cpj0(1,1)*cpi1(2,1)-cpi1(1,1)*cpj0(2,1)+cpi0(1,1)*cpj1(2,1)-cpj1(1,1)*cpi0(2,1)
-               ro22_im=cpj0(1,2)*cpi1(2,2)-cpi1(1,2)*cpj0(2,2)+cpi0(1,2)*cpj1(2,2)-cpj1(1,2)*cpi0(2,2)
+               ro11_im=cpj0(2,1)*cpi1(1,1)-cpi1(2,1)*cpj0(1,1)+cpi0(1,1)*cpj1(2,1)-cpj1(1,1)*cpi0(2,1)
+               ro22_im=cpj0(2,2)*cpi1(1,2)-cpi1(2,2)*cpj0(1,2)+cpi0(1,2)*cpj1(2,2)-cpj1(1,2)*cpi0(2,2)
                pawrhoij(iatom)%rhoij_(klmn_im,1)=pawrhoij(iatom)%rhoij_(klmn_im,1)+weight*(ro11_im+ro22_im)
                if (nspden_rhoij>1) then
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight*(ro11_im-ro22_im)
-                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_im+ro21_im)
+                 pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_im+ro21_im)
                end if
              end if
            end if
@@ -844,6 +848,8 @@ end subroutine pawmkrhoij
                pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
                pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
+                 !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+                 ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,1)*cpj0(2,1)-dcpi0(2,2,1)*cpj0(1,1)+cpi0(1,2)*dcpj0(2,1,1)-cpi0(2,2)*dcpj0(1,1,1)
                  ro21_im=dcpi0(1,1,1)*cpj0(2,2)-dcpi0(2,1,1)*cpj0(1,2)+cpi0(1,1)*dcpj0(2,2,1)-cpi0(2,1)*dcpj0(1,2,1)
                  if (substract_diagonal) then
@@ -952,6 +958,8 @@ end subroutine pawmkrhoij
                pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
                pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
+                 !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+                 ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,mu)*cpj0(2,1)+cpi0(1,2)*dcpj0(2,1,mu)-dcpi0(2,2,mu)*cpj0(1,1)-cpi0(2,2)*dcpj0(1,1,mu)
                  ro21_im=dcpi0(1,1,mu)*cpj0(2,2)+cpi0(1,1)*dcpj0(2,2,mu)-dcpi0(2,1,mu)*cpj0(1,2)-cpi0(2,1)*dcpj0(1,2,mu)
                  pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)

@@ -3029,7 +3029,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
            j0lmnp=jlmnp*(jlmnp-1)/2
            do ilmnp=1,jlmnp
              klmnp=j0lmnp+ilmnp
-             klmn1=iq0_dij+cplex_dij*klmnp+cplex_dij-1
+             klmn1=iq0_dij+cplex_dij*(klmnp-1)+1
 
 !            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)

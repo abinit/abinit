@@ -183,7 +183,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
  integer :: irhoij,ispden,itypat,itypat0
- integer :: jrhoij,kklmn,klmn,lm_size,lmn2_size,mesh_size
+ integer :: jrhoij,kklmn,klmn,klmnq,lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nspdiag,nsppol,opt_compch
  integer :: qphase,usecore,usepawu,usetcore,usexcnhat,usenhat,usefock
  logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc
@@ -192,7 +192,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
  real(dp) :: eldaumdc,eldaumdcdc,enucdip,etmp,espnorb,etild1xc,etild1xcdc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
- real(dp) :: dd,d1i,d1r,d2i,d2r,ro,ro1i,ro1r,ro2i,ro2r
  character(len=3) :: pertstrg
  character(len=500) :: msg
 !arrays
@@ -716,23 +715,14 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Hartree energy computation
    if (option/=1) then
      do ispden=1,nspdiag
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-         ro1r=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-         d1r=paw_ij(iatom)%dijhartree(klmn)
-         etmp=ro1r*d1r
-         if (qphase==2) then
-           ro2r=pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij,ispden)
-           d2r=paw_ij(iatom)%dijhartree(iq0_dij+klmn)
-           etmp=etmp+ro2r*d2r
-           if (cplex_rhoij==2) then
-             ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
-             ro2i=pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,ispden)
-             etmp=etmp+ro1i*d2r-ro2i*d1r
-           end if
-         end if
-         eh2=eh2+etmp*pawtab(itypat)%dltij(klmn)
+       do iq=1,qphase
+         jrhoij=1+(iq-1)*iq0_rhoij ; klmnq=(iq-1)*lmn2_size
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=klmnq+klmn
+           eh2=eh2+pawrhoij(iatom)%rhoijp(jrhoij,ispden)*paw_ij(iatom)%dijhartree(kklmn) &
+&                 *pawtab(itypat)%dltij(klmn) &
+           jrhoij=jrhoij+cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -851,68 +841,39 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        !   D^1_ij.cos(qr) and D^2_ij.sin(qr) are complex if cplex_dij=2
        !   The same for Rho_ij
        if (option/=1) then
-		 do ispden=1,pawrhoij(iatom)%nspden !????
-		   jrhoij=1
-		   do irhoij=1,pawrhoij(iatom)%nrhoijsel
-			 klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=cplex_dij*(klmn-1)+1
-			 ro1r=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-			 d1r=paw_ij(iatom)%dijU(kklmn,ispden)
-             etmp=ro1r*d1r
-             if (cplex_dij==2.and.cplex_rhoij==2) then
-		       ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
-		       d1i=paw_ij(iatom)%dijU(kklmn+1,ispden)
-               etmp=etmp+ro1i*d1i
-             end if
-             etmp=etmp*pawtab(itypat)%dltij(klmn)
-             eldaumdc   = eldaumdc   + etmp
-             eldaumdcdc = eldaumdcdc - etmp
-             jrhoij=jrhoij+cplex_rhoij
-     	   end do
-		 end do
-         if (qphase==2) then
-		   jrhoij=1
-		   do irhoij=1,pawrhoij(iatom)%nrhoijsel
-	     	 klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=cplex_dij*(klmn-1)+1
-             ro1r=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-	     	 ro2r=pawrhoij(iatom)%rhoijp(iq0_dij+jrhoij,ispden)
-	     	 d1r=paw_ij(iatom)%dijU(kklmn,ispden)
-	     	 d2r=paw_ij(iatom)%dijU(iq0_dij+kklmn,ispden)
-             etmp=ro2r*d2r
-             if (cplex_dij==2) then
-	       	   d1i=paw_ij(iatom)%dijU(kklmn+1,ispden)
-	       	   d2i=paw_ij(iatom)%dijU(iq0_dij+kklmn+1,ispden)
-               etmp=etmp+ro2r*d1i-ro1r*d2i
-             end if
-             if (cplex_rhoij==2) then
-               ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
-	       	   ro2i=pawrhoij(iatom)%rhoijp(iq0_dij+jrhoij+1,ispden)
-               etmp=etmp+ro1i*d2r-ro2i*d1r
-               if (cplex_dij==2) etmp=etmp+ro2i*d2i
-             end if
-             etmp=etmp*pawtab(itypat)%dltij(klmn)
-             eldaumdc   = eldaumdc   + etmp
-             eldaumdcdc = eldaumdcdc - etmp
-             jrhoij=jrhoij+cplex_rhoij
+
+         do ispden=1,pawrhoij(iatom)%nspden !????
+           do iq=1,qphase
+             jrhoij=1+(iq-1)*iq0_rhoij ; klmnq=(iq-1)*lmn2_size
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=klmnq+cplex_dij*(klmn-1)+1
+               etmp=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*paw_ij(iatom)%dijU(kklmn,ispden)
+               if (cplex_dij==2.and.cplex_rhoij==2) &
+&                etmp=etmp-pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)*paw_ij(iatom)%dijU(kklmn+1,ispden)
+               etmp=etmp*pawtab(itypat)%dltij(klmn)
+               eldaumdc   = eldaumdc   + etmp
+               eldaumdcdc = eldaumdcdc - etmp
+               jrhoij=jrhoij+cplex_rhoij
+             end do
            end do
-         end if
+         end do
          !Add FLL double-counting part
          if (ipert==0.and.pawu_new_algo.and.pawtab(itypat)%usepawu==5) then
+           ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for Dble-C FLL term!')
            do ispden=1,nspdiag
-             iq0_rhoij=cplex_rhoij*lmn2_size ; jrhoij=1
+             jrhoij=1
              do irhoij=1,pawrhoij(iatom)%nrhoijsel
                klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-               ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-               if (qphase==2.and.cplex_rhoij==2) ro=ro-pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,ispden)
-               dd=pawtab(itypat)%euij_fll(klmn)
-               eldaumdc=eldaumdc+ro*dd*pawtab(itypat)%dltij(klmn)
+               eldaumdc=eldaumdc+pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%euij_fll(klmn) &
+&                               *pawtab(itypat)%dltij(klmn)
                jrhoij=jrhoij+cplex_rhoij
              end do
            end do
          end if
-	   end if
 
-	 end if
-   end if
+       end if ! option/=1
+     end if ! LDA+U algo
+   end if ! Dij Hartree
 
 !  ========= Compute nuclear dipole moment energy contribution  ========
 !  =====================================================================
@@ -935,20 +896,15 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !      The same for Rho_ij
    if (any(abs(nucdipmom(:,iatom))>tol8).and.ipert==0.and.ipositron/=1.and.option/=1) then
      ABI_CHECK(cplex_rhoij==1,'BUG in pawdenpot: rhoij must be complex for ND moments!')
-     jrhoij=1
+     ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for ND moments!')
+     jrhoij=2 !Select imaginary part of rhoij
      do irhoij=1,pawrhoij(iatom)%nrhoijsel
        klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-       kklmn=cplex_dij*(klmn-1)+1
-       ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,1) !Select imaginary part of rhoij
-       d1i=paw_ij(iatom)%dijnd(kklmn+1,1)      !Select imaginary part of dijnd
-       enucdip=enucdip-ro1i*d1i*pawtab(itypat)%dltij(klmn)
-       if (qphase==2) then
-         ro1r=pawrhoij(iatom)%rhoijp(jrhoij,1)
-         ro2r=pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij,1)
-         d1r=paw_ij(iatom)%dijnd(kklmn,1)
-         d2r=paw_ij(iatom)%dijnd(iq0_dij+kklmn,1)
-         enucdip=enucdip-(ro2r*d2r+ro1i*d2r+ro2r*d1i)*pawtab(itypat)%dltij(klmn)
-       end if
+       kklmn=cplex_dij*(klmn-1)+2 !Select imaginary part of dijnd (only nonzero part)
+!      Because dijnd involves no spin flips, following formula is correct for all values of nspden
+       enucdip=enucdip-pawrhoij(iatom)%rhoijp(jrhoij,1)*paw_ij(iatom)%dijnd(kklmn,1) &
+&                     *pawtab(itypat)%dltij(klmn)
+       jrhoij=jrhoij+cplex_rhoij
      end do
    end if
 
@@ -1005,6 +961,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        if(cplex_rhoij==2) ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,2)
        if(cplex_dij==2) d1i=paw_ij(iatom)%dijso(kklmn+1,3)
        if (qphase==2) then
+
 		 ro2r=pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij,2)
 		 d2r=paw_ij(iatom)%dijso(iq0_dij+kklmn,3)
 		 if(cplex_rhoij==2) ro2i=pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,2)
@@ -1030,6 +987,31 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end do
 
    end if
+
+
+   if (option/=1.and.pawspnorb>0.and.ipert==0.and.ipositron/=1.and.cplex_rhoij==2) then
+     ABI_CHECK(cplex==1,'BUG in pawdenpot: Epaw^SO not available for cplex=2!')
+     ABI_CHECK(pawrhoij(iatom)%nspden==4,'BUG in pawdenpot: pawrhoij must have 4 components!')
+     jrhoij=2 !Select imaginary part of rhoij
+     do irhoij=1,pawrhoij(iatom)%nrhoijsel
+       klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+       kklmn=cplex_dij*(klmn-1)+1
+       espnorb=espnorb-pawrhoij(iatom)%rhoijp(jrhoij,3)*paw_ij(iatom)%dijso(kklmn,3) &
+&                     *pawtab(itypat)%dltij(klmn)
+       if (cplex_dij==2) then
+         kklmn=kklmn+1
+         espnorb=espnorb-(pawrhoij(iatom)%rhoijp(jrhoij,2)*paw_ij(iatom)%dijso(kklmn,3) &
+&              +half*pawrhoij(iatom)%rhoijp(jrhoij,4)*(paw_ij(iatom)%dijso(kklmn,1) &
+&              -paw_ij(iatom)%dijso(kklmn,2))) &
+&              *pawtab(itypat)%dltij(klmn)
+       end if
+       jrhoij=jrhoij+cplex_rhoij
+     end do
+   end if
+
+
+
+
 
 !  === Compute 2nd part of local exact-exchange energy and potential  ===
 !  ======================================================================
