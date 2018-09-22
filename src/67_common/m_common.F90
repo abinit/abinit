@@ -185,10 +185,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs
  integer,save :: ttolwfr
  integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
- integer :: tmagnet
+ integer :: tmagnet, my_rank
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
@@ -207,6 +208,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+ my_rank = mpi_enreg%me_cell
 
  quit=0; conv_retcode=0
 
@@ -483,7 +486,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
 !  Print eigenvalues every step if dtset%prtvol>=10 and GS case
-   if (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0) then
+   if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
      call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
 &     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
