@@ -45,15 +45,20 @@ MODULE m_paw_denpot
  use m_crystal,          only : crystal_t
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+#endif
+
  implicit none
 
  private
 
 !public procedures.
- public :: pawdenpot    ! Compute different (PAW) energies, densities and potentials inside PAW spheres
- public :: pawdensities ! Compute PAW on-site densities (all-electron ,pseudo and compensation)
- public :: pawaccenergy ! Accumulate the atomic contribution of a PAW on-site energy
- public :: paw_mknewh0  ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
+ public :: pawdenpot           ! Compute different (PAW) energies, densities and potentials inside PAW spheres
+ public :: pawdensities        ! Compute PAW on-site densities (all-electron ,pseudo and compensation)
+ public :: pawaccenergy        ! Accumulate the atomic contribution of a PAW on-site energy
+ public :: pawaccenergy_nospin ! As pawaccenergy, but with no spin polarization
+ public :: paw_mknewh0         ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
 
 CONTAINS  !========================================================================================
 !!***
@@ -1645,13 +1650,12 @@ end subroutine pawdensities
 !! This contribution has the form: Sum_ij[Rhoij.Dij]
 !!
 !! INPUTS
-!!  dij(cplex_dij*qphase*lmn2_size,ndij)= array containing D_ij values
 !!  pawrhoij<type(pawrhoij_type)>= datastructure containing Rho_ij values
+!!  dij(cplex_dij*qphase_dij*lmn2_size,nspden_dij)= array containing D_ij values
 !!  cplex_dij= 2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
-!!  qphase= 2 if dij/rhoij have a exp(iqR) phase, 1 if not
-!!  lmn2_size= number of klmn=(ilmn,jlmn) channels
+!!  qphase_dij= 2 if dij has a exp(iqR) phase, 1 if not
 !!  nspden_dij= number of spin components for dij
-!!  nspden_rhoij= number of spin density components for rhoij
+!!  pawtab<type(pawtab_type)>=paw tabulated starting data
 !!
 !! OUTPUT
 !!
@@ -1685,12 +1689,9 @@ end subroutine pawdensities
 !!   The present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
 !!     rho^{s1,s2}^_ij = Sum[<Psi^s2|pi><pj|Psi^s1]  (s1 and s2 exponents inverted)
 !!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine pawaccenergy(dij,rhoij,cplex_dij,qphase,lmn2_size,nspden_dij,nspden_rhoij, &
+subroutine pawaccenergy(pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab, &
 &                       epaw,epawdc)
 
 
@@ -1704,85 +1705,108 @@ subroutine pawaccenergy(dij,rhoij,cplex_dij,qphase,lmn2_size,nspden_dij,nspden_r
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,cplex_rhoij,qphase,lmn2_size,nspden_dij,nspden_rhoij
+ integer,intent(in) :: cplex_dij,qphase_dij,nspden_dij
  real(dp),intent(inout),optional :: epaw,epawdc
- type(pawrhoij_type),intent(inout) :: pawrhoij
+ type(pawrhoij_type),intent(in),target :: pawrhoij
+ type(pawtab_type),intent(in) :: pawtab
 !arrays
- real(dp),intent(in) :: dij(cplex_dij*qphase*lmn2_size,nspden_dij)
+ real(dp),intent(in) :: dij(cplex_dij*qphase_dij*pawtab%lmn2_size,nspden_dij)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_rhoij_,iq,iq0_dij,iq0_rhoij,irhoij,jrhoij
- integer :: klmn,kklmn,krhoij,nspden_rhoij
- logical :: compute_imaginary
- real(dp) ::
+ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,irhoij,ispden,jrhoij
+ integer :: klmn,kklmn,krhoij,lmn2_size,nspden_rhoij
+ logical :: compute_epaw,compute_epawdc,compute_imaginary
+ real(dp) :: etmp
  character(len=500) :: msg
 !arrays
- real(dp),pointer :: rhoij_
+ real(dp),pointer :: rhoij(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
+ compute_epaw  =present(epaw)
+ compute_epawdc=present(epawdc)
+ if ((.not.compute_epaw).and.(.not.compute_epawdc)) return
+ 
 !Compatibility tests
- if (pawrhoij%qphase/=qphase) then
-   msg='pawaccenergy: pawrhoij%qphase/=qphase!'
+ if (pawrhoij%qphase/=qphase_dij) then
+   msg='pawaccenergy: pawrhoij%qphase/=qphase_dij!'
+   MSG_BUG(msg)
+ end if
+ if (pawrhoij%nspden_rhoij>nspden_dij) then
+   msg='pawaccenergy: pawrhoij%nspden_rhoij>nspden_dij!'
    MSG_BUG(msg)
  end if
 
 !Useful variables
- compute_imaginary=((cplex_dij==2).and.(pawrhoij%cplex_rhoij==2))
+ lmn2_size=pawtab%lmn2_size
  nspden_rhoij=pawrhoij%nspden_rhoij
- if (nspden_rhoij==4) then
-   cplex_rhoij_=2
-   ABI_ALLOCATE(rhoij_,(2*lmn2_size,4))
+ if (nspden_rhoij==4.and.nspden_dij==4) then
+   cplex_rhoij=2
+   ABI_ALLOCATE(rhoij,(2*lmn2_size,4))
  else
-   cplex_rhoij_=pawrhoij%cplex_rhoij
-   rhoij_ => pawrhoij%rhoijp
+   cplex_rhoij=pawrhoij%cplex_rhoij
+   rhoij => pawrhoij%rhoijp
  end if
+ compute_imaginary=(cplex_dij==2.and.cplex_rhoij==2)
 
 !Loop over qphase components
- do iq=1,qphase
-   iq0_rhoij=(iq-1)*lmn2_size*cplex_rhoij_
-   iq0_dij=(iq-1)*lmn2_size*cplex_dij
+ do iq=1,qphase_dij
+   iq0_rhoij=(iq-1)*lmn2_size*cplex_rhoij
+   iq0_dij  =(iq-1)*lmn2_size*cplex_dij
 
 !  Non-collinear case
-   if (nspden_rhoij==4) then
-     rhoij_(:,:)=zero
+   if (nspden_rhoij==4.and.nspden_dij==4) then
+     rhoij(:,:)=zero
      jrhoij=(iq-1)*lmn2_size*cplex_rhoij+1 ; krhoij=1
      do irhoij=1,pawrhoij(iatom)%nrhoijsel
        klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-       rhoij_(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,1))
-       rhoij_(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,1))
-       rhoij_(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij,2)
-       rhoij_(krhoij+1,3)=-half*pawrhoij%rhoijp(jrhoij,3)
-       rhoij_(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij,2)
-       rhoij_(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij,3)
+       rhoij(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,1))
+       rhoij(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,1))
+       !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
+       !because of the inversion of spins in rhoij definition
+       rhoij(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij,2)
+       rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij,3)
+       rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij,2)
+       rhoij(krhoij+1,4)=-half*pawrhoij%rhoijp(jrhoij,3)
        if (cplex_rhoij==2) then
-		 rhoij_(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
-		 rhoij_(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
-		 rhoij_(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij+1,3)
-		 rhoij_(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
-		 rhoij_(krhoij  ,4)=-half*pawrhoij%rhoijp(jrhoij+1,3)
-		 rhoij_(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
+		 rhoij(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
+		 rhoij(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
+         !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
+         !because of the inversion of spins in rhoij definition
+		 rhoij(krhoij  ,3)=-half*pawrhoij%rhoijp(jrhoij+1,3)
+		 rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
+		 rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij+1,3)
+		 rhoij(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
        end if
-       jrhoij=krhoij+cplex_rhoij ; krhoij=krhoij+2
+       jrhoij=krhoij+pawrhoij%cplex_rhoij ; krhoij=krhoij+2
      end do
      iq0_rhoij=0
    end if
 
-!  Loop over non-zero rhoij components
-   jrhoij=iq0_rhoij+1
-   do irhoij=1,pawrhoij(iatom)%nrhoijsel
-     klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-     kklmn=iq0_dij+klmn
+!  Loop over rhoij spin components
+   do ispden=1,nspden_rhoij
 
+!    Loop over non-zero rhoij components
+     jrhoij=iq0_rhoij+1
+     do irhoij=1,pawrhoij(iatom)%nrhoijsel
+       klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+       kklmn=iq0_dij+klmn
 
-manque dltij (pawtab)
+!      Contribution to on-site energy
+       etmp=rhoij(jrhoij,ispden)*dij(kklmn,ispden)
+       if (compute_imaginary) etmp=etmp-rhoij(jrhoij+1,ispden)*dij(kklmn+1,ispden)
+       etmp=etmp*pawtab%dltij(klmn)
 
+       if (compute_epaw)   epaw  =epaw  +etmp
+       if (compute_epawdc) epawdc=epawdc-etmp
 
-     jrhoij=krhoij+cplex_rhoij_
-   end do
+       jrhoij=krhoij+cplex_rhoij
+     end do
+
+  end do ! nspden_rhoij
 
  end do ! qphase
  
@@ -1793,6 +1817,100 @@ manque dltij (pawtab)
  DBG_EXIT("COLL")
 
 end subroutine pawaccenergy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_denpot/pawaccenergy_nospin
+!! NAME
+!! pawaccenergy_nospin
+!!
+!! FUNCTION
+!! Accumulate an on-site PAW energy by adding the contribution of the current atom.
+!! This contribution has the form: Sum_ij[Rhoij.Dij]
+!! Applies only for Dij without spin components (as f.i. Dij^Hartree).
+!! This routine is a wrapper to pawaccenergy.
+!!
+!! INPUTS
+!!  pawrhoij<type(pawrhoij_type)>= datastructure containing Rho_ij values
+!!  dij(cplex_dij*qphase_dij*lmn2_size)= array containing D_ij values
+!!  cplex_dij= 2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
+!!  qphase_dij= 2 if dij has a exp(iqR) phase, 1 if not
+!!  pawtab<type(pawtab_type)>=paw tabulated starting data
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  [epaw]= PAW on-site energy. At output, the contribution of the current atom
+!!          has been added to epaw.
+!!  [epawdc]= PAW on-site energy. At output, the contribution of the current atom
+!!            has been added to epawdc.
+!!
+!! PARENTS
+!!      m_paw_denpot
+!!
+!! CHILDREN
+!!      pawaccenergy
+!!
+!! SOURCE
+
+subroutine pawaccenergy_nospin(rhoij,dij,cplex_dij,qphase_dij,pawtab, &
+&                              epaw,epawdc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawaccenergy_nospin'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: cplex_dij,qphase_dij
+ real(dp),intent(inout),optional :: epaw,epawdc
+ type(pawrhoij_type),intent(in),target :: pawrhoij
+ type(pawtab_type),intent(in) :: pawtab
+!arrays
+ real(dp),intent(in) :: dij(cplex_dij*qphase_dij*pawtab%lmn2_size)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: size_dij
+#ifdef HAVE_FC_ISO_C_BINDING
+ type(C_PTR) :: cptr
+#endif
+!arrays
+real(dp), ABI_CONTIGUOUS pointer :: dij_2D(:,:)
+
+! *************************************************************************
+
+ size_dij=size(dij)
+ 
+#ifdef HAVE_FC_ISO_C_BINDING
+ cptr=c_loc(dij(1))
+ call c_f_pointer(cptr,dij_2D,shape=[size_dij,1])
+#else
+ ABI_ALLOCATE(dij_2D,(size_dij,1))
+ dij_2D=reshape(dij,[size_dij,1])
+#endif
+
+ if (present(epaw)) then
+   if (present(epawdc)) then
+     call pawaccenergy(pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab,epaw=epaw,epawdc=epawdc)
+   else
+     call pawaccenergy(pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab,epaw=epaw)
+   end if
+ else if present(epawdc)) then
+   call pawaccenergy(pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab,epawdc=epawdc)
+ end if
+
+#ifndef HAVE_FC_ISO_C_BINDING
+ ABI_DEALLOCATE(dij_2D)
+#endif
+
+end subroutine pawaccenergy_nospin
 !!***
 
 !----------------------------------------------------------------------
