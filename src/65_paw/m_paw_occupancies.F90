@@ -459,7 +459,7 @@ CONTAINS  !=====================================================================
    ABI_DATATYPE_DEALLOCATE(cwaveprjb)
  end if
 
- if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
+ if (allocated(buffer_cprj_correl)) then
    ABI_DEALLOCATE(buffer_cprj_correl)
    ABI_DEALLOCATE(req_correl)
  end if
