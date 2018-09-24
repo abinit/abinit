@@ -91,6 +91,8 @@ module m_spin_model
      type(multibinit_dtset_type) :: params
      type(spin_ncfile_t) :: spin_ncfile
      integer :: nmatoms
+
+     character(len=fnlen) :: in_fname, out_fname, xml_fname
      !  CONTAINS
      !    procedure :: run => spin_model_t_run
      !    procedure :: initialize=>spin_model_t_initialize
@@ -162,7 +164,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_model_t_initialize(self, xml_fname,  params)
+  subroutine spin_model_t_initialize(self, filenams,  params)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -172,16 +174,20 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    character(len=*), intent(in) :: xml_fname
+    character(len=fnlen), intent(in) :: filenames(:)
     integer :: sc_matrix(3,3)
     type(multibinit_dtset_type), intent(in) :: params
+
+    self%in_fname(:)=filenames(1,:)
+    self%xml_fname(:)=filenames(2,:)
+    self%out_fname(:)=filanames(3,:)
 
     ! read input
     !call self%spin_primitive%initialize()
     call spin_model_primitive_t_initialize(self%spin_primitive)
     self%params=params
     !call self%read_xml(xml_fname)
-    call spin_model_t_read_xml(self, xml_fname)
+    call spin_model_t_read_xml(self, self%xml_fname)
     !call self%spin_primitive%print_terms()
     call spin_model_primitive_t_print_terms(self%spin_primitive)
 
@@ -333,7 +339,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    character(len=*), intent(in) :: xml_fname
+    character(len=fnlen), intent(in) :: xml_fname
     !call self%spin_primitive%read_xml(xml_fname)
     call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname)
   end subroutine spin_model_t_read_xml
