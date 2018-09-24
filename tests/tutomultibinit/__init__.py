@@ -10,7 +10,7 @@ keywords = [
 
 #: List of input files
 inp_files = [
-#    "tmulti1_1.in",
+    "tmulti1_1.in",
     "tmulti1_2.in",
     "tmulti1_3.in",
 ]
