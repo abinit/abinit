@@ -3087,7 +3087,7 @@ subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 !scalars
  integer :: natom,n2buffer,ncpgr,n2dim
  integer :: iat,jj,n1dim,nn
- integer :: ntotcp,ipck
+ integer :: ipck
  character(len=100) :: msg
 !arrays
 
@@ -3117,9 +3117,9 @@ subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
    do iat=1,natom
      nn=nlmn(iat)
      buffer(:,ipck+1:ipck+nn)=cprj(iat,jj)%cp(:,1:nn)
-!     if (ncpgr/=0) then
-!       buffer_gr(:,:,ipck+1:ipck+nn)=cprj(iat,jj)%dcp(:,:,1:nn)
-!     end if
+     if (ncpgr/=0) then
+       buffer_gr(:,:,ipck+1:ipck+nn)=cprj(iat,jj)%dcp(:,:,1:nn)
+     end if
      ipck=ipck+nn
    end do
  end do
@@ -3175,7 +3175,7 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
 !scalars
  integer :: natom,n2buffer,ncpgr,n2dim
  integer :: iat,jj,n1dim,nn
- integer :: ntotcp,ipck
+ integer :: ipck
  character(len=100) :: msg
 !arrays
 
@@ -3187,30 +3187,27 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
  n2dim=size(cprj,dim=2)
 
  if (natom/=n1dim) then
-   msg='size mismatch in natom (pawcprj_pack)!'
+   msg='size mismatch in natom (pawcprj_unpack)!'
    MSG_BUG(msg)
  end if
  if (n2dim*SUM(nlmn)/=n2buffer) then
-   msg='size mismatch in dim=2 (pawcprj_pack)!'
+   msg='size mismatch in dim=2 (pawcprj_unpack)!'
    MSG_BUG(msg)
  end if
  ncpgr=0
  if (present(buffer_gr)) then
    ncpgr=size(buffer_gr,dim=2)
  end if
-
  
-!write (msg,"(a,60F20.15)") "???? natom, ", cprj(1,1)%nlmn
-!MSG_ERROR(msg)
 !=== Unpack buffers into cprj ===
  ipck=0
  do jj=1,n2dim
    do iat=1,natom
      nn=nlmn(iat)
      cprj(iat,jj)%cp(:,1:nn)=buffer(:,ipck+1:ipck+nn)
-!     if (ncpgr/=0) then
-!       cprj(iat,jj)%dcp(:,:,1:nn)=buffer_gr(:,:,ipck+1:ipck+nn)
-!     end if
+     if (ncpgr/=0) then
+       cprj(iat,jj)%dcp(:,:,1:nn)=buffer_gr(:,:,ipck+1:ipck+nn)
+     end if
      ipck=ipck+nn
    end do
  end do
