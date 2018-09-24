@@ -205,7 +205,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:),lmselect_cur_ep(:),lmselect_ep(:),lmselect_tmp(:)
  real(dp) :: mpiarr(7),tsec(2)
- real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:),diju_im(:,:)
+ real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:)
  real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
  real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
  real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
@@ -719,7 +719,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Hartree energy computation
    if (option/=1) then
-     call pawaccenergy_nospin(eh2,pawrhoij,paw_ij(iatom)%dijhartree,1,qphase,pawtab(itypat))
+     call pawaccenergy_nospin(eh2,pawrhoij(iatom),paw_ij(iatom)%dijhartree,1,qphase,pawtab(itypat))
    end if
 
 !  Electron-positron calculation:
@@ -732,7 +732,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      call pawdijhartree(dij_ep,qphase,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
      if (option/=1) then
        etmp=zero
-       call pawaccenergy_nospin(electronpositron%e_paw,pawrhoij,dij_ep,1,1,pawtab(itypat))
+       call pawaccenergy_nospin(electronpositron%e_paw,pawrhoij(iatom),dij_ep,1,1,pawtab(itypat))
        electronpositron%e_paw  =electronpositron%e_paw  -etmp
        electronpositron%e_pawdc=electronpositron%e_pawdc-etmp
      end if
@@ -823,12 +823,12 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        !Then, compute energy
        if (option/=1) then
          etmp=zero
-         call pawaccenergy(etmp,pawrhoij,paw_ij(iatom)%dijU,cplex_dij,qphase,ndij,pawtab(itypat))
+         call pawaccenergy(etmp,pawrhoij(iatom),paw_ij(iatom)%dijU,cplex_dij,qphase,ndij,pawtab(itypat))
          eldaumdc=eldaumdc+etmp ; eldaumdcdc=eldaumdcdc-etmp
          !Add FLL double-counting part
          if (ipert==0.and.pawu_new_algo.and.pawtab(itypat)%usepawu==5) then
            ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for Dble-C FLL term!')
-           call pawaccenergy_nospin(eldaumdc,pawrhoij,pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
+           call pawaccenergy_nospin(eldaumdc,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
          end if
        end if
 
@@ -851,7 +851,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute nuclear dipole contribution to energy
      if (option/=1) then
-       call pawaccenergy_nospin(enucdip,pawrhoij,paw_ij(iatom)%dijnd,cplex_dij,1,pawtab(itypat))
+       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,cplex_dij,1,pawtab(itypat))
      end if
 
    end if
@@ -870,7 +870,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
-       call pawaccenergy(espnorb,pawrhoij,paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
+       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
    end if
@@ -900,58 +900,34 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ==== Compute Fock Dij term and Fock energy terms ====
 !  =====================================================
 
-!!!!!!!!!NOTE : rhoij en mode alpha,beta avec partie imaginaire
-!!!!!POUR L'INSTANT PAS EN NON_COLINAIRE ; CPLEX=2 pourrait se faire
-!!!!! COMME DIJSO
    if (usefock==1) then
-     ABI_CHECK(cplex==1,'Dij^Fock not available for cplex=2!')
-     ABI_ALLOCATE(dijfock_vv,(cplex_dij*lmn2_size,ndij))
-     ABI_ALLOCATE(dijfock_cv,(cplex_dij*lmn2_size,ndij))
 
-!    Computation of Fock contribution to Dij
      if (ipositron/=1) then
+
+!      Fock contribution to Dij
+       ABI_ALLOCATE(dijfock_vv,(cplex_dij*qphase*lmn2_size,ndij))
+       ABI_ALLOCATE(dijfock_cv,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,cplex,hyb_mixing_,hyb_mixing_sr_, &
 &                      ndij,pawrhoij(iatom),pawtab(itypat))
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
-     else
-!      No Fock contribution for positron
+       paw_ij(iatom)%has_dijfock=2
+
+!      Fock contribution to energy
+       if (option/=1) then
+         dijfock_cv(:,:)=half*dijfock_vv(:,:)+dijfock_cv(:,:)
+         call pawaccenergy(efock  ,pawrhoij(iatom),dijfock_cv,cplex_dij,qphase,ndij,pawtab(itypat))
+         call pawaccenergy(efockdc,pawrhoij(iatom),dijfock_vv,cplex_dij,qphase,ndij,pawtab(itypat))
+         ABI_DEALLOCATE(dijfock_vv)
+         ABI_DEALLOCATE(dijfock_cv)
+       end if
+     end if
+
+!    Special case for positron
+     if (ipositron==1) then
        paw_ij(iatom)%dijfock(:,:)=zero
-     end if
-     paw_ij(iatom)%has_dijfock=2
-
-!    Fock contribution to energy
-     if (option/=1.and.ipositron/=1) then
-	   do ispden=1,pawrhoij(iatom)%nspden !????
-		 jrhoij=1
-		 do irhoij=1,pawrhoij(iatom)%nrhoijsel
-		   klmn=pawrhoij(iatom)%rhoijselect(irhoij) ; kklmn=cplex_dij*(klmn-1)+1
-
-		   ro1r=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-		   ro1i=zero;if (cplex_rhoij==2) ro1i=pawrhoij(iatom)%rhoijp(jrhoij+1,ispden)
-           
-		   d1r=half*dijfock_vv(kklmn,ispden)+dijfock_cv(kklmn,ispden)
-		   etmp=ro1r*d1r
-		   if (cplex_dij==2) then
-			 d1i=half*dijfock_vv(kklmn+1,ispden)+dijfock_cv(kklmn+1,ispden)
-			 etmp=etmp+ro1i*d1i
-		   end if
-           efock=efock+etmp*pawtab(itypat)%dltij(klmn)
-
-		   d1r=half*dijfock_vv(kklmn,ispden)
-		   etmp=ro1r*d1r
-		   if (cplex_dij==2) then
-			 d1i=half*dijfock_vv(kklmn+1,ispden)
-			 etmp=etmp+ro1i*d1i
-		   end if
-           efockdc=efockdc+etmp*pawtab(itypat)%dltij(klmn)
-
-		   jrhoij=jrhoij+cplex_rhoij
-		 end do
-	   end do
+       paw_ij(iatom)%has_dijfock=2
      end if
 
-     ABI_DEALLOCATE(dijfock_vv)
-     ABI_DEALLOCATE(dijfock_cv)
    end if
 
 !  === Compute the zero of the potentials if requested ==================
@@ -963,17 +939,9 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      vpotzero(1)=vpotzero(1)-pawtab(itypat)%beta/ucvol
 
      !Term 2 : \sum_ij rho_ij gamma_ij
-	 do ispden=1,nspdiag
-	   jrhoij=1
-	   do irhoij=1,pawrhoij(iatom)%nrhoijsel
-		 klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-		 ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-    	 if (qphase==2.and.cplex_rhoij==2) ro=ro-pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,ispden)
-    	 dd=pawtab(itypat)%gammaij(klmn)/ucvol
-		 vpotzero(2)=vpotzero(2)-ro*dd*pawtab(itypat)%dltij(klmn)
-		 jrhoij=jrhoij+cplex_rhoij
-	   end do
-	 end do
+     etmp=zero
+     call pawaccenergy_nospin(etmp,pawrhoij(iatom),pawtab(itypat)%gammaij,1,qphase,pawtab(itypat))
+     vpotzero(2)=vpotzero(2)-etmp/ucvol
 
    end if
 
@@ -982,31 +950,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
    if (option/=1.and.ipert<=0) then
 
-	 do ispden=1,nspdiag
-	   jrhoij=1
-	   do irhoij=1,pawrhoij(iatom)%nrhoijsel
-		 klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-		 ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-    	 if (qphase==2.and.cplex_rhoij==2) ro=ro-pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,ispden)
-         dd=pawtab(itypat)%dij0(klmn)
-		 e1t10=e1t10+ro*dd*pawtab(itypat)%dltij(klmn)
-		 jrhoij=jrhoij+cplex_rhoij
-	   end do
-	 end do
+     call pawaccenergy_nospin(e1t10,pawrhoij(iatom),pawtab(itypat)%dij0,1,qphase,pawtab(itypat))
 
 !    Positron special case (dij0 is opposite, except for kinetic term)
      if (ipositron/=0) then
-       do ispden=1,nspdiag
-	     jrhoij=1
-	     do irhoij=1,pawrhoij(iatom)%nrhoijsel
-		   klmn=pawrhoij(iatom)%rhoijselect(irhoij)
-	  	   ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-	  	   if (qphase==2.and.cplex_rhoij==2) ro=ro-pawrhoij(iatom)%rhoijp(iq0_rhoij+jrhoij+1,ispden)
-           dd=two*(pawtab(itypat)%kij(klmn)-pawtab(itypat)%dij0(klmn))
-		   e1t10=e1t10+ro*dd*pawtab(itypat)%dltij(klmn)
-		   jrhoij=jrhoij+cplex_rhoij
-	     end do
-       end do
+       ABI_ALLOCATE(dij_ep,(qphase*lmn2_size))
+       dij_ep(:)=two*(pawtab(itypat)%kij(:)-pawtab(itypat)%dij0(:))
+       call pawaccenergy_nospin(e1t10,pawrhoij(iatom),dij_ep,1,qphase,pawtab(itypat))
      end if
 
    end if
@@ -1022,13 +972,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Deallocate potentials
    if (.not.keep_vhartree) then
      paw_an(iatom)%has_vhartree=0
-     if (allocated(paw_an(iatom)%vh1) then
+     if (allocated(paw_an(iatom)%vh1)) then
        ABI_DEALLOCATE(paw_an(iatom)%vh1)
      end if
    end if
    if (temp_vxc) then
      paw_an(iatom)%has_vxc=0
-     if (allocated(paw_an(iatom)%vxc1) then
+     if (allocated(paw_an(iatom)%vxc1)) then
        ABI_DEALLOCATE(paw_an(iatom)%vxc1)
      end if
    end if
@@ -1184,7 +1134,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 
 !Local variables ---------------------------------------
 !scalars
- integer :: dplex,ii,ilm,iplex,ir,irhoij,isel,ispden,jrhoij
+ integer :: dplex,ii,ilm,iplex,iq0,ir,irhoij,isel,ispden,jrhoij
  integer :: klm,klmn,kln,ll,lmax,lmin,mesh_size
  real(dp) :: m1,mt1,rdum
  character(len=500) :: msg
@@ -1199,29 +1149,29 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 
 !Compatibility tests
  if (opt_dens/=2.and.opt_l>=0) then
-   msg='  opt_dens/=2 incompatible with opt_l>=0 !'
+   msg='opt_dens/=2 incompatible with opt_l>=0!'
    MSG_BUG(msg)
  end if
  if(nzlmopt/=0.and.nzlmopt/=1.and.nzlmopt/=-1) then
-   msg='  invalid value for variable "nzlmopt".'
+   msg='invalid value for variable "nzlmopt"!'
    MSG_BUG(msg)
  end if
  if(nspden>pawrhoij%nspden) then
-   msg='  nspden must be <= pawrhoij%nspden !'
+   msg='nspden must be <= pawrhoij%nspden!'
    MSG_BUG(msg)
  end if
  if (cplex>pawrhoij%cplex_rhoij) then
-   msg='  cplex must be <= pawrhoij%cplex_rhoij !'
+   msg='cplex must be <= pawrhoij%qphase!'
    MSG_BUG(msg)
  end if
  if (nzlmopt/=1) then
    if (any(.not.lmselectin(1:lm_size))) then
-     msg='  With nzlmopt/=1, lmselectin must be true !'
+     msg='With nzlmopt/=1, lmselectin must be true!'
      MSG_BUG(msg)
    end if
  end if
  if (pawang%gnt_option==0) then
-   msg='  pawang%gnt_option=0 !'
+   msg='pawang%gnt_option=!'
    MSG_BUG(msg)
  end if
 
@@ -1230,6 +1180,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
  if (opt_dens <2) trho1=zero
  if (opt_dens==0) nhat1=zero
  mesh_size=pawtab%mesh_size;dplex=cplex-1
+ iq0=pawrhoij%cplex_rhoij*pawrhoij%lmn2_size
  if (nzlmopt<1) lmselectout(1:lm_size)=.true.
  if (present(one_over_rad2)) then
    one_over_rad2_ => one_over_rad2
@@ -1253,16 +1204,17 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      lmin=pawtab%indklmn(3,klmn)
      lmax=pawtab%indklmn(4,klmn)
 
-
 !    Retrieve rhoij
      if (pawrhoij%nspden/=2) then
-       ro(1:cplex)=pawrhoij%rhoijp(jrhoij:jrhoij+dplex,ispden)
+       ro(1)=pawrhoij%rhoijp(jrhoij,ispden)
+       if (cplex==2) ro(2)=pawrhoij%rhoijp(iq0+jrhoij,ispden)
      else
        if (ispden==1) then
-         ro(1:cplex)=pawrhoij%rhoijp(jrhoij:jrhoij+dplex,1)&
-&                   +pawrhoij%rhoijp(jrhoij:jrhoij+dplex,2)
+         ro(1)=pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,2)
+         if (cplex==2) ro(2)=pawrhoij%rhoijp(iq0+jrhoij,1)+pawrhoij%rhoijp(iq0+jrhoij,2)
        else if (ispden==2) then
-         ro(1:cplex)=pawrhoij%rhoijp(jrhoij:jrhoij+dplex,1)
+         ro(1)=pawrhoij%rhoijp(jrhoij,1)
+         if (cplex==2) ro(1)=pawrhoij%rhoijp(iq0+jrhoij,1)
        end if
      end if
      ro(1:cplex)=pawtab%dltij(klmn)*ro(1:cplex)
@@ -1599,13 +1551,13 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
    msg='pawaccenergy: pawrhoij%qphase/=qphase_dij!'
    MSG_BUG(msg)
  end if
- if (pawrhoij%nspden_rhoij>nspden_dij.and.nspden_dij/=1) then
-   msg='pawaccenergy: pawrhoij%nspden_rhoij>nspden_dij!'
+ if (pawrhoij%nspden>nspden_dij.and.nspden_dij/=1) then
+   msg='pawaccenergy: pawrhoij%nspden>nspden_dij!'
    MSG_BUG(msg)
  end if
 
 !Useful data
- nspden_rhoij=pawrhoij%nspden_rhoij
+ nspden_rhoij=pawrhoij%nspden
  lmn2_size=pawtab%lmn2_size
  add_imaginary=(cplex_dij==2.and.cplex_rhoij==2)
 
@@ -1631,8 +1583,8 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
    if (nspden_rhoij==4.and.nspden_dij==4) then
      rhoij(:,:)=zero
      jrhoij=(iq-1)*lmn2_size*cplex_rhoij+1 ; krhoij=1
-     do irhoij=1,pawrhoij(iatom)%nrhoijsel
-       klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+     do irhoij=1,pawrhoij%nrhoijsel
+       klmn=pawrhoij%rhoijselect(irhoij)
        rhoij(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,1))
        rhoij(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,1))
        !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
@@ -1642,14 +1594,14 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
        rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij,2)
        rhoij(krhoij+1,4)=-half*pawrhoij%rhoijp(jrhoij,3)
        if (cplex_rhoij==2) then
-		 rhoij(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
-		 rhoij(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
+         rhoij(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
+         rhoij(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
          !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
          !because of the inversion of spins in rhoij definition
-		 rhoij(krhoij  ,3)=-half*pawrhoij%rhoijp(jrhoij+1,3)
-		 rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
-		 rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij+1,3)
-		 rhoij(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
+         rhoij(krhoij  ,3)=-half*pawrhoij%rhoijp(jrhoij+1,3)
+         rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
+         rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij+1,3)
+         rhoij(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
        end if
        jrhoij=krhoij+pawrhoij%cplex_rhoij ; krhoij=krhoij+2
      end do
@@ -1662,8 +1614,8 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 
 !    Loop over non-zero rhoij components
      jrhoij=iq0_rhoij+1
-     do irhoij=1,pawrhoij(iatom)%nrhoijsel
-       klmn=pawrhoij(iatom)%rhoijselect(irhoij)
+     do irhoij=1,pawrhoij%nrhoijsel
+       klmn=pawrhoij%rhoijselect(irhoij)
        kklmn=iq0_dij+klmn
 
 !      Contribution to on-site energy
@@ -1680,7 +1632,7 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
  end do ! qphase
  
  if (nspden_rhoij==4) then
-   ABI_DEALLOCATE(rhoij_)
+   ABI_DEALLOCATE(rhoij)
  end if
  
  DBG_EXIT("COLL")
@@ -1739,7 +1691,7 @@ subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab)
  type(pawrhoij_type),intent(in),target :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
 !arrays
- real(dp),intent(in) :: dij(cplex_dij*qphase_dij*pawtab%lmn2_size)
+ real(dp),intent(in),target :: dij(cplex_dij*qphase_dij*pawtab%lmn2_size)
 
 !Local variables ---------------------------------------
 !scalars
