@@ -156,6 +156,21 @@ contains
 &                    QptBound_type (4,-1,'Y1   ', 0.500, 0.500,-zeta ),&
 &                    QptBound_type (4,-1,'Z    ', 0.500, 0.500,-0.500) /)
     end if
+  else if ((InVar%bravais(1).eq.5).and.(InVar%bravais(2).eq.0)) then
+    qptbound_tot=9
+    angle_alpha=Lattice%angle_alpha
+    eta=(1d0+4*dcos(angle_alpha*pi/180d0))/(2d0+4*dcos(angle_alpha*pi/180d0))
+    nu=3d0/4d0-eta/2d0
+    ABI_MALLOC(QptBound,(qptbound_tot))
+    QptBound(:)=(/ QptBound_type (5, 0,'G ', 0.000, 0.000, 0.000),&
+&                  QptBound_type (5, 0,'F ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (5, 0,'F1 ', 0.500, 0.000, -0.500),&
+&                  QptBound_type (5, 0,'L ', 0.500, 0.000, 0.000),&
+&                  QptBound_type (5, 0,'Z ', 0.500, 0.500, 0.500),&
+&                  QptBound_type (5, 0,'Q ', 1-nu,nu,0),&
+&                  QptBound_type (5, 0,'X ', nu,0,-nu),&
+&                  QptBound_type (5, 0,'B1 ', 0.500,1-eta,eta-1),&
+&                  QptBound_type (5, 0,'B ', eta,0.500, 1-eta) /)
   else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
     qptbound_tot=6
     ABI_MALLOC(QptBound,(qptbound_tot))
@@ -269,6 +284,19 @@ contains
         Qpt%special_qpt(10)="Y1   "
         Qpt%special_qpt(11)="Z    "
       end if
+    else if ((InVar%bravais(1).eq.5).and.(InVar%bravais(2).eq.0)) then
+!     RHOMBO:F1-Q-G-Z-B-B1-L-G-F
+      qpt_tot=9
+      ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
+      Qpt%special_qpt(1)="F1"
+      Qpt%special_qpt(2)="X"
+      Qpt%special_qpt(3)="G "
+      Qpt%special_qpt(4)="Z "
+      Qpt%special_qpt(5)="B "
+      Qpt%special_qpt(6)="B1 "
+      Qpt%special_qpt(7)="L "
+      Qpt%special_qpt(8)="G "
+      Qpt%special_qpt(9)="F "
     else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
 !     HEX: G-M-K-G-A-L-H-A
       qpt_tot=8
