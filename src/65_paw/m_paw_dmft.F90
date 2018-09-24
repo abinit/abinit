@@ -470,7 +470,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
   paw_dmft%mbandc = 0
  endif
   
- if(mpi_enreg%paral_kgb/=0) then
+ if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
 
@@ -1774,11 +1774,11 @@ subroutine destroy_sc_dmft_paralkgb(paw_dmft)
  type(paw_dmft_type),intent(inout) :: paw_dmft
 ! *********************************************************************
 
- if ( allocated(paw_dmft%bandc_proc) )  then
+ if (allocated(paw_dmft%bandc_proc)) then
    ABI_DEALLOCATE(paw_dmft%bandc_proc)
  end if
 
- if ( allocated(paw_dmft%use_bandc) )  then
+ if (allocated(paw_dmft%use_bandc)) then
    ABI_DEALLOCATE(paw_dmft%use_bandc)
  end if
 

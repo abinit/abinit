@@ -96,6 +96,8 @@ module m_pawcprj
  public :: pawcprj_mpi_sum        ! Perform MPI_SUM on a pawcprj_type inside a MPI communicator.
  public :: pawcprj_getdim         ! Returns the number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom.
  public :: paw_overlap            ! Compute the onsite contribution to the overlap between two states.
+ public :: pawcprj_pack           ! Copy data from a cprj to a simple real buffer
+ public :: pawcprj_unpack         ! Copy data from a simple real buffer to a cprj
 !!***
 
 CONTAINS
@@ -3038,6 +3040,179 @@ end function paw_overlap
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawcprj/pawcprj_pack
+!! NAME
+!! pawcprj_pack
+!!
+!! FUNCTION
+!! Pack structured data into a simple buffer
+!!
+!! INPUTS
+!!  nlmn(natom)=Number of nlm partial waves for each atom.
+!!  ncpgr = number of gradients in cprj_out
+!!  cprj= The datatype to be packed.
+!!
+!! OUTPUT
+!!  buffer = the data packed, dim : (2, n2dim*sum(nlmn))
+!!  [buffer_gr] = if present the gradient data packed, dim : (2, ncpgr, n2dim*sum(nlmn))
+!!
+!! PARENTS
+!!  pawmkrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawcprj_pack'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ integer,intent(in) :: nlmn(:)
+ type(pawcprj_type),intent(in) :: cprj(:,:)
+ real(dp),intent(out) :: buffer(:,:)
+ real(dp),intent(out),optional :: buffer_gr(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom,n2buffer,ncpgr,n2dim
+ integer :: iat,jj,n1dim,nn
+ integer :: ipck
+ character(len=100) :: msg
+!arrays
+
+! *************************************************************************
+
+ natom=size(nlmn,dim=1)
+ n2buffer=size(buffer,dim=2)
+ n1dim=size(cprj,dim=1)
+ n2dim=size(cprj,dim=2)
+
+ if (natom/=n1dim) then
+   msg='size mismatch in natom (pawcprj_pack)!'
+   MSG_BUG(msg)
+ end if
+ if (n2dim*SUM(nlmn)/=n2buffer) then
+   msg='size mismatch in dim=2 (pawcprj_pack)!'
+   MSG_BUG(msg)
+ end if
+ ncpgr=0
+ if (present(buffer_gr)) then
+   ncpgr=size(buffer_gr,dim=2)
+ end if
+
+!=== Pack cprj ====
+ ipck=0
+ do jj=1,n2dim
+   do iat=1,natom
+     nn=nlmn(iat)
+     buffer(:,ipck+1:ipck+nn)=cprj(iat,jj)%cp(:,1:nn)
+     if (ncpgr/=0) then
+       buffer_gr(:,:,ipck+1:ipck+nn)=cprj(iat,jj)%dcp(:,:,1:nn)
+     end if
+     ipck=ipck+nn
+   end do
+ end do
+
+end subroutine pawcprj_pack
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawcprj/pawcprj_unpack
+!! NAME
+!! pawcprj_unpack
+!!
+!! FUNCTION
+!! Unpack structured data from a simple buffer
+!!
+!! INPUTS
+!!  nlmn(natom)=Number of nlm partial waves for each atom.
+!!  ncpgr = number of gradients in cprj_in
+!!  buffer = the data to be unpacked, dim : (2, n2dim*sum(nlmn))
+!!  [buffer_gr] = if present the gradient data to be unpacked, dim : (2, ncpgr, n2dim*sum(nlmn))
+!!
+!! OUTPUT
+!!  cprj=The datatype unpacked
+!!
+!! PARENTS
+!!  pawmkrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawcprj_unpack'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ integer,intent(in) :: nlmn(:)
+ real(dp),intent(in) :: buffer(:,:)
+ real(dp),intent(in),optional :: buffer_gr(:,:,:)
+ type(pawcprj_type),intent(inout) :: cprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom,n2buffer,ncpgr,n2dim
+ integer :: iat,jj,n1dim,nn
+ integer :: ipck
+ character(len=100) :: msg
+!arrays
+
+! *************************************************************************
+
+ natom=size(nlmn,dim=1)
+ n2buffer=size(buffer,dim=2)
+ n1dim=size(cprj,dim=1)
+ n2dim=size(cprj,dim=2)
+
+ if (natom/=n1dim) then
+   msg='size mismatch in natom (pawcprj_unpack)!'
+   MSG_BUG(msg)
+ end if
+ if (n2dim*SUM(nlmn)/=n2buffer) then
+   msg='size mismatch in dim=2 (pawcprj_unpack)!'
+   MSG_BUG(msg)
+ end if
+ ncpgr=0
+ if (present(buffer_gr)) then
+   ncpgr=size(buffer_gr,dim=2)
+ end if
+ 
+!=== Unpack buffers into cprj ===
+ ipck=0
+ do jj=1,n2dim
+   do iat=1,natom
+     nn=nlmn(iat)
+     cprj(iat,jj)%cp(:,1:nn)=buffer(:,ipck+1:ipck+nn)
+     if (ncpgr/=0) then
+       cprj(iat,jj)%dcp(:,:,1:nn)=buffer_gr(:,:,ipck+1:ipck+nn)
+     end if
+     ipck=ipck+nn
+   end do
+ end do
+
+end subroutine pawcprj_unpack
 
 end module m_pawcprj
 !!***
