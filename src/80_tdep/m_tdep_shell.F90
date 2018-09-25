@@ -142,7 +142,7 @@ contains
   ABI_MALLOC(Shell1at%ncoeff_prev,(Shell1at%nshell)); Shell1at%ncoeff_prev(:)=zero
   write(InVar%stdout,*) ' Number of shells=',Shell1at%nshell
   write(InVar%stdout,*) '============================================================================'
-  open(unit=16,file='nbcoeff-pij.dat')
+  open(unit=16,file=trim(InVar%output_prefix)//'nbcoeff-pij.dat')
   ncoeff_prev=0
   do ishell=1,Shell1at%nshell
     ncoeff=0

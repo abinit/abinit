@@ -306,7 +306,7 @@ program tdep
  close(53)
  close(52)
  close(51)
- call tdep_write_yaml(Eigen2nd,Lattice,Qpt,InVar%output_prefix)
+ call tdep_write_yaml(Eigen2nd,Qpt,InVar%output_prefix)
  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
 !==========================================================================================
 !===================== Compute the elastic constants ======================================

@@ -433,7 +433,7 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_calc_alpha_gamma'
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
   implicit none
@@ -469,15 +469,11 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   ABI_ALLOCATE(wtq,(nqbz))
   ABI_ALLOCATE(wtq_folded,(nqbz))
   wtq(:)=one/nqbz         ! Weights sum up to one
-<<<<<<< HEAD
 
 !FB  write(InVar%stdlog,*) 'nqbz = ', nqbz
   call symkpt(0,Crystal%gmet,ibz2bz,InVar%stdlog,qbz,nqbz,nqibz,Sym%nsym,Crystal%symrec,1,wtq,wtq_folded)
 !FB  write(InVar%stdlog,*) 'nqibz = ', nqibz
  
-=======
-  call symkpt(0,Crystal%gmet,ibz2bz,InVar%stdlog,qbz,nqbz,nqibz,Sym%nsym,Crystal%symrec,1,wtq,wtq_folded)
->>>>>>> V8.7.3_branch
   ABI_ALLOCATE(wtqibz   ,(nqibz))
   ABI_ALLOCATE(qibz     ,(3,nqibz))
   ABI_ALLOCATE(qibz_cart,(3,nqibz))
@@ -560,7 +556,7 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   call simpson_int(ntemp,10.d0,tmp,p_thermo2)
   deallocate(tmp)
 
-  open(unit=20,file='thermo3.dat')
+  open(unit=20,file=trim(InVar%output_prefix)//'thermo3.dat')
   write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
   write(20,'(a)')'#                                                                         ----------------------------------------------'
   write(20,'(a)')'#                                                                          {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
@@ -656,7 +652,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
   
   nmode=3*InVar%natom_unitcell
   ABI_MALLOC(Gruneisen,(3*InVar%natom_unitcell)); Gruneisen(:)=zero
-  open(unit=53,file='gruneisen.dat')
+  open(unit=53,file=trim(InVar%output_prefix)//'gruneisen.dat')
   do iqpt=1,Qpt%nqpt
     qpt_cart(:)=Qpt%qpt_cart(:,iqpt)
     if ((sum(abs(Qpt%qpt_red(:,iqpt)))).lt.tol8) cycle  ! G point

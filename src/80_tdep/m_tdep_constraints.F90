@@ -189,7 +189,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Compute the constraints !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  open(unit=16,file='constraints.dat')
+  open(unit=16,file=trim(InVar%output_prefix)//'constraints.dat')
   ntotcoeff=CoeffMoore%ntotcoeff
   if (present(proj2nd)) then
     ABI_MALLOC(const_rot1st,(3,                                ntotcoeff)); const_rot1st(:,:)        =zero
