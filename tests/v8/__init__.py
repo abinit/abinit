@@ -38,6 +38,7 @@ inp_files = [
 "t33.in",
 "t34.in",
 "t35.in",
+"t36.in",
 "t41.in",
 "t42.in",
 "t43.in",
@@ -72,7 +73,6 @@ inp_files = [
 "t78.in",
 "t79.in",
 "t80.in",
-"t81.in",
 #GW-soc
 "t90.in",
 "t91.in",

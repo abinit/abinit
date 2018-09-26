@@ -1,3 +1,68 @@
+## v8.10
+
+Version 8.10, released on October 10, 2018.
+List of changes with respect to version 8.8.
+
+Many thanks to the contributors to the ABINIT project between
+April 2018 and October 2018. These release notes
+are relative to modifications/improvements of ABINIT v8.10 with respect to v8.8.
+The merge request #411 is the first MR not reported in these release notes.
+
+The list of contributors includes:
+TBU B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen,
+C. Espejo, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, A. Martin,
+H. Miranda, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, F. Ricci,
+G.-M. Rignanese, M. Torrent , M. Verstraete, J. Zwanziger
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+### A. Warnings and important remarks
+
+TBU A.1 Due to the availability of new input variables, some obsolete input variables have been suppressed:
+
+* input variable cgtyphf, see now [[fockoptmix]];
+* input variable gwfockmix, see now [[hyb_mixing]] and [[hyb_mixing_sr]].
+
+* * *
+
+### B. Most noticeable achievements
+
+TBU B.1 The whole ABINIT documentation has been placed under the control of [mkdocs](http://www.mkdocs.org/),
+    and most files have been translated to markdown
+    (well, there are still a few remaining files not placed in this system, but these are quite few).
+    The capabilities developed for [v8.6](#v86)
+    (Topics -B.1-, central bibliography -B.2-, restructured and searcheable list of input variables -B.3-,
+    frequency statistics -B.4-) have been maintained and consolidated.
+    More documentation is available for developers than before. The whole system is better integrated and easier to maintain.
+    The appearance is also new.
+    The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
+    central bibliographic database.
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
+    By M. Giantomassi, with some help from X. Gonze.
+
+* * *
+
+###C. Changes for the developers (also compilers)
+
+TBU C.1 Add support for NAG 6.2, use netcdf4 and hdf5 with NAG 6.2.
+    New builders: abiref_nag_6.2_openmpi and atlas_gnu_7.2_fb
+
+* * *
+
+###D.  Other changes (or on-going developments, not yet finalized)
+
+TBU D.1 Implementation of the LDA-1/2 methodology (see the announcement B.10 of v8.6): [[test:v8_32]] has been provided.
+    By F. Jollet.
+
+TBU D.20 Miscellaneous additional bug fixes and improvements of documentation by:
+     L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+
+* * *
+
 ## v8.8
 
 Version 8.8, released on April 28, 2018.
