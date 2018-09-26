@@ -28,28 +28,28 @@ fit_cutoff = 7
 #%% [NCPU_1]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
-#%% md_hist = t101_HIST
+#%% md_hist = t82_HIST
 #%% files_to_test = 
 #%%   t82_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_2]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
-#%% md_hist = t101_HIST
+#%% md_hist = t82_HIST
 #%% files_to_test = 
 #%%   t82_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI2_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_4]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
-#%% md_hist = t101_HIST
+#%% md_hist = t82_HIST
 #%% files_to_test = 
 #%%   t82_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI4_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_10]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
-#%% md_hist = t101_HIST
+#%% md_hist = t82_HIST
 #%% files_to_test = 
 #%%   t82_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
