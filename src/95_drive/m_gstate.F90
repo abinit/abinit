@@ -762,8 +762,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize wavefunctions.
  if(dtset%imgwfstor==1 .and. initialized==1)then
-   cg(:,:)=scf_history%cg(:,:,1) 
-   eigen(:)=scf_history%eigen(:,1) 
+   cg(:,:)=scf_history%cg(:,:,1)
+   eigen(:)=scf_history%eigen(:,1)
  else if(dtset%tfkinfunc /=2) then
 !if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
@@ -1049,7 +1049,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ncpgr=0
    if (dtset%usefock==1) then
      if (dtset%optforces == 1) then
-       ncpgr = 3 
+       ncpgr = 3
      end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
@@ -1610,8 +1610,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if(dtset%imgwfstor==1)then
-   scf_history%cg(:,:,1)=cg(:,:)  
-   scf_history%eigen(:,1)=eigen(:)  
+   scf_history%cg(:,:,1)=cg(:,:)
+   scf_history%eigen(:,1)=eigen(:)
  endif
 
 !Deallocate arrays
@@ -1631,7 +1631,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%imgwfstor==0)then
    ABI_DEALLOCATE(cg)
    ABI_DEALLOCATE(eigen)
- else 
+ else
    nullify(cg,eigen)
  endif
 
@@ -2055,16 +2055,18 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  if(dtset%nstep==0)iscf_dum=-1
 
  if(dtset%tfkinfunc==0)then
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
+   if (me == master) then
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+   end if
 
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
@@ -2072,7 +2074,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
      call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
-
  end if
 
 !Compute and print location of maximal and minimal density

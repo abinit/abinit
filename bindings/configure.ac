@@ -25,12 +25,12 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Bindings],[8.9.4],
+AC_INIT([ABINIT-Bindings],[8.11.0],
   [https://bugs.launchpad.net/abinit/],[abinit-bindings])
 AC_REVISION([Autotools support for the ABINIT Bindings])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
-AC_CONFIG_SRCDIR([parser/README])
+AC_CONFIG_SRCDIR([libpaw/README])
 _AC_SRCDIRS(["."])
 
 # Initial setup
