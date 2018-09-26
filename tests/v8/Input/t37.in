@@ -21,12 +21,12 @@
 #%% [setup]
 #%% executable = tdep
 #%% need_cpp_vars = HAVE_NETCDF
-#%% md_hist = t110_HIST.nc
+#%% md_hist = t37_HIST.nc
 #%% [files]
 #%% files_to_test = 
-#%%   t110.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
-#%%   t110omega.dat, tolnlines = 2, tolabs = 3e-6, tolrel = 1.01, fld_options = -medium;
-#%%   t110thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
+#%%   t37.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
+#%%   t37omega.dat, tolnlines = 2, tolabs = 3e-6, tolrel = 1.01, fld_options = -medium;
+#%%   t37thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
