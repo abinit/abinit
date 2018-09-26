@@ -153,10 +153,10 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t104.in, t105.in
+#%% test_chain = t85.in, t86.in
 #%% [files]
 #%% files_to_test = 
-#%%    t105.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t86.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -166,5 +166,5 @@ optdriver7    5 # for nonlinear calculation
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
-#%%   Test the polarized case (with a non-polarized system). Must give same results than t103.in
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t84.in
 #%%<END TEST_INFO>
