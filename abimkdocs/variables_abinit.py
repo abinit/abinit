@@ -3005,7 +3005,7 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE alogorithm
+It is also used in geometric relaxation calculation with the FIRE algorithm
 ([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
@@ -6634,7 +6634,13 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by 
+Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. 
+The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22). 
+It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. 
+The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones. 
+The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well. 
+The positions are in reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:** The initial time step [[dtion]]
