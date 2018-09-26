@@ -61,7 +61,7 @@ inp_files = [
 "t80.in",
 "t81.in",
 "t82.in",
-"t83.in"
+"t83.in",
 "t91.in",
 "t92.in",
 "t93.in",
