@@ -182,5 +182,5 @@
 #%% keywords = PAW, DFPT
 #%% description = 
 #%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
-#%%   Test the polarized case (with a non-polarized system). Must give same results than t102.in
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t83.in
 #%%<END TEST_INFO>

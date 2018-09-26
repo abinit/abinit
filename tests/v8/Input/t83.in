@@ -147,27 +147,27 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t102.in, t103.in
+#%% test_chain = t83.in, t84.in
 #%% [shell]
 #%% post_commands = 
-#%%   ww_mv t102o_DS2_DEN   t103o_DS2_DEN;
-#%%   ww_mv t102o_DS2_WFK   t103o_DS2_WFK;
-#%%   ww_mv t102o_DS3_1WF7  t103o_DS3_1WF7;
-#%%   ww_mv t102o_DS3_1WF8  t103o_DS3_1WF8;
-#%%   ww_mv t102o_DS3_1WF9  t103o_DS3_1WF9;
-#%%   ww_mv t102o_DS4_DEN1  t103o_DS4_DEN1;
-#%%   ww_mv t102o_DS4_DEN4  t103o_DS4_DEN4;
-#%%   ww_mv t102o_DS4_DEN10 t103o_DS4_DEN10;
-#%%   ww_mv t102o_DS4_DEN11 t103o_DS4_DEN11;
-#%%   ww_mv t102o_DS4_DEN12 t103o_DS4_DEN12;
-#%%   ww_mv t102o_DS4_1WF1  t103o_DS4_1WF1;
-#%%   ww_mv t102o_DS4_1WF4  t103o_DS4_1WF4;
-#%%   ww_mv t102o_DS4_1WF10 t103o_DS4_1WF10;
-#%%   ww_mv t102o_DS4_1WF11 t103o_DS4_1WF11;
-#%%   ww_mv t102o_DS4_1WF12 t103o_DS4_1WF12
+#%%   ww_mv t83o_DS2_DEN   t84o_DS2_DEN;
+#%%   ww_mv t83o_DS2_WFK   t84o_DS2_WFK;
+#%%   ww_mv t83o_DS3_1WF7  t84o_DS3_1WF7;
+#%%   ww_mv t83o_DS3_1WF8  t84o_DS3_1WF8;
+#%%   ww_mv t83o_DS3_1WF9  t84o_DS3_1WF9;
+#%%   ww_mv t83o_DS4_DEN1  t84o_DS4_DEN1;
+#%%   ww_mv t83o_DS4_DEN4  t84o_DS4_DEN4;
+#%%   ww_mv t83o_DS4_DEN10 t84o_DS4_DEN10;
+#%%   ww_mv t83o_DS4_DEN11 t84o_DS4_DEN11;
+#%%   ww_mv t83o_DS4_DEN12 t84o_DS4_DEN12;
+#%%   ww_mv t83o_DS4_1WF1  t84o_DS4_1WF1;
+#%%   ww_mv t83o_DS4_1WF4  t84o_DS4_1WF4;
+#%%   ww_mv t83o_DS4_1WF10 t84o_DS4_1WF10;
+#%%   ww_mv t83o_DS4_1WF11 t84o_DS4_1WF11;
+#%%   ww_mv t83o_DS4_1WF12 t84o_DS4_1WF12
 #%% [files]
 #%% files_to_test = 
-#%%    t102.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
+#%%    t83.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
