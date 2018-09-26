@@ -1399,7 +1399,7 @@ end subroutine extrapwf
        cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=(one+alpha)*psi_ortho(:,1:my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
          do ibdmix=1,nbdmix
-           call pawcprj_axpby(one+alpha,zero,cprj_kh(:,ibdmix:ibdmix),cprj(:,ibdmix:ibdmix))
+           call pawcprj_axpby(one+alpha,zero,cprj_kh(:,ibdmix:ibdmix),cprj_k(:,ibdmix:ibdmix))
          end do ! end loop on ibdmix
        end if
 !      psi(t+dt) <- -alpha.psi(t-dt) + beta.psi(t-dt)
@@ -1408,7 +1408,7 @@ end subroutine extrapwf
 &             (beta-alpha)*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind1)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(beta-alpha,one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind1),cprj(:,ibdmix:ibdmix))
+             call pawcprj_axpby(beta-alpha,one,scf_history_wf%cprj(:,ibg_hist+ibdmix:ibg_hist+ibdmix,ind1),cprj_k(:,ibdmix:ibdmix))
            end do ! end loop on ibdmix
          end if
        end if
@@ -1419,7 +1419,7 @@ end subroutine extrapwf
 &                               -beta*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind2)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(-beta,one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind2),cprj(:,ibdmix:ibdmix))
+             call pawcprj_axpby(-beta,one,scf_history_wf%cprj(:,ibg_hist+ibdmix:ibg_hist+ibdmix,ind2),cprj_k(:,ibdmix:ibdmix))
            end do ! end loop on ibdmix
          end if
        end if
@@ -1433,8 +1433,8 @@ end subroutine extrapwf
        end if
 
 !      Back to usual orthonormalization for the cg and cprj_k
-!       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,mcprj_k,dtset%mkmem,&
-!&       mpi_enreg,dtset%natom,nattyp,nbdmax,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,mcprj_k,dtset%mkmem,&
+&       mpi_enreg,dtset%natom,nattyp,nbdmax,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !      Need to transfer cprj_k to cprj
        if(usepaw==1) then
