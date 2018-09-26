@@ -22,27 +22,34 @@ Xavier
 
 ### A. Warnings and important remarks
 
-TBU A.1 Due to the availability of new input variables, some obsolete input variables have been suppressed:
+A.1 The multibinit input variable "supercell" has been renamed "supercell_latt".
 
-* input variable cgtyphf, see now [[fockoptmix]];
-* input variable gwfockmix, see now [[hyb_mixing]] and [[hyb_mixing_sr]].
+A.2 Tests v8#100-107 have been moved to v8#81-88.
+    Tests paral#100-103 have been moved to paral#80-83
 
 * * *
 
 ### B. Most noticeable achievements
 
-TBU B.1 The whole ABINIT documentation has been placed under the control of [mkdocs](http://www.mkdocs.org/),
-    and most files have been translated to markdown
-    (well, there are still a few remaining files not placed in this system, but these are quite few).
-    The capabilities developed for [v8.6](#v86)
-    (Topics -B.1-, central bibliography -B.2-, restructured and searcheable list of input variables -B.3-,
-    frequency statistics -B.4-) have been maintained and consolidated.
-    More documentation is available for developers than before. The whole system is better integrated and easier to maintain.
-    The appearance is also new.
-    The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
-    central bibliographic database.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
-    By M. Giantomassi, with some help from X. Gonze.
+B.1 Computing the Raman intensity in DFPT with PAW is now possible (was only available with norm conserving psps previously).
+    This is based on the second-order Sternheimer equation for the derivative
+    with respect to an electric field.
+    See tests [[test:v8_81]] to [[test:v8_88]].
+    
+By L. Baguet and M. Torrent.
+
+B.2 The multibinit application (for second-principles calculations) has progressed to the point
+    that documentation was heavily needed. Topics have been constituted,
+    in addition to the already existing input variable documentation and test cases.
+    See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]].
+    A tutorial is in final phase of preparation.
+
+By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
+
+B.3 Tutorial [[tutorial:nuc]]
+    has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.
+    
+By J. Zwanziger.
 
 * * *
 
@@ -55,8 +62,24 @@ TBU C.1 Add support for NAG 6.2, use netcdf4 and hdf5 with NAG 6.2.
 
 ###D.  Other changes (or on-going developments, not yet finalized)
 
-TBU D.1 Implementation of the LDA-1/2 methodology (see the announcement B.10 of v8.6): [[test:v8_32]] has been provided.
-    By F. Jollet.
+D.1 New input variable [[prtkbff]].
+    This input variable activates the output of the Kleynman-Bylander form factors in the netcdf WFK file produced at the end of the ground-state calculation. 
+    The form factors are needed to compute the matrix elements of the commutator [Vnl, r] of the non-local part of the (NC) pseudopotentials. 
+    This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo. The option is ignored if PAW.
+
+By M. Giantomassi.
+
+D.2 New input variable [[slk_rankpp]].
+    This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value,
+    by J. Bieder.
+
+D.3 New input variables [[prtefmas]] and [[getefmas]], to deal with the effective masses, e.g. to allow feeding computed effective masses
+    from one dataset to another one, 
+    by X. Gonze.
+
+D.4 Automatic test [[test:v8_37]] for TDep application, 
+    by J. Bieder.
+
 
 TBU D.20 Miscellaneous additional bug fixes and improvements of documentation by:
      L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
@@ -228,7 +251,7 @@ D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpii
 D.5 Ongoing work on the multibinit project.
     New input variables fit_nfixcoeff, fit_fixcoeff, fix_generateTerm, 
     see [[test:v8_13]] and [[test:v8_14]].
-    New input variable dipdip_prt, see [[test:v8_06]], as well as tests [[test:paral_96]] to [[test:paral_102]].
+    New input variable dipdip_prt, see [[test:v8_06]], as well as tests [[test:paral_96]] to paral[102].
     New generator for the polynomial coefficients, debug strain for the fit process, add tolerance in the fit process,
     add the plot of the comparison between model and DFT.
     By A. Martin, M. Verstraete and Ph. Ghosez.

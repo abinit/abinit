@@ -15770,15 +15770,16 @@ Variable(
     mnemonics="ScaLapacK matrix RANK Per Process",
     text="""
 This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.
-This value is the matrix rank each process will hold for the diagonalization.
-For a 1000x1000 matrix with default value, scalapack won't be used.
-For a 2000x2000 matrix with default value, scalapack will used 2000/1000=2 MPI.
-For a 2000x2000 matrix with a slk_rank=500, scalapack will use 2000/500=4 MPI.
+This value is the matrix rank that each process will hold for the diagonalization.
+For a 1000x1000 matrix with default value, scalapack won't be used (Lapack will be used).
+For a 2000x2000 matrix with default value, scalapack will be used with 2000/1000=2 MPI processes.
+For a 2000x2000 matrix with a slk_rank=500, scalapack will be used with 2000/500=4 MPI processes.
 In case of hybrid MPI+OpenMP, the number of thread is also taken into account.
+
 ***WARNING*** None of the available scalapack library are thread-safe  (2018). Therefore using both scalapack *and* OpenMP is highly unpredictable.
 Furthermore, using multithreaded linear algebra library (MKL ACML...) is more efficient than pure MPI scalapack.
 
-Usually it is better to tune this variable and let the code do the rest.
+Usually it is better to define this variable and let the code do the rest.
 """,
 ),
 
