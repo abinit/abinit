@@ -164,7 +164,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_model_t_initialize(self, filenams,  params)
+  subroutine spin_model_t_initialize(self, filenames,  params)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -178,9 +178,9 @@ contains
     integer :: sc_matrix(3,3)
     type(multibinit_dtset_type), intent(in) :: params
 
-    self%in_fname(:)=filenames(1,:)
-    self%xml_fname(:)=filenames(2,:)
-    self%out_fname(:)=filenames(3,:)
+    self%in_fname=filenames(1)
+    self%xml_fname=filenames(2)
+    self%out_fname=filenames(3)
 
     ! read input
     !call self%spin_primitive%initialize()
