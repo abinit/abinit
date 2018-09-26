@@ -1277,7 +1277,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  if (.not. incache) then
    ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, xmpi_comm_self)
+   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
  end if
 
  if (db%qcache_size > 0 .and. .not. incache) then

@@ -954,7 +954,7 @@ type dataset_type
  ! Number of shifts in k-mesh for Sigma_{nk}.
 
  real(dp),allocatable :: sigma_shiftk(:,:)
- ! sigma_shiftk(3, sigma_nshiftk),
+ ! sigma_shiftk(3, sigma_nshiftk)
  ! shiftks after inkpts
 !END EPH
 

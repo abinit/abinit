@@ -1632,7 +1632,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  character(len=500) :: wfk_fname_dense
- real(dp) :: dksqmax
+ real(dp) :: dksqmax,rfact
  character(len=500) :: msg
  logical :: changed,found,isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -1752,7 +1752,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    if (gw_qprange /= 0) then
 
-     if (any(dtset%sigma_ngkpt /= 0) then
+     if (any(dtset%sigma_ngkpt /= 0)) then
      !if (.False.) then
         ABI_CHECK(gw_qprange /= 0, "gw_qprange must be != 0")
         ! Get %kcalc from sigma_ngkpt
