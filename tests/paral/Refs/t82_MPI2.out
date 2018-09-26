@@ -17,7 +17,7 @@
 .Starting date : Thu 29 Jun 2017.
 - ( at 10h44 )
   
--  nproc =    4
+-  nproc =    2
 
 ================================================================================
 
@@ -201,7 +201,7 @@ dipdip_range         1         1         1
 
 ================================================================================
 
- Generation of the xml file for the model in t102_MPI4_model.xml
+ Generation of the xml file for the model in t82_MPI2_model.xml
 
 ================================================================================
 

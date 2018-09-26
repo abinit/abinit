@@ -22,7 +22,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--/mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t100_sys.xml
+-/mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t80_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -65,8 +65,8 @@
 
 ================================================================================
 
--Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t100_sys.xml
--Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t100_sys.xml with LibXML library
+-Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t80_sys.xml
+-Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t80_sys.xml with LibXML library
 
 ================================================================================
 
@@ -140,14 +140,14 @@
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t100_coeff.xml
--Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t100_coeff.xml with LibXML library
+-Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t80_coeff.xml
+-Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/paral/Input/t80_coeff.xml with LibXML library
 
 ================================================================================
 
- Generation of the xml file for the model in t100_MPI2_sys.xml
+ Generation of the xml file for the model in t80_MPI2_sys.xml
 
- Generation of the xml file for the fitted polynomial in t100_MPI2_coeffs.xml
+ Generation of the xml file for the fitted polynomial in t80_MPI2_coeffs.xml
 
 ================================================================================
 

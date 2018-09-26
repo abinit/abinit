@@ -35,33 +35,33 @@ optcell = 2
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% system_xml = t100_sys.xml
-#%% coeff_xml = t100_coeff.xml
+#%% system_xml = t80_sys.xml
+#%% coeff_xml = t80_coeff.xml
 #%% files_to_test = 
-#%%   t100_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI1_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI1_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_2]
-#%% system_xml = t100_sys.xml
-#%% coeff_xml = t100_coeff.xml
+#%% system_xml = t80_sys.xml
+#%% coeff_xml = t80_coeff.xml
 #%% files_to_test = 
-#%%   t100_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI2_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI2_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_4]
-#%% system_xml = t100_sys.xml
-#%% coeff_xml = t100_coeff.xml
+#%% system_xml = t80_sys.xml
+#%% coeff_xml = t80_coeff.xml
 #%% files_to_test = 
-#%%   t100_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI4_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI4_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_10]
-#%% system_xml = t100_sys.xml
-#%% coeff_xml = t100_coeff.xml
+#%% system_xml = t80_sys.xml
+#%% coeff_xml = t80_coeff.xml
 #%% files_to_test = 
-#%%   t100_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI10_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t100_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI10_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t80_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit

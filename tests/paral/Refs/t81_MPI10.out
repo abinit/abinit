@@ -17,12 +17,12 @@
 .Starting date : Fri 30 Jun 2017.
 - ( at 16h23 )
   
--  nproc =    1
+-  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t101_ddb.in
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t81_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -189,7 +189,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
+-/home/alex/dev/abinit_git/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -231,9 +231,9 @@
 
 ================================================================================
 
- Generation of the xml file for the model in t101_MPI1_sys.xml
+ Generation of the xml file for the model in t81_MPI10_sys.xml
 
- Generation of the xml file for the fitted polynomial in t101_MPI1_coeffs.xml
+ Generation of the xml file for the fitted polynomial in t81_MPI10_coeffs.xml
 
 ================================================================================
 
