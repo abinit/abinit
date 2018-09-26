@@ -5,7 +5,7 @@
 # PAW + nsppol=2 + nsym=1 + kptopt=3 + empty bands
 # However, tolwfr and the number of kpoints are reduced to limit the computation time, leading to crazy results
 
-# Enable ouput for nonliner (full DFPT only)
+# Enable output for nonlinear (full DFPT only)
 #*****************************************************
 #   nonlinear_info 1  # print details of 3rd derivatives in .out file (no time consuming)
 #   nonlinear_info 2  # nonlinear_info=1 + debug_mode activated in nonlinear (time consuming)

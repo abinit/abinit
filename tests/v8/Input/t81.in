@@ -2,7 +2,7 @@
 # Test on AlAs, with norm conserving pseudopotentials
 # (L. Baguet, 04.2018)
 
-# Enable ouput for nonliner (full DFPT only)
+# Enable output for nonlinear (full DFPT only)
 #*****************************************************
 #   nonlinear_info 1  # print details of 3rd derivatives in .out file (no time consuming)
 #   nonlinear_info 2  # nonlinear_info=1 + debug_mode activated in nonlinear (time consuming)

@@ -88,10 +88,11 @@ xred
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = JF. Danel, L. Kazandjian
+#%% authors = JF. Danel, L. Kazandjian, X. Gonze
 #%% keywords = 
 #%% description = 
 #%%   Test of molecular dynamics of B atoms, in the isokinetic
 #%%   ensemble, based on the Thomas-Fermi functional (very fast, even with 32 atoms).
+#%%   Fix the position of one atom.
 #%% topics = Recursion
 #%%<END TEST_INFO>

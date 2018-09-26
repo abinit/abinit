@@ -17376,7 +17376,9 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. 
+The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. 
+Three choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
