@@ -485,11 +485,16 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
  if(scf_history%usecg==1) then
    if (hasmoved) then
-     scf_history%hindex(1)=ind1
-     scf_history%hindex(2)=ind2
-     scf_history%hindex(3)=ind1new
-     call extrapwf_biortho(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
+     if (dtset%extrapwf==1) then
+       call extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,nattyp,&
+&       ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
+     elseif(dtset%extrapwf==2) then
+       scf_history%hindex(1)=ind1
+       scf_history%hindex(2)=ind2
+       scf_history%hindex(3)=ind1new
+       call extrapwf_biortho(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &         nattyp,npwarr,pawtab,scf_history)
+     end if
    else
      scf_history%cg(:,:,2)=zero
    end if

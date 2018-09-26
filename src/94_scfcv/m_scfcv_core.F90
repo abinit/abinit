@@ -3254,10 +3254,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  ABI_DEALLOCATE(dimcprj)
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
- ABI_DEALLOCATE(dotprod_res_k)
- ABI_DEALLOCATE(dotprod_res)
- ABI_DEALLOCATE(res_mn)
- 
+ if(wfmixalg>2)then
+   ABI_DEALLOCATE(dotprod_res_k)
+   ABI_DEALLOCATE(dotprod_res)
+   ABI_DEALLOCATE(res_mn)
+ end if
 
 end subroutine wf_mixing
 !!***
