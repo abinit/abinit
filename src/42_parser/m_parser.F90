@@ -1728,10 +1728,10 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
            factor=BField_Tesla
          end if
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if(string(b1+1:b1+2)=='S ') .or. (string(b1+1:b1+3)=='SEC') .or. \
-\         (string(b1+1:b1+6)=='SECOND') then
-           factor=Time_Sec
-       end if
+         if(string(b1+1:b1+2)=='S ' .or. string(b1+1:b1+3)=='SEC' .or. string(b1+1:b1+6)=='SECOND') then
+           factor=one/Time_Sec
+         end if
+       endif
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else

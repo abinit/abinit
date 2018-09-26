@@ -126,6 +126,9 @@ ABI_UNITS = [
     'Rydbergs',
     'T',
     'Tesla',
+    'Second',
+    'S',
+    'Sec',
 ]
 
 # Operators supported by parser

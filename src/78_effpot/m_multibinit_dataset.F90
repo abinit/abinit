@@ -1089,7 +1089,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
  multibinit_dtset%spin_dt= 1d-16
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dt',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dt',tread,'TIM')
  if(tread==1) multibinit_dtset%spin_dt=dprarr(1)
  if(multibinit_dtset%spin_dt<0)then
     write(message, '(a,es10.2,a,a,a,a,a)' )&

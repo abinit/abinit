@@ -76,7 +76,7 @@ module m_spin_model_primitive
           uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
           bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_read_spin")
        import
-       character(len=1), dimension(*), intent(in) :: xml_fname
+       character(c_char), intent(in) :: xml_fname(*)
        integer (c_int), intent(out):: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
        real  (c_double), intent(out) :: ref_energy
        type(c_ptr)::  unitcell,  &
@@ -301,7 +301,8 @@ contains
 !End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
-    character(len=*), intent(in):: xml_fname
+    !character(len=*), intent(in):: xml_fname
+    character(kind=C_CHAR) :: xml_fname(*)
     integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
     real(dp) :: ref_energy
     type(c_ptr) ::  p_unitcell,         &
@@ -324,7 +325,8 @@ contains
          uni_amplitude_list(:)=>null(), uni_direction_list(:)=>null(), &
          bi_vallist(:)=>null()
 
-    call xml_read_spin(trim(xml_fname)//C_NULL_CHAR, ref_energy, p_unitcell,                 &
+    !call xml_read_spin(trim(xml_fname)//C_NULL_CHAR, ref_energy, p_unitcell,                 &
+    call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
          natoms, p_masses, nmatoms, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
          dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &

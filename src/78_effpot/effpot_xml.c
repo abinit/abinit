@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <config.h>
+#include <sys/stat.h>
 
 #if defined HAVE_LIBXML
 
@@ -128,6 +129,16 @@ void string2IntArray(char *input, int **farray, size_t *size) {
   }
   copyIntArrayToCIntArray(&tmp, farray, size);
   freeIntArray(&tmp);
+}
+
+// check if file exist
+int file_exists(const char* filename){
+    struct stat buffer;
+    int exist = stat(filename,&buffer);
+    if(exist == 0)
+        return 1;
+    else 
+        return 0;
 }
 
 
@@ -1080,13 +1091,17 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   *nmatoms = 0;
 
   size_t size;
+  if (file_exists(fname)==0){
+  fprintf(stderr, "xml file %s does not exist. Exit!\n", fname);
+  return 1;
+  }
 
   xmlDocPtr doc;
   xmlNodePtr cur, cur2;
   xmlChar *key;
   doc = xmlParseFile(fname);
   if (doc == NULL) {
-    fprintf(stderr, "Document parse failed. \n");
+    fprintf(stderr, "Document %s parse failed. \n", fname);
     return 1;
   }
 

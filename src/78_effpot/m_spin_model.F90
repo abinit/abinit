@@ -179,15 +179,16 @@ contains
     type(multibinit_dtset_type), intent(in) :: params
 
     self%in_fname=filenames(1)
-    self%xml_fname=filenames(2)
-    self%out_fname=filenames(3)
+    self%out_fname=filenames(2)
+    self%xml_fname=filenames(3)
 
     ! read input
     !call self%spin_primitive%initialize()
     call spin_model_primitive_t_initialize(self%spin_primitive)
     self%params=params
     !call self%read_xml(xml_fname)
-    call spin_model_t_read_xml(self, self%xml_fname)
+    ! use trim + char(0) to make c happy
+    call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
     !call self%spin_primitive%print_terms()
     call spin_model_primitive_t_print_terms(self%spin_primitive)
 
