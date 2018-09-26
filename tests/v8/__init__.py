@@ -74,18 +74,18 @@ inp_files = [
 "t78.in",
 "t79.in",
 "t80.in",
+#Nonlinear + Second order Sternheimer
+"t81.in",
+"t82.in",
+"t83.in",
+"t84.in",
+"t85.in",
+"t86.in",
+"t87.in",
+"t88.in",
 #GW-soc
 "t90.in",
 "t91.in",
 "t92.in",
 "t93.in",
-#Nonlinear + Second order Sternheimer
-"t100.in",
-"t101.in",
-"t102.in",
-"t103.in",
-"t104.in",
-"t105.in",
-"t106.in",
-"t107.in",
 ]

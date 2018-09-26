@@ -17,10 +17,10 @@
 .Starting date : Wed 25 Apr 2018.
 - ( at 12h10 )
   
-- input  file    -> t100.in
-- output file    -> t100.out
-- root for input  files -> t100i
-- root for output files -> t100o
+- input  file    -> t81.in
+- output file    -> t81.out
+- root for input  files -> t81i
+- root for output files -> t81o
 
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -723,7 +723,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  frms,max,avg= 8.3010190E-30 1.0166630E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t100o_DS1_EIG
+ prteigrs : about to open file t81o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.06899   Average Vxc (hartree)=  -0.34367
  Eigenvalues (hartree) for nkpt=   2  k points:
  kpt#   1, nband=  4, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -781,7 +781,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 ================================================================================
@@ -837,7 +837,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  frms,max,avg= 5.7187296E-30 5.7187296E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t100o_DS2_EIG
+ prteigrs : about to open file t81o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.06899   Average Vxc (hartree)=  -0.34367
  Eigenvalues (hartree) for nkpt=  16  k points:
  kpt#   1, nband=  4, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -895,7 +895,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -917,7 +917,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -934,7 +934,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  Mean square residual over all n,k,spin=   1.9336E-29; max=  8.6983E-29
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.1843057472E+00
- prteigrs : about to open file t100_1WF1_EIG
+ prteigrs : about to open file t81_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -963,7 +963,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -980,7 +980,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  Mean square residual over all n,k,spin=   1.9502E-29; max=  8.6992E-29
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.1843057472E+00
- prteigrs : about to open file t100_1WF1_EIG
+ prteigrs : about to open file t81_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -1009,7 +1009,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1026,7 +1026,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  Mean square residual over all n,k,spin=   1.9336E-29; max=  8.6986E-29
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.1843057472E+00
- prteigrs : about to open file t100_1WF1_EIG
+ prteigrs : about to open file t81_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -1093,7 +1093,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1131,7 +1131,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1157,9 +1157,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  ETOT 17   5.2544029015235      1.776E-15 9.121E-29 1.530E-25
 
  At SCF step   17   max residual=  9.12E-29 < tolwfr=  1.00E-28 =>converged.
--open ddk wf file :t100o_DS3_1WF7
--open ddk wf file :t100o_DS3_1WF8
--open ddk wf file :t100o_DS3_1WF9
+-open ddk wf file :t81o_DS3_1WF7
+-open ddk wf file :t81o_DS3_1WF8
+-open ddk wf file :t81o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1193,7 +1193,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1219,9 +1219,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  ETOT 17   5.2544749906888      8.527E-14 9.807E-29 1.188E-24
 
  At SCF step   17   max residual=  9.81E-29 < tolwfr=  1.00E-28 =>converged.
--open ddk wf file :t100o_DS3_1WF7
--open ddk wf file :t100o_DS3_1WF8
--open ddk wf file :t100o_DS3_1WF9
+-open ddk wf file :t81o_DS3_1WF7
+-open ddk wf file :t81o_DS3_1WF8
+-open ddk wf file :t81o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1255,12 +1255,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -345.87266243266     -3.459E+02 8.399E-01 1.563E+03
@@ -1282,9 +1282,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  ETOT 17  -360.65875634561     -6.821E-13 8.011E-29 4.740E-25
 
  At SCF step   17   max residual=  8.01E-29 < tolwfr=  1.00E-28 =>converged.
--open ddk wf file :t100o_DS3_1WF7
--open ddk wf file :t100o_DS3_1WF8
--open ddk wf file :t100o_DS3_1WF9
+-open ddk wf file :t81o_DS3_1WF7
+-open ddk wf file :t81o_DS3_1WF8
+-open ddk wf file :t81o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1311,12 +1311,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -345.87429712251     -3.459E+02 8.399E-01 1.563E+03
@@ -1338,9 +1338,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  ETOT 17  -360.65875633357      6.821E-13 5.208E-29 4.990E-25
 
  At SCF step   17   max residual=  5.21E-29 < tolwfr=  1.00E-28 =>converged.
--open ddk wf file :t100o_DS3_1WF7
--open ddk wf file :t100o_DS3_1WF8
--open ddk wf file :t100o_DS3_1WF9
+-open ddk wf file :t81o_DS3_1WF7
+-open ddk wf file :t81o_DS3_1WF8
+-open ddk wf file :t81o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1367,12 +1367,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -345.87266425224     -3.459E+02 8.399E-01 1.563E+03
@@ -1394,9 +1394,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
  ETOT 17  -360.65875632154     -1.137E-13 8.462E-29 4.767E-25
 
  At SCF step   17   max residual=  8.46E-29 < tolwfr=  1.00E-28 =>converged.
--open ddk wf file :t100o_DS3_1WF7
--open ddk wf file :t100o_DS3_1WF8
--open ddk wf file :t100o_DS3_1WF9
+-open ddk wf file :t81o_DS3_1WF7
+-open ddk wf file :t81o_DS3_1WF8
+-open ddk wf file :t81o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1737,7 +1737,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1755,12 +1755,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   966.96689542777      9.670E+02 8.037E-29 0.000E+00
@@ -1788,12 +1788,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   966.96689536290      9.670E+02 8.445E-29 0.000E+00
@@ -1821,13 +1821,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   265.33798222241      2.653E+02 9.983E-29 0.000E+00
@@ -1855,13 +1855,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   265.33798223774      2.653E+02 9.992E-29 0.000E+00
@@ -1920,7 +1920,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1938,14 +1938,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF25
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF10
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF25
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF10
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -19349.594819066     -1.935E+04 9.926E-29 0.000E+00
@@ -1973,14 +1973,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF26
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF26
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -19349.594819453     -1.935E+04 9.950E-29 0.000E+00
@@ -2008,15 +2008,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF28
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF12
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF28
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF12
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6753.2825446542     -6.753E+03 8.267E-29 0.000E+00
@@ -2044,15 +2044,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF30
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF30
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6753.2825447484     -6.753E+03 8.265E-29 0.000E+00
@@ -2080,15 +2080,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF28
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF11
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF9
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF28
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF11
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6753.2825444204     -6.753E+03 8.250E-29 0.000E+00
@@ -2116,15 +2116,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t100o_DS5_1WF30
--dfpt_looppert : read the wavefunctions from file: t100o_DS4_1WF10
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF8
--dfpt_looppert : read the wavefunctions from file: t100o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t81o_DS5_1WF30
+-dfpt_looppert : read the wavefunctions from file: t81o_DS4_1WF10
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t81o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6753.2825445149     -6.753E+03 8.221E-29 0.000E+00
@@ -2243,97 +2243,97 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t100o_DS2_WFK
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t81o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF34
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF42
 
 NONLINEAR :  perts :  1.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF39
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF4
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF34
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF42
 
 NONLINEAR :  perts :  2.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF39
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF34
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF42
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF39
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF35
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF35
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.2
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF12
--inwffil : will read wavefunctions from disk file t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: t100o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: t100o_DS6_1WF37
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t81o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t81o_DS6_1WF37
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.3
 

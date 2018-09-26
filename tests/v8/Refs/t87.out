@@ -17,10 +17,10 @@
 .Starting date : Sat 19 May 2018.
 - ( at 16h03 )
   
-- input  file    -> t106.in
-- output file    -> t106.out
-- root for input  files -> t106i
-- root for output files -> t106o
+- input  file    -> t87.in
+- output file    -> t87.out
+- root for input  files -> t87i
+- root for output files -> t87o
 
 - inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
 - inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
@@ -534,7 +534,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  frms,max,avg= 6.4277643E-02 6.4341477E-02  -2.039E-04 -2.943E-04 -3.883E-04 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t106o_DS1_EIG
+ prteigrs : about to open file t87o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.05720   Average Vxc (hartree)=  -0.34494
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -621,7 +621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 ================================================================================
@@ -788,7 +788,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  frms,max,avg= 6.4221785E-02 6.4221785E-02  -2.534E-04 -2.534E-04 -2.534E-04 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t106o_DS2_EIG
+ prteigrs : about to open file t87o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.05720   Average Vxc (hartree)=  -0.34494
  Eigenvalues (hartree) for nkpt=   8  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -875,7 +875,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -897,7 +897,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -914,7 +914,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  Mean square residual over all n,k,spin=   2.8677E-21; max=  9.5173E-21
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.5030811728E+00
- prteigrs : about to open file t106_1WF1_EIG
+ prteigrs : about to open file t87_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -954,7 +954,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -971,7 +971,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  Mean square residual over all n,k,spin=   2.6627E-21; max=  9.5173E-21
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.5030811728E+00
- prteigrs : about to open file t106_1WF1_EIG
+ prteigrs : about to open file t87_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1011,7 +1011,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1028,7 +1028,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  Mean square residual over all n,k,spin=   2.8794E-21; max=  9.5173E-21
  dfpt_looppert : ek2=    1.6738545539E+01
           f-sum rule ratio=    1.5030811728E+00
- prteigrs : about to open file t106_1WF1_EIG
+ prteigrs : about to open file t87_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1106,10 +1106,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF9
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF9
 
  ==>  initialize data related to q vector <== 
 
@@ -1133,7 +1133,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1180,9 +1180,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 38   5.0510251974158      7.105E-15 7.614E-21 1.994E-25
 
  At SCF step   38   max residual=  7.61E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1219,7 +1219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1266,9 +1266,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 38   5.0510251973314      1.066E-14 9.473E-21 3.079E-26
 
  At SCF step   38   max residual=  9.47E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1305,7 +1305,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1352,9 +1352,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 38   5.0510251972690      5.329E-15 7.618E-21 8.455E-26
 
  At SCF step   38   max residual=  7.62E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF9
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1391,7 +1391,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1441,9 +1441,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 41   5.1250897458706     -2.842E-14 9.651E-21 5.086E-27
 
  At SCF step   41   max residual=  9.65E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1480,7 +1480,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1530,9 +1530,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 41   5.1250897458798      1.421E-14 9.602E-21 5.171E-27
 
  At SCF step   41   max residual=  9.60E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1569,7 +1569,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1619,9 +1619,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 41   5.1250897458544      0.000E+00 9.662E-21 4.036E-27
 
  At SCF step   41   max residual=  9.66E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF9
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1658,12 +1658,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t106o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t87o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -453.98070372409     -4.540E+02 4.362E+02 1.165E+04
@@ -1694,9 +1694,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 26  -469.85173649199      1.137E-13 9.710E-21 1.151E-26
 
  At SCF step   26   max residual=  9.71E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1724,12 +1724,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t106o_DS3_1WF8
+-dfpt_looppert : read the wavefunctions from file: t87o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -453.98073728909     -4.540E+02 4.362E+02 1.165E+04
@@ -1760,9 +1760,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 26  -469.85173649078      0.000E+00 9.701E-21 1.277E-26
 
  At SCF step   26   max residual=  9.70E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
--open ddk wf file :t106o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1790,12 +1790,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t106o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t87o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t106o_DS3_1WF9
+-dfpt_looppert : read the wavefunctions from file: t87o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -453.98070221312     -4.540E+02 4.362E+02 1.165E+04
@@ -1826,9 +1826,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      94.250      94.249
  ETOT 26  -469.85173648803      0.000E+00 9.711E-21 1.379E-26
 
  At SCF step   26   max residual=  9.71E-21 < tolwfr=  1.00E-20 =>converged.
--open ddk wf file :t106o_DS3_1WF9
--open ddk wf file :t106o_DS3_1WF8
--open ddk wf file :t106o_DS3_1WF7
+-open ddk wf file :t87o_DS3_1WF9
+-open ddk wf file :t87o_DS3_1WF8
+-open ddk wf file :t87o_DS3_1WF7
 ================================================================================
 
  ----iterations are completed or convergence reached----
