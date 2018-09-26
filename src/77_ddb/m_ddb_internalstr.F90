@@ -272,12 +272,12 @@ natom,nblok)
  end do
 
 !DEBUG
-!do ivarA=1,3*natom
-!write(std_out,'(/)')
-!do ivarB=1,3*natom
-!write(std_out,'(es16.6)')Nmatr(ivarB,ivarA)
-!end do
-!end do
+do ivarA=1,3*natom
+  write(std_out,'(/)')
+  do ivarB=1,3*natom
+    write(std_out,'(es16.6)')Nmatr(ivarB,ivarA)
+  end do
+end do
 !ENDDEBUG
 
 !starting the pseudoinervering processes
@@ -287,28 +287,34 @@ natom,nblok)
  do ivarA=1,3*natom
    do ivarB=1,ivarA
      Bpmatr(1,ii1)=Nmatr(ivarB,ivarA)
+     write(200,*)3*natom, ivarA,ivarB,ii1, Bpmatr(1,ii1)    
      ii1=ii1+1
    end do
  end do
-
+ close(200)
 !Bpmatr(2,:) is the imaginary part of the force matrix
 !then call the subroutines CHPEV and ZHPEV to get the eigenvectors
  call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
  ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
-
-!DEBUG
+ write(100,*) 3*natom
+ write(100,*)eigvalp
+ write(100,*) "tata"
+ write(100,*)eigvecp
+ close(100)
+!DEBUG 
 !the eigenval and eigenvec
-!write(std_out,'(/,a,/)')'the eigenvalues and eigenvectors'
-!do ivarA=1,3*natom
-!write(std_out,'(/)')
-!write(std_out,'(es16.6)')eigvalp(ivarA)
-!end do
-!do ivarA=1,3*natom
-!write(std_out,'(/)')
-!do ivarB=1,3*natom
-!write(std_out,'(es16.6)')eigvecp(1,ivarB,ivarA)
-!end do
-!end do
+write(std_out,'(/,a,/)')'the eigenvalues and eigenvectors'
+write(std_out,*)3*natom
+do ivarA=1,3*natom
+write(std_out,'(/)')
+write(std_out,'(es16.6)')eigvalp(ivarA)
+end do
+do ivarA=1,3*natom
+  write(std_out,'(/)')
+  do ivarB=1,3*natom
+    write(std_out,'(I3,I3,es16.6)')ivarA,ivarB,eigvecp(1,ivarB,ivarA)
+  end do
+end do
 !ENDDEBUG
 
 !Then do the multiplication to get the reduced matrix,in two steps
