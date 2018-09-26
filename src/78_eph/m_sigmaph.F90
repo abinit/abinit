@@ -392,7 +392,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
- real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
+ real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: wall_dvscf, cpu_dvscf
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight
  real(dp) :: elow,ehigh,wmax
@@ -1217,6 +1217,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Compute Debye-Waller term
      ! =========================
      if (.not. sigma%imag_only) then
+       call wrtout(std_out, "Computing Debye-Waller term...")
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "start")
        call xmpi_sum(dbwl_nu, comm, ierr)
        call xmpi_sum(gkk0_atm, comm, ierr)
 
@@ -1404,6 +1406,10 @@ end if
        ABI_FREE(hka_mn)
        ABI_FREE(dbwl_nu)
        ABI_FREE(gkk0_atm)
+
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "stop")
+       call wrtout(std_out, sjoin("DW completed. wall-time:", sec2str(cpu), &
+           ",cpu time:", sec2str(wall)), do_flush=.True.)
      end if ! not %imag_only
 
      if (sigma%gfw_nomega /= 0) then

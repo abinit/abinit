@@ -1694,7 +1694,7 @@ pcase_loop: &
    write(msg,"(5a)")&
      "Cannot recostruct all 3*natom atomic perturbations from file",ch10,&
      "This usually happens when the DVDB does not contain all the independent perturbations for this q-point",ch10,&
-     "See message above for further information."
+     "See above message for further information."
    MSG_ERROR(msg)
  end if
 
