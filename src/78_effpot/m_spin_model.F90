@@ -180,7 +180,7 @@ contains
 
     self%in_fname(:)=filenames(1,:)
     self%xml_fname(:)=filenames(2,:)
-    self%out_fname(:)=filanames(3,:)
+    self%out_fname(:)=filenames(3,:)
 
     ! read input
     !call self%spin_primitive%initialize()
@@ -219,7 +219,7 @@ contains
     call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=params%spin_dt, &
          &  total_time=params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
 
-    call spin_ncfile_t_init(self%spin_ncfile, 'spinhist.nc')
+    call spin_ncfile_t_init(self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
     call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
     call spin_ncfile_t_write_supercell(self%spin_ncfile, self%spin_calculator)
