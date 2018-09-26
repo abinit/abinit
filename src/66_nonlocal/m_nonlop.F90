@@ -152,7 +152,7 @@ contains
 !!     | use_gpu_cuda=governs wheter we do the hamiltonian calculation on gpu or not
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
-!!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
+!!          will be applied. (used to apply derivative of NL operator wrt an atomic displacement)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions

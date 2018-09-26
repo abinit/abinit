@@ -514,6 +514,10 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
 
+ dtout%sigma_ngkpt = dtin%sigma_ngkpt
+ dtout%sigma_nshiftk = dtin%sigma_nshiftk
+ if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
+
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
  dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
@@ -1456,13 +1460,16 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%shiftk))      then
    ABI_DEALLOCATE(dtset%shiftk)
  end if
- if (allocated(dtset%spinat))      then
+ if (allocated(dtset%spinat)) then
    ABI_DEALLOCATE(dtset%spinat)
  end if
- if (allocated(dtset%tnons))       then
+ if (allocated(dtset%tnons)) then
    ABI_DEALLOCATE(dtset%tnons)
  end if
- if (allocated(dtset%upawu))       then
+ if (allocated(dtset%sigma_shiftk)) then
+   ABI_DEALLOCATE(dtset%sigma_shiftk)
+ end if
+ if (allocated(dtset%upawu)) then
    ABI_DEALLOCATE(dtset%upawu)
  end if
  if (allocated(dtset%vel_orig))    then

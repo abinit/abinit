@@ -2966,12 +2966,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    MSG_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
 
- if(dtset%nkptgw>0) then
+ if (dtset%nkptgw>0) then
    ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
-&     reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
+       reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
@@ -3224,10 +3224,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
- if (tread==1) then
-   dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
+ ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
+
+ if (tread == 1) then
+   ! sigma_nkkpt mode --> initialize shifts, provide default if not given in input
+   dtset%sigma_ngkpt = intarr(1:3)
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
+   if (tread == 1) dtset%sigma_nshiftk = intarr(1)
+   if (dtset%nshiftk < 1 .or. dtset%nshiftk > MAX_NSHIFTK ) then
+     write(message,  '(a,i0,2a,i0,3a)' )&
+     'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
+     'while it is found to be',dtset%nshiftk,'.',ch10,&
+     'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
+     MSG_ERROR(message)
+   end if
+
+   call intagm(dprarr, intarr, jdtset, marr, 3*dtset%sigma_nshiftk, string(1:lenstr), 'sigma_shiftk', tread, 'DPR')
+   ! Yes, I know that multidatasets will likely crash if sigma_nshiftk changes...
+   if (tread == 1) then
+     ABI_MALLOC(dtset%sigma_shiftk, (3, dtset%sigma_nshiftk))
+     dtset%shiftk(:,1:dtset%sigma_nshiftk) = reshape( dprarr(1:3*dtset%sigma_nshiftk), [3,dtset%sigma_nshiftk])
+   else
+     ! Default
+     ABI_CALLOC(dtset%sigma_shiftk, (3, 1))
+   end if
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
+ if (tread==1) dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    MSG_ERROR(sjoin("wfk_task must be specified when optdriver=",itoa(dtset%optdriver)))
  end if

@@ -5871,7 +5871,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    MSG_ERROR("gamma_centered not available anymore")
  end if
 
- if (ANY(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER] )) then
+ if (ANY(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
    MSG_ERROR(sjoin("Unsupported value for iomode: ",itoa(iomode)))
  end if
 

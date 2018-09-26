@@ -922,7 +922,7 @@ type dataset_type
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
- integer :: ph_
+ !integer :: ph_
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
   ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
@@ -946,6 +946,16 @@ type dataset_type
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
+
+ integer :: sigma_ngkpt(3) = 0
+ ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
+
+ integer :: sigma_nshiftk = 1
+ ! Number of shifts in k-mesh for Sigma_{nk}.
+
+ real(dp),allocatable :: sigma_shiftk(:,:)
+ ! sigma_shiftk(3, sigma_nshiftk),
+ ! shiftks after inkpts
 !END EPH
 
  integer :: ndivsm=0

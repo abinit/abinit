@@ -173,7 +173,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
- real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
+ real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -203,7 +203,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dksqmax, dksqmin, dksqmean, maxfreq, error
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
- real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
+ real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  real(dp),allocatable :: kpt_efmas(:,:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -252,12 +252,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
  end if
  use_wfk = (dtset%eph_task /= 5)
- use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0 .and. dtset%eph_frohlichm/=1)
- use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm/=1)
+ use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
+ use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1)
 
- if(dtset%eph_frohlichm/=1)then
-   efmas_path = dtfil%fnameabi_efmas
- endif
+ if (dtset%eph_frohlichm /= 1) efmas_path = dtfil%fnameabi_efmas
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -310,7 +308,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
 
- if (dtset%eph_frohlichm/=1) then
+ if (dtset%eph_frohlichm /= 1) then
    call xmpi_bcast(efmas_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", efmas_path) )
  end if
@@ -361,7 +359,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
-   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
+   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
    call hdr_vs_dtset(wfk0_hdr,dtset)
 
    call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
@@ -374,7 +372,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
-   call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
+   call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
    !call hdr_vs_dtset(wfq_hdr,dtset)
    ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
@@ -620,7 +618,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
 !I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
- if (dtset%eph_frohlichm/=0) then
+ if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)

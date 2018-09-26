@@ -1624,7 +1624,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop,band
- integer :: nk_found,ifo,jj,bstart,nbcount
+ integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
  integer :: isym_k, trev_k, g0_k(3)
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -1640,12 +1640,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  type(hdr_type) :: hdr_wfk_dense
 !arrays
  integer :: intp_kptrlatt(3,3)
- integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  real(dp):: params(3), nelect
  integer,allocatable :: gtmp(:,:),degblock(:,:)
  real(dp) :: my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
  real(dp),pointer :: energies_dense(:,:,:)
+ real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:)
 
 ! *************************************************************************
 
@@ -1704,7 +1705,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! to distribuite the calculations among processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- ! TODO: debug gw_qprange > 0. Rename variable
+ ! TODO: Rename variable
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
    call wrtout(std_out, "Getting list of k-points for self-energy from kptgw and bdgw.")
@@ -1742,9 +1743,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
    !          Include all occupied states and `num` empty states.
 
-   call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
    gw_qprange = dtset%gw_qprange
-
    if (gap_err /=0 .and. gw_qprange == 0) then
      msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
@@ -1752,15 +1751,29 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
 
    if (gw_qprange /= 0) then
-     ! Include all the k-points in the IBZ.
-     ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
-     ! No need to map kcalc onto ebands%kptns.
-     new%nkcalc = ebands%nkpt
-     ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+
+     if (any(dtset%sigma_ngkpt /= 0) then
+     !if (.False.) then
+        ABI_CHECK(gw_qprange /= 0, "gw_qprange must be != 0")
+        ! Get %kcalc from sigma_ngkpt
+        kptrlatt = 0
+        kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
+        call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
+          new%nkcalc, new%kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
+        ABI_FREE(sigma_kbz)
+        ABI_FREE(sigma_wtk)
+     else
+       ! Include all the k-points in the IBZ.
+       ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
+       ! No need to map kcalc onto ebands%kptns.
+        call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for sigma_{nk}.")
+        new%nkcalc = ebands%nkpt
+        ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+        new%kcalc = ebands%kptns
+     end if
+
      ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
      ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
-
-     new%kcalc = ebands%kptns
 
      if (gw_qprange > 0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
@@ -2077,32 +2090,31 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
    ! are different from the occ_fd that will be used in the rest of the subroutine
    !
+   rfact = two / (tmp_ebands%nsppol * tmp_ebands%nspinor)
    do it=1,new%ntemp
-     nelect = 0
-     !loop over spin
+     nelect = zero
      do spin=1,tmp_ebands%nsppol
-       !loop over kpoints
        do ik=1,tmp_ebands%nkpt
-         !loop over bands
          do ii=1,tmp_ebands%nband(ik)
-           nelect = nelect + 2*tmp_ebands%wtk(ik)*occ_fd(tmp_ebands%eig(ii,ik,spin),new%kTmesh(it),new%mu_e(it))
+           nelect = nelect + rfact * tmp_ebands%wtk(ik) * occ_fd(tmp_ebands%eig(ii,ik,spin),new%kTmesh(it),new%mu_e(it))
          end do
        end do
      end do
-     !
-     write(msg,'(3(a,f10.6))')&
-       'Calculated number of electrons nelect = ',nelect,&
-       ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,&
-       ' for T = ',new%kTmesh(it)
-     ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-     ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
-     ! in this case we print a warning
-     if (new%kTmesh(it) == 0) then
-       MSG_WARNING(msg)
-     else
-       ABI_CHECK(abs(nelect-ebands%nelect) < tol6,msg)
+
+     if (abs(nelect - ebands%nelect) > tol6) then
+       write(msg,'(3(a,f10.6))')&
+         'Calculated number of electrons nelect = ',nelect,&
+         ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,&
+         ' for T = ',new%kTmesh(it)
+       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
+       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+       ! in this case we print a warning
+       if (new%kTmesh(it) == 0) then
+         MSG_WARNING(msg)
+       else
+         MSG_ERROR(msg)
+       end if
      end if
-     !
    end do
    call ebands_free(tmp_ebands)
  else
