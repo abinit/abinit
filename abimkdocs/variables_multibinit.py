@@ -725,10 +725,12 @@ Variable(
     vartype="real",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
-    defaultval=1e-16,
+    defaultval=100,
     mnemonics="SPIN Delta Time",
     text="""
-Time step for spin dynamics. Unit: second
+Time step for spin dynamics. Default value is 100. 
+Default unit is atomic unit (2.419e-17 s).
+S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec). 
 """,
 ),
 
@@ -815,6 +817,7 @@ Variable(
     mnemonics="SPIN TEMPERATURE",
     text="""
 Temperature of spin for spin dynamics. Unit: Kelvin.
+Default value: 325.
 """,
 ),
 

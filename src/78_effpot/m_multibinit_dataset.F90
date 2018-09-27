@@ -336,7 +336,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_n1l=1
  multibinit_dtset%spin_n2l=0
 
- multibinit_dtset%spin_dt=1d-16
+ multibinit_dtset%spin_dt=100
  !TODO hexu: what is the unit. s. here.  the atomic unit is 2.418884e-17, should we use it ?
 multibinit_dtset%spin_temperature=325 ! or 0 ?
 multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
