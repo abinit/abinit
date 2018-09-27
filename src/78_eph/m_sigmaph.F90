@@ -1173,7 +1173,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_FREE(vlocal1)
 
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
-         call cwtime(cpu, wall, gflops,"stop")
+         call cwtime(cpu, wall, gflops, "stop")
          write(msg,'(4(a,i0),2(a,f8.2))') "k-point [",ikcalc,"/",sigma%nkcalc, &
                                           "] q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
          call wrtout(std_out, msg, do_flush=.True.)
@@ -1386,7 +1386,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
    call wrtout(std_out, sjoin("Computation of Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
            ",wall-time:", sec2str(wall_ks)), do_flush=.True.)
- end do !ikcalc
+ end do ! ikcalc
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, "Computation of Sigma_eph completed")

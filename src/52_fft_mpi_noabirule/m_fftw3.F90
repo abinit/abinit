@@ -105,22 +105,22 @@ MODULE m_fftw3
 
 #ifdef HAVE_FFT_FFTW3_MPI
 ! flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_FORWARD=FFTW_FORWARD
- integer,public,parameter :: ABI_FFTW_BACKWARD=FFTW_BACKWARD
- integer,public,parameter :: ABI_FFTW_ESTIMATE=FFTW_ESTIMATE
- integer,public,parameter :: ABI_FFTW_MEASURE=FFTW_MEASURE
+ integer,public,parameter :: ABI_FFTW_FORWARD = FFTW_FORWARD
+ integer,public,parameter :: ABI_FFTW_BACKWARD = FFTW_BACKWARD
+ integer,public,parameter :: ABI_FFTW_ESTIMATE = FFTW_ESTIMATE
+ integer,public,parameter :: ABI_FFTW_MEASURE = FFTW_MEASURE
  ! end flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN=FFTW_MPI_TRANSPOSED_IN
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT=FFTW_MPI_TRANSPOSED_OUT
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN = FFTW_MPI_TRANSPOSED_IN
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT = FFTW_MPI_TRANSPOSED_OUT
  ! end flags copies from fftw3-mpi.f03
 #else
- integer,public,parameter :: ABI_FFTW_FORWARD=-1
- integer,public,parameter :: ABI_FFTW_BACKWARD=+1
- integer,public,parameter :: ABI_FFTW_ESTIMATE=64
- integer,public,parameter :: ABI_FFTW_MEASURE=0
+ integer,public,parameter :: ABI_FFTW_FORWARD = -1
+ integer,public,parameter :: ABI_FFTW_BACKWARD = +1
+ integer,public,parameter :: ABI_FFTW_ESTIMATE = 64
+ integer,public,parameter :: ABI_FFTW_MEASURE = 0
 ! end flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN=536870912
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT=1073741824
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN = 536870912
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT = 1073741824
 ! end flags copies from fftw3-mpi.f03
 #endif
 
@@ -322,8 +322,8 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
 
  select case (cplex)
- case (2) ! Complex to Complex.
-
+ case (2)
+   ! Complex to Complex.
    if (fftcore_precision == sp) then
      ! Mixed precision: copyin + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
@@ -355,6 +355,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      ABI_FREE(work_sp)
 
    else
+     ! double precision version.
      select case (isign)
      case (ABI_FFTW_BACKWARD) ! +1
        call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags=my_flags)
@@ -365,15 +366,13 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      end select
    end if
 
- case (1) ! Real case.
-
+ case (1)
+   ! Real case.
    select case (isign)
    case (ABI_FFTW_FORWARD) ! -1; R --> G
      call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg,fftw_flags=my_flags)
-
    case (ABI_FFTW_BACKWARD) ! +1; G --> R
      call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr,fftw_flags=my_flags)
-
    case default
      MSG_BUG("Wrong isign")
    end select
@@ -525,11 +524,11 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
    if (ndat == 1) then
      if (fftcore_precision == dp) then
-         call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+       call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      else
-         call fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+       call fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      end if
 
    else

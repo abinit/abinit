@@ -1260,7 +1260,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
         v1scf = real(db%qcache(db_iqpt)%v1scf, kind=QCACHE_KIND)
         db%qcache_stats(2) = db%qcache_stats(2) + 1
         incache = .True.
-        !call wrtout(std_out, sjoin("Hurray! db_iqpt", itoa(db_iqpt), "found in cache"))
       else
         ! This to handle the unlikely event in which the caller changes ngfft!
         !write(std_out, *)"cplex cache, out:", size(db%qcache(db_iqpt)%v1scf, dim=1), cplex
@@ -1446,9 +1445,14 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
    db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    ABI_FREE(v1scf)
-   call cwtime(cpu, wall, gflops, "stop")
-   msg = sjoin("q-point [", itoa(db_iqpt), "/", itoa(db%nqpt), "]")
-   call wrtout(std_out, sjoin(msg, sec2str(cpu), ", cpu time:", sec2str(cpu), ", wall time:", sec2str(wall)))
+   ! Print progress.
+   if (db_iqpt < 20) then
+     call cwtime(cpu, wall, gflops, "stop")
+     write(msg,'(2(a,i0),2(a,f8.2))') "Reding q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
+     call wrtout(std_out, msg)
+   else if (db_iqpt == 20) then
+     call wrtout(std_out, "...", msg)
+  end if
  end do
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
