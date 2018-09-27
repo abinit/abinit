@@ -2346,7 +2346,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 
    maxocc=two/(ebands%nsppol*ebands%nspinor)
 
-   ! * Calculate the valence index for each spin channel.
+   ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
      valencetop(spin)= smallest_real
      condbottom(spin)= greatest_real
@@ -2354,10 +2354,10 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
      do ikibz=1,ebands%nkpt
        nband_k=ebands%nband(ikibz+(spin-1)*ebands%nkpt)
        do band=1,nband_k
-         if (ebands%occ(band,ikibz,spin)/maxocc>one-tol6 .and. valencetop(spin)<ebands%eig(band,ikibz,spin)) then
+         if (ebands%occ(band,ikibz,spin)/maxocc> one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
            valencetop(spin)=ebands%eig(band,ikibz,spin)
          end if
-         if (ebands%occ(band,ikibz,spin)/maxocc<tol6 .and. condbottom(spin)>ebands%eig(band,ikibz,spin)) then
+         if (ebands%occ(band,ikibz,spin)/maxocc < tol6 .and. condbottom(spin) > ebands%eig(band,ikibz,spin)) then
            condbottom(spin)=ebands%eig(band,ikibz,spin)
          end if
        end do
@@ -2387,7 +2387,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    ! Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
    ebands%entropy=zero
    ebands%fermie=(vtop+cbot)/2
-   if (ABS(cbot-vtop)<1.d-4) ebands%fermie=vtop ! To avoid error on the last digit FIXME is it really needed
+   if (ABS(cbot-vtop)<1.d-4) ebands%fermie=vtop ! To avoid error on the last digit
  end if
 
  write(msg,'(a,f6.2,a)')' Fermi energy         [eV] ',ebands%fermie*Ha_eV,ch10

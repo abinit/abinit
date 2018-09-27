@@ -713,7 +713,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
-       ABI_MALLOC(gkk0_atm, (2, nbcalc_ks, nbsum, natom3))
+       ABI_STAT_ALLOCATE(gkk0_atm, (2, nbcalc_ks, nbsum, natom3), ierr)
        ABI_CHECK(ierr == 0, "oom in gkk0_atm")
        gkk0_atm = zero
      end if
@@ -880,7 +880,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
            pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
        end do
-       !vlocal1 = one
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! BE careful here because I will need sij_opt==-1
@@ -1030,8 +1029,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end if
 
              do it=1,sigma%ntemp
+               ! Compute occ for this T (note mu_e(it) Fermi level)
                nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
-               ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
                ! Here we have to handle 3 different logical values
@@ -1992,7 +1991,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
- new%mu_e = ebands%fermie
+ new%mu_e(:) = ebands%fermie
 
  if (dtset%eph_fermie == zero) then
    if (new%use_doublegrid) then
@@ -2000,19 +1999,20 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    else
      call ebands_copy(ebands, tmp_ebands)
    endif
-   !
+
+   ! We only need mu_e so MPI paralleize the T-loop.
+   new%mu_e = zero
    do it=1,new%ntemp
+     if (mod(it, nprocs) /= my_rank) cycle
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
      new%mu_e(it) = tmp_ebands%fermie
-   end do
-   !
-   ! Check that the total number of electrons is correct
-   ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
-   ! are different from the occ_fd that will be used in the rest of the subroutine
-   !
-   rfact = two / (tmp_ebands%nsppol * tmp_ebands%nspinor)
-   do it=1,new%ntemp
+     !
+     ! Check that the total number of electrons is correct
+     ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
+     ! are different from the occ_fd that will be used in the rest of the subroutine
+     !
+     rfact = two / (tmp_ebands%nsppol * tmp_ebands%nspinor)
      nelect = zero
      do spin=1,tmp_ebands%nsppol
        do ik=1,tmp_ebands%nkpt
@@ -2036,10 +2036,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
          MSG_ERROR(msg)
        end if
      end if
-   end do
+   end do ! it
+
    call ebands_free(tmp_ebands)
- else
-   new%mu_e(:) = ebands%fermie
+   call xmpi_sum(new%mu_e, comm, ierr)
  endif
 
  call ebands_free(ebands_dense)

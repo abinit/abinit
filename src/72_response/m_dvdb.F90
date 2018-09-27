@@ -1446,7 +1446,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  end do
 
  call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("IO completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10), &
+ call wrtout(std_out, sjoin("IO + symmetrization completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10), &
             do_flush=.True.)
 
 end subroutine dvdb_qcache_read
@@ -3560,8 +3560,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: enough=50
- integer :: tot_miss,tot_weird,miss_q,idir,ipert,iv1,psy,weird_q
+ integer :: tot_miss,tot_weird,miss_q,idir,ipert,iv1,psy,weird_q,enough
  integer :: iq_ibz,nqibz,iq_file,qptopt,nshiftq,ii,timerev_q,unt,nqbz
  character(len=500) :: msg,ptype,found
  type(crystal_t),pointer :: cryst
@@ -3606,10 +3605,11 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  ! and if all the independent perturbations are available.
  !   `tot_miss` is the number of irreducible perturbations not found in the DVDB (critical)
  !   `tot_weird` is the number of redundant perturbations found in the DVDB (not critical)
+ enough = 20; if (db%prtvol > 0) enough = nqibz + 1
  tot_miss = 0; tot_weird = 0
  do iq_ibz=1,nqibz
    if (iq_ibz == enough)  then
-     call wrtout(unt,' More than 50 q-points. Only important messages will be printed...')
+     call wrtout(unt,' More than 20 q-points. Only important messages will be printed...')
    end if
    qq = qibz(:,iq_ibz)
    iq_file = dvdb_findq(db, qq)

@@ -61,17 +61,17 @@ contains
 !! getnel
 !!
 !! FUNCTION
-!! Option=1 :
-!! Get the total number of electrons nelect, given a trial fermienergy fermie.
-!! For this, compute new occupation numbers at each k point,
-!! from eigenenergies eigen, according to the
-!! smearing scheme defined by occopt (and smearing width tsmear or tphysel).
+!! Option=1:
+!!   Get the total number of electrons nelect, given a trial fermienergy fermie.
+!!   For this, compute new occupation numbers at each k point,
+!!   from eigenenergies eigen, according to the
+!!   smearing scheme defined by occopt (and smearing width tsmear or tphysel).
 !!
-!! Option=2 :
-!! Compute and output the smeared density of states, and the integrated density
-!! of states, then write these data
+!! Option=2:
+!!   Compute and output the smeared density of states, and the integrated density
+!!   of states, then write these data
 !!
-!! Warning : this routine assumes checks have been done in the calling
+!! Warning: this routine assumes checks have been done in the calling
 !! routine, and that the values of the arguments are sensible
 !!
 !! NOTE
@@ -181,8 +181,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !Initialize the occupation function and generalized entropy function,
 !at the beginning, or if occopt changed
 
-!Just get the number nptsdiv2 and allocate entfun, occfun,
-!smdfun and xgrid accordingly
+!Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
  nptsdiv2 = nptsdiv2_def
 
 ! call init_occ_ent(entfun, limit, &
@@ -195,8 +194,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_ALLOCATE(xgrid,(-nptsdiv2:nptsdiv2))
 
 !Call to init_occ_ent
- call init_occ_ent(entfun, limit, &
-& nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
+ call init_occ_ent(entfun, limit, nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
 & tsmear, tsmearinv, xgrid)
 
 !The initialisation of occfun and entfun is done
@@ -211,7 +209,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_ALLOCATE(ent,(bantot))
 
  if(option==1)then
-   !normal evaluation of occupations and entropy
+   ! normal evaluation of occupations and entropy
 
 !  Compute the arguments of the occupation and entropy functions
 !  HM 20/08/2018 Treat the T --> 0 limit
@@ -529,7 +527,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !If the target nelect is not between nelectlo and nelecthi, exit
  if(nelect<nelectlo .or. nelect>nelecthi)then
    write(message, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
-&   ' newocc : ',ch10,&
+&   ' newocc: ',ch10,&
 &   '  The calling routine gives nelect=',nelect,ch10,&
 &   '  The lowest bound is ',fermilo,', with nelect=',nelectlo,ch10,&
 &   '  The highest bound is ',fermihi,', with nelect=',nelecthi
@@ -553,7 +551,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !    Produce nelectmid from fermimid
      call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
-!    write(std_out,'(a,es24.16,a,es24.16)' )' newocc : from fermi=',fermimid,', getnel gives nelect=',nelectmid
+!    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
      if(nelectmid>nelect*(one-tol14))then
        fermihi=fermimid
        nelecthi=nelectmid
@@ -562,8 +560,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        fermilo=fermimid
        nelectlo=nelectmid
      end if
-     if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. &
-&     abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
+     if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
      if(ii==niter_max)then
        write(message,'(a,i0,3a,es22.14,a,es22.14,a)')&
 &       'It was not possible to find Fermi energy in ',niter_max,' bissections.',ch10,&
@@ -586,12 +583,11 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      occ(:)=occ(:)-occt(:)
      nelect_biased=abs(nelectmid-nelect_biased)
-!    Here, arrange to have globally positive occupation numbers,
-!    irrespective of the stmbias sign
+!    Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
      if(-stmbias>tol10)occ(:)=-occ(:)
      ABI_DEALLOCATE(occt)
 
-     write(message,'(a,f14.6)')' newocc : the number of electrons in the STM range is nelect_biased=',nelect_biased
+     write(message,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -613,10 +609,8 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      fermilo = fermilot(is)
      nelecthi = nelecthit(is)
      nelectlo = nelectlot(is)
-!    DEBUG
 !    write(std_out,'(a,i1,3(f8.4,1x))') "Spin, N(spin):", is, nelect, fermihi, fermilo
 !    write(std_out,'(a,2(f8.4,1x))') "Hi, lo:", nelecthi, nelectlo
-!    ENDDEBUG
 
      do ii=1,niter_max
        fermimid_tmp=(fermihi+fermilo)/2.0_dp
@@ -647,7 +641,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
            doccde(cnt+cnt2) = doccdet(cnt)
          end do
        end do
-!      write(std_out,'(a,es24.16,a,es24.16)' )' newocc : from fermi=',fermimid,', getnel gives nelect=',nelectmid
+!      write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
 
        if(nelectmid>=nelect_tmp)then
          fermihi=fermimid_tmp
@@ -702,21 +696,16 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
 
 !  DEBUG
-!  write(message, '(a)' ) &
-!  &   ' newocc : corresponding derivatives are '
-!  call wrtout(std_out,message,'COLL')
+!  call wrtout(std_out,' newocc: corresponding derivatives are ','COLL')
 !  do ikpt=1,nkpt_eff
 !  write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
 !  do ii=0,(nband(1)-1)/12
-!  write(message,'(12f6.1)') &
-!  &    doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+!  write(message,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
 !  call wrtout(std_out,message,'COLL')
 !  end do
 !  end do
 !  if(nkpt/=nkpt_eff)then
-!  write(message,'(a)') &
-!  &    ' newocc : prtvol=0, stop printing more k-point informations'
-!  call wrtout(std_out,message,'COLL')
+!    call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
 !  end if
 !  ENDDEBUG
  else
@@ -819,7 +808,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    nptsdiv2 = nptsdiv2_def
    return
  end if
-
 
  if (occopt_prev/=occopt .or. abs(tsmear_prev-tsmear)  >tol12 .or. abs(tphysel_prev-tphysel)>tol12) then
    occopt_prev=occopt
@@ -1018,7 +1006,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_BUG(message)
      end if
 
-
 !    Use O(1/N4) algorithm from Num Rec (see below)
 !
 !    The grid for the convoluted delta is taken (conservatively)
@@ -1033,8 +1020,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 !    do jj=-nptsdiv2_def,-nptsdiv2_def
 !    do ii=-nconvd2+4,nconvd2
 !    call smdFD(xgrid_prev(jj) - tgrid(ii)*tratio, resFD)
-!    write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', &
-!    &    xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
+!    write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
 !    end do
 !    end do
 
@@ -1371,14 +1357,11 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
          if( abs(diffocc) > tol5 ) then
            write(message,'(a,a,a,a,a,a,a,2(a,i4,a,es16.6,a,es16.6,a,a),a)' ) &
 &           'In a non-metallic case (occopt<3), for a RF calculation,',ch10,&
-&           'if the eigenvalues are degenerate,',&
-&           ' the occupation numbers must also be degenerate.',ch10,&
+&           'if the eigenvalues are degenerate,',' the occupation numbers must also be degenerate.',ch10,&
 &           'However, the following pair of states gave :',ch10,&
-&           'k -state, band number',ibandk,', occ=',occ_k(ibandk),&
-&           'eigenvalue=',eig0_k(ibandk),',',ch10,&
-&           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),&
-&           ', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
-&           'Action : change occopt, consistently, in GS and RF calculations.'
+&           'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
+&           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
+&           'Action: change occopt, consistently, in GS and RF calculations.'
            MSG_ERROR(message)
          end if
          ratio=0.0_dp
@@ -1386,10 +1369,8 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
 !        In the metallic case, one can compute a better approximation of the
 !        ratio by using derivatives doccde
          ratio=0.5_dp*(doccde_kq(ibandkq)+doccde_k(ibandk))
-!        DEBUG
 !        write(std_out,*)' occeig : ibandkq,doccde_kq(ibandkq)',ibandkq,doccde_kq(ibandkq)
 !        write(std_out,*)'          ibandk ,doccde_k (ibandk )',ibandk,doccde_k(ibandk)
-!        ENDDEBUG
        end if
      end if
 
