@@ -1,6 +1,6 @@
 
-.Version 8.5.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 8.10.0 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,22 +14,22 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 30 Jun 2017.
-- ( at 16h23 )
+.Starting date : Thu 27 Sep 2018.
+- ( at 13h20 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t81_ddb.in
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/paral/Input/t81_ddb.in
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         2
      strcpli        -1
@@ -155,25 +155,6 @@
   5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
   5  z    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
 
- Displacement-response internal strain tensor (Unit:Bohr)
-
- Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
-  1  x    -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000
-  1  y     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  1  z     0.0000000  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
-  2  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
-  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  2  z     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  3  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
-  3  y    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
-  3  z    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
-  4  x     0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  4  y    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  4  z     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  5  x     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000   0.0000000
-  5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
-  5  z    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-
 
 
 ================================================================================
@@ -189,7 +170,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/alex/dev/abinit_git/tests/paral/Input/t81_HIST
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -204,9 +185,9 @@
  Mean Standard Deviation values at the begining of the fit process (meV/atm):
    Energy          :   7.4104178298699275E-01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460724822E-03
-   Forces          :   7.3678367059228245E-03
-   Stresses        :   1.3882954014965735E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -222,11 +203,11 @@
  734 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/atm):
-   Energy          :   4.0062564296154834E-01
+   Energy          :   4.0062564296154907E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836299233E-03
-   Forces          :   3.6336164702165481E-03
-   Stresses        :   1.5400161341337475E-04
+   Forces+Stresses :   3.7876180836302017E-03
+   Forces          :   3.6336164702165238E-03
+   Stresses        :   1.5400161341367816E-04
 
 
 ================================================================================
@@ -238,10 +219,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
-+Total cpu time      3.834  and wall time      3.832 sec
++Total cpu time      9.660  and wall time      9.678 sec
 
  multibinit : the run completed succesfully.
