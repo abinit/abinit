@@ -328,9 +328,9 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      ! Mixed precision: copyin + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
-       work_sp = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
      else if (isign == ABI_FFTW_FORWARD) then ! -1
-       work_sp = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
      else
        MSG_BUG("Wrong isign")
      end if
@@ -348,7 +348,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
        jj = 1
        do ii=1,ldx*ldy*ldz*ndat
          fofg(jj) = real(work_sp(ii), kind=dp)
-         fofg(jj) = aimag(work_sp(ii))
+         fofg(jj+1) = aimag(work_sp(ii))
          jj = jj + 2
        end do
      end if
