@@ -66,6 +66,9 @@ contains
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
+!! prt_internalstr=if 2 or higher, print force and displacement internal strain, 
+!!                 if 1, print only force internal strain, 
+!!                 if 0, do not print internal strain. 
 !!
 !! OUTPUT
 !! instrain=force response internal strain tensor
@@ -89,7 +92,7 @@ subroutine ddb_internalstr(asr,&
 !&asrq0,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
-natom,nblok)
+natom,nblok,prt_internalstr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -102,7 +105,7 @@ natom,nblok)
 
 !Arguments----------------------------------------------
 !scalars
- integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok
+ integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok,prt_internalstr
 !integer,intent(in) :: msize
 !type(crystal_t),intent(in) :: crystal
 !type(asrq0_t),intent(inout) :: asrq0
@@ -182,28 +185,29 @@ natom,nblok)
 !ending the sum rule
 
 !print the force response internal strain constants into the output file
-
- write(message,'(a,a,a,a)')ch10,&
-& ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
-
- write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
-& 'strainyy','strainzz','strainyz','strainxz','strainxy'
- call wrtout(std_out,message,'COLL')
- do ii1=1,3*natom
-   if(mod(ii1,3)==1)then
-     direction='x'
-   elseif(mod(ii1,3)==2)then
-     direction='y'
-   elseif(mod(ii1,3)==0)then
-     direction='z'
-   end if
-   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
-&   instrain(ii1,1),instrain(ii1,2),instrain(ii1,3),&
-&   instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+ if(prt_internalstr>0)then
+   write(message,'(a,a,a,a)')ch10,&
+&   ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
    call wrtout(std_out,message,'COLL')
- end do
+   call wrtout(iout,message,'COLL')
+
+   write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+&   'strainyy','strainzz','strainyz','strainxz','strainxy'
+   call wrtout(std_out,message,'COLL')
+   do ii1=1,3*natom
+     if(mod(ii1,3)==1)then
+       direction='x'
+     elseif(mod(ii1,3)==2)then
+       direction='y'
+     elseif(mod(ii1,3)==0)then
+       direction='z'
+     end if
+     write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
+&     instrain(ii1,1),instrain(ii1,2),instrain(ii1,3),&
+&     instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+     call wrtout(std_out,message,'COLL')
+   end do
+ endif
 
 !now write into the ddb output file
  write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
@@ -480,29 +484,31 @@ natom,nblok)
  end do
 
 !Print out the results
- write(message,'(a,a,a,a)')ch10,&
-& ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
- write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
-& 'strainyy','strainzz','strainyz','strainxz','strainxy'
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
- do ivarA=1,3*natom
-   if(mod(ivarA,3)==1)then
-     direction='x'
-   elseif(mod(ivarA,3)==2)then
-     direction='y'
-   elseif(mod(ivarA,3)==0)then
-     direction='z'
-   end if
-   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
-&   instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
-&   instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
-&   instrain_dis(6,ivarA)
+ if(prt_internalstr>1)then
+   write(message,'(a,a,a,a)')ch10,&
+&   ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
- end do
+   write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+&   'strainyy','strainzz','strainyz','strainxz','strainxy'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+   do ivarA=1,3*natom
+     if(mod(ivarA,3)==1)then
+       direction='x'
+     elseif(mod(ivarA,3)==2)then
+       direction='y'
+     elseif(mod(ivarA,3)==0)then
+       direction='z'
+     end if
+     write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
+&     instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
+&     instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
+&     instrain_dis(6,ivarA)
+     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,message,'COLL')
+   end do
+ endif
 
 end subroutine ddb_internalstr
 !!***

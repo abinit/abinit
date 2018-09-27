@@ -101,7 +101,7 @@ program anaddb
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
- logical :: iam_master
+ logical :: iam_master,prt_internalstr
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
@@ -823,7 +823,8 @@ program anaddb
      end if
 
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
+     prt_internalstr=2
+     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok,prt_internalstr)
    end if
  end if !end the part for internal strain
 
