@@ -13,4 +13,5 @@ inp_files = [
 #    "tmulti1_1.in",
     "tmulti1_2.in",
     "tmulti1_3.in",
+    "tmulti_spin1.in"
 ]

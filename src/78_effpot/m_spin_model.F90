@@ -189,7 +189,6 @@ contains
     ! TODO: remove this and use a.u. everywhere.
     call spin_model_t_unit_conversion(self)
     !call self%read_xml(xml_fname)
-    ! use trim + char(0) to make c happy
     call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
     !call self%spin_primitive%print_terms()
     call spin_model_primitive_t_print_terms(self%spin_primitive)
@@ -219,8 +218,8 @@ contains
     call spin_model_t_set_initial_spin(self, mode=0)
 
     !call self%spin_mover%initialize(self%nmatoms, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
-    call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=params%spin_dt, &
-         &  total_time=params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
+    call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=self%params%spin_dt, &
+         &  total_time=self%params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
 
     call spin_ncfile_t_init(self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
     call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
@@ -596,8 +595,8 @@ contains
 #define ABI_FUNC 'spin_model_t_unit_conversion'
 !End of the abilint section
 
-    class(spin_model_t), intend(inout) :: self
-    self%params%spin_dt = self%params%spin_dt/Time_Sec
+    class(spin_model_t), intent(inout) :: self
+    self%params%spin_dt = self%params%spin_dt*Time_Sec
   end subroutine spin_model_t_unit_conversion
 
 end module m_spin_model

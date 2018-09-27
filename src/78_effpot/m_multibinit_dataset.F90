@@ -2060,7 +2060,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(a18,3es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
     write(nunit,'(3x,a15,3I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
     write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
-    write(nunit,'(3x,a15,3es15.5)')  'spin_dt',multibinit_dtset%spin_dt
+    write(nunit,'(3x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
     write(nunit,'(3x,a15)')   'spin_mag_field'
