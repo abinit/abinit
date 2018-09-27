@@ -55,12 +55,12 @@ contains
 !! Get the insternal strain tensors,both force response and displacement response ones.
 !!
 !! INPUTS
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
 !!   atom displacements,strain,...... all in cartesian coordinates
 !! crystal<crystal_t>=Crystalline structure info.
-!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
-!! iblok= bolk number in DDB file
+!! iblok= blok number in DDB file
 !! iout=out file number
 !! mpert=maximum number of ipert
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
@@ -224,7 +224,9 @@ natom,nblok)
    call wrtout(iout,message,'COLL')
  end do
 
-!try to get the displacement response internal strain tensor
+! ----------------------------------------------------------------------------------------
+
+!Try to get the displacement response internal strain tensor
 !first need the inverse of force constant matrix
  d2cart = zero
  do ipertA=1,natom
@@ -280,7 +282,7 @@ natom,nblok)
 !end do
 !ENDDEBUG
 
-!starting the pseudoinervering processes
+!starting the pseudoinverting processes
 !then get the eigenvectors of the big matrix,give values to matrixBp
  Bpmatr=0.0_dp
  ii1=1
@@ -394,7 +396,7 @@ natom,nblok)
    call wrtout(std_out,message,'COLL')
  end if
 
-!Do the matrix muplication to get pseudoinverse inverse matrix
+!Do the matrix mutiplication to get pseudoinverse inverse matrix
  Cmatr(:,:)=0.0_dp
  Amatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
@@ -410,7 +412,7 @@ natom,nblok)
  end do
 
 
-!The second mulplication
+!The second multiplication
  Cmatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
    do ivarB=1,3*natom-3
@@ -431,7 +433,7 @@ natom,nblok)
 !ENDDEBUG
 
 !So now the inverse of the reduced matrix is in the matrixC
-!now do another mulplication to get the pseudoinverse of the original
+!now do another mutilplication to get the pseudoinverse of the original
  Cpmatr(:,:)=0.0_dp
  Apmatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
