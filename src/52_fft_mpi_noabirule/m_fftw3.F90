@@ -521,11 +521,16 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out,strcat(ABI_FUNC,": calls fftw3_fftrisc","COLL")
+   !call wrtout(std_out, calling fftw3_fftrisc","COLL")
 
-   if (ndat==1) then
-     call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&      mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+   if (ndat == 1) then
+     if (fftcore_precision == dp) then
+         call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     else
+         call fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     end if
 
    else
      ! All this boilerplate code is needed because the caller might pass zero-sized arrays
@@ -565,7 +570,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 &          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
        end do
 
-       ! This version seems not to be efficient
+       ! This version doesn't seem efficient
        !!!  !$OMP PARALLEL PRIVATE(ptg,ptr,saveden)
        !!!         ABI_MALLOC(saveden, (ldx,ldy,ldz))
        !!!         saveden = zero
