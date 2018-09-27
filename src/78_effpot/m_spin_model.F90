@@ -186,6 +186,8 @@ contains
     !call self%spin_primitive%initialize()
     call spin_model_primitive_t_initialize(self%spin_primitive)
     self%params=params
+    ! TODO: remove this and use a.u. everywhere.
+    call spin_model_t_unit_conversion(self)
     !call self%read_xml(xml_fname)
     ! use trim + char(0) to make c happy
     call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
@@ -581,5 +583,21 @@ contains
     write(std_err, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
   !!***
+
+  !! convert unit of input variables into S.I. unit
+  !! TODO This is temporary and should be removed
+  !!         a.u. should be used internally. 
+  subroutine spin_model_t_unit_conversion(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_model_t_unit_conversion'
+!End of the abilint section
+
+    class(spin_model_t), intend(inout) :: self
+    self%params%spin_dt = self%params%spin_dt/Time_Sec
+  end subroutine spin_model_t_unit_conversion
 
 end module m_spin_model
