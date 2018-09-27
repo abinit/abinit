@@ -1004,6 +1004,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
            if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
+             !WARNING : this routine actually does NOT compute the Fock contrib to total energy, but modifies the force ONLY.
              call fock_calc_ene(dtset,fock%fock_common,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if
