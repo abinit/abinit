@@ -137,7 +137,11 @@ With the two last examples, we have shown that MULTIBINIT is able to read either
 We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3*. in your work directly and have a look them.
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
-  
+
+you can visualize your dynamic with the agate software:
+
+    agate < multi1_3.out_HIST.nc
+   
 * * *
 
-This MULTIBINIT tutorial is now finished. You are advised to read now the [[lesson:fit_process|second tutorial on Multibinit]]
+This MULTIBINIT tutorial is now finished.

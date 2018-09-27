@@ -3,7 +3,7 @@ description: How to fit build a lattice model in Multibinit
 authors: AM
 ---
 
-This page gives hints on how to a lattice model in multibinit.
+This page gives hints on how to build a lattice model in multibinit.
 
 ## Introduction
 
