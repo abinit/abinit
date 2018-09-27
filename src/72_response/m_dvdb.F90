@@ -1427,7 +1427,8 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
 !Local variables-------------------------------
 !scalars
  integer :: db_iqpt, cplex
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: v1scf(:,:,:,:)
 
@@ -1435,19 +1436,24 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
 
  if (db%qcache_size == 0) return
 
- call cwtime(cpu, wall, gflops, "start")
  call wrtout(std_out, "Loading Vscf(q) in cache...", do_flush=.True.)
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+
  do db_iqpt=1,db%nqpt
    if (db_iqpt > db%qcache_size) exit
+   call cwtime(cpu, wall, gflops, "start")
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
    db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    ABI_FREE(v1scf)
+   call cwtime(cpu, wall, gflops, "stop")
+   msg = sjoin("q-point [", itoa(db_iqpt), "/", itoa(db%nqpt), "]")
+   call wrtout(std_out, sjoin(msg, sec2str(cpu), ", cpu time:", sec2str(cpu), ", wall time:", sec2str(wall)))
  end do
 
- call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("IO + symmetrization completed. wall-time:", sec2str(cpu), ", Total cpu time:", sec2str(wall), ch10), &
-            do_flush=.True.)
+ call cwtime(cpu_all, wall_all, gflops_all, "stop")
+ call wrtout(std_out, sjoin("IO + symmetrization completed. Total cpu-time:", sec2str(cpu_all), &
+     ", Total wall-time:", sec2str(wall_all), ch10), do_flush=.True.)
 
 end subroutine dvdb_qcache_read
 !!***

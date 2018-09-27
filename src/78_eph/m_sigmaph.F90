@@ -987,7 +987,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkk_atm, phfrq, displ_red, gkk_nu, num_smallw)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
-         ! gkk_nu(2, nbcalc_ks, natom3)
+         ! gkk_nu(2, nbcalc_ks, nbsum, natom3)
          if (isqzero .and. .not. sigma%imag_only) then
            gkk0_atm(:, :, ibsum_kq, :) = gkk_atm
          end if
@@ -1322,8 +1322,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_FREE(gkk0_atm)
 
        call cwtime(cpu_dw, wall_dw, gflops_dw, "stop")
-       call wrtout(std_out, sjoin("DW completed. wall-time:", sec2str(cpu), &
-           ",cpu time:", sec2str(wall)), do_flush=.True.)
+       call wrtout(std_out, sjoin("DW completed. cpu-time:", sec2str(cpu_dw), ",wall-time:", sec2str(wall_dw)), do_flush=.True.)
      end if ! not %imag_only
 
      if (sigma%gfw_nomega /= 0) then
@@ -1355,8 +1354,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
 
        call cwtime(cpu, wall, gflops, "stop")
-       call wrtout(std_out, sjoin("Eliashberg function completed. wall-time:", sec2str(cpu), &
-           ",cpu time:", sec2str(wall)), do_flush=.True.)
+       call wrtout(std_out, sjoin("Eliashberg function completed. cpu-time:", sec2str(cpu), &
+           ",wall time:", sec2str(wall)), do_flush=.True.)
 
        ! For tetrahedron method.
        !do nu=1,natom3
@@ -1384,13 +1383,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_FREE(ylmgr_kq)
 
    call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
-   call wrtout(std_out, sjoin("Computation of Sigma_nk completed. wall-time:", sec2str(cpu_ks), &
-           ",cpu time:", sec2str(wall_ks)), do_flush=.True.)
+   call wrtout(std_out, sjoin("Computation of Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
+           ",wall-time:", sec2str(wall_ks)), do_flush=.True.)
  end do !ikcalc
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, "Computation of Sigma_eph completed")
- call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10))
+ call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -1482,11 +1481,9 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_nu
      gkk_nu(1,:,:,:,nu) = gkk_nu(1,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
        - gkk_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
-       !+ gkk_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
      gkk_nu(2,:,:,:,nu) = gkk_nu(2,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(2,ipc,nu) &
        + gkk_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
-       !- gkk_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
    end do
 
    gkk_nu(:,:,:,:,nu) = gkk_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
@@ -1904,7 +1901,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
-
  new%use_doublegrid = .False.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
      (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
@@ -2000,7 +1996,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      call ebands_copy(ebands, tmp_ebands)
    endif
 
-   ! We only need mu_e so MPI paralleize the T-loop.
+   ! We only need mu_e so MPI parallelize the T-loop.
    new%mu_e = zero
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle
@@ -2457,8 +2453,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  call cwtime(cpu, wall, gflops, "stop", comm=comm)
- call wrtout(std_out, sjoin("Sigma_{nk} gather completed. Average wall-time:", sec2str(cpu), &
-     ", Total Average cpu time:", sec2str(wall), ch10), do_flush=.True.)
+ call wrtout(std_out, sjoin("Sigma_{nk} gather completed. Average cpu-time:", sec2str(cpu), &
+     ", Total Average wall-time:", sec2str(wall), ch10), do_flush=.True.)
 
  ! Only master writes
  if (my_rank /= master) return
@@ -2698,8 +2694,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 #endif
 
  call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("Sigma_{nk} netcdf output completed. wall-time:", sec2str(cpu), &
-     ", Total cpu time:", sec2str(wall), ch10), do_flush=.True.)
+ call wrtout(std_out, sjoin("Sigma_{nk} netcdf output completed. cpu-time:", sec2str(cpu), &
+     ", Total wall-time:", sec2str(wall), ch10), do_flush=.True.)
 
 end subroutine sigmaph_gather_and_write
 !!***
