@@ -53,7 +53,6 @@ MODULE m_fftw3
  use m_mpinfo,         only : ptabs_fourwf
  use m_fstrings,       only : strcat
  use m_fft_mesh,       only : zpad_t, zpad_init, zpad_free
- use m_fftcore
 
  implicit none
 
@@ -559,8 +558,14 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
-           call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           if (fftcore_precision == dp) then
+             call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
+                 istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           else
+             !write(std_out, *)"Calling fftrisc_mixp"
+             call fftw3_fftrisc_mixp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
+                 istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           end if
          end do
        else
 !$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
@@ -1000,6 +1005,73 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #endif
 
 end subroutine fftw3_fftrisc_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fftw3/fftw3_fftrisc_mixp
+!! NAME
+!! fftw3_fftrisc_mixp
+!!
+!! FUNCTION
+!!  Mixed precision version of fftrisc: input/output in dp, computation done in sp.
+!!  See fftw3_fftrisc_dp for API docs.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fftw3_fftrisc_mixp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
+ real(dp),intent(in) :: weight_r,weight_i
+!arrays
+ integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
+ integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
+ real(dp),intent(in) :: fofgin(2,npwin)
+ real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz),fofr(2,ldx*ldy*ldz)
+ real(dp),intent(inout) :: fofgout(2,npwout)
+
+! *************************************************************************
+
+#ifdef HAVE_FFT_FFTW3
+
+#undef  FFT_PRECISION
+#undef  MYKIND
+#undef  MYCZERO
+#undef  MYCMPLX
+#undef  MYCONJG
+
+#define FFT_PRECISION FFTW3_MIXP
+#define MYKIND SPC
+#define MYCZERO (0._sp,0._sp)
+#define MYCMPLX  CMPLX
+#define MYCONJG  CONJG
+
+#include "fftw3_fftrisc.finc"
+
+#else
+ MSG_ERROR("FFTW3 support not activated")
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
+ ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+#endif
+
+end subroutine fftw3_fftrisc_mixp
 !!***
 
 !----------------------------------------------------------------------

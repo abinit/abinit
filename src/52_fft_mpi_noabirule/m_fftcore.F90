@@ -98,9 +98,11 @@ module m_fftcore
  public :: mpifft_collect_datar           ! Collect a real-space MPI-FFT distributed array on each proc.
 
  public :: indfftrisc
-
  public :: addrho
  public :: multpot
+
+ integer, public, protected :: fftcore_precision = dp
+ public :: fftcore_set_precision
 
 ! *************************************************************************
 
@@ -127,6 +129,45 @@ module m_fftcore
 &   "zero-pad+cache "/)
 
 contains
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fftcore/fftcore_set_precision
+!! NAME
+!! fftalg_set_precision
+!!
+!! FUNCTION
+!!  Set the precision to be used in the FFT routines: dp for standard double precision,
+!!   sp for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer function fftcore_set_precision(wp) result(old_wp)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fftcore_set_precision'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: wp
+
+! *************************************************************************
+
+ old_wp = fftcore_precision
+ fftcore_precision = wp
+
+end function fftcore_set_precision
 !!***
 
 !----------------------------------------------------------------------

@@ -123,6 +123,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_abi_linalg
  use m_abicore
  use m_exit
+ use m_fftcore
  use libxc_functionals
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
@@ -677,8 +678,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
 !  FFTW3 threads initialization
-   if (dtset%ngfft(7)/100==FFT_FFTW3)then
-     call fftw3_init_threads()
+   if (dtset%ngfft(7) /100 == FFT_FFTW3) call fftw3_init_threads()
+   if (dtset%useria == 789) then
+      call wrtout(std_out, "Setting FFT precision to SP")
+      ii = fftcore_set_precision(sp)
    end if
 
 !  linalg initialisation:
