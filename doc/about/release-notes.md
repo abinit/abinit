@@ -1,6 +1,6 @@
 ## v8.10
 
-Version 8.10, released on October 10, 2018.
+Version 8.10, released on October 7, 2018.
 List of changes with respect to version 8.8.
 
 Many thanks to the contributors to the ABINIT project between
@@ -31,7 +31,7 @@ A.2 Tests v8#100-107 have been moved to v8#81-88.
 
 ### B. Most noticeable achievements
 
-B.1 Computing the Raman intensity in DFPT with PAW is now possible (was only available with norm conserving psps previously).
+B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it was only available with norm conserving psps previously).
     This is based on the second-order Sternheimer equation for the derivative
     with respect to an electric field.
     See tests [[test:v8_81]] to [[test:v8_88]].
@@ -39,17 +39,42 @@ B.1 Computing the Raman intensity in DFPT with PAW is now possible (was only ava
 By L. Baguet and M. Torrent.
 
 B.2 The multibinit application (for second-principles calculations) has progressed to the point
-    that documentation was heavily needed. Topics have been constituted,
+    that documentation was heavily needed. So, "topics" have been written,
     in addition to the already existing input variable documentation and test cases.
-    See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]].
+    See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
+    that are hub to the relevant input variables and test cases (e.g. [[test:v8_15]], [[test:v8_16]]...).
     A tutorial is in final phase of preparation.
 
 By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
-B.3 Tutorial [[tutorial:nuc]]
+B.3 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:
+    * [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
+    * [[ionmov]]=25 for the hybrid Monte Carlo algorithm, [[test:v8_34]];
+    * for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
+    
+By He Xu, S. Prokhorenko and X. Gonze.
+
+B.4 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6.
+    In this case, the total energy and forces are also assembled as a linear combination, and the geometry is optimized using 
+    algorithms selected with the usual [[ionmov]] input variable.
+    See test [[test:v8_20]].
+    The wavefunctions from the previous itimimage value (see [[ntimimage]] input variables) can be stored,
+    using the new input variable [[imgwfstor]]. This allows saving CPU time at the expense of memory, in all
+    the image based algorithms.
+
+By X. Gonze.
+
+B.4 Tutorial [[tutorial:nuc]]
     has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.
     
 By J. Zwanziger.
+
+B.5 The Frohlich model is now implemented in the electron-phonon part of ABINIT, [[optdriver]]=7.
+    The Frohlich average of effective masses is computed with the DFPT computation of effective masses, see [[test:v8_56]].
+    Also, the zero-point renormalization of the band extrema is computed using a general formula valid for isotropic and anisotropic
+    solids, as well as for non-degenerate or degenerate extrema, see [[test:v8_57]].
+
+By X. Gonze.
 
 * * *
 
@@ -80,6 +105,14 @@ D.3 New input variables [[prtefmas]] and [[getefmas]], to deal with the effectiv
 D.4 Automatic test [[test:v8_37]] for TDep application, 
     by J. Bieder.
 
+D.5 New value for input variable [[usepawu]]=4.
+    The FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without polarization in the exchange correlation functional.
+
+By B. Amadon.
+
+D.6 New extensive testing of the DFPT+PAW+GGA, see [[test:v8_51]], by M. Torrent.
+    However, [[pawxcdev]]=0 is still needed.
+    
 
 TBU D.20 Miscellaneous additional bug fixes and improvements of documentation by:
      L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
