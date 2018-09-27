@@ -1378,15 +1378,15 @@ end subroutine extrapwf
 
 !  do iband=1,nband_k
 !     call dotprod_g(dotr,doti,istwf_k,npw_k,2,scf_history_wf%cg(:,icg+1+my_nspinor*npw_k:icg+2*my_nspinor*npw_k,indh),&
-!&                             psi_ortho(:,1+(iband-1)*my_nspinor*npw_k:iband*my_nspinor*npw_k),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!&            psi_ortho(:,1+(iband-1)*my_nspinor*npw_k:iband*my_nspinor*npw_k),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 ! write(80+mpi_enreg%me,*) dotr,doti
 !flush(80+mpi_enreg%me)
  
 !  end do
 !    if (usepaw==1) then
 !       hermitian=0
-!       call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),psi_ortho,scf_history_wf%cprj(:,:,indh),cprj_kh,dimcprj,hermitian,&
-!&         0,0,icg_hist,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj_k,mcprj_k,dtset%mkmem,&
+!       call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),psi_ortho,scf_history_wf%cprj(:,:,indh)&
+!&         ,cprj_kh,dimcprj,hermitian,0,0,icg_hist,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj_k,mcprj_k,dtset%mkmem,&
 !&         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn(:,1:nbdmix,1:nbdmix),usepaw)
 !   write(90+mpi_enreg%me,*) smn
 !   flush(90+mpi_enreg%me)
@@ -1408,14 +1408,15 @@ end subroutine extrapwf
 &             (beta-alpha)*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind1)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(beta-alpha,one,scf_history_wf%cprj(:,ibg_hist+ibdmix:ibg_hist+ibdmix,ind1),cprj_k(:,ibdmix:ibdmix))
+             call pawcprj_axpby(beta-alpha,one,scf_history_wf%cprj(:,ibg_hist+ibdmix:ibg_hist+ibdmix,ind1),&
+&                                 cprj_k(:,ibdmix:ibdmix))
            end do ! end loop on ibdmix
          end if
        end if
 
 !      psi(t+dt) <- -beta.psi(t-2dt)
        if (abs(beta)>tol14.and.ind2>0) then
-         cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)+&
+         cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)&
 &                               -beta*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind2)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
