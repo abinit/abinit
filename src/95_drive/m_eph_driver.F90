@@ -396,7 +396,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
-   if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
+   ! default value of eph_fermie is zero hence no tolerance is used!
+   if (dtset%eph_fermie /= zero) then
      ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
      call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
      call ebands_set_fermie(ebands, dtset%eph_fermie, msg)

@@ -756,6 +756,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end if
 
      ABI_MALLOC(zvals, (nz, nbcalc_ks))
+
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
@@ -796,7 +797,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          cplex = 2
          ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
          call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, xmpi_comm_self)
-         !v1scf = zero
        end if
 
        ! TODO: Make sure that symmetries in Q-space are preserved.
@@ -1184,9 +1184,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_FREE(sigma%deltaw_pm)
        ABI_FREE(sigma%cweights)
      end if
+
      ! Print cache stats. The first k-point is expected to have lots of misses
      ! especially if it's the Gamma point and symsigma = 1.
-     if (dvdb%qcache_size > 0) then
+     if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
        write(std_out, "(a)")"Qcache stats"
        write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
        write(std_out, "(a,i0,2x,f5.1,a)")&
@@ -1229,9 +1230,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          end if
 
          ! Get phonons for this q-point.
+         !if (all(abs(qpt) < tol12)) cycle
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
          !phfrq = phfrq_ibz
-         !if (all(abs(qpt) < tol12)) cycle
 
          ! Sum over modes for this q-point.
          do nu=1,natom3
