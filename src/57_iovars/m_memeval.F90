@@ -556,7 +556,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer,parameter :: marrays=150,nchain=10
  integer :: fftalgb,histsz,ii,iscf10,jj,l_max,l_size_max,matblk,mblk,mincat,mu
  integer :: my_natom,n_fftgr,narr_fourdp,nbnd_in_blk,ndiel4,ndiel456,ndiel5,ndiel6
- integer :: ngrad,nprocwf,nspgrad,rhoij_nspden
+ integer :: ngrad,nprocwf,nspgrad,qphase_rhoij,rhoij_nspden
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
  character(len=500) :: message
 ! character(len=1) :: firstchar
@@ -745,6 +745,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    ABI_ALLOCATE(shape_type,(1))
    ABI_ALLOCATE(pawver,(1))
    ABI_ALLOCATE(rshp,(1))
+   qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
    rhoij_nspden=nspden
    l_size_max=1
    l_max=1
@@ -839,8 +840,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    dttyp(20)=4
    if (usepaw==1) then
      do ii=1,ntypat
-       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc  ! %pawrhoij()%rhoijp
-       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden              ! %pawrhoij()%rhoijselect
+       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*qphase_rhoij*pawcpxocc ! %pawrhoij()%rhoijp
+       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden ! %pawrhoij()%rhoijselect
      end do
    end if
    if (extrapwf>0) then
@@ -1075,8 +1076,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  dttyp(63)=8
  if((usepaw==1) .and. ((iscf>0) .or. (iscf == -3) .and. mpi_enreg%nproc_atom>1 ))then
    do ii=1,ntypat
-     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc   ! Rhoij_gather and related data
-     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii))    ! Rhoij_gather (rhoijselect, ...)
+     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc*qphase_rhoij ! Rhoij_gather and related data
+     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii)) ! Rhoij_gather (rhoijselect, ...)
    end do
  end if
 

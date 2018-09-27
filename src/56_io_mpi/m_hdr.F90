@@ -1152,7 +1152,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 ! For PAW have to copy Pawrhoij ====
 ! NOTE alchemy requires a different treatment but for the moment it is not available within PAW.
  if (Hdr_in%usepaw==1) then
-   cplex_rhoij = Hdr_in%Pawrhoij(1)%cplex_rhoij
+   cplex_rhoij  = Hdr_in%Pawrhoij(1)%cplex_rhoij
    qphase_rhoij = Hdr_in%Pawrhoij(1)%qphase
    nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
    ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
@@ -2592,8 +2592,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,ispden,list_size,list_size2,natom,nkpt
- integer :: npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
+ integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,iq,iq0,ispden,list_size,list_size2
+ integer :: lmn2_size,natom,nkpt,npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
  character(len=fnlen) :: list_tmp
 !arrays
  integer,allocatable :: list_int(:)
@@ -2830,19 +2830,23 @@ subroutine hdr_bcast(hdr,master,me,comm)
    call xmpi_bcast(qphase,master,comm,ierr)
    call xmpi_bcast(nspden,master,comm,ierr)
 
-   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex_rhoij
+   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex_rhoij*qphase
    ABI_MALLOC(list_int,(list_size))
    ABI_MALLOC(list_dpr,(list_size2))
    if (master==me)then
      index=0;index2=0
      do iatom=1,natom
        nsel=hdr%pawrhoij(iatom)%nrhoijsel
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        list_int(1+index)=nsel
        list_int(2+index:1+nsel+index)=hdr%pawrhoij(iatom)%rhoijselect(1:nsel)
        index=index+1+nsel
        do ispden=1,nspden
-         list_dpr(1+index2:nsel*cplex_rhoij+index2)=hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex_rhoij,ispden)
-         index2=index2+nsel*cplex_rhoij
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           list_dpr(1+index2:nsel*cplex_rhoij+index2)=hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -2857,12 +2861,16 @@ subroutine hdr_bcast(hdr,master,me,comm)
 &                        lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        hdr%pawrhoij(iatom)%nrhoijsel=nsel
        hdr%pawrhoij(iatom)%rhoijselect(1:nsel)=list_int(2+index:1+nsel+index)
        index=index+1+nsel
        do ispden=1,nspden
-         hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex_rhoij,ispden)=list_dpr(1+index2:nsel*cplex_rhoij+index2)
-         index2=index2+nsel*cplex_rhoij
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)=list_dpr(1+index2:nsel*cplex_rhoij+index2)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if

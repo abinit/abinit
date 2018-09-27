@@ -1279,6 +1279,11 @@ CONTAINS  !=====================================================================
 
  DBG_ENTER("COLL")
 
+ if (pawrhoij%qphase==2) then
+   message='pawxenergy: local exact-exchange not compatible with qphase=2!'
+   MSG_ERROR(message)
+ end if
+
  lexexch=pawtab%lexexch
  if (pawtab%nproju==1) nk=1
  if (pawtab%nproju==2) nk=6
@@ -1309,8 +1314,6 @@ CONTAINS  !=====================================================================
            n3=pawtab%klmntomn(3,klmn1);n4=pawtab%klmntomn(4,klmn1)
            nn2=(n3*n4)/2+1
            do ll=1,lexexch+1
-!            eexextemp=eexextemp-pawtab%vex(m11,m31,m41,m21,ll)*factnk(indn(nn1,nn2))*pawtab%fk(indn(nn1,nn2),ll)&
-!            &        *pawrhoij%rhoijp(jrhoij,ispden)*pawrhoij%rhoijp(jrhoij1,ispden)
              eexextemp=eexextemp-pawtab%vex(m11,m31,m41,m21,ll)*pawtab%dltij(klmn)*pawtab%fk(indn(nn1,nn2),ll)&
 &             *pawtab%dltij(klmn1)*pawrhoij%rhoijp(jrhoij,ispden)*pawrhoij%rhoijp(jrhoij1,ispden)
            end do
@@ -1445,7 +1448,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: limp=0 ! could become an input variable
- integer :: at_indx,cplex_dij,dmatudiag_loc,iafm,iatom,iatom_tot,iatpawu,icount
+ integer :: at_indx,cplex_dij,cplex_rhoij,dmatudiag_loc,iafm,iatom,iatom_tot,iatpawu,icount
  integer :: ilm,im1,im2,in1,in2,info,iplex,irot,ispden, irhoij,itypat,jlm,jrhoij
  integer :: jspden,klmn,kspden,lcur,ldim,lmax,lmin,lpawu,lwork,my_comm_atom,ndij,nmat,nspden,nsploop
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
@@ -1457,7 +1460,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !arrays
  integer :: nsym_used(2)
  integer,pointer :: my_atmtab(:)
- real(dp) :: sumocc(2)
+ real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
  real(dp),allocatable :: rwork(:),ro(:),noccmmp2(:,:,:,:),nocctot2(:)
  complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
@@ -1484,6 +1487,10 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
        message=' inconsistent values for nspden !'
        MSG_BUG(message)
      end if
+   end if
+   if (pawrhoij(1)%qphase==2) then
+     message='setnoccmmp not compatible with qphase=2!'
+     MSG_BUG(message)
    end if
  end if
  if (usepawu>0.and.useexexch>0) then
@@ -1639,6 +1646,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  do iatom=1,my_natom
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
    itypat=pawrhoij(iatom)%itypat
+   cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 
    if (useexexch>0) then
      lcur=pawtab(itypat)%lexexch
@@ -1674,21 +1682,17 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            in2=pawtab(itypat)%klmntomn(4,klmn)
            lmin=pawtab(itypat)%indklmn(3,klmn)
            lmax=pawtab(itypat)%indklmn(4,klmn)
-           ABI_ALLOCATE(ro,(cplex_dij))
-           if (ndij==1) then
-             ro(1)=half*pawrhoij(iatom)%rhoijp(jrhoij,1)
-           else if (ndij==2) then
-             ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-           else  ! ndij==4
-!            Non-collinear magnetism: transfer rhoij to ro_c (keep n, m storage because
+
+           ro(1:2)=zero
+           ro(1:cplex_rhoij)=half*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)
+           if (ndij==1) ro(1:2)=half*ro(1:2)
+!          Non-collinear magnetism: keep n, m storage because
 !            it is easier for the computation of noccmmp from rhoij)
-!            cplex_dij has to be used here, because it is the dimension of rhoijp
-             ro(1:cplex_dij)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij-1+cplex_dij,ispden)
-           end if
+
            if(lmin==0.and.lmax==2*lcur) then
              icount=in1+(in2*(in2-1))/2
              if(pawtab(itypat)%ij_proj<icount)  then
-               message=' PAW+U: Problem in the loop for calculating noccmmp !'
+               message='PAW+U: Problem in the loop for calculating noccmmp !'
                MSG_BUG(message)
              end if
              if(in1/=in2) then
@@ -1697,12 +1701,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
                end if
              end if
              if(im2>=im1) then
-
                paw_ij(iatom)%noccmmp(:,im1,im2,ispden)=paw_ij(iatom)%noccmmp(:,im1,im2,ispden) &
 &               +ro(:)*pawtab(itypat)%phiphjint(icount)
              end if
            end if
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
+           jrhoij=jrhoij+cplex_rhoij
            ABI_DEALLOCATE(ro)
          end do ! irhoij
          do im2=1,2*lcur+1
@@ -2324,8 +2327,8 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: ll=3
- integer :: iatom,iatom_tot,ierr,ii,ios,iread,irhoij,ispden,itypat,jj,klmn,my_comm_atom,my_rank,nselect
- integer :: nstep1,nstep1_abs,rhoijshft,rhoijsz
+ integer :: cplex_rhoij,iatom,iatom_tot,ierr,ii,ios,iread,irhoij,ispden,itypat,jj
+ integer :: klmn,my_comm_atom,my_rank,nselect,nstep1,nstep1_abs,rhoijshft,rhoijsz
  logical :: my_atmtab_allocated,paral_atom,test0
  character(len=9),parameter :: filnam='rhoijpbe0'
  character(len=9),parameter :: dspin(6)=(/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
@@ -2338,6 +2341,14 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+!Some limitation
+ if (my_natom>0) then
+   if (pawrhoij(1)%qphase==2) then
+     message='setrhoijpbe0 not compatible with qphase=2!'
+     MSG_BUG(message)
+   end if
+ end if
 
 !Test existence of file and open it
  inquire(file=filnam,iostat=ios,exist=test0)
@@ -2386,6 +2397,8 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !  Loop on atoms
    do iatom=1,natom
      itypat=typat(iatom)
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
+
      if (pawtab(itypat)%useexexch>0) then
 
 !      Set sizes depending on ll
@@ -2425,11 +2438,12 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 
 !      Compress rhoij
        nselect=0 ; pawrhoij(iatom)%rhoijselect=0
+       pawrhoij(iatom)%rhoijp=zero
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
+           nselect=nselect+1 ; ii=cplex_rhoij*(nselect-1)+1
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
+             pawrhoij(iatom)%rhoijp(ii,ispden)=rhoijtmp(klmn,ispden)
            end do
            pawrhoij(iatom)%rhoijselect(nselect)=klmn
          end if
@@ -2533,6 +2547,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    do iatom=1,my_natom
      iatom_tot=my_atmtab(iatom)
      itypat=pawrhoij(iatom)%itypat
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 
      if (pawtab(itypat)%useexexch>0) then
 
@@ -2560,11 +2575,12 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 
 !      Compress rhoij
        nselect=0 ; pawrhoij(iatom)%rhoijselect=0
+       pawrhoij(iatom)%rhoijp=zero
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
+           nselect=nselect+1 ; ii=cplex_rhoij*(nselect-1)+1
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
+             pawrhoij(iatom)%rhoijp(ii,ispden)=rhoijtmp(klmn,ispden)
            end do
            pawrhoij(iatom)%rhoijselect(nselect)=klmn
          end if
