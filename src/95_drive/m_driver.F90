@@ -679,7 +679,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  FFTW3 threads initialization
    if (dtset%ngfft(7) /100 == FFT_FFTW3) call fftw3_init_threads()
-   if (dtset%useria == 789) then
+   if (dtset%userib == 789) then
       call wrtout(std_out, "Setting FFT precision to SP")
       ii = fftcore_set_precision(sp)
    end if

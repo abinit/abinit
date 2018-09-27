@@ -314,7 +314,8 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 
 !Local variables-------------------------------
 !scalars
- integer :: my_flags
+ integer :: my_flags,ii,jj
+ complex(spc), allocatable :: work_sp(:)
 
 ! *************************************************************************
 
@@ -323,16 +324,46 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  select case (cplex)
  case (2) ! Complex to Complex.
 
-   select case (isign)
-   case (ABI_FFTW_BACKWARD) ! +1
-     call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags=my_flags)
+   if (fftcore_precision == sp) then
+     ! Mixed precision: copyin + in-place + copyout
+     ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
+     if (isign == ABI_FFTW_BACKWARD) then ! +1
+       work_sp = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+     else if (isign == ABI_FFTW_FORWARD) then ! -1
+       work_sp = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+     else
+       MSG_BUG("Wrong isign")
+     end if
 
-   case (ABI_FFTW_FORWARD)  ! -1
-     call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
+     call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
 
-   case default
-     MSG_BUG("Wrong isign")
-   end select
+     if (isign == ABI_FFTW_BACKWARD) then ! +1
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofr(jj) = real(work_sp(ii), kind=dp)
+         fofr(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     else if (isign == ABI_FFTW_FORWARD) then  ! -1
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofg(jj) = real(work_sp(ii), kind=dp)
+         fofg(jj) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     end if
+     ABI_FREE(work_sp)
+
+   else
+     select case (isign)
+     case (ABI_FFTW_BACKWARD) ! +1
+       call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags=my_flags)
+     case (ABI_FFTW_FORWARD)  ! -1
+       call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
+     case default
+       MSG_BUG("Wrong isign")
+     end select
+   end if
 
  case (1) ! Real case.
 

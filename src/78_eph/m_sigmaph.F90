@@ -408,19 +408,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:) !,degblock(:,:),
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
- !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
- !real(dp) :: ucart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: d0mat(2,3*cryst%natom,3*cryst%natom)
- complex(dpc) :: cmat(3*cryst%natom,3*cryst%natom),cvec1(3*cryst%natom),cvec2(3*cryst%natom)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
- real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:),gdw2_mn(:,:),gkk0_atm(:,:,:,:)
- complex(dpc),allocatable :: tpp(:,:),tpp_red(:,:),hka_mn(:,:,:),wmat1(:,:,:),zvals(:,:)
+ real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),gdw2_mn(:,:),gkk0_atm(:,:,:,:)
+ complex(dpc),allocatable :: tpp_red(:,:),zvals(:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -717,9 +713,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
-       ABI_STAT_MALLOC(dbwl_nu, (2, nbcalc_ks, nbsum, natom3), ierr)
-       ABI_CHECK(ierr == 0, "oom in dbwl_nu")
-       dbwl_nu = zero
        ABI_MALLOC(gkk0_atm, (2, nbcalc_ks, nbsum, natom3))
        ABI_CHECK(ierr == 0, "oom in gkk0_atm")
        gkk0_atm = zero
@@ -995,11 +988,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkk_atm, phfrq, displ_red, gkk_nu, num_smallw)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
-         ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
+         ! gkk_nu(2, nbcalc_ks, natom3)
          if (isqzero .and. .not. sigma%imag_only) then
            gkk0_atm(:, :, ibsum_kq, :) = gkk_atm
-           dbwl_nu(:, :, ibsum_kq, :) = gkk_nu
-           !dbwl_nu(:, :, ibsum_kq, :) = one
          end if
 
          ! Accumulate contribution to self-energy
@@ -1219,35 +1210,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (.not. sigma%imag_only) then
        call wrtout(std_out, "Computing Debye-Waller term...")
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start")
-       call xmpi_sum(dbwl_nu, comm, ierr)
        call xmpi_sum(gkk0_atm, comm, ierr)
 
        ABI_MALLOC(gdw2_mn, (nbsum, nbcalc_ks))
-       ABI_MALLOC(tpp, (natom3, natom3))
        ABI_MALLOC(tpp_red, (natom3, natom3))
-       ABI_MALLOC(hka_mn, (natom3, nbsum, nbcalc_ks))
 
-       qpt = zero
-       call ifc_fourq(ifc, cryst, qpt, sqrt_phfrq0, displ_cart)
-       where (sqrt_phfrq0 >= zero)
-         sqrt_phfrq0 = sqrt(sqrt_phfrq0)
-       else where
-         sqrt_phfrq0 = zero
-       end where
-       ! cmat contains the displament vectors as complex array
-       d0mat = reshape(displ_cart, [2, natom3, natom3])
-       cmat = dcmplx(d0mat(1,:,:), d0mat(2,:,:))
-       ! Multiply d by M to get e * M^{1/2}
-       do nu=1,natom3
-         do ip1=1,natom3
-           idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
-           rfact = ifc%amu(cryst%typat(ipert1)) * amu_emass !; rfact = one
-           cmat(ip1, nu) = cmat(ip1, nu) * rfact
-         end do
-       end do
-
-       ! Integral over IBZ. Note that here we can use IBZ(k=0).
-       ! TODO Bug if symsigma 0 ?
+       ! Integral over IBZ(k).
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
        if (sigma%symsigma == +1) nq = sigma%nqibz_k
 
@@ -1262,33 +1230,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          end if
 
          ! Get phonons for this q-point.
-         ! DEBUG
-         !call ifc_fourq(ifc, cryst, sigma%qibz(:, sigma%indkk(iq_ibz, 1)), phfrq_ibz, displ_cart)
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
          !phfrq = phfrq_ibz
          !if (all(abs(qpt) < tol12)) cycle
-
-         ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
-         ! Needed for Giustino's equation.
-         ! dbwl_nu(2, nbcalc_ks, nbsum, natom3)
-         !dbwl_nu = one !; dbwl_nu(:,:,:,1:3) = zero
-         !sqrt_phfrq0 = one
-         do in=1,nbcalc_ks
-           do im=1,nbsum
-             cvec1 = dcmplx(sqrt_phfrq0(:) * dbwl_nu(1, in, im, :), &
-                            sqrt_phfrq0(:) * dbwl_nu(2, in, im, :))
-             !cvec1 = cone * tol6
-             do ii=1,natom3
-               !cvec2 = cone * tol6
-               cvec2 = cmat(ii,:)
-               !cvec2 = real(cmat(ii,:)
-               hka_mn(ii, im, in) = dot_product(dconjg(cvec2), cvec1)
-               !hka_mn(ii, im, in) = dconjg(hka_mn(ii, im, in))
-               !hka_mn(ii, im, in) = cone
-               !write(std_out, *)"hka_mn(ii, im, in)", hka_mn(ii, im, in)
-             end do
-           end do
-         end do
 
          ! Sum over modes for this q-point.
          do nu=1,natom3
@@ -1301,13 +1245,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              do ip1=1,natom3
                idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
                ! (k,a) (k,a')* + (k',a) (k',a')*
-               dka   = dcmplx(displ_cart(1, idir1, ipert1, nu), displ_cart(2, idir1, ipert1, nu))
-               dkap  = dcmplx(displ_cart(1, idir2, ipert1, nu), displ_cart(2, idir2, ipert1, nu))
-               dkpa  = dcmplx(displ_cart(1, idir1, ipert2, nu), displ_cart(2, idir1, ipert2, nu))
-               dkpap = dcmplx(displ_cart(1, idir2, ipert2, nu), displ_cart(2, idir2, ipert2, nu))
-               tpp(ip1,ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
-               !tpp(ip1,ip2) = dconjg(dka) * dkap + dconjg(dkpa) * dkpap
-               !write(std_out,*)"tpp: ",tpp(ip1, ip2)
+               !dka   = dcmplx(displ_cart(1, idir1, ipert1, nu), displ_cart(2, idir1, ipert1, nu))
+               !dkap  = dcmplx(displ_cart(1, idir2, ipert1, nu), displ_cart(2, idir2, ipert1, nu))
+               !dkpa  = dcmplx(displ_cart(1, idir1, ipert2, nu), displ_cart(2, idir1, ipert2, nu))
+               !dkpap = dcmplx(displ_cart(1, idir2, ipert2, nu), displ_cart(2, idir2, ipert2, nu))
+               !tpp(ip1,ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
 
                dka   = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
                dkap  = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
@@ -1317,30 +1259,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
            end do
 
-           ! Giustino's equation in RMP
-           ! gdw2_mn = diag(conjg(H) T H) / (2 w(qu,nu))
-           ! tpp(natom3, natom3), hka_mn(natom3, nbsum, nbcalc_ks)
-           ABI_MALLOC(wmat1, (natom3, nbsum, nbcalc_ks))
-           call zgemm("N", "N", natom3, nbsum*nbcalc_ks, natom3, cone, tpp, natom3, hka_mn, natom3, czero, wmat1, natom3)
-
-           do ibsum=1,nbsum
-             do ib_k=1,nbcalc_ks
-               !write(std_out,*)"maxval(wmat)",maxval(abs(wmat1(:, ibsum, ib_k)))
-               cfact = dot_product(hka_mn(:, ibsum, ib_k), wmat1(:, ibsum, ib_k))
-               !cfact = dot_product(wmat1(:, ibsum, ib_k), wmat1(:, ibsum, ib_k))
-               !cfact = xdotc(natom3, hka_mn(:, ibsum, ib_k), 1, wmat1(:, ibsum, ib_k), 1)
-               !cfact = xdotu(natom3, hka_mn(:, ibsum, ib_k), 1, wmat1(:, ibsum, ib_k), 1)
-               gdw2_mn(ibsum, ib_k) = real(cfact) / (two * wqnu)
-               !write(std_out, *)"gdw2_mn: ", gdw2_mn(ibsum, ib_k)
-             end do
-           end do
-           ABI_FREE(wmat1)
-
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
-if (dtset%useria == 0) then
            do ibsum=1,nbsum
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
@@ -1360,13 +1282,9 @@ if (dtset%useria == 0) then
                  end do
                end do
 
-               !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
-               !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
-               ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
              end do ! ibsum
            end do ! ib_k
-end if
 
            do ibsum=1,nbsum
              eig0mk = ebands%eig(ibsum, ik_ibz, spin)
@@ -1401,10 +1319,7 @@ end if
        end do ! iq_ibz
 
        ABI_FREE(gdw2_mn)
-       ABI_FREE(tpp)
        ABI_FREE(tpp_red)
-       ABI_FREE(hka_mn)
-       ABI_FREE(dbwl_nu)
        ABI_FREE(gkk0_atm)
 
        call cwtime(cpu_dw, wall_dw, gflops_dw, "stop")

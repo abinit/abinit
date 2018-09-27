@@ -433,7 +433,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol) !vz_i
 
 !Local variables-------------------------------
- integer,parameter :: niter_max=120,nkpt_max=50,fake_unit=-666,option1=1
+ integer,parameter :: niter_max=120,nkpt_max=2,fake_unit=-666,option1=1
  integer :: cnt,cnt2,cnt3,ib,ii,ik,ikpt,is,isppol,nkpt_eff
  integer :: sign
  integer,allocatable :: nbandt(:)
@@ -688,13 +688,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  nkpt_eff=nkpt
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
 
- if(nsppol==1)then
+ if (nsppol==1)then
    write(message, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
    call wrtout(std_out,message,'COLL')
    do ikpt=1,nkpt_eff
      write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
      do ii=0,(nband(1)-1)/12
-       if (ii == 5 .and. prtvol /= 0) exit
+       if (ii == 3 .and. prtvol /= 0) exit
        write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
        call wrtout(std_out,message,'COLL')
      end do
@@ -725,7 +725,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    do ikpt=1,nkpt_eff
      write(message,'(a,i0,a)' ) ' k-point number ',ikpt,':'
      do ii=0,(nband(1)-1)/12
-       if (ii == 5 .and. prtvol /= 0) exit
+       if (ii == 3 .and. prtvol /= 0) exit
        write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
        call wrtout(std_out,message,'COLL')
      end do
@@ -735,7 +735,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    call wrtout(std_out,'  (2) spin down values  ','COLL')
    do ikpt=1,nkpt_eff
      do ii=0,(nband(1)-1)/12
-       if (ii == 5 .and. prtvol /= 0) exit
+       if (ii == 3 .and. prtvol /= 0) exit
        write(message,'(12f6.3)') occ( 1+ii*12+(ikpt-1+nkpt)*nband(1):min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
        call wrtout(std_out,message,'COLL')
      end do

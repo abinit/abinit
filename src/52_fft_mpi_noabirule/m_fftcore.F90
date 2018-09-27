@@ -139,7 +139,8 @@ contains
 !!
 !! FUNCTION
 !!  Set the precision to be used in the FFT routines: dp for standard double precision,
-!!   sp for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!  sp for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!  Return old value.
 !!
 !! INPUTS
 !!
