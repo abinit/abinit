@@ -3519,9 +3519,11 @@ Variable(
     defaultval=0,
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian.
-Then use it to compute the
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]), 
+as the parameters of a Frohlich Hamiltonian.
+Then use these to compute the
 change of electronic eigenvalues due to electron-phonon interaction,
 using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
 as well as temperature dependence.
@@ -4591,6 +4593,21 @@ dataset to find the proper dataset. As an example:
       ndtset 3   jdtset 1 2 4  getXXX -1
 
 refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]].
 """,
 ),
 
@@ -6985,6 +7002,21 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer to ReaD the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]] in another run.
 """,
 ),
 
@@ -13579,7 +13611,15 @@ Variable(
     mnemonics="PRint Electric Field Gradient",
     requires="[[usepaw]] == 1, [[quadmom]]",
     text="""
-  * If nonzero, calculate the electric field gradient at each atomic site in the unit cell. Using this option requires [[quadmom]] to be set as well. Values will be written to main output file (search for Electric Field Gradient). If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. If prtefg=2, the full electric field gradient tensors in atomic units are also given, showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. This is useful for comparing the accurate PAW-based results to those of simple ion-only models. Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell. 
+Using this option requires [[quadmom]] to be set as well. 
+Values will be written to main output file (search for Electric Field Gradient). 
+If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. 
+If prtefg=2, the full electric field gradient tensors in atomic units are also given, 
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. 
+If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. 
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models. 
+Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
 [[nspden]]) and also LDA+U (see [[usepawu]]).
 """,
@@ -13595,7 +13635,7 @@ Variable(
     mnemonics="PRint EFfective MASs data",
     requires="[[efmas]] == 1",
     text="""
-  * If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
+If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
 """,
 ),
 

@@ -6,7 +6,7 @@ List of changes with respect to version 8.8.
 Many thanks to the contributors to the ABINIT project between
 April 2018 and October 2018. These release notes
 are relative to modifications/improvements of ABINIT v8.10 with respect to v8.8.
-The merge request #411 is the first MR not reported in these release notes.
+The merge request #408 is the first MR not reported in these release notes.
 
 The list of contributors includes:
 TBU B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen,
@@ -39,22 +39,23 @@ B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it 
 By L. Baguet and M. Torrent.
 
 B.2 The multibinit application (for second-principles calculations) has progressed to the point
-    that documentation was heavily needed. So, "topics" have been written,
+    that documentation was heavily needed. So, "topics" have been written, as well as a tutorial,
     in addition to the already existing input variable documentation and test cases.
     See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
-    that are hub to the relevant input variables and test cases (e.g. [[test:v8_15]], [[test:v8_16]]...).
-    A tutorial is in final phase of preparation.
+    that are hub to the relevant tutorial, input variables and test cases 
+    (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).
 
 By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
 B.3 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:
     * [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
-    * [[ionmov]]=25 for the hybrid Monte Carlo algorithm, [[test:v8_34]];
+    * [[ionmov]]=25 for the hybrid Monte Carlo algorithm, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]];
     * for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
     
 By He Xu, S. Prokhorenko and X. Gonze.
 
-B.4 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6.
+B.4 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6,
+    and mixing factor given by [[mixesimgf]].
     In this case, the total energy and forces are also assembled as a linear combination, and the geometry is optimized using 
     algorithms selected with the usual [[ionmov]] input variable.
     See test [[test:v8_20]].
@@ -72,7 +73,7 @@ By J. Zwanziger.
 B.5 The Frohlich model is now implemented in the electron-phonon part of ABINIT, [[optdriver]]=7.
     The Frohlich average of effective masses is computed with the DFPT computation of effective masses, see [[test:v8_56]].
     Also, the zero-point renormalization of the band extrema is computed using a general formula valid for isotropic and anisotropic
-    solids, as well as for non-degenerate or degenerate extrema, see [[test:v8_57]].
+    solids, as well as for non-degenerate or degenerate extrema, see [[eph_frohlichm]] and [[test:v8_57]].
 
 By X. Gonze.
 
@@ -98,7 +99,7 @@ D.2 New input variable [[slk_rankpp]].
     This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value,
     by J. Bieder.
 
-D.3 New input variables [[prtefmas]] and [[getefmas]], to deal with the effective masses, e.g. to allow feeding computed effective masses
+D.3 New input variables [[prtefmas]], [[irdefmas]] and [[getefmas]], to deal with the effective masses, e.g. to allow feeding computed effective masses
     from one dataset to another one, 
     by X. Gonze.
 
@@ -112,6 +113,8 @@ By B. Amadon.
 
 D.6 New extensive testing of the DFPT+PAW+GGA, see [[test:v8_51]], by M. Torrent.
     However, [[pawxcdev]]=0 is still needed.
+
+D.7 New input variable [[prtfull1wf]] to print the full perturbed wavefunctions, by G. Antonius.
     
 
 TBU D.20 Miscellaneous additional bug fixes and improvements of documentation by:
