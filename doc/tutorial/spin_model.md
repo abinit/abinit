@@ -71,21 +71,72 @@ For building the Wannier function Hamiltonian from Abinit, see tutorial [wannier
 
 ## 4. Run spin dynamics
 
-Now that we have the spin model xml file, we can run spin dynamics from multibinit.  An example input files can be found at ~abinit/tests/tutomultibinit/Input/tmulti_spin1.* .  Three files are there: 
+Now that we have the spin model xml file, we can run spin dynamics from multibinit.  An example input files can be found at ~abinit/tests/tutomultibinit/Input/tmulti5.* .  Three files are there: 
 
-* "tmulti_spin1.files" is the files file, which gives the names of the input and output files for  Multibinit.
+* "tmulti5.files" is the "files" file, which gives the names of the input and output files for  Multibinit.
 
-* "tmulti_spin1.xml" is the file containing the Heisenberg model parameters.
+* "tmulti5.xml" is the file containing the Heisenberg model parameters.
 
-* "tmulti_spin1.in" is the main input file, where you can put the parameters for the spin dynamics simulation.
+* "tmulti5.in" is the main input file, where you can put the parameters for the spin dynamics simulation.
 
-You can copy these three files into a directory. 
+You can copy these three files into a directory (e.g. tutor_spindyn). 
+
+In tmulti5.files, three files names are given: 
+
+```
+tmulti5.in
+tmulti5.out
+tmulti5.xml
+```
+
+, which gives the input, output and xml file names. 
+
+In tmulti5.in, the variables for runing spin dynamics are given:
+
+```
+prt_model = 0
+ncell =   15 15 15             ! number of unitcell in supercell
+
+spin_mag_field= 0.0 0.0 0.0    ! external magnetic field (Tesla)
+spin_dynamics=1	               ! switch on spin dynamics
+spin_temperature = 600         ! temperature of spin. (Kelvin)
+spin_ntime =10000              ! Total number of time steps.
+spin_nctime=100                ! Number of time steps between two writes into netcdf file
+spin_dt=1e-16 s                ! Time step
+spin_qpoint = 0.0 0.0 0.0      ! Wave vector for summation of spin in each sublattice.
+```
+
+To run spindynamics with multibinit,
+
+```
+cd tutor_spindyn
+multibinit < tmulti5.files > tmulti5.txt
+```
+
+After that, a output file named tmulti5.out and a netcdf file tmulti5.out_spinhist.nc will be found.  
+
+(<!--TODO: Impove the output. Energy should be in Ha instead of eV. average M should be for each sublattice (or not)-->: )
+
+In the .out file, lines below can be found, which gives a overview of the evoving of the system with time. 
+
+```
+ Begining spin dynamic steps :
+  ==================================================================================
+     Iteration          time(s)        average M           Energy
+  -----------------------------------------------------------------------------------
+           100      9.90000E-15      6.38643E-01     -6.34928E-17
+           200      1.99000E-14      5.49196E-01     -5.56385E-17
+           300      2.99000E-14      5.20451E-01     -5.41959E-17
+           400      3.99000E-14      4.94333E-01     -5.25889E-17
+           500      4.99000E-14      4.93464E-01     -5.23715E-17
+......
+```
+
+In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using postprocessing tools. 
+
+
 
 ## 5. Postprocessing
-
-
-
-
 
 
 
