@@ -77,8 +77,11 @@ By X. Gonze.
 
 ###C. Changes for the developers (also compilers)
 
-TBU C.1 Add support for NAG 6.2, use netcdf4 and hdf5 with NAG 6.2.
-    New builders: abiref_nag_6.2_openmpi and atlas_gnu_7.2_fb
+C.1 New [Howto for developers](../developers/developers_howto) (variables, mkparents, robodoc, test_suite),
+    by M. Giantomassi.
+
+C.2 New [Howto for the test suite](../developers/testsuite_howto),  
+    by M. Giantomassi. 
 
 * * *
 
@@ -109,8 +112,13 @@ D.6 New extensive testing of the DFPT+PAW+GGA, see [[test:v8_51]], by M. Torrent
     However, [[pawxcdev]]=0 is still needed.
 
 D.7 New input variable [[prtfull1wf]] to print the full perturbed wavefunctions, by G. Antonius.
+
+D.8 Allows one to suppress completion of the 2DTE for vanishing elements using symmetries only, 
+    negative values of [[rfmeth]], by X. Gonze.
     
 
+D.20 Miscellaneous additional bug fixes and improvements of documentation by:
+     F. Jollet, 
 TBU D.20 Miscellaneous additional bug fixes and improvements of documentation by:
      L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
 
