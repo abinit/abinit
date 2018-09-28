@@ -8,6 +8,7 @@ This page gives hints on how to build a lattice model in multibinit.
 ## Introduction
 
 The MULTIBINIT software is based on a second-principles approach for lattice dynamics simulations using atomic potentials fitted on first-principles calculations [[cite:Wojdel2013]].
+See the [[help:multibinit|MULTIBINIT user guide]].
 The set up of a lattice model is the first step of the second-principles approach. 
 It has a harmonic part and possibly an anharmonic part.
 For the harmonic part, see the tutorial below.

@@ -148,7 +148,7 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
     shows how to determine the U value with the constrained Random Phase Approximation 
     using projected Wannier orbitals. Prerequisite: DFT+U.
 
-  * [The tutorialon the determination of U for DFT+U](udet) shows how to determine the U value 
+  * [The tutorial on the determination of U for DFT+U](udet) shows how to determine the U value 
     with the linear response method, to be used in the DFT+U approach. Prerequisite: DFT+U.
 
   * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems, 
@@ -168,17 +168,17 @@ piezoelectricity ...), for which some common additional information are needed:*
     phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. 
     The creation of the "Derivative Data Base" (DDB) is presented.
 
+**The additional information given by tutorial DFPT1 opens the door to:**
+
   * [The tutorial DFPT 2 (RF2 - response function 2)](rf2) presents the analysis of the DDBs that have been 
     introduced in the preceeding tutorial RF1. The computation of the interatomic forces and the computation 
     of thermodynamical properties is an outcome of this tutorial.
-
-**The additional information given by tutorial DFPT1 opens the door to:**
 
   * [The tutorial on Optic](optic), the utility that allows to obtain
     the frequency dependent linear optical dielectric function and the frequency
     dependent second order nonlinear optical susceptibility, in the simple "Sum-Over-State" approximation.
 
-**The additional information given by tutorials DFPT1 and DFPT2 opens the door to a group of tutorials 
+**The additional information given by tutorials DFPT1 and DFPT2 (Optic not needed) opens the door to a group of tutorials 
 that can be followed independently of each other:**
 
   * [The tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB 
@@ -195,6 +195,12 @@ that can be followed independently of each other:**
     the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation): 
     Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect. 
     Comparison with the finite field technique (combining DFPT calculatons with finite difference calculations), is also provided.
+
+**After following tutorials DFPT1, DFPT2, Elastic and NLO, the tutorials on MULTIBINIT might be followed:**
+
+  * [The first tutorial on MULTIBINIT](multi1) presents the basic use of the MULTIBINIT application,
+    how to build a harmonic model by using a second-principles approach for lattice dynamics 
+    simulations based on atomic potentials fitted on first-principles calculations.
 
 ### MBPT-related tutorials
 **There is another additional group of tutorials on many-body perturbation

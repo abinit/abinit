@@ -35,8 +35,7 @@ B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it 
     This is based on the second-order Sternheimer equation for the derivative
     with respect to an electric field.
     See tests [[test:v8_81]] to [[test:v8_88]].
-    
-By L. Baguet and M. Torrent.
+    By L. Baguet and M. Torrent.
 
 B.2 The multibinit application (for second-principles calculations) has progressed to the point
     that documentation was heavily needed. So, "topics" have been written, as well as a tutorial,
@@ -44,14 +43,14 @@ B.2 The multibinit application (for second-principles calculations) has progress
     See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
     that are hub to the relevant tutorial, input variables and test cases 
     (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).
-
-By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
+    By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
 B.3 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:
-    * [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
-    * [[ionmov]]=25 for the hybrid Monte Carlo algorithm, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]];
-    * for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
-    
+
+* [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
+* [[ionmov]]=25 for the hybrid Monte Carlo algorithm, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]];
+* for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
+
 By He Xu, S. Prokhorenko and X. Gonze.
 
 B.4 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6,
@@ -62,19 +61,16 @@ B.4 The linear combination of images is now allowed, with the new value for inpu
     The wavefunctions from the previous itimimage value (see [[ntimimage]] input variables) can be stored,
     using the new input variable [[imgwfstor]]. This allows saving CPU time at the expense of memory, in all
     the image based algorithms.
-
 By X. Gonze.
 
 B.4 Tutorial [[tutorial:nuc]]
     has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.
-    
 By J. Zwanziger.
 
 B.5 The Frohlich model is now implemented in the electron-phonon part of ABINIT, [[optdriver]]=7.
     The Frohlich average of effective masses is computed with the DFPT computation of effective masses, see [[test:v8_56]].
     Also, the zero-point renormalization of the band extrema is computed using a general formula valid for isotropic and anisotropic
     solids, as well as for non-degenerate or degenerate extrema, see [[eph_frohlichm]] and [[test:v8_57]].
-
 By X. Gonze.
 
 * * *
@@ -92,7 +88,6 @@ D.1 New input variable [[prtkbff]].
     This input variable activates the output of the Kleynman-Bylander form factors in the netcdf WFK file produced at the end of the ground-state calculation. 
     The form factors are needed to compute the matrix elements of the commutator [Vnl, r] of the non-local part of the (NC) pseudopotentials. 
     This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo. The option is ignored if PAW.
-
 By M. Giantomassi.
 
 D.2 New input variable [[slk_rankpp]].
@@ -108,7 +103,6 @@ D.4 Automatic test [[test:v8_37]] for TDep application,
 
 D.5 New value for input variable [[usepawu]]=4.
     The FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without polarization in the exchange correlation functional.
-
 By B. Amadon.
 
 D.6 New extensive testing of the DFPT+PAW+GGA, see [[test:v8_51]], by M. Torrent.
