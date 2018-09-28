@@ -8,7 +8,7 @@
 !! This program is decribed in the following paper
 !! Explicit integrators for extended systems dynamics
 !! Glenn J Martyna et al.
-!! Mol. Phys., 1996, Vol. 87, pp. 1117-1157
+!! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
@@ -32,7 +32,7 @@ module m_pred_isothermal
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_linalg_interfaces
@@ -62,7 +62,7 @@ contains
 !! Reversible integrator of Martyna at al.
 !! The equation of motion of the ions in contact with a thermostat
 !! and a barostat are solved with the algorithm proposed by Martyna,
-!! Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
+!! Tuckermann Tobias and Klein, Mol. Phys., 1996, p. 1117. [[cite:Martyna1996]]
 !! Related parameters : the time step (dtion),
 !! the initial temperature mdtemp(1), the final temperature mdtemp(2),
 !! the number of thermostats (nnos), and the masses of thermostats (qmass).
@@ -100,7 +100,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isothermal'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

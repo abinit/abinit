@@ -30,7 +30,7 @@ MODULE m_ppmodel
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_array
  use m_linalg_interfaces
 
@@ -42,6 +42,7 @@ MODULE m_ppmodel
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t, cmod_qpg
  use m_fft_mesh,       only : g2ifft
+ use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
@@ -1189,7 +1190,6 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_ppm_eigenvalues'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1343,7 +1343,6 @@ subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm1par'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1448,7 +1447,7 @@ end subroutine cppm1par
 !! cppm2par
 !!
 !! FUNCTION
-!!  Calculate plasmon-pole parameters of the Hybertsen and Louie model (PRB 34, 5390 (1986))
+!!  Calculate plasmon-pole parameters of the Hybertsen and Louie model (PRB 34, 5390 (1986) [[cite:Hybertsen1986]])
 !!
 !! INPUTS
 !!  qpt(3)=The coordinates of the q-point in the IBZ.
@@ -1484,8 +1483,6 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm2par'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1677,8 +1674,8 @@ end subroutine cppm2par
 !! cppm3par
 !!
 !! FUNCTION
-!! Calculate the plasmon-pole parameters using the von Linden-Horsh model (PRB 37, 8351, 1988)
-!! (see also Pag 22 of Quasiparticle Calculations in Solids. Aulbur et. al)
+!! Calculate the plasmon-pole parameters using the von Linden-Horsh model (PRB 37, 8351, 1988) [[cite:vonderLinden1988]]
+!! (see also Pag 22 of Quasiparticle Calculations in Solids [[cite:Aulbur2001]].
 !!
 !! INPUTS
 !! epsm1(npwc,npwc))= symmetrized inverse dielectric
@@ -1710,8 +1707,6 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm3par'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1955,8 +1950,8 @@ end subroutine cppm3par
 !! cppm4par
 !!
 !! FUNCTION
-!! Calculate the plasmon-pole parameters using Engel and Farid model (PRB47,15931,1993)
-!! See also Quasiparticle Calculations in Solids, Aulbur et al. (pag. 23)
+!! Calculate the plasmon-pole parameters using Engel and Farid model (PRB47,15931,1993) [[cite:Engel1993]].
+!! See also Quasiparticle Calculations in Solids [[cite:Aulbur2001]] p. 23
 !!
 !! INPUTS
 !!  qpt(3)=Reduced coordinates of the q-point.
@@ -1985,8 +1980,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cppm4par'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

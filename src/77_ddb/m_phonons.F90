@@ -28,7 +28,7 @@ module m_phonons
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
@@ -203,7 +203,6 @@ subroutine phdos_print(PHdos,fname)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -344,7 +343,6 @@ subroutine phdos_print_debye(PHdos, ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_debye'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -467,7 +465,6 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_thermo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -536,7 +533,7 @@ implicit none
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
-     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
      energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
      spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
@@ -701,7 +698,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphdos'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -902,7 +898,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        phdos%phdos(:) = phdos%phdos(:) + gvals_wtq
 
        ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
-       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108
+       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
        ! In principle there's a phase due to nonsymmorphic translations
        ! but we here need |e(Sq)_iatom|**2
        syme2_xyza = zero
@@ -1190,7 +1186,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016)
+!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1897,7 +1893,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2297,7 +2292,6 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phdos_print_vsound'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3583,7 +3577,6 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_symph'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

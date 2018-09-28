@@ -54,7 +54,7 @@ program mrgscr
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
  use m_nctk
@@ -72,6 +72,7 @@ program mrgscr
  use m_fstrings,            only : int2char4, endswith, itoa, sjoin, strcat
  use m_fft_mesh,            only : g2ifft
  use m_fftcore,             only : get_cache_kb, getng
+ use m_fft,                 only : fourdp
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
@@ -98,8 +99,6 @@ program mrgscr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgscr'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

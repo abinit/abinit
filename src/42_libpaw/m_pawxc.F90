@@ -46,11 +46,13 @@ module m_pawxc
  public :: pawxc          ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
  public :: pawxcpositron  ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (r,theta,phi)
  public :: pawxc_dfpt     ! Compute first-order change of XC potential and contribution to
-                          ! 2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
+                          !   2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
  public :: pawxcsum       ! Compute useful sums of moments of densities needed to compute on-site contributions to XC energy and potential
  public :: pawxcm         ! Compute xc correlation potential and energies inside a paw sphere. USE (L,M) MOMENTS
  public :: pawxcmpositron ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
- public :: pawxcm_dfpt    ! Compute first-order change of XC potential and contribution to 2nd-order change of XC energy inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxcm_dfpt    ! Compute 1st-order change of XC potential and contrib
+                          !   to 2nd-order change of XC ene inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxc_get_nkxc ! Compute sze of XC kernel (Kxc) according to spin polarization and XC type
 
 !Private procedures
  private :: pawxcsph                   ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
@@ -116,11 +118,11 @@ CONTAINS !===========================================================
 !!
 !! NOTES
 !!   References for electron-positron correlation functionals:
-!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-!!         [2] Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979) [[cite:Arponen1979a]].
+!!         [2] E. Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986) [[cite:Boronski1986]].
+!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991) [[cite:Sterne1991]].
+!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
+!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
 !!      m_pawxc
@@ -908,11 +910,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !----- Check options
 !----------------------------------------------------------------------
 
- nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==19)
- if(nkxc_updn>3) then
-   msg='Kxc for GGA not implemented!'
-   MSG_ERROR(msg)
- end if
+ nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
@@ -1137,7 +1135,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !    ----- Accumulate and store XC kernel and its derivative
 !    ----------------------------------------------------------------------
      if (nkxc_updn>0.and.ndvxc>0) then
-       if (nkxc==1.and.ndvxc==15) then
+       if (nkxc_updn==1.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
        else if (nkxc_updn==3.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
@@ -1828,7 +1826,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,npts,nspden_updn
+ integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,nkxc_cur,npts,nspden_updn
  logical :: need_impart
  real(dp),parameter :: tol24=tol12*tol12
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
@@ -1866,12 +1864,9 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    MSG_BUG(msg)
  end if
  if(option/=3) then
-   if (xclevel==1.and.nkxc/=2*min(nspden,2)-1+3*(nspden/4)) then
-     msg='nkxc must be 1 or 3 for LDA!'
-     MSG_BUG(msg)
-   end if
-   if(xclevel==2.and.nkxc/=12*min(nspden,2)-5+3*(nspden/4)) then
-     msg='nkxc should be 7 or 19 for GGA!'
+   call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
+   if (nkxc/=nkxc_cur) then
+     msg='Wrong dimension for array kxc!'
      MSG_BUG(msg)
    end if
    if(xclevel==2.and.nspden==4) then
@@ -4602,7 +4597,7 @@ end subroutine pawxcsphpositron
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,iplex,ir,ivxc,jr,kr
+ integer :: ii,ilm,iplex,ir,ivxc,jr,kr,nkxc_cur
  logical :: need_impart
  real(dp) :: invsqfpi,ro1i,ro1r,sqfpi,sqfpi2,v1i,v1r,vxcrho
  character(len=500) :: msg
@@ -4627,16 +4622,13 @@ end subroutine pawxcsphpositron
    msg='wrong option!'
    MSG_BUG(msg)
  end if
- if(option/=3.and.nkxc/=2*min(nspden,2)-1) then
-   msg='nkxc must be 1 or 3 (not OK for GGA)!'
-   MSG_BUG(msg)
+ if(option/=3) then
+   call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
+   if(nkxc/=nkxc_cur) then
+     msg='Wrong size for kxc array!'
+     MSG_BUG(msg)
+   end if
  end if
-!This is to avoid complain that xclevel is an unused argument.
- if(.false.)write(std_out,*)xclevel
-! if(xclevel==2) then
-!   msg='GGA is not implemented!'
-!   MSG_ERROR(msg)
-! end if
  if(nspden==4.and.option/=3) then
    msg='nspden=4 not implemented (for vxc)!'
    MSG_ERROR(msg)
@@ -5353,6 +5345,116 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
  LIBPAW_DEALLOCATE(rhotot_ep)
 
 end subroutine pawxcmpositron
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawxc/pawxc_get_nkxc
+!! NAME
+!! pawxc_get_nkxc
+!!
+!! FUNCTION
+!! Get size of XC kernel array (Kxc) according to spin polarization and XC type
+!!
+!! INPUTS
+!!  nspden= nmber of density spin components
+!!  xclevel= XC type
+!!
+!! OUTPUT
+!!  nkxc= size of XC kernel (kxc array)
+!!
+!! NOTES
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
+!!    if nspden==4:
+!!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
+!!
+!! PARENTS
+!!      m_pawxc,respfn,nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawxc_get_nkxc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nspden,xclevel
+ integer,intent(out) :: nkxc
+!arrays
+
+!Local variables-------------------------------
+!scalars
+!arrays
+
+!************************************************************************
+
+ nkxc=0
+
+ if (nspden==1) then ! Non polarized
+
+   if (xclevel==1) nkxc=1
+   if (xclevel==2) nkxc=7
+
+ else if (nspden==2) then ! Polarized
+
+   if (xclevel==1) nkxc=3
+   if (xclevel==2) nkxc=19
+
+ else if (nspden==4) then ! Non-collinear
+
+   ! Store magnetization in the 3 last terms of Kxc
+   if (xclevel==1) nkxc=6
+   if (xclevel==2) nkxc=22
+
+ end if
+
+ end subroutine pawxc_get_nkxc
 !!***
 
 !----------------------------------------------------------------------

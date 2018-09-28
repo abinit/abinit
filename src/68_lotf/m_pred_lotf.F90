@@ -24,7 +24,7 @@
 
 module m_pred_lotf
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abimover
  use m_abihist
@@ -93,7 +93,6 @@ CONTAINS !===========================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_lotf'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -237,7 +236,8 @@ CONTAINS !===========================================================
     !--call the LOTF initialization
     call init_lotf(itime,ab_mover%natom,acell,rprimd,xcart)
 
-    !--Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102)
+    !--Application of Gauss' principle of least constraint according to 
+    ! Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102 [[cite:Zhang1997]])
     !--v2gauss is twice the kinetic energy
     call vel_to_gauss(vel,ab_mover%amass,v2gauss)
 

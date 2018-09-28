@@ -35,7 +35,7 @@ module m_gwls_TimingLog
 use m_gwls_utility
 
 ! Abinit modules
-use m_profiling_abi
+use m_abicore
 use defs_basis
 
 use m_io_tools,  only : get_unit

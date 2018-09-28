@@ -14,9 +14,9 @@
 !!
 !! CHILDREN
 !! interfaces_14_hidewrite.F90
+!! m_abicore.F90
 !! m_fstrings.F90
 !! m_io_tools.F90
 !! m_specialmsg.F90
-!! wrtout.F90
 !!
 !!***

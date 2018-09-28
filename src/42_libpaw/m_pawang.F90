@@ -49,9 +49,6 @@ MODULE m_pawang
  public :: mat_mlms2jmj
  public :: mat_slm2ylm
 
- ! MGPAW: Private?
- public :: rfactorial         ! Calculates N!. as a double precision real.
- public :: perms              ! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
 !!***
 
 !----------------------------------------------------------------------
@@ -396,7 +393,6 @@ subroutine pawang_lsylm(pawang)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawang_lsylm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1017,14 +1013,14 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
  do ii=1,(n+1)/2
    z=cos(pi*(ii-0.25_dp)/(n+0.5_dp))
-   do 
+   do
      p1=1._dp
      p2=0._dp
      do jj=1,n
        p3=p2
        p2=p1
        p1=((2._dp*jj-1._dp)*z*p2-(jj-1._dp)*p3)/jj
-     end do  
+     end do
      pp=n*(p2-z*p1)/(1._dp-z**2)
      z1=z
      z=z1-p1/pp
@@ -1046,7 +1042,8 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !! rfactorial
 !!
 !! FUNCTION
-!! Calculates N!. as a double precision real.
+!! Private function
+!! Calculates N! as a double precision real.
 !!
 !! INPUTS
 !!   nn=number to use
@@ -1060,7 +1057,7 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !!
 !! SOURCE
 
-function rfactorial(nn)
+elemental function rfactorial(nn)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1097,6 +1094,7 @@ end function rfactorial
 !! perms
 !!
 !! FUNCTION
+!! Private function
 !! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
 !!
 !! INPUTS

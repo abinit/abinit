@@ -23,7 +23,7 @@
 #%% md_hist = t110_HIST.nc
 #%% [files]
 #%% files_to_test = 
-#%%   t110_output, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
+#%%   t110.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%%   t110omega.dat, tolnlines = 2, tolabs = 3e-6, tolrel = 1.01, fld_options = -medium;
 #%%   t110thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]

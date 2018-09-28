@@ -28,7 +28,7 @@ module m_spgbuilder
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_symtk,   only : chkgrp, print_symmetries
  use m_symsg,   only : symsgcube, symsghexa, symsgmono, symsgortho, symsgtetra

@@ -4,12 +4,14 @@
 #include "abi_common.h"
 
 module m_mathfuncs
+
   use defs_basis, only: dp, PI
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   !use ziggurat
   use m_random_xoroshiro128plus
   implicit none
+
 contains
 
   ! vector cross production
@@ -92,7 +94,7 @@ contains
 
   ! wrapper of  normal random number generator using ziggurat method.
   ! rnor implemented in ziggruat.F90
-  ! TODO hexu: implement a random number generator module which contains 
+  ! TODO hexu: implement a random number generator module which contains
   ! all the related subroutines. & Move this one there.
   !  subroutine rand_normal_ziggurat(a)
 
@@ -111,5 +113,5 @@ contains
 !      end do
 !    end do
 !    end subroutine rand_normal_ziggurat
-  
-end module
+
+end module m_mathfuncs

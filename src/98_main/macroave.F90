@@ -7,7 +7,7 @@
 !! **********************************************************************
 !! The MACROAVE program implements the macroscopic average technique,
 !! introduced by A. Baldereschi and coworkers
-!! (A. Baldereschi, S. Baroni, and R. Resta, Phys. Rev. Lett. 61, 734 (1988)).
+!! (A. Baldereschi, S. Baroni, and R. Resta, Phys. Rev. Lett. 61, 734 (1988) [[cite:Baldereschi1988]]).
 !! This is an extremely powerful method that relates
 !! microscopic quantities, typical outputs of first-principles codes,
 !! with macroscopic magnitudes, needed to perform electrostatic analysis.
@@ -18,7 +18,7 @@
 !! It can be used to compute band offsets, work functions, effective
 !! charges, and high frequency dielectric constants, among others
 !! interesting physical properties.
-!! Ref: L. Colombo, R. Resta and S. Baroni  Phys Rev B  44, 5572 (1991).
+!! Ref: L. Colombo, R. Resta and S. Baroni  Phys Rev B  44, 5572 (1991) [[cite:Colombo1991]].
 !! Coded by P. Ordejon and J. Junquera, April 1999.
 !! Modified by J. Junquera, November 2001.
 !! **********************************************************************
@@ -57,7 +57,7 @@ program macroave
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF

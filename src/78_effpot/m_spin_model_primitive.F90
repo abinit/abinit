@@ -39,7 +39,7 @@ module m_spin_model_primitive
   use m_dynmaic_array
   use m_mathfuncs
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_supercell
   use m_spin_terms
@@ -137,7 +137,7 @@ contains
 !End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
-    !TODO
+   !TODO should something  be done here?
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &

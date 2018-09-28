@@ -61,12 +61,17 @@ in the tutorials in the light brown blocks. Finally, the Many-Body Perturbation 
 capabilities are demonstrated in the tutorials belonging to the dark brown blocks.
 The right-hand side blocks gather the tutorials related to the parallelism inside ABINIT.
 
+Visualisation tools are NOT covered in the ABINIT tutorials. 
+Powerful visualisation procedures have been developed in the Abipy context, 
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 Before following the tutorials, you should have read the 
 [new user's guide](..),
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
-[[cite:Martin2008|this book]] by R. M. Martin.
+[[cite:Martin2004|this book]] by R. M. Martin.
 The latter reference is a must if you have not yet used another electronic structure code or a Quantum Chemistry package.
 
 After the tutorial, you might find it useful to learn about the test cases

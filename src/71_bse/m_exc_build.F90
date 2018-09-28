@@ -28,7 +28,7 @@
 module m_exc_build
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_bse_io
  use m_xmpi
@@ -54,6 +54,7 @@ module m_exc_build
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_sym,      only : paw_symcprj_op
  use m_wfd,          only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_ihave_cprj
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
@@ -167,8 +168,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_block'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1777,7 +1776,6 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_v'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2172,7 +2170,6 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_ham'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2311,7 +2308,6 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_all_mgq0'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

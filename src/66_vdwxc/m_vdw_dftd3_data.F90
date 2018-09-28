@@ -21,7 +21,7 @@
 !!                the divergence
 !!  vdw_dftd3_c6: C6ij tabulated dispersion coefficients used for the interpolation
 !!                of the coordination number ordered by reference number* (
-!!                Grimme, J. Chem. Phys. 132, 154104 (2010)) and then by
+!!                Grimme, J. Chem. Phys. 132, 154104 (2010) [[cite:Grimme2010]]) and then by
 !!                pair of chemical elements (H-H,He-H,He-He,etc.;
 !!                only i-j coefficient are given as j-i is identical by symmetry)
 !!  index_c6: table containing the index of non-zero values of C6 coefficients

@@ -31,7 +31,7 @@ MODULE m_mpinfo
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -1264,7 +1264,6 @@ subroutine initmpi_grid(mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initmpi_grid'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1687,7 +1686,8 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    mpi_enreg%comm_cell=mpi_enreg%comm_world
  end if
 
- if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%optdriver==RUNL_GSTATE) then
+ if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%npimage<=mpi_enreg%nproc.and. &
+&    dtset%optdriver==RUNL_GSTATE) then
 
 !  Activate flag for parallelization over images
    mpi_enreg%paral_img=1

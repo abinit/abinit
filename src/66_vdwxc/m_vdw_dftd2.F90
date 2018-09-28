@@ -26,7 +26,7 @@
 module m_vdw_dftd2
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
 
@@ -82,7 +82,7 @@ contains
 !! NOTES
 !!  Ref.: S. Grimme, Semiempirical GGA-type density functional
 !!        constructed with a long-range dispersion correction,
-!!        J. Comp. Chem. 27, 1787 (2006)
+!!        J. Comp. Chem. 27, 1787 (2006) [[cite:Grimme2006]]
 !!
 !! PARENTS
 !!      respfn,setvtr,stress
@@ -99,7 +99,6 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_dftd2'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

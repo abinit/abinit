@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -844,7 +844,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -18.973   0.000  -0.213   0.000  -0.213   0.000  -0.213  -0.000
        -0.000   0.000  -4.940  -0.000  -0.325   0.000  -0.325   0.000  -0.325
@@ -859,10 +859,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.042   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.042   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -876,7 +876,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
         0.000  -1.722  -2.514  -0.846   1.907  -0.846   1.907  -0.846   1.907
 
     2  -1.722 -18.561   0.000  -0.523  -0.000  -0.523   0.000  -0.523  -0.000
-        1.722  -0.000  -4.258  -0.000   0.002   0.000   0.002  -0.000   0.002
+        1.722   0.000  -4.258  -0.000   0.002   0.000   0.002  -0.000   0.002
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     91.54  [%]
 
@@ -901,7 +901,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.956  -2.323  -0.086  -0.086  -2.323  -0.086  -2.323  -2.323  -0.086
-        0.000  -2.323   0.086  -0.086   2.323  -0.086   2.323  -2.323   0.086
+       -0.000  -2.323   0.086  -0.086   2.323  -0.086   2.323  -2.323   0.086
 
     2  -2.323 -19.148   0.000  -0.505   0.000  -0.505   0.000  -0.509  -0.000
         2.323   0.000  -3.437   0.000   0.184  -0.000   0.184  -0.000  -0.375
@@ -918,7 +918,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
        -0.000  -2.689  -0.576  -1.536   2.971  -1.536   2.971  -2.617   1.683
 
     2  -2.689 -17.654   0.000  -0.131  -0.000  -0.131  -0.000  -0.067  -0.000
-        2.689   0.000  -3.129   0.000   0.341   0.000   0.341  -0.000  -0.076
+        2.689  -0.000  -3.129   0.000   0.341   0.000   0.341  -0.000  -0.076
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     90.38  [%]
 
@@ -929,10 +929,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -14.882   0.427  -2.562  -2.347  -2.347  -2.347  -2.347  -2.562   0.427
-       -0.000   0.427   2.562  -2.347   2.347  -2.347   2.347  -2.562  -0.427
+        0.000   0.427   2.562  -2.347   2.347  -2.347   2.347  -2.562  -0.427
 
     2   0.427 -19.000   0.000   0.644  -0.000   0.644   0.000  -0.189  -0.000
-       -0.427  -0.000  -3.254  -0.000  -0.139   0.000  -0.139  -0.000  -1.683
+       -0.427   0.000  -3.254  -0.000  -0.139   0.000  -0.139  -0.000  -1.683
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     90.59  [%]
 
@@ -943,7 +943,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -18.043  -3.045  -1.269  -1.269  -3.045  -1.269  -3.045  -3.045  -1.269
-        0.000  -3.045   1.269  -1.269   3.045  -1.269   3.045  -3.045   1.269
+       -0.000  -3.045   1.269  -1.269   3.045  -1.269   3.045  -3.045   1.269
 
     2  -3.045 -17.960   0.000  -0.118   0.000  -0.118   0.000   0.078  -0.000
         3.045   0.000  -2.260   0.000   0.373  -0.000   0.373   0.000  -0.254
@@ -1264,7 +1264,7 @@ P           mkmem4          8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

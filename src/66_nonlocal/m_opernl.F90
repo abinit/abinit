@@ -28,7 +28,7 @@ module m_opernl
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_mkffkg, only : mkffkg, dfpt_mkffkg
 
@@ -525,7 +525,7 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)
@@ -1149,7 +1149,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)
@@ -2519,7 +2519,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)

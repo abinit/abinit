@@ -13,27 +13,14 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! check_kxc.F90
-!! drivexc.F90
-!! drivexc_main.F90
-!! echo_xc_name.F90
 !! interfaces_41_xc_lowlevel.F90
-!! invcb.F90
+!! m_drivexc.F90
 !! m_libxc_functionals.F90
-!! mkdenpos.F90
-!! size_dvxc.F90
-!! xchcth.F90
-!! xchelu.F90
-!! xciit.F90
-!! xclb.F90
-!! xcmult.F90
-!! xcpbe.F90
-!! xcpositron.F90
-!! xcpzca.F90
-!! xcspol.F90
-!! xctetr.F90
-!! xctfw.F90
-!! xcwign.F90
-!! xcxalp.F90
+!! m_xc_noncoll.F90
+!! m_xchcth.F90
+!! m_xciit.F90
+!! m_xclda.F90
+!! m_xcpbe.F90
+!! m_xcpositron.F90
 !!
 !!***

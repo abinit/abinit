@@ -42,7 +42,7 @@
 MODULE m_copy
 
  use defs_basis,  only : dp, spc, dpc
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif

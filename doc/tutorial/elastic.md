@@ -19,17 +19,32 @@ to introduce the density-functional perturbation theory (DFPT) features of
 ABINIT before starting this tutorial. You will learn to use additional DFPT
 features of ABINIT, and to use relevant parts of the associated codes Mrgddb and Anaddb.
 
+[TUTORIAL_README]
+
 This tutorial should take about two hours.
+
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
 *Before beginning, you might consider working in a different subdirectory as for the other tutorials. 
-Why not create "Work_elast" in ~abinit/tests/tutorespfn/Input?*
+Why not create Work_elast in \$ABI_TUTORESPFN/Input?*
+You should also copy the files *telast_1.files* and *telast_1.in* from *\$ABI_TUTORESPFN/Input* to *Work_elast*. 
 
-You should copy the files ~abinit/tests/tutorespfn/Input/telast_1.files and telast_1.in into Work_elast. 
+```sh
+cd $ABI_TUTORESPFN/Input
+mkdir Work_elast
+cd Work_elast
+cp ../telast_1.files . 
+cp ../telast_1.in .
+```
+
 You may wish to start the calculation (less than
 one minute on a standard 3GHz machine) before you read the following. 
-You should open your input file telast_1.in with an editor and examine it as you read this discussion.
+You should open your input file *telast_1.in* with an editor and examine it as you read this discussion.
 
 {% dialog tests/tutorespfn/Input/telast_1.files tests/tutorespfn/Input/telast_1.in %}
 
@@ -47,7 +62,7 @@ new features here, and you should look at the following new input variables whic
   * [[natfix]] 
   * [[strfact]]   
 
-There are two datasets specified in telast_1.in. First, let us examine the
+There are two datasets specified in *telast_1.in*. First, let us examine the
 common input data. We specify a starting guess for [[acell]], and give an
 accurate decimal specification for [[rprim]]. The definition of the atom
 types and atoms follows [tutorial DFPT1](rf1). The reduced atomic
@@ -97,7 +112,7 @@ that way, so we may as well develop good habits.
 Now we shall examine the results of the structural optimization run. As
 always, we should first examine the log file to make sure the run has
 terminated cleanly. There are a number of warnings, but none of them are
-apparently serious. Next, let us edit the output file, telast_1.out. 
+apparently serious. Next, let us edit the output file, *telast_1.out*. 
 
 {% dialog tests/tutorespfn/Refs/telast_1.out %}
 
@@ -123,10 +138,10 @@ We can also confirm that the stresses are relaxed:
      sigma(2 2)= -3.76811542E-10  sigma(3 1)=  0.00000000E+00
      sigma(3 3)=  7.81471561E-10  sigma(2 1)=  0.00000000E+00
     
-Now would be a good time to copy telast_2.in and telast_2.files into your
+Now would be a good time to copy *telast_2.in* and *telast_2.files* into your
 working directory, since we will use the present output to start the next run.
 Locate the optimized lattice parameters and reduced atomic coordinates near
-the end of telast_1.out:
+the end of *telast_1.out*:
     
          acell2   7.5389647789E+00  7.5389647789E+00  1.2277795511E+01 Bohr
     
@@ -135,7 +150,7 @@ the end of telast_1.out:
                   3.3333333333E-01  6.6666666667E-01  3.7608587611E-01
                   6.6666666667E-01  3.3333333333E-01  8.7608587611E-01
     
-With your editor, copy and paste these into telast_2.in at the indicated
+With your editor, copy and paste these into *telast_2.in* at the indicated
 places in the "Common input data" area. Be sure to change acell2 and xred2 to
 acell and xred since these common values will apply to all datasets in the next set of calculations.  
 
@@ -160,9 +175,9 @@ with strain, so you should review the variables
   * [[rfdir]] 
   * [[rfelfd]]   
 
-It would be a good idea to copy telast_2.files into Work_elast and start the
+It would be a good idea to copy *telast_2.files* into *Work_elast* and start the
 calculation while you read (less than 2 minutes on a standard 3GHz machine).
-Look at telast_2.in in your editor to follow the discussion, and double check
+Look at *telast_2.in* in your editor to follow the discussion, and double check
 that you have copied acell and xred as discussed in the last section.
 
 {% dialog tests/tutorespfn/Input/telast_2.in %}
@@ -175,7 +190,7 @@ datasets. We set a tight limit on the convergence of the self-consistent
 potential with [[tolvrs]]. Since we have specified [[nband]]=8, all the bands
 are occupied and the potential test also assures us that all the wave
 functions are well converged. This issue will come up again in the section on
-metals. We could have used the output wave functions telast_1o_DS2_WFK as
+metals. We could have used the output wave functions *telast_1o_DS2_WFK* as
 input for our RF calculations and skipped dataset 1, but redoing the GS
 calculation takes relatively little time for this simple system.
 
@@ -186,20 +201,20 @@ response to the [[lesson:rf1#5|electric field perturbation]] and
 introduced in [tutorial RF1](rf1). It would be a good idea to review the relevant
 parts of [[help:respfn#1|section 1]] of the respfn_help file. 
 
-Examining this section of telast_2.in, note that electric
+Examining this section of *telast_2.in*, note that electric
 field as well as strain are uniform perturbations, only are defined for
-[[qpt]]= 0 0 0. [[rfelfd]]= 2 specifies that we want the ddk calculation to be
-performed, which requires [[iscf]]= -3. The ddk wave functions will be used to
+[[qpt]] = 0 0 0. [[rfelfd]] = 2 specifies that we want the ddk calculation to be
+performed, which requires [[iscf]] = -3. The ddk wave functions will be used to
 calculate both the piezoelectric tensor and the Born effective charges, and in
 general we need them for **k** derivatives in all three (reduced) directions,
-[[rfdir]]= 1 1 1. Since there is no potential self-consistency in the ddk
+[[rfdir]] = 1 1 1. Since there is no potential self-consistency in the ddk
 calculations, we must specify convergence in terms of the wave function
 residuals using [[tolwfr]].  
 
 Finally, dataset 3 performs the actual calculations of the needed 2DTE's for
-the elastic and piezoelectric tensors. Setting [[rfphon]]=1 turns on the
-atomic displacement perturbation, which we need for all atoms ([[rfatpol]]= 1
-4) and all directions ([[rfdir]]= 1 1 1). Abinit will calculate first-order
+the elastic and piezoelectric tensors. Setting [[rfphon]] = 1 turns on the
+atomic displacement perturbation, which we need for all atoms ([[rfatpol]] = 1
+4) and all directions ([[rfdir]] = 1 1 1). Abinit will calculate first-order
 wave functions for each atom and direction in turn, and use those to calculate
 2DTE's with respect to all pairs of atomic displacements and with respect to
 one atomic displacement and one component of electric field. These quantities,
@@ -209,7 +224,7 @@ piezoelectric tensor.
 
 First-order wave functions for the strain perturbation are computed next.
 Setting [[rfstrs]] = 3 specifies that we want both uniaxial and shear strains
-to be treated, and [[rfdir]]= 1 1 1 cycles through strains xx, yy, and zz for
+to be treated, and [[rfdir]] = 1 1 1 cycles through strains xx, yy, and zz for
 uniaxial and yz, xz, and xy for shear. We note that while other perturbations
 in Abinit are treated in reduced coordinates, strain is better dealt with in
 Cartesian coordinates for reasons discussed in the reference cited above.
@@ -243,13 +258,13 @@ of a few conventions in the file names. The root output file name telast_2o is
 from the 4th line of the "files" file. The dataset producing the file is next.
 Finally, the first-order wave function 1WF files have a final "pertcase"
 number described in [[help:respfn#1|section 1]] of the respfn_help file.
-While telast_2.in specifies all atomic displacements, only the symmetry-
+While *telast_2.in* specifies all atomic displacements, only the symmetry-
 inequivalent perturbations are treated, so the "pertcase" list is incomplete.
 All cases specified in the input data are treated for the strain perturbation.  
 
-First, take a look at the end of the telast_2.log file to make sure the run
+First, take a look at the end of the *telast_2.log *file to make sure the run
 has completed without error. You might wish to take a look at the WARNING's,
-but they all appear to be harmless. Next, edit your telast_2.out file.
+but they all appear to be harmless. Next, edit your *telast_2.out* file.
 Searching backwards for ETOT you will find
     
          iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
@@ -337,7 +352,7 @@ Now let us take a look at the results we want, the various 2DTE's. They begin
 These are the "raw" 2DTE's, in reduced coordinates for atom-displacement and
 electric-field perturbations, but Cartesian coordinates for strain
 perturbations. This same results with the same organization appear in the file
-telast_2_DS3_DDB which will be used later as input for automated analysis and
+*telast_2_DS3_DDB* which will be used later as input for automated analysis and
 converted to more useful notation and units by anaddb. A breakout of various
 types of 2DTE's follows (all converted to Cartesian coordinates and in atomic units):  
     
@@ -413,8 +428,8 @@ and one uniform electric field component. (Yes, there are non-zero elements.)
 ## 3 ANADDB calculation of atom-relaxation effects
   
 In this section, we will run the program anaddb, which analyzes DDB files
-generated in prior RF calculations. You should copy telast_3.in and
-telast_3.files in your Work_elast directory. You should now go to the [[help:anaddb|anaddb help file]]
+generated in prior RF calculations. You should copy *telast_3.in* and
+*telast_3.files* in your *Work_elast* directory. You should now go to the [[help:anaddb|anaddb help file]]
 introduction. The bulk of the material in this help file is contained in the
 description of the variables. You should read the descriptions of  
 
@@ -440,24 +455,24 @@ as stresses and forces with the RF DDB. It is anticipated that anaddb in a
 future release will implement the finite-stress corrections to the elastic
 tensor discussed in [notes by A. R. Oganov](../../theory/documents/elasticity-oganov.pdf) .  
   
-Now would be a good time to edit telast_3.in and observe that it is very
+Now would be a good time to edit *telast_3.in* and observe that it is very
 simple, consisting of nothing more than the four variables listed above set to
 appropriate values. 
 
 {% dialog tests/tutorespfn/Input/telast_3.files tests/tutorespfn/Input/telast_3.in %}
 
-The telast_3.files file is used with anaddb in the same
+The *telast_3.files* file is used with anaddb in the same
 manner as the abinit .files you are by now used to. The first two lines
 specify the .in and .out files, the third line specifies the DDB file, and the
 last two lines are dummy names which would be used in connection with other
 capabilities of anaddb. Now you should run the calculation, which is done in
 the same way as you are now used to for abinit:  
   
-    ../../anaddb <telast_3.files >&telast_3.log  
+    anaddb <telast_3.files >&telast_3.log  
   
 This calculation should only take a few seconds. You should edit the log file,
 go to the end, and make sure the calculation terminated without error. Next,
-examine telast_3.out. After some header information, we come to tables giving
+examine *telast_3.out*. After some header information, we come to tables giving
 the "force-response" and "displacement-response" internal strain tensors.
 These represent, respectively, the force on each atom and the displacement of
 each atom in response to a unit strain of the specified type. These numbers
@@ -503,7 +518,7 @@ Departures from expected symmetries (there are a few in the last decimal place
 here) are due to either convergence errors or, if large, incorrectly specified
 geometry (however, see the final comments on symmetry  below).  
   
-Next in telast_3.out we find the piezoelectric tensor results:  
+Next in *telast_3.out* we find the piezoelectric tensor results:  
     
      Proper piezoelectric constants(clamped ion)(unit:c/m^2)
      
@@ -529,7 +544,7 @@ contributions are based on 2DTE's for internal strain, interatomic force
 constants, and Born effective charges, and typically constitute much larger
 corrections to the piezoelectric tensor than to the elastic tensor. Once
 again, symmetries should be checked (The slight discrepancies seen here can
-be removed by setting tolvrs3=1.0d-18 in telast_2.in). One should be aware
+be removed by setting tolvrs3 = 1.0d-18 in *telast_2.in*). One should be aware
 that the piezoelectric tensor is identically zero in any material which has a center of symmetry.  
   
 Since we are dealing with a hypothetical material, there is no experimental
@@ -538,11 +553,11 @@ a few of these numbers by a finite-difference method to gain confidence in the R
 
 ## 4 Finite-difference calculation of elastic and piezoelectric constants
 
-You should copy telast_4.in and telast_4.files into your Work_elast directory.
+You should copy *telast_4.in* and *telast_4.files* into your *Work_elast* directory.
 
 {% dialog tests/tutorespfn/Input/telast_4.in %}
 
-Editing telast_4.in, you will see that it has four datasets, the first two
+Editing *telast_4.in*, you will see that it has four datasets, the first two
 with the c-axis contracted 0.01% and the second two with it expanded 0.01%,
 which we specified by changing the third row of [[rprim]]. The common data is
 essentially the same as telast_2.in, and the relaxed [[acell]] values and
@@ -565,8 +580,8 @@ ddk wave functions used in RF calculations in section 2 and introduced in
 which utilizes an improved coding of the calculation, and must specify
 [[rfdir]] = 1 1 1 so that the Cartesian components of the polarization are computed.  
   
-Now, run the telast_4 calculation, which should only take a minute or two, and
-edit telast_4.out. To calculate the elastic constants, we need to find the
+Now, run the *telast_4.in* calculation, which should only take a minute or two, and
+edit *telast_4.out*. To calculate the elastic constants, we need to find the
 stresses  sigma(1 1) and sigma(3 3). We see that each of the four datasets
 have stress results, but that there are slight differences between those from,
 for example dataset 1 and dataset 2, which should be identical. Despite our
@@ -642,11 +657,11 @@ connection with the calculation of Born effective charges by  Na Sai, K. M.
 Rabe, and D. Vanderbilt, Phys. Rev. B 66, 104108 (2002) [[cite:Sai2002]], Abinit has
 incorporated the ability to use finite-difference ddk wave functions from GS
 calculations in RF calculations of electric-field-related 2DTE's. Copy
-telast_5.in and telast_5.files into Work_elast, and edit telast_5.in.
+*telast_5.in* and *telast_5.files* into *Work_elast*, and edit *telast_5.in*.
 
 {% dialog tests/tutorespfn/Input/telast_5.in %}
 
-You should compare this with our previous RF data, telast_2.in, and note that
+You should compare this with our previous RF data, *telast_2.in*, and note that
 dataset1 and the Common data (after entering relaxed structural results) are
 essentially identical. Dataset 2 has been replaced by a non-self-consistent GS
 calculation with [[berryopt]] = -2 specified to perform the finite-difference
@@ -654,17 +669,16 @@ ddk wave function calculation. (The finite-difference first-order wave
 functions are implicit but not actually calculated in the GS polarization
 calculation.) We have restricted [[rfdir]] to 0 0 1 since we are only
 interested in the 3,3 piezoelectric constant. Now compare dataset 3 with that
-in telast_2.in. Can you figure out what we have dropped and why? Run the
-telast_5 calculation, which will only take about a minute with our simplifications.
+in *telast_2.in*. Can you figure out what we have dropped and why? Run the
+*telast_5.in* calculation, which will only take about a minute with our simplifications.
 
-Now edit telast_5.out, looking for the piezoelectric tensor,
+Now edit *telast_5.out*, looking for the piezoelectric tensor,
     
       Rigid-atom proper piezoelectric tensor, in cartesian coordinates,
          j1       j2                   matrix element
       dir pert dir pert          real part        imaginary part
     
        3    6   3    7        -0.0130314050         0.0000000000
-
 
 {% dialog tests/tutorespfn/Refs/telast_5.out %}
   
@@ -692,12 +706,12 @@ For metals, the existence of partially occupied bands is a complicating
 feature for RF as well as GS calculations.  
 Now would be a good time to review [tutorial 4](base4) which dealt in detail with the interplay between
 **k**-sample convergence and Fermi-surface broadening, especially [[lesson:base4#3|section 3 of tutorial 4]].
-You should copy telast_6.in and telast_6.files into Work_elast, and begin your run 
+You should copy *telast_6.in* and *telast_6.files* into *Work_elast*, and begin your run 
 while you read on, since it involves a convergence study with multiple datasets and may take about two minutes.  
 
 {% dialog tests/tutorespfn/Input/telast_6.in %}
   
-While the run is in progress, edit telast_6.in.  As in t43.in, we will set
+While the run is in progress, edit *telast_6.in*. As in *tbase4_3.in*, we will set
 [[udtset]] to specify a double loop.  In the present case, however, the outer
 loop will be over 3 successively larger meshes of **k** points, while the
 inner loop will be successively  
@@ -715,7 +729,7 @@ forward to the rest.  If we were doing a more complicated structure with
 internal coordinates that were also optimized, we would need to use both this
 and [[getxred]] to transfer these, as in telast_1.in.  
   
-The specific data for inner-loop dataset 1 is very similar to that for telast_1.in.  
+The specific data for inner-loop dataset 1 is very similar to that for *telast_1.in*.
 Inner-loop dataset 2 is a bit of a hack.  We need the density
 for inner-loop dataset 3, and while we could set [[prtden]] = 1 in dataset 1,
 this would produce a separate density file for every step in the structural
@@ -750,22 +764,22 @@ The data specific to the elastic-tensor RF calculation in inner-loop dataset 4
 should by now be familiar.  We take advantage of the fact that for cubic
 symmetry the only symmetry-inequivalent elastic constants are C$_{11}$, C$_{12}$, and
 C$_{44}$.  Abinit, unfortunately, does not do this analysis automatically, so we
-specify [[rfdir]]=1 0 0 to avoid duplicate calculations.  (Note that if atom
+specify [[rfdir]] = 1 0 0 to avoid duplicate calculations.  (Note that if atom
 relaxation is to be taken into account  for a more complex structure, the full
 set of directions must be used.)  
   
-When the telast_6 calculations finish, first look at telast_6.log as usual to
-make sure they have run to completion without error.  Next, it would be a good
+When the telast_6 calculations finish, first look at *telast_6.log* as usual to
+make sure they have run to completion without error. Next, it would be a good
 idea to look at the band occupancies occ?? (where ?? is a dual-loop dataset
-index) reported at the end (following  ==END DATASET(S)==).  The highest band,
+index) reported at the end (following  `==END DATASET(S)==`).  The highest band,
 the fourth in this case, should have zero or very small occupation, or you
 need to increase [[nband]] or decrease [[tsmear]] .  Now, use your newly
 perfected knowledge of the Abinit perturbation indexing conventions to scan
-through telast_6.out and find C$_{11}$ , C$_{12}$ , and C$_{44}$ for each of the three
+through *telast_6.out* and find C$_{11}$ , C$_{12}$ , and C$_{44}$ for each of the three
 **k** -sample choices, which will be  under the " Rigid-atom elastic tensor"
 heading.  Also find the lattice constants for each case, whose convergence you
-studied in [tutorial 4](base4).  You should be able to cut-and-paste these into a table
-like the following,  
+studied in [tutorial 4](base4).
+You should be able to cut-and-paste these into a table like the following,  
     
                 C_11           C_12           C_44           acell
     ngkpt=3*6   0.0037773556   0.0022583541   0.0013453692   7.5710952266
@@ -839,5 +853,6 @@ elastic tensor have to be rotated!) but it's easier to start with a more
 conventional alignment of the unit cell. 
 
 If you use a standard text like
-Bradley and Cracknell, The Mathematical Theory of Symmetry in Solids, Oxford [[cite:Bradley1972]] you can find the standard primitive cell descriptions for the Bravais lattice
+Bradley and Cracknell, The Mathematical Theory of Symmetry in Solids, Oxford [[cite:Bradley1972]]
+you can find the standard primitive cell descriptions for the Bravais lattice
 types and these are aligned as much as possible with a standard laboratory frame.

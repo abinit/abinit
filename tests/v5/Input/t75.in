@@ -1,7 +1,7 @@
  acell 3*7.128759292410183  #compression 4
  ngfft 3*12                 #need to be defined for recursion
  tsmear   3.1668297
- mdtemp   1000000 1000000
+ mdtemp   1500000 1500000
  recptrott 10   #trotter parameter
  occopt 3
  enunit 2      #All units on output

@@ -24,7 +24,7 @@
 module m_ab7_symmetry
 
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
 
   use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
   use m_symfind,   only : symfind, symanal, symlatt

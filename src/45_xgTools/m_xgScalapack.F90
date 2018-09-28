@@ -22,7 +22,7 @@
 module m_xgScalapack
 
   use defs_basis, only : std_err, std_out, dp
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
   use m_errors
   use m_slk
@@ -160,6 +160,13 @@ module m_xgScalapack
     end if
 
     if ( maxProc == 1 .or. M__CONFIG == SLK_DISABLED) then
+      usable = .false.
+      return
+    else if ( nthread > 1 ) then ! disable scalapack with threads since it is not threadsafe
+      ! This should be check with new elpa version en MPI+OpenMP
+      if ( M__CONFIG > 0 ) then
+        MSG_WARNING("xgScalapack turned off because you have threads")
+      end if
       usable = .false.
       return
     else

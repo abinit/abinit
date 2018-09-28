@@ -21,7 +21,7 @@ already used another electronic structure code, or a quantum chemistry code,
 it might be sufficient to read the introduction of [[cite:Payne1992]].
 If you have never used another electronic structure code or a Quantum
 Chemistry package, you should complete such reading by going (at your own
-pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2008]].
+pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
 After having gone through the present New User's Guide, you should follow the
 [[tutorial:index|ABINIT tutorial]].

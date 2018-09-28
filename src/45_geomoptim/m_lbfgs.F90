@@ -30,7 +30,7 @@
 module m_lbfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status

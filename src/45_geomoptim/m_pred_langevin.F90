@@ -27,7 +27,7 @@
 module m_pred_langevin
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
 
@@ -55,7 +55,7 @@ contains
 !!
 !! IONMOV 9:
 !! Uses a Langevin dynamics algorithm :
-!! see J. Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33
+!! see J. Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33 [[cite:Chelikowsky2000]]
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
@@ -86,7 +86,6 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_langevin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -45,7 +45,7 @@
 #include "abi_common.h"
 module m_spin_hist
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xmpi
   implicit none

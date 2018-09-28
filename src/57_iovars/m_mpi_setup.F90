@@ -34,7 +34,7 @@ module m_mpi_setup
  use m_hdr
  use m_sort
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,         only : abi_wtime
  use m_parser,       only : intagm
@@ -101,7 +101,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mpi_setup'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -196,7 +195,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread0==1) dtsets(idtset)%paral_atom=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_rf',tread0,'INT')
-   if (tread0==1.and.optdriver==RUNL_RESPFN) dtsets(idtset)%paral_rf=intarr(1)
+   if (tread0==1.and.any(optdriver==[RUNL_RESPFN, RUNL_NONLINEAR])) dtsets(idtset)%paral_rf=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npimage',tread(2),'INT')
    if(tread(2)==1) dtsets(idtset)%npimage=intarr(1)
@@ -245,8 +244,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
+
    ! Dump the list of irreducible perturbations and exit.
-   if (dtsets(idtset)%paral_rf==-1) then
+   if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
      call get_npert_rbz(dtsets(idtset),nband_rbz,nkpt_rbz,npert)
      ABI_DEALLOCATE(nband_rbz)
      ABI_DEALLOCATE(nkpt_rbz)
@@ -256,7 +256,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])) iexit = 0
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
@@ -1016,7 +1016,6 @@ end subroutine mpi_setup
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1897,7 +1896,6 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_kgb_indicator'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

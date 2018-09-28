@@ -26,7 +26,7 @@
 MODULE m_bseinterp
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -822,5 +822,5 @@ end subroutine interpolator_free
 
 !-------------------------------------------------------------------
 
-end module
+end module m_bseinterp
 !!***

@@ -29,7 +29,7 @@ module m_effpot_mpi
  use defs_basis
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_supercell,only: getPBCIndexes_supercell
  
  implicit none
