@@ -1635,12 +1635,12 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 	   jrhoij=iq0_rhoij+1
 	   do irhoij=1,pawrhoij%nrhoijsel
 		 klmn=pawrhoij%rhoijselect(irhoij)
-		 if (qphase_dij==1) then
+		 if (iq==1) then
            kklmn=lmn2_size*cplex_dij+klmn
            etmp=-rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp+rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
 		 end if
-		 if (qphase_dij==2) then
+		 if (iq==2) then
            kklmn=klmn
            etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
