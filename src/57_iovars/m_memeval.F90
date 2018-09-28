@@ -305,7 +305,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       mpi_enregs(idtset),mpsang,mpssoang,mpw,mqgrid_ff,mqgrid_vl,natom,nband,dtsets(idtset)%nfft,nfftdiel,nfftf,&
 &       dtsets(idtset)%ngfft,ngfftdiel,ngfftf,dtsets(idtset)%nimage,nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,&
 &       nsppol,nsym,ntypat,occopt,optforces,mem_test,optstress,pawcpxocc,pawmixdg,&
-&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,dtsets(idtset)%tfkinfunc,&
+&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,qphon,dtsets(idtset)%tfkinfunc,&
 &       dtsets(idtset)%typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
      else if( dtsets(idtset)%usepaw==0) then
        if (mpi_enregs(idtset)%me == 0) then
@@ -503,7 +503,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & natom,nband,nfft,nfftdiel,nfftf,ngfft,ngfftdiel,ngfftf,nimage,&
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
-& prtvol,pspheads,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
+& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -530,6 +530,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol),ngfft(18),ngfftdiel(18),ngfftf(18)
  integer,intent(in) :: nloalg(3),typat(natom)
+ real(dp),intent(in) :: qphon(3)
  type(pspheader_type) :: pspheads(npsp)
 
 !Local variables-------------------------------

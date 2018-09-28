@@ -1462,7 +1462,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  integer,pointer :: my_atmtab(:)
  real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
- real(dp),allocatable :: rwork(:),ro(:),noccmmp2(:,:,:,:),nocctot2(:)
+ real(dp),allocatable :: rwork(:),noccmmp2(:,:,:,:),nocctot2(:)
  complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
  complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
@@ -1706,7 +1706,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              end if
            end if
            jrhoij=jrhoij+cplex_rhoij
-           ABI_DEALLOCATE(ro)
          end do ! irhoij
          do im2=1,2*lcur+1
            do im1=1,im2

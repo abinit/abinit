@@ -1485,6 +1485,10 @@ end subroutine pawdensities
 !! SIDE EFFECTS
 !!  epaw= PAW on-site energy. At output, the contribution of the current atom
 !!        has been added to epaw.
+!!  [epaw_im]= imaginary part of PAW on-site energy. At output, the contribution
+!!             of the current atom has been added to epaw.
+!!             This imaginary p	rt only exists in a few cases (f.i. non-stationnary
+!!             expression of 2nd-order energy)
 !!
 !! PARENTS
 !!      m_paw_denpot
@@ -1512,7 +1516,7 @@ end subroutine pawdensities
 !!
 !! SOURCE
 
-subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab)
+subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab,epaw_im)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1527,6 +1531,7 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 !scalars
  integer,intent(in) :: cplex_dij,qphase_dij,nspden_dij
  real(dp),intent(inout) :: epaw
+ real(dp),intent(inout),optional :: epaw_im
  type(pawrhoij_type),intent(in),target :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
 !arrays
@@ -1559,7 +1564,6 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 !Useful data
  nspden_rhoij=pawrhoij%nspden
  lmn2_size=pawtab%lmn2_size
- add_imaginary=(cplex_dij==2.and.cplex_rhoij==2)
 
 !Special treatment for nspden
  nsploop=nspden_rhoij
@@ -1573,6 +1577,8 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
    cplex_rhoij=pawrhoij%cplex_rhoij
    rhoij => pawrhoij%rhoijp
  end if
+
+ add_imaginary=(cplex_dij==2.and.cplex_rhoij==2)
 
 !Loop over qphase components
  do iq=1,qphase_dij
@@ -1608,26 +1614,42 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
      iq0_rhoij=0
    end if
 
-!  Loop over rhoij spin components
+!  Contribution to on-site energy (real part)
    do isp_rhoij=1,nsploop
      isp_dij=min(isp_rhoij,nspden_dij)
-
-!    Loop over non-zero rhoij components
      jrhoij=iq0_rhoij+1
      do irhoij=1,pawrhoij%nrhoijsel
        klmn=pawrhoij%rhoijselect(irhoij)
        kklmn=iq0_dij+klmn
-
-!      Contribution to on-site energy
        etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
        if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
-
        epaw=epaw+etmp*pawtab%dltij(klmn)
-
        jrhoij=krhoij+cplex_rhoij
      end do
+   end do ! nsploop
 
-  end do ! nspden_rhoij
+!  Contribution to on-site energy (imaginary part)
+   if (present(epaw_im).and.qphase_dij==2) then
+	 do isp_rhoij=1,nsploop
+	   isp_dij=min(isp_rhoij,nspden_dij)
+	   jrhoij=iq0_rhoij+1
+	   do irhoij=1,pawrhoij%nrhoijsel
+		 klmn=pawrhoij%rhoijselect(irhoij)
+		 if (qphase_dij==1) then
+           kklmn=lmn2_size*cplex_dij+klmn
+           etmp=-rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
+           if (add_imaginary) etmp=etmp+rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
+		 end if
+		 if (qphase_dij==2) then
+           kklmn=klmn
+           etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
+           if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
+		 end if
+		 epaw_im=epaw_im+etmp*pawtab%dltij(klmn)
+		 jrhoij=krhoij+cplex_rhoij
+	   end do
+	 end do ! nsploop
+   end if
 
  end do ! qphase
  
@@ -1664,6 +1686,10 @@ end subroutine pawaccenergy
 !! SIDE EFFECTS
 !!  epaw= PAW on-site energy. At output, the contribution of the current atom
 !!        has been added to epaw.
+!!  [epaw_im]= imaginary part of PAW on-site energy. At output, the contribution
+!!             of the current atom has been added to epaw.
+!!             This imaginary p	rt only exists in a few cases (f.i. non-stationnary
+!!             expression of 2nd-order energy)
 !!
 !! PARENTS
 !!      m_paw_denpot
@@ -1673,7 +1699,7 @@ end subroutine pawaccenergy
 !!
 !! SOURCE
 
-subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab)
+subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab,epaw_im)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1688,6 +1714,7 @@ subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab)
 !scalars
  integer,intent(in) :: cplex_dij,qphase_dij
  real(dp),intent(inout) :: epaw
+ real(dp),intent(inout),optional :: epaw_im
  type(pawrhoij_type),intent(in),target :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
 !arrays
@@ -1714,7 +1741,11 @@ real(dp), ABI_CONTIGUOUS pointer :: dij_2D(:,:)
  dij_2D=reshape(dij,[size_dij,1])
 #endif
 
- call pawaccenergy(epaw,pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab)
+ if (present(epaw_im)) then
+   call pawaccenergy(epaw,pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab,epaw_im=epaw_im)
+ else
+   call pawaccenergy(epaw,pawrhoij,dij_2D,cplex_dij,qphase_dij,1,pawtab)
+ end if
 
 #ifndef HAVE_FC_ISO_C_BINDING
  ABI_DEALLOCATE(dij_2D)

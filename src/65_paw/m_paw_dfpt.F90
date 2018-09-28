@@ -42,7 +42,7 @@ MODULE m_paw_dfpt
  use m_pawfgrtab,    only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_nullify, pawfgrtab_gather
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_pawxc,        only : pawxc_dfpt, pawxcm_dfpt
- use m_paw_denpot,   only : pawdensities
+ use m_paw_denpot,   only : pawdensities,pawaccenergy_nospin
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
 
  use m_atm2fft,      only : dfpt_atm2fft
@@ -259,14 +259,15 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !For some perturbations, nothing else to do
  if (ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11 .or. &
-& ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11) return
+&    ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11) return
 
 !Various inits
  opt_compch=0;optvxc=1;optexc=3
  usecore=0;usetcore=0  ! This is true for phonons and Efield pert.
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
- delta_energy_xc(1:2)=zero;delta_energy_h(1:2)=zero;delta_energy_u(1:2)=zero
- dij(1:2)=zero;ro(1:2)=zero
+ delta_energy_xc(1:2)=zero
+ delta_energy_h(1:2)=zero
+ delta_energy_u(1:2)=zero
 
 
 !================ Loop on atomic sites =======================
@@ -392,39 +393,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    ABI_DEALLOCATE(nhat1)
 
 !  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order Hartree potential
-   nspdiag=1;if (nspden==2) nspdiag=2
-   do ispden=1,nspdiag
-     if (cplex_dijh1==1) then
-       jrhoij=1
-       do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-         klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-         dij(1)=paw_ij1(iatom)%dijhartree(klmn)
-         ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-         delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
-         if (cplex_b==2) then
-           ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_h(2)=delta_energy_h(2)+ro(2)*dij(1)
-         end if
-         jrhoij=jrhoij+cplex_b
-       end do
-     else ! cplex_dijh1==2
-       jrhoij=1
-       do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-         klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-         dij(1)=paw_ij1(iatom)%dijhartree(klmn)
-         dij(2)=paw_ij1(iatom)%dijhartree(klmn+nlmn2_dij1)
-         ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-         delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
-         delta_energy_h(2)=delta_energy_h(2)-ro(1)*dij(2)
-         if (cplex_b==2) then
-           ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_h(1)=delta_energy_h(1)+ro(2)*dij(2)
-           delta_energy_h(2)=delta_energy_h(2)+ro(2)*dij(1)
-         end if
-         jrhoij=jrhoij+cplex_b
-       end do
-     end if
-   end do
+   call pawaccenergy_nospin(delta_energy_h(1),pawrhoij_b(iatom),paw_ij1(iatom)%dijhartree, &
+&                           1,cplex_dijh1,pawtab(itypat),epaw_im=delta_energy_h(2))
 
 !  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order PAW+U potential
    if (usepawu==5.or.usepawu==6) then
