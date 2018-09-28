@@ -58,8 +58,9 @@ B.3 The multibinit application (for second-principles calculations) has consider
 B.4 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:
 
 * [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
-* [[ionmov]]=25 for the hybrid Monte Carlo algorithm, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]];
 * for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
+
+Also, the documentation for the hybrid Monte Carlo algorithm has been improved, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]].
 
 By He Xu, S. Prokhorenko and X. Gonze.
 

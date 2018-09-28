@@ -89,7 +89,7 @@ that apply, generally speaking, to all types of calculations are explained later
   1. [[topic:Berry|Electric polarization and finite electric field]]
   2. [[topic:MagField|External magnetic field]]
   3. [[topic:MagMom|Constrained atomic magnetic moment]]
-  4. [[topic:EFG|Electric field gradients]]
+  4. [[topic:EFG|Electric field gradients and Mossbauer Fermi contact interaction]]
   5. [[topic:Artificial|Artificial modifications of the system]]
 
 ## 3 Global control parameters: flow, parallelism, output files, output content, timing and memory control ...
