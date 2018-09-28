@@ -37,7 +37,7 @@
   spin_temperature    6.00000E+02
         spin_ntime      1000
              ncell         6         6         6
-           spin_dt    1.00000E-16
+           spin_dt    1.00000E-16  second
     spin_mag_field
                     0.00000E+00 0.00000E+00 0.00000E+00
        spin_qpoint
