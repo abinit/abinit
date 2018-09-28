@@ -159,7 +159,7 @@ program tdep
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
 !==========================================================================================
  call tdep_init_crystal(Crystal,InVar,Lattice,Sym)
- call tdep_init_ddb(Crystal,DDB,InVar,Lattice)
+ call tdep_init_ddb(DDB,InVar,Lattice)
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=

@@ -27,6 +27,7 @@ module m_tdep_abitypes
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
+  use m_ifc,              only : ifc_write
 
   implicit none
 

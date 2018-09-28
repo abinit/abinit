@@ -114,9 +114,9 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
   double precision, allocatable :: const_rot2nd(:,:,:,:)
   double precision, allocatable :: const_dynmat(:,:,:,:,:)
   double precision, allocatable :: const_huang(:,:,:,:,:)
-  double precision, allocatable :: const_asr3rd(:,:,:,:,:,:,:)
+  !double precision, allocatable :: const_asr3rd(:,:,:,:,:,:,:)
 !FB  double precision, allocatable :: const_rot3rd(:,:,:,:,:,:)
-  double precision, allocatable :: const_rot3rd(:,:,:,:,:,:,:,:)
+  !double precision, allocatable :: const_rot3rd(:,:,:,:,:,:,:,:)
 
   natom_unitcell=InVar%natom_unitcell
   natom         =InVar%natom
@@ -197,11 +197,11 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     ABI_MALLOC(const_dynmat,(3,3,natom_unitcell,natom_unitcell,ntotcoeff)); const_dynmat(:,:,:,:,:)  =zero
     ABI_MALLOC(const_huang ,(3,3,3,3                          ,ntotcoeff)); const_huang(:,:,:,:,:)   =zero
   end if  
-  if (present(proj3rd)) then
-!FB    ABI_MALLOC(const_rot3rd,(3,3,3,       natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:)  =zero
-    ABI_MALLOC(const_rot3rd,(3,3,3,3,3,     natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:,:,:)=zero
-    ABI_MALLOC(const_asr3rd,(8,3,3,3,     natom_unitcell,natom,ntotcoeff)); const_asr3rd(:,:,:,:,:,:,:)=zero
-  end if
+!  if (present(proj3rd)) then
+!!FB    ABI_MALLOC(const_rot3rd,(3,3,3,       natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:)  =zero
+!    ABI_MALLOC(const_rot3rd,(3,3,3,3,3,     natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:,:,:)=zero
+!    ABI_MALLOC(const_asr3rd,(8,3,3,3,     natom_unitcell,natom,ntotcoeff)); const_asr3rd(:,:,:,:,:,:,:)=zero
+!  end if
 
 ! First order only
   do ishell=1,Shell1at%nshell
@@ -295,174 +295,174 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
           end do
 !         4/ Rotational invariances (for the 3nd order). Number of constraints = natom_unitcell*natom*3**3
 !FB          if (present(proj3rd).and.(distance(iatom,jatom,1).lt.InVar%Rcut3)) then
-          if (present(proj3rd)) then
-            do alpha=1,3
-              do beta=1,3
-                do gama=1,3
-                  do lambda=1,3
-                    do icoeff=1,ncoeff
-                      terme1=zero ; terme2=zero ; terme3=zero ; terme4=zero ;
-                      if (alpha.eq.lambda) terme1=sum(SS_ref(gama  ,:,beta  ,isym,trans)*proj2nd(:,icoeff,ishell))
-                      if (beta.eq.lambda)  terme2=sum(SS_ref(alpha ,:,gama  ,isym,trans)*proj2nd(:,icoeff,ishell))
-                      if (alpha.eq.gama)   terme3=sum(SS_ref(lambda,:,beta  ,isym,trans)*proj2nd(:,icoeff,ishell))
-                      if (beta.eq.gama)    terme4=sum(SS_ref(alpha ,:,lambda,isym,trans)*proj2nd(:,icoeff,ishell))
-                      if (distance(iatom,jatom,1).lt.InVar%Rcut3) then
-                        const_rot3rd(:,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
-&                       const_rot3rd(:,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2-terme3-terme4
-                      end if
-                      const_rot3rd(:,alpha,beta,gama,lambda,iatom,iatom,icoeff+ncoeff_prev)=&
-&                     const_rot3rd(:,alpha,beta,gama,lambda,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2+terme3+terme4
-                    end do
-                  end do
-                end do
-              end do    
-            end do  
-!FB            do nu=1,3
-!FB              do alpha=1,3
-!FB                do beta=1,3
-!FB                  do gama=1,3
-!FB                    do icoeff=1,ncoeff
-!FB                      terme1=sum(SS_ref(alpha,:,beta,isym,trans)*proj2nd(:,icoeff,ishell))*Levi_Civita(gama,alpha,nu)
-!FB                      terme2=sum(SS_ref(alpha,:,gama,isym,trans)*proj2nd(:,icoeff,ishell))*Levi_Civita(gama,beta,nu)
-!FB!FB                      if (iatom.ne.jatom) then
-!FB                        const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)=&
-!FB&                       const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2                   
-!FB!FB                      else if (iatom.eq.jatom) then
-!FB!FB                        const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
-!FB!FB&                       const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2                   
-!FB!FB                      end if
-!FB                    end do
-!FB                  end do
-!FB                end do
-!FB              end do    
-!FB            end do  
-          end if
+!          if (present(proj3rd)) then
+!            do alpha=1,3
+!              do beta=1,3
+!                do gama=1,3
+!                  do lambda=1,3
+!                    do icoeff=1,ncoeff
+!                      terme1=zero ; terme2=zero ; terme3=zero ; terme4=zero ;
+!                      if (alpha.eq.lambda) terme1=sum(SS_ref(gama  ,:,beta  ,isym,trans)*proj2nd(:,icoeff,ishell))
+!                      if (beta.eq.lambda)  terme2=sum(SS_ref(alpha ,:,gama  ,isym,trans)*proj2nd(:,icoeff,ishell))
+!                      if (alpha.eq.gama)   terme3=sum(SS_ref(lambda,:,beta  ,isym,trans)*proj2nd(:,icoeff,ishell))
+!                      if (beta.eq.gama)    terme4=sum(SS_ref(alpha ,:,lambda,isym,trans)*proj2nd(:,icoeff,ishell))
+!                      if (distance(iatom,jatom,1).lt.InVar%Rcut3) then
+!                        const_rot3rd(:,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                       const_rot3rd(:,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2-terme3-terme4
+!                      end if
+!                      const_rot3rd(:,alpha,beta,gama,lambda,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                     const_rot3rd(:,alpha,beta,gama,lambda,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2+terme3+terme4
+!                    end do
+!                  end do
+!                end do
+!              end do    
+!            end do  
+!!FB            do nu=1,3
+!!FB              do alpha=1,3
+!!FB                do beta=1,3
+!!FB                  do gama=1,3
+!!FB                    do icoeff=1,ncoeff
+!!FB                      terme1=sum(SS_ref(alpha,:,beta,isym,trans)*proj2nd(:,icoeff,ishell))*Levi_Civita(gama,alpha,nu)
+!!FB                      terme2=sum(SS_ref(alpha,:,gama,isym,trans)*proj2nd(:,icoeff,ishell))*Levi_Civita(gama,beta,nu)
+!!FB!FB                      if (iatom.ne.jatom) then
+!!FB                        const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)=&
+!!FB&                       const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2                   
+!!FB!FB                      else if (iatom.eq.jatom) then
+!!FB!FB                        const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
+!!FB!FB&                       const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2                   
+!!FB!FB                      end if
+!!FB                    end do
+!!FB                  end do
+!!FB                end do
+!!FB              end do    
+!!FB            end do  
+!          end if
         end do !iatshell
       end do !iatom
     end do !ishell
   end if !Order=2
 
 ! Second + third order
-  if (present(proj3rd)) then
-    write(16,*) ' Compute the 3rd order'
-    do ishell=1,nshell3at
-      do iatom=1,natom_unitcell
-        if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
-        do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
-          jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
-          katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
-          if ((iatom.eq.jatom).and.(jatom.eq.katom)) cycle
-          isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
-          trans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          ncoeff     =Shell3at%ncoeff(ishell)
-          ncoeff_prev=Shell3at%ncoeff_prev(ishell)+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
-!         1/ Acoustic sum rules (3rd order). Number of constraints = 6*natom_unitcell*natom*2*3**3
-          if (trans==1) then ; trans1=2 ; trans2=6 ; trans3=4 ; trans4=5 ; trans5=3 ; end if
-          if (trans==2) then ; trans1=1 ; trans2=4 ; trans3=6 ; trans4=3 ; trans5=5 ; end if
-          if (trans==3) then ; trans1=4 ; trans2=5 ; trans3=2 ; trans4=6 ; trans5=1 ; end if
-          if (trans==4) then ; trans1=3 ; trans2=2 ; trans3=5 ; trans4=1 ; trans5=6 ; end if
-          if (trans==5) then ; trans1=6 ; trans2=3 ; trans3=1 ; trans4=4 ; trans5=2 ; end if
-          if (trans==6) then ; trans1=5 ; trans2=1 ; trans3=3 ; trans4=2 ; trans5=4 ; end if
-          do alpha=1,3
-            do beta=1,3
-              do gama=1,3
-!FB                write(6,'(a,1x,8(i3,1x))') '    --->',alpha,beta,gama,iatom,jatom,katom,ishell,trans
-                do icoeff=1,ncoeff
-                  terme =sum(SSS_ref(alpha,:,beta,gama,isym,trans )*proj3rd(:,icoeff,ishell))
-                  terme1=sum(SSS_ref(alpha,:,beta,gama,isym,trans1)*proj3rd(:,icoeff,ishell))
-                  terme2=sum(SSS_ref(alpha,:,beta,gama,isym,trans2)*proj3rd(:,icoeff,ishell))
-!                 First acoustic sum rules (i.ne.j)
-                  if (iatom.ne.jatom) then
-                    const_asr3rd(1,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(1,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(2,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(2,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme1
-                    const_asr3rd(3,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(3,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme2
-                  end if
-!FB                  if (iatom.ne.katom) then
-!FB                    const_asr3rd(9,alpha,beta,gama,iatom,katom,icoeff+ncoeff_prev)=&
-!FB&                   const_asr3rd(9,alpha,beta,gama,iatom,katom,icoeff+ncoeff_prev)+terme
-!FB                  end if
-                  if ((iatom.eq.jatom).and.(iatom.ne.katom)) then
-                    terme3=sum(SSS_ref(alpha,:,beta,gama,isym,trans3)*proj3rd(:,icoeff,ishell))
-                    terme4=sum(SSS_ref(alpha,:,beta,gama,isym,trans4)*proj3rd(:,icoeff,ishell))
-                    terme5=sum(SSS_ref(alpha,:,beta,gama,isym,trans5)*proj3rd(:,icoeff,ishell))
-
-                    const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme1
-                    const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme2
-                    const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme3
-                    const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme4
-                    const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
-                    const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
-&                   const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme5
-                  end if
-                end do
-              end do
-            end do
-          end do
-!         2/ Rotational invariances (3rd order). Number of constraints = natom_unitcell*natom*2*3**3
-          if (katom==iatom) cycle
-            do alpha=1,3
-              do beta=1,3
-                do gama=1,3
-                  do lambda=1,3
-                    do icoeff=1,ncoeff
-                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
-                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
-                      const_rot3rd(1,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
-&                     const_rot3rd(1,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
-                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans1)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
-                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans1)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
-                      const_rot3rd(2,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
-&                     const_rot3rd(2,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
-                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans2)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
-                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans2)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
-                      const_rot3rd(3,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
-&                     const_rot3rd(3,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
-                    end do
-                  end do
-                end do
-              end do    
-            end do  
-!FB          do nu=1,3
-!FB            do alpha=1,3
-!FB              do beta=1,3
-!FB                do gama=1,3
-!FB                  do icoeff=1,ncoeff
-!FB                    terme=sum(SSS_ref(alpha,:,beta,gama,isym,trans)*proj3rd(:,icoeff,ishell))*dlevi(iatom,katom,gama,nu)
-!FB                    if (iatom.ne.jatom) then
-!FB                      const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)=&
-!FB&                     const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme
-!FB!FB                    else if (iatom.eq.jatom) then
-!FB!FB                      const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
-!FB!FB&                     const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme
-!FB                    end if 
-!FB                  end do
-!FB                end do
-!FB              end do
-!FB            end do    
-!FB          end do  
-        end do !iatshell
-      end do !iatom   
-    end do !ishell   
-  end if
+!  if (present(proj3rd)) then
+!    write(16,*) ' Compute the 3rd order'
+!    do ishell=1,nshell3at
+!      do iatom=1,natom_unitcell
+!        if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
+!        do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!          jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
+!          katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
+!          if ((iatom.eq.jatom).and.(jatom.eq.katom)) cycle
+!          isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
+!          trans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
+!          ncoeff     =Shell3at%ncoeff(ishell)
+!          ncoeff_prev=Shell3at%ncoeff_prev(ishell)+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
+!!         1/ Acoustic sum rules (3rd order). Number of constraints = 6*natom_unitcell*natom*2*3**3
+!          if (trans==1) then ; trans1=2 ; trans2=6 ; trans3=4 ; trans4=5 ; trans5=3 ; end if
+!          if (trans==2) then ; trans1=1 ; trans2=4 ; trans3=6 ; trans4=3 ; trans5=5 ; end if
+!          if (trans==3) then ; trans1=4 ; trans2=5 ; trans3=2 ; trans4=6 ; trans5=1 ; end if
+!          if (trans==4) then ; trans1=3 ; trans2=2 ; trans3=5 ; trans4=1 ; trans5=6 ; end if
+!          if (trans==5) then ; trans1=6 ; trans2=3 ; trans3=1 ; trans4=4 ; trans5=2 ; end if
+!          if (trans==6) then ; trans1=5 ; trans2=1 ; trans3=3 ; trans4=2 ; trans5=4 ; end if
+!          do alpha=1,3
+!            do beta=1,3
+!              do gama=1,3
+!!FB                write(6,'(a,1x,8(i3,1x))') '    --->',alpha,beta,gama,iatom,jatom,katom,ishell,trans
+!                do icoeff=1,ncoeff
+!                  terme =sum(SSS_ref(alpha,:,beta,gama,isym,trans )*proj3rd(:,icoeff,ishell))
+!                  terme1=sum(SSS_ref(alpha,:,beta,gama,isym,trans1)*proj3rd(:,icoeff,ishell))
+!                  terme2=sum(SSS_ref(alpha,:,beta,gama,isym,trans2)*proj3rd(:,icoeff,ishell))
+!!                 First acoustic sum rules (i.ne.j)
+!                  if (iatom.ne.jatom) then
+!                    const_asr3rd(1,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(1,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(2,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(2,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme1
+!                    const_asr3rd(3,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(3,alpha,beta,gama,iatom,jatom,icoeff+ncoeff_prev)+terme2
+!                  end if
+!!FB                  if (iatom.ne.katom) then
+!!FB                    const_asr3rd(9,alpha,beta,gama,iatom,katom,icoeff+ncoeff_prev)=&
+!!FB&                   const_asr3rd(9,alpha,beta,gama,iatom,katom,icoeff+ncoeff_prev)+terme
+!!FB                  end if
+!                  if ((iatom.eq.jatom).and.(iatom.ne.katom)) then
+!                    terme3=sum(SSS_ref(alpha,:,beta,gama,isym,trans3)*proj3rd(:,icoeff,ishell))
+!                    terme4=sum(SSS_ref(alpha,:,beta,gama,isym,trans4)*proj3rd(:,icoeff,ishell))
+!                    terme5=sum(SSS_ref(alpha,:,beta,gama,isym,trans5)*proj3rd(:,icoeff,ishell))
+!
+!                    const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(4,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme1
+!                    const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(5,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme2
+!                    const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(6,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme3
+!                    const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(7,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme4
+!                    const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)+terme
+!                    const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)=&
+!&                   const_asr3rd(8,alpha,beta,gama,iatom,iatom,icoeff+ncoeff_prev)-terme5
+!                  end if
+!                end do
+!              end do
+!            end do
+!          end do
+!!         2/ Rotational invariances (3rd order). Number of constraints = natom_unitcell*natom*2*3**3
+!          if (katom==iatom) cycle
+!            do alpha=1,3
+!              do beta=1,3
+!                do gama=1,3
+!                  do lambda=1,3
+!                    do icoeff=1,ncoeff
+!                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
+!                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
+!                      const_rot3rd(1,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                     const_rot3rd(1,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
+!                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans1)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
+!                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans1)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
+!                      const_rot3rd(2,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                     const_rot3rd(2,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
+!                      terme1=sum(SSS_ref(alpha,:,beta,gama  ,isym,trans2)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
+!                      terme2=sum(SSS_ref(alpha,:,beta,lambda,isym,trans2)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
+!                      const_rot3rd(3,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)=&
+!&                     const_rot3rd(3,alpha,beta,gama,lambda,iatom,jatom,icoeff+ncoeff_prev)+terme1-terme2
+!                    end do
+!                  end do
+!                end do
+!              end do    
+!            end do  
+!!FB          do nu=1,3
+!!FB            do alpha=1,3
+!!FB              do beta=1,3
+!!FB                do gama=1,3
+!!FB                  do icoeff=1,ncoeff
+!!FB                    terme=sum(SSS_ref(alpha,:,beta,gama,isym,trans)*proj3rd(:,icoeff,ishell))*dlevi(iatom,katom,gama,nu)
+!!FB                    if (iatom.ne.jatom) then
+!!FB                      const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)=&
+!!FB&                     const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme
+!!FB!FB                    else if (iatom.eq.jatom) then
+!!FB!FB                      const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
+!!FB!FB&                     const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme
+!!FB                    end if 
+!!FB                  end do
+!!FB                end do
+!!FB              end do
+!!FB            end do    
+!!FB          end do  
+!        end do !iatshell
+!      end do !iatom   
+!    end do !ishell   
+!  end if
 
   if (present(proj2nd)) ABI_FREE(SS_ref)
-  if (present(proj3rd)) ABI_FREE(SSS_ref)
+  !if (present(proj3rd)) ABI_FREE(SSS_ref)
   ABI_FREE(dlevi)
 
 ! Reduce the number of constraints by selecting the non-zero equations
@@ -577,84 +577,84 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     write(16,*) ' Number of constraints at the 2nd order (Huang)=',nconst_loc
   end if  
 
-  if (present(proj3rd)) then
-!   1/ For acoustic sum rules (3rd order)
-    write(16,*) ' ======== Constraints at the 3rd order (Acoustic sum rules) ='
-    iconst=0
-    ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_asr3rd)) ; vectin(:,:)=zero
-    ABI_MALLOC(vectout,(ntotcoeff,CoeffMoore%nconst_asr3rd)) ; vectout(:,:)=zero
-    do iatom=1,natom_unitcell
-      do jatom=1,natom
-        do alpha=1,3
-          do beta=1,3
-            do gama=1,3 
-              do ii=1,8
-                iconst=iconst+1
-                vectin(:,iconst)=const_asr3rd(ii,alpha,beta,gama,iatom,jatom,:)
-              end do 
-            end do
-          end do
-        end do
-      end do
-    end do
-    call tdep_calc_orthonorm(ntotcoeff,CoeffMoore%nconst_asr3rd,nconst_loc,vectin,vectout)
-    if (nconst_loc.ne.0) then
-      do iconst_loc=1,nconst_loc
-        iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
-        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
-&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
-&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-      end do  
-    end if
-    ABI_FREE(vectin)
-    ABI_FREE(vectout)
-    write(16,*) ' Number of constraints at the 3rd order (Acoustic sum rules)=',nconst_loc
-
-!   2/ For Rotational invariances (3rd order)
-    write(16,*) ' ======== Constraints at the 3rd order (Rotational Invariances) ='
-    iconst=0
-    ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_rot3rd)) ; vectin(:,:)=zero
-    ABI_MALLOC(vectout,(ntotcoeff,CoeffMoore%nconst_rot3rd)) ; vectout(:,:)=zero
-    do iatom=1,natom_unitcell
-      do jatom=1,natom
-        do alpha=1,3
-          do beta=1,3
-            do gama=1,3
-              do lambda=1,3
-                do ii=1,3
-                  iconst=iconst+1
-                  vectin(:,iconst)=const_rot3rd(ii,alpha,beta,gama,lambda,iatom,jatom,:)
-                end do  
-              end do
-            end do
-          end do
-        end do
-!FB        do alpha=1,3
-!FB          do beta=1,3
-!FB            do nu=1,3 
-!FB              iconst=iconst+1
-!FB              vectin(:,iconst)=const_rot3rd(alpha,beta,nu,iatom,jatom,:)
-!FB            end do
-!FB          end do
-!FB        end do
-      end do
-    end do
-    call tdep_calc_orthonorm(ntotcoeff,CoeffMoore%nconst_rot3rd,nconst_loc,vectin,vectout)
-    if (nconst_loc.ne.0) then
-      do iconst_loc=1,nconst_loc
-        iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
-        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
-&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
-&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-      end do  
-    end if
-    ABI_FREE(vectin)
-    ABI_FREE(vectout)
-    write(16,*) ' Number of constraints at the 3rd order (Rotational Invariances)=',nconst_loc
-
-  end if
+!  if (present(proj3rd)) then
+!!   1/ For acoustic sum rules (3rd order)
+!    write(16,*) ' ======== Constraints at the 3rd order (Acoustic sum rules) ='
+!    iconst=0
+!    ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_asr3rd)) ; vectin(:,:)=zero
+!    ABI_MALLOC(vectout,(ntotcoeff,CoeffMoore%nconst_asr3rd)) ; vectout(:,:)=zero
+!    do iatom=1,natom_unitcell
+!      do jatom=1,natom
+!        do alpha=1,3
+!          do beta=1,3
+!            do gama=1,3 
+!              do ii=1,8
+!                iconst=iconst+1
+!                vectin(:,iconst)=const_asr3rd(ii,alpha,beta,gama,iatom,jatom,:)
+!              end do 
+!            end do
+!          end do
+!        end do
+!      end do
+!    end do
+!    call tdep_calc_orthonorm(ntotcoeff,CoeffMoore%nconst_asr3rd,nconst_loc,vectin,vectout)
+!    if (nconst_loc.ne.0) then
+!      do iconst_loc=1,nconst_loc
+!        iconst_new=iconst_new+1
+!        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+!        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
+!&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
+!&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
+!      end do  
+!    end if
+!    ABI_FREE(vectin)
+!    ABI_FREE(vectout)
+!    write(16,*) ' Number of constraints at the 3rd order (Acoustic sum rules)=',nconst_loc
+!
+!!   2/ For Rotational invariances (3rd order)
+!    write(16,*) ' ======== Constraints at the 3rd order (Rotational Invariances) ='
+!    iconst=0
+!    ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_rot3rd)) ; vectin(:,:)=zero
+!    ABI_MALLOC(vectout,(ntotcoeff,CoeffMoore%nconst_rot3rd)) ; vectout(:,:)=zero
+!    do iatom=1,natom_unitcell
+!      do jatom=1,natom
+!        do alpha=1,3
+!          do beta=1,3
+!            do gama=1,3
+!              do lambda=1,3
+!                do ii=1,3
+!                  iconst=iconst+1
+!                  vectin(:,iconst)=const_rot3rd(ii,alpha,beta,gama,lambda,iatom,jatom,:)
+!                end do  
+!              end do
+!            end do
+!          end do
+!        end do
+!!FB        do alpha=1,3
+!!FB          do beta=1,3
+!!FB            do nu=1,3 
+!!FB              iconst=iconst+1
+!!FB              vectin(:,iconst)=const_rot3rd(alpha,beta,nu,iatom,jatom,:)
+!!FB            end do
+!!FB          end do
+!!FB        end do
+!      end do
+!    end do
+!    call tdep_calc_orthonorm(ntotcoeff,CoeffMoore%nconst_rot3rd,nconst_loc,vectin,vectout)
+!    if (nconst_loc.ne.0) then
+!      do iconst_loc=1,nconst_loc
+!        iconst_new=iconst_new+1
+!        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+!        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
+!&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
+!&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
+!      end do  
+!    end if
+!    ABI_FREE(vectin)
+!    ABI_FREE(vectout)
+!    write(16,*) ' Number of constraints at the 3rd order (Rotational Invariances)=',nconst_loc
+!
+!  end if
   write(16,*) '================================================================='
   write(16,*) ' Total number of constraints =',iconst_new
 
@@ -666,10 +666,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     ABI_FREE(const_dynmat)
     ABI_FREE(const_huang)
   end if  
-  if (present(proj3rd)) then
-    ABI_FREE(const_rot3rd)
-    ABI_FREE(const_asr3rd)
-  end if  
+!  if (present(proj3rd)) then
+!    ABI_FREE(const_rot3rd)
+!    ABI_FREE(const_asr3rd)
+!  end if  
   close(16)
 
 end subroutine tdep_calc_constraints
