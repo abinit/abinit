@@ -387,13 +387,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
+ integer :: n1,n2,n3,n4,n5,n6,nspden,nu !do_ftv1q,
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
- real(dp) :: wall_dvscf, cpu_dvscf, cpu_setk, wall_setk, gflops_setk
+ real(dp) :: cpu_setk, wall_setk, gflops_setk
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight
  real(dp) :: elow,ehigh,wmax
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
@@ -406,10 +406,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
- integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
- integer :: indkk_kq(1,6)
+ integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
- integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:)
+ integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
@@ -435,7 +434,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- cpu_dvscf = 0; wall_dvscf = 0
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
@@ -648,28 +646,35 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    !   * we use symrec instead of symrel (see also m_dvdb)
    !
    ABI_MALLOC(indq2dvdb, (6, sigma%nqibz_k))
-   do_ftv1q = 0
-   do iq_ibz=1,sigma%nqibz_k
-     call listkk(dksqmax, cryst%gmet, indkk_kq, dvdb%qpts, sigma%qibz_k(:,iq_ibz), dvdb%nqpt, 1, cryst%nsym, &
-        1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
-     indq2dvdb(:, iq_ibz) = indkk_kq(1, :)
-     if (dksqmax > tol12) then
-       ! Cannot recostruct this qpt by symmetry. Set entry to -1 and activate Fourier interpolation.
-       indq2dvdb(:, iq_ibz) = -1
-       do_ftv1q = do_ftv1q + 1
-     end if
-   end do
 
-   if (do_ftv1q /= 0) then
-     call cwtime(cpu,wall,gflops,"start")
-     write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",sigma%nqibz_k,"]"
-     call wrtout(std_out, msg)
-     call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(sigma%ngqpt)))
-     call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfftf, ngfftf, comm)
-     call cwtime(cpu,wall,gflops,"stop")
-     wall_dvscf = wall_dvscf + wall
-     cpu_dvscf = cpu_dvscf + cpu
+   !do_ftv1q = 0
+   !do iq_ibz=1,sigma%nqibz_k
+   !  call listkk(dksqmax, cryst%gmet, indkk_kq, dvdb%qpts, sigma%qibz_k(:,iq_ibz), dvdb%nqpt, 1, cryst%nsym, &
+   !     1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+   !  indq2dvdb(:, iq_ibz) = indkk_kq(1, :)
+   !  if (dksqmax > tol12) then
+   !    ! Cannot recostruct this qpt by symmetry. Set entry to -1 and activate Fourier interpolation.
+   !    indq2dvdb(:, iq_ibz) = -1
+   !    do_ftv1q = do_ftv1q + 1
+   !  end if
+   !end do
+   !if (do_ftv1q /= 0) then
+   !  MSG_ERROR("FT interpolation not supported anymore")
+   !end if
+
+   ABI_MALLOC(iqk2dvdb, (sigma%nqibz_k, 6))
+   call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, sigma%qibz_k, dvdb%nqpt, sigma%nqibz_k, cryst%nsym, &
+        1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6,2a)' )&
+       "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
+       'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+     MSG_ERROR(msg)
    end if
+   do iq_ibz=1,sigma%nqibz_k
+     indq2dvdb(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
+   end do
+   ABI_FREE(iqk2dvdb)
 
    ! Allocate PW-arrays. Note mpw in kg_kq
    ABI_MALLOC(kg_k, (3, npw_k))
@@ -795,12 +800,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
          call dvdb_readsym_qbz(dvdb, cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
-         ! Fourier interpolation of the potential
-         if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
-         ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-         cplex = 2
-         ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-         call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, xmpi_comm_self)
+         MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
        end if
 
        ! TODO: Make sure that symmetries in Q-space are preserved.
