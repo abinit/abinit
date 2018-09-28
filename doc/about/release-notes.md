@@ -10,9 +10,9 @@ The merge request #408 is the first MR not reported in these release notes.
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, 
-J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, F. Jollet, 
+J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, F. Jollet, 
 A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
-S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, He Xu, J. Zwanziger.
+S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete,  J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -44,8 +44,8 @@ B.2 There has been a large effort to clean the documentation, that was needed an
     In particular, many new hyperlinks have been created in dozens of markdown files, 
     references have been centralized in the [[theory:bibliography]].  
     By B. Amadon, G. Antonius, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, G. Geneste,
-    M. Giantomassi, X. Gonze, F. Jollet, A. Lherbier, H. Miranda, F. Naccarato, G. Petretto, N. Pike, 
-    S. Ponce, Y. Pouillon, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger, He Xu.
+    M. Giantomassi, X. Gonze, Xu He, F. Jollet, A. Lherbier, H. Miranda, F. Naccarato, G. Petretto, N. Pike, 
+    S. Ponce, Y. Pouillon, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
 
 B.3 The multibinit application (for second-principles calculations) has considerably progressed.
     Documentation has thus been set up: "topics" have been written, as well as a tutorial,
@@ -62,7 +62,7 @@ B.4 Several new options are available for the [[ionmov]] input variable governin
 
 Also, the documentation for the hybrid Monte Carlo algorithm has been improved, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]].
 
-By He Xu, S. Prokhorenko and X. Gonze.
+By Xu He, S. Prokhorenko and X. Gonze.
 
 B.5 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6,
     and mixing factor given by [[mixesimgf]].

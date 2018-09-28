@@ -58,6 +58,7 @@ Olivier Gingras
 Yannick Gillet
 Xavier Gonze
 F. Goudreault (U. Montreal)
+Xu He
 Francois Jollet
 Jonathan Laflamme Janssen
 Javier Junquera
@@ -88,7 +89,6 @@ Matthieu Verstraete
 David Waroquiers
 Julia Wiktor
 Bin Xu
-He Xu
 Joe Zwanziger
 
 direct contributors to ABINIT (versions 7.0 to 7.11-8.0) are :
