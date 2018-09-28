@@ -101,6 +101,7 @@ module m_fftcore
  public :: addrho
  public :: multpot
 
+ ! dp for double precision version (default), sp for mixed precision FFTs
  integer, public, protected :: fftcore_precision = dp
  public :: fftcore_set_precision
 

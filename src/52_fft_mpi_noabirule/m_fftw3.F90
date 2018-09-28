@@ -32,6 +32,9 @@
 #define FFTLIB "FFTW3"
 #define FFT_PREF(name) CONCAT(fftw3_,name)
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
+#define FFTW3_DOUBLE 1
+#define FFTW3_SINGLE 2
+#define FFTW3_MIXP 3
 
 MODULE m_fftw3
 

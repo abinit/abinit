@@ -265,7 +265,7 @@ if (istwf_k==1) then
 #elif FFT_PRECISION == FFTW3_MIXP
      do ix=0,ldxy-1
        fofr(1, xyplane + ix) = real(slice_a(ix+1), kind=dp)
-       fofr(2, xyplane + ix) = aimag(slice_a(ix+1), kind=dp)
+       fofr(2, xyplane + ix) = aimag(slice_a(ix+1))
      end do
 #else
      MSG_ERROR("Wrong FFT precision")

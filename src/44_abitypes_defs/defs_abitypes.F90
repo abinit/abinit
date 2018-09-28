@@ -947,6 +947,8 @@ type dataset_type
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
 
+ !integer :: numprec = dp
+
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
 

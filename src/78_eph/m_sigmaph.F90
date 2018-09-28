@@ -207,7 +207,7 @@ module m_sigmaph
   ! qibz(3,nqibz_k)
   ! Reduced coordinates of the q-points in the IBZ(k). Depends on ikcalc.
 
-  integer,allocatable:: indkk(:, :)
+  !integer,allocatable:: indkk(:, :)
    ! Mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
 
   real(dp),allocatable :: wtq_k(:)
@@ -393,7 +393,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
- real(dp) :: wall_dvscf, cpu_dvscf
+ real(dp) :: wall_dvscf, cpu_dvscf, cpu_setk, wall_setk, gflops_setk
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight
  real(dp) :: elow,ehigh,wmax
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
@@ -624,6 +624,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    kk = sigma%kcalc(:, ikcalc)
 
    ! Find IBZ(k) for q-point integration.
+   call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
    call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol)
    call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
    msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nqibz_k), "]")
@@ -679,6 +680,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_MALLOC(ylm_k,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylm_kq,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+
+   call cwtime(cpu_setk, wall_setk, gflops_setk, "stop")
+   call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(cpu_setk)))
 
    do spin=1,nsppol
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
@@ -2244,9 +2248,9 @@ subroutine sigmaph_free(self)
  if (allocated(self%qibz_k)) then
    ABI_FREE(self%qibz_k)
  end if
- if (allocated(self%indkk)) then
-   ABI_FREE(self%indkk)
- end if
+ !if (allocated(self%indkk)) then
+ !  ABI_FREE(self%indkk)
+ !end if
  if (allocated(self%wtq_k)) then
    ABI_FREE(self%wtq_k)
  end if
@@ -2376,13 +2380,13 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
  ! DEBUGGING
  ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
- if (allocated(self%indkk)) then
-   ABI_FREE(self%indkk)
- end if
- ABI_MALLOC(self%indkk, (self%nqibz_k, 6))
- call listkk(dksqmax, cryst%gmet, self%indkk, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
- if (dksqmax > tol12) MSG_ERROR("Wrong mapping")
+ !if (allocated(self%indkk)) then
+ !  ABI_FREE(self%indkk)
+ !end if
+ !ABI_MALLOC(self%indkk, (self%nqibz_k, 6))
+ !call listkk(dksqmax, cryst%gmet, self%indkk, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ !if (dksqmax > tol12) MSG_ERROR("Wrong mapping")
 
 end subroutine sigmaph_setup_kcalc
 !!***

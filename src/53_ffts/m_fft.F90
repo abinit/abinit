@@ -1604,7 +1604,7 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
  ldx = ngfft(4); ldy = ngfft(5); ldz = ngfft(6)
  mgfft = MAXVAL(ngfft(1:3))
 
-  nxyz =  nx* ny* nz
+ nxyz =  nx* ny* nz
  ldxyz = ldx*ldy*ldz
 
  ABI_CALLOC(cg_ref, (2, ldxyz*ndat))
@@ -1639,10 +1639,10 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 
    istwf_k = set_istwfk(kpoint)
 
-   ! * Calculate the number of G-vectors for this k-point.
+   ! Calculate the number of G-vectors for this k-point.
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
    !
-   ! * Allocate and calculate the set of G-vectors.
+   ! Allocate and calculate the set of G-vectors.
    ABI_MALLOC(kg_k,(3,npw_k))
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
 

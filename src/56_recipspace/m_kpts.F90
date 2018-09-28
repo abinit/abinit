@@ -607,10 +607,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: usesym=1
  integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime,limit
- integer :: nsym_used,timrev_used,usesym
+ integer :: nsym_used,timrev_used
  real(dp) :: dksq,dksqmn,lk2,llarger,ldiff,lsmaller,ltrial,min_l
  character(len=500) :: message
 !arrays
@@ -627,23 +628,19 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  call timab(1021,1,tsec)
 
  if(sppoldbl<1 .or. sppoldbl>2)then
-   write(message, '(a,i4,3a)' )&
+   write(message, '(a,i0,3a)' )&
 &   'The value of sppoldbl is',sppoldbl,',',ch10,&
 &   'but it should be either 1 or 2.'
    MSG_BUG(message)
  end if
 
-!When usesym=0, the old way of converting the wavefunctions (without
-!using the symmetries), is recovered.
- usesym=1
-
+!When usesym=0, the old way of converting the wavefunctions (without using the symmetries), is recovered.
  nsym_used=nsym
  timrev_used=timrev
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
-!Precompute the length of the kpt1 vectors, also taking into account
-!possible umpklapp vectors
+!Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
  limit=1 ; l3 = (2*limit+1)**3
  ABI_ALLOCATE(lkpg1,(l3*nkpt1))
  ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
@@ -700,11 +697,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      lk2=sqrt(gmet(1,1)*k2(1)**2+gmet(2,2)*k2(2)**2+&
 &     gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
 &     gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
-
-!    DEBUG
 !    write(std_out, '(a,i4,7es16.6)' )' listkk : ikpt2,kptns2(:,ikpt2),k2(:),lk2=',ikpt2,kptns2(:,ikpt2),k2(:),lk2
-!    if(ikpt2/=17)cycle
-!    ENDDEBUG
 
 !    Find the kpt1 vector whose length is the most similar to the length of lk2
 !    up to a tolerance. Use a bissection algorithm.
@@ -739,10 +732,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !      than the already achieved distance, the search is finished ...
        ldiff=abs(lkpg1_sorted(itrial)-lk2)
 
-
-!      DEBUG
 !      write(std_out,*)' listkk : ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn=',ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn
-!      ENDDEBUG
        if(ldiff**2>dksqmn+tol8)exit
 
 !      If this k-point has already been examined in a previous batch, skip it
@@ -751,10 +741,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
        ikpt1=(isort(itrial)-1)/l3+1
        min_l=minval(abs(lkpg1((ikpt1-1)*l3+1:(ikpt1-1)*l3+l3)-lk2))
 !      Then compare with the current ldiff
-
-!      DEBUG
 !      write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
-!      ENDDEBUG
 
        if(min_l > ldiff-tol12)then
 
@@ -818,7 +805,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
                end if
 
 !              Update in three cases : either if succeeded to have exactly the vector, or the distance is better,
-!              or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1, in order to respect previous ordering
+!              or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
+!               in order to respect previous ordering
                if(  ikpt2_done==1 .or. &
 &               dksq+tol12<dksqmn .or. &
 &               ( abs(dksq-dksqmn)<tol12 .and. &
@@ -851,13 +839,10 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
              end if
              if(ikpt2_done==1)exit
-
            end do ! isym
            if(ikpt2_done==1)exit
-
          end do ! itimrev
          if(ikpt2_done==1)exit
-
        end if
 
 !      Update the interval that has been explored
@@ -866,11 +851,9 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !      Select the next index to be tried (preferably the smaller indices, but this is a bit arbitrary).
 
-!      DEBUG
 !      write(std_out,*)' before choosing the next index :'
 !      write(std_out,*)' ismaller,itrial,ilarger=',ismaller,itrial,ilarger
 !      write(std_out,*)' lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)=',lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)
-!      ENDDEBUG
        if(ismaller>1 .and. ilarger<l3*nkpt1)then
          if(abs(lkpg1_sorted(ismaller-1)-lk2)<abs(lkpg1_sorted(ilarger+1)-lk2)+tol12)then
            itrial=ismaller-1
@@ -881,7 +864,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
        if(ismaller==1 .and. ilarger<l3*nkpt1)itrial=ilarger+1
        if(ismaller>1 .and. ilarger==l3*nkpt1)itrial=ismaller-1
 !      if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
-
      end do ! ikpt1
 
      indkk(ikpt2+(isppol-1)*nkpt2,1)=jkpt1
