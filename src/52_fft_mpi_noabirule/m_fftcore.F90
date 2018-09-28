@@ -41,6 +41,7 @@ module m_fftcore
  use m_sort
 
  use m_time,         only : timab
+ use m_fstrings,     only : itoa, sjoin
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
@@ -101,9 +102,9 @@ module m_fftcore
  public :: addrho
  public :: multpot
 
- ! dp for double precision version (default), sp for mixed precision FFTs
- integer, public, protected :: fftcore_precision = dp
- public :: fftcore_set_precision
+ ! 0 for double precision version (default), 1 for mixed precision FFTs
+ integer, public, protected :: ffcore_mixprec = 0
+ public :: fftcore_set_mixprec
 
 ! *************************************************************************
 
@@ -134,13 +135,13 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_fftcore/fftcore_set_precision
+!!****f* m_fftcore/fftcore_set_mixprec
 !! NAME
 !! fftalg_set_precision
 !!
 !! FUNCTION
-!!  Set the precision to be used in the FFT routines: dp for standard double precision,
-!!  sp for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!  Set the precision to be used in the FFT routines: 0 for standard double precision,
+!!  1 for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
 !!  Return old value.
 !!
 !! INPUTS
@@ -149,13 +150,13 @@ contains
 !!
 !! SOURCE
 
-integer function fftcore_set_precision(wp) result(old_wp)
+integer function fftcore_set_mixprec(wp) result(old_wp)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fftcore_set_precision'
+#define ABI_FUNC 'fftcore_set_mixprec'
 !End of the abilint section
 
  implicit none
@@ -166,10 +167,19 @@ integer function fftcore_set_precision(wp) result(old_wp)
 
 ! *************************************************************************
 
- old_wp = fftcore_precision
- fftcore_precision = wp
+ old_wp = ffcore_mixprec
+ ffcore_mixprec = abs(wp)
 
-end function fftcore_set_precision
+ select case (abs(ffcore_mixprec))
+ case (0)
+   call wrtout(std_out, "Using FFT in double-precision.")
+ case (1)
+   call wrtout(std_out, "Using FFT in mixed precision.")
+ case default
+   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(ffcore_mixprec)))
+ end select
+
+end function fftcore_set_mixprec
 !!***
 
 !----------------------------------------------------------------------

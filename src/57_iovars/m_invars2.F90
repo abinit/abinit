@@ -1359,6 +1359,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mem_test',tread,'INT')
  if(tread==1) dtset%mem_test=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mixprec',tread,'INT')
+ if (tread==1) dtset%mixprec = intarr(1)
+
  if (dtset%imgmov==0.or.dtset%imgmov==2.or.dtset%imgmov==5) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mep_mxstep',tread,'LEN')
    if(tread==1) then

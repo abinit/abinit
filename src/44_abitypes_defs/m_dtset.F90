@@ -671,6 +671,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%mdf_epsinf         = dtin%mdf_epsinf
  dtout%mep_solver         = dtin%mep_solver
  dtout%mem_test           = dtin%mem_test
+ dtout%mixprec            = dtin%mixprec
  dtout%mffmem             = dtin%mffmem
  dtout%mgfft              = dtin%mgfft
  dtout%mgfftdg            = dtin%mgfftdg
@@ -2401,7 +2402,7 @@ subroutine chkvars (string)
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip  dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
  list_vars=trim(list_vars)//' dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
@@ -2479,7 +2480,7 @@ subroutine chkvars (string)
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
- list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixesimgf'
+ list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'

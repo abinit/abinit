@@ -1451,7 +1451,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
      write(msg,'(2(a,i0),2(a,f8.2))') "Reding q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
    else if (db_iqpt == 20) then
-     call wrtout(std_out, "...", msg)
+     call wrtout(std_out, "...")
   end if
  end do
 

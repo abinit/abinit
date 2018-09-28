@@ -8901,6 +8901,30 @@ Elastic Band ([[imgmov]] = 5).
 ),
 
 Variable(
+    abivarname="mixprec",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="MIXed PRECision",
+    characteristics=['[[DEVELOP]]'],
+    text="""
+This variable activates FFT transforms in single precision.
+The code thus works in mixed-precision mode in the sense that all the high-level
+operations are done in double-precision while the FFT of wavefunctions densities and potentials
+are done with workspace arrays in single precision.
+
+This option **requires** the linkage with external FFT libraries (FFTW3 or MKL-DFTI, see also [[fftalg]])
+Tests showed a speedup of ~25% in calculations in which FFTs (in particular fourwf%pot) represent the dominant part.
+Typical examples are EPH calculation with [[optdriver]] = 7.
+
+At present (|today|), only selected kernels support mixed-precision, in particular MPI-FFTs
+in mixed precision **are not yet supported**.
+""",
+),
+
+Variable(
     abivarname="mgfft",
     varset="internal",
     vartype="integer",
@@ -8935,8 +8959,7 @@ Variable(
     mnemonics="MIXing coefficients for ALCHemical potentials",
     characteristics=['[[EVOLVING]]'],
     text="""
-Used for the generation of alchemical pseudoatoms, that is, when [[ntypalch]]
-is non-zero.
+Used for the generation of alchemical pseudoatoms, that is, when [[ntypalch]] is non-zero.
 
 This array gives, for each type of alchemical pseudatom (there are
 [[ntypalch]] such pseudoatoms), the mixing coefficients of the basic

@@ -671,18 +671,17 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        write(message,'(3a)')&
 &       'vdW-DF functionals are not fully operational yet.',ch10,&
-&       'Action : modify vdw_xc'
+&       'Action: modify vdw_xc'
        MSG_ERROR(message)
      end if
 #endif
    end if
 
-!  FFTW3 threads initialization
-   if (dtset%ngfft(7) /100 == FFT_FFTW3) call fftw3_init_threads()
-   if (dtset%userib == 789) then
-      call wrtout(std_out, "Setting FFT precision to SP")
-      ii = fftcore_set_precision(sp)
-   end if
+   ! FFTW3 threads initialization
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_init_threads()
+
+   ! Set precision for FFT libs.
+   ii = fftcore_set_mixprec(dtset%mixprec)
 
 !  linalg initialisation:
    call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
@@ -733,7 +732,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      write(message,'(3a)')&
 &     'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
-&     'Action : modify optdriver in the input file.'
+&     'Action: modify optdriver in the input file.'
      MSG_ERROR(message)
 
    case (RUNL_BSE)
@@ -826,9 +825,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_DEALLOCATE(vel_cell_img)
    ABI_DEALLOCATE(xred_img)
 
-   if (dtset%ngfft(7)/100==FFT_FFTW3) then
-     call fftw3_cleanup()
-   end if
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
 
    if (dtset%ixc<0) then
      call libxc_functionals_end()

@@ -687,7 +687,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
    call cwtime(cpu_setk, wall_setk, gflops_setk, "stop")
-   call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(cpu_setk)))
+   call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(wall_setk)))
 
    do spin=1,nsppol
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
@@ -1388,12 +1388,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_FREE(ylmgr_kq)
 
    call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
-   call wrtout(std_out, sjoin("Computation of Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
+   call wrtout(std_out, sjoin("Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
            ",wall-time:", sec2str(wall_ks)), do_flush=.True.)
  end do ! ikcalc
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, "Computation of Sigma_eph completed")
+ call wrtout(std_out, "Sigma_eph completed")
  call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
 
  ! Free memory

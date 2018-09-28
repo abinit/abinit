@@ -32,9 +32,9 @@
 #define FFTLIB "FFTW3"
 #define FFT_PREF(name) CONCAT(fftw3_,name)
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
-#define FFTW3_DOUBLE 1
-#define FFTW3_SINGLE 2
-#define FFTW3_MIXP 3
+#define FFT_DOUBLE 1
+#define FFT_SINGLE 2
+#define FFT_MIXPREC 3
 
 MODULE m_fftw3
 
@@ -322,12 +322,12 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 
 ! *************************************************************************
 
- my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
+ my_flags = ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
 
  select case (cplex)
  case (2)
    ! Complex to Complex.
-   if (fftcore_precision == sp) then
+   if (ffcore_mixprec == 1) then
      ! Mixed precision: copyin + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
@@ -526,11 +526,11 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
    !call wrtout(std_out, calling fftw3_fftrisc","COLL")
 
    if (ndat == 1) then
-     if (fftcore_precision == dp) then
-       call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+     if (ffcore_mixprec == 0) then
+       call fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      else
-       call fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+       call fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      end if
 
@@ -596,12 +596,11 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
-           if (fftcore_precision == dp) then
+           if (ffcore_mixprec == 0) then
              call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
                  istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
            else
-             !write(std_out, *)"Calling fftrisc_mixp"
-             call fftw3_fftrisc_mixp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
+             call fftw3_fftrisc_mixprec(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
                  istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
            end if
          end do
@@ -796,65 +795,7 @@ end subroutine fftw3_seqfourwf
 !! Carry out Fourier transforms between real and reciprocal (G) space,
 !! for wavefunctions, contained in a sphere in reciprocal space,
 !! in both directions. Also accomplish some post-processing.
-!!
-!! NOTES
-!! Specifically uses rather sophisticated algorithms, based on S Goedecker
-!! routines, specialized for superscalar RISC architecture.
-!! Zero padding : saves 7/12 execution time
-!! Bi-dimensional data locality in most of the routine : cache reuse
-!! For k-point (0 0 0) : takes advantage of symmetry of data.
-!! Note however that no blocking is used, in both 1D z-transform
-!! or subsequent 2D transform. This should be improved.
-!!
-!! INPUTS
-!!  cplex= if 1 , denpot is real, if 2 , denpot is complex
-!!     (cplex=2 only allowed for option=2 when istwf_k=1)
-!!     one can also use cplex=0 if option=0 or option=3
-!!  fofgin(2,npwin)=holds input wavefunction in G vector basis sphere.
-!!  gboundin(2*mgfft+8,2)=sphere boundary info for reciprocal to real space
-!!  gboundout(2*mgfft+8,2)=sphere boundary info for real to reciprocal space
-!!  istwf_k=option parameter that describes the storage of wfs
-!!  kg_kin(3,npwin)=reduced planewave coordinates, input
-!!  kg_kout(3,npwout)=reduced planewave coordinates, output
-!!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
-!!  npwout=number of elements in fofgout array (for option 2 and 3)
-!!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
-!!  option= if 0: do direct FFT
-!!          if 1: do direct FFT, then sum the density
-!!          if 2: do direct FFT, multiply by the potential, then do reverse FFT
-!!          if 3: do reverse FFT only
-!!  weight=weight to be used for the accumulation of the density in real space
-!!          (needed only when option=1)
-!!
-!! OUTPUT
-!!  (see side effects)
-!!
-!! OPTIONS
-!!  The different options are:
-!!  - reciprocal to real space and output the result (when option=0),
-!!  - reciprocal to real space and accumulate the density (when option=1) or
-!!  - reciprocal to real space, apply the local potential to the wavefunction
-!!    in real space and produce the result in reciprocal space (when option=2)
-!!  - real space to reciprocal space (when option=3).
-!!  option=0 IS NOT ALLOWED when istwf_k>2
-!!  option=3 IS NOT ALLOWED when istwf_k>=2
-!!
-!! SIDE EFFECTS
-!!  for option==0, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 fofr(2,ldx,ldy,ldz) contains the Fourier Transform of fofgin;
-!!                 no use of denpot, fofgout and npwout.
-!!  for option==1, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input density at input,
-!!                 and the updated density at output;
-!!                 no use of fofgout and npwout.
-!!  for option==2, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input local potential;
-!!                 fofgout(2,npwout) contains the output function;
-!!  for option==3, fofr(2,ldx,ldy,ldz) contains the real space wavefunction;
-!!                 fofgout(2,npwout) contains its Fourier transform;
-!!                 no use of fofgin and npwin.
+!! See fftw3_fftrisc_dp for API doc.
 !!
 !! PARENTS
 !!
@@ -897,7 +838,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCMPLX
 #undef  MYCONJG
 
-#define FFT_PRECISION FFTW3_SINGLE
+#define FFT_PRECISION FFT_SINGLE
 #define MYKIND SPC
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
@@ -1027,7 +968,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCMPLX
 #undef  MYCONJG
 
-#define FFT_PRECISION FFTW3_DOUBLE
+#define FFT_PRECISION FFT_DOUBLE
 #define MYKIND DPC
 #define MYCZERO (0._dp,0._dp)
 #define MYCMPLX  DCMPLX
@@ -1047,9 +988,9 @@ end subroutine fftw3_fftrisc_dp
 
 !----------------------------------------------------------------------
 
-!!****f* m_fftw3/fftw3_fftrisc_mixp
+!!****f* m_fftw3/fftw3_fftrisc_mixprec
 !! NAME
-!! fftw3_fftrisc_mixp
+!! fftw3_fftrisc_mixprec
 !!
 !! FUNCTION
 !!  Mixed precision version of fftrisc: input/output in dp, computation done in sp.
@@ -1061,14 +1002,14 @@ end subroutine fftw3_fftrisc_dp
 !!
 !! SOURCE
 
-subroutine fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftrisc_mixp'
+#define ABI_FUNC 'fftw3_fftrisc_mixprec'
 !End of the abilint section
 
  implicit none
@@ -1094,7 +1035,7 @@ subroutine fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundou
 #undef  MYCMPLX
 #undef  MYCONJG
 
-#define FFT_PRECISION FFTW3_MIXP
+#define FFT_PRECISION FFT_MIXPREC
 #define MYKIND SPC
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
@@ -1109,7 +1050,7 @@ subroutine fftw3_fftrisc_mixp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundou
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
 #endif
 
-end subroutine fftw3_fftrisc_mixp
+end subroutine fftw3_fftrisc_mixprec
 !!***
 
 !----------------------------------------------------------------------

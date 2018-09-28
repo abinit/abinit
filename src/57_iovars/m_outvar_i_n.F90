@@ -787,6 +787,9 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'mixalch','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
+ intarr(1,:)=dtsets(:)%mixprec
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mixprec','INT',0)
+
 !mixesimgf
  dprarr(1:marr,0)=zero              ! default value
  narr=mxvals%nimage                 ! default size for all datasets
