@@ -21,11 +21,11 @@ spin_qpoint = 0.0 0.0 0.0
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF HAVE_LIBXML
-#%% system_xml = tmulti5.xml
+#%% system_xml = tmulti5_1.xml
 #%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 
-#%%   tmulti5.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   tmulti5_1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
