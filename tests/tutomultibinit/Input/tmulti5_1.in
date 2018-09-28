@@ -20,7 +20,7 @@ spin_qpoint = 0.0 0.0 0.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF HAVE_LIBXML
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_LIBXML
 #%% system_xml = tmulti5_1.xml
 #%% coeff_xml = no
 #%% [files]
