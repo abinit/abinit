@@ -185,7 +185,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      cwavef1(2,ig)=cg1(2,ig+icgb1)
    end do
    if(usepaw==1 .and. ibg1/=0) then
-     call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,1,isppol,mband,&
+     call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,0,isppol,mband,&
 &     mkmem,natom,nbd1,nbd1,nspinor,nsppol,0,&
 &     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
    end if
@@ -205,7 +205,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      end do
 
      if(usepaw==1 .and. ibg2/=0) then
-       call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,1,isppol,mband,&
+       call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,0,isppol,mband,&
 &       mkmem,natom,nbd2,nbd2,nspinor,nsppol,0,&
 &       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
      end if
