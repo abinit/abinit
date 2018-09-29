@@ -301,7 +301,6 @@ contains
 !End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
-    !character(len=*), intent(in):: xml_fname
     character(kind=C_CHAR) :: xml_fname(*)
     integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
     real(dp) :: ref_energy
@@ -325,7 +324,6 @@ contains
          uni_amplitude_list(:)=>null(), uni_direction_list(:)=>null(), &
          bi_vallist(:)=>null()
 
-    !call xml_read_spin(trim(xml_fname)//C_NULL_CHAR, ref_energy, p_unitcell,                 &
     call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
          natoms, p_masses, nmatoms, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
