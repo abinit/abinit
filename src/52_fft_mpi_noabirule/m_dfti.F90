@@ -236,37 +236,34 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
  case (2)
    ! Complex to Complex.
    if (fftcore_mixprec == 1) then
-     NOT_IMPLEMENTED_ERROR()
      ! Mixed precision: copyin + in-place + copyout
-     !ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
-     !if (isign == +1) then
-     !  work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
-     !else if (isign == -1) then
-     !  work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
-     !else
-     !  MSG_BUG("Wrong isign")
-     !end if
+     ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
+     if (isign == +1) then
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+     else if (isign == -1) then
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+     else
+       MSG_BUG("Wrong isign")
+     end if
 
-     ! TODO
-     !call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
-     !call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
+     call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp)
 
-     !if (isign == +1) then
-     !  jj = 1
-     !  do ii=1,ldx*ldy*ldz*ndat
-     !    fofr(jj) = real(work_sp(ii), kind=dp)
-     !    fofr(jj+1) = aimag(work_sp(ii))
-     !    jj = jj + 2
-     !  end do
-     !else if (isign == -1) then
-     !  jj = 1
-     !  do ii=1,ldx*ldy*ldz*ndat
-     !    fofg(jj) = real(work_sp(ii), kind=dp)
-     !    fofg(jj+1) = aimag(work_sp(ii))
-     !    jj = jj + 2
-     !  end do
-     !end if
-     !ABI_FREE(work_sp)
+     if (isign == +1) then
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofr(jj) = real(work_sp(ii), kind=dp)
+         fofr(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     else if (isign == -1) then
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofg(jj) = real(work_sp(ii), kind=dp)
+         fofg(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     end if
+     ABI_FREE(work_sp)
 
    else
      ! double precision version.
@@ -428,9 +425,8 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
        call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      else
-       NOT_IMPLEMENTED_ERROR()
-       !call dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-       !  mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+       call dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      end if
    else
      ! All this boilerplate code is needed because the caller might pass zero-sized arrays
@@ -478,9 +474,8 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
              call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,&
                kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
            else
-             NOT_IMPLEMENTED_ERROR()
-             !call dfti_fftrisc_mixprec(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,&
-             !  kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             call dfti_fftrisc_mixprec(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,&
+               kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
            end if
          end do
        else
@@ -794,6 +789,82 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #endif
 
 end subroutine dfti_fftrisc_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dfti/dfti_fftrisc_mixprec
+!! NAME
+!! dfti_fftrisc_mixprec
+!!
+!! FUNCTION
+!! Carry out Fourier transforms between real and reciprocal (G) space,
+!! for wavefunctions, contained in a sphere in reciprocal space,
+!! in both directions. Also accomplish some post-processing.
+!! This is the Mixed Precision version (dp in input, FFT done with sp data, output is dp)
+!! See dfti_fftrisc_dp for API doc.
+!!
+!! PARENTS
+!!      m_dfti
+!!
+!! CHILDREN
+!!      c_f_pointer
+!!
+!! SOURCE
+
+subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfti_fftrisc_mixprec'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
+ real(dp),intent(in) :: weight_i,weight_r
+!arrays
+ integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
+ integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
+ real(dp),intent(in) :: fofgin(2,npwin)
+ real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
+ real(dp),intent(inout) :: fofr(2,ldx*ldy*ldz)
+ real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
+
+! *************************************************************************
+
+#ifdef HAVE_FFT_DFTI
+
+#undef  FFT_PRECISION
+#undef  MYKIND
+#undef  MYCZERO
+#undef  MYCMPLX
+#undef  MYCONJG
+
+#define FFT_PRECISION DFTI_SINGLE
+#define MYKIND SPC
+#define MYCZERO (0._sp,0._sp)
+#define MYCMPLX  CMPLX
+#define MYCONJG  CONJG
+
+#define HAVE_DFTI_MIXED_PRECISION 1
+
+#include "dfti_fftrisc.finc"
+
+#undef HAVE_DFTI_MIXED_PRECISION
+
+#else
+ MSG_ERROR("DFTI support not activated")
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
+ ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+#endif
+
+end subroutine dfti_fftrisc_mixprec
 !!***
 
 !----------------------------------------------------------------------

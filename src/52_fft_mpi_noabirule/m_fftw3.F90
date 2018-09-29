@@ -327,7 +327,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  select case (cplex)
  case (2)
    ! Complex to Complex.
-   if (ffcore_mixprec == 1) then
+   if (fftcore_mixprec == 1) then
      ! Mixed precision: copyin + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
@@ -526,7 +526,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
    !call wrtout(std_out, calling fftw3_fftrisc","COLL")
 
    if (ndat == 1) then
-     if (ffcore_mixprec == 0) then
+     if (fftcore_mixprec == 0) then
        call fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
      else
@@ -596,7 +596,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
-           if (ffcore_mixprec == 0) then
+           if (fftcore_mixprec == 0) then
              call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
                  istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
            else

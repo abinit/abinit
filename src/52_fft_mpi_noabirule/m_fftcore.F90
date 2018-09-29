@@ -103,7 +103,7 @@ module m_fftcore
  public :: multpot
 
  ! 0 for double precision version (default), 1 for mixed precision FFTs
- integer, public, protected :: ffcore_mixprec = 0
+ integer, public, protected :: fftcore_mixprec = 0
  public :: fftcore_set_mixprec
 
 ! *************************************************************************
@@ -167,16 +167,16 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 
 ! *************************************************************************
 
- old_wp = ffcore_mixprec
- ffcore_mixprec = abs(wp)
+ old_wp = fftcore_mixprec
+ fftcore_mixprec = abs(wp)
 
- select case (abs(ffcore_mixprec))
+ select case (abs(fftcore_mixprec))
  case (0)
    call wrtout(std_out, "Using FFT in double-precision.")
  case (1)
    call wrtout(std_out, "Using FFT in mixed precision.")
  case default
-   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(ffcore_mixprec)))
+   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select
 
 end function fftcore_set_mixprec
