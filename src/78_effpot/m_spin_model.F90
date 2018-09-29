@@ -80,7 +80,7 @@ module m_spin_model
   !! spin_mover = include information for how to run spin dynamics
   !! params = parameters from input file
   !! spin_ncfile = wrapper for spin hist netcdf file.
-  !! nmatom= number of magnetic atoms
+  !! nspins= number of magnetic atoms
   !! SOURCE
 
   type spin_model_t
@@ -90,8 +90,7 @@ module m_spin_model
      type(spin_mover_t):: spin_mover
      type(multibinit_dtset_type) :: params
      type(spin_ncfile_t) :: spin_ncfile
-     integer :: nmatoms
-
+     integer :: nspins
      character(len=fnlen) :: in_fname, out_fname, xml_fname
      !  CONTAINS
      !    procedure :: run => spin_model_t_run
@@ -202,13 +201,15 @@ contains
     call spin_model_t_make_supercell(self, sc_matrix)
 
     ! set parameters to hamiltonian and mover
-    self%nmatoms= self%spin_calculator%nmatoms
+    self%nspins= self%spin_calculator%nspins
 
     call spin_model_t_set_params(self)
 
 
-    !TODO hexu: mxhist, has_latt, natom should be input with their true values when lattice part also added
-    call spin_hist_t_init(hist=self%spin_hist, nmatom=self%nmatoms, mxhist=3, has_latt=.False.)
+    !TODO hexu: mxhist, has_latt, natoms should be input with their true values when lattice part also added
+    call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
+         & nspins_prim=self%spin_primitive%nspins,  mxhist=3, has_latt=.False.)
+
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=self%params%spin_temperature)
     !TODO
@@ -217,9 +218,9 @@ contains
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self, mode=0)
 
-    !call self%spin_mover%initialize(self%nmatoms, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
-    call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=self%params%spin_dt, &
-         &  total_time=self%params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
+    !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
+    call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=params%spin_dt, &
+         &  total_time=params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
 
     call spin_ncfile_t_init(self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
     call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
@@ -299,11 +300,11 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp):: mfield(3, self%nmatoms)
-    integer ::  i
+    real(dp):: mfield(3, self%nspins)
+    integer ::  i 
     ! params -> mover
     ! params -> calculator
-    do i=1, self%nmatoms
+    do i=1, self%nspins
       mfield(:, i)=self%params%spin_mag_field(:)
     end do
     call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
@@ -414,7 +415,7 @@ contains
     class(spin_model_t), intent(inout) :: self
     integer, intent(in) :: mode
     integer :: i
-    real(dp) :: S(3, self%nmatoms)
+    real(dp) :: S(3, self%nspins)
     character(len=500) :: msg
     if(mode==0) then
        ! set all spin to z direction.
@@ -429,7 +430,7 @@ contains
    call wrtout(std_out,msg,'COLL')
        call random_number(S)
        S=S-0.5
-       do i=1, self%nmatoms
+       do i=1, self%nspins
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
     else
@@ -475,7 +476,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp) :: S_tmp(3,self%nmatoms), etot
+    real(dp) :: S_tmp(3,self%nspins), etot
     call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
          spin_hist_t_get_S(self%spin_hist),S_tmp, etot)
     call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, etot=etot, inc=.False.)

@@ -49,7 +49,7 @@ module m_spin_model_primitive
   interface
      ! C function:
      ! void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-     ! int *natoms, double *masses[], int *nmatoms,
+     ! int *natoms, double *masses[], int *nspins,
      ! int *index_spin[], double *gyroratios[], double *damping_factors[],
      ! double *positions[], double *spinat[],
      ! // exchange
@@ -70,14 +70,14 @@ module m_spin_model_primitive
      ! double *bi_vallist[])
 
      subroutine xml_read_spin(xml_fname, ref_energy, unitcell,                 &
-          natoms, masses, nmatoms, index_spin, gyroratios, damping_factors, positions, spinat, &
+          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
           exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
           dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
           uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
           bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_read_spin")
        import
        character(c_char), intent(in) :: xml_fname(*)
-       integer (c_int), intent(out):: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
        real  (c_double), intent(out) :: ref_energy
        type(c_ptr)::  unitcell,  &
             masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
@@ -89,7 +89,7 @@ module m_spin_model_primitive
   end interface
 
   type spin_model_primitive_t
-     integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+     integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
      real (dp) :: ref_energy, unitcell(3,3)
      ! integer, allocatable :: masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
      !exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
@@ -141,7 +141,7 @@ contains
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
-       nmatoms, index_spin, spinat, gyroratios, damping_factors )
+       nspins, index_spin, spinat, gyroratios, damping_factors )
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -151,26 +151,26 @@ contains
 !End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
-    integer, intent(in):: natoms, nmatoms, index_spin(:)
+    integer, intent(in):: natoms, nspins, index_spin(:)
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
-         spinat(3,nmatoms), gyroratios(nmatoms), damping_factors(nmatoms)
+         spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
 
     !print *, "natoms",natoms
-    !print *, "nmatoms", nmatoms
+    !print *, "nspins", nspins
     !print *, "positions", positions
     !print *, "spinat", spinat
     !print *, "gyroratios", gyroratios
     !print *, "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
-    ABI_ALLOCATE(self%spinat, (3, nmatoms))
-    ABI_ALLOCATE(self%gyroratios, (nmatoms))
-    ABI_ALLOCATE(self%damping_factors, (nmatoms))
+    ABI_ALLOCATE(self%spinat, (3, natoms))
+    ABI_ALLOCATE(self%gyroratios, (nspins))
+    ABI_ALLOCATE(self%damping_factors, (nspins))
 
     self%natoms=natoms
     self%unitcell(:,:)=unitcell(:,:)
     self%positions(:,:)=positions(:,:)
-    self%nmatoms=nmatoms
+    self%nspins=nspins
     self%index_spin(:)=index_spin(:)
     self%spinat(:,:)=spinat(:,:)
     self%gyroratios(:)=gyroratios(:)
@@ -302,7 +302,7 @@ contains
 
     class(spin_model_primitive_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
-    integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+    integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
     real(dp) :: ref_energy
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -325,7 +325,7 @@ contains
          bi_vallist(:)=>null()
 
     call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
-         natoms, p_masses, nmatoms, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
          dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
@@ -334,10 +334,10 @@ contains
     call c_f_pointer(p_unitcell, unitcell, [9])
     call c_f_pointer(p_masses, masses, [natoms])
     call c_f_pointer(p_index_spin, index_spin, [natoms])
-    call c_f_pointer(p_gyroratios, gyroratios, [nmatoms])
-    call c_f_pointer(p_damping_factors, damping_factors, [nmatoms])
+    call c_f_pointer(p_gyroratios, gyroratios, [nspins])
+    call c_f_pointer(p_damping_factors, damping_factors, [nspins])
     call c_f_pointer(p_positions, positions, [natoms*3])
-    call c_f_pointer(p_spinat, spinat, [nmatoms*3])
+    call c_f_pointer(p_spinat, spinat, [natoms*3])
     call c_f_pointer(p_exc_ilist, exc_ilist, [exc_nnz])
     call c_f_pointer(p_exc_jlist, exc_jlist, [exc_nnz])
     call c_f_pointer(p_exc_Rlist, exc_Rlist, [exc_nnz*3])
@@ -356,16 +356,16 @@ contains
 
     print *, "Spin model: setting structure."
     !print *, "natoms", natoms
-    !print *, "nmatoms", nmatoms
+    !print *, "nspins", nspins
     !print *, "positions", positions
     !print *, "unitcell: ", unitcell
     !print *, "spinat", spinat
     !print *, "index_spin", index_spin
     call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
             & reshape(positions, [3, natoms]), &
-            & nmatoms, &
+            & nspins, &
             & index_spin, &
-            & reshape(spinat, [3, nmatoms]), &
+            & reshape(spinat, [3, natoms]), &
             & gyroratios,damping_factors)
 
     print *, "Spin model: setting exchange terms."
@@ -752,9 +752,9 @@ contains
 
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3), atom_index(self%nmatoms)
+    integer :: sc_matrix(3,3), atom_index(self%nspins)
 
-    integer ::  typat_primcell(self%natoms), sc_nmatoms,  i, counter, icell
+    integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
     integer, allocatable ::sc_index_spin(:), sc_znucl(:)
@@ -782,16 +782,16 @@ contains
     ! cell, positions
     !scell%rprimd
     !scell%xcart
-    !nmatoms
-    sc_nmatoms=scell%ncells*self%nmatoms
+    !nspins
+    sc_nspins=scell%ncells*self%nspins
     ABI_ALLOCATE(sc_index_spin, (self%natoms*scell%ncells))
-    ABI_ALLOCATE(sc_ispin_prim, (sc_nmatoms) )
-    ABI_ALLOCATE(sc_rvec, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_spinat, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_spinpos, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_gyroratios, (sc_nmatoms))
-    ABI_ALLOCATE(sc_damping_factors, (sc_nmatoms))
-    ABI_ALLOCATE(sc_znucl, (sc_nmatoms))
+    ABI_ALLOCATE(sc_ispin_prim, (sc_nspins) )
+    ABI_ALLOCATE(sc_rvec, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_spinat, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_spinpos, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
+    ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
+    ABI_ALLOCATE(sc_znucl, (sc_nspins))
     ! sc_index_spin
     counter=0
     do i = 1, scell%natom, 1
@@ -801,7 +801,10 @@ contains
           counter=counter+1
           sc_index_spin(i)=counter
           sc_spinpos(:, counter)=scell%xcart(:,counter)
-          sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
+          !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
+          ! in primitive cell, everyone has spinat
+          sc_spinat(:, counter)=self%spinat(:,iatom) 
+          print *, self%spinat(:, iatom)
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
@@ -812,7 +815,7 @@ contains
     end do
     !print *, sc_index_spin
 
-    do i=1, sc_nmatoms
+    do i=1, sc_nspins
        sc_znucl(i)=1
     enddo
 
@@ -824,7 +827,6 @@ contains
     sc_ham%gyro_ratio(:)=sc_gyroratios(:)
     sc_ham%gilbert_damping(:)=sc_damping_factors(:)
 
-    !print *, "The total number of terms in primitive cell: ", self%total_nnz
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
           ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
@@ -840,6 +842,9 @@ contains
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
+                if(isnan(tmp(icol, irow)))then
+                    print *, 'nan found'
+                endif
              end do
           end do
           !print *, "i0", self%total_ilist%data(i)
