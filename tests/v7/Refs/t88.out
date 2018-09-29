@@ -1175,9 +1175,9 @@ All the independent perturbations are available
 
  q-point =    1.250000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.223550E-04    8.429032E-08    2.044169E-01
-    2        1.223550E-04    8.429032E-08    2.044169E-01
-    3        5.186508E-04    2.094690E-06    2.827172E-01
+    1        1.223550E-04    8.429207E-08    2.044212E-01
+    2        1.223550E-04    8.429207E-08    2.044212E-01
+    3        5.186508E-04    2.095239E-06    2.827913E-01
 
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1187,9 +1187,9 @@ All the independent perturbations are available
 
  q-point =    3.750000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        3.795172E-04    4.122714E-08    1.039209E-02
-    2        3.795172E-04    4.122714E-08    1.039209E-02
-    3        1.310590E-03    2.212238E-07    4.676069E-03
+    1        3.795172E-04    4.122323E-08    1.039110E-02
+    2        3.795172E-04    4.122323E-08    1.039110E-02
+    3        1.310590E-03    2.210518E-07    4.672433E-03
 
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1199,9 +1199,9 @@ All the independent perturbations are available
 
  q-point =    1.250000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1       -1.946319E-04    3.496933E-08    3.351519E-02
-    2       -1.946319E-04    3.496933E-08    3.351519E-02
-    3        4.466532E-04    2.621553E-06    4.770898E-01
+    1       -1.946319E-04    3.489982E-08    3.344856E-02
+    2       -1.946319E-04    3.489982E-08    3.344856E-02
+    3        4.466532E-04    2.622928E-06    4.773401E-01
 
  q-point =    2.500000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1236,8 +1236,8 @@ All the independent perturbations are available
  q-point =   -1.250000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        3.057195E-04    5.388377E-07    2.093121E-01
-    2        5.358707E-04    7.991125E-07    1.010347E-01
-    3        9.118360E-04    1.043815E-05    4.557979E-01
+    2        5.358707E-04    8.016787E-07    1.013591E-01
+    3        9.118360E-04    1.042774E-05    4.553437E-01
 
  q-point =    2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1271,9 +1271,9 @@ All the independent perturbations are available
 
  q-point =    3.750000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        5.776842E-04    3.106516E-06    3.379676E-01
-    2        5.776842E-04    3.106516E-06    3.379676E-01
-    3        1.157955E-03    3.354873E-05    9.083964E-01
+    1        5.776842E-04    3.142560E-06    3.418889E-01
+    2        5.776842E-04    3.142560E-06    3.418889E-01
+    3        1.157955E-03    3.342186E-05    9.049612E-01
 
  q-point =    5.000000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1284,8 +1284,8 @@ All the independent perturbations are available
  q-point =   -3.750000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.677485E-04    4.623446E-06    5.207584E-01
-    2        1.160074E-03    1.858810E-06    5.014710E-02
-    3        1.195206E-03    4.785498E-06    1.216253E-01
+    2        1.160074E-03    1.869322E-06    5.043070E-02
+    3        1.195206E-03    4.777524E-06    1.214227E-01
 
  q-point =    5.000000E-01    5.000000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1295,9 +1295,9 @@ All the independent perturbations are available
 
  q-point =    3.750000E-01    2.500000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.304411E-04    8.640289E-07    1.693103E-01
-    2        6.400082E-04    3.136968E-06    2.780491E-01
-    3        1.104933E-03    3.467972E-06    1.031303E-01
+    1        4.304411E-04    8.727812E-07    1.710253E-01
+    2        6.400082E-04    3.141851E-06    2.784819E-01
+    3        1.104933E-03    3.471888E-06    1.032467E-01
 
  q-point =    5.000000E-01    2.500000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1313,9 +1313,9 @@ All the independent perturbations are available
 
  q-point =    5.000000E-01    3.750000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        7.042689E-04    8.331583E-07    6.098639E-02
-    2        8.052054E-04    2.041150E-06    1.142994E-01
-    3        1.242637E-03    3.296597E-06    7.751040E-02
+    1        7.042689E-04    8.326238E-07    6.094727E-02
+    2        8.052054E-04    2.032825E-06    1.138332E-01
+    3        1.242637E-03    3.296050E-06    7.749754E-02
 
  q-point =   -3.750000E-01    3.750000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1331,9 +1331,9 @@ All the independent perturbations are available
 
  q-point =   -3.750000E-01    5.000000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        7.859832E-04    8.714918E-07    5.121761E-02
-    2        8.189416E-04    4.285294E-07    2.319836E-02
-    3        1.200177E-03    1.725933E-05    4.350268E-01
+    1        7.859832E-04    8.726282E-07    5.128439E-02
+    2        8.189416E-04    4.277564E-07    2.315651E-02
+    3        1.200177E-03    1.725816E-05    4.349971E-01
 
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1341,7 +1341,7 @@ All the independent perturbations are available
     2        1.101344E-03    1.499455E-06    4.488175E-02
     3        1.101344E-03    1.499455E-06    4.488175E-02
 
- lambda=   0.5415
+ lambda=   0.5416
 
 == END DATASET(S) ==============================================================
 ================================================================================
