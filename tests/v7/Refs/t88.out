@@ -1,6 +1,6 @@
 
-.Version 8.9.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.0 of ABINIT 
+.(MPI version, prepared for a x86_64_darwin16.7.0_gnu4.8 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  7 Sep 2018.
-- ( at 23h42 )
+.Starting date : Sat 29 Sep 2018.
+- ( at 02h59 )
   
 - input  file    -> t88.in
 - output file    -> t88.out
@@ -73,6 +73,23 @@ P This job should need less than                       2.212 Mbytes of memory.
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
+
+ DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      12  mpssoang =       3    mqgrid =    3001
+     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       7   xclevel =       2
+-    mband =           5        mffmem =           1         mkmem =          29
+       mpw =          78          nfft =        1728          nkpt =          29
+================================================================================
+P This job should need less than                       2.212 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -91,19 +108,27 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
       eph_intmeth1          2
       eph_intmeth2          1
       eph_intmeth3          2
+      eph_intmeth4          2
        eph_fsmear1     9.99999978E-03 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
        eph_fsmear3     9.99999978E-03 Hartree
+       eph_fsmear4     9.99999978E-03 Hartree
        eph_fsewin      2.93994603E-02 Hartree
        eph_mustar      1.20000000E-01
+         eph_task1          1
+         eph_task2          1
+         eph_task3          5
+         eph_task4          1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       8    8    8
+   eph_ngqpt_fine4       8    8    8
     eph_transport           1
          ph_wstep      3.67493254E-06 Hartree
        ph_intmeth1       2
        ph_intmeth2       1
        ph_intmeth3       2
+       ph_intmeth4       2
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        4    4    4
         ph_nqpath           3
@@ -111,12 +136,16 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -          fftalg         312
            getddb          20
            getddk          20
+          getdvdb1          0
+          getdvdb2          0
+          getdvdb3          0
+          getdvdb4         -1
            getwfk          20
            istwfk        2    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          7    0    0    0    0    0    0    0    0
               ixc          11
-           jdtset        1    2    3
+           jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.25000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -151,7 +180,7 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 P           mkmem          29
             natom           1
             nband           5
-           ndtset           3
+           ndtset           4
             ngfft          12      12      12
              nkpt          29
              nsym          48
@@ -190,18 +219,23 @@ P           mkmem          29
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
+       prtbltztrp4          0
         prtebands1          1
         prtebands2          2
         prtebands3          1
+        prtebands4          1
          prtfsurf1          1
          prtfsurf2          0
          prtfsurf3          0
+         prtfsurf4          0
        prtphbands1          1
        prtphbands2          2
        prtphbands3          1
+       prtphbands4          1
         prtphsurf1          1
         prtphsurf2          0
         prtphsurf3          0
+        prtphsurf4          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -247,6 +281,8 @@ P           mkmem          29
  chkinp: Checking input parameters for consistency, jdtset=   2.
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -724,7 +760,6 @@ All the independent perturbations are available
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
 - Reading DDK x from file: t88o_DS20_1WF4
@@ -874,9 +909,263 @@ qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+Interpolation of the electron-phonon coupling potential
+
+Interpolation of the electron-phonon coupling potential completed
+
+
+================================================================================
+== DATASET  4 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET  20.
+
+ mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+
+ mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   3.
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS states from WFK file: t88o_DS20_WFK
+- Reading DDB from file: t88o_DS20_DDB
+- Reading DVDB from file: t88o_DS3_DVDB
+- Reading DDK x from file: t88o_DS20_1WF4
+- Reading DDK y from file: t88o_DS20_1WF5
+- Reading DDK z from file: t88o_DS20_1WF6
+- Reading EFMAS information from file: t88i_DS4_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
+ R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
+ R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
+ Unit cell volume ucvol=  1.0546875E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+- Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
+Values initialized with zeros
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1163945337E-02 (at units)
+-                                   =           2.5464 [km/s]
+
+ Debye frequency from partial sums:     0.9602293612E-03 (Ha)
+-                                 =     0.6318005688E+01 (THz)
+-Debye temperature from partial sums:     0.3032160905E+03 (K)
+
+ Average speed of sound partial sums:     0.1163945337E-02 (at units)
+-                                   =           2.5464 [km/s]
+
+ Debye frequency from partial sums:     0.9602293612E-03 (Ha)
+-                                 =     0.6318005688E+01 (THz)
+-Debye temperature from partial sums:     0.3032160905E+03 (K)
+
+- Writing phonon DOS to file: t88o_DS4_PHDOS
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 1.2500E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 3.7500E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 1.2500E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [ 3.7500E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [ 5.0000E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-3.7500E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-2.5000E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-1.2500E-01,  1.2500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [ 3.7500E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-3.7500E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+ More than 20 q-points. Only important messages will be printed...
+qpoint: [ 3.7500E-01,  3.7500E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+
+
+
+
+
+
+
+
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
  Fermi level:   7.16066825E+00 [eV]
  Total electron DOS in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS3_EDOS
+- Writing electron DOS to file: t88o_DS4_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1065,19 +1354,27 @@ All the independent perturbations are available
       eph_intmeth1          2
       eph_intmeth2          1
       eph_intmeth3          2
+      eph_intmeth4          2
        eph_fsmear1     9.99999978E-03 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
        eph_fsmear3     9.99999978E-03 Hartree
+       eph_fsmear4     9.99999978E-03 Hartree
        eph_fsewin      2.93994603E-02 Hartree
        eph_mustar      1.20000000E-01
+         eph_task1          1
+         eph_task2          1
+         eph_task3          5
+         eph_task4          1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       8    8    8
+   eph_ngqpt_fine4       8    8    8
     eph_transport           1
          ph_wstep      3.67493254E-06 Hartree
        ph_intmeth1       2
        ph_intmeth2       1
        ph_intmeth3       2
+       ph_intmeth4       2
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        4    4    4
         ph_nqpath           3
@@ -1085,18 +1382,24 @@ All the independent perturbations are available
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
+           etotal4     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            getddb          20
            getddk          20
+          getdvdb1          0
+          getdvdb2          0
+          getdvdb3          0
+          getdvdb4         -1
            getwfk          20
            istwfk        2    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          7    0    0    0    0    0    0    0    0
               ixc          11
-           jdtset        1    2    3
+           jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.25000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1131,7 +1434,7 @@ All the independent perturbations are available
 P           mkmem          29
             natom           1
             nband           5
-           ndtset           3
+           ndtset           4
             ngfft          12      12      12
              nkpt          29
              nsym          48
@@ -1170,18 +1473,23 @@ P           mkmem          29
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
+       prtbltztrp4          0
         prtebands1          1
         prtebands2          2
         prtebands3          1
+        prtebands4          1
          prtfsurf1          1
          prtfsurf2          0
          prtfsurf3          0
+         prtfsurf4          0
        prtphbands1          1
        prtphbands2          2
        prtphbands3          1
+       prtphbands4          1
         prtphsurf1          1
         prtphsurf2          0
         prtphsurf3          0
+        prtphsurf4          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1191,6 +1499,8 @@ P           mkmem          29
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0

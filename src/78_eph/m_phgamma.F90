@@ -4244,14 +4244,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    end do
  end do
  call wrtout(std_out, " ", do_flush=.True.)
-
- ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
  if (do_ftv1q /= 0) then
-   MSG_ERROR("Fourier interpolation not supported")
-   !write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",gams%nqibz,"]"
-   !call wrtout(std_out, msg)
-   !call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(gamma_ngqpt)))
-   !call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,1,[zero,zero,zero],nfftf,ngfftf,comm)
+   MSG_ERROR(sjoin("Cannot find", itoa(do_ftv1q), "q-points in DVDB. Use eph_task to interpolate DFPT potentials"))
  end if
 
  ! Initialize the wave function descriptor.
@@ -4455,12 +4449,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
      MSG_ERROR(sjoin("Could not find q-point:", ktoa(qpt), "in DVDB"))
-     !if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
-     ! Fourier interpolate of the potential
-     !ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-     !cplex = 2
-     !ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-     !call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
    end if
 
    ! Examine the symmetries of the q wavevector

@@ -24,6 +24,7 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 ##############
 symsigma1  0
 symsigma2  1
+mixprec 1
 
 # Test qcache
 dvdb_qcache_mb1 -1.0
