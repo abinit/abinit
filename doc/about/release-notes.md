@@ -15,7 +15,7 @@ A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
 S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
-and examine the links to help files or test cases ...
+and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
@@ -86,7 +86,7 @@ By X. Gonze.
 
 * * *
 
-###C. Changes for the developers (also compilers)
+### C. Changes for the developers (also compilers)
 
 C.1 All F90 ABINIT sources are now inside modules.
     Makemake now aborts if F90 procedures outside modules.  
@@ -103,7 +103,7 @@ C.3 New [Howto for the test suite](../developers/testsuite_howto).
 
 * * *
 
-###D.  Other changes (or on-going developments, not yet finalized)
+### D.  Other changes (or on-going developments, not yet finalized)
 
 D.1 New input variable [[prtkbff]].
     This input variable activates the output of the Kleynman-Bylander form factors in the netcdf WFK file produced at the end of the ground-state calculation. 
@@ -112,10 +112,10 @@ D.1 New input variable [[prtkbff]].
 By H. Miranda and M. Giantomassi.
 
 D.2. A new routine to calculate and write the DDK matrix elements in a EVK.nc files for norm-conserving pseudo-potentials (and nspinor == 1),
-    from a WFK file using the commutator [r,H] used to calculate the matrix elements for chi. 
+    from a WFK file using the commutator [H, r] used to calculate the matrix elements for chi.
     These files are in the same format and contain the same information as the EVK.nc files (former DDK.nc) produced by the DFPT part of the code. 
     This routine is parallelized over k-points and bands and requires a much smaller memory footprint than the DFPT code.  
-    By M. Giantomassi.
+    By H. Miranda and M. Giantomassi.
 
 D.3 New input variable [[slk_rankpp]].
     This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.  
@@ -149,7 +149,7 @@ D.9 Allows one to suppress completion of the 2DTE for vanishing elements using s
 D.10 Interface with TRIQS_2.0.  
     By O. Gingras.
 
-D.11 Allows to defined different occupations for different spins, when [[occopt]]=0 and [[nsppol]]=2.  
+D.11 Allows to define different occupations for different spins, when [[occopt]]=0 and [[nsppol]]=2.
      By X. Gonze.
 
 D.12 NEB is now tested (at last), [[test:v6_29]].   
@@ -161,12 +161,13 @@ D.13 Many |abitutorials| have been improved.
 D.14 Work on orbital magnetization.   
      By J. Zwanziger.
 
-D.15 Elastic and piezoelectric tensors in nc format.  
+D.15 Elastic and piezoelectric tensors in netcdf format.  
      By M. Giantomassi
 
-D.16 Allow boxcutmin for DFPT case, after check by H. Miranda.
+D.16 Allow [[boxcutmin]] for DFPT case, after check by H. Miranda.
 
-D.17 ABIWAN.nc files with Wannier output.   
+D.17 ABIWAN.nc files with Wannier output that can be analyzed wit AbiPy. 
+     See the |AbiwanFileNb| for futher information.  
      By M. Giantomassi.
 
 D.18 The [[topic:Macroave]] has been created.  
