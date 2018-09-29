@@ -2523,9 +2523,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !van der Waals with Wannier functions (Silvestrelli's approach versions 1,2 and 3)
  if(dtset%vdw_xc==10.or.dtset%vdw_xc==11.or.dtset%vdw_xc==12.or.dtset%vdw_xc==14) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_nfrag',tread,'INT')
-   if(tread==1)then
-     dtset%vdw_nfrag=intarr(1)
-   end if
+   if(tread==1) dtset%vdw_nfrag=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,dtset%natom,string(1:lenstr),'vdw_typfrag',tread,'INT')
    if(tread==1)then
@@ -2990,7 +2988,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%kptgw(1:3,1:dtset%nkptgw) = reshape(dprarr(1:3*dtset%nkptgw), [3, dtset%nkptgw])
  end if
 
- if(dtset%nqptdm>0) then
+ if (dtset%nqptdm > 0) then
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%nqptdm,string(1:lenstr),'qptdm',tread,'DPR')
    if(tread==1) dtset%qptdm(1:3,1:dtset%nqptdm)=reshape(dprarr(1:3*dtset%nqptdm), [3, dtset%nqptdm])
  end if
@@ -3085,8 +3083,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
            iat=iat+1;jj=jj+isiz
          end if
        end do
-       call intagm_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, &
-&       string,'dmatpawu',tread_alt,'DPR')
+       call intagm_img(dmatpawu_tmp,iimage,jdtset,lenstr,dtset%nimage,dmatsize, string,'dmatpawu',tread_alt,'DPR')
        if(tread_alt==1) then
          iat=1;jj=1
          do iatom=1,natom
@@ -3178,9 +3175,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%densty(1:ntypat,1)=dprarr(1:ntypat)
 
  call intagm(dprarr,intarr,jdtset,marr,npsp,string(1:lenstr),'so_psp',tread,'INT')
- if(tread==1.and.dtset%usepaw==0)then
-   dtset%so_psp(1:npsp)=intarr(1:npsp)
- end if
+ if (tread==1.and.dtset%usepaw==0) dtset%so_psp(1:npsp) = intarr(1:npsp)
 
 !LOTF variables
 #if defined HAVE_LOTF
@@ -3230,26 +3225,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
 
  if (tread == 1) then
-   ! sigma_nkkpt mode --> initialize shifts, provide default if not given in input
+   ! sigma_ngkpt mode --> initialize shifts, provide default if not given in input
+   ! Consistency check: nkptgw must be zero
+   ABI_CHECK(dtset%nkptgw == 0, "nkptgw and sigma_ngkpt are mutually exclusive.")
+   ABI_CHECK(dtset%gw_qprange /= 0, "gw_qprange must be specified when Sigma_ngkpt is used.")
+
    dtset%sigma_ngkpt = intarr(1:3)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
    if (tread == 1) dtset%sigma_nshiftk = intarr(1)
-   if (dtset%nshiftk < 1 .or. dtset%nshiftk > MAX_NSHIFTK ) then
+   if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
      write(message,  '(a,i0,2a,i0,3a)' )&
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
-     'while it is found to be',dtset%nshiftk,'.',ch10,&
+     'while it is found to be',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
      MSG_ERROR(message)
    end if
 
    call intagm(dprarr, intarr, jdtset, marr, 3*dtset%sigma_nshiftk, string(1:lenstr), 'sigma_shiftk', tread, 'DPR')
    ! Yes, I know that multidatasets will likely crash if sigma_nshiftk changes...
+   ABI_CALLOC(dtset%sigma_shiftk, (3, dtset%sigma_nshiftk))
    if (tread == 1) then
-     ABI_MALLOC(dtset%sigma_shiftk, (3, dtset%sigma_nshiftk))
-     dtset%shiftk(:,1:dtset%sigma_nshiftk) = reshape( dprarr(1:3*dtset%sigma_nshiftk), [3,dtset%sigma_nshiftk])
-   else
-     ! Default
-     ABI_CALLOC(dtset%sigma_shiftk, (3, 1))
+     dtset%shiftk(:,1:dtset%sigma_nshiftk) = reshape(dprarr(1:3*dtset%sigma_nshiftk), [3,dtset%sigma_nshiftk])
    end if
  end if
 

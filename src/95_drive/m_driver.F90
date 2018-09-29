@@ -291,10 +291,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
-   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,&
-&   dtset%mkmem,dtset%nsppol)) then
-     write(message,'(2a)') trim(message),&
-&     '   -> not optimal: autoparal keyword recommended in input file'
+   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
+     write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
    end if
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
@@ -779,9 +777,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call timab(643,1,tsec)
 !  ****************************************************************************
 
-!  Transfer of multi dataset outputs from temporaries :
-!  acell, xred, occ rprim, and vel might be modified from their
-!  input values
+!  Transfer of multi dataset outputs from temporaries:
+!  acell, xred, occ rprim, and vel might be modified from their input values
 !  etotal, fcart, fred, and strten have been computed
 !  npwtot was already computed before, but is stored only now
 

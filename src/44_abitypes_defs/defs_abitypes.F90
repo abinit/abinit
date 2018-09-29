@@ -7,11 +7,10 @@
 !! This module contains definitions of high-level structured datatypes for the ABINIT package.
 !!
 !! If you are sure a new high-level structured datatype is needed,
-!! write it here, and DOCUMENT it properly (not all datastructure here are
-!! well documented, it is a shame ...).
-!! Do not forget : you will likely be the major winner if you document
-!! properly.
-!! Proper documentation of a structured datatype means :
+!! write it here, and DOCUMENT it properly (not all datastructure here are well documented, it is a shame ...).
+!! Do not forget: you will likely be the major winner if you document properly.
+!!
+!! Proper documentation of a structured datatype means:
 !!  (1) Mention it in the list just below
 !!  (2) Describe it in the NOTES section
 !!  (3) Put it in alphabetical order in the the main section of this module
@@ -20,14 +19,14 @@
 !!      input variables, for which there is a help file)
 !!  (5) Declare variables on separated lines in order to reduce the occurence of git conflicts.
 !!
-!! List of datatypes :
-!! * aim_dataset_type : the "dataset" for aim
-!! * bandfft_kpt_type : the "dataset" for triple band-fft-kpt parallelization
+!! List of datatypes:
+!! * aim_dataset_type: the "dataset" for aim
+!! * bandfft_kpt_type: the "dataset" for triple band-fft-kpt parallelization
 !! * datafiles_type: gather all the variables related to files
-!! * dataset_type : the "dataset" for the main abinit code
-!! * MPI_type : the data related to MPI parallelization
-!! * hdr_type : the header of wf, den and pot files
-!! * macro_uj_type : TO BE COMPLETED
+!! * dataset_type: the "dataset" for the main abinit code
+!! * MPI_type: the data related to MPI parallelization
+!! * hdr_type: the header of wf, den and pot files
+!! * macro_uj_type: TO BE COMPLETED
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2018 ABINIT group (XG)
@@ -281,9 +280,9 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
- integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_diel_model             ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging
  integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
  integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
@@ -294,9 +293,12 @@ type dataset_type
  integer :: gwls_band_index             ! band index of the state to be corrected
  integer :: gwls_exchange               ! Flag to determine if Exchange energy will be computed
  integer :: gwls_correlation            ! Flag to determine if Correlation energy will be computed
- integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm; seeds will go from first_seed to first_seed+nseeds
- !integer :: gwls_n_ext_freq             ! The number of frequencies to be read in gwls_ext_freq
- integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matric and add them to the other solutions requested. 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
+ integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm;
+                                        ! seeds will go from first_seed to first_seed+nseeds
+ !integer :: gwls_n_ext_freq            ! The number of frequencies to be read in gwls_ext_freq
+ integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
+                                        ! and add them to the other solutions requested.
+                                        ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
  integer :: gw_frqim_inzgrid
  integer :: gw_frqre_inzgrid
  integer :: gw_frqre_tangrid
@@ -957,7 +959,7 @@ type dataset_type
 
  real(dp),allocatable :: sigma_shiftk(:,:)
  ! sigma_shiftk(3, sigma_nshiftk)
- ! shiftks after inkpts
+ ! shifts in k-mesh for Sigma_{nk}.
 !END EPH
 
  integer :: ndivsm=0

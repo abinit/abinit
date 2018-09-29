@@ -172,9 +172,9 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 
  select case (abs(fftcore_mixprec))
  case (0)
-   call wrtout(std_out, "Using FFT in double-precision.")
+   call wrtout(std_out, " Using FFT in double-precision.")
  case (1)
-   call wrtout(std_out, "Using FFT in mixed precision.")
+   call wrtout(std_out, " Using FFT in mixed precision.")
  case default
    MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select

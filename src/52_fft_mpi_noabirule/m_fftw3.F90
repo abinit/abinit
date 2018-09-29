@@ -1074,7 +1074,7 @@ end subroutine fftw3_fftrisc_mixprec
 !! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
+!! gbound(2*mgfft+8,2)=Table for zero-padded FFT. See sphereboundary.
 !!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! OUTPUT

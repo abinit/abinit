@@ -1630,7 +1630,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: Rename variable
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
-   call wrtout(std_out, "Getting list of k-points for self-energy from kptgw and bdgw.")
+   call wrtout(std_out, "Generating list of k-points for self-energy from kptgw and bdgw.")
    new%nkcalc = dtset%nkptgw
    ABI_MALLOC(new%kcalc, (3, new%nkcalc))
    ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
@@ -1675,20 +1675,23 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (gw_qprange /= 0) then
 
      if (any(dtset%sigma_ngkpt /= 0)) then
-     !if (.False.) then
+        call wrtout(std_out, "Generating list of k-points for self-energy from sigma_nkpt and qprange.")
         ABI_CHECK(gw_qprange /= 0, "gw_qprange must be != 0")
         ! Get %kcalc from sigma_ngkpt
         kptrlatt = 0
         kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
+        !write(std_out,*)"kptrlatt", kptrlatt
+        !write(std_out,*)"sigma_nshiftk", dtset%sigma_nshiftk
+        !write(std_out,*)"sigma_shiftk", dtset%sigma_shiftk
         call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
           new%nkcalc, new%kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
         ABI_FREE(sigma_kbz)
         ABI_FREE(sigma_wtk)
      else
-       ! Include all the k-points in the IBZ.
-       ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
-       ! No need to map kcalc onto ebands%kptns.
-        call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for sigma_{nk}.")
+        ! Include all the k-points in the IBZ.
+        ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
+        ! No need to map kcalc onto ebands%kptns.
+        call wrtout(std_out, "nkptgw set to 0 ==> Automatic selection of k-points and bands for sigma_{nk}.")
         new%nkcalc = ebands%nkpt
         ABI_MALLOC(new%kcalc, (3, new%nkcalc))
         new%kcalc = ebands%kptns
@@ -1723,6 +1726,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
      !
      ! Find the list of `interesting` kpoints.
+     call wrtout(std_out, "qprange not specified in input --> Include direct and fundamental KS gap in Sigma_{nk}")
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
@@ -1813,8 +1817,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
          MSG_COMMENT(msg)
          write(msg,'(2(a,i0),2a)') "The number of included states ",bstop,&
                       " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
-                      "Please increase nband."
-         ABI_CHECK( bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg )
+                      "Action: Increase nband."
+         ABI_CHECK(bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg)
        end if
        ! Store band indices used for averaging (shifted by bstart_ks)
        ndeg = size(degblock, dim=2)
@@ -2005,6 +2009,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%mu_e = zero
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle
+     ! Use Fermi-Dirac occopt
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
      new%mu_e(it) = tmp_ebands%fermie

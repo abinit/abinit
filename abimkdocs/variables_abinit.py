@@ -19014,8 +19014,7 @@ simulates the experimental uncertainty and the finite lifetime of the
 quasiparticles (although the true lifetime should be k- and band-dependent).
 The value of [[zcut]] affects the number of iteration needed to achieve
 convergence in the Haydock iterative method. In this case, [[zcut]] should be
-larger than the typical distance between the eigenvalues of the exciton
-Hamiltonian.
+larger than the typical distance between the eigenvalues of the exciton Hamiltonian.
 Ideally, one should make a convergence study decreasing the value of [[zcut]]
 for increasing number of k points.
 """,
@@ -19097,7 +19096,7 @@ Variable(
     dimensions="scalar",
     requires="[[iomode]] == 3",
     mnemonics="PRinT Kleynman-Bylander Form Factors",
-    text="""
+    text=r"""
 This input variable activates the output of the Kleynman-Bylander form factors in the **netcdf** WFK file
 produced at the end of the ground-state calculation. Remember to set [[iomode]] to 3.
 
@@ -19114,5 +19113,57 @@ The option is ignored if PAW.
 """,
 ),
 
-]
+Variable(
+    abivarname="sigma_ngkpt",
+    varset="gw",
+    topics=['SelfEnergy_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="[3]",
+    requires="[[optdriver]] in [4, 7]",
+    mnemonics="SIGMA: Number of Grid points for K PoinTs generation",
+    text=r"""
+This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
+in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
+of [[nkptgw]], [[kptgw]], [[bdgw]].
 
+The specification in terms of sigma_ngkpt is easier to use especially when
+the self-energy is needed on a sub-mesh.
+The use of this variables requires a band range specified via [[gw_qprange]].
+
+!! important
+
+    sigma_ngkpt and [[nkptgw]] are mutually exclusive.
+""",
+),
+
+Variable(
+    abivarname="sigma_nshiftk",
+    varset="gw",
+    topics=['SelfEnergy_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] in [4, 7]",
+    mnemonics="SIGMA: Number of SHIFTs for K point grids",
+    text="""
+The number of shifts in [[sigma_shiftk]].
+""",
+),
+
+Variable(
+    abivarname="sigma_shiftk",
+    varset="gw",
+    topics=['SelfEnergy_useful'],
+    vartype="integer",
+    defaultval=[0, 0, 0],
+    dimensions=[3, '[[sigma_nshiftk]]'],
+    requires="[[optdriver]] in [4, 7]",
+    mnemonics="SHIFT for K points",
+    text=r"""
+The shifts in the k-mesh used for the electron self-energy $\Sigma_{n\kk}$
+See also [[sigma_nshiftk]].
+""",
+),
+
+]

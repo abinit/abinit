@@ -1969,9 +1969,9 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
 
    if(nkpt/=nkptlatt*nshiftk)then
-     write(message, '(a,i0,a,a,a,i0,a)' )&
-&     'The number of k points ',nkpt,'  is not equal to',ch10,&
-&     'nkptlatt*nshiftk which is',nkptlatt*nshiftk,'.'
+     write(message, '(a,i0,3a,i0,a)' )&
+&     'The number of k points ',nkpt,' is not equal to',ch10,&
+&     'nkptlatt*nshiftk which is ',nkptlatt*nshiftk,'.'
      MSG_BUG(message)
    end if
 
