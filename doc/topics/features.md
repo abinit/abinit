@@ -89,7 +89,7 @@ that apply, generally speaking, to all types of calculations are explained later
   1. [[topic:Berry|Electric polarization and finite electric field]]
   2. [[topic:MagField|External magnetic field]]
   3. [[topic:MagMom|Constrained atomic magnetic moment]]
-  4. [[topic:EFG|Electric field gradients]]
+  4. [[topic:EFG|Electric field gradients and Mossbauer Fermi contact interaction]]
   5. [[topic:Artificial|Artificial modifications of the system]]
 
 ## 3 Global control parameters: flow, parallelism, output files, output content, timing and memory control ...
@@ -172,16 +172,20 @@ for isolated defects in a solid, not for e.g. correcting the band gap.
   9. [[topic:RandStopPow|Random electronic stopping power]]
   10. [[topic:GWls|GW- Lanczos-Sternheimer method]] (not in production)
 
-## 8 Second-principles calculations: handling millions of atoms with first-principles accuracy
+## 8 Second-principles calculations with MULTIBINIT: handling millions of atoms with first-principles accuracy
 
 By constructing model Hamiltonians whose linear and selected non-linear characteristics
 are identical to those from first-principles calculations, and simulating millions
 of atoms with these model Hamiltonians, one can study phase transitions, polarization boundaries,  
-and other larger-scale properties than the ones from first-principles.
+and other properties for large-scale systems that cannot be reached from first-principles algorithms
+implemented in ABINIT and most DFT codes. Even with respect to linear-scaling codes, the prefactor
+is much smaller. 
 This is implemented in the MULTIBINIT application.
 
   1. [[topic:LatticeModel|Lattice model at the harmonic level]]
   2. [[topic:FitProcess|FitProcess]]
+  3. [[topic:BoundProcess|BoundProcess]]
+  4. [[topic:DynamicsMultibinit|DynamicsMultibinit]]
 
 ## 9 Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)
 

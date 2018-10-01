@@ -19,6 +19,8 @@ In the first option, multibinit will generate a set of coefficients only if [[mu
 Then, the fit process will select the coefficients one by one up to [[multibinit:fit_ncoeff]] according to the procedure details in [[cite:Escorihuela-Sayalero2017]]. This process requires to provide the training_set_HIST.nc list file (see [[help:multibinit]])
   
 
+## Tutorials
+The [[tutorial:lattice_model|First lesson on Multibinit]] explains how to build a lattice model and to run a dynamics.
     
 ## Related Input Variables
 
