@@ -19127,7 +19127,7 @@ This variable allows the user to specify the list of k-points in the self-energy
 in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
 of [[nkptgw]], [[kptgw]], [[bdgw]].
 
-The specification in terms of sigma_ngkpt is easier to use especially when
+The specification in terms of sigma_ngkpt is easier to use in particular when
 the self-energy is needed on a sub-mesh.
 The use of this variables requires a band range specified via [[gw_qprange]].
 

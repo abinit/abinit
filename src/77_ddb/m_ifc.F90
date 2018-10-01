@@ -3593,10 +3593,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
    ! Initialisation of the phonon wavevector
    qphon(:,1) = qph2l(:,iphl2)
    qphnrm(1)=zero
-   if(present(qnrml2))then
-     qphnrm(1) = qnrml2(iphl2)
-   endif
-
+   if(present(qnrml2)) qphnrm(1) = qnrml2(iphl2)
 
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
@@ -3606,9 +3603,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
    ! Write the phonon frequencies
    !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
-   if(present(phfrq2l))then
-     phfrq2l(:,iphl2)=phfrq(:)
-   endif
+   if(present(phfrq2l)) phfrq2l(:,iphl2)=phfrq(:)
 
    if(present(polarity2l))then
      polarity2l(:,:,iphl2)=zero

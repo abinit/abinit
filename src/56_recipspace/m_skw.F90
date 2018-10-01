@@ -147,7 +147,7 @@ CONTAINS  !=====================================================================
 !!  kpts(3,nkpt)=ab-initio k-points in reduced coordinates.
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
 !!  band_block(2)=Initial and final band index to interpolate. If [0,0], all bands are used
-!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
+!!    This is a global variable i.e. all MPI procs MUST call the routine with the same value.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -208,8 +208,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol
 
  ! Get point group operations.
- call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, &
-   include_timrev=cplex==1)
+ call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
 
  ! -----------------------
  ! Find nrwant star points
@@ -279,9 +278,8 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    end do
  end do
 
- ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", & ! [[cite:Pickett1988]]
-             do_flush=.True.)
+ ! Solve all bands and spins at once [[cite:Pickett1988]]
+ call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))
 
@@ -460,7 +458,7 @@ end subroutine skw_print
 !!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
 !!
 !! INPUTS
-!!  band=Band index.
+!!  band=Band index (global index associated to the input eigenvalues, i.e. independent of band_block)
 !!  kpt(3)=K-point in reduced coordinates.
 !!  spin=Spin index.
 !!
