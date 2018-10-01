@@ -10396,18 +10396,23 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Output NON-LINEAR INFOrmation",
-    requires="[[optdriver]] == 5 and [[usepead]] == 0, or if [[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0",
+    requires="[[optdriver]] == 5 and [[usepead]] == 0, or [[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0",
     text="""
 Control the output of the non-linear implementation (only when [[usepead]] == 0).
 The default value, [[nonlinear_info]] == 0 does nothing. If [[nonlinear_info]] == 1,
 different contributions of 3rd derivatives of the energy are written in the
-standard output file (non time consuming). Higher values activate some internal tests for
+output file (non time consuming).
+
+Higher values activate some internal tests for
 checking the implementation correctness (time consuming, not useable in parallel).
 If [[nonlinear_info]] == 2, same effect than 1 and tests are done in non-linear 
 ([[optdriver]]==5 and [[usepead]] == 0).
 If [[nonlinear_info]] == 3, same effect than 1 and tests are done in rf2_init
 ([[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0).
 If [[nonlinear_info]] == 4, same effect than 1 and tests are done in both non-linear and rf2_init.
+A line containining "NOT PASSED" (and other information) is added to the output file
+for each test that does not pass, otherwise nothing is printed. However, more information concerning
+the tests is always printed in the **standard** output file.
 """,
 ),
 
