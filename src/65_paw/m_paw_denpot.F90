@@ -1214,7 +1214,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
          if (cplex==2) ro(2)=pawrhoij%rhoijp(iq0+jrhoij,1)+pawrhoij%rhoijp(iq0+jrhoij,2)
        else if (ispden==2) then
          ro(1)=pawrhoij%rhoijp(jrhoij,1)
-         if (cplex==2) ro(1)=pawrhoij%rhoijp(iq0+jrhoij,1)
+         if (cplex==2) ro(2)=pawrhoij%rhoijp(iq0+jrhoij,1)
        end if
      end if
      ro(1:cplex)=pawtab%dltij(klmn)*ro(1:cplex)

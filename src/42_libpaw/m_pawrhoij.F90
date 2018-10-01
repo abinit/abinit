@@ -3601,8 +3601,11 @@ end subroutine pawrhoij_inquire_dim
 !!  [mode_paral]= parallel printing mode (optional, default='COLL')
 !   [rhoijselect(lmn2_size)]=Indirect array selecting the non-zero elements of rhoij
 !!  [test_value]=(real number) if positive, print a warning when the magnitude of Dij is greater (optional)
+!!  [l_only]=if >=0 only parts of rhoij corresponding to li=l_only are printed (optional);
+!!           Needs indlmn(:,:) optional argument.
 !!  [title_msg]=message to print as title (optional)
 !!  [unit]=the unit number for output (optional)
+!!  [indlmn(6,lmn_size)]= array giving l,m,n,lm,ln,s
 !!
 !! OUTPUT
 !! (Only writing)
@@ -3617,7 +3620,8 @@ end subroutine pawrhoij_inquire_dim
 !! SOURCE
 
 subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
-&          rhoijselect,test_value,title_msg,unit,opt_prtvol,mode_paral) ! Optional arguments
+&          rhoijselect,test_value,title_msg,unit,opt_prtvol,&
+&          l_only,indlmn,mode_paral) ! Optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3632,25 +3636,26 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,qphase,iatom,natom
- integer,optional,intent(in) :: opt_prtvol,unit
+ integer,optional,intent(in) :: opt_prtvol,l_only,unit
  real(dp),intent(in),optional :: test_value
  character(len=4),optional,intent(in) :: mode_paral
  character(len=100),optional,intent(in) :: title_msg
 !arrays
+ integer,optional,intent(in) :: indlmn(:,:)
  integer,optional,intent(in),target :: rhoijselect(:)
  real(dp),intent(in),target :: rhoij(:,:)
 
 !Local variables-------------------------------
 !scalars
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
- integer :: irhoij,kk,my_cplex,my_lmn_size,my_lmn2_size,my_nspden
+ integer :: irhoij,kk,my_cplex,my_lmn_size,my_lmn2_size,my_l_only,my_nspden
  integer :: my_opt_pack,my_opt_sym,my_prtvol,my_unt,nrhoijsel,rhoij_size
  real(dp) :: my_test_value,test_value_eff
  character(len=4) :: my_mode
  character(len=2000) :: msg
 !arrays
  integer,target :: idum(0)
- integer,pointer :: my_rhoijselect(:)
+ integer,pointer :: l_index(:),my_rhoijselect(:)
  real(dp),pointer :: rhoij_(:)
 
 ! *************************************************************************
@@ -3660,6 +3665,12 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
  my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
  my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
  my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
+ my_l_only=-1      ; if (PRESENT(l_only))     my_l_only=l_only
+
+ if (my_l_only>=0.and.(.not.present(indlmn))) then
+   msg='pawrhoij_print_rhoij: l_only>=0 and indlmn not present!'
+   MSG_BUG(msg)
+ end if
 
 !Title
  if (present(title_msg)) then
@@ -3689,6 +3700,15 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
    end if
  end if
 
+ if (my_l_only<0) then
+   l_index => idum
+ else
+   LIBPAW_ALLOCATE(l_index,(my_lmn_size))
+   do kk=1,my_lmn_size
+     l_index(kk)=indlmn(1,kk)
+   end do
+ end if
+
  if (qphase==2) then
    LIBPAW_ALLOCATE(rhoij_,(2*rhoij_size))
  end if
@@ -3715,15 +3735,21 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 
    !Subtitle
    if (natom>1.or.my_nspden>1) then
-     if (my_nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
-     if (my_nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
-     if (my_nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+     if (my_l_only<0) then
+       if (my_nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
+       if (my_nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
+       if (my_nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+     else
+       if (my_nspden==1) write(msg,'(a,i3,a,i1,a)')   ' Atom #',iatom,' - L=',my_l_only,' ONLY'
+       if (my_nspden==2) write(msg,'(a,i3,a,i1,a,i1)')' Atom #',iatom,' - L=',my_l_only,' ONLY - Spin component ',irhoij
+       if (my_nspden==4) write(msg,'(a,i3,a,i1,3a)')  ' Atom #',iatom,' - L=',my_l_only,' ONLY - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+     end if
      call wrtout(my_unt,msg,my_mode)
    end if
 
    !Printing
    test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
-   call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,-1,idum,my_opt_pack,&
+   call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,my_l_only,l_index,my_opt_pack,&
 &                      my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
 &                      mode_paral=my_mode)
 
@@ -3731,6 +3757,9 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 
  if (qphase==2) then
    LIBPAW_DEALLOCATE(rhoij_)
+ end if
+ if (my_l_only>=0) then
+   LIBPAW_DEALLOCATE(l_index)
  end if
 
 end subroutine pawrhoij_print_rhoij

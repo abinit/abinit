@@ -123,9 +123,9 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  real(dp),intent(out) :: d3exc(2)
  type(paw_an_type),intent(in) :: paw_an0(my_natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
- type(pawrhoij_type),intent(in) :: pawrhoij_1(natom)
- type(pawrhoij_type),intent(in) :: pawrhoij_2(natom)
- type(pawrhoij_type),intent(in) :: pawrhoij_3(natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_1(my_natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_2(my_natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_3(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
 
 !Local variables ---------------------------------------
@@ -135,7 +135,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  integer :: opt_compch,usecore,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: compch,d3exc1_iat(2)
-! character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_1(:),lmselect_2(:),lmselect_3(:),lmselect_tmp(:)
@@ -150,7 +150,14 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  nzlmopt = 0 ! compute all LM-moments of the density and use all LM-moments
 
  if (pawxcdev/=0) then
-   MSG_BUG("paw_dfptnl_energy is not implemented for pawxcdev /=0")
+   msg="paw_dfptnl_energy is not implemented for pawxcdev/=0"
+   MSG_BUG(msg)
+ end if
+ if (my_natom>0) then
+   if (pawrhoij_1(1)%qphase/=1.or.pawrhoij_2(1)%qphase/=1.or.pawrhoij_3(1)%qphase/=1) then
+     msg="paw_dfptnl_energy not supposed to be called with q/=0!"
+     MSG_BUG(msg)
+   end if
  end if
 
 !Set up parallelism over atoms
@@ -584,7 +591,11 @@ end subroutine paw_dfptnl_xc
 
  ncpgr=1
  if (ipert1<0.or.ipert1>natom+2.or.ipert2<0.or.ipert2>natom+2) then
-   message = 'Wrong inputs. Necessary conditions on ipert1 or ipert2 : 0 <= ipert <= natom+2'
+   message = 'paw_dfptnl_accrhoij: Necessary conditions on ipert1 or ipert2: 0<=ipert<=natom+2'
+   MSG_BUG(message)
+ end if
+ if (pawrhoij(1)%qphase/=1) then
+   message="paw_dfptnl_accrhoij not supposed to be called with q/=0!"
    MSG_BUG(message)
  end if
 
@@ -732,7 +743,8 @@ end subroutine paw_dfptnl_xc
        end do
      end do
    else ! nspinor=2
-     MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+     message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
+     MSG_BUG(message)
    end if
  end if
 !  End
@@ -770,7 +782,8 @@ end subroutine paw_dfptnl_xc
        end do
      end do
    else ! nspinor=2
-     MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+     message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
+     MSG_BUG(message)
    end if
  end if
 

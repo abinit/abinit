@@ -113,6 +113,10 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 
  call timab(560,1,tsec)
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'pawpolev not supposed to be called with qphase/=1!')
+ end if
+
 !Check for parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
 

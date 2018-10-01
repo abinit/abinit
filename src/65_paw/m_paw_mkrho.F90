@@ -410,6 +410,10 @@ end subroutine pawmkrho
 
  DBG_ENTER("COLL")
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'denfgr not supposed to be called with qphase/=1!')
+ end if
+
 !Set up parallelism over atoms (compatible only with band-FFT parallelism)
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
@@ -425,11 +429,11 @@ end subroutine pawmkrho
  if (my_natom>0) then
    if (paral_atom) then
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat,mpi_atmtab=my_atmtab)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex_rhoij,l_size_atm,nspden,typat,&
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat,&
 &     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    else
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex_rhoij,l_size_atm,nspden,typat)
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat)
    end if
    ABI_DEALLOCATE(l_size_atm)
  end if

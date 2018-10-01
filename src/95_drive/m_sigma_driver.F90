@@ -1012,7 +1012,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    MSG_WARNING("testing on-site HF")
    lmn2_size_max=MAXVAL(Pawtab(:)%lmn2_size)
    ABI_MALLOC(dij_hf,(cplex_dij*lmn2_size_max,ndij,Cryst%natom))
-   call paw_dijhf(ndij,cplex_dij,lmn2_size_max,Cryst%natom,Cryst%ntypat,Pawtab,Pawrad,Pawang,&
+   call paw_dijhf(ndij,cplex_dij,1,lmn2_size_max,Cryst%natom,Cryst%ntypat,Pawtab,Pawrad,Pawang,&
 &   KS_Pawrhoij,dij_hf,Dtset%prtvol)
 
    do iat=1,Cryst%natom
