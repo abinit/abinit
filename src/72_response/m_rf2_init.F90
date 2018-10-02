@@ -935,7 +935,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! **************************************************************************************************
 
 ! Deallocations of arrays
- if (debug_mode==0) ABI_DEALLOCATE(rf2%amn)
+ if (debug_mode==0) then
+   ABI_DEALLOCATE(rf2%amn)
+ end if
 
  call timab(514,2,tsec)
 
