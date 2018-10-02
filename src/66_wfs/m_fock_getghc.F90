@@ -43,7 +43,6 @@ module m_fock_getghc
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian, &
                             init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian
  use m_pawdij,       only : pawdijhat
- use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
  use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop

@@ -159,9 +159,9 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,cplex_rhoij,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,irhoij,ispden,itypat,jrhoij,klmn
+ integer :: cplex_rhoij,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,iq,iq0,irhoij,ispden,itypat,jrhoij,klmn
  integer :: lmn2_size,nselect,nspden_rhoij,optatm,optdyfr,opteltfr,optgr,option,optn,optn2
- integer :: optstr,optv
+ integer :: optstr,optv,qphase_rhoij
  real(dp) :: a11,a12,a22,a33,alpha,b1,b2,beta,detA,fact,ratio1,ratio2
  logical :: hasmoved,usegauss
  character(len=500) :: message
@@ -387,48 +387,52 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 
      nspden_rhoij=pawrhoij(iatom)%nspden
      lmn2_size=pawrhoij(iatom)%lmn2_size
-     cplex=pawrhoij(iatom)%cplex_rhoij;dplex=cplex-1
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij;dplex=cplex_rhoij-1
+     qphase_rhoij=pawrhoij(iatom)%qphase
 
      if (hasmoved) then
-       ABI_ALLOCATE(rhoijtmp,(cplex*lmn2_size,nspden_rhoij))
+       ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*qphase_rhoij*lmn2_size,nspden_rhoij))
        rhoijtmp=zero
 
        do ispden=1,nspden_rhoij
+         do iq=1,qphase_rhoij
+           iq0=merge(0,cplex_rhoij*lmn2_size,iq==1)
 
-!        rhoij(t+dt) <- rhoij(t) + alpha.rhoij(t)
-         fact=one+alpha
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&           +fact*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-           jrhoij=jrhoij+cplex
-         end do
-
-!        rhoij(t+dt) <- -alpha.rhoij(t-dt) + beta.rhoij(t-dt)
-         if (abs(beta-alpha)>tol14.and.ind1>0) then
-           fact=beta-alpha
-           jrhoij=1
-           do irhoij=1,scf_history%pawrhoij(iatom,ind1)%nrhoijsel
-             klmn=cplex*scf_history%pawrhoij(iatom,ind1)%rhoijselect(irhoij)-dplex
+!          rhoij(t+dt) <- rhoij(t) + alpha.rhoij(t)
+           fact=one+alpha
+           jrhoij=1+iq0
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=cplex_rhoij*(pawrhoij(iatom)%rhoijselect(irhoij)-dplex+iq0
              rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +fact*scf_history%pawrhoij(iatom,ind1)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
+&             +fact*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+             jrhoij=jrhoij+cplex_rhoij
            end do
-         end if
 
-!        rho(t+dt) <- -beta.rhoij(t-2dt)
-         if (abs(beta)>tol14.and.ind2>0) then
-           fact=-beta
-           jrhoij=1
-           do irhoij=1,scf_history%pawrhoij(iatom,ind2)%nrhoijsel
-             klmn=cplex*scf_history%pawrhoij(iatom,ind2)%rhoijselect(irhoij)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +fact*scf_history%pawrhoij(iatom,ind2)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
-           end do
-         end if
+!          rhoij(t+dt) <- -alpha.rhoij(t-dt) + beta.rhoij(t-dt)
+           if (abs(beta-alpha)>tol14.and.ind1>0) then
+             fact=beta-alpha
+             jrhoij=1+iq0
+             do irhoij=1,scf_history%pawrhoij(iatom,ind1)%nrhoijsel
+               klmn=cplex_rhoij*scf_history%pawrhoij(iatom,ind1)%rhoijselect(irhoij)-dplex+iq0
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +fact*scf_history%pawrhoij(iatom,ind1)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end if
 
+!          rho(t+dt) <- -beta.rhoij(t-2dt)
+           if (abs(beta)>tol14.and.ind2>0) then
+             fact=-beta
+             jrhoij=1+iq0
+             do irhoij=1,scf_history%pawrhoij(iatom,ind2)%nrhoijsel
+               klmn=cplex_rhoij*scf_history%pawrhoij(iatom,ind2)%rhoijselect(irhoij)-dplex+iq0
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +fact*scf_history%pawrhoij(iatom,ind2)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end if
+
+         end do ! iq
        end do !ispden
      end if !hasmoved
 
@@ -438,36 +442,14 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
      scf_history%pawrhoij(iatom,ind1new)%nrhoijsel=nselect
      scf_history%pawrhoij(iatom,ind1new)%rhoijselect(:)=0
      scf_history%pawrhoij(iatom,ind1new)%rhoijselect(1:nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
-     scf_history%pawrhoij(iatom,ind1new)%rhoijp(1:cplex*nselect,1:nspden_rhoij)= &
-&     pawrhoij(iatom)%rhoijp(1:cplex*nselect,1:nspden_rhoij)
+     scf_history%pawrhoij(iatom,ind1new)%rhoijp(1:cplex_rhoij*nselect,1:nspden_rhoij)= &
+&     pawrhoij(iatom)%rhoijp(1:cplex_rhoij*nselect,1:nspden_rhoij)
 
 !    Select non-zero values of rhoij(t+dt)
      if (hasmoved) then
-       nselect=0
-       if (cplex==1) then
-         do klmn=1,lmn2_size
-           if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-             nselect=nselect+1
-             pawrhoij(iatom)%rhoijselect(nselect)=klmn
-             do ispden=1,nspden_rhoij
-               pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-             end do
-           end if
-         end do
-       else
-         do klmn=1,lmn2_size
-           if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-             nselect=nselect+1
-             pawrhoij(iatom)%rhoijselect(nselect)=klmn
-             do ispden=1,nspden_rhoij
-               pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-             end do
-           end if
-         end do
-       end if
-       pawrhoij(iatom)%nrhoijsel=nselect
-       if (nselect<pawrhoij(iatom)%lmn2_size) &
-&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
+       call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,pawrhoij(iatom)%nrhoijsel,&
+&                           cplex_rhoij,qphase_rhoij,lmn2_size,nspden_rhoij,&
+&                           rhoij_input=rhoijtmp)
        ABI_DEALLOCATE(rhoijtmp)
      end if
 
