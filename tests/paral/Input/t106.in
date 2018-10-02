@@ -5,10 +5,10 @@ ndtset 2
 jdtset 1 2
 
 getwfk -1
-nline1 15
-nnsclo1 20
-nline2 15
-nnsclo2 20
+nline1 7
+nnsclo1 7
+nline2 10
+nnsclo2 10
 
 prtvol    4
 pawprtvol 3
@@ -41,7 +41,7 @@ rprim 1.0 0.0 0.0    #Real space PRIMitive translations
       0.0 0.0 1.0 
 
 # == Points k and symetries
-ngkpt   3 3 3    #K - PoinTs grid : Real space LATTice
+ngkpt   2 2 2    #K - PoinTs grid : Real space LATTice
 nshiftk 2
 shiftk 1/2 1/2 1/2
        0.0 0.0 0.0
@@ -63,13 +63,8 @@ dmft_t2g 1   # special value for t2g only calculation.
 dmftctqmc_gmove 0
 dmftctqmc_order 50
 
-# == CTQMC
-dmft_solv 2 # CTQMC
+dmft_solv 2 # H1
 dmft_charge_prec 1e-10
-dmftqmc_l 50
-dmftqmc_n 1.d6
-dmftqmc_therm 10000
-
 
 # == LDA+U
 usepawu     1  #  For density matrix printout.
@@ -92,17 +87,17 @@ bandpp2 8
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t106.out, tolnlines = 50, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -easy
+#%%   t106.out, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -medium
 #%% psp_files = 23v.paw, 38sr.paw, 8o.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t106_MPI4.out, tolnlines = 50, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -easy;
+#%%   t106_MPI4.out, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI
-#%% description = DFT+DMFT for SrVO3 using CTQMC code with KGB parallelism
+#%% description = DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
 #%% topics = DMFT, KGB
 #%%<END TEST_INFO>
