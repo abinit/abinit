@@ -17,10 +17,10 @@
 .Starting date : Fri 28 Sep 2018.
 - ( at 14h20 )
   
-- input  file    -> t104.in
-- output file    -> t104_MPI10.out
-- root for input  files -> t104_MPI10i
-- root for output files -> t104_MPI10o
+- input  file    -> t84.in
+- output file    -> t84_MPI10.out
+- root for input  files -> t84_MPI10i
+- root for output files -> t84_MPI10o
 
 
  DATASET    1 : space group F4 3 2 (#209); Bravais cF (face-center cubic)
@@ -803,7 +803,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
- prteigrs : about to open file t104_MPI10o_DS1_EIG
+ prteigrs : about to open file t84_MPI10o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.38213   Average Vxc (hartree)=  -0.50639
  Eigenvalues (hartree) for nkpt=   7  k points:
  kpt#   1, nband= 22, wtk=  0.22222, kpt= -0.1667 -0.3333  0.0000 (reduced coord)
@@ -967,7 +967,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
          ecut(hartree)=     60.000   => boxcut(ratio)=   2.08583
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t104_MPI10o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t84_MPI10o_DS1_WFK
 P newkpt: treating     22 bands with npw=     135 for ikpt=   1 by node    0
 P newkpt: treating     22 bands with npw=     129 for ikpt=   2 by node    0
 P newkpt: treating     22 bands with npw=     131 for ikpt=   3 by node    1
@@ -1555,7 +1555,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     131.963     131.939
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
- prteigrs : about to open file t104_MPI10o_DS2_EIG
+ prteigrs : about to open file t84_MPI10o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.38424   Average Vxc (hartree)=  -0.50619
  Eigenvalues (hartree) for nkpt=   7  k points:
  kpt#   1, nband= 22, wtk=  0.22222, kpt= -0.1667 -0.3333  0.0000 (reduced coord)
