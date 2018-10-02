@@ -381,7 +381,7 @@ Namespace      | Markdown                         | Result
 ## 4 More detailed presentation of the files file
 ```
 
-Also in this case, it's possible to specify the name of the link with the
+Also in this case, it's possible to specify the name of the link 
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
 
 

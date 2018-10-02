@@ -193,8 +193,8 @@ pages:
         - Images: tutorial/paral_images.md
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
-    #- Multibinit:
-        #- Lattice Model: tutorial/lattice_model.md
+    - Multibinit:
+        - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
@@ -306,7 +306,7 @@ copyright: Copyright &copy; 2018 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 8.9.4
+    version: 8.11.0
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
@@ -341,7 +341,8 @@ extra:
         DdbFileNb: "[DdbFile notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/ddb.ipynb)"
         SigresFileNb: "[Sigres notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigres.ipynb)"
         MdfFileNb: "[MdfFile notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/mdf.ipynb)"
-        # Links to abiturial lessosn
+        AbiwanFileNb: "[AbiwanFile notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/abiwan.ipynb)"
+        # Links to abitutorials lessons
         G0W0LessonNb: "[notebook with the GW lesson](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/g0w0/lesson_g0w0.ipynb)"
         # Links to websites
         abiconfig: "[abiconfig](https://github.com/abinit/abiconfig)"

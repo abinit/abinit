@@ -340,7 +340,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout) :: tauresid(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
- type(pawcprj_type),allocatable,intent(inout) :: cprj(:,:)
+ type(pawcprj_type),pointer,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
@@ -380,8 +380,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
+ type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
+
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
@@ -552,13 +554,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (usecprj==0) then
      mcprj_local=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
      !This is a check but should always be true since scfcv allocated cprj anyway
-     if (allocated(cprj)) then
+     if (allocated(cprj_local)) then
        !Was allocated in scfcv so we just destroy and reconstruct it as desired
-       call pawcprj_free(cprj)
-       ABI_DATATYPE_DEALLOCATE(cprj)
+       call pawcprj_free(cprj_local)
+       ABI_DATATYPE_DEALLOCATE(cprj_local)
      end if
-     ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj_local))
-     call pawcprj_alloc(cprj,0,gs_hamk%dimcprj)
+     ABI_DATATYPE_ALLOCATE(cprj_local,(dtset%natom,mcprj_local))
+     call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
+     cprj=> cprj_local
    end if
  end if
 
@@ -1001,6 +1004,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
            if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
+             !WARNING : this routine actually does NOT compute the Fock contrib to total energy, but modifies the force ONLY.
              call fock_calc_ene(dtset,fock%fock_common,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if
@@ -1604,7 +1608,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(enlnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
-   if(iscf<=0)then
+   if(iscf<=0 .and. me_distrb==0)then
      option=2 ; enunit=1 ; vxcavg_dum=zero
      call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
 &     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
@@ -1802,6 +1806,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if ! end condition on iscf
 
  call destroy_hamiltonian(gs_hamk)
+
+ if (psps%usepaw==1) then
+   if (usecprj==0) then
+     call pawcprj_free(cprj_local)
+     ABI_DATATYPE_DEALLOCATE(cprj_local)
+   end if
+ end if
 
  if(dtset%usewvl==0) then
    ABI_DEALLOCATE(EigMin)
