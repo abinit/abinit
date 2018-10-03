@@ -49,7 +49,7 @@ B.2 There has been a large effort to clean the documentation, that was needed an
 B.3 The multibinit application (for second-principles calculations) has considerably progressed.
     Documentation has thus been set up: "topics" have been written, as well as a tutorial,
     in addition to the already existing input variable documentation and test cases.
-    See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
+    See [[topic:LatticeModel]], [[topic:BoundingProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
     that are hub to the relevant tutorial, input variables and test cases 
     (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).  
     By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez

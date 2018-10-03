@@ -50,7 +50,7 @@ pages:
     - topics/Berry.md
     - topics/BandOcc.md
     - topics/BSE.md
-    - topics/BoundProcess.md
+    - topics/BoundingProcess.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
