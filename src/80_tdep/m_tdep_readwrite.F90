@@ -179,6 +179,8 @@ contains
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
+  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
+&                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
   character(len=500) :: filename
   character(len=500) :: inputfilename
   integer :: values(8)  
@@ -316,8 +318,7 @@ contains
   write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
   call date_and_time(date,time,zone,values)
-  write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a,i2,a,i2,a,i4)') '.Starting date : ',values(3),'/',values(2),'/',values(1)
+  write(InVar%stdout,'(/,a,i2,1x,a,1x,i4,a)') '.Starting date : ',values(3),month_names(values(2)),values(1),'.'
 
 ! Read (and echo) of input variables from the input.in input file
   write(InVar%stdout,*) ' '

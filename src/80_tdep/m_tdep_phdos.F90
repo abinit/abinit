@@ -418,9 +418,9 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 !===================== Bulk and Shear modulus--Sound velocities ===========================
 !==========================================================================================
 ! Voigt notation
-  write(InVar%stdout,'(a,f9.3)')'For density rho=',rho
+  write(InVar%stdout,'(a,f9.3)')' For density rho=',rho
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Voigt average (constant strain) ==================='
+  write(InVar%stdout,*)' ========================= Voigt average (constant strain) ==================='
   BV=((Cij(1,1)+Cij(2,2)+Cij(3,3))+2.d0*(Cij(1,2)+Cij(1,3)+Cij(2,3)))/9.d0
   GV=((Cij(1,1)+Cij(2,2)+Cij(3,3))-     (Cij(1,2)+Cij(1,3)+Cij(2,3))+3.d0*(Cij(4,4)+Cij(5,5)+Cij(6,6)))/15.d0
   write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
@@ -436,7 +436,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 
 ! Reuss notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) ' ========================= Reuss average (constant stress) ==================='
+  write(InVar%stdout,*)' ========================= Reuss average (constant stress) ==================='
   BR=1.d0/(Sij(1,1)+Sij(2,2)+Sij(3,3)+2.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3)))
   GR=15.d0/(4.d0*(Sij(1,1)+Sij(2,2)+Sij(3,3))-4.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3))+3.d0*(Sij(4,4)+Sij(5,5)+Sij(6,6)))
   write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
@@ -452,7 +452,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 
 ! Voigt-Reuss-Hill notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) ' ============================== Hill average ================================='
+  write(InVar%stdout,*)' ============================== Hill average ================================='
   BH=(BR+BV)/2.d0
   GH=(GR+GV)/2.d0
   write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH

@@ -1,4 +1,4 @@
--Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_tdep_test/tests/v8/Input/t37_HIST.nc for reading
+-Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__baguetl/tests/v8/Input/t37_HIST.nc for reading
  Extracting information from NetCDF file...
   
 .Version    2.0 of PHONONS
@@ -14,8 +14,8 @@
  Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
- 
-.Starting date : 21/ 6/2018
+
+.Starting date :  2 Oct 2018.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -821,17 +821,17 @@
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
  For density rho= 6475.654
   
- ========================= Voigt average (constant strain) ===================
+  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.061
  Average of Young modulus E=  198.000 Lame modulus Lambda=   71.886 and Poisson ratio Nu=    0.237
  Velocities: compressional Vp= 5985.639  shear Vs= 3516.171  and bulk Vphi= 4398.097
   
- ========================= Reuss average (constant stress) ===================
+  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.057
  Average of Young modulus E=  197.990 Lame modulus Lambda=   71.889 and Poisson ratio Nu=    0.237
  Velocities: compressional Vp= 5985.558  shear Vs= 3516.068  and bulk Vphi= 4398.097
   
- ============================== Hill average =================================
+  ============================== Hill average =================================
  ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.059
  Average of Young modulus E=  197.995 Lame modulus Lambda=   71.887 and Poisson ratio Nu=    0.237
  Velocities: compressional Vp= 5985.598  shear Vs= 3516.120  and bulk Vphi= 4398.097
