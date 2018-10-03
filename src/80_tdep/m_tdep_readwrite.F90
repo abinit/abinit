@@ -263,11 +263,11 @@ contains
  !Open netCDF file
   ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(InVar%stdout,'(3a)') '.'//'Could no open ',trim(filename),', starting from scratch'
+    write(InVar%stdout,'(3a)') '-'//'Could no open ',trim(filename),', starting from scratch'
     InVar%netcdf=.false.
   else
-    write(InVar%stdout,'(3a)') '.'//'Succesfully open ',trim(filename),' for reading'
-    write(InVar%stdout,'(a)') 'Extracting information from NetCDF file...'
+    write(InVar%stdout,'(3a)') '-'//'Succesfully open ',trim(filename),' for reading'
+    write(InVar%stdout,'(a)') ' Extracting information from NetCDF file...'
     InVar%netcdf=.true.
   end if
 

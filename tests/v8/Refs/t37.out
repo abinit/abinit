@@ -1,5 +1,5 @@
-.Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_tdep_test/tests/v8/Input/t37_HIST.nc for reading
-Extracting information from NetCDF file...
+-Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_tdep_test/tests/v8/Input/t37_HIST.nc for reading
+ Extracting information from NetCDF file...
   
 .Version    2.0 of PHONONS
 .Copyright (C) 1998-2018 ABINIT group (FB,JB).
@@ -800,41 +800,41 @@ Extracting information from NetCDF file...
  ################ Bulk and Shear modulus--Sound velocities ###################
  #############################################################################
  
-========== Using the formulation proposed by Wallace (using the IFC) =========
-Cijkl=
-| C11 C12 C13 C14 C15 C16 |    233.014   71.383   71.383    0.000    0.000    0.000
-| C21 C22 C23 C24 C25 C26 |     71.383  233.014   71.383    0.000    0.000    0.000
-| C31 C32 C33 C34 C35 C36 |     71.383   71.383  233.014    0.000    0.000    0.000
-| C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000   79.559    0.000    0.000
-| C51 C52 C53 C54 C55 C56 |      0.000    0.000    0.000    0.000   79.559    0.000
-| C61 C62 C63 C64 C65 C66 |      0.000    0.000    0.000    0.000    0.000   79.559
-Young modulus E1, E2 and E3= 199.534  199.534  199.534
-Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.235    0.235    0.235    0.235    0.235    0.235
-Shear modulus G23, G13 and G12=  79.559   79.559   79.559
+ ========== Using the formulation proposed by Wallace (using the IFC) =========
+ Cijkl=
+ | C11 C12 C13 C14 C15 C16 |    233.014   71.383   71.383    0.000    0.000    0.000
+ | C21 C22 C23 C24 C25 C26 |     71.383  233.014   71.383    0.000    0.000    0.000
+ | C31 C32 C33 C34 C35 C36 |     71.383   71.383  233.014    0.000    0.000    0.000
+ | C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000   79.559    0.000    0.000
+ | C51 C52 C53 C54 C55 C56 |      0.000    0.000    0.000    0.000   79.559    0.000
+ | C61 C62 C63 C64 C65 C66 |      0.000    0.000    0.000    0.000    0.000   79.559
+ Young modulus E1, E2 and E3= 199.534  199.534  199.534
+ Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.235    0.235    0.235    0.235    0.235    0.235
+ Shear modulus G23, G13 and G12=  79.559   79.559   79.559
  
-Sijkl=
-| S11 S12 S13 S14 S15 S16 |      0.005   -0.001   -0.001    0.000    0.000    0.000
-| S21 S22 S23 S24 S25 S26 |      0.005    0.005   -0.001    0.000    0.000    0.000
-| S31 S32 S33 S34 S35 S36 |     -0.001   -0.001    0.005    0.000    0.000    0.000
-| S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.013    0.000    0.000
-| S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.013    0.000
-| S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
-For density rho= 6475.654
+ Sijkl=
+ | S11 S12 S13 S14 S15 S16 |      0.005   -0.001   -0.001    0.000    0.000    0.000
+ | S21 S22 S23 S24 S25 S26 |      0.005    0.005   -0.001    0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.001   -0.001    0.005    0.000    0.000    0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.013    0.000    0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.013    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
+ For density rho= 6475.654
   
  ========================= Voigt average (constant strain) ===================
-ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.061
-Average of Young modulus E=  198.000 Lame modulus Lambda=   71.886 and Poisson ratio Nu=    0.237
-Velocities: compressional Vp= 5985.639  shear Vs= 3516.171  and bulk Vphi= 4398.097
+ ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.061
+ Average of Young modulus E=  198.000 Lame modulus Lambda=   71.886 and Poisson ratio Nu=    0.237
+ Velocities: compressional Vp= 5985.639  shear Vs= 3516.171  and bulk Vphi= 4398.097
   
  ========================= Reuss average (constant stress) ===================
-ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.057
-Average of Young modulus E=  197.990 Lame modulus Lambda=   71.889 and Poisson ratio Nu=    0.237
-Velocities: compressional Vp= 5985.558  shear Vs= 3516.068  and bulk Vphi= 4398.097
+ ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.057
+ Average of Young modulus E=  197.990 Lame modulus Lambda=   71.889 and Poisson ratio Nu=    0.237
+ Velocities: compressional Vp= 5985.558  shear Vs= 3516.068  and bulk Vphi= 4398.097
   
  ============================== Hill average =================================
-ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.059
-Average of Young modulus E=  197.995 Lame modulus Lambda=   71.887 and Poisson ratio Nu=    0.237
-Velocities: compressional Vp= 5985.598  shear Vs= 3516.120  and bulk Vphi= 4398.097
+ ISOTHERMAL modulus: Bulk Kt=  125.260 and Shear G=   80.059
+ Average of Young modulus E=  197.995 Lame modulus Lambda=   71.887 and Poisson ratio Nu=    0.237
+ Velocities: compressional Vp= 5985.598  shear Vs= 3516.120  and bulk Vphi= 4398.097
   
  #############################################################################
  ######################### Energies, errors,...  #############################
