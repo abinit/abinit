@@ -179,7 +179,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use m_time,     only : timab
  use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
+ use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
  use m_prcref,   only : prcref
 
 !This section has been created automatically by the script Abilint (TD).
@@ -234,8 +234,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp9=9
- integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,irhoij,ispden,jfft
- integer :: jrhoij,klmn,kmix,mpicomm,nfftot,nselect
+ integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,iq,iq0,irhoij,ispden,jfft
+ integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase
  logical :: mpi_summarize,reset
  real(dp) :: fact,ucvol,ucvol_local
  character(len=500) :: message
@@ -284,8 +284,9 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
  if (usepaw==1.and.my_natom>0) then
    cplex=pawrhoij(1)%cplex_rhoij;dplex=cplex-1
+   qphase=pawrhoij(1)%qphase
  else
-   cplex = 0;dplex = 0
+   cplex = 0;dplex = 0 ; qphase=0
  end if
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -392,18 +393,21 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (usepaw==1.and.my_natom>0) then
    if (pawrhoij(1)%nspden==2) then
      do iatom=1,my_natom
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         ro(1:1+dplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
-         pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-         pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-         jrhoij=jrhoij+cplex
-       end do
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         ro(1:1+dplex)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)
-         pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
-         pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+       do iq=1,qphase
+         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+         jrhoij=1+iq0
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           ro(1:1+dplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
+           pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+           pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+           jrhoij=jrhoij+cplex
+         end do
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+           ro(1:1+dplex)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)
+           pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+           pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+         end do
        end do
      end do
    end if
@@ -457,23 +461,25 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (usepaw==1) then
    indx=-dplex
    do iatom=1,my_natom
-     do ispden=1,pawrhoij(iatom)%nspden
-       ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
-       rhoijtmp=zero
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-         rhoijtmp(klmn:klmn+dplex,1)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-         jrhoij=jrhoij+cplex
+     ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
+     do iq=1,qphase
+       iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+       do ispden=1,pawrhoij(iatom)%nspden
+         rhoijtmp=zero ; jrhoij=1+iq0
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+           rhoijtmp(klmn:klmn+dplex,1)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+           jrhoij=jrhoij+cplex
+         end do
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex ; kklmn=klmn+iq0
+           npaw(indx:indx+dplex)=rhoijtmp(klmn:klmn+dplex,1)-pawrhoij(iatom)%rhoijres(kklmn:kklmn+dplex,ispden)
+           mix%f_paw(indx:indx+dplex,i_vresid1)=pawrhoij(iatom)%rhoijres(kklmn:kklmn+dplex,ispden)
+           mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
+         end do
        end do
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         npaw(indx:indx+dplex)=rhoijtmp(klmn:klmn+dplex,1)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-         mix%f_paw(indx:indx+dplex,i_vresid1)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-         mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
-       end do
-       ABI_DEALLOCATE(rhoijtmp)
      end do
+     ABI_DEALLOCATE(rhoijtmp)
    end do
  end if
 
@@ -512,53 +518,45 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    if (usepaw==1) then
      indx=-dplex
      do iatom=1,my_natom
-       ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+       ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        rhoijtmp=zero
-       if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
-         do ispden=1,pawrhoij(iatom)%nspden
-           do kmix=1,pawrhoij(iatom)%lmnmix_sz
-             indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijrespc(indx:indx+dplex) &
-&             -pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-           end do
-         end do
-       end if
-       if (pawrhoij(iatom)%nspden/=2) then
-         do ispden=1,pawrhoij(iatom)%nspden
-           jrhoij=1
-           do irhoij=1,pawrhoij(iatom)%nrhoijsel
-             klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
-           end do
-         end do
-       else
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
-           rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2)) &
-&           +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
-           rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2)) &
-&           +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-           jrhoij=jrhoij+cplex
-         end do
-       end if
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(cplex*klmn-dplex:cplex*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
+       do iq=1,qphase
+         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+         if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(cplex*nselect-dplex:cplex*nselect,ispden)=&
-&             rhoijtmp(cplex*klmn-dplex:cplex*klmn,ispden)
+             do kmix=1,pawrhoij(iatom)%lmnmix_sz
+               indx=indx+cplex;klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijrespc(indx:indx+dplex) &
+&               -pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
+             end do
+           end do
+         end if
+         if (pawrhoij(iatom)%nspden/=2) then
+           do ispden=1,pawrhoij(iatom)%nspden
+             jrhoij=iq0+1
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex
+             end do
+           end do
+         else
+           jrhoij=iq0+1
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+             ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
+             rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2)) &
+&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
+             rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2)) &
+&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+             jrhoij=jrhoij+cplex
            end do
          end if
        end do
-       pawrhoij(iatom)%nrhoijsel=nselect
-       if (nselect<pawrhoij(iatom)%lmn2_size) &
-&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
+       call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
+&           pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
+&           pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
        ABI_DEALLOCATE(rhoijtmp)
      end do
    end if
@@ -572,59 +570,40 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16) then
    indx=-dplex
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+     ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
-     if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
+     do iq=1,qphase
+       iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+       if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
+         do ispden=1,pawrhoij(iatom)%nspden
+           jrhoij=iq0+1
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+             rhoijtmp(klmn:klmn+dplex,ispden)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+             jrhoij=jrhoij+cplex
+           end do
+         end do
+       end if
        do ispden=1,pawrhoij(iatom)%nspden
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           rhoijtmp(klmn:klmn+dplex,ispden)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-           jrhoij=jrhoij+cplex
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           indx=indx+cplex;klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+           rhoijtmp(klmn:klmn+dplex,ispden)=npaw(indx:indx+dplex)
          end do
        end do
-     end if
-     do ispden=1,pawrhoij(iatom)%nspden
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         rhoijtmp(klmn:klmn+dplex,ispden)=npaw(indx:indx+dplex)
-       end do
+       if (pawrhoij(iatom)%nspden==2) then
+         jrhoij=iq0+1
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+           ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
+           rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2))
+           rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2))
+           jrhoij=jrhoij+cplex
+         end do
+       end if
      end do
-     if (pawrhoij(iatom)%nspden==2) then
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-         ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
-         rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2))
-         rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2))
-         jrhoij=jrhoij+cplex
-       end do
-     end if
-     nselect=0
-     if (cplex==1) then
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-           end do
-         end if
-       end do
-     else
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-           end do
-         end if
-       end do
-     end if
-     pawrhoij(iatom)%nrhoijsel=nselect
-     if (nselect<pawrhoij(iatom)%lmn2_size) &
-&      pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
+     call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
+&         pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
+&         pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
      ABI_DEALLOCATE(rhoijtmp)
    end do
  end if   ! usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16

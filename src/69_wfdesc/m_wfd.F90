@@ -7233,7 +7233,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex,cplex_rhoij,iatom,band,ik_ibz
+ integer :: cplex,cplex_rhoij,qphase,iatom,band,ik_ibz
  integer :: spin,natinc,nband_k,option,lmn2_size,nspden
  logical :: usetimerev
  real(dp) :: occup,wtk_k
@@ -7259,9 +7259,10 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  do iatom=1,Wfd%natom
    if (pawrhoij(iatom)%use_rhoij_==0) then
      cplex_rhoij= pawrhoij(iatom)%cplex_rhoij
+     qphase     = pawrhoij(iatom)%qphase
      lmn2_size  = pawrhoij(iatom)%lmn2_size
      nspden     = pawrhoij(iatom)%nspden
-     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(cplex_rhoij*lmn2_size,nspden))
+     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nspden))
      pawrhoij(iatom)%use_rhoij_=1
    end if
    pawrhoij(iatom)%rhoij_=zero

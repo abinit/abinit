@@ -586,6 +586,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 !with the same mixing factor as the model dielectric function.
 
  if (usepaw==1.and.my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'wvl_prcref: not available with qphase=1!')
 !  mixfac=dielar(4);mixfacmag=abs(dielar(7))
    if (pawrhoij(1)%cplex_rhoij==1) then
      index=0

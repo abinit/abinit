@@ -43,7 +43,7 @@ module m_odamix
  use m_paw_an,     only : paw_an_type
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
- use m_pawrhoij,   only : pawrhoij_type
+ use m_pawrhoij,   only : pawrhoij_type,pawrhoij_filter
  use m_paw_nhat,   only : pawmknhat
  use m_paw_denpot, only : pawdenpot
  use m_energies,   only : energies_type
@@ -235,7 +235,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iatom,ider,idir,ierr,ifft,ipert,irhoij,ispden,itypat,izero,iir,jjr,kkr
- integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nselect,nzlmopt,nk3xc,option,optxc
+ integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
  logical :: with_vxctau
  logical :: non_magnetic_xc
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
@@ -299,6 +299,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  fp0=energies%e_eigenvalues-energies%h0-two*energies%e_hartree-energies%e_xcdc
  if (usepaw==1) then
    do iatom=1,my_natom
+     ABI_CHECK(pawrhoij(iatom)%qphase==1,'ODA mixing not allowed with a Q phase in PAW objects!')
      itypat=pawrhoij(iatom)%itypat
      do ispden=1,pawrhoij(iatom)%nspden
        jrhoij=1
@@ -549,8 +550,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
 
  if (usepaw==1) then
+   if (my_natom>0) then
+     ABI_ALLOCATE(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
+   end if
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%cplex_rhoij*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
      if (pawrhoij(iatom)%cplex_rhoij==1) then
        if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
@@ -567,18 +570,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
            rhoijtmp(klmn,ispden)=rhoijtmp(klmn,ispden)+(alphaopt-one)*pawrhoij(iatom)%rhoijres(klmn,ispden)
          end do
        end do
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-           end do
-         end if
-       end do
-       pawrhoij(iatom)%nrhoijsel=nselect
-       ABI_DEALLOCATE(rhoijtmp)
      else
        if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
          jrhoij=1
@@ -597,25 +588,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &           +(alphaopt-one)*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
          end do
        end do
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-           end do
-         end if
-       end do
-       pawrhoij(iatom)%nrhoijsel=nselect
-       if (nselect<pawrhoij(iatom)%lmn2_size) &
-&        pawrhoij(iatom)%rhoijselect(nselect+1:pawrhoij(iatom)%lmn2_size)=0
-       ABI_DEALLOCATE(rhoijtmp)
      end if
-
-   end do
- end if
-
+     call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,pawrhoij(iatom)%nrhoijsel,&
+&                         pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,pawrhoij(iatom)%lmn2_size,&
+&                         pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
+   end do ! iatom
+   if (allocated(rhoijtmp)) then
+     ABI_DEALLOCATE(rhoijtmp)
+   end if
+ end if ! usepaw
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!! Calcul des quantites qui dependent de rho_tilde_n+1 (rho apres mixing)

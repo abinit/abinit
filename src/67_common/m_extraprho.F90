@@ -41,7 +41,7 @@ module m_extraprho
  use m_jellium,  only : jellium
  use m_atm2fft,  only : atm2fft
  use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_inquire_dim
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_inquire_dim, pawrhoij_filter
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
@@ -402,7 +402,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
            fact=one+alpha
            jrhoij=1+iq0
            do irhoij=1,pawrhoij(iatom)%nrhoijsel
-             klmn=cplex_rhoij*(pawrhoij(iatom)%rhoijselect(irhoij)-dplex+iq0
+             klmn=cplex_rhoij*pawrhoij(iatom)%rhoijselect(irhoij)-dplex+iq0
              rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
 &             +fact*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
              jrhoij=jrhoij+cplex_rhoij

@@ -804,7 +804,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
        ABI_ALLOCATE(pawrhoij(iatom)%kpawmix,(pawtab(itypat)%lmnmix_sz))
        pawrhoij(iatom)%lmnmix_sz=pawtab(itypat)%lmnmix_sz
        pawrhoij(iatom)%kpawmix=pawtab(itypat)%kmix
-       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz*pawrhoij(iatom)%cplex_rhoij
+       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz &
+&                     *pawrhoij(iatom)%cplex_rhoij*pawrhoij(iatom)%qphase
      end do
    end if
    if (dtset%iscf > 0) then
