@@ -19,13 +19,16 @@ LIBPAW_ABINIT_DIR = $(ABINIT_SRC_DIR)/src/42_libpaw
 LIBPAW_VERSION = @libpaw_version@
 LIBPAW_TAR_NAME = libpaw-$(LIBPAW_VERSION)
 
+#Abilint interfaces
+DO_COPY_INTERFACES=''`$(GREP) -s -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces_*.F90 2>/dev/null`
+
 bindings-ready: dist
 
 default: dist
 
 dist: libpaw libpaw-tarball clean-src done
 
-libpaw-tarball:
+libpaw-tarball: libpaw
 	@echo "Making libPAW tarball..."
 	@$(TAR) -czvf $(LIBPAW_TAR_NAME).tar.gz libpaw >>/dev/null
 
@@ -44,26 +47,26 @@ libpaw: check_interfaces clean libpaw_message \
 	libpaw_copy_makefile libpaw_build_src_list \
 	libpaw_eliminate_interfaces libpaw_rename_mpi
 
-libpaw_create_dirs:
+libpaw_create_dirs: clean libpaw_message
 	@if ! test -d $(LIBPAW_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_DIR);fi
 	@if ! test -d $(LIBPAW_SRC_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_SRC_DIR);fi
 	@if ! test -d $(LIBPAW_CFG_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_CFG_DIR);fi
 
-libpaw_copy_src:
+libpaw_copy_src: libpaw_create_dirs
 	@cp -rf $(LIBPAW_ABINIT_DIR)/*.F90 $(LIBPAW_SRC_DIR)
 	@cp -rf $(LIBPAW_ABINIT_DIR)/*.c $(LIBPAW_SRC_DIR)
 	@cp -rf $(LIBPAW_ABINIT_DIR)/*.h $(LIBPAW_SRC_DIR)
 	@cp -rf $(LIBPAW_ABINIT_DIR)/*.txt $(LIBPAW_SRC_DIR)
 	@if test -z $(DO_COPY_INTERFACES); then rm -rf $(LIBPAW_SRC_DIR)/interfaces_*.F90; fi
 
-libpaw_copy_makefile:
+libpaw_copy_makefile: libpaw_create_dirs
 	@cp -rf $(LIBPAW_UTIL_DIR)/VERSION $(LIBPAW_DIR)
 	@cp -rf $(LIBPAW_UTIL_DIR)/Makefile.main $(LIBPAW_DIR)/Makefile
 	@cp -rf $(LIBPAW_UTIL_DIR)/makefile.in $(LIBPAW_DIR)
 	@cp -rf $(LIBPAW_UTIL_DIR)/Makefile.src $(LIBPAW_CFG_DIR)
 	@echo 'LIBPAW_SRC_FILES= \' > $(LIBPAW_CFG_DIR)/libpaw.src
 
-libpaw_build_src_list:
+libpaw_build_src_list: libpaw_create_dirs
 #   Build abinit.src file from abinit.amf and abinit.src file
 	@echo 'LIBPAW_SRC_FILES= \' > $(LIBPAW_CFG_DIR)/libpaw.src
 	@if ! test -z $(DO_COPY_INTERFACES) ; then \
@@ -77,20 +80,19 @@ libpaw_build_src_list:
 	 $(SED) -e 's/,/\ \\/g' | $(SED) -e 's/\"//g' \
 	 >> $(LIBPAW_CFG_DIR)/libpaw.src
 
-libpaw_eliminate_interfaces:
+libpaw_eliminate_interfaces: libpaw_create_dirs
 #   Eliminate unwanted "use interfaces_*" statements
 	@$(FIND) $(LIBPAW_SRC_DIR) -name '*.F90' -exec \
 	 $(SED) -i'.orig' -e '/use[ ]*interfaces_.*\(libpaw\)/!s/use[ ]*interfaces_/\!&/g' {} \;
 	@rm -rf $(LIBPAW_SRC_DIR)/*.orig
 
-libpaw_rename_mpi:
+libpaw_rename_mpi: libpaw_create_dirs
 #   Rename MPI objects beginning with xmpi
 	@$(FIND) $(LIBPAW_SRC_DIR) -name '*.F90' -exec \
 	 $(SED) -i'.orig' -e 's/xmpi_/xpaw_mpi_/g' {} \;
 	@rm -rf $(LIBPAW_SRC_DIR)/*.orig
 
 check_interfaces:
-DO_COPY_INTERFACES=`$(GREP) -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces_*.F90 2>/dev/null`
 	@if ! test -z $(DO_COPY_INTERFACES) ; then \
 	  if ! test -f $(LIBPAW_ABINIT_DIR)/interfaces_*.F90; then \
 	   echo 'Before building the libPAW library, you must execute'; \
@@ -99,7 +101,7 @@ DO_COPY_INTERFACES=`$(GREP) -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces
 	  fi; \
 	 fi
 
-libpaw_message:
+libpaw_message: check_interfaces
 	@echo "Building libPAW directory..."
 
 done:
