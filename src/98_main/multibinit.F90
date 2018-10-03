@@ -228,41 +228,39 @@ program multibinit
 &     'reading spin terms.'
      call spin_model_t_initialize(spin_model, filnam(3), inp )
    end if
-    endif
-
-!Read the model (from DDB or XML)
-    if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
-     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+ else
+   !  Read the model (from DDB or XML)  
+   call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
  !Read the coefficient from fit
-     if(filnam(4)/=''.and.filnam(4)/='no')then
-       call effective_potential_file_getType(filnam(4),filetype)
+   if(filnam(4)/=''.and.filnam(4)/='no')then
+     call effective_potential_file_getType(filnam(4),filetype)
    ! TODO hexu: filetype==(33?)
-       if(filetype==3.or.filetype==23) then
-         call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-       else
-         write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&         ' There is no specific file for the coefficients from polynomial fitting'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
-       end if
+     if(filetype==3.or.filetype==23) then
+       call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
      else
-       if(inp%ncoeff/=0) then
-         write(message, '(5a)' )&
+       write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&         ' There is no specific file for the coefficients from polynomial fitting'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
+   else
+     if(inp%ncoeff/=0) then
+       write(message, '(5a)' )&
 &         'ncoeff is specified in the input but,',ch10,&
 &         'there is no file for the coefficients ',ch10,&
 &         'Action: add coefficients.xml file'
-         MSG_ERROR(message)
+       MSG_ERROR(message)
 
-       else
-         write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     else
+       write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &         ' There is no file for the coefficients from polynomial fitting'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
-       end if
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
      end if
-
    end if
+ end if
+ 
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences

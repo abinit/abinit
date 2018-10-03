@@ -99,9 +99,9 @@ In the first part of this tutorial, we will describe how to compute various
 linear and non-linear responses directly connected to second-order and third-
 order derivatives of the energy, using DFPT. From the (2n+1) theorem,
 computation of energy derivatives up to third order only requires the
-knowledge of the ground-state and first-order wavefunctions, see X. Gonze and
-J.-P. Vigneron, PRB 39, 13120 (1989) and X. Gonze, Phys. Rev. A 52, 1096
-(1995). Our study will therefore include the following steps : (i) resolution
+knowledge of the ground-state and first-order wavefunctions, see 
+[[cite:Gonze1989]] and [[cite:Gonze1995]].
+Our study will therefore include the following steps : (i) resolution
 of the ground-state problem, (ii) determination of the first-order
 wavefunctions and construction of the related databases for second and third-
 order energy derivatives, (iii) combination of the different databases and
@@ -130,7 +130,7 @@ clarity we have decomposed the calculation into individual inputs that are now d
 Let us examine the file *tnlo_2.in*. Its purpose is to build databases for
 second and third energy derivatives with respect to electric fields and atomic
 displacements. You can edit it. It is made of 5 datasets. The first four data
-sets are nearly the same as for a usual linear response calculation : (1)
+sets are nearly the same as for a usual linear response calculation: (1)
 self-consistent calculation in the IBZ; (2) non self-consistent calculations
 to get the wave-functions over the full BZ; (3) ddk calculation, (4)
 derivatives with respect to electric field and atomic displacements. Some
@@ -162,8 +162,9 @@ used later for a global and convenient analysis of the results using ANADDB.
 **Responses to strain.** We combine the above-mentioned computation of the
 response to electric field and atomic displacements with the response to
 strain. This is not at all mandatory for the computation of the presently
-accessible non-linear response coefficients. However, this was used in the
-above-mentioned paper by Veithen et al, to add corrections corresponding to
+accessible non-linear response coefficients. However, this was used in 
+[[cite:Veithen2005]], already mentioned,
+to add corrections corresponding to
 free boundary conditions, thanks to a further finite difference calculation on
 top of linear response calculations. The DFPT implementation of the
 computation of this correction is not available at present.
@@ -222,7 +223,7 @@ For the non-linear responses you need
 
 [[anaddb:ramansr]] = 1 will impose the sum rule on the first-order change of the
 electronic dielectric susceptibility under atomic displacement, hereafter
-referred to as dchi/dtau. It is a condition of invariance of chi under
+referred to as $\frac{d \chi}{d \tau}$. It is a condition of invariance of chi under
 translation of the whole crystal, similar to the acoustic sum rules for
 phonons at Gamma or the charge neutrality sum rule on Z*.
 
@@ -254,7 +255,7 @@ tnlo_5.out. You will have to jump between different sections of tnlo_5.out to fi
 
 For comparison, we report in parenthesis (...) the values obtained with ecut =
 5, and for nonlinear responses in brackets [...] the fully converged result as
-reported in PRB 71, 125107 (2005).  
+reported in [[cite:Veithen2005]].
 
   * Born effective charge of Al:
     
@@ -285,8 +286,8 @@ Finally, different quantities are related to non-linear responses.
 
   * Nonlinear optical susceptibility :   
 They are directly provided in the output in pm/V. As you can see the value
-computed here is far from the well converged result as reported in PRB 71,
-125107 (2005).
+computed here is far from the well converged result as reported in 
+[[cite:Veithen2005]].
 
     
         d_36 (pm/V)  = 21.175523 (32.772254) [fully converged :35] 
@@ -309,8 +310,8 @@ and longitudinal (LO) optic modes at Gamma:
                 alpha(TO) = -0.008489212 (-0.009114814)
             alpha(LO) = -0.011466211 (-0.013439375) 
   
-The basic quantity to get the Raman susceptibilities are the dchi/dtau that
-are also reported separately :
+The basic quantity to get the Raman susceptibilities are the $\frac{d \chi}{d \tau}$ that
+are also reported separately:
     
         dchi_23/dtau_1 (Bohr^-1) of Al = -0.094488281 (-0.099889084) 
   
@@ -328,7 +329,7 @@ the system (1/mu = 1/m_Al + 1/m_As). From the previous data, we get :
 
 ## 3 Finite difference calculation of the Raman tensor
   
-For comparison with the DPFT calculation, we can compute dchi/dtau for the Al
+For comparison with the DPFT calculation, we can compute $\frac{d \chi}{d \tau}$ for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
 This is done with the file *\$ABI_TUTORESPFN/Input/tnlo_6.in*, however
@@ -429,6 +430,6 @@ successively considered (heavy for complex crystals) and the results must then
 be converted into appropriate units with risk of error of manipulations.
 
 The DFPT approach is the most convenient and avoid a lot of human work.
-Everything is reported together (not only dchi/dtau but also the full Raman
+Everything is reported together (not only $\frac{d \chi}{d \tau}$ but also the full Raman
 polarizability tensors) and in appropriate units. It should therefore be
 considered as the best choice (when available, as in ABINIT).

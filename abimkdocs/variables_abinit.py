@@ -3005,7 +3005,7 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE alogorithm
+It is also used in geometric relaxation calculation with the FIRE algorithm
 ([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
@@ -3519,9 +3519,11 @@ Variable(
     defaultval=0,
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian.
-Then use it to compute the
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]), 
+as the parameters of a Frohlich Hamiltonian.
+Then use these to compute the
 change of electronic eigenvalues due to electron-phonon interaction,
 using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
 as well as temperature dependence.
@@ -4591,6 +4593,21 @@ dataset to find the proper dataset. As an example:
       ndtset 3   jdtset 1 2 4  getXXX -1
 
 refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]].
 """,
 ),
 
@@ -6634,7 +6651,13 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by 
+Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. 
+The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22). 
+It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. 
+The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones. 
+The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well. 
+The positions are in reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:** The initial time step [[dtion]]
@@ -6979,6 +7002,21 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer to ReaD the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]] in another run.
 """,
 ),
 
@@ -13578,7 +13616,15 @@ Variable(
     mnemonics="PRint Electric Field Gradient",
     requires="[[usepaw]] == 1, [[quadmom]]",
     text="""
-  * If nonzero, calculate the electric field gradient at each atomic site in the unit cell. Using this option requires [[quadmom]] to be set as well. Values will be written to main output file (search for Electric Field Gradient). If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. If prtefg=2, the full electric field gradient tensors in atomic units are also given, showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. This is useful for comparing the accurate PAW-based results to those of simple ion-only models. Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell. 
+Using this option requires [[quadmom]] to be set as well. 
+Values will be written to main output file (search for Electric Field Gradient). 
+If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. 
+If prtefg=2, the full electric field gradient tensors in atomic units are also given, 
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. 
+If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. 
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models. 
+Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
 [[nspden]]) and also LDA+U (see [[usepawu]]).
 """,
@@ -13594,7 +13640,7 @@ Variable(
     mnemonics="PRint EFfective MASs data",
     requires="[[efmas]] == 1",
     text="""
-  * If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
+If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
 """,
 ),
 
@@ -15769,15 +15815,16 @@ Variable(
     mnemonics="ScaLapacK matrix RANK Per Process",
     text="""
 This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.
-This value is the matrix rank each process will hold for the diagonalization.
-For a 1000x1000 matrix with default value, scalapack won't be used.
-For a 2000x2000 matrix with default value, scalapack will used 2000/1000=2 MPI.
-For a 2000x2000 matrix with a slk_rank=500, scalapack will use 2000/500=4 MPI.
+This value is the matrix rank that each process will hold for the diagonalization.
+For a 1000x1000 matrix with default value, scalapack won't be used (Lapack will be used).
+For a 2000x2000 matrix with default value, scalapack will be used with 2000/1000=2 MPI processes.
+For a 2000x2000 matrix with a slk_rank=500, scalapack will be used with 2000/500=4 MPI processes.
 In case of hybrid MPI+OpenMP, the number of thread is also taken into account.
+
 ***WARNING*** None of the available scalapack library are thread-safe  (2018). Therefore using both scalapack *and* OpenMP is highly unpredictable.
 Furthermore, using multithreaded linear algebra library (MKL ACML...) is more efficient than pure MPI scalapack.
 
-Usually it is better to tune this variable and let the code do the rest.
+Usually it is better to define this variable and let the code do the rest.
 """,
 ),
 
@@ -17375,7 +17422,9 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. 
+The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. 
+Three choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 

@@ -56,4 +56,4 @@ done
 rm -rf \
   abinit-bindings-[0-9]* \
   libpaw/libpaw-0.* libpaw/libpaw-1.* libpaw/libpaw-*.tar.gz \
-  parser/bindings-ready
+  libpaw/bindings-ready
