@@ -36,8 +36,7 @@ A.3 Tests v8#100-107 have been moved to v8#81-88.
 B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it was only available with norm conserving psps previously).
     This is based on the second-order Sternheimer equation for the derivative
     with respect to an electric field.
-    Spinor are treated, as well as DFT+U.
-    See tests [[test:v8_81]] to [[test:v8_88]].  
+    See tests [[test:v8_81]] to [[test:v8_89]].  
     By L. Baguet and M. Torrent.
 
 B.2 There has been a large effort to clean the documentation, that was needed and made possible thanks to the recent move to the mkdocs system.
