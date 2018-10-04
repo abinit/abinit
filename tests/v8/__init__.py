@@ -89,15 +89,6 @@ inp_files = [
 "t91.in",
 "t92.in",
 "t93.in",
-#Nonlinear + Second order Sternheimer
-"t100.in",
-"t101.in",
-"t102.in",
-"t103.in",
-"t104.in",
-"t105.in",
-"t106.in",
-"t107.in",
 #Electron-phonon
 "t150.in",
 "t151.in",
@@ -106,5 +97,4 @@ inp_files = [
 "t154.in",
 "t155.in",
 "t156.in",
-"t110.in",
 ]

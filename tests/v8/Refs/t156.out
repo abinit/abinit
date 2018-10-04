@@ -436,6 +436,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
@@ -553,6 +555,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
@@ -674,6 +678,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
@@ -797,6 +803,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
@@ -919,6 +927,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
@@ -1034,6 +1044,8 @@ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
+asr: 1 dipdip: 1 symdynmat: 1
+No special treatment of Frohlich divergence in gkq for q --> 0
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
 ================================================================================
