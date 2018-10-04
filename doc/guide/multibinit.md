@@ -122,7 +122,7 @@ at fixed temperature (DDB file mandatory) activated by imposing [[abinit:ionmov]
 ### 3.3 How to bound a model
 
 MULTIBINIT includes an automatic binding process.
-Have a look at the [[topic:BoundProcess]],
+Have a look at the [[topic:BoundingProcess]],
 where input variables and selected input files are mentioned.
 Later, a <!-- [[lesson:lattice_model | tutorial]]--> tutorial will be available.
 

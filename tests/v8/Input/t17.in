@@ -1,5 +1,5 @@
 #Silicon interstitial in a conventional cell -> 9 atoms total
-#Perform a geometry optimization with the LBFGS algorithm
+#Perform a geometry optimization with the FIRE algorithm
 
 boxcutmin   1.5
 

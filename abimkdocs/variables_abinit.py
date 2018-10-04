@@ -3005,7 +3005,7 @@ values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
 For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
-It is also used in geometric relaxation calculation with the FIRE alogorithm
+It is also used in geometric relaxation calculation with the FIRE algorithm
 ([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
@@ -3519,9 +3519,11 @@ Variable(
     defaultval=0,
     mnemonics="Electron-PHonon: FROHLICH Model",
     text="""
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]]), as the parameters of a Frohlich Hamiltonian.
-Then use it to compute the
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]), 
+as the parameters of a Frohlich Hamiltonian.
+Then use these to compute the
 change of electronic eigenvalues due to electron-phonon interaction,
 using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
 as well as temperature dependence.
@@ -4551,6 +4553,153 @@ refers to dataset 2 when dataset 4 is initialized.
 ),
 
 Variable(
+    abivarname="getdelfd",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the 1st derivative of wavefunctions with respect to ELectric FielD, from _1WF file",
+    text="""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
+starting wavefunctions, as an alternative to
+[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+explanations given for these latter variables.
+The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
+typically used to chain the calculations in the multi-dataset mode, since they
+describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+wavefunctions of the present dataset.
+
+We now focus on the **getwfk** input variable (the only one used in ground-
+state calculations), but the rules for **getwfq** and **get1wf** are similar,
+with _WFK replaced by _WFQ or _1WF.
+If **getwfk** ==0, no use of previously computed output wavefunction file
+appended with _DSx_WFK is done.
+If **getwfk** is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _WFK must be used.
+If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
+be taken, which is a frequently occurring case.
+If **getwfk** is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file. In this case, if one refers to
+a non existent data set (prior to the first), the wavefunctions are not
+initialised from a disk file, so that it is as if **getwfk** =0 for that
+initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
+straightforward: except for the first wavefunctions, that are not initialized
+by reading a disk file, the output wavefunction of one dataset is input of the
+next one.
+In the case of a ddk calculation in a multi dataset run, in order to compute
+correctly the localisation tensor, it is mandatory to declare give getddk the
+value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
+should be changed in the future.
+NOTE: a negative value of a "get" variable indicates the number of datasets
+to go backwards; it is not the number to be subtracted from the current
+dataset to find the proper dataset. As an example:
+
+      ndtset 3   jdtset 1 2 4  getXXX -1
+
+refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getdkdk",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the 2nd derivative of wavefunctions with respect to K, from _1WF file",
+    text="""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
+starting wavefunctions, as an alternative to
+[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+explanations given for these latter variables.
+The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
+typically used to chain the calculations in the multi-dataset mode, since they
+describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+wavefunctions of the present dataset.
+
+We now focus on the **getwfk** input variable (the only one used in ground-
+state calculations), but the rules for **getwfq** and **get1wf** are similar,
+with _WFK replaced by _WFQ or _1WF.
+If **getwfk** ==0, no use of previously computed output wavefunction file
+appended with _DSx_WFK is done.
+If **getwfk** is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _WFK must be used.
+If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
+be taken, which is a frequently occurring case.
+If **getwfk** is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file. In this case, if one refers to
+a non existent data set (prior to the first), the wavefunctions are not
+initialised from a disk file, so that it is as if **getwfk** =0 for that
+initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
+straightforward: except for the first wavefunctions, that are not initialized
+by reading a disk file, the output wavefunction of one dataset is input of the
+next one.
+In the case of a ddk calculation in a multi dataset run, in order to compute
+correctly the localisation tensor, it is mandatory to declare give getddk the
+value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
+should be changed in the future.
+NOTE: a negative value of a "get" variable indicates the number of datasets
+to go backwards; it is not the number to be subtracted from the current
+dataset to find the proper dataset. As an example:
+
+      ndtset 3   jdtset 1 2 4  getXXX -1
+
+refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getdkde",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the mixed 2nd derivative of wavefunctions with respect to K and electric field, from _1WF file",
+    text="""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
+starting wavefunctions, as an alternative to
+[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+explanations given for these latter variables.
+The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
+typically used to chain the calculations in the multi-dataset mode, since they
+describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+wavefunctions of the present dataset.
+
+We now focus on the **getwfk** input variable (the only one used in ground-
+state calculations), but the rules for **getwfq** and **get1wf** are similar,
+with _WFK replaced by _WFQ or _1WF.
+If **getwfk** ==0, no use of previously computed output wavefunction file
+appended with _DSx_WFK is done.
+If **getwfk** is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _WFK must be used.
+If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
+be taken, which is a frequently occurring case.
+If **getwfk** is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file. In this case, if one refers to
+a non existent data set (prior to the first), the wavefunctions are not
+initialised from a disk file, so that it is as if **getwfk** =0 for that
+initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
+straightforward: except for the first wavefunctions, that are not initialized
+by reading a disk file, the output wavefunction of one dataset is input of the
+next one.
+In the case of a ddk calculation in a multi dataset run, in order to compute
+correctly the localisation tensor, it is mandatory to declare give getddk the
+value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
+should be changed in the future.
+NOTE: a negative value of a "get" variable indicates the number of datasets
+to go backwards; it is not the number to be subtracted from the current
+dataset to find the proper dataset. As an example:
+
+      ndtset 3   jdtset 1 2 4  getXXX -1
+
+refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
     abivarname="getden",
     varset="files",
     vartype="integer",
@@ -4591,6 +4740,21 @@ dataset to find the proper dataset. As an example:
       ndtset 3   jdtset 1 2 4  getXXX -1
 
 refers to dataset 2 when dataset 4 is initialized.
+""",
+),
+
+Variable(
+    abivarname="getefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]].
 """,
 ),
 
@@ -6634,7 +6798,13 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. This efficiency of this method is competible with bfgs. It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. The initial time step is set with [[dtion]]. Note that here the physical meaning and unit of dtion are different from the default one. The purpose of this ionmov is for relaxation, not molecular dynamics. It is still the step of moving the ions, but the cellparameters change as well. The positions are in the reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by 
+Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. 
+The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22). 
+It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. 
+The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones. 
+The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well. 
+The positions are in reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:** The initial time step [[dtion]]
@@ -6979,6 +7149,21 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdefmas",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer to ReaD the EFfective MASses from...",
+    text="""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode).
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]] in another run.
 """,
 ),
 
@@ -10241,6 +10426,34 @@ energy is numerically estimated through linear interpolation.
 ),
 
 Variable(
+    abivarname="nonlinear_info",
+    varset="dfpt",
+    vartype="integer",
+    topics=['nonlinear_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Output NON-LINEAR INFOrmation",
+    requires="[[optdriver]] == 5 and [[usepead]] == 0, or [[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0",
+    text="""
+Control the output of the non-linear implementation (only when [[usepead]] == 0).
+The default value, [[nonlinear_info]] == 0 does nothing. If [[nonlinear_info]] == 1,
+different contributions of 3rd derivatives of the energy are written in the
+output file (non time consuming).
+
+Higher values activate some internal tests for
+checking the implementation correctness (time consuming, not useable in parallel).
+If [[nonlinear_info]] == 2, same effect than 1 and tests are done in non-linear 
+([[optdriver]]==5 and [[usepead]] == 0).
+If [[nonlinear_info]] == 3, same effect than 1 and tests are done in rf2_init
+([[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0).
+If [[nonlinear_info]] == 4, same effect than 1 and tests are done in both non-linear and rf2_init.
+A line containining "NOT PASSED" (and other information) is added to the output file
+for each test that does not pass, otherwise nothing is printed. However, more information concerning
+the tests is always printed in the **standard** output file.
+""",
+),
+
+Variable(
     abivarname="normpawu",
     varset="dev",
     vartype="integer",
@@ -13207,6 +13420,10 @@ During the linear response calculation, in order to prepare a non-linear
 calculation, one should put [[prepanl]] to 1 in order to force ABINIT to
 compute the electric field perturbation along the three directions explicitly,
 and to keep the full number of k-points.
+
+In the case of a 2nd derivative of wavefunction ([[rf2_dkdk]] or [[rf2_dkde]]),
+[[prepanl]] == 1 can be used in order to skip directions of perturbations that
+will not be used by the non-linear routine (see [[rf2_dkdk]] for more details).
 """,
 ),
 
@@ -13578,7 +13795,15 @@ Variable(
     mnemonics="PRint Electric Field Gradient",
     requires="[[usepaw]] == 1, [[quadmom]]",
     text="""
-  * If nonzero, calculate the electric field gradient at each atomic site in the unit cell. Using this option requires [[quadmom]] to be set as well. Values will be written to main output file (search for Electric Field Gradient). If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. If prtefg=2, the full electric field gradient tensors in atomic units are also given, showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. This is useful for comparing the accurate PAW-based results to those of simple ion-only models. Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell. 
+Using this option requires [[quadmom]] to be set as well. 
+Values will be written to main output file (search for Electric Field Gradient). 
+If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. 
+If prtefg=2, the full electric field gradient tensors in atomic units are also given, 
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. 
+If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. 
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models. 
+Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
 [[nspden]]) and also LDA+U (see [[usepawu]]).
 """,
@@ -13594,7 +13819,7 @@ Variable(
     mnemonics="PRint EFfective MASs data",
     requires="[[efmas]] == 1",
     text="""
-  * If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
+If 1, at the end of an effective mass calculation ([[efmas]] = 1), create a file *_EFMAS, that contains the generalized second-order k-derivatives, see Eq.(66) in [[cite:Laflamme2016]], in view of further processing.
 """,
 ),
 
@@ -15116,18 +15341,72 @@ Variable(
     defaultval=0,
     mnemonics="Response Function: 2nd Derivative of wavefunctions with respect to K",
     text="""
-UNUSABLE (in development)
-
-Activates computation of second derivatives of wavefunctions with respect to
-wavevectors. This is not strictly a response function but is a needed
+If is equal to 1, activates computation of second derivatives of wavefunctions with respect to
+wavevectors (ipert = natom+10 is activated). This is not strictly a response function but is a needed
 auxiliary quantity in the calculations of 3rd-order derivatives of the energy
-(non-linear response). The directions for the derivatives are determined by
-[[rfdir]] (TO BE CORRECTED!).
+(non-linear response) if [[usepead]] == 0. The directions for the derivatives are determined by
+[[rf2_pert1_dir]] and [[rf2_pert2_dir]] and [[prepanl]] as the following:
 
-  * 0 --> no derivative calculation
-  * 1 --> calculation along diagonal directions ($\,d^2$/($\,d k_i \,d k_i$), natom+10 is activated)
-  * 2 --> calculation along off-diagonal directions ($\,d^2$/($\,d k_i \,d k_j$), natom+11 is activated)
-  * 3 --> calculation along all directions (both natom+10 and natom+11 are activated)
+The computation of the 2nd derivative of wavefunction with respect to "lambda_1" and "lambda_2" is computed if
+if rf2_pert1_dir[idir1] AND rf2_pert2_dir[idir2] are equal to 1, where "idir1" ("idir2") is direction of
+the perturbation "lambda_1" ("lambda_2").
+If ALL directions are activated (default behavior) AND [[prepanl]] == 1, then the code automatically selects
+only the directions that will be used by the non-linear routine ([[optdriver]] == 5) using crystal symmetries.
+""",
+),
+
+Variable(
+    abivarname="rf2_dkde",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Response Function: mixed 2nd Derivative of wavefunctions with respect to K and electric field",
+    text="""
+If is equal to 1, activates computation of mixed second derivatives of wavefunctions with respect to
+wavevector and electric field (ipert = natom+11 is activated). This is not strictly a response function
+but is a needed auxiliary quantity in the calculations of 3rd-order derivatives of the energy
+(non-linear response) if [[usepead]] == 0. The directions for the derivatives are determined by
+[[rf2_pert1_dir]], [[rf2_pert2_dir]] and [[prepanl]] in the same way than [[rf2_dkdk]].
+""",
+),
+
+Variable(
+    abivarname="rf2_pert1_dir",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_useful'],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="Response Function (2nd order Sternheimer equation): 1st PERTurbation DIRection",
+    text="""
+Gives the directions of the 1st perturbation to be considered when solving the 2nd order Sternheimer equation.
+The three elements corresponds to the three primitive vectors, either in real
+space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
+electric field, homogeneous magnetic field calculations).
+If equal to 1, the 2nd order wavefunctions, as defined by [[rf2_dkdk]] or [[rf2_dkde]], are computed for the
+corresponding direction. If 0, this direction is not considered.
+See [[rf2_dkdk]] for more details.
+""",
+),
+
+Variable(
+    abivarname="rf2_pert2_dir",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_useful'],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="Response Function (2nd order Sternheimer equation): 2nd PERTurbation DIRection",
+    text="""
+Gives the directions of the 2nd perturbation to be considered when solving the 2nd order Sternheimer equation.
+The three elements corresponds to the three primitive vectors, either in real
+space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
+electric field, homogeneous magnetic field calculations).
+If equal to 1, the 2nd order wavefunctions, as defined by [[rf2_dkdk]] or [[rf2_dkde]], are computed for the
+corresponding direction. If 0, this direction is not considered.
+See [[rf2_dkdk]] for more details.
 """,
 ),
 
@@ -15769,15 +16048,16 @@ Variable(
     mnemonics="ScaLapacK matrix RANK Per Process",
     text="""
 This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.
-This value is the matrix rank each process will hold for the diagonalization.
-For a 1000x1000 matrix with default value, scalapack won't be used.
-For a 2000x2000 matrix with default value, scalapack will used 2000/1000=2 MPI.
-For a 2000x2000 matrix with a slk_rank=500, scalapack will use 2000/500=4 MPI.
+This value is the matrix rank that each process will hold for the diagonalization.
+For a 1000x1000 matrix with default value, scalapack won't be used (Lapack will be used).
+For a 2000x2000 matrix with default value, scalapack will be used with 2000/1000=2 MPI processes.
+For a 2000x2000 matrix with a slk_rank=500, scalapack will be used with 2000/500=4 MPI processes.
 In case of hybrid MPI+OpenMP, the number of thread is also taken into account.
+
 ***WARNING*** None of the available scalapack library are thread-safe  (2018). Therefore using both scalapack *and* OpenMP is highly unpredictable.
 Furthermore, using multithreaded linear algebra library (MKL ACML...) is more efficient than pure MPI scalapack.
 
-Usually it is better to tune this variable and let the code do the rest.
+Usually it is better to define this variable and let the code do the rest.
 """,
 ),
 
@@ -17375,7 +17655,9 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. Two choices are allowed concerning the double counting term:
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. 
+The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. 
+Three choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
@@ -17410,6 +17692,31 @@ smaller U than the one used in the DFT calculation. See the description of the
 
 Suggested acknowledgment:[[cite:Amadon2008a]].
 
+""",
+),
+
+Variable(
+    abivarname="usepead",
+    varset="dfpt",
+    vartype="integer",
+    topics=['nonlinear_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="USE of PEAD formalism",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
+    text=r"""
+Determine which non-linear implementation is used. If [[usepead]]=1, the Perturbation
+Expansion After Discretization formalism is used, as in [[cite:Veithen2005]].
+In that method, the electric field is treated numerically, i.e the k-space 
+gradient operator appearing in the expression of the electric field potential
+is discretized (see Eq.7 and 10 of [[cite:Veithen2005]]).
+If [[usepead]]=0, the electric field is treated analytically, leading to a better
+k-points convergence. Furthermore, the current implementation is compatible with PAW
+pseudopentials, while [[usepead]]=1 is not. The drawback of the analytical method
+is one has to solve a second order Sternheimer equation before actually computing
+third derivatives of the energy, using [[rf2_dkdk]] and [[rf2_dkde]].
+This is not the most time-consumming part though.
+Look at the inputs of related tests in the testsuite to see examples of the workflow.
 """,
 ),
 

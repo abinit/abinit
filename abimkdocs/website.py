@@ -1122,8 +1122,8 @@ The bibtex file is available [here](../abiref.bib).
                     if a.text is None: a.text = "%s %s" % (name, namespace)
                 html_classes.append("lesson-wikilink")
 
-            elif namespace == "help":
-                # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
+            elif namespace == "help" or namespace == "guide" :
+                # Handle [[help:optic|text] NB: [[help:codename]] is echoed "codename help file"
                 if name == "index":
                     url = "/guide/"
                     if a.text is None: a.text = "user-guide home page"
@@ -1131,6 +1131,26 @@ The bibtex file is available [here](../abiref.bib).
                     url = "/guide/%s" % name
                     if a.text is None: a.text = "%s help file" % name
                 html_classes.append("user-guide-wikilink")
+
+            elif namespace == "about" :
+                # Handle [[about:release-notes|text] NB: [[about:file]] is echoed "file"
+                if name == "index":
+                    url = "/about/"
+                    if a.text is None: a.text = "no index for about at present"
+                else:
+                    url = "/about/%s" % name
+                    if a.text is None: a.text = "%s" % name
+                html_classes.append("about-wikilink")
+
+            elif namespace == "developers" :
+                # Handle [[developers:psp8_info|text] NB: [[developers:filename]] is echoed "filename developer doc"
+                if name == "index":
+                    url = "/developers/"
+                    if a.text is None: a.text = "no index for developers at present"
+                else:
+                    url = "/developers/%s" % name
+                    if a.text is None: a.text = "%s developer doc" % name
+                html_classes.append("developers-wikilink")
 
             elif namespace == "topic":
                 # Handle [[topic:BSE|text]]
