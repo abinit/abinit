@@ -109,10 +109,10 @@ module m_xg
     module procedure xgBlock_gemmC
   end interface
 
-! interface xgBlock_colwiseMul
-!   module procedure xgBlock_colwiseMulR
-!   module procedure xgBlock_colwiseMulC
-! end interface
+ interface xgBlock_colwiseMul
+   module procedure xgBlock_colwiseMulR
+   module procedure xgBlock_colwiseMulC
+ end interface
 
   interface xgBlock_trsm
     module procedure xgBlock_trsmR
@@ -173,7 +173,7 @@ module m_xg
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
   public :: xgBlock_colwiseCymax
-  !public :: xgBlock_colwiseMul
+  public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
   public :: xgBlock_zero
@@ -2029,78 +2029,78 @@ module m_xg
 !! NAME
 !! xgBlock_colwiseMulR
 
-!  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'xgBlock_colwiseMulR'
-!!End of the abilint section
-!
-!    type(xgBlock_t) , intent(inout) :: xgBlock
-!    double precision, intent(in   ) :: vec(:)
-!    integer, intent(in   )          :: shift
-!    integer :: rows
-!    integer :: iblock
-!
-!    rows = size(vec,dim=1)
-!
-!    select case(xgBlock%space)
-!    case (SPACE_R,SPACE_CR)
-!      !$omp parallel do shared(xgBlock,vec), &
-!      !$omp& schedule(static)
-!      do iblock = 1, xgBlock%cols
-!        xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-!        xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-!      end do
-!    case (SPACE_C)
-!      !$omp parallel do shared(xgBlock,vec), &
-!      !$omp& schedule(static)
-!      do iblock = 1, xgBlock%cols
-!        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-!        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-!      end do
-!    end select
-!
-!  end subroutine xgBlock_colwiseMulR
-!!!***
-!
-!!!****f* m_xg/xgBlock_colwiseMulC
-!!!
-!!! NAME
-!!! xgBlock_colwiseMulC
-!
-!  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'xgBlock_colwiseMulC'
-!!End of the abilint section
-!
-!    type(xgBlock_t), intent(inout) :: xgBlock
-!    complex(kind=8), intent(in   ) :: vec(:)
-!    integer, intent(in   )         :: shift
-!    integer :: rows
-!    integer :: iblock
-!
-!    rows = size(vec,dim=1)
-!
-!    select case(xgBlock%space)
-!    case (SPACE_R,SPACE_CR)
-!      MSG_ERROR("Error colwiseMulC")
-!    case (SPACE_C)
-!      !$omp parallel do shared(xgBlock,vec), &
-!      !$omp& schedule(static)
-!      do iblock = 1, xgBlock%cols
-!        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-!        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-!      end do
-!    end select
-!
-!  end subroutine xgBlock_colwiseMulC
+  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_colwiseMulR'
+!End of the abilint section
+
+    type(xgBlock_t) , intent(inout) :: xgBlock
+    double precision, intent(in   ) :: vec(:)
+    integer, intent(in   )          :: shift
+    integer :: rows
+    integer :: iblock
+
+    rows = size(vec,dim=1)
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      !$omp parallel do shared(xgBlock,vec), &
+      !$omp& schedule(static)
+      do iblock = 1, xgBlock%cols
+        xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+        xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+      end do
+    case (SPACE_C)
+      !$omp parallel do shared(xgBlock,vec), &
+      !$omp& schedule(static)
+      do iblock = 1, xgBlock%cols
+        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+      end do
+    end select
+
+  end subroutine xgBlock_colwiseMulR
+!!***
+
+!!****f* m_xg/xgBlock_colwiseMulC
+!!
+!! NAME
+!! xgBlock_colwiseMulC
+
+  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_colwiseMulC'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    complex(kind=8), intent(in   ) :: vec(:)
+    integer, intent(in   )         :: shift
+    integer :: rows
+    integer :: iblock
+
+    rows = size(vec,dim=1)
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      MSG_ERROR("Error colwiseMulC")
+    case (SPACE_C)
+      !$omp parallel do shared(xgBlock,vec), &
+      !$omp& schedule(static)
+      do iblock = 1, xgBlock%cols
+        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+      end do
+    end select
+
+  end subroutine xgBlock_colwiseMulC
 !!***
 
 !!****f* m_xg/xgBlock_add
