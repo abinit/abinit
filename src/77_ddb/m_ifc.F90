@@ -3554,7 +3554,9 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,imode,iphl2
- !character(len=500) :: msg
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
@@ -3585,6 +3587,22 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  if(present(ncid))then
    iphl2 = 0
    call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+   !ncerr = nctk_def_arrays(ncid, [ &
+   !  nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
+   !  nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")], &
+   !  defmode=.True.)
+   !NCF_CHECK(ncerr)
+   ! TODO chneut is missing
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !    "asr", "chneut", "dipdip", "symdynmat"])
+   !NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_set_datamode(ncid))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'emacro_cart'), ifc%dielt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'becs_cart'), ifc%zeff))
+   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "asr", "chneut", "dipdip", "symdynmat"], &
+   !  [ifc%asr, inp%chneut, ifc%dipdip, ifc%symdynmat])
+   !NCF_CHECK(ncerr)
  endif
 #endif
 

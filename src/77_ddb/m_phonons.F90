@@ -1373,7 +1373,7 @@ end subroutine zacharias_supercell_make
 !!   nconfig = numer of requested configurations
 !!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
 !!   temperature_K =  temperature in Kelvin
-!!   nqpt = number of q-point 
+!!   nqpt = number of q-point
 !!   namplitude = number of amplitude provided by the user
 !!   amplitudes(namplitude) = list of the amplitudes of the unstable phonons
 !!                            amplitudes(1:3,iamplitude) = qpt
@@ -1523,7 +1523,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
            !Default amplitude for all the frequencies
            sigma = 100._dp
          case(3)
-           !Absolute value of the frequencie 
+           !Absolute value of the frequencies
            sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
 &                abs(phfrq_allq(imode,iq)))
          case(4)
@@ -1564,7 +1564,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
        freeze_displ =  rand * sigma
 
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))       
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
      end do !iconfig
    end do !imode
  end do !iq
@@ -3478,7 +3478,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <=0 or ph_ndivsm <= 0, phonon bands won't be produced. returning")
+   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
    return
  end if
 
@@ -3508,7 +3508,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, weights, phfrqs, phdispl_cart)
+   call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))

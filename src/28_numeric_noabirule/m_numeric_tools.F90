@@ -7123,6 +7123,7 @@ function dotproduct(nv1,nv2,v1,v2)
    dotproduct=dotproduct+v1(i,j)*v2(i,j)
   end do
  end do
+
 end function dotproduct
 !!***
 

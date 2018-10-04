@@ -4419,6 +4419,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
    ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+
  new%fermie = ebands%fermie
 
  ABI_FREE(new_kibz)

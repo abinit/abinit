@@ -5901,9 +5901,9 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!In the case the non-analyticity is required :
-! MG: the tensor is in cartesian coordinates and this means that qphon must be in
-!     given in Cartesian coordinates.
+!In the case the non-analyticity is required:
+! the tensor is in cartesian coordinates and this means that qphon must be in
+! given in Cartesian coordinates.
  if(analyt==0)then
 
 !  Normalize the limiting direction
@@ -5948,7 +5948,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
 
    ABI_DEALLOCATE(zeff)
- end if !  End of the non-analyticity treatment :
+ end if !  End of the non-analyticity treatment
 
  ! Multiply IFC(q) by masses
  call massmult_and_breaksym(natom, ntypat, typat, amu, displ)

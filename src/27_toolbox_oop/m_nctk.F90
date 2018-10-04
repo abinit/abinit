@@ -1851,7 +1851,7 @@ integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(nc
  end if
 
  do ii=1,size(varnames)
-   NCF_CHECK(nf90_inq_varid(ncid, varnames(ii), varid))
+   NCF_CHECK_MSG(nf90_inq_varid(ncid, varnames(ii), varid), sjoin("Inquiring: ", varnames(ii)))
    NCF_CHECK(nf90_put_var(ncid, varid, values(ii)))
  end do
 
