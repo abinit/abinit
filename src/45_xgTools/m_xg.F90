@@ -173,7 +173,7 @@ module m_xg
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
   public :: xgBlock_colwiseCymax
-  public :: xgBlock_colwiseMul
+  !public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
   public :: xgBlock_zero
