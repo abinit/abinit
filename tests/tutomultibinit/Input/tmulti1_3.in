@@ -24,6 +24,6 @@ optcell =  2  # Relaxation of the cell
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and generate effective potential
+#%%   read xml file and run a molecular dynamics
 #%% topics = LatticeModel
 #%%<END TEST_INFO>

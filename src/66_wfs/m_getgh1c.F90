@@ -1072,7 +1072,9 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 !Compute ffnl for nonlop with signs = 1
  print_info = 0
- if (dtset%prtvol==-19.or.dtset%prtvol==-20.or.dtset%prtvol==-21) print_info = 1
+ if (dtset%prtvol==-19.or.dtset%prtvol==-20.or.dtset%prtvol==-21.or.dtset%nonlinear_info>=3) then
+   print_info = 1
+ end if
  if (present(ffnl1_test).and.print_info/=0.and.(ipert==natom+10.or.ipert==natom+11)) then
    ABI_ALLOCATE(ffnl1_test,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
    idir0 = 0 ! for nonlop with signs = 1

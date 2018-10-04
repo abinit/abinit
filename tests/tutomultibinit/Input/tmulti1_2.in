@@ -24,6 +24,6 @@ dipdip  = 0
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and generate effective potential
+#%%   read xml file and generate effective potential
 #%% topics = LatticeModel
 #%%<END TEST_INFO>
