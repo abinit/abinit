@@ -752,12 +752,12 @@ contains
 
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3), atom_index(self%nspins)
+    integer :: sc_matrix(3,3), iatoms(self%nspins)
 
     integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:)
+    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
@@ -773,7 +773,7 @@ contains
     do i=1, self%natoms
       if(self%index_spin(i)>0) then
           counter=counter+1
-          atom_index(counter)=i
+          iatoms(counter)=i
       endif
     enddo 
 
@@ -792,6 +792,7 @@ contains
     ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
     ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
     ABI_ALLOCATE(sc_znucl, (sc_nspins))
+    ABI_ALLOCATE(sc_iatoms, (sc_nspins))
     ! sc_index_spin
     counter=0
     do i = 1, scell%natom, 1
@@ -804,7 +805,7 @@ contains
           !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
           ! in primitive cell, everyone has spinat
           sc_spinat(:, counter)=self%spinat(:,iatom) 
-          print *, self%spinat(:, iatom)
+          sc_iatoms(counter)=i
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
@@ -813,43 +814,31 @@ contains
           sc_index_spin(i)=-1
        endif
     end do
-    !print *, sc_index_spin
 
-    do i=1, sc_nspins
-       sc_znucl(i)=1
-    enddo
+    !!do i=1, sc_nspins
+    !   sc_znucl(i)=1
+    !enddo
 
-    !call spin_terms_t_initialize(sc_ham,)
-    !call sc_ham%initialize( cell=scell%rprimd, pos=sc_spinpos, &
-    !     spinat=sc_spinat, zion=sc_znucl)
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         spinat=sc_spinat, zion=sc_znucl, spin_index=sc_index_spin, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
+         spinat=sc_spinat, iatoms=iatoms, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
     sc_ham%gyro_ratio(:)=sc_gyroratios(:)
     sc_ham%gilbert_damping(:)=sc_damping_factors(:)
 
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
           ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
-          call find_supercell_ijR(scell=scell, i0=atom_index(self%total_ilist%data(i)), &
-               j0=atom_index(self%total_jlist%data(i)), &
+          call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &
+               j0=iatoms(self%total_jlist%data(i)), &
                R0=[self%total_Rlist(1)%data(i),  &
                self%total_Rlist(2)%data(i),  &
                self%total_Rlist(3)%data(i)], &
                R=scell%rvecs(:,icell), &
                i1=ii,j1=jj,R1=rr,R_sc=R_sc)
-          ! ii is the index in atom supercell not in spin supercell 
-          !scell%rvecs(icell)
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
-                if(isnan(tmp(icol, irow)))then
-                    print *, 'nan found'
-                endif
              end do
           end do
-          !print *, "i0", self%total_ilist%data(i)
-          !print *, "ii", ii, sc_index_spin(ii)
-          !print *, "jj", jj, sc_index_spin(jj)
           call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
        enddo
     enddo

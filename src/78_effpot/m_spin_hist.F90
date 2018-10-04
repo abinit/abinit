@@ -7,6 +7,7 @@
 !! FUNCTION
 !! This module contains definition the type spin_hist_t
 !! and its related routines
+!! The observables are also calculated. 
 !!
 !! Datatypes:
 !!
