@@ -184,7 +184,7 @@ This is implemented in the MULTIBINIT application.
 
   1. [[topic:LatticeModel|Lattice model at the harmonic level]]
   2. [[topic:FitProcess|FitProcess]]
-  3. [[topic:BoundProcess|BoundProcess]]
+  3. [[topic:BoundingProcess|BoundingProcess]]
   4. [[topic:DynamicsMultibinit|DynamicsMultibinit]]
 
 ## 9 Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)

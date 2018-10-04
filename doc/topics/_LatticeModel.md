@@ -12,7 +12,7 @@ See the [[help:multibinit|MULTIBINIT user guide]].
 The set up of a lattice model is the first step of the second-principles approach. 
 It has a harmonic part and possibly an anharmonic part.
 For the harmonic part, see the tutorial below.
-For the anharmonic part, see other topics namely, the [[topic:FitProcess |topic for the fit process]] and the [[topic:BoundProcess |topic for the bound process]].
+For the anharmonic part, see other topics namely, the [[topic:FitProcess |topic for the fit process]] and the [[topic:BoundingProcess |topic for the bound process]].
 Then, one can run a dynamics, see the [[topic:DynamicsMultibinit |topic how to run a dynamics]].
 
 ## Tutorials
