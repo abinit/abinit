@@ -2320,7 +2320,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer :: chneut,i1,i2,i3,ia,ib,iblok,idir1,idir2,ierr,ii,ipert1,iphl1
  integer :: ipert2,irpt,irpt2,ivarA,ivarB,max1,max2,max3,min1,min2,min3
  integer :: msize,mpert,natom,nblok,nrpt_new,nrpt_new2,rftyp,selectz
- integer :: my_rank,nproc
+ integer :: my_rank,nproc,prt_internalstr
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
  integer :: nptsym,nsym
@@ -2917,9 +2917,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
   if (iblok /=0) then
 
-!   then print the internal stain tensor
+!   then print the internal strain tensor (only the force one)
+    prt_internalstr=1
     call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,&
-&                        ab_out,mpert,natom,nblok)
+&                        ab_out,mpert,natom,nblok,prt_internalstr)
 
     do ipert1=1,6
       do ipert2=1,natom

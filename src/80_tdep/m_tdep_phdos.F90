@@ -355,14 +355,14 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     end do
   end do
   write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a)') '========== Using the formulation proposed by Wallace (using the IFC) ========='
-  write(InVar%stdout,'(a)') 'Cijkl='
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
+  write(InVar%stdout,'(a)') ' ========== Using the formulation proposed by Wallace (using the IFC) ========='
+  write(InVar%stdout,'(a)') ' Cijkl='
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
 
 ! Mean value of the off-diagonal elements
   Cij(1,2)=(Cij(1,2)+Cij(2,1))/2.d0 ; Cij(2,1)=Cij(1,2)
@@ -376,7 +376,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 &   /(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
   E3=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
 &   /(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,3(f8.3,1x))') 'Young modulus E1, E2 and E3=',E1,E2,E3
+  write(InVar%stdout,'(a,3(f8.3,1x))') ' Young modulus E1, E2 and E3=',E1,E2,E3
 
 ! Poisson Ratio
   Nu21=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
@@ -385,11 +385,11 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Nu12=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu13=(Cij(2,2)*Cij(1,3)-Cij(1,2)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu32=(Cij(1,1)*Cij(2,3)-Cij(1,2)*Cij(1,3))/(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,6(f8.3,1x))') 'Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
 
 ! Shear modulus
   G23=Cij(4,4) ; G13=Cij(5,5) ; G12=Cij(6,6)
-  write(InVar%stdout,'(a,3(f8.3,1x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
+  write(InVar%stdout,'(a,3(f8.3,1x))') ' Shear modulus G23, G13 and G12=',G23,G13,G12
 
 ! Compliance matrix
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
@@ -406,65 +406,65 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     end do
   end do
   write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a)') 'Sijkl='
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
+  write(InVar%stdout,'(a)') ' Sijkl='
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
 
 !==========================================================================================
 !===================== Bulk and Shear modulus--Sound velocities ===========================
 !==========================================================================================
 ! Voigt notation
-  write(InVar%stdout,'(a,f9.3)')'For density rho=',rho
+  write(InVar%stdout,'(a,f9.3)')' For density rho=',rho
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Voigt average (constant strain) ==================='
+  write(InVar%stdout,*)' ========================= Voigt average (constant strain) ==================='
   BV=((Cij(1,1)+Cij(2,2)+Cij(3,3))+2.d0*(Cij(1,2)+Cij(1,3)+Cij(2,3)))/9.d0
   GV=((Cij(1,1)+Cij(2,2)+Cij(3,3))-     (Cij(1,2)+Cij(1,3)+Cij(2,3))+3.d0*(Cij(4,4)+Cij(5,5)+Cij(6,6)))/15.d0
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
   Eaverage=9.d0*BV*GV/(3*BV+GV)
   Nuaverage=0.5*(1.d0-(3.d0*GV)/(3.d0*BV+GV) )
   Laverage=(3.d0*BV-2.d0*GV)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BV+4.d0*GV/3.d0)/rho)
   Vs=dsqrt(1.d9*GV/rho)
   Vphi=dsqrt(1.d9*BV/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Reuss notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Reuss average (constant stress) ==================='
+  write(InVar%stdout,*)' ========================= Reuss average (constant stress) ==================='
   BR=1.d0/(Sij(1,1)+Sij(2,2)+Sij(3,3)+2.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3)))
   GR=15.d0/(4.d0*(Sij(1,1)+Sij(2,2)+Sij(3,3))-4.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3))+3.d0*(Sij(4,4)+Sij(5,5)+Sij(6,6)))
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
   Eaverage=9.d0*BR*GR/(3*BR+GR)
   Nuaverage=0.5*(1.d0-(3.d0*GR)/(3.d0*BR+GR) )
   Laverage=(3.d0*BR-2.d0*GR)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BR+4.d0*GR/3.d0)/rho)
   Vs=dsqrt(1.d9*GR/rho)
   Vphi=dsqrt(1.d9*BR/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Voigt-Reuss-Hill notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '============================== Hill average ================================='
+  write(InVar%stdout,*)' ============================== Hill average ================================='
   BH=(BR+BV)/2.d0
   GH=(GR+GV)/2.d0
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH
   Eaverage=9.d0*BH*GH/(3*BH+GH)
   Nuaverage=0.5*(1.d0-(3.d0*GH)/(3.d0*BH+GH) )
   Laverage=(3.d0*BH-2.d0*GH)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BH+4.d0*GH/3.d0)/rho)
   Vs=dsqrt(1.d9*GH/rho)
   Vphi=dsqrt(1.d9*BH/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 ! Store the RVH value of the bulk modulus (will be useful for the Gruneisen)
   Lattice%BulkModulus=BH
 

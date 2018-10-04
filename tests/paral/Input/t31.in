@@ -317,7 +317,7 @@ prtvol 4
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = 
+#%% authors = J. Bieder
 #%% keywords = 
-#%% description = 
+#%% description = Test for input variable slk_rankpp
 #%%<END TEST_INFO>
