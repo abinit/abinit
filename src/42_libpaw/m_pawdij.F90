@@ -2934,9 +2934,6 @@ end subroutine pawdiju
 !! [Ib] : Re(D_kl) = sum_i<=j Re(rho_ij)  ( eu_ijkl + (1-delta_ij) eu_jikl )  (same as [I])
 !! [II] : Im(D_kl) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
 !!                 + sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
-!!      where:
-!!        Im(rhoB_ij) is stored in the imaginary part of "pawrhoij%rhoijp(:)"
-!!        Im(rhoA_ij) is stored in the array "pawrhoij%rhoijim(:)"
 !!      We note:
 !!        Im(D_kl^A) = sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
 !!        Im(D_kl^B) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
