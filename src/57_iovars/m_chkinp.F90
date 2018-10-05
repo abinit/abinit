@@ -826,7 +826,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkdpr(0,0,cond_string,cond_values,ierr,'exchmix',dt%exchmix,1,0.0_dp,iout)
 
 !  extrapwf
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'extrapwf',dt%extrapwf,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'extrapwf',dt%extrapwf,3,(/0,1,2/),iout)
    if (dt%extrapwf>0.and.dt%densfor_pred<5) then
      write(message,'(3a)')&
 &     'extrapwf keyword (extrapolation of WF) is only compatible with',ch10,&

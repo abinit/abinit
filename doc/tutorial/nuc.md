@@ -165,8 +165,8 @@ variables, only one additional variable is needed:
 
 After running this file, inspect the output and look for the phrase
 "Fermi-contact Term Calculation". There you'll find the FC output for
-each atom; in this case, the tin atoms, typat 1, yield a contact term
-of 72.2969 atomic units, which are charge per volume ($e/a^3_0$).
+each atom; in this case, the Sn atoms, [[typat]] 1, yield a contact term
+of 72.2969 atomic units (charge per volume $e/a^3_0$).
 
 To interpret M&ouml;ssbauer spectra you need really both a source and
 an absorber; in the tutorial we provide also a file for $\alpha$-Sn (grey

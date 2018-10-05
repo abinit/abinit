@@ -198,8 +198,8 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  real(dp) :: fcart(3,ab_mover%natom)
  real(dp) :: B(3*ab_mover%natom)
  real(dp) :: rprimd(3,3)
- real(dp) :: matrix_tmp(3*ab_mover%natom,3*ab_mover%natom)
  real(dp) :: w(3*ab_mover%natom)
+ real(dp),allocatable :: matrix_tmp(:,:)
  real(dp),allocatable :: work(:)
  real(dp) :: badger(6,6)
  real(dp),allocatable,save :: matrix(:,:)
@@ -407,6 +407,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
      end do
    end if
 
+   ABI_ALLOCATE(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
    matrix_tmp(:,:)=matrix(:,:)
    !write(*,*)"matrix_tmp",matrix_tmp
 
@@ -419,7 +420,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    ABI_ALLOCATE(work,(lwork))
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
    ABI_DEALLOCATE(work)
-
+   ABI_DEALLOCATE(matrix_tmp)
    write(std_out,*) 'DSYEV info=',info
    write(std_out,*) 'Eigenvalues:'
    write(std_out,fmt) w(:)

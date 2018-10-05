@@ -101,8 +101,6 @@ module m_build_info
 &   "@lib_trio_flavor@"
 
 ! Info on experimental features
-  character(len=*),parameter :: enable_bindings = &
-&   "@enable_bindings@"
   character(len=*),parameter :: enable_exports = &
 &   "@enable_exports@"
   character(len=*),parameter :: enable_gw_dpc = &
@@ -196,7 +194,6 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  TRIO flavor   : ',trim(trio_flavor)
   write(my_unit,*)
   write(my_unit,'(a)' )' === Experimental features === '
-  write(my_unit,'(2a)')'  Bindings            : ',trim(enable_bindings)
   write(my_unit,'(2a)')'  Exports             : ',trim(enable_exports)
   write(my_unit,'(2a)')'  GW double-precision : ',trim(enable_gw_dpc)
   write(my_unit,*)
