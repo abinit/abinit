@@ -8,6 +8,8 @@ module m_tdep_psij
 
   use defs_basis
   use m_errors
+  use m_profiling_abi
+  use m_numeric_tools
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_ifc,              only : ifc_type,ifc_fourq
@@ -17,11 +19,12 @@ module m_tdep_psij
   use m_tdep_shell,       only : Shell_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_phij,        only : Eigen_Variables_type,Eigen_Variables_type,tdep_init_eigen2nd,tdep_destroy_eigen2nd
+  use m_tdep_utils,       only : Coeff_Moore_type
 
   implicit none
 
   public :: tdep_calc_psijfcoeff
-  public :: tdep_build_psijNNN
+  public :: tdep_calc_psijtot
   public :: tdep_build_psij333
   public :: tdep_calc_gruneisen
   public :: tdep_calc_alpha_gamma
@@ -29,7 +32,7 @@ module m_tdep_psij
 contains
 
 !====================================================================================================
-subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
+subroutine tdep_calc_psijfcoeff(CoeffMoore,InVar,proj,Shell3at,Sym,ucart)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -40,13 +43,12 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
 
   implicit none
 
-  integer, intent(in) :: ntotcoeff
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell3at
+  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,InVar%natom,InVar%nstep)
   double precision, intent(in) :: proj(27,27,Shell3at%nshell)
-  double precision, intent(out) :: fcoeff(3*InVar%natom*InVar%nstep,ntotcoeff)
 
   integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,katom
   integer :: icoeff,isym,iatshell,trans
@@ -55,12 +57,7 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
   double precision :: udiff_ki(3),udiff_ji(3),SSSu(3,27)
   double precision, allocatable :: SSS_ref(:,:,:,:,:,:)
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '########################## Compute the pseudo-inverse #######################'
-  write(InVar%stdout,*) '#############################################################################'
-
-! For each couple of atoms, transform the Psij (3x3) ifc matrix using the symetry operation (S)
+! For each couple of atoms, transform the Psij (3x3x3) ifc matrix using the symetry operation (S)
 ! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
   ABI_MALLOC(SSS_ref,(3,27,3,3,Sym%nsym,6)); SSS_ref(:,:,:,:,:,:)=zero
   do isym=1,Sym%nsym
@@ -85,19 +82,19 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
     end do
   end do  
         
-  write(InVar%stdout,*) ' Compute the coefficients used in the Moore-Penrose...'
+  write(InVar%stdout,*) ' Compute the coefficients (at the 3rd order) used in the Moore-Penrose...'
   do ishell=1,Shell3at%nshell
     do iatom=1,InVar%natom
       if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
         jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
         katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
-!FB        if (iatom==katom.and.iatom==jatom) cycle
-        if (iatom==katom) cycle
+        if (iatom==jatom.or.iatom==katom) cycle
+!FB        if (iatom==katom) cycle
         isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         trans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
         ncoeff     =Shell3at%ncoeff(ishell)
-        ncoeff_prev=Shell3at%ncoeff_prev(ishell)
+        ncoeff_prev=Shell3at%ncoeff_prev(ishell)+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
   
         do istep=1,InVar%nstep
 
@@ -115,16 +112,17 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
           do nu=1,3
             do xi=1,3
 !FB              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*udiff(xi)*ucart(nu,jatom,istep)
-!FB              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*udiff_ki(xi)*udiff_ji(nu)
+              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*udiff_ki(xi)*udiff_ji(nu)
 !FB              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*(ucart(nu,jatom,istep)*ucart(xi,katom,istep)+ucart(nu,iatom,istep)*ucart(xi,iatom,istep))
-              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*udiff_ki(xi)*ucart(nu,jatom,istep)
+!FB              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*udiff_ki(xi)*ucart(nu,jatom,istep)
+!FB              SSSu(:,:)=SSSu(:,:)+SSS_ref(:,:,nu,xi,isym,trans)*ucart(nu,jatom,istep)*ucart(xi,katom,istep)
             end do  
           end do  
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSSu(mu,:)*proj(:,icoeff,ishell))
-              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)=&
-&               fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+              CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    
           end do  
         
@@ -138,13 +136,13 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
 end subroutine tdep_calc_psijfcoeff
 
 !=====================================================================================================
-subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,Shell3at,Sym)
+subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,Shell3at,Sym)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_psijNNN'
+#define ABI_FUNC 'tdep_calc_psijtot'
 !End of the abilint section
 
   implicit none
@@ -153,15 +151,14 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell3at
   integer,intent(in) :: ntotcoeff
-  double precision,intent(in) :: distance(InVar%natom,InVar%natom,4),proj(27,27,Shell3at%nshell)
-  double precision,intent(in) :: Psij_coeff(ntotcoeff,1)
-  double precision,intent(out) :: Psij_NN(3*InVar%natom,3*InVar%natom,3*InVar%natom)
+  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4),proj(27,27,Shell3at%nshell)
+  double precision, intent(in) :: Psij_coeff(ntotcoeff,1)
+  double precision, intent(inout) :: Psij_ref(3,3,3,Shell3at%nshell)
 
-  integer :: iatcell,ishell,isym,iatom,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
+  integer :: iatcell,ishell,jshell,isym,iatom,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
   integer :: iatref,jatref,katref,iatshell,nshell,trans
-  integer :: ii,jj,kk,ll,kappa
-  double precision :: norm
-  double precision, allocatable :: Psij_333(:,:,:),Psij_ref(:,:,:,:)
+  integer :: ii,jj,kk,ll,kappa,alpha,beta,gama
+  double precision, allocatable :: Psij_333(:,:,:)
 
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
@@ -170,9 +167,8 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
 
   nshell=Shell3at%nshell
 !==========================================================================================
-!======== 1/ Build the Psij_NN ============================================================
+!======== 1/ Build the Psi_ijk ============================================================
 !==========================================================================================
-  ABI_MALLOC(Psij_ref,(3,3,3,nshell)) ; Psij_ref(:,:,:,:)=0.d0
   ABI_MALLOC(Psij_333,(3,3,3)) ; Psij_333(:,:,:)=0.d0
   do ishell=1,nshell
 !   Build the 3x3x3 IFC per shell    
@@ -187,7 +183,9 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
         end do  
       end do  
     end do  
-    do eatom=1,Invar%natom
+  end do
+  do eatom=1,Invar%natom
+    do ishell=1,nshell
 !     Build the 3x3x3 IFC of an atom in this shell    
       if (Shell3at%neighbours(eatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell3at%neighbours(eatom,ishell)%n_interactions
@@ -195,162 +193,36 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
         gatom=Shell3at%neighbours(eatom,ishell)%atomk_in_shell(iatshell)
         isym =Shell3at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
         trans=Shell3at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
-        if ((eatom.eq.fatom).and.(fatom.eq.gatom)) cycle
-        call tdep_build_psij333(eatom,fatom,gatom,isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans) 
-!       Symetrization of the Psij_NN matrix
-        do ii=1,3
-          do jj=1,3
-            do kk=1,3
-              Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)=Psij_333(ii,jj,kk) !\Psi_efg
-              Psij_NN(3*(eatom-1)+ii,3*(gatom-1)+kk,3*(fatom-1)+jj)=Psij_333(ii,jj,kk) !\Psi_egf
-              Psij_NN(3*(fatom-1)+jj,3*(eatom-1)+ii,3*(gatom-1)+kk)=Psij_333(ii,jj,kk) !\Psi_feg
-              Psij_NN(3*(fatom-1)+jj,3*(gatom-1)+kk,3*(eatom-1)+ii)=Psij_333(ii,jj,kk) !\Psi_fge
-              Psij_NN(3*(gatom-1)+kk,3*(eatom-1)+ii,3*(fatom-1)+jj)=Psij_333(ii,jj,kk) !\Psi_gef
-              Psij_NN(3*(gatom-1)+kk,3*(fatom-1)+jj,3*(eatom-1)+ii)=Psij_333(ii,jj,kk) !\Psi_gfe
-            end do  
-          end do        
-        end do  
+!       Skip the onsite terms
+        if ((eatom.eq.fatom).and.(eatom.eq.gatom)) cycle
+        call tdep_build_psij333(isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans) 
+!       Compute the onsite terms : Psi_iii=sum_{k.ne.i j.ne.i} Psi_ijk
+        if (fatom.ne.eatom.and.gatom.ne.eatom) then
+          do jshell=1,Shell3at%nshell
+            iatref=Shell3at%iatref(jshell)
+            jatref=Shell3at%jatref(jshell)
+            katref=Shell3at%katref(jshell)
+            if ((iatref.eq.jatref).and.(jatref.eq.katref).and.(katref.eq.eatom)) then
+              Psij_ref(:,:,:,jshell)=Psij_ref(:,:,:,jshell)+Psij_333(:,:,:)
+            end if
+          end do !jshell  
+        end if 
       end do !iatshell
-    end do !eatom
-  end do !ishell
+    end do !ishell
+  end do !eatom
 
-! Set the (efe) & (eef) terms to zero. These terms will be initialized with the accoustic sum rule
-  do eatom=1,InVar%natom
-    do fatom=1,InVar%natom
-      do ii=1,3
-        do jj=1,3
-          do kk=1,3
-            Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)=zero
-            Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(fatom-1)+kk)=zero
-          end do
-        end do
-      end do
-    end do
-  end do
-  do eatom=1,InVar%natom
-    do fatom=1,InVar%natom
-      do gatom=1,InVar%natom
-        do ii=1,3
-          do jj=1,3
-!FB            do kk=1,3
-!FB              if (fatom.ne.eatom.and.gatom.ne.eatom) then
-!FB                Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)=&
-!FB&               Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)-&
-!FB&               Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-!FB
-!FB                Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)=&
-!FB&               Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)-&
-!FB&               Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-!FB              end if
-            do kk=1,3
-              if (gatom.eq.eatom) cycle
-              Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)=&
-&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)-&
-&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-            end do 
-            do kk=1,3
-              if (fatom.eq.eatom) cycle
-              Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)=&
-&             Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)-&
-&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-            end do  
-          end do
-        end do
-      end do
-    end do
-  end do
-
-!FB! Accoustic sum ruleS (whatever eatom and fatom)
-!FB  do ishell=1,Shell3at%nshell
-!FB    do eatom=1,InVar%natom
-!FB      if (Shell3at%neighbours(eatom,ishell)%n_interactions.eq.0) cycle
-!FB      do iatshell=1,Shell3at%neighbours(eatom,ishell)%n_interactions
-!FB        fatom=Shell3at%neighbours(eatom,ishell)%atomj_in_shell(iatshell)
-!FB        gatom=Shell3at%neighbours(eatom,ishell)%atomk_in_shell(iatshell)
-!FB        if (gatom==eatom) cycle
-!FB        if (fatom==eatom) cycle
-!FB        do ii=1,3
-!FB          do jj=1,3
-!FB            do kk=1,3
-!FB              Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)=&
-!FB&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(eatom-1)+kk)-&
-!FB&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-!FB
-!FB              Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)=&
-!FB&             Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)-&
-!FB&             Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-!FB            enddo !kk
-!FB          enddo !jj
-!FB        enddo !ii
-!FB      enddo !iatshell
-!FB    end do !eatom
-!FB  end do !ishell
-
-! Set the (eee) terms to zero. These terms will be initialized with the accoustic sum rule
-  do eatom=1,InVar%natom
+!==========================================================================================
+!======== 2/ Write the Psi_ijk in output ==================================================
+!==========================================================================================
+! Remove the rounding errors before writing (for non regression testing purposes)
+  do ishell=1,Shell3at%nshell
     do ii=1,3
       do jj=1,3
         do kk=1,3
-          Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(eatom-1)+kk)=zero
+          if (abs(Psij_ref(ii,jj,kk,ishell)).lt.tol8) Psij_ref(ii,jj,kk,ishell)=zero
         end do
       end do
-    end do
-  end do
-!FB  do ishell=1,Shell3at%nshell
-!FB    do eatom=1,InVar%natom
-!FB      if (Shell3at%neighbours(eatom,ishell)%n_interactions.eq.0) cycle
-!FB      do iatshell=1,Shell3at%neighbours(eatom,ishell)%n_interactions
-!FB        fatom=Shell3at%neighbours(eatom,ishell)%atomj_in_shell(iatshell)
-!FB        gatom=Shell3at%neighbours(eatom,ishell)%atomk_in_shell(iatshell)
-  do eatom=1,InVar%natom
-    do gatom=1,InVar%natom
-      if (gatom.eq.eatom) cycle
-      do ii=1,3
-        do jj=1,3
-          do kk=1,3
-            Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(eatom-1)+kk)=&
-&           Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(eatom-1)+kk)-&
-&           Psij_NN(3*(eatom-1)+ii,3*(eatom-1)+jj,3*(gatom-1)+kk)
-          enddo !kk
-        enddo !jj
-      enddo !ii
-    end do !gatom
-  end do !eatom
-
-  ABI_FREE(Psij_333)
-  ABI_FREE(Psij_ref)
-
-! Check the acoustic sum rules
-  do eatom=1,InVar%natom
-    do fatom=1,InVar%natom
-      do ii=1,3
-        do jj=1,3
-          do kk=1,3
-            norm=zero
-            do gatom=1,InVar%natom
-              norm=norm+Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
-            end do !gatom
-            if (abs(norm).gt.tol8) then
-              write(std_out,*) ' BUG : the acoustic sum rule is not fulfilled'
-              write(std_out,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
-              MSG_BUG('the acoustic sum rule is not fulfilled')
-            end if
-          end do !kk
-        end do !jj
-      end do !ii  
-    end do !fatom  
-  end do !eatom
-
-!==========================================================================================
-!======== 2/ Write the Psij_NN in output ==================================================
-!==========================================================================================
-! Remove the rounding errors before writing (for non regression testing purposes)
-  do ii=1,3*InVar%natom
-    do jj=1,3*InVar%natom
-      do kk=1,3*InVar%natom
-        if (abs(Psij_NN(ii,jj,kk)).lt.tol8) Psij_NN(ii,jj,kk)=zero
-      end do
-    end do
+    end do  
   end do  
 
 ! Write the IFCs in the data.out file (with others specifications: 
@@ -365,48 +237,41 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
       do iatshell=1,Shell3at%neighbours(iatref,ishell)%n_interactions
         jatom=Shell3at%neighbours(iatref,ishell)%atomj_in_shell(iatshell)
         katom=Shell3at%neighbours(iatref,ishell)%atomk_in_shell(iatshell)
+        isym =Shell3at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
+        trans=Shell3at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
+!FB        if ((iatref.ne.jatom).or.(jatom.ne.katom)) then
+          call tdep_build_psij333(isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans) 
+!FB	else 
+!FB	  Psij_333(:,:,:)=Psij_ref(:,:,:,ishell)
+!FB	end if  
         write(InVar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,InVar%natom_unitcell)+1
         write(InVar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,InVar%natom_unitcell)+1
         write(InVar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,InVar%natom_unitcell)+1
         write(InVar%stdout,'(a)') '  \Psi^{\alpha\beta x}='
         do ii=1,3
-          write(InVar%stdout,'(2x,3(f9.6,x))') (Psij_NN((iatref-1)*3+ii,(jatom-1)*3+jj,(katom-1)*3+1),jj=1,3)
+          write(InVar%stdout,'(2x,3(f9.6,1x))') (Psij_333(ii,jj,1),jj=1,3)
         end do
         write(InVar%stdout,'(a)') '  \Psi^{\alpha\beta y}='
         do ii=1,3
-          write(InVar%stdout,'(2x,3(f9.6,x))') (Psij_NN((iatref-1)*3+ii,(jatom-1)*3+jj,(katom-1)*3+2),jj=1,3)
+          write(InVar%stdout,'(2x,3(f9.6,1x))') (Psij_333(ii,jj,2),jj=1,3)
         end do
         write(InVar%stdout,'(a)') '  \Psi^{\alpha\beta z}='
         do ii=1,3
-          write(InVar%stdout,'(2x,3(f9.6,x))') (Psij_NN((iatref-1)*3+ii,(jatom-1)*3+jj,(katom-1)*3+3),jj=1,3)
+          write(InVar%stdout,'(2x,3(f9.6,1x))') (Psij_333(ii,jj,3),jj=1,3)
         end do
-        write(InVar%stdout,'(a,3(x,f9.6))') '  (i,j) vector components:', distance(iatref,jatom,2:4)
-        write(InVar%stdout,'(a,3(x,f9.6))') '  (j,k) vector components:', distance(jatom ,katom,2:4)
-        write(InVar%stdout,'(a,3(x,f9.6))') '  (k,i) vector components:', distance(katom,iatref,2:4)
+        write(InVar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
+        write(InVar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(jatom ,katom,jj+1),jj=1,3)
+        write(InVar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(katom,iatref,jj+1),jj=1,3)
         write(InVar%stdout,*) ' '
       end do !iatshell
     end if !n_interactions 
   end do !ishell 
+  ABI_FREE(Psij_333)
 
-! Write the Psij_unitcell.dat and Psij_NN.dat files
-  if (InVar%debug) then
-    write(InVar%stdout,'(a)') ' See the Psij*.dat file'
-    open(unit=52,file='Psij_unitcell.dat')
-    open(unit=55,file='Psij_NN.dat')
-    do iatcell=1,3*InVar%natom
-      if (iatcell.le.3*InVar%natom_unitcell) then
-        write(52,'(10000(f10.6,x))') Psij_NN(iatcell,:,1),Psij_NN(iatcell,:,2),Psij_NN(iatcell,:,3)
-      end if  
-      write(55,'(10000(f10.6,x))') Psij_NN(iatcell,:,1),Psij_NN(iatcell,:,2),Psij_NN(iatcell,:,3)
-    end do  
-    close(52)
-    close(55)
-  end if  
-
-end subroutine tdep_build_psijNNN
+end subroutine tdep_calc_psijtot
 
 !=====================================================================================================
-subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_NN,qpt_cart,Rlatt_cart,Shell3at)
+subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -417,20 +282,22 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
 
   implicit none
 
+  type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   integer,intent(in) :: iqpt
   double precision,intent(in) :: distance(InVar%natom,InVar%natom,4)
-  double precision,intent(in) :: Psij_NN(3*InVar%natom,3*InVar%natom,3*InVar%natom)
+  double precision,intent(in) :: Psij_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
   double precision,intent(in) :: qpt_cart(3)
   double complex  ,intent(out) :: Gruneisen(3*InVar%natom_unitcell)
 
   integer :: ii,jj,kk,iatcell,jatom,katom,itypat,jtypat,natom_unitcell
-  integer :: imode,nmode,ncomp,jat_mod,jatcell,iatshell,ishell
+  integer :: imode,nmode,ncomp,jat_mod,jatcell,iatshell,ishell,isym,trans
   double precision :: phase
+  double precision, allocatable :: Psij_333(:,:,:)
   double complex, allocatable :: mass_mat(:,:),eigen_prod(:,:,:,:,:),Grun_shell(:,:)
 
 ! Define quantities
@@ -455,6 +322,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
 
 ! Calculation of the Gruneisen
   ABI_MALLOC(Grun_shell,(3*InVar%natom_unitcell,Shell3at%nshell)); Grun_shell(:,:)=czero
+  ABI_MALLOC(Psij_333,(3,3,3)) ; Psij_333(:,:,:)=0.d0
   Gruneisen(:)=zero
   do ishell=1,Shell3at%nshell
     do iatcell=1,InVar%natom_unitcell
@@ -462,18 +330,20 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
       do iatshell=1,Shell3at%neighbours(iatcell,ishell)%n_interactions
         jatom=Shell3at%neighbours(iatcell,ishell)%atomj_in_shell(iatshell)
         katom=Shell3at%neighbours(iatcell,ishell)%atomk_in_shell(iatshell)
+        isym =Shell3at%neighbours(iatcell,ishell)%sym_in_shell(iatshell)
+        trans=Shell3at%neighbours(iatcell,ishell)%transpose_in_shell(iatshell)
         jat_mod=mod(jatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
         jtypat=InVar%typat_unitcell(jat_mod)
         phase=0.d0
         do jj=1,3
           phase=phase+2*pi*Rlatt_cart(jj,iatcell,jatom)*qpt_cart(jj)
         end do
+        call tdep_build_psij333(isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans) 
         do ii=1,3
           do jj=1,3
             do kk=1,3
               do imode=1,nmode
-                Grun_shell(imode,ishell)=Grun_shell(imode,ishell)-&
-&                 dcmplx(Psij_NN(3*(iatcell-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk),0.d0)*&
+                Grun_shell(imode,ishell)=Grun_shell(imode,ishell)-dcmplx(Psij_333(ii,jj,kk),0.d0)*&
 &                                eigen_prod(ii,jj,iatcell,jat_mod,imode)*&
 &                                exp(dcmplx(0.d0,phase))*dcmplx(distance(iatcell,katom,kk+1),0.d0)/&
 &                                dcmplx(dsqrt(InVar%amu(itypat)*InVar%amu(jtypat))*amu_emass,0.d0)/&
@@ -485,6 +355,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
       end do !iatshell 
     end do !iatcell 
   end do !ishell
+  ABI_FREE(Psij_333)
   ABI_FREE(eigen_prod)
   do ishell=1,Shell3at%nshell
     Gruneisen(:)=Gruneisen(:)+Grun_shell(:,ishell)
@@ -494,7 +365,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
 end subroutine tdep_calc_gruneisen
 
 !=====================================================================================================
-subroutine tdep_build_psij333(eatom,fatom,gatom,isym,InVar,Psij_ref,Psij_333,Sym,trans) 
+subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -509,7 +380,7 @@ subroutine tdep_build_psij333(eatom,fatom,gatom,isym,InVar,Psij_ref,Psij_333,Sym
   type(Input_Variables_type),intent(in) :: InVar
   double precision, intent(in) :: Psij_ref(3,3,3)
   double precision, intent(out) :: Psij_333(3,3,3)
-  integer,intent(in) :: eatom,fatom,gatom,isym,trans
+  integer,intent(in) :: isym,trans
 
   integer :: alpha,beta,gama
   integer :: ii,jj,kk,ee,ff,gg,mu,nu,xi
@@ -536,7 +407,7 @@ subroutine tdep_build_psij333(eatom,fatom,gatom,isym,InVar,Psij_ref,Psij_333,Sym
 ! Take into account the 6 allowed permutations
   Psij_tmp(:,:,:)=Psij_333(:,:,:)
   if ((trans.lt.1).or.(trans.gt.6)) then  
-    write(InVar%stdout,'(a)') '  BUG: this value of the symmetry index is not permitted'
+    MSG_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
     do jj=1,3
@@ -555,14 +426,14 @@ subroutine tdep_build_psij333(eatom,fatom,gatom,isym,InVar,Psij_ref,Psij_333,Sym
 end subroutine tdep_build_psij333
 
 !=====================================================================================================
-subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,Rlatt_cart,Shell3at,Sym)
+subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref,Rlatt_cart,Shell3at,Sym)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_calc_alpha_gamma'
- use interfaces_41_geometry
+ use interfaces_29_kpoints
 !End of the abilint section
 
   implicit none
@@ -575,14 +446,16 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Symetries_Variables_type),intent(in) :: Sym
   double precision,intent(in) :: distance(InVar%natom,InVar%natom,4)
-  double precision,intent(in) :: Psij_NN(3*InVar%natom,3*InVar%natom,3*InVar%natom)
+  double precision,intent(in) :: Psij_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
 
-  integer :: iq_ibz,nqbz,nqibz,ii,iatcell,jatcell,jj,nmode
+  integer :: iq_ibz,nqbz,nqibz,ii,iatcell,jatcell,jj,nmode,ntemp,itemp
   integer, allocatable :: ibz2bz(:)
-  double precision :: k_B,wovert,xx,C_v,Gama,alpha_v
+  double precision :: k_B,wovert,xx,C_v,Gama,alpha_v,P_th,E_th,P_th1,P_th2
   double precision, allocatable :: qbz(:,:),wtq(:),wtq_folded(:),wtqibz(:),qibz(:,:),qibz_cart(:,:)
-  double precision, allocatable :: omega(:,:),displ(:,:),out_eigvec(:,:,:,:,:,:),heatcapa(:),grun_thermo(:)
+  double precision, allocatable :: omega(:,:),displ(:,:),out_eigvec(:,:,:,:,:,:),heatcapa(:),grun_thermo(:),u_vib(:)
+  double precision, allocatable :: heatcapa_HA(:,:),grun_thermo_HA(:,:),p_thermo1(:),p_thermo_HA(:,:),u_vib_HA(:,:)
+  double precision, allocatable :: p_thermo2(:),tmp(:)
   double complex :: Gruneisen(3*InVar%natom_unitcell)
   type(Eigen_Variables_type) :: Eigen2nd_tmp
 
@@ -612,11 +485,18 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,
 
 ! Loop over irreducible q-points
 ! =======================
+  ntemp=1000
   nmode=3*InVar%natom_unitcell
   k_B=kb_HaK*Ha_eV
-  wovert=1.d0/(2*InVar%temperature*k_B)
   ABI_MALLOC(heatcapa,(nmode))   ; heatcapa   (:)=0.d0 
   ABI_MALLOC(grun_thermo,(nmode)); grun_thermo(:)=0.d0 
+  ABI_MALLOC(p_thermo1,(nmode))  ; p_thermo1  (:)=0.d0 
+  ABI_MALLOC(p_thermo2,(ntemp))  ; p_thermo2  (:)=0.d0 
+  ABI_MALLOC(u_vib,(nmode))      ; u_vib      (:)=0.d0 
+  ABI_MALLOC(heatcapa_HA,(nmode,ntemp))   ; heatcapa_HA   (:,:)=0.d0 
+  ABI_MALLOC(grun_thermo_HA,(nmode,ntemp)); grun_thermo_HA(:,:)=0.d0 
+  ABI_MALLOC(p_thermo_HA,(nmode,ntemp))   ; p_thermo_HA   (:,:)=0.d0 
+  ABI_MALLOC(u_vib_HA,(nmode,ntemp))      ; u_vib_HA      (:,:)=0.d0 
   ABI_MALLOC(displ,(2*3*InVar%natom_unitcell*3*InVar%natom_unitcell,nqibz)); displ(:,:)=zero
   ABI_MALLOC(out_eigvec,(2,3,InVar%natom_unitcell,3,InVar%natom_unitcell,nqibz)); out_eigvec(:,:,:,:,:,:)=zero
   ABI_MALLOC(omega,(3*InVar%natom_unitcell,nqibz)); omega(:,:)=zero
@@ -640,70 +520,112 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,
         end do  
       end do  
     end do 
-!   Print the frequencies (omega)
-!FB    write(InVar%stdlog,'(i5,x,100(f15.6,x))') iq_ibz,(omega(ii,iq_ibz)*Ha_eV*1000,ii=1,nmode)
-!FB    write(InVar%stdlog,*) 'wtq=',wtqibz(iq_ibz)
-!   Print the eigenvectors (eigenV) 
-!FB    do ii=1,nmode
-!FB      write(InVar%stdlog,*) 'Mode number',ii,' energy',omega(ii,iq_ibz)
-!FB      write(InVar%stdlog,*) '  Real:'
-!FB      write(InVar%stdlog,*) real(Eigen2nd_tmp%eigenvec(:,ii,iq_ibz))
-!FB      write(InVar%stdlog,*) '  Imag:'
-!FB      write(InVar%stdlog,*) imag(Eigen2nd_tmp%eigenvec(:,ii,iq_ibz))
-!FB    end do  
-    call tdep_calc_gruneisen(distance,Eigen2nd_tmp,Gruneisen,iq_ibz,InVar,Lattice,Psij_NN,qibz_cart(:,iq_ibz),Rlatt_cart,Shell3at)
-!FB    write(InVar%stdlog,*) 'Gruneisen='
-!FB    write(InVar%stdlog,'(i5,x,100(e15.6,x))') iq_ibz,(real(Gruneisen(ii)),ii=1,nmode)
+    call tdep_calc_gruneisen(distance,Eigen2nd_tmp,Gruneisen,iq_ibz,InVar,Lattice,Psij_ref,qibz_cart(:,iq_ibz),Rlatt_cart,Shell3at,Sym)
 
-!   Compute the heat capacity and thermodynamical gruneisen parameter
-!   =================================================================
+!   Compute the heat capacity and thermodynamical gruneisen parameter at present temperature
+!   ========================================================================================
+    wovert=1.d0/(2*InVar%temperature*k_B)
     do ii=1,nmode
       xx=omega(ii,iq_ibz)*Ha_eV
       if (xx.le.0) cycle
-!FB      write(6,*)'wovert,xx=',wovert,xx
       heatcapa(ii)   =heatcapa(ii)   +(wovert*xx/sinh(wovert*xx))**2*wtqibz(iq_ibz)
-      grun_thermo(ii)=grun_thermo(ii)+(wovert*xx/sinh(wovert*xx))**2*Gruneisen(ii)*wtqibz(iq_ibz)
-!FB      write(InVar%stdlog,'(a,i5,x,100(f15.6,x))')'mode,heatcapa(mode)='   ,ii,heatcapa(ii)
-!FB      write(InVar%stdlog,'(a,i5,x,100(f15.6,x))')'mode,grun_thermo(mode)=',ii,grun_thermo(ii)
+      grun_thermo(ii)=grun_thermo(ii)+(wovert*xx/sinh(wovert*xx))**2*wtqibz(iq_ibz)*Gruneisen(ii) ! Gamma= sum_i Gamma_i*C_Vi / C_V
+      p_thermo1(ii)  =p_thermo1(ii)  +  (xx/2.d0/tanh(wovert*xx))   *wtqibz(iq_ibz)*Gruneisen(ii) ! P    = sum_i Gamma_i*E_i / V
+      u_vib(ii)      =u_vib(ii)      +  (xx/2.d0/tanh(wovert*xx))   *wtqibz(iq_ibz)
+    end do  
+!   Compute the heat capacity and thermodynamical gruneisen parameter as a function of temperature
+!   ==============================================================================================
+    do itemp=1,ntemp
+      wovert=1.d0/(2*real(itemp)*10*k_B)
+      do ii=1,nmode
+        xx=omega(ii,iq_ibz)*Ha_eV
+        if (xx.le.0) cycle
+        heatcapa_HA(ii,itemp)   =heatcapa_HA(ii,itemp)   +(wovert*xx/sinh(wovert*xx))**2*wtqibz(iq_ibz)
+        grun_thermo_HA(ii,itemp)=grun_thermo_HA(ii,itemp)+(wovert*xx/sinh(wovert*xx))**2*wtqibz(iq_ibz)*Gruneisen(ii)
+        p_thermo_HA(ii,itemp)   =p_thermo_HA(ii,itemp)   +  (xx/2.d0/tanh(wovert*xx))   *wtqibz(iq_ibz)*Gruneisen(ii)
+        u_vib_HA(ii,itemp)      =u_vib_HA(ii,itemp)      +  (xx/2.d0/tanh(wovert*xx))   *wtqibz(iq_ibz)
+      end do  
     end do  
   end do
+! Compute the pressure as the integral of Gamma*C_v overt T  
+  allocate(tmp(ntemp)); tmp(:)=0.d0
+  do itemp=1,ntemp
+!FB    tmp(itemp)=sum(heatcapa_HA(:,itemp))
+    tmp(itemp)=sum(grun_thermo_HA(:,itemp))
+  end do  
+  call simpson_int(ntemp,10.d0,tmp,p_thermo2)
+  deallocate(tmp)
+
+  open(unit=20,file=trim(InVar%output_prefix)//'thermo3.dat')
+  write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
+  write(20,'(a)')'#                                                                         ----------------------------------------------'
+  write(20,'(a)')'#                                                                          {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
+  do itemp=1,ntemp
+    C_v    =sum(heatcapa_HA   (:,itemp))
+    E_th   =sum(u_vib_HA    (:,itemp))
+    Gama   =sum(grun_thermo_HA(:,itemp))/C_v
+    alpha_v=Gama*C_v*kb_HaK*Ha_J/(Lattice%BulkModulus*1.d9)/(Lattice%ucvol*Bohr_Ang**3*1.d-30)
+    P_th1  =sum(p_thermo_HA (:,itemp))/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+    P_th2  =      p_thermo2(itemp)*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+    P_th   =                 Gama*E_th/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+    write(20,'(x,i5,7(x,f15.5))') itemp*10,C_v,Gama,alpha_v*1.d6,E_th,P_th1,P_th2,P_th
+  end do  
+  close(20)
+  ABI_FREE(heatcapa_HA)
+  ABI_FREE(grun_thermo_HA)
+  ABI_FREE(p_thermo_HA)
+  ABI_FREE(u_vib_HA)
+
   call tdep_destroy_eigen2nd(Eigen2nd_tmp)
-  ABI_DEALLOCATE(displ)
-  ABI_DEALLOCATE(out_eigvec)
-  ABI_DEALLOCATE(omega)
-  ABI_DEALLOCATE(ibz2bz)
-  ABI_DEALLOCATE(wtq)
-  ABI_DEALLOCATE(qbz)
-  ABI_DEALLOCATE(wtqibz)
-  ABI_DEALLOCATE(qibz)
-  ABI_DEALLOCATE(qibz_cart)
+  ABI_FREE(displ)
+  ABI_FREE(out_eigvec)
+  ABI_FREE(omega)
+  ABI_FREE(ibz2bz)
+  ABI_FREE(wtq)
+  ABI_FREE(qbz)
+  ABI_FREE(wtqibz)
+  ABI_FREE(qibz)
+  ABI_FREE(qibz_cart)
 
 ! Summary
 ! =======
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '################## Gruneisen parameter, Thermal expansion... ################'
+  write(InVar%stdout,*) '####### Gruneisen parameter, Thermal expansion, Thermal pressure... #########'
   write(InVar%stdout,*) '#############################################################################'
 !FB  heatcapa   (:)=heatcapa   (:)/InVar%natom_unitcell
 !FB  write(InVar%stdlog,*) 'Summary:'
-!FB  write(InVar%stdlog,'(a,x,100(f15.6,x))') 'C_v(per_mode \& per unit cell)=',(heatcapa(ii)   ,ii=1,nmode)
-!FB  write(InVar%stdlog,'(a,x,100(f15.6,x))') 'Gamma(per mode)=',(grun_thermo(ii),ii=1,nmode)
-  C_v =sum(heatcapa(:))
-  Gama=sum(grun_thermo(:))/C_v
+!FB  write(InVar%stdlog,'(a,1x,100(f15.6,1x))') 'C_v(per_mode \& per unit cell)=',(heatcapa(ii)   ,ii=1,nmode)
+!FB  write(InVar%stdlog,'(a,1x,100(f15.6,1x))') 'Gamma(per mode)=',(grun_thermo(ii),ii=1,nmode)
+  C_v    =sum(heatcapa(:))
+  E_th   =sum(u_vib   (:))
+  Gama   =sum(grun_thermo(:))/C_v
   alpha_v=Gama*C_v*kb_HaK*Ha_J/(Lattice%BulkModulus*1.d9)/(Lattice%ucvol*Bohr_Ang**3*1.d-30)
-  write(InVar%stdout,*) 'Specific heat : C_v  (in k_B per unit cell)=',C_v
-  write(InVar%stdout,*) 'Gruneisen parameter : Gamma=',Gama
-  write(InVar%stdout,*) 'Bulk Modulus (in GPa): B=',Lattice%BulkModulus
-  write(InVar%stdout,*) 'Volume (in bohr^3 per unit cell): V=',Lattice%ucvol
-  write(InVar%stdout,*) 'Thermal expansion : alpha_v=',alpha_v
+  P_th1  =                   sum(p_thermo1(:))    /(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+  P_th2  =p_thermo2(int(InVar%temperature/10))*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+  P_th   =                           Gama*E_th    /(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
+  write(InVar%stdout,'(a,x,f15.5)') ' Specific heat (k_B/f.u.):             C_v=',C_v
+  write(InVar%stdout,'(a,x,f15.5)') ' Gruneisen parameter :               Gamma=',Gama
+  write(InVar%stdout,'(a,x,f15.5)') ' Isothermal Bulk Modulus (GPa):        B_T=',Lattice%BulkModulus
+  write(InVar%stdout,'(a,x,f15.5)') ' Volume (bohr^3 per unit cell):          V=',Lattice%ucvol
+  write(InVar%stdout,'(a,x,f15.5)') ' Thermal energy (eV) :                E_th=',E_th
+  write(InVar%stdout,'(a,x,f15.5)') ' Thermal expansion (K^{-1}*10^6) : alpha_v=',alpha_v*1.d6
+  write(InVar%stdout,'(a)') ' Thermal pressure (in GPa) : '
+  write(InVar%stdout,'(a,x,f15.5)') '  - with    intrinsic effects and with    ZPE : P_th=sum_i Gamma_i*E_i/V   =',P_th1
+  write(InVar%stdout,'(a,x,f15.5)') '  - with    intrinsic effects and without ZPE : P_th=integ{Gamma*C_v/V dT} =',P_th2
+  write(InVar%stdout,'(a,x,f15.5)') '  - without intrinsic effects and without ZPE : P_th=Gamma*E_th/V          =',P_th
   ABI_FREE(heatcapa)
+  ABI_FREE(grun_thermo)
+  ABI_FREE(p_thermo1)
+  ABI_FREE(p_thermo2)
+  ABI_FREE(u_vib)
 
 !FB  0.473294364993209*(2.38255605878933*1.38065e-23)/1.20512e11/3.0/((30.6135754000*0.529177e-10)**3/216)
 
 end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================
-subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlatt_cart,Shell3at)
+subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -714,13 +636,14 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlat
 
   implicit none
 
+  type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
   double precision,intent(in) :: distance(InVar%natom,InVar%natom,4)
-  double precision,intent(in) :: Psij_NN(3*InVar%natom,3*InVar%natom,3*InVar%natom)
+  double precision,intent(in) :: Psij_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
 
   integer :: iqpt,nmode,ii,jj
@@ -729,19 +652,19 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlat
   
   nmode=3*InVar%natom_unitcell
   ABI_MALLOC(Gruneisen,(3*InVar%natom_unitcell)); Gruneisen(:)=zero
-  open(unit=53,file='gruneisen.dat')
+  open(unit=53,file=trim(InVar%output_prefix)//'gruneisen.dat')
   do iqpt=1,Qpt%nqpt
     qpt_cart(:)=Qpt%qpt_cart(:,iqpt)
-    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_NN,qpt_cart,Rlatt_cart,Shell3at)
+    if ((sum(abs(Qpt%qpt_red(:,iqpt)))).lt.tol8) cycle  ! G point
+    if (abs(sum(Qpt%qpt_red(:,iqpt)**2)-1.d0).lt.tol8) cycle ! Gp point
+    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 !   Write the Gruneisen
-    if (sum(abs(qpt_cart(:))).gt.tol8) then 
-      if (sum(abs(imag(Gruneisen(:)))).gt.tol8) then
-        write(std_out,*) 'BUG : the imaginary part of the Gruneisen is not equal to zero'
-        write(53,'(i5,x,100(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(imag(Gruneisen(ii)),ii=1,nmode)
-      else 
-!FB        write(53,'(i5,x,500(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
-        write(53,'(i5,x,500(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode)
-      end if  
+    if (sum(abs(imag(Gruneisen(:)))).gt.tol8) then
+      write(53,'(i5,1x,100(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(imag(Gruneisen(ii)),ii=1,nmode)
+      MSG_BUG('The imaginary part of the Gruneisen is not equal to zero')
+    else 
+!FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
+      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode)
     end if  
   end do  
   close(53)
