@@ -63,14 +63,14 @@ module m_effective_potential_file
  private :: system_xml2effpot
  private :: system_ddb2effpot
 
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  private :: rdfromline
  private :: rmtabfromline
  private :: rdfromline_value
  private :: elementfromline
 #endif
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
  public :: effpot_xml_checkXML
  public :: effpot_xml_getDimCoeff
  public :: effpot_xml_readSystem
@@ -739,13 +739,13 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !Local variables-------------------------------
  !scalar
  integer ::  filetype
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer ::  count,count2
  integer :: funit = 1,ios=0
  logical :: found,found2
 #endif
 !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  character (len=XML_RECL) :: line,readline
 #endif
  character(len=500) :: message
@@ -763,7 +763,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
    nterm_max = 0
    ndisp_max = 0
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !  Read with libxml the number of coefficient
    call effpot_xml_getDimCoeff(char_f2c(trim(filename)),ncoeff,nterm_max,ndisp_max)
 #else
@@ -887,13 +887,13 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
  integer,intent(out) :: nrpt
 !Local variables-------------------------------
  !scalar
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: irpt,ivoigt
  integer :: funit = 1,ios=0
  logical :: found
 #endif
 !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  character (len=XML_RECL) :: line,readline,strg,strg1
  character(len=500) :: message
 #endif
@@ -902,7 +902,7 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
    nrpt = 0
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !  Read with libxml the number of coefficient
    call effpot_xml_getDimStrainCoupling(char_f2c(trim(filename)),nrpt,voigt)
 #else
@@ -1164,7 +1164,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
   integer :: nrpt1,nrpt2
   real :: itypat
   character(len=500) :: message
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
   integer :: funit = 1,ios = 0
   integer :: iatom
   logical :: found
@@ -1172,7 +1172,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
   character (len=XML_RECL) :: strg,strg1
 #endif
   !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
   integer,allocatable :: typat(:)
 #endif
 
@@ -1195,7 +1195,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Open the atomicdata XML file for reading
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !Read with libxml
  call effpot_xml_getDimSystem(char_f2c(trim(filename)),natom,ntypat,nph1l,nrpt1,nrpt2)
 #else
@@ -1365,7 +1365,7 @@ end subroutine system_getDimFromXML
  integer,parameter :: master=0
  logical :: has_anharmonics = .FALSE.
  logical :: iam_master
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: funit = 1,ios=0
  integer :: iatom,iamu,iph1l,irpt,irpt1,irpt2,irpt3,jj,mu,nu
  real(dp):: amu
@@ -1390,11 +1390,11 @@ end subroutine system_getDimFromXML
  type(ifc_type),dimension(:),allocatable :: phonon_strain
  type(crystal_t)  :: crystal
  type(atomdata_t) :: atom
-#ifdef HAVE_LIBXML
+#ifdef HAVE_XML
  real(dp),allocatable :: phonon_strain_atmfrc(:,:,:,:,:)
  integer,allocatable  :: phonon_straincell(:,:)
 #endif
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  real(dp),allocatable :: work2(:,:)
 #endif
 
@@ -1467,7 +1467,7 @@ end subroutine system_getDimFromXML
 
  if(iam_master)then
 !Open the atomicdata XML file for reading
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
    write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'
@@ -2980,7 +2980,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
 
@@ -3004,11 +3004,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,nstrain,ndisp_max,nproc,nterm
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
-#ifdef HAVE_LIBXML
+#ifdef HAVE_XML
  integer :: icoeff,iterm
 #endif
 
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: funit = 1,ios = 0
  integer :: icoeff,idisp,istrain,iterm,mu
  logical :: found,found2,displacement
@@ -3064,7 +3064,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  if(iam_master)then
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
    write(message,'(3a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'
 #else
@@ -3082,7 +3082,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 
  !Read with libxml librarie
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
    ABI_DATATYPE_ALLOCATE(terms,(ncoeff,nterm_max))
    ABI_ALLOCATE(atindx,(ncoeff,nterm_max,2,ndisp_max))
@@ -3350,7 +3350,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  if(debug)then
    do ii=1,ncoeff
      do jj=1,coeffs(ii)%nterm
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
        write(200+my_rank,*)"ii,jj,ndisp,nterm",ii,jj,coeffs(ii)%nterm,coeffs(ii)%terms(jj)%ndisp
        write(200+my_rank,*)"atindx",coeffs(ii)%terms(jj)%atindx
        write(200+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
@@ -3369,7 +3369,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 #endif
      end do
    end do
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
    close(200+my_rank)
 #else
    close(300+my_rank)
@@ -4058,7 +4058,7 @@ end subroutine rdfromline_value
 !!
 !! SOURCE
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
 function char_f2c(f_string) result(c_string)
 
