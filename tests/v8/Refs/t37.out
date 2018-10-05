@@ -55,7 +55,7 @@
  ======================= Optional input variables ============================
  Ngqpt2                  2    2    2
  
- STOP: THIS VALUE IS NOT ALLOWED FOR Impose_Symetry
+ STOP IF THE DIJ (IFC) MATRIX IS NOT HERMITIAN (SYMETRIC)
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
  
  WARNING: ALL the quantities are now computed :

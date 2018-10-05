@@ -8,7 +8,7 @@ module m_tdep_psij
 
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_numeric_tools
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
@@ -20,6 +20,7 @@ module m_tdep_psij
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_phij,        only : Eigen_Variables_type,Eigen_Variables_type,tdep_init_eigen2nd,tdep_destroy_eigen2nd
   use m_tdep_utils,       only : Coeff_Moore_type
+  use m_symkpt
 
   implicit none
 
@@ -433,7 +434,6 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_calc_alpha_gamma'
- use interfaces_29_kpoints
 !End of the abilint section
 
   implicit none

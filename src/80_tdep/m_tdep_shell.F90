@@ -163,7 +163,7 @@ contains
   close(16)
   ntotcoeff=ncoeff_prev
 
- end subroutine
+ end subroutine tdep_init_shell1at
 
 !====================================================================================================
  subroutine tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
@@ -698,7 +698,7 @@ contains
 !FB  close(91)
 !EndFB
   
- end subroutine
+ end subroutine tdep_init_shell3at
 
 !====================================================================================================
  subroutine tdep_destroy_shell(natom,order,Shell)
