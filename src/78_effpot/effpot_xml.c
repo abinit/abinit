@@ -23,7 +23,7 @@
 #include <string.h>
 #include <config.h>
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>

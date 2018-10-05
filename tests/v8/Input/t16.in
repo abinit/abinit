@@ -40,7 +40,7 @@ spin_dt=1e-16
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_LIBXML
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
 #%% system_xml = t16.xml
 #%% [files]
 #%% files_to_test = 
