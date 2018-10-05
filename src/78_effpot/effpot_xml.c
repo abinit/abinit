@@ -24,7 +24,7 @@
 #include <config.h>
 #include <sys/stat.h>
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
