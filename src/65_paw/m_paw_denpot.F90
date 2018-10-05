@@ -732,7 +732,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      call pawdijhartree(dij_ep,qphase,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
      if (option/=1) then
        etmp=zero
-       call pawaccenergy_nospin(electronpositron%e_paw,pawrhoij(iatom),dij_ep,1,1,pawtab(itypat))
+       call pawaccenergy_nospin(etmp,pawrhoij(iatom),dij_ep,1,1,pawtab(itypat))
        electronpositron%e_paw  =electronpositron%e_paw  -etmp
        electronpositron%e_pawdc=electronpositron%e_pawdc-etmp
      end if
@@ -953,10 +953,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      call pawaccenergy_nospin(e1t10,pawrhoij(iatom),pawtab(itypat)%dij0,1,qphase,pawtab(itypat))
 
 !    Positron special case (dij0 is opposite, except for kinetic term)
-     if (ipositron/=0) then
+     if (ipositron==1) then
        ABI_ALLOCATE(dij_ep,(qphase*lmn2_size))
        dij_ep(:)=two*(pawtab(itypat)%kij(:)-pawtab(itypat)%dij0(:))
        call pawaccenergy_nospin(e1t10,pawrhoij(iatom),dij_ep,1,qphase,pawtab(itypat))
+       ABI_DEALLOCATE(dij_ep)
      end if
 
    end if
@@ -1487,7 +1488,7 @@ end subroutine pawdensities
 !!        has been added to epaw.
 !!  [epaw_im]= imaginary part of PAW on-site energy. At output, the contribution
 !!             of the current atom has been added to epaw.
-!!             This imaginary p	rt only exists in a few cases (f.i. non-stationnary
+!!             This imaginary p    rt only exists in a few cases (f.i. non-stationnary
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
@@ -1624,31 +1625,31 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
        etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
        if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
        epaw=epaw+etmp*pawtab%dltij(klmn)
-       jrhoij=krhoij+cplex_rhoij
+       jrhoij=jrhoij+cplex_rhoij
      end do
    end do ! nsploop
 
 !  Contribution to on-site energy (imaginary part)
    if (present(epaw_im).and.qphase_dij==2) then
-	 do isp_rhoij=1,nsploop
-	   isp_dij=min(isp_rhoij,nspden_dij)
-	   jrhoij=iq0_rhoij+1
-	   do irhoij=1,pawrhoij%nrhoijsel
-		 klmn=pawrhoij%rhoijselect(irhoij)
-		 if (iq==1) then
+     do isp_rhoij=1,nsploop
+       isp_dij=min(isp_rhoij,nspden_dij)
+       jrhoij=iq0_rhoij+1
+       do irhoij=1,pawrhoij%nrhoijsel
+         klmn=pawrhoij%rhoijselect(irhoij)
+         if (iq==1) then
            kklmn=lmn2_size*cplex_dij+klmn
            etmp=-rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp+rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
-		 end if
-		 if (iq==2) then
+         end if
+         if (iq==2) then
            kklmn=klmn
            etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
-		 end if
-		 epaw_im=epaw_im+etmp*pawtab%dltij(klmn)
-		 jrhoij=krhoij+cplex_rhoij
-	   end do
-	 end do ! nsploop
+         end if
+         epaw_im=epaw_im+etmp*pawtab%dltij(klmn)
+         jrhoij=jrhoij+cplex_rhoij
+       end do
+     end do ! nsploop
    end if
 
  end do ! qphase
@@ -1688,7 +1689,7 @@ end subroutine pawaccenergy
 !!        has been added to epaw.
 !!  [epaw_im]= imaginary part of PAW on-site energy. At output, the contribution
 !!             of the current atom has been added to epaw.
-!!             This imaginary p	rt only exists in a few cases (f.i. non-stationnary
+!!             This imaginary part only exists in a few cases (f.i. non-stationnary
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
