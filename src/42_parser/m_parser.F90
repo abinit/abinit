@@ -238,7 +238,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      errcod=1
    end if
 
- else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
+ else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' & 
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
 
@@ -1402,7 +1403,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
      write(message, '(9a)' )&
@@ -1605,7 +1607,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  ii=0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  & 
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  strln=len_trim(string)
 
  do while (ii<narr)
@@ -1690,7 +1693,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  end if
 
 !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
+&    .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -1700,9 +1704,11 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
      if(b2==0) b2=strln-b1+1
 
 !    DEBUG
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-!    write(std_out,*)' inarray : b2=',b2
-!    write(std_out,*)' typevarphys==',typevarphys
+    write(std_out,*)' inarray : strln=',strln
+    write(std_out,*)' inarray : b1=',b1
+    write(std_out,*)' inarray : b2=',b2
+    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+    write(std_out,*)' typevarphys==',typevarphys
 !    ENDDEBUG
 
 !    Identify the presence of a non-digit character
