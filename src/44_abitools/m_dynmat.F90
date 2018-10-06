@@ -5677,10 +5677,8 @@ end subroutine nanal9
 !!
 !! SOURCE
 
-subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
-& dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,&
-& trans,ucvol,wghatm,xred,zeff)
+subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
