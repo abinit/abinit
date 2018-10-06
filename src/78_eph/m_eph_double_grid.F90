@@ -39,7 +39,7 @@ module m_eph_double_grid
 !!***
 
  public :: eph_double_grid_new   ! Initialize the double grid structure
- public :: eph_double_grid_free  ! Free the double grid structure 
+ public :: eph_double_grid_free  ! Free the double grid structure
  public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
  public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
  public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
@@ -388,7 +388,7 @@ end subroutine eph_double_grid_free
 !! INPUTS
 !!   kpt=kpoint to be mapped (reduced coordinates)
 !!   opt=Map to the coarse (1) or dense grid (2)
-!! 
+!!
 !! PARENTS
 !!      m_sigmaph
 !!
@@ -423,7 +423,7 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
              mod(nint((kpt(3)+1)*self%nkpt_dense(3)),self%nkpt_dense(3))+1)
  else
    MSG_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
- endif    
+ endif
 
 end function eph_double_grid_get_index
 
@@ -471,7 +471,7 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
  integer,intent(in) :: symrec(:,:,:)
  integer,intent(out):: bz2ibz(self%dense_nbz)
  real(dp) :: kpt(3), kpt_sym(3)
- 
+
  !call cwtime(cpu,wall,gflops,"start")
  bz2ibz = 0
  do ik_ibz=1,nibz
@@ -530,7 +530,7 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
 
 !Arguments --------------------------------
  type(eph_double_grid_t) :: self
- real(dp) :: kk(3), kq(3), qpt(3) 
+ real(dp) :: kk(3), kq(3), qpt(3)
 !Variables --------------------------------
  integer :: jj
  integer :: ik_bz, ikq_bz, iq_bz
@@ -559,7 +559,7 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
       ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
  enddo
 
-end subroutine eph_double_grid_get_mapping 
+end subroutine eph_double_grid_get_mapping
 
 end module m_eph_double_grid
 !!***

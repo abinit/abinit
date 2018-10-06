@@ -170,7 +170,7 @@ module m_sigmaph
    ! Radius of the sphere for the numerical integration of the Frohlich self-energy
 
   !real(dp) :: qdamp
-   ! Damping
+   ! Exponential damping added to Frohlich model.
 
   integer :: qint_method
    ! Defines the method used to integrate in q-space
@@ -250,12 +250,12 @@ module m_sigmaph
   ! This array is initialized inside the (ikcalc, spin) loop
 
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:)
-  ! (nz, 2, nbcalc_ks, natom3, nq, ibsum))
+  ! (nz, 2, nbcalc_ks, natom3, nbsum, nq_k))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
   ! This array is initialized inside the (ikcalc, spin) loop
 
   real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
-  ! (nbcalc_ks, 2, natom3, nq, ibsum))
+  ! (2, nbcalc_ks, natom3, nbsum, nq_k))
   ! Weights for the q-integration of the two delta (abs/emission) if imag_only
   ! This array is initialized inside the (ikcalc, spin) loop
 
@@ -474,7 +474,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
- complex(dpc),allocatable :: tpp_red(:,:),zvals(:,:)
+ complex(dpc),allocatable :: tpp_red(:,:) !,zvals(:,:)
  complex(dpc) :: cdd(3)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
@@ -816,10 +816,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        MSG_ERROR("Invalid eph_task")
      end if
 
-     ABI_MALLOC(zvals, (nz, nbcalc_ks))
+     !ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
+       ! FIXME: This part is broken now. Lot of memory allocated here!
        ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
        ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
@@ -1130,8 +1131,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !
                ! we will write this with nested conditionals using the order above
 
-               ! zcut mode
                if (sigma%qint_method == 0) then
+                 ! zcut mode
                  if (sigma%use_doublegrid) then
                    cfact = zero
                    do jj=1,sigma%eph_doublegrid%ndiv
@@ -1288,7 +1289,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end if
 
      ABI_FREE(sigma%e0vals)
-     ABI_FREE(zvals)
+     !ABI_FREE(zvals)
      ABI_FREE(kets_k)
      ABI_FREE(gkq_atm)
      ABI_FREE(gkq_nu)
@@ -1735,7 +1736,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        if (dtset%bdgw(2,ikcalc,spin) > dtset%mband) then
          ierr = ierr + 1
          write(msg,'(a,2i0,2(a,i0))')&
-          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband=",dtset%mband
+          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband = ",dtset%mband
          MSG_WARNING(msg)
        end if
      end do
@@ -1745,7 +1746,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  else
    ! Use qp_range to select the interesting k-points and the corresponing bands.
    !
-   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
    !           bands above and below the Fermi level.
    ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
@@ -1753,7 +1754,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    gw_qprange = dtset%gw_qprange
    if (gap_err /=0 .and. gw_qprange == 0) then
-     msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
+     msg = "Problem while computing the fundamental and direct gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
      gw_qprange = 1
    end if
@@ -1807,9 +1808,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    else
      ! gw_qprange is not specified in the input.
-     ! Include the optical and the fundamental KS gap.
+     ! Include the direct and the fundamental KS gap.
      ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
-     ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
+     ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
      !
      ! Find the list of `interesting` kpoints.
      call wrtout(std_out, "qprange not specified in input --> Include direct and fundamental KS gap in Sigma_{nk}")
@@ -3134,8 +3135,18 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
     enddo
   enddo
  enddo
+
+ ! TODO: Reintegrate cweights
+ ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
+ !ABI_MALLOC(zvals, (nz, nbc))
+ !zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
+ !call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights, xmpi_comm_self, &
+ !  use_bzsum=sigma%symsigma == 0)
+ !ABI_FREE(zvals)
+
  ABI_FREE(tmp_deltaw_pm)
  call xmpi_sum(sigma%deltaw_pm, comm, ierr)
+
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))') "weights with tetrahedron  cpu:",cpu,", wall:",wall
  call wrtout(std_out, msg, do_flush=.True.)
