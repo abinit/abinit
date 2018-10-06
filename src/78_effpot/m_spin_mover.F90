@@ -220,20 +220,20 @@ contains
     real(dp) ::  S(3, self%nspins), etot
     real(dp):: t
     integer :: counter
-    character(len=100) :: msg
+    character(len=66) :: msg
     t=0.0
     counter=0
     write(msg, *) " Begining spin dynamic steps :"
     write(std_out,*) msg
     write(ab_out, *) msg
-    write(msg, *)  "==================================================================================" 
+    msg=repeat("=", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
     write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average M", "Energy"
     write(std_out,*) msg
     write(ab_out, *) msg
-    write(msg, *)  "-----------------------------------------------------------------------------------" 
+    msg=repeat("-", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
@@ -253,7 +253,7 @@ contains
           !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
        t=t+self%dt
     enddo
-    write(msg, *)  "=====================================================================================" 
+    msg=repeat("=", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
