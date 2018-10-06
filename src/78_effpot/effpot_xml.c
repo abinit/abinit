@@ -1823,4 +1823,30 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
 	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
 	exit(1);
 }
+
+
+void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
+                   int *natoms, double *masses[], int *nspins,
+                   int *index_spin[], double *gyroratios[], double *damping_factors[],
+                   double *positions[], double *spinat[],
+                   // exchange
+                   int *exc_nnz, int *exc_ilist[],
+                   int *exc_jlist[], int *exc_Rlist[],
+                   double *exc_vallist[],
+                   //dmi
+                   int *dmi_nnz, int *dmi_ilist[],
+                   int *dmi_jlist[], int *dmi_Rlist[],
+                   double *dmi_vallist[],
+                   //uniaxial SIA
+                   int *uni_nnz, int *uni_ilist[],
+                   double *uni_amplitude_list[],
+                   double *uni_direction_list[],
+                   //bilinear
+                   int *bi_nnz, int *bi_ilist[],
+                   int *bi_jlist[], int *bi_Rlist[],
+                   double *bi_vallist[])
+{
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
+	exit(1);
+}
 #endif
