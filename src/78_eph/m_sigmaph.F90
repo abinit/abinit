@@ -160,12 +160,12 @@ module m_sigmaph
   integer :: ntheta, nphi
   !integer :: ndvis(3)=3
 
+  integer :: nqr = 0
+   ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
+
   integer :: angl_size = 0
    ! Dimension of angular mesh for spherical integration of the Frohlich self-energy
    ! angl_size = ntheta * nphi
-
-  integer :: nqr = 0
-   ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
 
   complex(dpc) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
@@ -2153,7 +2153,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
    !ABI_MALLOC(new%frohl_gkq2, (new%max_nbcalc, natom3))
-   new%ntheta = 10; new%nphi = 2 * new%ntheta
+   new%ntheta = 10
+   !new%ntheta = dtser%efmas_ntheta
+   new%nphi = 2 * new%ntheta
    new%qrad = tol6
    !new%qrad = pi * min(norm2(cryst%gprimd(:, 1)), norm2(cryst%gprimd(:, 2)), norm2(cryst%gprimd(:, 3)))
    new%qrad = new%qrad / 2.0_dp
@@ -2210,7 +2212,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
  end if
 
- ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
+ ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
@@ -2285,8 +2287,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      NCF_CHECK(ncerr)
      if (new%nwr > 0) then
        ncerr = nctk_def_arrays(ncid, [ &
-           nctkarr_t("frohl_vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-           nctkarr_t("frohl_spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
+         nctkarr_t("frohl_vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+         nctkarr_t("frohl_spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
        ])
        NCF_CHECK(ncerr)
      end if
@@ -2642,7 +2644,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  integer,parameter :: master=0, max_ntemp=1
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, self2fmts
  complex(dpc) :: sig0c,sig0fr,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
@@ -2743,34 +2745,34 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    write(ab_out,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
    write(ab_out,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
    write(ab_out,"(a)")"   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
-   !write(ab_out,"(a)")"   TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
+   write(ab_out,"(a)")"   TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
 
  do it=1,min(self%ntemp, max_ntemp)
    ! Write header.
-   if (it == 1) then
-     if (self%nsppol == 1) then
-       write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)))
-     else
-       write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)), ", spin:", itoa(spin))
-     end if
-     !if (self%imag_only) then
-     !  if (self%frohl_model == 0) then
-     !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  TAU(fms)  DeKS"
-     !  else
-     !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  SF2(eKS)  TAU(fms)  DeKS"
-     !  end if
-     !else
-       if (self%frohl_model == 0) then
-         write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
-       else
-         write(ab_out,"(a)")&
-           "   B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS)  SE2(eKS)  SF2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
-       end if
-     !end if
+   if (self%nsppol == 1) then
+     write(ab_out,"(3a,f4.1,a)") &
+       "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", T= ", self%kTmesh(it) / kb_HaK, " [K]"
+   else
+     write(ab_out,"(3a,i1,a,f4.1,a)") &
+       "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", spin: ", spin, ", T= ",self%kTmesh(it) / kb_HaK, " [K]"
    end if
+   !if (self%imag_only) then
+   !  if (self%frohl_model == 0) then
+   !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  TAU(eKS)  DeKS"
+   !  else
+   !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS"
+   !  end if
+   !else
+     if (self%frohl_model == 0) then
+       write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+     else
+       write(ab_out,"(a)")&
+         "   B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS)  SE2(eKS)  SF2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+     end if
+   !end if
 
    do ibc=1,self%nbcalc_ks(ikcalc,spin)
      band_ks = self%bstart_ks(ikcalc,spin) + ibc - 1
@@ -2797,23 +2799,27 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
      end if
      ! FIXME
+     !self2fmts = Time_Sec * tol15
      !if (self%imag_only) then
      !  if (self%frohl_model == 0) then
-     !    "   B    eKS     SE2(eKS)  TAU(fms)  DeKS"
+     !    "   B    eKS     SE2(eKS)  TAU(eKS)  DeKS"
      !    write(ab_out, "(i4,3(f8.3,1x))") &
-     !      band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, one / (two_pi * abs(aimag(sig0c))) * Time_Sec * tol15
+     !      band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, self2fmts / (two_pi * abs(aimag(sig0c))), (kse - kse_prev) * Ha_eV
      !  else
-     !    "   B    eKS     SE2(eKS)  SF2(eKS)  TAU(fms)  DeKS"
+     !    "   B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS"
+     !    write(ab_out, "(i4,3(f8.3,1x))") &
+     !      band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, self2fmts / (two_pi * abs(aimag(sig0c))),
+     !      self2fmts / (two_pi * abs(aimag(sig0fr))), (kse - kse_prev) * Ha_eV
      !  end if
      !else
        if (self%frohl_model == 0) then
-         !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+         ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
          write(ab_out, "(i4, 10(f8.3,1x))") &
            band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
            real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
            fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
        else
-         !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS) SE2(eKS) SF2(eKS) Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+         ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS) SE2(eKS) SF2(eKS) Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
          write(ab_out, "(i4, 12(f8.3,1x))") &
            band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
            real(sig0c) * Ha_eV, real(sig0fr) * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, real(zc), &
@@ -2847,17 +2853,18 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    else
      if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
        write(ab_out, "(a)")" "
-       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
-         "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
        write(ab_out, "(a)")" "
      end if
    end if
+
+   write(ab_out, "(a)")repeat("=", 92)
  end do ! it
 
- !if (self%ntemp > max_ntemp) then
- !  write(ab_out, "(a,i0,a)")"No more than ", max_ntemp, " temperatures are written to main output file."
- !  write(ab_out, "(a)")"Please use SIGEPH.nc file and AbiPy to analyze the results."
- !end if
+ if (self%ntemp > max_ntemp .and. (ikcalc == 1 .and. spin == 1)) then
+   write(ab_out, "(a,i0,a)")"No more than ", max_ntemp, " temperatures are written to the main output file."
+   write(ab_out, "(2a)")"Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
+ end if
 
  if (prtvol > 0 .and. (ikcalc == 1 .and. spin == 1)) then
    if (self%gfw_nomega > 0) then
@@ -3404,7 +3411,7 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
           if (sigma%imag_only) then
             ! NB: Here we are not completely consistent if the integration is done with tetrahedra.
-            ! In principle one should avoid ieta and use some kind of tesselation for the sphere.
+            ! In principle one should avoid ieta and use some kind of tessellation for the sphere.
             sigma%frohl_vals_e0ks(it, ib_k) = sigma%frohl_vals_e0ks(it, ib_k) + j_dpc * aimag(cfact)
           else
             sigma%frohl_vals_e0ks(it, ib_k) = sigma%frohl_vals_e0ks(it, ib_k) + cfact
