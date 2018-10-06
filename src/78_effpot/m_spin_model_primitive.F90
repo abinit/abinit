@@ -86,8 +86,9 @@ module m_spin_model_primitive
             uni_ilist, uni_amplitude_list, uni_direction_list, &
             bi_ilist, bi_jilst, bi_Rlist, bi_vallist
      end subroutine xml_read_spin
+ end interface
 
-
+ interface
      subroutine xml_free_spin(xml_fname, ref_energy, unitcell,                 &
           natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
           exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
@@ -105,7 +106,6 @@ module m_spin_model_primitive
             uni_ilist, uni_amplitude_list, uni_direction_list, &
             bi_ilist, bi_jilst, bi_Rlist, bi_vallist
      end subroutine xml_free_spin
-
   end interface
 
   type spin_model_primitive_t
