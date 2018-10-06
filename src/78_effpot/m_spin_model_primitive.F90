@@ -558,9 +558,7 @@ contains
     class(spin_model_primitive_t), intent(inout) :: self
     integer :: i, j
 
-    !if(allocated(self%masses))  then
-    !    ABI_DEALLOCATE(self%masses)
-    !  end if
+
     if(allocated(self%index_spin))  then
        ABI_DEALLOCATE(self%index_spin)
     end if
