@@ -816,7 +816,7 @@ contains
     ABI_ALLOCATE(sc_spinpos, (3, sc_nspins) )
     ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
     ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
-    ABI_ALLOCATE(sc_znucl, (sc_nspins))
+    !ABI_ALLOCATE(sc_znucl, (sc_nspins))
     ABI_ALLOCATE(sc_iatoms, (sc_nspins))
     ! sc_index_spin
     counter=0
@@ -871,6 +871,12 @@ contains
     if (allocated(sc_ispin_prim)) then
        ABI_DEALLOCATE(sc_ispin_prim)
     endif
+    if (allocated(sc_iatoms)) then
+        ABI_DEALLOCATE(sc_iatoms)
+    endif
+    if (allocated(sc_spinpos)) then
+        ABI_DEALLOCATE(sc_spinpos)
+    endif
     if (allocated(sc_rvec)) then
        ABI_DEALLOCATE(sc_rvec)
     endif
@@ -887,7 +893,6 @@ contains
     if (allocated(sc_spinat)) then
        ABI_DEALLOCATE(sc_spinat)
     endif
-    ! TODO hexu: should it be destroyed here? or do all magnetic moment should be stored there?
     call destroy_supercell(scell)
   end subroutine spin_model_primitive_t_make_supercell
 
