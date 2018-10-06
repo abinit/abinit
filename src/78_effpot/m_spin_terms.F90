@@ -688,6 +688,16 @@ contains
 !End of the abilint section
 
     class(spin_terms_t), intent(inout):: self
+
+    if (allocated(self%S)) then
+        ABI_DEALLOCATE(self%S)
+    endif
+
+    if (allocated(self%Htmp)) then
+        ABI_DEALLOCATE(self%Htmp)
+    endif
+
+
     if (allocated(self%ms))  then
        ABI_DEALLOCATE(self%ms)
     endif
