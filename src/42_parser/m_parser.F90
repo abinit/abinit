@@ -1704,11 +1704,11 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
      if(b2==0) b2=strln-b1+1
 
 !    DEBUG
-    write(std_out,*)' inarray : strln=',strln
-    write(std_out,*)' inarray : b1=',b1
-    write(std_out,*)' inarray : b2=',b2
-    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-    write(std_out,*)' typevarphys==',typevarphys
+!    write(std_out,*)' inarray : strln=',strln
+!    write(std_out,*)' inarray : b1=',b1
+!    write(std_out,*)' inarray : b2=',b2
+!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!    write(std_out,*)' typevarphys==',typevarphys
 !    ENDDEBUG
 
 !    Identify the presence of a non-digit character
@@ -1734,7 +1734,7 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
            factor=BField_Tesla
          end if
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if(string(b1+1:b1+2)=='S ' .or. string(b1+1:b1+3)=='SEC' .or. string(b1+1:b1+6)=='SECOND') then
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
            factor=one/Time_Sec
          end if
        endif
