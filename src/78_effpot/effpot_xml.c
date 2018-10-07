@@ -327,8 +327,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       uri = xmlGetProp(cur, (const  xmlChar *) "mass");
       present = 0;
       //1) fill the atomic mass unit
-      for(i=0;i<=*ntypat;i++){
-        if(amu[i]==strtod(uri,NULL)){
+      for(i=0;i<*ntypat;i++){
+        if(abs(amu[i]-strtod(uri,NULL))<1e-5){
+        //if(amu[i]==strtod(uri,NULL)){
           present = 1;
           break;
         }
@@ -338,9 +339,14 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         iamu++;
       }
       // fill the typat table
-      for(i=0;i<=*ntypat;i++){
-        if(amu[i]==strtod(uri,NULL)){
+      //printf("=====typat====\n");
+      //printf("ntypat: %d\n", *ntypat);
+      for(i=0;i<*ntypat;i++){
+        if(abs(amu[i]-strtod(uri,NULL))<1e-5){
           typat[iatom]=i+1;
+      // Debug typat
+      //   printf("i= %d\n", i);
+      //   printf("%d: %f, %f, %d\n", iatom, amu[i], strtod(uri,NULL), typat[iatom]);
         }
       }
       xmlFree(uri);
