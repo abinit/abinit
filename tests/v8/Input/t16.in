@@ -24,6 +24,7 @@ spin_dt=1e-16 s
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% exclude_hosts = nag@abiref
 #%% system_xml = t16.xml
 #%% [files]
 #%% files_to_test = 
@@ -35,4 +36,7 @@ spin_dt=1e-16 s
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml and run spin dynamics
+#%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
+#%%   is detected, which is needed by the random number generator.
+#%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
 #%%<END TEST_INFO>
