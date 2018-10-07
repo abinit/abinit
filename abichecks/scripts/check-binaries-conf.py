@@ -46,7 +46,7 @@ dep_levels = {
   "timer":1,
   "triqs":0, 
   "wannier90":3,
-  "xml":3  # Comment hexu: Please check. Should it be 3?
+  "xml":0  # Comment hexu: Please check. 
 }
 
 # ---------------------------------------------------------------------------- #
