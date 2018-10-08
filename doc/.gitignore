@@ -6,7 +6,6 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/optic.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -27,6 +26,8 @@ variables/w90.md
 variables/multibinit.md
 variables/aim.md
 variables/anaddb.md
+variables/multibinit.md
+variables/optic.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -37,7 +38,7 @@ topics/Bader.md
 topics/Band2eps.md
 topics/Berry.md
 topics/BandOcc.md
-topics/BoundProcess.md
+topics/BoundingProcess.md
 topics/BSE.md
 topics/ConstrainedPol.md
 topics/Control.md

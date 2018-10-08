@@ -202,7 +202,7 @@ contains
 #endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=fnlen) :: wfnname
- character(len=500) :: message
+ character(len=1000) :: message
  character(len=fnlen) :: seed_name(nsppol)
  character(len=fnlen) :: fname,filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
  character(len=fnlen) :: filew90_mmn(nsppol),filew90_eig(nsppol)
@@ -1503,7 +1503,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  integer::isppol
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
- character(len=500) :: message                   ! to be uncommented, if needed
+ character(len=2000) :: message   
  character(len=10)::postfix
 ! *************************************************************************
 

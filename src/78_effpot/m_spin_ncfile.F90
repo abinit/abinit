@@ -31,7 +31,6 @@
 !!
 !! SOURCE
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -114,14 +113,22 @@ contains
     !call ab_define_var(ncid,dim1,typat_id,NF90_DOUBLE,&
     !     &  "typat","types of atoms","dimensionless" )
 
-    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), self%S_id, NF90_DOUBLE, "S", "Spin orientations", "dimensionless")
-    call ab_define_var(self%ncid, (/ self%nspins, self%ntime /), self%snorm_id, NF90_DOUBLE, "snorm", "Spin norm2", "Mu_B")
-    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), self%dsdt_id, NF90_DOUBLE, "dsdt", "Spin orientations derivative to time", "1/s")
-    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), self%Heff_id, NF90_DOUBLE, "Heff", "Effective spin torque", "Tesla")
-    call ab_define_var(self%ncid, (/ self%ntime /), self%time_id, NF90_DOUBLE, "time", "time", "s")
-    call ab_define_var(self%ncid, (/ self%ntime /), self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Joule")
-    call ab_define_var(self%ncid, (/ self%ntime /), self%entropy_id, NF90_DOUBLE, "entropy", "Entropy", "Joule/K") 
-    call ab_define_var(self%ncid, (/ self%ntime /), self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
+    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), &
+&         self%S_id, NF90_DOUBLE, "S", "Spin orientations", "dimensionless")
+    call ab_define_var(self%ncid, (/ self%nspins, self%ntime /), &
+&         self%snorm_id, NF90_DOUBLE, "snorm", "Spin norm2", "Mu_B")
+    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), &
+&         self%dsdt_id, NF90_DOUBLE, "dsdt", "Spin orientations derivative to time", "1/s")
+    call ab_define_var(self%ncid, (/ self%three, self%nspins, self%ntime /), &
+&         self%Heff_id, NF90_DOUBLE, "Heff", "Effective spin torque", "Tesla")
+    call ab_define_var(self%ncid, (/ self%ntime /), &
+&         self%time_id, NF90_DOUBLE, "time", "time", "s")
+    call ab_define_var(self%ncid, (/ self%ntime /), &
+&         self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Joule")
+    call ab_define_var(self%ncid, (/ self%ntime /), &
+&         self%entropy_id, NF90_DOUBLE, "entropy", "Entropy", "Joule/K")
+    call ab_define_var(self%ncid, (/ self%ntime /), &
+&         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
     ncerr=nf90_enddef(self%ncid)
 #endif
   end subroutine spin_ncfile_t_def_sd
@@ -141,15 +148,27 @@ contains
     itime=self%itime+1
 #if defined HAVE_NETCDF
     !write(std_out, *) "writing spin dynamics step into spin hist netcdf file: itime: ", itime
-    ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspins, 1])
-    ncerr=nf90_put_var(self%ncid, self%dsdt_id, hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspins, 1])
-    ncerr=nf90_put_var(self%ncid, self%heff_id, hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspins, 1])
-    ncerr=nf90_put_var(self%ncid, self%snorm_id, hist%snorm(:,hist%ihist_prev), start=[1, itime], count=[hist%nspins, 1])
+      ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), &
+&      start=[1, 1, itime], count=[3, hist%nspins, 1])
+
+      ncerr=nf90_put_var(self%ncid, self%dsdt_id, &
+&      hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], &
+&      count=[3, hist%nspins, 1])
+
+      ncerr=nf90_put_var(self%ncid, self%heff_id, &
+&      hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspins, 1])
+
+      ncerr=nf90_put_var(self%ncid, self%snorm_id, &
+&      hist%snorm(:,hist%ihist_prev), start=[1, itime], count=[hist%nspins, 1])
     !ncerr=nf90_put_var(self%ncid, self%ihist_g_id, [hist%ihist_latt(hist%ihist_prev)], start=[itime], count=[1])
-    ncerr=nf90_put_var(self%ncid, self%itime_id, [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
-    ncerr=nf90_put_var(self%ncid, self%time_id, [hist%time(hist%ihist_prev)], start=[itime], count=[1])
-    ncerr=nf90_put_var(self%ncid, self%entropy_id, [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
-    ncerr=nf90_put_var(self%ncid, self%etotal_id, [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
+      ncerr=nf90_put_var(self%ncid, self%itime_id, &
+&       [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
+      ncerr=nf90_put_var(self%ncid, self%time_id, &
+      & [hist%time(hist%ihist_prev)], start=[itime], count=[1])
+      ncerr=nf90_put_var(self%ncid, self%entropy_id, &
+      & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
+      ncerr=nf90_put_var(self%ncid, self%etotal_id,  &
+      & [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
     self%itime=itime
 #endif
   end subroutine spin_ncfile_t_write_one_step
@@ -174,12 +193,16 @@ contains
     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
     !ncerr=nf90_def_dim(self%ncid, "ntypat", 1, self%ntypat)
 
-    ncerr=nf90_def_var(self%ncid, "prim_acell", NF90_DOUBLE, (/ self%three /), self%acell_id)
-    ncerr=nf90_def_var(self%ncid, "prim_rprimd", NF90_DOUBLE, (/self%three, self%three /), self%rprimd_id)
-    ncerr=nf90_def_var(self%ncid, "prim_xred", NF90_DOUBLE, (/self%three, self%natoms /), self%xred_id)
+      ncerr=nf90_def_var(self%ncid, "prim_acell", NF90_DOUBLE, &
+      & (/ self%three /), self%acell_id)
+      ncerr=nf90_def_var(self%ncid, "prim_rprimd", NF90_DOUBLE, &
+      & (/self%three, self%three /), self%rprimd_id)
+      ncerr=nf90_def_var(self%ncid, "prim_xred", NF90_DOUBLE, &
+      & (/self%three, self%natoms /), self%xred_id)
     !ncerr=nf90_def_var(self%ncid, "prim_typat", NF90_INT, [self%natoms],  self%typat_id)
     !ncerr=nf90_def_var(self%ncid, "prim_znucl", NF90_DOUBLE, [self%ntypat],  self%znucl_id)
-    ncerr=nf90_def_var(self%ncid, "prim_spin_index", NF90_DOUBLE, [self%natoms], self%spin_index_id)
+      ncerr=nf90_def_var(self%ncid, "prim_spin_index", NF90_DOUBLE, &
+      & [self%natoms], self%spin_index_id)
 
     ncerr=nf90_enddef(self%ncid)
 
@@ -210,10 +233,14 @@ contains
     ncerr=nf90_redef(self%ncid)
 
 
-    call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id, NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with units", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspins/), pos_id, NF90_DOUBLE, "xcart_spin","position of spin in cartesian coordinates", "bohr")
-    call ab_define_var(self%ncid, (/ self%nspins/), ispin_prim_id, NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
-    call ab_define_var(self%ncid, (/self%three, self%nspins/), rvec_id, NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
+      call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id, &
+      & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with units", "bohr")
+      call ab_define_var(self%ncid, (/self%three, self%nspins/), pos_id, &
+      & NF90_DOUBLE, "xcart_spin","position of spin in cartesian coordinates", "bohr")
+      call ab_define_var(self%ncid, (/ self%nspins/), ispin_prim_id, &
+      & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
+    call ab_define_var(self%ncid, (/self%three, self%nspins/), rvec_id, &
+      & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
 
     !ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%three, self%three], unitcell_id)
     !ncerr=nf90_def_var(self%ncid, "xred", NF90_DOUBLE, [self%three, self%nspins], pos_id)
@@ -248,12 +275,17 @@ contains
 
     ! dims 
     ! vars
-    call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE, "spin_qpoint", "spin QPOINT", "dimensionless")
+      call ab_define_var(self%ncid, (/self%three/), qpoint_id, &
+      & NF90_DOUBLE, "spin_qpoint", "spin QPOINT", "dimensionless")
     ! TODO should change ncell to 3*3 matrix
-    call ab_define_var(self%ncid, (/self%three/), ncell_id, NF90_INT, "ncell", "supercell matrix (only diagonal)", "dimensionless")
-    call ab_define_var(self%ncid, dim0, temperature_id, NF90_DOUBLE, "spin_temperature", "Spin temperature", "Kelvin")
-    call ab_define_var(self%ncid, dim0, dt_id, NF90_DOUBLE, "spin_dt", "Spin time step", "second")
-    call ab_define_var(self%ncid, (/self%three/), mfield_id, NF90_DOUBLE, "spin_mag_field", "magnetic field for spin dynamics", "Tesla")
+      call ab_define_var(self%ncid, (/self%three/), ncell_id, &
+      & NF90_INT, "ncell", "supercell matrix (only diagonal)", "dimensionless")
+      call ab_define_var(self%ncid, dim0, temperature_id, &
+      & NF90_DOUBLE, "spin_temperature", "Spin temperature", "Kelvin")
+    call ab_define_var(self%ncid, dim0, dt_id, &
+      & NF90_DOUBLE, "spin_dt", "Spin time step", "second")
+    call ab_define_var(self%ncid, (/self%three/), mfield_id, &
+      & NF90_DOUBLE, "spin_mag_field", "magnetic field for spin dynamics", "Tesla")
     !ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%three], qpoint_id)
     !ncerr=nf90_def_var(self%ncid, "ncell", NF90_INT, [self%three], ncell_id)
     !ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,  temperature_id)

@@ -7,6 +7,7 @@
 !! FUNCTION
 !! This module contains definition the type spin_hist_t
 !! and its related routines
+!! The observables are also calculated. 
 !!
 !! Datatypes:
 !!
@@ -421,6 +422,23 @@ contains
     if (allocated(hist%ihist_latt)) then
        ABI_DEALLOCATE(hist%ihist_latt)
     end if
+
+    if (allocated(hist%label)) then
+       ABI_DEALLOCATE(hist%label)
+    end if
+   if (allocated(hist%ms_prim)) then
+       ABI_DEALLOCATE(hist%ms_prim)
+    end if
+   if (allocated(hist%Cv)) then
+       ABI_DEALLOCATE(hist%Cv)
+    end if
+   if (allocated(hist%rcorr)) then
+       ABI_DEALLOCATE(hist%rcorr)
+    end if
+    if (allocated(hist%sp_corr_func)) then
+       ABI_DEALLOCATE(hist%sp_corr_func)
+    end if
+   
   end subroutine spin_hist_t_free
 !!***
 

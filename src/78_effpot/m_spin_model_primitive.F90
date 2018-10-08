@@ -86,6 +86,26 @@ module m_spin_model_primitive
             uni_ilist, uni_amplitude_list, uni_direction_list, &
             bi_ilist, bi_jilst, bi_Rlist, bi_vallist
      end subroutine xml_read_spin
+ end interface
+
+ interface
+     subroutine xml_free_spin(xml_fname, ref_energy, unitcell,                 &
+          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
+          exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
+          dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
+          uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
+          bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_free_spin")
+       import
+       character(c_char), intent(in) :: xml_fname(*)
+       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+       real  (c_double), intent(out) :: ref_energy
+       type(c_ptr)::  unitcell,  &
+            masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
+            exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
+            dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
+            uni_ilist, uni_amplitude_list, uni_direction_list, &
+            bi_ilist, bi_jilst, bi_Rlist, bi_vallist
+     end subroutine xml_free_spin
   end interface
 
   type spin_model_primitive_t
@@ -398,125 +418,132 @@ contains
          Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
          vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
 
+    call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
+         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+         exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
+         dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
+         uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
+         bi_nnz, p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist)
+
 
     ! TODO hexu: should use free in C code, not here.
-    if(associated(unitcell))  then
-       ABI_DEALLOCATE(unitcell)
-    end if
-    nullify(unitcell)
+  !   if(associated(unitcell))  then
+  !      ABI_DEALLOCATE(unitcell)
+  !   end if
+  !   nullify(unitcell)
 
-    if(associated(masses))  then
-       ABI_DEALLOCATE(masses)
-    end if
-    nullify(masses)
+  !   if(associated(masses))  then
+  !      ABI_DEALLOCATE(masses)
+  !   end if
+  !   nullify(masses)
 
-    if(associated(index_spin))  then
-       ABI_DEALLOCATE(index_spin)
-    end if
-    nullify(index_spin)
+  !   if(associated(index_spin))  then
+  !      ABI_DEALLOCATE(index_spin)
+  !   end if
+  !   nullify(index_spin)
 
-    if(associated(gyroratios))  then
-       ABI_DEALLOCATE(gyroratios)
-    end if
-    nullify(gyroratios)
+  !   if(associated(gyroratios))  then
+  !      ABI_DEALLOCATE(gyroratios)
+  !   end if
+  !   nullify(gyroratios)
 
-    if(associated(damping_factors))  then
-       ABI_DEALLOCATE(damping_factors)
-    end if
-    nullify(damping_factors)
-    if(associated(positions))  then
-       ABI_DEALLOCATE(positions)
-    end if
-    nullify(positions)
+  !   if(associated(damping_factors))  then
+  !      ABI_DEALLOCATE(damping_factors)
+  !   end if
+  !   nullify(damping_factors)
+  !   if(associated(positions))  then
+  !      ABI_DEALLOCATE(positions)
+  !   end if
+  !   nullify(positions)
 
-    if(associated(spinat))  then
-       ABI_DEALLOCATE(spinat)
-    end if
-    nullify(spinat)
+  !   if(associated(spinat))  then
+  !      ABI_DEALLOCATE(spinat)
+  !   end if
+  !   nullify(spinat)
 
-    if(exc_nnz /=0) then
-       if(associated(exc_ilist))  then
-          ABI_DEALLOCATE(exc_ilist)
-       end if
-       nullify(exc_ilist)
+  !   if(exc_nnz /=0) then
+  !      if(associated(exc_ilist))  then
+  !         ABI_DEALLOCATE(exc_ilist)
+  !      end if
+  !      nullify(exc_ilist)
 
 
-       if(associated(exc_jlist))  then
-          ABI_DEALLOCATE(exc_jlist)
-       end if
-       nullify(exc_jlist)
+  !      if(associated(exc_jlist))  then
+  !         ABI_DEALLOCATE(exc_jlist)
+  !      end if
+  !      nullify(exc_jlist)
 
-       if(associated(exc_Rlist))  then
-          ABI_DEALLOCATE(exc_Rlist)
-       end if
-       nullify(exc_Rlist)
+  !      if(associated(exc_Rlist))  then
+  !         ABI_DEALLOCATE(exc_Rlist)
+  !      end if
+  !      nullify(exc_Rlist)
 
-       if(associated(exc_vallist))  then
-          ABI_DEALLOCATE(exc_vallist)
-       end if
-       nullify(exc_vallist)
-    endif
+  !      if(associated(exc_vallist))  then
+  !         ABI_DEALLOCATE(exc_vallist)
+  !      end if
+  !      nullify(exc_vallist)
+  !   endif
 
-    if(dmi_nnz/=0) then
-       if(associated(dmi_ilist))  then
-          ABI_DEALLOCATE(dmi_ilist)
-       end if
-       nullify(dmi_ilist)
+  !   if(dmi_nnz/=0) then
+  !      if(associated(dmi_ilist))  then
+  !         ABI_DEALLOCATE(dmi_ilist)
+  !      end if
+  !      nullify(dmi_ilist)
 
-       if(associated(dmi_jlist))  then
-          ABI_DEALLOCATE(dmi_jlist)
-       end if
-       nullify(dmi_jlist)
+  !      if(associated(dmi_jlist))  then
+  !         ABI_DEALLOCATE(dmi_jlist)
+  !      end if
+  !      nullify(dmi_jlist)
 
-       if(associated(dmi_Rlist))  then
-          ABI_DEALLOCATE(dmi_Rlist)
-       end if
-       nullify(dmi_Rlist)
+  !      if(associated(dmi_Rlist))  then
+  !         ABI_DEALLOCATE(dmi_Rlist)
+  !      end if
+  !      nullify(dmi_Rlist)
 
-       if(associated(dmi_vallist))  then
-          ABI_DEALLOCATE(dmi_vallist)
-       end if
-       nullify(dmi_vallist)
-    end if
+  !      if(associated(dmi_vallist))  then
+  !         ABI_DEALLOCATE(dmi_vallist)
+  !      end if
+  !      nullify(dmi_vallist)
+  !   end if
 
-    if(uni_nnz/=0) then
-       if(associated(uni_ilist))  then
-          ABI_DEALLOCATE(uni_ilist)
-       end if
-       nullify(uni_ilist)
+  !   if(uni_nnz/=0) then
+  !      if(associated(uni_ilist))  then
+  !         ABI_DEALLOCATE(uni_ilist)
+  !      end if
+  !      nullify(uni_ilist)
 
-       if(associated(uni_amplitude_list))  then
-          ABI_DEALLOCATE(uni_amplitude_list)
-       end if
-       nullify(uni_amplitude_list)
+  !      if(associated(uni_amplitude_list))  then
+  !         ABI_DEALLOCATE(uni_amplitude_list)
+  !      end if
+  !      nullify(uni_amplitude_list)
 
-       if(associated(uni_direction_list))  then
-          ABI_DEALLOCATE(uni_direction_list)
-       end if
-       nullify(uni_direction_list)
-    end if
+  !      if(associated(uni_direction_list))  then
+  !         ABI_DEALLOCATE(uni_direction_list)
+  !      end if
+  !      nullify(uni_direction_list)
+  !   end if
 
-    if(bi_nnz/=0) then
-       if(associated(bi_ilist))  then
-          ABI_DEALLOCATE(bi_ilist)
-       end if
-       nullify(bi_ilist)
+  !   if(bi_nnz/=0) then
+  !      if(associated(bi_ilist))  then
+  !         ABI_DEALLOCATE(bi_ilist)
+  !      end if
+  !      nullify(bi_ilist)
 
-       if(associated(bi_jlist))  then
-          ABI_DEALLOCATE(bi_jlist)
-       end if
-       nullify(bi_jlist)
+  !      if(associated(bi_jlist))  then
+  !         ABI_DEALLOCATE(bi_jlist)
+  !      end if
+  !      nullify(bi_jlist)
 
-       if(associated(bi_Rlist))  then
-          ABI_DEALLOCATE(bi_Rlist)
-       end if
-       nullify(bi_Rlist)
+  !      if(associated(bi_Rlist))  then
+  !         ABI_DEALLOCATE(bi_Rlist)
+  !      end if
+  !      nullify(bi_Rlist)
 
-       if(associated(bi_vallist))  then
-          ABI_DEALLOCATE(bi_vallist)
-       end if
-       nullify(bi_vallist)
-    endif
+  !      if(associated(bi_vallist))  then
+  !         ABI_DEALLOCATE(bi_vallist)
+  !      end if
+  !      nullify(bi_vallist)
+  !   endif
   end subroutine spin_model_primitive_t_read_xml
 
   subroutine spin_model_primitive_t_finalize(self)
@@ -531,9 +558,7 @@ contains
     class(spin_model_primitive_t), intent(inout) :: self
     integer :: i, j
 
-    !if(allocated(self%masses))  then
-    !    ABI_DEALLOCATE(self%masses)
-    !  end if
+
     if(allocated(self%index_spin))  then
        ABI_DEALLOCATE(self%index_spin)
     end if
@@ -752,12 +777,12 @@ contains
 
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3), atom_index(self%nspins)
+    integer :: sc_matrix(3,3), iatoms(self%nspins)
 
     integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:)
+    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
@@ -773,7 +798,7 @@ contains
     do i=1, self%natoms
       if(self%index_spin(i)>0) then
           counter=counter+1
-          atom_index(counter)=i
+          iatoms(counter)=i
       endif
     enddo 
 
@@ -791,7 +816,8 @@ contains
     ABI_ALLOCATE(sc_spinpos, (3, sc_nspins) )
     ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
     ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
-    ABI_ALLOCATE(sc_znucl, (sc_nspins))
+    !ABI_ALLOCATE(sc_znucl, (sc_nspins))
+    ABI_ALLOCATE(sc_iatoms, (sc_nspins))
     ! sc_index_spin
     counter=0
     do i = 1, scell%natom, 1
@@ -804,7 +830,7 @@ contains
           !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
           ! in primitive cell, everyone has spinat
           sc_spinat(:, counter)=self%spinat(:,iatom) 
-          print *, self%spinat(:, iatom)
+          sc_iatoms(counter)=i
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
@@ -813,49 +839,43 @@ contains
           sc_index_spin(i)=-1
        endif
     end do
-    !print *, sc_index_spin
 
-    do i=1, sc_nspins
-       sc_znucl(i)=1
-    enddo
+    !!do i=1, sc_nspins
+    !   sc_znucl(i)=1
+    !enddo
 
-    !call spin_terms_t_initialize(sc_ham,)
-    !call sc_ham%initialize( cell=scell%rprimd, pos=sc_spinpos, &
-    !     spinat=sc_spinat, zion=sc_znucl)
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         spinat=sc_spinat, zion=sc_znucl, spin_index=sc_index_spin, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
+         spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
     sc_ham%gyro_ratio(:)=sc_gyroratios(:)
     sc_ham%gilbert_damping(:)=sc_damping_factors(:)
 
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
           ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
-          call find_supercell_ijR(scell=scell, i0=atom_index(self%total_ilist%data(i)), &
-               j0=atom_index(self%total_jlist%data(i)), &
+          call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &
+               j0=iatoms(self%total_jlist%data(i)), &
                R0=[self%total_Rlist(1)%data(i),  &
                self%total_Rlist(2)%data(i),  &
                self%total_Rlist(3)%data(i)], &
                R=scell%rvecs(:,icell), &
                i1=ii,j1=jj,R1=rr,R_sc=R_sc)
-          ! ii is the index in atom supercell not in spin supercell 
-          !scell%rvecs(icell)
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
-                if(isnan(tmp(icol, irow)))then
-                    print *, 'nan found'
-                endif
              end do
           end do
-          !print *, "i0", self%total_ilist%data(i)
-          !print *, "ii", ii, sc_index_spin(ii)
-          !print *, "jj", jj, sc_index_spin(jj)
           call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
        enddo
     enddo
 
     if (allocated(sc_ispin_prim)) then
        ABI_DEALLOCATE(sc_ispin_prim)
+    endif
+    if (allocated(sc_iatoms)) then
+        ABI_DEALLOCATE(sc_iatoms)
+    endif
+    if (allocated(sc_spinpos)) then
+        ABI_DEALLOCATE(sc_spinpos)
     endif
     if (allocated(sc_rvec)) then
        ABI_DEALLOCATE(sc_rvec)
@@ -873,7 +893,6 @@ contains
     if (allocated(sc_spinat)) then
        ABI_DEALLOCATE(sc_spinat)
     endif
-    ! TODO hexu: should it be destroyed here? or do all magnetic moment should be stored there?
     call destroy_supercell(scell)
   end subroutine spin_model_primitive_t_make_supercell
 
