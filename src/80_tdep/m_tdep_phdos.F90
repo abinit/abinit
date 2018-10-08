@@ -253,7 +253,8 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
   write(20,'(1x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
   write(20,'(1x,a)')'    3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2'
   write(20,'(1x,a)')'    4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)'
-  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)           C_v(T)         S_vib(T)        U_vib(T)   DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)   MSD(T)'
+  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)           C_v(T)  '&
+&   //'       S_vib(T)        U_vib(T)   DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)   MSD(T)'
   do itemp=1,100
     wovert=1.d0/(2*real(itemp)*100*k_B)
     freeE=0.d0

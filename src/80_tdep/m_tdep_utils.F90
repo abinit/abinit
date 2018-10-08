@@ -639,7 +639,8 @@ contains
     PijUi(istep)=sum(Pij_N(:)*ucart_blas(:))
     Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=-Pij_N(:)-ftot2(:)
     if (present(ftot3)) then
-      call DGEMM('T','N',1,1,3*InVar%natom,1./6.d0,ftot3(:,istep),3*InVar%natom,ucart_blas,3*InVar%natom,0.d0,PsijUiUjUk(istep),3*InVar%natom)
+      call DGEMM('T','N',1,1,3*InVar%natom,1./6.d0,ftot3(:,istep),3*InVar%natom,ucart_blas,&
+&       3*InVar%natom,0.d0,PsijUiUjUk(istep),3*InVar%natom)
       Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=-Pij_N(:)-ftot2(:)-ftot3(:,istep)/2.d0
     end if !Psij
   end do !istep  
@@ -721,7 +722,8 @@ contains
 &       Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
     endif 
   end do  
-  write(InVar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',3.d0/2.d0*kb_HaK*Ha_eV*InVar%temperature
+  write(InVar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',&
+&   3.d0/2.d0*kb_HaK*Ha_eV*InVar%temperature
 
 ! Write : i) (U_TDEP vs U_MD) in etotMDvsTDEP.dat
 !        ii) (Forces_TDEP vs Forces_MD) in fcartMDvsTDEP.dat

@@ -809,7 +809,9 @@ end subroutine tdep_calc_constraints
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Psij_333(:,:,:)
 !         Compute the rotational invariance (third order)
 	  if (iatom.eq.1.and.jatom.eq.7) then
-            write(6,'(a,6(i5,x),2(e12.6,x))') 'ishell,iatom,jatom,katom,isym,trans,Psi=',ishell,iatom,jatom,katom,isym,trans,Psij_333(1,3,3),asr3(1,jatom,1,3,3)
+            write(6,'(a,6(i5,x),2(e12.6,x))') &
+&          'ishell,iatom,jatom,katom,isym,trans,Psi=', &
+&           ishell,iatom,jatom,katom,isym,trans,Psij_333(1,3,3),asr3(1,jatom,1,3,3)
 	  end if
           do alpha=1,3
             do beta=1,3

@@ -520,7 +520,8 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
         end do  
       end do  
     end do 
-    call tdep_calc_gruneisen(distance,Eigen2nd_tmp,Gruneisen,iq_ibz,InVar,Lattice,Psij_ref,qibz_cart(:,iq_ibz),Rlatt_cart,Shell3at,Sym)
+    call tdep_calc_gruneisen(distance,Eigen2nd_tmp,Gruneisen,iq_ibz,InVar,Lattice,Psij_ref,qibz_cart(:,iq_ibz),&
+&     Rlatt_cart,Shell3at,Sym)
 
 !   Compute the heat capacity and thermodynamical gruneisen parameter at present temperature
 !   ========================================================================================
@@ -558,8 +559,8 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
 
   open(unit=20,file=trim(InVar%output_prefix)//'thermo3.dat')
   write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
-  write(20,'(a)')'#                                                                         ----------------------------------------------'
-  write(20,'(a)')'#                                                                          {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
+  write(20,'(a,72x,a)')'#',' ----------------------------------------------'
+  write(20,'(a,72x,a)')'#','  {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
   do itemp=1,ntemp
     C_v    =sum(heatcapa_HA   (:,itemp))
     E_th   =sum(u_vib_HA    (:,itemp))
