@@ -170,7 +170,7 @@ ABI_TOPICS = [
     "Band2eps",
     "Berry",
     "BandOcc",
-    "BoundProcess",
+    "BoundingProcess",
     "BSE",
     "ConstrainedPol",
     "Control",
