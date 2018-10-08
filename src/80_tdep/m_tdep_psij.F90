@@ -569,7 +569,7 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
     P_th1  =sum(p_thermo_HA (:,itemp))/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
     P_th2  =      p_thermo2(itemp)*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
     P_th   =                 Gama*E_th/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
-    write(20,'(x,i5,7(x,f15.5))') itemp*10,C_v,Gama,alpha_v*1.d6,E_th,P_th1,P_th2,P_th
+    write(20,'(1x,i5,7(1x,f15.5))') itemp*10,C_v,Gama,alpha_v*1.d6,E_th,P_th1,P_th2,P_th
   end do  
   close(20)
   ABI_FREE(heatcapa_HA)
@@ -605,16 +605,16 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   P_th1  =                   sum(p_thermo1(:))    /(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
   P_th2  =p_thermo2(int(InVar%temperature/10))*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
   P_th   =                           Gama*E_th    /(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
-  write(InVar%stdout,'(a,x,f15.5)') ' Specific heat (k_B/f.u.):             C_v=',C_v
-  write(InVar%stdout,'(a,x,f15.5)') ' Gruneisen parameter :               Gamma=',Gama
-  write(InVar%stdout,'(a,x,f15.5)') ' Isothermal Bulk Modulus (GPa):        B_T=',Lattice%BulkModulus
-  write(InVar%stdout,'(a,x,f15.5)') ' Volume (bohr^3 per unit cell):          V=',Lattice%ucvol
-  write(InVar%stdout,'(a,x,f15.5)') ' Thermal energy (eV) :                E_th=',E_th
-  write(InVar%stdout,'(a,x,f15.5)') ' Thermal expansion (K^{-1}*10^6) : alpha_v=',alpha_v*1.d6
+  write(InVar%stdout,'(a,1x,f15.5)') ' Specific heat (k_B/f.u.):             C_v=',C_v
+  write(InVar%stdout,'(a,1x,f15.5)') ' Gruneisen parameter :               Gamma=',Gama
+  write(InVar%stdout,'(a,1x,f15.5)') ' Isothermal Bulk Modulus (GPa):        B_T=',Lattice%BulkModulus
+  write(InVar%stdout,'(a,1x,f15.5)') ' Volume (bohr^3 per unit cell):          V=',Lattice%ucvol
+  write(InVar%stdout,'(a,1x,f15.5)') ' Thermal energy (eV) :                E_th=',E_th
+  write(InVar%stdout,'(a,1x,f15.5)') ' Thermal expansion (K^{-1}*10^6) : alpha_v=',alpha_v*1.d6
   write(InVar%stdout,'(a)') ' Thermal pressure (in GPa) : '
-  write(InVar%stdout,'(a,x,f15.5)') '  - with    intrinsic effects and with    ZPE : P_th=sum_i Gamma_i*E_i/V   =',P_th1
-  write(InVar%stdout,'(a,x,f15.5)') '  - with    intrinsic effects and without ZPE : P_th=integ{Gamma*C_v/V dT} =',P_th2
-  write(InVar%stdout,'(a,x,f15.5)') '  - without intrinsic effects and without ZPE : P_th=Gamma*E_th/V          =',P_th
+  write(InVar%stdout,'(a,1x,f15.5)') '  - with    intrinsic effects and with    ZPE : P_th=sum_i Gamma_i*E_i/V   =',P_th1
+  write(InVar%stdout,'(a,1x,f15.5)') '  - with    intrinsic effects and without ZPE : P_th=integ{Gamma*C_v/V dT} =',P_th2
+  write(InVar%stdout,'(a,1x,f15.5)') '  - without intrinsic effects and without ZPE : P_th=Gamma*E_th/V          =',P_th
   ABI_FREE(heatcapa)
   ABI_FREE(grun_thermo)
   ABI_FREE(p_thermo1)
@@ -660,8 +660,8 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
     if (abs(sum(Qpt%qpt_red(:,iqpt)**2)-1.d0).lt.tol8) cycle ! Gp point
     call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 !   Write the Gruneisen
-    if (sum(abs(imag(Gruneisen(:)))).gt.tol8) then
-      write(53,'(i5,1x,100(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(imag(Gruneisen(ii)),ii=1,nmode)
+    if (sum(abs(dimag(Gruneisen(:)))).gt.tol8) then
+      write(53,'(i5,1x,100(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(dimag(Gruneisen(ii)),ii=1,nmode)
       MSG_BUG('The imaginary part of the Gruneisen is not equal to zero')
     else 
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)

@@ -589,7 +589,7 @@ contains
 &             Shell3at%neighbours(iatom,ishell)%sym_in_shell(tmpinter)) then
             if (Shell3at%neighbours(iatom,ishell)%transpose_in_shell(  ninter).ne.&
 &	        Shell3at%neighbours(iatom,ishell)%transpose_in_shell(tmpinter)) cycle
-            write(std_out,'(a,2(x,i5))') 'For ishell and iatom =',ishell,iatom
+            write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
             write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
 &             ' and ',tmpinter,' have both the same symmetry isym=',Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
             MSG_ERROR('Some interactions are equals due to the symmetry')

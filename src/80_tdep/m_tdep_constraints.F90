@@ -481,7 +481,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     if (nconst_loc.ne.0) then
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+        write(16,'(500(f10.5,1x))') vectout(:,iconst_loc)
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
@@ -508,7 +508,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     if (nconst_loc.ne.0) then
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+        write(16,'(500(f10.5,1x))') vectout(:,iconst_loc)
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
@@ -537,7 +537,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     if (nconst_loc.ne.0) then
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+        write(16,'(500(f10.5,1x))') vectout(:,iconst_loc)
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
@@ -566,7 +566,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     if (nconst_loc.ne.0) then
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
-        write(16,'(500(f10.5,x))') vectout(:,iconst_loc)
+        write(16,'(500(f10.51,1x))') vectout(:,iconst_loc)
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
@@ -809,7 +809,7 @@ end subroutine tdep_calc_constraints
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Psij_333(:,:,:)
 !         Compute the rotational invariance (third order)
 	  if (iatom.eq.1.and.jatom.eq.7) then
-            write(6,'(a,6(i5,x),2(e12.6,x))') &
+            write(6,'(a,6(i5,1x),2(e12.6,1x))') &
 &          'ishell,iatom,jatom,katom,isym,trans,Psi=', &
 &           ishell,iatom,jatom,katom,isym,trans,Psij_333(1,3,3),asr3(1,jatom,1,3,3)
 	  end if
