@@ -100,5 +100,5 @@ bandpp2 8
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI
 #%% description = DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
-#%% topics = DMFT, KGB
+#%% topics = DMFT, parallelism
 #%%<END TEST_INFO>
