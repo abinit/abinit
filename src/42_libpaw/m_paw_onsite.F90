@@ -396,8 +396,9 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    LIBPAW_DEALLOCATE(int2)
    LIBPAW_DEALLOCATE(int1)
    LIBPAW_DEALLOCATE(dphi)
-   LIBPAW_DEALLOCATE(ang_phipphj)
+
  end do !itypat
+ LIBPAW_DEALLOCATE(ang_phipphj)
 
 end subroutine pawnabla_core_init
 !!***

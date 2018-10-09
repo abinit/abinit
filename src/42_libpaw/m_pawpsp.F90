@@ -3496,12 +3496,12 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      end if
    end do
    ivlocmesh=iread1
-   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
-   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
-   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
-   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
-   call pawrad_init(vloc_mesh)
-!   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
+!   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
+!   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
+!   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
+!   vloc_mesh%mesh_size=radmesh(ivlocmesh)%mesh_size
+!   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
+   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
    vlocr=zero
    shft=mesh_shift(ivlocmesh)
