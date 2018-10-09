@@ -284,12 +284,12 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
 !Local variables-------------------------------
 !scalars
  integer :: nln,nln_cor,il,ilm,ilmn,iln,itypat
- integer :: jl,jlm,jlmn,jln,lmn_size,lmncmax,mesh_size,mesh_size_cor
+ integer :: jl,jlm,jlmn,jln,lmn_size,lmcmax,lmncmax,mesh_size,mesh_size_cor
  real(dp) :: intg
  character(len=500) :: msg
 !arrays
  integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8)
+ real(dp) , allocatable:: ang_phipphj(:,:,:)
  real(dp),allocatable :: dphi(:),ff(:),int1(:,:),int2(:,:),rad(:)
 
 ! *************************************************************************
@@ -297,6 +297,8 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  mesh_size_cor=size(phi_cor,1)
  nln_cor=size(phi_cor,2)
  lmncmax=size(indlmn_cor,2)
+ lmcmax=indlmn_cor(4,lmncmax)
+ LIBPAW_ALLOCATE(ang_phipphj,(lmcmax,lmcmax,8))
 
  if (mpsang>4)then
    write(msg,'(3a)')&
@@ -394,7 +396,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    LIBPAW_DEALLOCATE(int2)
    LIBPAW_DEALLOCATE(int1)
    LIBPAW_DEALLOCATE(dphi)
-
+   LIBPAW_DEALLOCATE(ang_phipphj)
  end do !itypat
 
 end subroutine pawnabla_core_init
