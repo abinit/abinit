@@ -101,13 +101,16 @@ subroutine real_array_type_push(self, val)
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
+    integer :: err
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
@@ -144,8 +147,10 @@ subroutine real_array_type_finalize(self)
 !End of the abilint section
 
   class(real_array_type), intent(inout):: self
+  integer :: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0
@@ -182,15 +187,17 @@ subroutine int_array_type_push(self, val)
 !End of the abilint section
 
     class(int_array_type), intent(inout):: self
-    integer :: val
+    integer :: val, err
     integer, allocatable :: temp(:)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
@@ -227,8 +234,10 @@ subroutine int_array_type_finalize(self)
 !End of the abilint section
 
   class(int_array_type), intent(inout):: self
+  integer:: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0

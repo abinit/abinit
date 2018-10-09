@@ -2,7 +2,7 @@
 authors: AM, FR
 ---
 
-# First lesson on MULTIBINIT
+# First tutorial on MULTIBINIT
 
 ## Build a harmonic lattice model and run a dynamics
 
@@ -78,12 +78,11 @@ Thereby you need to provide into the DDB file the clamped-ion dielectric tensor 
 
 In this tutorial, we will take as an example of a material without lattice instabilities: the perovskite CaTiO$_3$ in its $Pnma$ phase.
 
-*Optional exercice $\Longrightarrow$ Compute the phonon band structure with [[help:anaddb|Anaddb]]. You can download the complete DDB file (resulting from the previous calculations) here:*
+*Optional exercise $\Longrightarrow$ Compute the phonon band structure with [[help:anaddb|Anaddb]]. You can download the complete DDB file (resulting from the previous calculations) here:*
 {% dialog tests/tutomultibinit/Input/tmulti1_DDB %}
 
 
-**Before starting, you might to consider working in a different subdirectory than for the other lessons. Why do not create "Work_latticeModel"?**
-
+**Before starting, you might to consider working in a different subdirectory than for the other lessons. Why not create "Work_latticeModel"?**
 
 The file ~abinit/tests/tutomultibinit/Input/tmulti1.files lists the file names and root names.
 You can copy it in the **Work_latticeModel** directory and look at this file content, you should see:
@@ -111,7 +110,7 @@ The resulting output file, trf1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
 
 
-The run you performed was aimet at reading the DDB file, generating the short range interatomic force constants and extract all the other informations related to the harmonic part of the model.
+The run you performed was aimed at reading the DDB file, generating the short range interatomic force constants and extract all the other informations related to the harmonic part of the model.
 You can find inside the output file, the Born effective charges, the clamped-ion elastic tensor and the internal strain coupling parameters. Take some time to open and read the tmulti1_1.out file.
 If the DDB file is complete, the generation of the XML file requires only few input variables:
 

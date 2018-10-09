@@ -408,6 +408,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    end if
 
    ABI_ALLOCATE(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
+   
    matrix_tmp(:,:)=matrix(:,:)
    !write(*,*)"matrix_tmp",matrix_tmp
 
@@ -421,6 +422,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(matrix_tmp)
+
    write(std_out,*) 'DSYEV info=',info
    write(std_out,*) 'Eigenvalues:'
    write(std_out,fmt) w(:)

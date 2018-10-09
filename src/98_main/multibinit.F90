@@ -226,7 +226,7 @@ program multibinit
 
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     'reading spin terms.'
-     call spin_model_t_initialize(spin_model, filnam(3), inp )
+     call spin_model_t_initialize(spin_model, filnam, inp )
    end if
  else
    !  Read the model (from DDB or XML)  
