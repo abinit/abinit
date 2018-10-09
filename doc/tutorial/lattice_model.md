@@ -2,7 +2,7 @@
 authors: AM, FR
 ---
 
-# First lesson on MULTIBINIT
+# First tutorial on MULTIBINIT
 
 ## Build a harmonic lattice model and run a dynamics
 
