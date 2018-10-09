@@ -567,6 +567,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      " and my_bstop:", itoa(my_bstop)))
    call wrtout(std_out, sjoin("elow:", ftoa(elow), "ehigh:", ftoa(ehigh), "[Ha]"))
    ABI_CHECK(my_bstart <= my_bstop, "my_bstart > my_bstop")
+   if (my_bstop > dtset%mband) then
+     write(msg,'(2(a,i0),2a)') "The number of included states ",my_bstop,&
+                  " is larger than the number of bands in the input ",dtset%mband,ch10,&
+                  " We will use the number of bands from the input."
+     MSG_COMMENT(msg)
+     my_bstop = dtset%mband
+   end if
    bks_mask = .False.; bks_mask(my_bstart:my_bstop, : ,:) = .True.
    bks_mask = .True. ! TODO: Have to redefine nbsum and reshift band index in sum
  else
@@ -1791,7 +1798,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange - 1, dtset%mband)
          end do
        end do
 
@@ -1804,7 +1811,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
          end do
        end do
      end if
-
    else
      ! gw_qprange is not specified in the input.
      ! Include the optical and the fundamental KS gap.
