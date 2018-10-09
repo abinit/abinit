@@ -51,7 +51,7 @@ B.3 The multibinit application (for second-principles calculations) has consider
     in addition to the already existing input variable documentation and test cases.
     See [[topic:LatticeModel]], [[topic:BoundingProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
     that are hub to the relevant tutorial, input variables and test cases 
-    (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).  
+    (e.g. [[lesson:lattice_model]],[[test:v8_15]], [[test:v8_16]]...).  
     By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
 B.4 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:

@@ -6,7 +6,8 @@ authors: AM, FR
 
 ## Build a harmonic lattice model and run a dynamics
 
-This lesson aims at showing how to build a harmonic model by using a second-principles approach for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations.
+This lesson aims at showing how to build a harmonic model by using a second-principles approach 
+for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations.
 
 **Before beginning, it is very important to read the reference [[cite:Wojdel2013]].**
 
@@ -38,14 +39,14 @@ As described in [[cite:Wojdel2013]], the construction of a model starts by defin
 
 The choice of this RS is fundamental since the model will be based on perturbations acting on it.
 Once this choice is done, make sure than your system is fully relaxed and compute a single DFT calculation on this system in order to generate a DDB file.
-In this tutorial, we will take as an example of a material without unstabilities, the perovskite CaTiO3 in the Pnma phase.
+In this tutorial, we will take as an example of a material without instabilities, the perovskite CaTiO3 in the Pnma phase.
 
 From the RS, now we consider the perturbations: the set of atomic displacements $\boldsymbol{u}$ and lattice strain $\boldsymbol{\eta}$:
 
 ![Schema 2](lattice_model_assets/deformation.png)
 : Fig. 2: Example of lattice perturbations: atomic displacements and strain.
 
-At **the harmonic level**, we can express the potential energy as a sum of three contributions as a function of the set of pertubations ($\boldsymbol{u}$, $\boldsymbol{\eta}$):
+At **the harmonic level**, we can express the potential energy as a sum of three contributions as a function of the set of perturbations ($\boldsymbol{u}$, $\boldsymbol{\eta}$):
 
 $$\displaystyle  E^{harm}(\boldsymbol{u},\boldsymbol{\eta}) =  E^{harm}(\boldsymbol{u}) + E^{harm}(\boldsymbol{u},\boldsymbol{\eta}) + E^{harm}(\boldsymbol{\eta})$$
 
@@ -81,7 +82,7 @@ In this tutorial, we will take as an example of a material without lattice insta
 {% dialog tests/tutomultibinit/Input/tmulti1_DDB %}
 
 
-**Before to start, you might to consider working in a different subdirectory with respect to the other lessons. Why do not create "Work_latticeModel"?**
+**Before starting, you might to consider working in a different subdirectory than for the other lessons. Why do not create "Work_latticeModel"?**
 
 
 The file ~abinit/tests/tutomultibinit/Input/tmulti1.files lists the file names and root names.
@@ -126,7 +127,7 @@ Your XML file is now ready and you can use it as input for MULTIBINIT. To do tha
       tutomulti1_2.out
       tmulti1_1_model.xml
 
-Here, the DDB file is remplace by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory before you run:
+Here, the DDB file is replaced by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory before you run:
 
     multibinit < tmulti2.files > tmulti1_2_stdout
   
