@@ -1212,7 +1212,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_temperature_start=0.0
+ multibinit_dtset%spin_temperature_start=1e-20
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature_start',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature_start=dprarr(1)
  if(multibinit_dtset%spin_temperature_start<=0)then
@@ -1223,7 +1223,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_temperature_end=0.0
+ multibinit_dtset%spin_temperature_end=1e-20
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature_end',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature_end=dprarr(1)
  if(multibinit_dtset%spin_temperature_end<=0)then
@@ -1234,12 +1234,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_temperature_nstep=0
+ multibinit_dtset%spin_temperature_nstep=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature_nstep',tread,'INT')
  if(tread==1) multibinit_dtset%spin_temperature_nstep=intarr(1)
- if(multibinit_dtset%spin_temperature_nstep<=1)then
+ if(multibinit_dtset%spin_temperature_nstep<=0)then
     write(message, '(a,i0,a,a,a,a)' )&
-         &   'spin_temperature_nstep is',multibinit_dtset%spin_temperature_nstep,', while it should be larger than 1',ch10,&
+         &   'spin_temperature_nstep is',multibinit_dtset%spin_temperature_nstep,', while it should be larger than 0',ch10,&
          &   'Action: correct spin_temperature_nstep in your input file.'
     MSG_ERROR(message)
  end if

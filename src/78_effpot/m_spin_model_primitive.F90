@@ -375,13 +375,7 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    !print *, "natoms", natoms
-    !print *, "nspins", nspins
-    !print *, "positions", positions
-    !print *, "unitcell: ", unitcell
-    !print *, "spinat", spinat
-    !print *, "index_spin", index_spin
-    call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
+    call spin_model_primitive_t_set_atoms(self,natoms,transpose(reshape(unitcell, [3,3])), & 
             & reshape(positions, [3, natoms]), &
             & nspins, &
             & index_spin, &
@@ -825,15 +819,20 @@ contains
        !if(scell%atom_indexing(i)>0) then
        if(self%index_spin(iatom)>0) then
           counter=counter+1
+          !map from spin to atom and atom to spin.
           sc_index_spin(i)=counter
-          sc_spinpos(:, counter)=scell%xcart(:,counter)
-          !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
-          ! in primitive cell, everyone has spinat
-          sc_spinat(:, counter)=self%spinat(:,iatom) 
-          sc_iatoms(counter)=i
+          ! variables which every atom have in primitive cell
+          sc_iatoms(counter)=iatom
+          sc_spinpos(:, counter)=scell%xcart(:,i)
+          sc_spinat(:, counter)=self%spinat(:,iatom)
+
+          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! variables only atoms with spin have.
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
-          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! Rvec
           sc_rvec(:,counter)=scell%uc_indexing(:,i)
        else
           sc_index_spin(i)=-1

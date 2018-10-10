@@ -440,7 +440,7 @@ contains
 
     end if
 
-    call spin_hist_t_set_vars(self%spin_hist, S=S, time=0.0_dp, ihist_latt=0, inc=.True.)
+    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms,  time=0.0_dp, ihist_latt=0, inc=.True.)
     !print *, "initial spin", self%spin_hist%current_S
   end subroutine spin_model_t_set_initial_spin
   !!***
@@ -476,10 +476,8 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp) :: S_tmp(3,self%nspins), etot
     call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
-         spin_hist_t_get_S(self%spin_hist),S_tmp, etot)
-    call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, etot=etot, inc=.False.)
+         self%spin_hist)
   end subroutine spin_model_t_run_one_step
   !!***
 
