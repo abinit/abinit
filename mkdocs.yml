@@ -50,7 +50,7 @@ pages:
     - topics/Berry.md
     - topics/BandOcc.md
     - topics/BSE.md
-    - topics/BoundProcess.md
+    - topics/BoundingProcess.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
@@ -114,6 +114,7 @@ pages:
     - topics/SelfEnergy.md
     - topics/SmartSymm.md
     - topics/spinpolarisation.md
+    - topics/SpinDynamicsMultibinit.md
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
@@ -196,6 +197,7 @@ pages:
     - Multibinit:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
+        - Spin Model: tutorial/spin_model.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md
@@ -221,6 +223,7 @@ pages:
     - Test Suite Howto: developers/testsuite_howto.md
     - Test Suite: developers/testsuite.md
     - HowTo for developers: developers/developers_howto.md
+    - XgType: developers/XgType.md
     - Pseudos: 
         - psp1: developers/psp1_info.md
         - psp3: developers/psp3_info.md

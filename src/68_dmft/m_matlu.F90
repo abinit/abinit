@@ -2786,10 +2786,10 @@ end subroutine add_matlu
          enddo ! im
        enddo ! ispinor
      enddo ! isppol
+     ABI_DEALLOCATE(slm2ylm)
    endif ! lpawu
  enddo ! iatom
 
- ABI_DEALLOCATE(slm2ylm)
 
  end subroutine slm2ylm_matlu
 !!***

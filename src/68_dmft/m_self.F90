@@ -1169,8 +1169,8 @@ subroutine new_self(self,self_new,paw_dmft,opt_mix)
 
  write(message,'(8x,a,e12.5)') "DMFT Loop: Precision on self-energy is",diff_self
  call wrtout(std_out,message,'COLL')
- if(diff_self<paw_dmft%dmft_fepr.and.sum_self>tol6.and.paw_dmft%idmftloop>=2) then
-    write(message,'(a,8x,a,e9.2,a,8x,a)') ch10, "Change of self =<", paw_dmft%dmft_fepr,&
+ if(diff_self<paw_dmft%dmft_fermi_prec.and.sum_self>tol6.and.paw_dmft%idmftloop>=2) then
+    write(message,'(a,8x,a,e9.2,a,8x,a)') ch10, "Change of self =<", paw_dmft%dmft_fermi_prec,&
 &    ch10,"DMFT Loop: Self Energy is converged" 
     call wrtout(std_out,message,'COLL')
     self%iself_cv=1

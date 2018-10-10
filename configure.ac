@@ -952,6 +952,29 @@ fallbacks_incs='-I$(fallbacks_instdir)/include'
 AC_SUBST(fallbacks_instdir)
 AC_SUBST(fallbacks_incs)
 
+# XML support
+lib_xml_fcflags=""
+lib_xml_incs=""
+lib_xml_ldflags=""
+lib_xml_libs=""
+if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
+  AC_LANG_PUSH([C])
+  AM_PATH_XML2([2.7.6], [abi_xml_ok="yes"], [abi_xml_ok="no"])
+  AC_LANG_POP([C])
+  if test "${abi_xml_ok}" = "yes"; then
+    AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
+    lib_xml_incs="${XML_CPPFLAGS}"
+    lib_xml_libs="${XML_LIBS}"
+  else
+    AC_MSG_WARN([could not find a usable XML library => disabling XML support])
+    enable_xml="no"
+  fi
+fi
+AC_SUBST(lib_xml_fcflags)
+AC_SUBST(lib_xml_incs)
+AC_SUBST(lib_xml_ldflags)
+AC_SUBST(lib_xml_libs)
+
 # Linear algebra support
 ABI_LINALG_DETECT
 

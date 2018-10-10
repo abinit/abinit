@@ -36,8 +36,7 @@ A.3 Tests v8#100-107 have been moved to v8#81-88.
 B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it was only available with norm conserving psps previously).
     This is based on the second-order Sternheimer equation for the derivative
     with respect to an electric field.
-    Spinor are treated, as well as DFT+U.
-    See tests [[test:v8_81]] to [[test:v8_88]].  
+    See tests [[test:v8_81]] to [[test:v8_89]].  
     By L. Baguet and M. Torrent.
 
 B.2 There has been a large effort to clean the documentation, that was needed and made possible thanks to the recent move to the mkdocs system.
@@ -50,9 +49,9 @@ B.2 There has been a large effort to clean the documentation, that was needed an
 B.3 The multibinit application (for second-principles calculations) has considerably progressed.
     Documentation has thus been set up: "topics" have been written, as well as a tutorial,
     in addition to the already existing input variable documentation and test cases.
-    See [[topic:LatticeModel]], [[topic:BoundProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
+    See [[topic:LatticeModel]], [[topic:BoundingProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
     that are hub to the relevant tutorial, input variables and test cases 
-    (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).  
+    (e.g. [[lesson:lattice_model]],[[test:v8_15]], [[test:v8_16]]...).  
     By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
 B.4 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:

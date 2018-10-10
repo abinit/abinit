@@ -94,7 +94,7 @@ subroutine init10(filnam,comm)
 !scalars
  integer,intent(in) :: comm
 !arrays
- character(len=*),intent(out) :: filnam(17)
+ character(len=fnlen),intent(out) :: filnam(17)
 
 !Local variables--------------------------
 !scalars
