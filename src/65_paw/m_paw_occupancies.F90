@@ -295,17 +295,42 @@ CONTAINS  !=====================================================================
 
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
-                 ! send to proc_recver
-                 ierr = 0
-                 call pawcprj_mpi_send(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),&
-&                                  proc_recver,mpi_enreg%comm_band,ierr)
+!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
+                 locc_test = .false.
+                 do ib_loop=1,nbandc1
+                   if(proc_recver == paw_dmft%bandc_proc(ib_loop))
+                   then
+                     ib = paw_dmft%include_bands(ib_loop)
+                     locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                                abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+                   end if
+                 end do
+                 if(locc_test) then
+                   ! send to proc_recver
+                   ierr = 0
+                   call pawcprj_mpi_send(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),&
+&                                        proc_recver,mpi_enreg%comm_band,ierr)
+                 end if
                end if
              end do
            else
-             ! recv from proc_sender
-             ierr = 0
-             call pawcprj_mpi_recv(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),proc_sender,&
-&                                  mpi_enreg%comm_band,ierr)
+!            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
+             locc_test = .false.
+             do ib_loop=1,nbandc1
+               if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop))
+               then
+                 ib = paw_dmft%include_bands(ib_loop)
+                 ib1 = paw_dmft%include_bands(ibc1)
+                 locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                            abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+               end if
+             end do
+             if(locc_test) then
+               ! recv from proc_sender
+               ierr = 0
+               call pawcprj_mpi_recv(natom,my_nspinor,dimcprj,0,cprj_correl(:,:,ibc1),proc_sender,&
+&                                    mpi_enreg%comm_band,ierr)
+             end if
            end if
          end do
        end if
