@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mover_effpot
+!! NAME
+!!  m_mover_effpot
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mover_effpot
+
+ use defs_basis
+ use m_errors
+ use m_abicore
+
+ implicit none
+
+ private
+!!***
+
+ public :: mover_effpot
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mover_effpot
 !! NAME
 !! mover_effpot
@@ -41,17 +83,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use defs_datatypes
  use m_errors
  use m_abimover
@@ -102,7 +138,6 @@ implicit none
 !Arguments --------------------------------
 !scalar
  integer, intent(in) :: option,comm
- !integer,optional, intent(in) :: analyze
 !array
  type(multibinit_dtset_type),intent(in) :: inp
  type(effective_potential_type),intent(inout)  :: effective_potential
@@ -112,7 +147,7 @@ implicit none
 !scalar
  integer :: filetype,icoeff_bound,ii
 !integer :: iexit,initialized
- integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
+ integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
@@ -148,7 +183,7 @@ implicit none
 !integer,allocatable :: npwtot(:)
  real(dp) :: acell(3)
 !real(dp) :: ecut_tmp(3,2,10)
- real(dp),allocatable :: amass(:) ,coeff_values(:,:)
+ real(dp),allocatable :: coeff_values(:,:)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
@@ -157,8 +192,6 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=200):: name
- character(len=5),allocatable :: symbols(:)
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -222,7 +255,7 @@ implicit none
 !NOTE:ARGUMENTS OF MOVER SHOULD BE CLEAN
 !     We may just need to provide AB_MOVER wich is the main object
 !     for mover and set  scfcv_args as an optional and depending on
-!     the king of calculation (abinit or multibinit), we provide
+!     the kind of calculation (abinit or multibinit), we provide
 !     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
@@ -237,16 +270,17 @@ implicit none
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1.0  ! DILATation : MaXimal value
+   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
-   dtset%friction = 0.0001 ! internal FRICTION coefficient
+   dtset%friction = 0.0001d0 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
    dtset%istatr = 0     ! Integer for STATus file SHiFT
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mqgrid = 0     ! Maximum number of Q-space GRID points for pseudopotentials
    dtset%mqgriddg = 0   ! Maximum number of Q-wavevectors for the 1-dimensional GRID
                         ! for the Double Grid in PAW
-   dtset%mdwall = 10000 ! Molecular Dynamics WALL location
+   dtset%mdwall = 10000d0 ! Molecular Dynamics WALL location
    dtset%ntypalch = 0   ! Number of TYPe of atoms that are "ALCHemical"
    dtset%natom = effective_potential%supercell%natom
    dtset%ntypat = effective_potential%crystal%ntypat
@@ -359,13 +393,13 @@ implicit none
      !   freq_b = 0.02
      ! end if
 
-!TEST_AM_old way 
+!TEST_AM_old way
 !     freq_q = 0.1
 !     freq_b = 0.01
 !     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
 !     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
 !TEST_AM
-     
+
 
 !TEST_AM
      freq_q = 800  / Ha_cmm1
@@ -373,8 +407,8 @@ implicit none
      qmass = 10 * dtset%natom * kb_HaK * dtset%mdtemp(1) / (freq_q**2)
      bmass = 10000*qmass
 !TEST_AM
-     
-     
+
+
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
@@ -402,10 +436,10 @@ implicit none
    if(dtset%ionmov == 27)then
      call effective_potential_file_getType(filnam(3),filetype)
      if(filetype /= 1)then
-          write(message, '(5a)' )&
-&           ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
-&           ' It is not compatible with ionmov 27'
-          MSG_ERROR(message)
+       write(message, '(5a)' )&
+&       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
+&       ' It is not compatible with ionmov 27'
+       MSG_ERROR(message)
      end if
 
    end if
@@ -465,12 +499,6 @@ implicit none
    scfcv_args%psps => psps
 !  Set other arguments of the mover.F90 routines
 
-   ABI_ALLOCATE(amass,(dtset%natom))
-!  Assign masses to each atom (for MD)
-   do jj = 1,dtset%natom
-     amass(jj)=amu_emass*&
-&     effective_potential%crystal%amu(effective_potential%supercell%typat(jj))
-   end do
 !  Set the dffil structure
    dtfil%filnam_ds(1:2)=filnam(1:2)
    dtfil%filnam_ds(3)=""
@@ -527,14 +555,10 @@ implicit none
      !*************************************************************
      write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &     '-Monte Carlo / Molecular Dynamics ',ch10
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-     
-     ncoeff = effective_potential%anharmonics_terms%ncoeff
 
      ! Marcus: if wanted analyze anharmonic terms of effective potential && 
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
-     if(inp%analyze_anh_pot == 1)then !MARCUS TRY TO REBUILD 
+     if(inp%analyze_anh_pot == 1)then 
        open(12,file='anharmonic_energy_terms.out',status='replace')
        write(12,*) '#---------------------------------------------#'
        write(12,*) '#    Anharmonic Terms Energy Contribution     #'
@@ -556,9 +580,11 @@ implicit none
          write(12,'(I5)',advance='yes') icoeff
          endif
        enddo  
-    end if 
+     end if 
 
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
 &     verbose=verbose,writeHIST=writeHIST)
@@ -573,7 +599,7 @@ implicit none
      call wrtout(std_out,message,'COLL')
 
 !    Try the model
-     call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+     call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
@@ -602,9 +628,9 @@ implicit none
 
 !        Get the additional coeff
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&                inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
-&                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&                anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
+&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -664,7 +690,7 @@ implicit none
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
-           call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+           call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &           rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &           effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
            if(.not.effective_potential%anharmonics_terms%bounded)then
@@ -693,9 +719,9 @@ implicit none
 !TEST_AM!
          sc_size_TS = (/2,2,2/)
          call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
-&       comm,anharmstr=inp%bound_anhaStrain==1,&
-&       spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
+&         ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
+&         comm,anharmstr=inp%bound_anhaStrain==1,&
+&         spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
 &         only_even_power=.true.,only_odd_power=.false.)
 
          if(iam_master)then
@@ -747,7 +773,7 @@ implicit none
          model_bound = 0
          model_ncoeffbound = 0
 
-       do ii=2,inp%bound_maxCoeff
+         do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
            nmodels = 1
            ABI_ALLOCATE(list_bound,(nmodels,ii))
@@ -849,7 +875,7 @@ implicit none
                  fcart(:,:)    = zero
 
 !              Run mover
-                 call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+                 call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &                 rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &                 effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
@@ -968,7 +994,6 @@ implicit none
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_DEALLOCATE(amass)
    ABI_DEALLOCATE(fred)
    ABI_DEALLOCATE(fcart)
    ABI_DEALLOCATE(indsym)
@@ -1009,3 +1034,5 @@ implicit none
 end subroutine mover_effpot
 !!***
 
+end module m_mover_effpot
+!!***
