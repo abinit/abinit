@@ -570,7 +570,7 @@ implicit none
        write(12,'(A)') 'Terms     Names' 
        do icoeff=1,ncoeff
          term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(12,'(I5,A,A)') icoeff,'     ',trim(name)
+         write(12,'(I5,A,A)') icoeff,'     ',trim(term_name)
        enddo  
        write(12,*) ''  
        write(12,'(A)',advance='no')  'Cycle/Terms'
