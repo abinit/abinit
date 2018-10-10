@@ -1212,10 +1212,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_temperature_start=1e-20
+ multibinit_dtset%spin_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature_start',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature_start=dprarr(1)
- if(multibinit_dtset%spin_temperature_start<=0)then
+ if(multibinit_dtset%spin_temperature_start<0.0)then
     write(message, '(a,f10.1,a,a,a,a,a)' )&
          &   'spin_temperature_start is ',multibinit_dtset%spin_temperature_start,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
@@ -1223,10 +1223,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_temperature_end=1e-20
+ multibinit_dtset%spin_temperature_end=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature_end',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature_end=dprarr(1)
- if(multibinit_dtset%spin_temperature_end<=0)then
+ if(multibinit_dtset%spin_temperature_end<0)then
     write(message, '(a,f10.1,a,a,a,a,a)' )&
          &   'spin_temperature_end is ',multibinit_dtset%spin_temperature_end,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&

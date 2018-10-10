@@ -57,7 +57,7 @@ module m_spin_model
        & spin_model_primitive_t_read_xml, &
        & spin_model_primitive_t_make_supercell
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
-       & spin_hist_t_set_params
+       & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
   use m_spin_mover, only: spin_mover_t, spin_mover_t_initialize, spin_mover_t_finalize, &
        & spin_mover_t_run_time, spin_mover_t_run_one_step
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
@@ -102,7 +102,6 @@ module m_spin_model
      !    procedure :: run_one_step => spin_model_t_run_one_step
      !    procedure :: run_time => spin_model_t_run_time
      !    procedure :: run_MvT => spin_model_t_run_MvT
-     !    procedure :: run_MvH => spin_model_t_run_MvH
   end type spin_model_t
   !!***
 contains
@@ -137,9 +136,12 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    integer :: i
-    !call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist)
-    call spin_model_t_run_time(self)
+    if(self%params%spin_var_temperature==1) then
+       call spin_model_t_run_various_T(self, self%params%spin_temperature_start, &
+            & self%params%spin_temperature_end, self%params%spin_temperature_nstep)
+    else
+       call spin_model_t_run_time(self)
+    end if
   end subroutine spin_model_t_run
   !!***
 
@@ -205,32 +207,27 @@ contains
 
     call spin_model_t_set_params(self)
 
-
     !TODO hexu: mxhist, has_latt, natoms should be input with their true values when lattice part also added
     call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
          & nspins_prim=self%spin_primitive%nspins,  mxhist=3, has_latt=.False.)
 
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=self%params%spin_temperature)
-    !TODO
-    !call spin_hist_t_set_atomic_structure(self%spin_hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
     !call self%set_initial_spin(mode=1)
-    call spin_model_t_set_initial_spin(self, mode=0)
+    call spin_model_t_set_initial_spin(self)
 
     !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature)
 
-    call spin_ncfile_t_init(self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
-    call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
-    !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
-    call spin_ncfile_t_write_supercell(self%spin_ncfile, self%spin_calculator)
-    call spin_ncfile_t_write_parameters(self%spin_ncfile, self%params)
+    call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
 
     call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
   end subroutine spin_model_t_initialize
   !!***
+
+
 
   !!****f* m_spin_model/spin_model_t_finalize
   !!
@@ -383,6 +380,43 @@ contains
     call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
   !!***
+  
+  !!****f* m_spin_model/spin_model_t_prepare_ncfile
+  !!
+  !! FUNCTION
+  !!  set initial spin state
+  !!
+  !! INPUTS
+  !!  mode= 0 : all along z. 1: random
+  !! OUTPUT
+  !!
+  !! NOTES
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine spin_model_t_prepare_ncfile(self, spin_ncfile, fname)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_model_t_prepare_ncfile'
+!End of the abilint section
+
+    class(spin_model_t), intent(inout) :: self
+    type(spin_ncfile_t), intent(out) :: spin_ncfile
+    character(len=*) :: fname
+    call spin_ncfile_t_init(spin_ncfile, trim(fname))
+    call spin_ncfile_t_def_sd(spin_ncfile, self%spin_hist )
+    !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+    call spin_ncfile_t_write_supercell(spin_ncfile, self%spin_calculator)
+    call spin_ncfile_t_write_parameters(spin_ncfile, self%params)
+  end subroutine spin_model_t_prepare_ncfile
+  !!***
+  
 
   !!****f* m_spin_model/spin_model_t_set_initial_spin
   !!
@@ -403,7 +437,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_model_t_set_initial_spin(self, mode)
+  subroutine spin_model_t_set_initial_spin(self)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -413,10 +447,11 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    integer, intent(in) :: mode
+    integer :: mode
     integer :: i
     real(dp) :: S(3, self%nspins)
     character(len=500) :: msg
+    mode=self%params%spin_init_state
     if(mode==0) then
        ! set all spin to z direction.
        S(1,:)=0.0d0
@@ -514,6 +549,63 @@ contains
   end subroutine spin_model_t_run_time
   !!***
 
+
+  subroutine spin_model_t_run_various_T(self, T_start, T_end, T_nstep)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_model_t_run_various_T'
+!End of the abilint section
+
+    class(spin_model_t), intent(inout) :: self
+    real(dp), intent(in) :: T_start, T_end
+    integer, intent(in) :: T_nstep
+    type(spin_ncfile_t) :: spin_ncfile
+    character(len=4) :: post_fname
+    real(dp) :: T, T_step
+    integer :: i
+    character(len=90) :: msg
+
+    T_step=(T_end-T_start)/(T_nstep-1)
+
+    write(msg, "(A52, ES13.5, A11, ES13.5, A1)") "Starting temperature dependent calculations. T from ", T_start, "to ", T_end, "."
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+
+    do i=0, T_nstep-1
+       T=T_start+i*T_step
+
+       msg=repeat("=", 79)
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+
+       write(msg, "(A13, 5X, ES13.5)") "Temperature: ", T
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out,  msg, "COLL")
+
+       call spin_hist_t_reset(self%spin_hist, array_to_zero=.False.)
+       self%params%spin_temperature=T
+       call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
+            &     spin_temperature=T)
+       ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
+       if(i==0) then
+          call spin_model_t_set_initial_spin(self)
+       else
+          call spin_hist_t_inc(self%spin_hist)
+       endif
+
+       self%spin_mover%temperature=T
+       write(post_fname, "(I4.4)") i+1
+       call spin_model_t_prepare_ncfile(self, spin_ncfile, trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
+       call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
+       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist, ncfile=spin_ncfile)
+       call spin_ncfile_t_close(spin_ncfile)
+
+ end do
+
+  end subroutine spin_model_t_run_various_T
 
   !!****f* m_spin_model/spin_model_t_run_MvT
   !!
