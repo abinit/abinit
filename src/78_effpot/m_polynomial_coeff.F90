@@ -852,7 +852,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'polynomial_coeff_writeXML'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1926,7 +1925,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'polynomial_coeff_getNorder'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3167,7 +3165,6 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'polynomial_coeff_getOrder1'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

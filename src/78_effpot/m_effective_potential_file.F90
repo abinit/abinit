@@ -249,7 +249,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_read'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -604,7 +603,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimSystem'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -729,7 +727,6 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimCoeff'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1152,7 +1149,6 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_getDimFromXML'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1347,7 +1343,6 @@ end subroutine system_getDimFromXML
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_xml2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2311,7 +2306,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2998,7 +2992,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'coeffs_xml2effpot'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3552,7 +3545,6 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_mapHistToRef'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3809,7 +3801,6 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_readDisplacement'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

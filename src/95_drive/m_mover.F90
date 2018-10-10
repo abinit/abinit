@@ -199,7 +199,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
- use interfaces_14_hidewrite
  use interfaces_45_geomoptim
  use interfaces_59_ionetcdf
  use interfaces_67_common
@@ -1191,7 +1190,6 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1321,7 +1319,6 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'erlxconv'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1429,7 +1426,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxfase'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none
@@ -1771,7 +1767,6 @@ subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtnatom'
- use interfaces_14_hidewrite
 !End of the abilint section
 
 implicit none

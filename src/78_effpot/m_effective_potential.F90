@@ -657,7 +657,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_generateDipDip'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1074,7 +1073,6 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_setCoeffs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1520,7 +1518,6 @@ subroutine effective_potential_print(eff_pot,option,filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1649,7 +1646,6 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_printSupercell'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1817,7 +1813,6 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeXML'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2158,7 +2153,6 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeAbiInput'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2350,7 +2344,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_evaluate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -3801,7 +3794,6 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeNETCDF'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

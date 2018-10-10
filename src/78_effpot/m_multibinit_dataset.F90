@@ -439,7 +439,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars10'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
