@@ -29,7 +29,7 @@ module m_effective_potential_file
 
  use defs_basis
  use m_errors
- use m_abicore
+ use m_profiling_abi
  use m_xmpi
  use m_harmonics_terms
  use m_anharmonics_terms
@@ -249,6 +249,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_read'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -603,6 +604,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimSystem'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -663,36 +665,35 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    MSG_ERROR(message)
  end if
 
-! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
 ! Do some checks
-! if (natom < 1) then
-!   write(message, '(a,a,a,a,a)' )&
-!&   ' Unable to read the number of atom from ',trim(filename),ch10,&
-!&   'This file  is not compatible with multibinit',ch10
-!   MSG_ERROR(message)
-! end if
-!
-! if (filetype==2 .or. filetype==23) then
-!
-!   if (natom < 1) then
-!     write(message, '(a,a,a)' )&
-!&     ' Unable to read the number of atom from ',trim(filename),ch10
-!     MSG_ERROR(message)
-!   end if
-!
-!   if (nrpt < 1) then
-!     write(message, '(a,a,a)' )&
-!&     ' Unable to read the number of rpt points ',trim(filename),ch10
-!     MSG_ERROR(message)
-!   end if
-!
-!   if (ntypat < 1) then
-!     write(message, '(a,a,a)' )&
-!&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-!     MSG_ERROR(message)
-!   end if
-!
-! end if
+ if (natom < 1) then
+   write(message, '(a,a,a,a,a)' )&
+&   ' Unable to read the number of atom from ',trim(filename),ch10,&
+&   'This file  is not compatible with multibinit',ch10
+   MSG_ERROR(message)
+ end if
+
+ if (filetype==2 .or. filetype==23) then
+
+   if (natom < 1) then
+     write(message, '(a,a,a)' )&
+&     ' Unable to read the number of atom from ',trim(filename),ch10
+     MSG_ERROR(message)
+   end if
+
+   if (nrpt < 1) then
+     write(message, '(a,a,a)' )&
+&     ' Unable to read the number of rpt points ',trim(filename),ch10
+     MSG_ERROR(message)
+   end if
+
+   if (ntypat < 1) then
+     write(message, '(a,a,a)' )&
+&     ' Unable to read the number of type of atoms ',trim(filename),ch10
+     MSG_ERROR(message)
+   end if
+
+ end if
 
 end subroutine effective_potential_file_getDimSystem
 !!***
@@ -728,6 +729,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimCoeff'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1150,6 +1152,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_getDimFromXML'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1344,6 +1347,7 @@ end subroutine system_getDimFromXML
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_xml2effpot'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2282,11 +2286,17 @@ end subroutine system_xml2effpot
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
  use m_errors
- use m_abicore
+ use m_profiling_abi
  use m_dynmat
  use m_xmpi
 
@@ -2301,6 +2311,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2385,7 +2396,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
-
   call crystal_init(ddb%amu,effective_potential%crystal,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
@@ -2687,7 +2697,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 ! Store the highest frequency
   max_phfq = zero
-
+  
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -2988,6 +2998,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'coeffs_xml2effpot'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3446,7 +3457,6 @@ subroutine effective_potential_file_readMDfile(filename,hist,option)
  if(present(option))then
    option_in = option
  end if
-
  if(type==40)then
 !  Netcdf type
    call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
@@ -3542,6 +3552,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_mapHistToRef'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3572,7 +3583,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  if (present(verbose)) need_verbose = verbose
 
  natom_hist = size(hist%xred,2)
- nstep_hist = size(hist%xred,3)
+ nstep_hist = size(hist%xred,3) ! MARCUS -> Original size(hist%xred,3)
 
 !Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
@@ -3649,13 +3660,42 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    call wrtout(ab_out,msg,'COLL')
  end if
 
+! MARCUS Try to map with reduced distance
+!try to map
+! do ia=1,natom_hist
+!   do ib=1,natom_hist
+!     if(blkval(ib)==1)then
+!       if(sqrt(abs((xred_ref(1,ia)-(1-xred_hist(1,ib))))**2 & !! Marcus increased from 0.1 to 0.3 test for CaTiO3
+!&        +  abs((xred_ref(2,ia)-(1-xred_hist(2,ib))))**2    &
+!&        +  abs((xred_ref(3,ia)-(1-xred_hist(3,ib))))**2) < 0.1 ) then
+!         blkval(ib) = 0
+!         list(ib) = ia
+!       end if
+!     end if
+!   end do
+! end do
+
+
+!!! ORIGINAL MAP 
 !try to map
  do ia=1,natom_hist
    do ib=1,natom_hist
      if(blkval(ib)==1)then
-       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.1 .and.&
-&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.1 .and.&
-&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.1) then
+       if(xred_hist(1,ib)>0.975)then         !Shift atoms back to first unit cell i
+          xred_hist(1,ib)=xred_hist(1,ib)-1
+          hist%xred(1,ib,1)=xred_hist(1,ib)
+       end if
+       if(xred_hist(2,ib)>0.975)then 
+          xred_hist(2,ib)=xred_hist(2,ib)-1
+          hist%xred(2,ib,1)=xred_hist(2,ib)
+       end if 
+       if(xred_hist(3,ib)>0.975)then 
+          xred_hist(3,ib)=xred_hist(3,ib)-1
+          hist%xred(3,ib,1)=xred_hist(3,ib)
+       end if
+       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.05 .and.& !! MARCUS ORIGINAL 0.1
+&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.05 .and.&
+&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.05) then
          blkval(ib) = 0
          list(ib) = ia
        end if
@@ -3663,8 +3703,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    end do
  end do
 
+
 !Check before transfert
- if(.not.all(blkval==0))then
+ if(.not.all(blkval==0))then      
    write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file ',ch10,&
 &         'on the reference supercell structure',ch10,&
@@ -3674,6 +3715,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  do ia=1,natom_hist
    if(.not.any(list(:)==ia))then
+     write(*,*) 'I broke at', ia
      write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
@@ -3725,7 +3767,6 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
      call abihist_copy(hist_tmp,hist)
    end do
    hist_tmp%mxhist = nstep_hist
-
    call abihist_free(hist_tmp)
  end if
 
@@ -3768,6 +3809,7 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_readDisplacement'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
