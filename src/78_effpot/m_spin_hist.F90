@@ -151,6 +151,7 @@ module m_spin_hist
 
   public :: spin_hist_t_init
   public :: spin_hist_t_free
+  public :: spin_hist_t_reset
   public :: spin_hist_t_get_S
   public :: spin_hist_t_findIndex
   public :: spin_hist_t_set_vars
@@ -236,6 +237,8 @@ contains
     ABI_ALLOCATE(hist%rcorr, (3, nrcorr))
     ABI_ALLOCATE(hist%sp_corr_func, (3, nrcorr, mxhist))
 
+    ! TODO: add observable allocation here.
+
     hist%etot(1) =zero
     hist%entropy(1) =zero
     hist%time(1) =zero
@@ -254,6 +257,39 @@ contains
 
   end subroutine spin_hist_t_init
 !!***
+
+  subroutine spin_hist_t_reset(hist, array_to_zero)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_reset'
+!End of the abilint section
+
+    implicit none
+    class(spin_hist_t), intent(inout) :: hist
+    logical :: array_to_zero
+    hist%ntypat=0
+    hist%ihist=1
+    hist%ihist_prev=0
+    hist%natoms=0
+
+    hist%etot(1) =zero
+    hist%entropy(1) =zero
+    hist%time(1) =zero
+
+    if(array_to_zero) then
+       hist%heff(:,:,1)=zero
+       hist%S(:,:,1)=zero
+       hist%dSdt(:,:,1)=zero
+       hist%snorm(:,1)=zero
+       hist%Cv( 1)=zero
+       hist%sp_corr_func(:, :, 1)=zero
+    endif
+
+
+  end subroutine spin_hist_t_reset
 
   !!****f* m_spin_hist/spin_hist_t_set_atomic_structure
   !!
@@ -646,6 +682,7 @@ contains
     endif
   end subroutine spin_hist_t_set_vars
   !!***
+
 
   !!***f* m_spin_hist/spin_hist_t_update_Cv
   !!
