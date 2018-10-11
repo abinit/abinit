@@ -298,8 +298,7 @@ CONTAINS  !=====================================================================
 !                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
                  locc_test = .false.
                  do ib_loop=1,nbandc1
-                   if(proc_recver == paw_dmft%bandc_proc(ib_loop))
-                   then
+                   if(proc_recver == paw_dmft%bandc_proc(ib_loop)) then
                      ib = paw_dmft%include_bands(ib_loop)
                      locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
 &                                                abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
@@ -317,8 +316,7 @@ CONTAINS  !=====================================================================
 !            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
              locc_test = .false.
              do ib_loop=1,nbandc1
-               if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop))
-               then
+               if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop)) then
                  ib = paw_dmft%include_bands(ib_loop)
                  ib1 = paw_dmft%include_bands(ibc1)
                  locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
