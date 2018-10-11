@@ -392,7 +392,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  if(specs%nhist/=-1 .and. hist%mxhist > 3)then 
     nhisttot = specs%nhist ! We don't need to store all the history
  else
-    nhisttot = 1 
+    nhisttot = hist%mxhist 
  end if   
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
