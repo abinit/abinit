@@ -605,9 +605,14 @@ in order of number of occurrence in the input files provided with the package.
         dirpath = os.path.join(self.root, "topics")
         all_mdfiles = [f for f in os.listdir(dirpath) if f.endswith(".md") and f.startswith("_")]
         for topic in self.all_topics:
-            all_mdfiles.remove("_" + topic + ".md")
+            mdname = "_" + topic + ".md"
+            try:
+                all_mdfiles.remove(mdname)
+            except ValueError:
+                cprint("Cannot find `%s` in all_mdfiles" % mdname, "yellow")
+
         if all_mdfiles:
-            raise RuntimeError("Found md files in topics not listed in python module `variables.py.\n%s" % (
+            raise RuntimeError("Found md files in topics not listed in `variables_code.py` modules\n%s" % (
                 str(all_mdfiles)))
 
         # datastructures needed for topics index.md
@@ -823,10 +828,10 @@ The bibtex file is available [here](../abiref.bib).
         pages_on_disk = set(p.relpath for p in self.md_pages)
         diff = pages_on_disk.difference(pages_in_toolbar)
         if diff:
-            self.warn("Found markdown files on disk not included in mkdocs.py:\n%s" % "\n".join(diff))
+            self.warn("Found markdown files on disk not included in mkdocs.yml:\n%s" % "\n".join(diff))
         diff = pages_in_toolbar.difference(pages_on_disk)
         if diff:
-            self.warn("Found markdown files in mkdocs.py not present in directories:\n%s" % "\n".join(diff))
+            self.warn("Found markdown files in mkdocsyml not present in directories:\n%s" % "\n".join(diff))
 
     def slugify(self, value):
         """
@@ -947,6 +952,9 @@ The bibtex file is available [here](../abiref.bib).
                         new_lines.extend(self.dialogs_from_filenames(args).splitlines())
                     else:
                         new_lines.extend(self.dialog_from_filename(args[0]).splitlines())
+                elif action == "include":
+                    with io.open(args[0], "rt", encoding="utf-8") as f:
+                        new_lines.extend([l.rstrip() for l in f])
                 else:
                     raise ValueError("Don't know how to handle action: `%s` in token: `%s`" % (action, m.group(1)))
 
@@ -1119,8 +1127,8 @@ The bibtex file is available [here](../abiref.bib).
                     if a.text is None: a.text = "%s %s" % (name, namespace)
                 html_classes.append("lesson-wikilink")
 
-            elif namespace == "help":
-                # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
+            elif namespace == "help" or namespace == "guide" :
+                # Handle [[help:optic|text] NB: [[help:codename]] is echoed "codename help file"
                 if name == "index":
                     url = "/guide/"
                     if a.text is None: a.text = "user-guide home page"
@@ -1128,6 +1136,26 @@ The bibtex file is available [here](../abiref.bib).
                     url = "/guide/%s" % name
                     if a.text is None: a.text = "%s help file" % name
                 html_classes.append("user-guide-wikilink")
+
+            elif namespace == "about" :
+                # Handle [[about:release-notes|text] NB: [[about:file]] is echoed "file"
+                if name == "index":
+                    url = "/about/"
+                    if a.text is None: a.text = "no index for about at present"
+                else:
+                    url = "/about/%s" % name
+                    if a.text is None: a.text = "%s" % name
+                html_classes.append("about-wikilink")
+
+            elif namespace == "developers" :
+                # Handle [[developers:psp8_info|text] NB: [[developers:filename]] is echoed "filename developer doc"
+                if name == "index":
+                    url = "/developers/"
+                    if a.text is None: a.text = "no index for developers at present"
+                else:
+                    url = "/developers/%s" % name
+                    if a.text is None: a.text = "%s developer doc" % name
+                html_classes.append("developers-wikilink")
 
             elif namespace == "topic":
                 # Handle [[topic:BSE|text]]

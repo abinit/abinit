@@ -13,6 +13,7 @@ import abc
 
 from collections import Counter, OrderedDict
 from tools import pprint_table, lazy_property
+#from termcolor import cprint
 
 # From https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#Error-and-Warning-Options
 #
@@ -160,6 +161,8 @@ this includes scalars and derived types.""",
 #
 "GnuExtension": "FIXME",
 "Obsolescent": "Obsolescent Feature",
+#
+"Miscellaneous": "Miscellaneous Warnings",   # Used to classify warnings that are not documented
 }
 
 class Message(object):
@@ -222,6 +225,7 @@ Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
         text = "\n".join(lines) #.encode("utf8")
 
         if len(lines) > 1:
+            #print(lines[0].split(":"))
             filepath, lineno, colno, _ = lines[0].split(":")
             last = lines[-1]
 
@@ -229,8 +233,15 @@ Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
                 kind = "GnuExtension"
             elif last.startswith("Warning: Obsolescent feature:"):
                 kind = "Obsolescent"
+            elif last.startswith("Warning: Same actual argument associated"):
+                kind = "-Waliasing"
+            elif last.startswith("Warning: Label"):
+                kind = "Miscellaneous"
             else:
                 kind = last.split()[-1].replace("[", "").replace("]", "")
+                if kind not in GNU_WARNINGS:
+                    print("Don't know how to classify:", last, "\nSetting kind to `Miscellaneous`")
+                    kind = "Miscellaneous"
 
         else:
             tokens = lines[0].split()
@@ -268,7 +279,6 @@ class WarningsParser(object):
     @property
     def num_warns(self):
         return len(self.warns)
-
 
     def __repr__(self):
         return "<%s %s: num_warns: %s>" % (self.__class__.__name__, self.filepath, self.num_warns)
@@ -310,6 +320,29 @@ class WarningsParser(object):
     #        od[w.kind].append(w)
     #    return od
 
+    def fix(self):
+        from tools import Editor, user_wants_to_exit
+        import json
+        fixed = set()
+        if os.path.exists("fixed.json"):
+            with open("fixed.json", "rt") as fh:
+                fixed = set(json.load(fh)["fixed"])
+
+        editor = Editor()
+        for i, warn in enumerate(self.warns):
+            if repr(warn) in fixed:
+                print("%s already fixed" % repr(warn))
+                continue
+
+            print("Fixing %d/%d" % (i, len(self.warns)))
+            print(warn)
+            editor.edit_file(warn.filepath, lineno=warn.lineno)
+            fixed.add(repr(warn))
+            if user_wants_to_exit(): break
+
+        with open("fixed.json", "wt") as fh:
+            json.dump(list(fixed), fh)
+
 
 class GfortranParser(WarningsParser):
     compiler = "gfortran"
@@ -338,20 +371,14 @@ class GfortranParser(WarningsParser):
 
         return self
 
-
-# Intel uses numbers to identify remarks and warnings.
-
-# ../../../src/17_libtetra_ext/m_tetrahedron.F90(1119): warning #6843: A dummy argument ... explicit value.   [TWEIGHT]
-RE_IFORT_WARN = re.compile(r"(?P<filepath>.+)\((?P<lineno>\d+)\):\s+warning\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
-
-# icc: command line remark #10010: option
-RE_IFORT_REMARK = re.compile(r".+command line remark\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
-
-
 class IfortRemark(Message):
 
+    # Intel uses numbers to identify remarks and warnings.
+    # icc: command line remark #10010: option
+    RE_IFORT_REMARK = re.compile(r".+command line remark\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
+
     def __init__(self, line):
-        m = RE_IFORT_REMARK.match(line)
+        m = self.RE_IFORT_REMARK.match(line)
         if not m:
             raise ValueError("String does not match regex: %s" % line)
 
@@ -361,8 +388,11 @@ class IfortRemark(Message):
 
 class IfortWarning(Message):
 
+    # ../../../src/17_libtetra_ext/m_tetrahedron.F90(1119): warning #6843: A dummy argument ... explicit value.   [TWEIGHT]
+    RE_IFORT_WARN = re.compile(r"(?P<filepath>.+)\((?P<lineno>\d+)\):\s+warning\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
+
     def __init__(self, lines):
-        m = RE_IFORT_WARN.match(lines[0])
+        m = self.RE_IFORT_WARN.match(lines[0])
         if not m:
             raise ValueError("String does not match regex: %s" % lines[0])
 
@@ -402,10 +432,22 @@ class IfortParser(WarningsParser):
 
 
 def main():
-    filepath = sys.argv[1]
-    compiler = "gfortran" if "intel" not in filepath else "ifort"
-    parser = WarningsParser.from_compiler(compiler).parse_file(filepath)
-    print(parser.to_string(verbose=0))
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
+        help='verbose, can be supplied multiple times to increase verbosity.')
+
+    parser.add_argument("filepath", type=str, help="File to parse.")
+    parser.add_argument("-c", "--compiler", type=str, default="gfortran",
+        help="Fortran Compiler. Allowed values in ['gfortran', 'ifort'], Default: gfortran")
+    parser.add_argument("-f", "--fix", action='store_true', default=False, help="Fix warnings in $EDITOR")
+
+    options = parser.parse_args()
+
+    #compiler = "gfortran" if "intel" not in options.path else "ifort"
+    parser = WarningsParser.from_compiler(options.compiler).parse_file(options.filepath)
+    print(parser.to_string(verbose=options.verbose))
 
     # Define set of ignored warnings.
     if parser.compiler == "gfortran":
@@ -419,13 +461,16 @@ def main():
         ])
 
     else:
-        raise ValueError("Missing ignored_kinds for compiler %s" % parser.compiler)
+        raise ValueError("Missing ignored_kinds for compiler %s" % options.compiler)
 
     retcode = 0
     for warn in parser.warns:
         if warn.kind in ignored_kinds: continue
-        #print(warn)
+        if options.verbose: print(warn)
         retcode += 1
+
+    if options.fix:
+        parser.fix()
 
     return retcode
 

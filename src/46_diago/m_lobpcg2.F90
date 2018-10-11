@@ -1068,7 +1068,7 @@ module m_lobpcg2
 
     call timab(tim_maxres,1,tsec)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCaxmy(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
 

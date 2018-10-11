@@ -126,6 +126,9 @@ ABI_UNITS = [
     'Rydbergs',
     'T',
     'Tesla',
+    'Second',
+    'S',
+    'Sec',
 ]
 
 # Operators supported by parser
@@ -170,7 +173,7 @@ ABI_TOPICS = [
     "Band2eps",
     "Berry",
     "BandOcc",
-    "BoundProcess",
+    "BoundingProcess",
     "BSE",
     "ConstrainedPol",
     "Control",
@@ -184,8 +187,8 @@ ABI_TOPICS = [
     "Dev",
     "DFPT",
     "DMFT",
-    "EffectiveMass",
     "DynamicsMultibinit",
+    "EffectiveMass",
     "EFG",
     "Elastic",
     "ElPhonInt",
@@ -235,6 +238,7 @@ ABI_TOPICS = [
     "SelfEnergy",
     "SmartSymm",
     "spinpolarisation",
+    "SpinDynamicsMultibinit",
     "STM",
     "Susceptibility",
     "TDDFT",

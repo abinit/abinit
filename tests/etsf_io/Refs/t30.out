@@ -428,7 +428,7 @@ P newkpt: treating     10 bands with npw=    1377 for ikpt=  10 by node    0
   -0.3750  0.3750  0.3750    1  3.15951E-09 kpt; spin; max resid(k); each band:
   4.37E-17 1.78E-17 2.21E-17 1.79E-17 1.28E-17 1.96E-17 1.50E-17 6.07E-17
   1.09E-17 3.16E-09
-prtkbff: writting first and last G-components of the KB form factors
+prtkbff: writing first and last G-components of the KB form factors
     atype     1
 projector     1
 vkbsign     0.1000E+01

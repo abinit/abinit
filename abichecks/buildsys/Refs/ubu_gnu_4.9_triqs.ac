@@ -991,8 +991,11 @@ with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
 #
-enable_triqs="yes"
+#enable_triqs_v2_0="no"
+enable_triqs_v1_4="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #

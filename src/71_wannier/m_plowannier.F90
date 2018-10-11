@@ -457,8 +457,7 @@ subroutine init_plowannier(dtset,wan)
      call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
    endif
 
-
-end subroutine
+end subroutine init_plowannier
 !!***
 
 
@@ -2927,8 +2926,6 @@ do isppol = 1,wan%nsppol
 
 end do
   close(unt)
-
-
 
 end subroutine print_operwan
 

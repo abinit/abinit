@@ -213,7 +213,9 @@ mkdocs_plugins/dist
 /src/56_xc/.deps
 /src/57_iovars/ab7_invars_f90.inc
 /src/57_iovars/ab7_invars_f90_get.f90
+/src/57_iovars/dtset.pickle
 /src/57_iovars/is_input_variable.F90
+/src/57_iovars/dtset.pickle
 /src/98_main/abinetcdf
 /src/98_main/abinit
 /src/98_main/aim
@@ -303,6 +305,7 @@ scripts/*/*/dist
 src/tags
 build2-debug-s
 .prev_run.pickle
+_project.pickle
 buildbot.ac
 tests/Analysis*
 tests/report.log

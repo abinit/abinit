@@ -37,7 +37,7 @@ topics/Bader.md
 topics/Band2eps.md
 topics/Berry.md
 topics/BandOcc.md
-topics/BoundProcess.md
+topics/BoundingProcess.md
 topics/BSE.md
 topics/ConstrainedPol.md
 topics/Control.md
@@ -51,8 +51,8 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffectiveMass.md
 topics/DynamicsMultibinit.md
+topics/EffectiveMass.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md
@@ -102,6 +102,7 @@ topics/SCFAlgorithms.md
 topics/SelfEnergy.md
 topics/SmartSymm.md
 topics/spinpolarisation.md
+topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md

@@ -269,7 +269,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2018
- mm_rel=7
+ mm_rel=10
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -571,12 +571,6 @@ end subroutine wrtout
 !!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 

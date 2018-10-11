@@ -1121,10 +1121,10 @@ CONTAINS  !=====================================================================
    edcdctemp=edcdctemp-half*upawu*n_tot**2
    edctemp  =edctemp  +half*upawu*(n_tot*(n_tot-one))
    if (nspden/=4.or.option_interaction==2) then
-     if(dmftdc/=5) then
+     if(dmftdc/=5.and.pawtab%usepawu/=4) then
        edcdctemp=edcdctemp+half*jpawu_dc*(n_upup**2+n_dndn**2)
        edctemp  =edctemp  -half*jpawu_dc*(n_upup*(n_upup-one)+n_dndn*(n_dndn-one))
-     else if(dmftdc==5)  then
+     else if(dmftdc==5.or.pawtab%usepawu==4)  then
        edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
        edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
      end if
@@ -1658,6 +1658,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_ALLOCATE(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        end if
        if(ndij==4)  then
+         if(allocated(nocctot2)) then
+           ABI_DEALLOCATE(nocctot2)
+         end if
          ABI_ALLOCATE(nocctot2,(ndij))
        end if
        do ispden=1,ndij

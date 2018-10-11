@@ -27,6 +27,7 @@ module m_tdep_abitypes
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
+  use m_ifc,              only : ifc_write
 
   implicit none
 
@@ -77,7 +78,7 @@ contains
   ABI_FREE(znucl)
   ABI_FREE(zion)
 
- end subroutine
+ end subroutine tdep_init_crystal
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt_cart,Shell2at,Sym)
@@ -177,7 +178,7 @@ contains
     end if
   end if
 
- end subroutine
+ end subroutine tdep_init_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ddb(DDB,InVar,Lattice)
@@ -249,7 +250,7 @@ contains
   ABI_FREE(spqpt)
   ABI_FREE(q1shft)
 
- end subroutine
+ end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
@@ -285,6 +286,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
     open(unit=40,file='ifc.tdep')
   end if
   Ifc%atmfrc(:,:,:,:,:)=zero
+  read(40,*) string
   read(40,*) string
   read(40,*) string
   read(40,*) string
@@ -361,7 +363,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 
   integer,intent(in) :: natom_unitcell,unitfile
   type(Input_Variables_type),intent(in) :: InVar
-  type(ifc_type),intent(in) :: Ifc
+  type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
 
   integer :: ifcana,ifcout,ncid,prt_ifc
@@ -384,11 +386,12 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
 !JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
 #else
   if (unitfile.eq.0) then
     open(unit=77,file=trim(InVar%output_prefix)//'ifc.tdep')
-  else 
+  else
     open(unit=77,file=trim(InVar%output_prefix)//'ifc.out')
   end if
   if (unitfile.eq.0) then
@@ -423,7 +426,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision, intent(inout) :: Phij_NN(3*InVar%natom,3*InVar%natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
 
-  integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
+  integer :: eatom,fatom,iatcell,iatom,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
   double precision :: tol,dist
   double precision :: tmp(3)
@@ -498,7 +501,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
           isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
           trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
           if (fatom.lt.eatom) cycle
-          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans)
+          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
 !         Symetrization of the Phij_NN matrix
           Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
           do ii=1,3

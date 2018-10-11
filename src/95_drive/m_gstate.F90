@@ -64,6 +64,7 @@ module m_gstate
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
+ use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
  use m_energies,         only : energies_type, energies_init
@@ -278,11 +279,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
- integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,nfftf,nfftot,npwmin
+ integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
+ integer :: nblok,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt,usecg
+ integer :: cnt,spin,band,ikpt,usecg,usecprj
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -308,7 +309,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(scfcv_t) :: scfcv_args
 !arrays
  integer :: ngfft(18),ngfftf(18)
- integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:)
+ integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),dimcprj_srt(:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
  integer,pointer :: npwarr_(:),pwind(:,:,:)
@@ -322,6 +323,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
+ type(pawcprj_type),allocatable :: cprj(:,:)
 
 ! ***********************************************************************
 
@@ -760,8 +762,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize wavefunctions.
  if(dtset%imgwfstor==1 .and. initialized==1)then
-   cg(:,:)=scf_history%cg(:,:,1) 
-   eigen(:)=scf_history%eigen(:,1) 
+   cg(:,:)=scf_history%cg(:,:,1)
+   eigen(:)=scf_history%eigen(:,1)
  else if(dtset%tfkinfunc /=2) then
 !if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
@@ -940,7 +942,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Initialize paw_dmft, even if neither dmft not paw are used
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
- if(dtset%paral_kgb>0) use_sc_dmft=0
+! if(dtset%paral_kgb>0) use_sc_dmft=0
  call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
 & dtset%nband,dtset%nkpt,dtset%nspden, &
 & dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,use_sc_dmft,dtset%dmft_solv,mpi_enreg)
@@ -1016,6 +1018,48 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%positron/=0) then
    call init_electronpositron(dtfil%ireadwf,dtset,electronpositron,mpi_enreg,nfftf,pawrhoij,pawtab)
  end if
+
+!###########################################################
+! Initialisation of cprj
+ usecprj=0; mcprj=0;mband_cprj=0
+ if (dtset%usepaw==1) then
+   if (associated(electronpositron)) then
+     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+   end if
+   if (dtset%prtnabla>0) usecprj=1
+   if (dtset%extrapwf>0) usecprj=1
+   if (dtset%pawfatbnd>0)usecprj=1
+   if (dtset%prtdos==3)  usecprj=1
+   if (dtset%usewvl==1)  usecprj=1
+   if (dtset%nstep==0) usecprj=0
+   if (dtset%usefock==1)  usecprj=1
+ end if
+ if (usecprj==0) then
+   ABI_DATATYPE_ALLOCATE(cprj,(0,0))
+ end if
+ if (usecprj==1) then
+   mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
+   mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
+!Was allocated above for valgrind sake so should always be true (safety)
+   if (allocated(cprj)) then
+     call pawcprj_free(cprj)
+     ABI_DATATYPE_DEALLOCATE(cprj)
+   end if
+   ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
+   ncpgr=0
+   if (dtset%usefock==1) then
+     if (dtset%optforces == 1) then
+       ncpgr = 3
+     end if
+!       if (dtset%optstress /= 0) then
+!         ncpgr = 6 ; ctocprj_choice = 3
+!       end if
+   end if
+   ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
+   call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
+   call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+ end if
+
 
 !###########################################################
 !### 12. Operations dependent of iscf value
@@ -1262,9 +1306,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call timab(35,3,tsec)
 
-   call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
+   call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
-&   indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
+&   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &   resid,results_gs,scf_history,fatvshift,&
@@ -1566,8 +1610,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if(dtset%imgwfstor==1)then
-   scf_history%cg(:,:,1)=cg(:,:)  
-   scf_history%eigen(:,1)=eigen(:)  
+   scf_history%cg(:,:,1)=cg(:,:)
+   scf_history%eigen(:,1)=eigen(:)
  endif
 
 !Deallocate arrays
@@ -1587,7 +1631,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%imgwfstor==0)then
    ABI_DEALLOCATE(cg)
    ABI_DEALLOCATE(eigen)
- else 
+ else
    nullify(cg,eigen)
  endif
 
@@ -1668,6 +1712,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_DEALLOCATE(mpi_enreg%mkmem)
    end if
  end if
+ ! deallocate cprj
+ if(usecprj==1) then
+   ABI_DEALLOCATE(dimcprj_srt)
+   call pawcprj_free(cprj)
+ end if
+ ABI_DATATYPE_DEALLOCATE(cprj)
 
  ! deallocate efield
  call destroy_efield(dtefield)
@@ -2005,16 +2055,18 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  if(dtset%nstep==0)iscf_dum=-1
 
  if(dtset%tfkinfunc==0)then
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
+   if (me == master) then
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+   end if
 
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
@@ -2022,7 +2074,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
      call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
-
  end if
 
 !Compute and print location of maximal and minimal density

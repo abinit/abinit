@@ -177,7 +177,6 @@
 
 
 CONTAINS
-!========================================================================================
 !!***
 
 !!****f* m_green/init_green
@@ -386,8 +385,6 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 end subroutine init_green_tau
 !!***
 
-!!      m_green
-!!      loc_oper,print_matlu,sym_matlu,wrtout
 !!****f* m_green/destroy_green
 !! NAME
 !! destroy_green
@@ -1751,17 +1748,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      do ikpt = 1, nkpt
    do is = 1 , nsppol
            paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&           paw_dmft%include_bands(ib1),ikpt,is)=real(green%occup%ks(is,ikpt,ib,ib1))
-           if(nspinor==1) then
+&           paw_dmft%include_bands(ib1),ikpt,is)=dreal(green%occup%ks(is,ikpt,ib,ib1))
+           paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
+&           paw_dmft%include_bands(ib1),ikpt,is)=dimag(green%occup%ks(is,ikpt,ib,ib1))
+           if(nspinor==1 .and. nsppol==1) then
+             paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dreal(green%occup%ks(is,ikpt,ib,ib1))
              paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=zero
-             if(nsppol==1) then
-               paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&               paw_dmft%include_bands(ib1),ikpt,is)=two*real(green%occup%ks(is,ikpt,ib,ib1))
-             endif
-           else if (nspinor==2) then  ! and SOC
-             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=aimag(green%occup%ks(is,ikpt,ib,ib1))
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dimag(green%occup%ks(is,ikpt,ib,ib1))
            endif
          enddo
        enddo
@@ -1871,8 +1865,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  DBG_EXIT("COLL")
 
 end subroutine integrate_green
-
-!!      m_green
 !!***
 
 !!****f* m_green/icip_green
@@ -2486,10 +2478,8 @@ end subroutine compa_occup_ks
 !!  proct= for parallelism
 !!
 !! SIDE EFFECTS
-!!  integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
-!!
-!! SIDE EFFECTS
-!!  ft= function is time space
+!!  * integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
+!!  * ft= function is time space
 !!
 !! PARENTS
 !!      m_green
@@ -2884,6 +2874,7 @@ end subroutine fourier_fct
 !!      loc_oper,print_matlu,sym_matlu,wrtout
 !!
 !! SOURCE
+
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
  use defs_basis
@@ -3193,10 +3184,7 @@ end subroutine occup_green_tau
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -3314,9 +3302,6 @@ end subroutine occup_green_tau
 !! OUTPUT
 !! fermie: output value
 !!
-!! CHILDREN
-!!  wrtout, spline_c,invfourier, nfourier
-!!
 !! PARENTS
 !!      m_dmft
 !!
@@ -3324,13 +3309,6 @@ end subroutine occup_green_tau
 !!      compute_green,integrate_green,newton,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 
@@ -3383,7 +3361,7 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !=========================================
  fermi_old=paw_dmft%fermie
  ierr_hh=0
- f_precision=paw_dmft%dmft_chpr
+ f_precision=paw_dmft%dmft_charge_prec
  !f_precision=0.01
  x_precision=tol5
 !if(option==1) then
@@ -3436,10 +3414,10 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !Check convergence of fermi level during DMFT iterations
 !========================================================
  if(paw_dmft%idmftloop>=2) then
-   if(abs(paw_dmft%fermie-fermi_old).le.paw_dmft%dmft_fepr) then
-!    write(message,'(a,8x,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=<",paw_dmft%dmft_fepr,ch10,&
+   if(abs(paw_dmft%fermie-fermi_old).le.paw_dmft%dmft_fermi_prec) then
+!    write(message,'(a,8x,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=<",paw_dmft%dmft_fermi_prec,ch10,&
      write(message,'(a,8x,a,e9.2,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=",&
-&     abs(paw_dmft%fermie-fermi_old),"<",paw_dmft%dmft_fepr,ch10,&
+&     abs(paw_dmft%fermie-fermi_old),"<",paw_dmft%dmft_fermi_prec,ch10,&
 &     "=> DMFT Loop: Fermi level is converged to:",paw_dmft%fermie
      call wrtout(std_out,message,'COLL')
      green%ifermie_cv=1
@@ -3494,14 +3472,6 @@ end subroutine fermi_green
 !!      compute_green,integrate_green
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
@@ -3725,6 +3695,7 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!      compute_green,integrate_green
 !!
 !! SOURCE
+
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
@@ -3908,8 +3879,6 @@ end subroutine newton
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      m_dmft
 !!
@@ -3917,13 +3886,6 @@ end subroutine newton
 !!      fourier_fct,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
 

@@ -121,8 +121,6 @@ contains
 
   ABI_FREE(tmp1)
 
-
-
  end subroutine tdep_make_sym
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -143,9 +141,9 @@ contains
   type(Symetries_Variables_type), intent(inout) :: Sym
   double precision, intent(in) :: xred_ideal(3,InVar%natom)
 
-  integer :: ptgroupma,isym,jatom,ii,jj,mu
+  integer :: iout,ptgroupma,option,isym,jatom,ii,jj,ncoeff,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
+  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,jatcell,counter,nzchempot
   integer :: bravais(11)
   integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
   integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)
@@ -259,7 +257,7 @@ contains
 ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
 ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
   write(InVar%stdout,'(a)') ' Search the matrix transformation going from (k) to (i)...'
-  ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,InVar%natom)); Sym%indsym(:,:,:)=0
+  ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,InVar%natom)); Sym%indsym(:,:,:)=zero
   call symatm(Sym%indsym(:,:,1:InVar%natom_unitcell),InVar%natom_unitcell,Sym%nptsym,&
 &   Sym%symrec,Sym%tnons,tol8,InVar%typat_unitcell,xred_temp)
 
@@ -272,7 +270,7 @@ contains
     open(unit=40,file=trim(InVar%output_prefix)//'Indsym-unitcell.dat')
     do iatom=1,InVar%natom_unitcell
       write(40,*) '=========================================='
-      write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
+      write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
       do isym=1,Sym%nptsym
         write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
@@ -289,8 +287,8 @@ contains
   if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-supercell.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
-!   For a single iatom
+    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
+!   For a single iatom 
     call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,InVar%natom_unitcell)+1
     vecti(:)=nint(tmpi(:,iatom)-tmp_store(:,iatom_unitcell))
@@ -316,10 +314,10 @@ contains
   if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-2atoms.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
+    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
     do jatom=1,InVar%natom
       if (InVar%debug) write(40,*) '  =========================================='
-      if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred=',xred_ideal(:,jatom)
+      if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred (supercell)=',xred_ideal(:,jatom)
       temp3(:,1)=xred_ideal(:,jatom)-xred_ideal(:,iatom)
       call tdep_make_inbox(temp3(:,1),1,1d-3,temp3(:,1))
       temp3(:,1)=xred_ideal(:,iatom)+temp3(:,1)
@@ -345,7 +343,7 @@ contains
   ABI_FREE(indsym2)
   write(InVar%stdout,'(a)') ' See the Indsym*.dat files (if debug)'
 
- end subroutine
+ end subroutine tdep_SearchS_1at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_SearchS_2at(InVar,iatom,jatom,eatom,fatom,Isym2at,Sym,xred_ideal)
@@ -443,7 +441,7 @@ contains
   integer, intent(in) :: iatom,jatom,katom,eatom,fatom,gatom
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
-  integer, intent(inout) :: Isym3at(InVar%natom,InVar%natom,InVar%natom,2)
+  integer, intent(inout) :: Isym3at(2)
   double precision, intent(in) :: xred_ideal(3,InVar%natom)
 
   integer :: isym,ee,ff,gg,ii
@@ -496,20 +494,20 @@ contains
 ! To understand the meaning of "latt", see SearchS_1at
   ok=.false.
   do isym=1,Sym%nsym
-!   TODO : A CHECKER!!!!!!!!!!!!!!!!!
-    indsym2(:)=0
+!   TODO : A CHECKER!!!!!!!!!!!!!!!!!  
+    indsym2(:)=zero
     call tdep_calc_indsym2(InVar,eatom,fatom,indsym2,isym,Sym,xred_ideal)
     ee=indsym2(4)
     lattef(:)=indsym2(1:3)
     lattfe(:)=indsym2(5:7)
 
-    indsym2(:)=0
+    indsym2(:)=zero
     call tdep_calc_indsym2(InVar,fatom,gatom,indsym2,isym,Sym,xred_ideal)
     ff=indsym2(4)
     lattfg(:)=indsym2(1:3)
     lattgf(:)=indsym2(5:7)
 
-    indsym2(:)=0
+    indsym2(:)=zero
     call tdep_calc_indsym2(InVar,gatom,eatom,indsym2,isym,Sym,xred_ideal)
     gg=indsym2(4)
     lattge(:)=indsym2(1:3)
@@ -533,8 +531,8 @@ contains
       if ((sum(abs((vecti(:)-lattef(:))-(vectj(:)-lattfe(:)))).lt.tol8).and.&
 &         (sum(abs((vectj(:)-lattfg(:))-(vectk(:)-lattgf(:)))).lt.tol8).and.&
 &         (sum(abs((vectk(:)-lattge(:))-(vecti(:)-latteg(:)))).lt.tol8)) then
-        Isym3at(eatom,fatom,gatom,1)=isym
-        Isym3at(eatom,fatom,gatom,2)=1
+        Isym3at(1)=isym
+        Isym3at(2)=1
         ok=.true.
       end if
     end if

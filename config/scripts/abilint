@@ -806,6 +806,8 @@ class Project:
         "Dump with pickle a Fortran type in a file"
         if name in self.ftypes:
             self.message.section("Write the fortran type '%s' into the file '%s'..." % (name,filename))
+            #from pprint import pprint
+            #pprint(self.ftypes[name].dict_vars)
             pickle.dump(self.ftypes[name].dict_vars,open(filename,"wb"))
             self.message.done()
         else:

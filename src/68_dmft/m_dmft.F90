@@ -85,13 +85,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtvol)
 
 
@@ -163,9 +156,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
 
  check=paw_dmft%dmftcheck ! checks enabled
- paw_dmft%dmft_fepr=tol5
- paw_dmft%dmft_chpr=tol6
-!paw_dmft%dmft_chpr=20_dp ! total number of electron.
+ !paw_dmft%dmft_fermi_prec=tol5
+ paw_dmft%dmft_fermi_prec=paw_dmft%dmft_charge_prec*ten
+!paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0
  etot_var=.true.
@@ -593,13 +586,6 @@ end subroutine dmft_solve
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,self_new,weiss,pawprtvol)
 
@@ -902,13 +888,6 @@ end subroutine impurity_solve
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 
  use defs_basis
@@ -1056,12 +1035,6 @@ end subroutine dyson
 !!      rw_self,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,prtopt)

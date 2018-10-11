@@ -107,12 +107,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
                      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
@@ -326,6 +320,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
              write(msg,'(a,i2,a,es22.13E3)') 'RF2 TEST dudkdk iband = ',iband,&
              ' : NOT PASSED. | < u^(0) | u^(2) > + Re[< u^(1) | u^(1) >] | = ',dotr
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
 !           else
 !             write(msg,'(a,i2,a)') 'RF2 TEST dudkdk iband = ',iband,' : OK.'
 !             call wrtout(std_out,msg)
@@ -813,8 +808,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            if (abs(occ_k(iband) - occ_k(jband)) > tol12 .and. occ_k(iband) > tol8) then
              write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
              write(msg,'(a)') 'ERROR : occ_k(iband) /= occ_k(jband) (and both are >0)'
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
            end if
            if (abs(eig0_k(iband) - eig0_k(jband)) < tol8 ) then
              write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
@@ -825,12 +822,16 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            if ( (eig0_k(iband) - eig0_k(jband) < -tol12) .and. (jband < iband) ) then
              write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
              write(msg,'(a)') 'ERROR : Eig(jband) < Eig(iband) with jband < iband'
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
              write(msg,'(a,es22.13e3)') 'Eig(jband) = ',eig0_k(jband)
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
              write(msg,'(a,es22.13e3)') 'Eig(iband) = ',eig0_k(iband)
              call wrtout(std_out,msg)
+             call wrtout(ab_out,msg)
            end if
          end if ! end tests
          if ( abs(occ_k(iband))<tol8 ) then ! for empty bands only
@@ -911,11 +912,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        if (dot2r > tol_final) then
          write(msg,'(a,i2,a,es22.13E3)') 'RF2 TEST FINAL iband = ',jband,' : NOT PASSED dotr = ',dotr
          call wrtout(std_out,msg)
+         call wrtout(ab_out,msg)
          write(msg,'(2(a,es22.13E3))') ' < cwave_j | rhs_j > =',dotr,',',doti
          call wrtout(std_out,msg)
+         call wrtout(ab_out,msg)
          write(msg,'(2(a,es22.13E3))') '           lambda_jj =',&
 &         rf2%lambda_mn(1,jband+(jband-1)*nband_k),',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
          call wrtout(std_out,msg)
+         call wrtout(ab_out,msg)
        else
          if (dot2r<tol9) dot2r = zero ! in order to hide the numerical noise
          write(msg,'(a,i2,a,es22.13E3,a,es7.1E2)') &
@@ -931,7 +935,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! **************************************************************************************************
 
 ! Deallocations of arrays
- if (debug_mode==0) ABI_DEALLOCATE(rf2%amn)
+ if (debug_mode==0) then
+   ABI_DEALLOCATE(rf2%amn)
+ end if
 
  call timab(514,2,tsec)
 
