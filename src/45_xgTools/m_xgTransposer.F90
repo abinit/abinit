@@ -341,6 +341,7 @@ module m_xgTransposer
    integer, allocatable :: request(:), status(:)
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
+   integer :: toe, tos, frome, froms, licpu
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
@@ -355,15 +356,16 @@ module m_xgTransposer
        MSG_ERROR("Space value unknown !")
    end select
    
-   ABI_MALLOC(nrowsInd,(ncpu))
+   ABI_MALLOC(nrowsInd,(xgTransposer%mpiData(MPI_LINALG)%size))
    nrowsTotal = rows(xgTransposer%xgBlock_linalg)/icplx
 
-   call xmpi_allgather(nrowsTotal,nrowsInd,comm,i)
+   call xmpi_allgather(nrowsTotal,nrowsInd,xgTransposer%mpiData(MPI_LINALG)%comm,i)
    if ( i /= MPI_SUCCESS ) then
      MSG_ERROR("Error while gathering number of rows")
    end if 
-   nrowsTotal = sum(nrowsInd)
-   ncolsInd = cols(xgTransposer%xgBlock_colsrows)
+   icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+   nrowsTotal = sum(nrowsInd(icpu+1:icpu+ncpu))
+   ncolsInd = cols(xgTransposer%xgBlock_linalg)/xgTransposer%mpiData(MPI_COLS)%size
 
    if ( nrowsTotal /= rows(xgTransposer%xgBlock_colsrows)/icplx ) then
      MSG_ERROR("Missmatch number of rows")
@@ -374,25 +376,28 @@ module m_xgTransposer
 
    ABI_MALLOC(sendbuf,(2,nrowsTotal*ncolsInd))
    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,buffer,icplx,nrowsTotal*ncolsInd)
-!$omp parallel do private(shiftCpu), collapse(2)
+   licpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+!!!$omp parallel do private(shiftCpu), collapse(2)
    do col = 1, ncolsInd
      do icpu = 1, ncpu
-       shiftCpu = ncolsInd*sum(nrowsInd(1:icpu-1))
-       sendbuf(:,(shiftCpu+(col-1)*nrowsInd(icpu)+1):(shiftCpu+col*nrowsInd(icpu))) = &
-
-       buffer(:,((col-1)*nrowsTotal+sum(nrowsInd(1:icpu-1))+1):((col-1)*nrowsTotal+sum(nrowsInd(1:icpu))))
+       shiftCpu = ncolsInd*sum(nrowsInd(licpu+1:licpu+icpu-1))
+       tos=((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu-1))+1)
+       toe=((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu)))
+       froms=(shiftCpu+(col-1)*nrowsInd(licpu+icpu)+1)
+       frome=(shiftCpu+col*nrowsInd(licpu+icpu))
+       sendbuf(:,froms:frome) = buffer(:,tos:toe)
      end do
    end do
 
    ABI_MALLOC(recvcounts,(ncpu))
    ABI_MALLOC(rdispls,(ncpu))
-   recvcounts(:) = 2*nrowsInd(me+1)*ncolsInd !! Thank you fortran for not starting at 0 !
+   recvcounts(:) = 2*nrowsInd(xgTransposer%mpiData(MPI_LINALG)%rank+1)*ncolsInd !! Thank you fortran for not starting at 0 !
    rdispls(1) = 0
    do i = 2, ncpu
      rdispls(i) = rdispls(i-1)+recvcounts(i-1)
    end do
 
-   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
+   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(xgTransposer%mpiData(MPI_LINALG)%rank+1))
    select case(xgTransposer%mpiAlgo)
    case (TRANS_ALL2ALL)
      ABI_MALLOC(sendcounts,(ncpu))
@@ -400,7 +405,8 @@ module m_xgTransposer
      ABI_MALLOC(request,(1))
      myrequest = 1
 
-     sendcounts(:) = 2*nrowsInd(:)*ncolsInd 
+     icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+     sendcounts(:) = 2*nrowsInd(icpu+1:icpu+ncpu)*ncolsInd 
      sdispls(1) = 0
      do i = 2, ncpu
        sdispls(i) = sdispls(i-1)+sendcounts(i-1)
@@ -416,7 +422,7 @@ module m_xgTransposer
      ABI_MALLOC(request,(ncpu))
      myrequest = me+1
 
-     ABI_ALLOCATE(sendptrbuf,(1:ncpu))
+     ABI_MALLOC(sendptrbuf,(1:ncpu))
      do icpu = 1, ncpu
        sendptrbuf(me+1)%ptr => sendbuf(:,(icpu-1)*ncolsInd*nrowsInd(icpu)+1:icpu*ncolsInd*nrowsInd(icpu+1))
        !call xmpi_gatherv(sendptrbuf(me+1)%ptr,2*ncolsInd*nrowsInd(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,i)
@@ -504,6 +510,7 @@ module m_xgTransposer
    integer, allocatable :: request(:), status(:)
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
+   integer :: tos, toe, froms, frome
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
@@ -531,6 +538,7 @@ module m_xgTransposer
    write(*,*) xgTransposer%mpiData(MPI_ROWS)%rank, "in transpose to col_row there is a total of ", nrowsTotal, "real in rows to gather"
    write(*,*) nrowsInd
 
+   write(*,*) "allocating ", nrowsTotal*ncolsInd, "pairs"
    ABI_MALLOC(recvbuf,(2,nrowsTotal*ncolsInd))
    ABI_MALLOC(recvcounts,(ncpu))
    ABI_MALLOC(rdispls,(ncpu))
@@ -540,6 +548,8 @@ module m_xgTransposer
    do icpu = 2, ncpu
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
    end do
+   write(*,*) recvcounts
+   write(*,*) rdispls
 
    select case(xgTransposer%mpiAlgo)
    case (TRANS_ALL2ALL)
@@ -549,24 +559,27 @@ module m_xgTransposer
      myrequest = 1
 
      sendcounts(:) = 2*nrowsInd(xgTransposer%mpiData(MPI_LINALG)%rank+1)*ncolsInd !! Thank you fortran for not starting at 0 !
+     write(*,*) sendcounts
      sdispls(1) = 0
      do i = 2, ncpu
        sdispls(i) = sdispls(i-1)+sendcounts(i-1)
      end do
 
-     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(me+1))
+     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf,icplx,cols(xgTransposer%xgBlock_linalg)*nrowsInd(xgTransposer%mpiData(MPI_LINALG)%rank+1))
+     write(*,*) "Before ialltoall"
      !call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
      !                    recvbuf, recvcounts, rdispls, & 
      !                    comm, i)
      call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
                          recvbuf, recvcounts, rdispls, & 
                          comm, request(myrequest))
+     write(*,*) "After ialltoall"
 
    case (TRANS_GATHER)
      ABI_MALLOC(request,(ncpu))
      myrequest = me+1
 
-     ABI_ALLOCATE(sendptrbuf,(1:ncpu))
+     ABI_MALLOC(sendptrbuf,(1:ncpu))
      do icpu = 0, ncpu-1
        call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsInd+1,rows(xgTransposer%xgBlock_linalg),ncolsInd)
        call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me+1)%ptr,icplx,ncolsInd*nrowsInd(me+1))
@@ -586,9 +599,11 @@ module m_xgTransposer
 
    ABI_MALLOC(status,(MPI_STATUS_SIZE))
    call mpi_wait(request(myrequest),status,i)
+   write(*,*) "Request ended"
    if ( i /= MPI_SUCCESS ) then
      MSG_ERROR("Error while waiting for mpi")
    end if 
+   write(*,*) "with success"
 
    licpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
    ABI_MALLOC(buffer,(2,nrowsTotal*ncolsInd))
@@ -596,9 +611,14 @@ module m_xgTransposer
    do col = 1, ncolsInd
      do icpu = 1, ncpu
        shiftCpu = ncolsInd*sum(nrowsInd(licpu+1:licpu+icpu-1))
+       tos=((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu-1))+1)
+       toe=((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu)))
+       froms=(shiftCpu+(col-1)*nrowsInd(licpu+icpu)+1)
+       frome=(shiftCpu+col*nrowsInd(licpu+icpu))
+       !write(*,*) "col", col, " from cpu ", icpu
+       !write(*,*) tos, toe, froms, frome
 
-       buffer(:,((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu-1))+1):((col-1)*nrowsTotal+sum(nrowsInd(licpu+1:licpu+icpu)))) = &
-       recvbuf(:,(shiftCpu+(col-1)*nrowsInd(licpu+icpu)+1):(shiftCpu+col*nrowsInd(licpu+icpu)))
+       buffer(:,tos:toe) = recvbuf(:,froms:frome)
      end do
    end do
    call xgBlock_map(xgTransposer%xgBlock_colsrows,buffer,space(xgTransposer%xgBlock_linalg),icplx*nrowsTotal,ncolsInd,xgTransposer%mpiData(MPI_ROWS)%comm)

@@ -250,22 +250,22 @@ ncpuRows = dtset%npfft*dtset%npspinor
 !call xgBlock_print(xgx0,6)
 
 write(*,*) dtset%useric
-l_istwf = 1
+l_istwf = 10
 call xgTransposer_init(xgTransposer,xgx0,xgeigen,ncpuRows,ncpuCols,STATE_LINALG,dtset%useric)
 do iband =1 , l_istwf
   walltime = abi_wtime()
   call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
   call xgBlock_scale(xgx0,0.d0,1)
-  call xgBlock_print(xgeigen,6)
+  !call xgBlock_print(xgeigen,6)
   call xgTransposer_transpose(xgTransposer,STATE_LINALG)
-  call xgBlock_print(xgx0,6)
+  !call xgBlock_print(xgx0,6)
   call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
   walltime = abi_wtime() - walltime
   cputime = cputime + walltime
   call xmpi_max(walltime,maxt,mpi_enreg%comm_bandspinorfft,nthreads)
   write(std_out,*) "walltime", maxt
 end do
-ABI_FREE(l_gvnlc)
+!ABI_FREE(l_gvnlc)
 call xmpi_max(cputime,maxt,mpi_enreg%comm_bandspinorfft,nthreads)
 call xgTransposer_free(xgTransposer)
 write(std_out,*) "mean", maxt/l_istwf
