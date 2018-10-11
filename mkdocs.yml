@@ -114,6 +114,7 @@ pages:
     - topics/SelfEnergy.md
     - topics/SmartSymm.md
     - topics/spinpolarisation.md
+    - topics/SpinDynamicsMultibinit.md
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
@@ -196,6 +197,7 @@ pages:
     - Multibinit:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
+        - Spin Model: tutorial/spin_model.md
     - tutorial/analysis_tools.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md

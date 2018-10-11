@@ -32,7 +32,6 @@
 !!
 !! SOURCE
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -46,41 +45,26 @@ module  m_spin_terms
   use m_sparse_matrix
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   implicit none
-!!***
+  !!***
 
   ! TODO move parameters to somewhere (where?)
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
-     integer :: nmatoms, natoms
+     integer :: nspins 
      real(dp) :: etot
      ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
      ! rvec: supercell R vector.
      integer, allocatable :: ispin_prim(:), rvec(:,:)
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
      real(dp):: cell(3,3)
-     integer, allocatable :: zion(:)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
-     integer, allocatable :: spin_index(:)
+     integer, allocatable :: iatoms(:)
      !integer :: seed
      type(rng_t) :: rng 
      ! random seed
-     ! has_xxx : which terms are included in hamiltonian
-     ! use_bilinear_mat_form: if false, for each ij pair,
-     ! J (exchange) is a scalar, D (DMI) is a vector,
-     ! which may be more efficient than a matrix. But a matrix form
-     ! is more general.
      logical :: has_external_hfield, has_uniaxial_anistropy, has_exchange, &
           has_DMI, has_dipdip, has_bilinear
 
-     !   real(dp), allocatable :: bilinear_exch(:,:,:,:)
-     !     Bilinear exchange, 3rd dimension unknown until all neighbours found
-     !     Size should be 3, 3, max_num_int, nmatoms (max_num_int is the number of interactions. Each spin can have a different number of neighbours.)
-
-     !  comment hexu . removed. instead three list i, j, val is used for exchange.
-     ! For exchange val is a scalar for each pair i, j. For DMI, val is a 3-vector.
-     ! For dipole dipole, val is a 3*3 matrix.
-
-     ! current in python version, i,j,R,val_ijR is stored in a class derived from self one.
 
      ! Array or scalar?
      real(dp), allocatable :: external_hfield(:,:)
@@ -91,7 +75,6 @@ module  m_spin_terms
      integer :: exchange_nint
      integer, allocatable:: exchange_i(:)
      integer, allocatable:: exchange_j(:)
-     ! J_ij is scalar
      real(dp), allocatable:: exchange_val(:)
 
 
@@ -120,50 +103,39 @@ module  m_spin_terms
 
      real(dp), allocatable :: gyro_ratio(:)
      !     Gyromagnetic ration can be on-site
-     !     Size should be nmatoms
+     !     Size should be nspins
 
      real(dp), allocatable :: k1(:)
      !     On-site uniaxial anisotropy
-     !     Size should be nmatoms
+     !     Size should be nspins
 
      real(dp), allocatable :: k1dir(:,:)
      !     Direction of On-site uniaxial anisotropy
-     !     Size should be 3, nmatoms
+     !     Size should be 3, nspins
      !   Should be normalized when being set.
 
      real(dp), allocatable :: gilbert_damping(:)
      ! Heat bath
-     ! HexuComm: use gilbert_damping instead of lambda to avoid conflict with python
-     ! (lambda is a python keyword)
      !     Coupling to thermal bath can be on-site
-     !     Size should be nmatoms
+     !     Size should be nspins?
 
      logical :: gamma_l_calculated = .False.
      real(dp), allocatable :: gamma_l(:)
      ! gamma_l= gyro_ratio/(1+gilbert_damping)**2
 
 
-     !   integer, allocatable :: bilin_num_int(:)
-     !     The number of interactions of spin i (the array value) with its neighbours
-     !     Size should be nmatoms. No value should be larger than nmatoms
-
-     ! TOMCOM - NOT SURE IF THE TOTAL NUMBER OF INTERACTIONS SHOULD BE ifc_type
-     !   type(ifc_type) :: max_num_int
-     !     total number of interactions
-     ! TOMCOM - UNTIL HERE
-
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:)
-  !  CONTAINS
-  !    procedure :: initialize => spin_terms_t_initialize
-  !    procedure :: finalize => spin_terms_t_finalize
-  !    procedure :: get_Heff => total_Heff
-  !    procedure :: Heff_to_dSdt => Heff_to_dSdt
-  !    procedure :: get_dSdt => get_dSdt
-  !    procedure :: get_Langevin_Heff => get_Langevin_Heff
-   end type spin_terms_t
+     !  CONTAINS
+     !    procedure :: initialize => spin_terms_t_initialize
+     !    procedure :: finalize => spin_terms_t_finalize
+     !    procedure :: get_Heff => total_Heff
+     !    procedure :: Heff_to_dSdt => Heff_to_dSdt
+     !    procedure :: get_dSdt => get_dSdt
+     !    procedure :: get_Langevin_Heff => get_Langevin_Heff
+  end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index, ispin_prim, rvec)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat,  iatoms, ispin_prim, rvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -177,36 +149,31 @@ contains
     !scalars
     class(spin_terms_t), intent(out) :: self
     integer, intent(in) :: ispin_prim(:), rvec(:,:)
-    integer, intent(in) :: zion(:), spin_index(:)
+    integer, intent(in) ::  iatoms(:)
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
     !Local variables-------------------------------
-    integer :: nmatoms, natoms, i
-    ! TODO: should be sth else, not zion
-    nmatoms=size(zion)
-    natoms=size(spin_index)
-    self%nmatoms=nmatoms
-    self%natoms=natoms
-    ABI_ALLOCATE(self%zion, (nmatoms))
-    ABI_ALLOCATE(self%spin_index, (natoms))
-    self%zion(:)=zion(:)
-    self%spin_index(:)=spin_index(:)
+    integer :: nspins,  i
+    nspins=size(pos, 2)
+    self%nspins=nspins
+    ABI_ALLOCATE(self%iatoms, (nspins))
+    self%iatoms(:)=iatoms(:)
     self%cell(:,:)=cell(:,:)
-    ABI_ALLOCATE( self%pos, (3,nmatoms) )
+    ABI_ALLOCATE( self%pos, (3,nspins) )
     self%pos(:,:)=pos(:,:)
-    ABI_ALLOCATE( self%spinat, (3, nmatoms))
+    ABI_ALLOCATE( self%spinat, (3, nspins))
     self%spinat(:,:)=spinat(:,:)
 
-    ABI_ALLOCATE( self%ms, (nmatoms) )
+    ABI_ALLOCATE( self%ms, (nspins) )
     self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))*bohr_mag
 
-    ABI_ALLOCATE( self%ispin_prim, (nmatoms))
-    ABI_ALLOCATE(self%rvec, (3, nmatoms))
+    ABI_ALLOCATE( self%ispin_prim, (nspins))
+    ABI_ALLOCATE(self%rvec, (3, nspins))
 
     self%ispin_prim(:)=ispin_prim(:)
     self%rvec(:,:)=rvec(:,:)
 
-    ABI_ALLOCATE( self%S, (3, nmatoms))
-    do i=1,nmatoms
+    ABI_ALLOCATE( self%S, (3, nspins))
+    do i=1,nspins
        self%S(:,i)=self%spinat(:,i)/self%ms(i)*bohr_mag
     end do
 
@@ -217,21 +184,21 @@ contains
     self%has_dipdip=.False.
     self%has_bilinear=.False.
 
-    ABI_ALLOCATE( self%gyro_ratio, (nmatoms))
+    ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ! Defautl gyro_ratio
     ! TODO remove this, use gyroration from xml
     self%gyro_ratio(:)=gyromagnetic_ratio
 
-    ABI_ALLOCATE( self%gilbert_damping, (nmatoms) )
-    ABI_ALLOCATE( self%gamma_l, (nmatoms))
+    ABI_ALLOCATE( self%gilbert_damping, (nspins) )
+    ABI_ALLOCATE( self%gamma_l, (nspins))
 
-    call LIL_mat_initialize(self%bilinear_lil_mat,self%nmatoms*3,self%nmatoms*3)
-    ABI_ALLOCATE( self%Htmp, (nmatoms*3))
+    call LIL_mat_initialize(self%bilinear_lil_mat,self%nspins*3,self%nspins*3)
+    ABI_ALLOCATE( self%Htmp, (nspins*3))
 
     call set_seed(self%rng, [111111_dp, 2_dp])
   end subroutine spin_terms_t_initialize
 
-  subroutine spin_terms_t_initialize_all(self,nmatoms, ms, &
+  subroutine spin_terms_t_initialize_all(self,nspins, ms, &
        &     external_hfield, &
        &     exchange_i, exchange_j, exchange_val, &
        &     DMI_i, DMI_j, DMI_val, &
@@ -248,7 +215,7 @@ contains
     implicit none
     !Arguments ------------------------------------
     !scalars
-    integer, intent(in) :: nmatoms
+    integer, intent(in) :: nspins
     !arrays
     type(spin_terms_t), intent(out) :: self
     real(dp), optional, intent(in) :: external_hfield(:,:)
@@ -257,14 +224,14 @@ contains
          & dmi_i(:), dmi_j(:), bilinear_i(:), bilinear_j(:)
     real(dp), intent(in) :: ms(:)
     real(dp), optional,intent(in) :: exchange_val(:), dmi_val(:,:), bilinear_val(:,:,:)
-    real(dp),optional,intent(in) :: gyro_ratio(nmatoms), gilbert_damping(nmatoms)
-    real(dp),optional,intent(in) :: k1(nmatoms)
-    real(dp),optional,intent(in) :: k1dir(3,nmatoms)
+    real(dp),optional,intent(in) :: gyro_ratio(nspins), gilbert_damping(nspins)
+    real(dp),optional,intent(in) :: k1(nspins)
+    real(dp),optional,intent(in) :: k1dir(3,nspins)
     !Local variables-------------------------------
 
     ! *************************************************************************
 
-    ABI_ALLOCATE( self%ms, (nmatoms))
+    ABI_ALLOCATE( self%ms, (nspins))
     self%ms = ms
 
     if(present(external_hfield)) then
@@ -286,7 +253,7 @@ contains
     end if
 
     if ( present(gyro_ratio) ) then
-       ABI_ALLOCATE(self%gyro_ratio, (nmatoms))
+       ABI_ALLOCATE(self%gyro_ratio, (nspins))
     endif
     self%gyro_ratio=gyro_ratio
 
@@ -295,7 +262,7 @@ contains
     endif
 
     if (present(gilbert_damping)) then
-       ABI_ALLOCATE(self%gilbert_damping, (self%nmatoms))
+       ABI_ALLOCATE(self%gilbert_damping, (self%nspins))
        self%gilbert_damping=gilbert_damping
     endif
 
@@ -327,7 +294,7 @@ contains
 
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: external_hfield(:,:)
-    ABI_ALLOCATE(self%external_hfield, (3,self%nmatoms))
+    ABI_ALLOCATE(self%external_hfield, (3,self%nspins))
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
   end subroutine spin_terms_t_set_external_hfield
@@ -360,11 +327,11 @@ contains
     integer :: i
     real(dp) :: norm
 
-    ABI_ALLOCATE(self%k1, (self%nmatoms))
-    ABI_ALLOCATE(self%k1dir, (3,self%nmatoms))
+    ABI_ALLOCATE(self%k1, (self%nspins))
+    ABI_ALLOCATE(self%k1dir, (3,self%nspins))
     self%has_uniaxial_anistropy= .true.
     self%k1=k1
-    do i = 1, self%nmatoms
+    do i = 1, self%nspins
        norm = sqrt(sum( k1dir(:,i)**2))
        self%k1dir(:,i)=k1dir(:,i)/norm
     end do
@@ -382,7 +349,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
-    call uniaxial_MCA_Heff(self%nmatoms,self%k1,self%k1dir,self%ms,S,Heff)
+    call uniaxial_MCA_Heff(self%nspins,self%k1,self%k1dir,self%ms,S,Heff)
   end subroutine spin_terms_t_calc_uniaxial_MCA_Heff
 
   subroutine spin_terms_t_set_bilinear_term_single(self, i, j, val)
@@ -447,10 +414,10 @@ contains
 
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
-    real(dp), intent(out) :: Heff(3,self%nmatoms)
+    real(dp), intent(out) :: Heff(3,self%nspins)
     integer :: i, iatom, jatom
     real(dp) ::  H(3,1)
-    !Svec=reshape(S, (/self%nmatoms*3/))
+    !Svec=reshape(S, (/self%nspins*3/))
     !do i = 1, self%bilinear_nint, 1
     !    iatom=self%bilinear_i(i)
     !    jatom=self%bilinear_j(i)
@@ -466,12 +433,12 @@ contains
        !call CSR_mat_print(self%bilinear_csr_mat)
        self%csr_mat_ready=.True.
     endif
-    !call CSR_mat_mv(self%bilinear_csr_mat, reshape(S, [3*self%nmatoms]),self%Htmp)
-    !Heff(:,:) = reshape (self%Htmp, [3, self%nmatoms])
+    !call CSR_mat_mv(self%bilinear_csr_mat, reshape(S, [3*self%nspins]),self%Htmp)
+    !Heff(:,:) = reshape (self%Htmp, [3, self%nspins])
     call CSR_mat_mv(self%bilinear_csr_mat, S ,Heff)
     !print *, "ms", self%ms
     !$OMP PARALLEL DO
-    do i =1, self%nmatoms
+    do i =1, self%nspins
        Heff(:, i)=Heff(:,i)/self%ms(i)
     end do
     !$OMP END PARALLEL DO
@@ -515,7 +482,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
-    call exchange_Heff(self%exchange_nint,self%nmatoms,self%exchange_i, &
+    call exchange_Heff(self%exchange_nint,self%nspins,self%exchange_i, &
          self%exchange_j,self%exchange_val,S,self%ms,Heff)
   end subroutine spin_terms_t_calc_exchange_Heff
 
@@ -556,7 +523,7 @@ contains
     real(dp), intent(out) :: Heff(:,:)
     integer :: nij
     nij=size(self%DMI_i)
-    call DMI_Heff(nij,self%nmatoms,self%DMI_i,self%DMI_j,self%DMI_val,S,self%ms,Heff)
+    call DMI_Heff(nij,self%nspins,self%DMI_i,self%DMI_j,self%DMI_val,S,self%ms,Heff)
   end subroutine spin_terms_t_calc_DMI_Heff
 
 
@@ -570,9 +537,9 @@ contains
 !End of the abilint section
 
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nmatoms)
-    real(dp), intent(out):: Heff(3,self%nmatoms)
-    real(dp) :: Htmp(3,self%nmatoms)
+    real(dp), intent(in):: S(3,self%nspins)
+    real(dp), intent(out):: Heff(3,self%nspins)
+    real(dp) :: Htmp(3,self%nspins)
     Heff(:,:) =0.0_dp
 
     if(.not. self%gamma_l_calculated) then
@@ -612,7 +579,7 @@ contains
     end if
 
   end subroutine spin_terms_t_total_Heff
-  
+
   ! A effective torque from Langevin heat bath
   subroutine spin_terms_t_get_Langevin_Heff(self, dt, temperature, Heff)
 
@@ -625,13 +592,15 @@ contains
 
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: dt, temperature
-    real(dp), intent(out):: Heff(3,self%nmatoms)
-    real(dp) :: x(3, self%nmatoms), C
+    real(dp), intent(out):: Heff(3,self%nspins)
+    real(dp) :: x(3, self%nspins), C
     integer :: i, j
     if ( temperature .gt. 1d-7) then
        !call rand_normal_ziggurat(x)
-       call rand_normal_array(self%rng, x, 3*self%nmatoms)
-       do i = 1, self%nmatoms
+       call rand_normal_array(self%rng, x, 3*self%nspins)
+       !print*, self%gilbert_damping(1), boltzmann, temperature, self%gyro_ratio(1), dt, self%ms(1)
+
+       do i = 1, self%nspins
           C=sqrt(2.0*self%gilbert_damping(i)*boltzmann* temperature &
                &  /(self%gyro_ratio(i)* dt *self%ms(i)))
           do j = 1, 3
@@ -654,16 +623,16 @@ contains
 !End of the abilint section
 
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: Heff(3,self%nmatoms), S(3,self%nmatoms)
-    real(dp), intent(out) :: dSdt(3, self%nmatoms)
+    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
+    real(dp), intent(out) :: dSdt(3, self%nspins)
     integer :: i
     real(dp) :: Ri(3)
-    !!$OMP PARALLEL DO private(Ri)
-    do i=1,self%nmatoms
+!!$OMP PARALLEL DO private(Ri)
+    do i=1,self%nspins
        Ri = cross(S(:,i),Heff(:,i))
        dSdt(:,i) = -self%gamma_L(i)*(Ri+self%gilbert_damping(i)* cross(S(:,i), Ri))
     end do
-    !!$OMP END PARALLEL DO
+!!$OMP END PARALLEL DO
   end subroutine spin_terms_t_Heff_to_dsdt
 
   subroutine spin_terms_t_get_etot(self, S, Heff, etot)
@@ -676,11 +645,11 @@ contains
 !End of the abilint section
 
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: S(3, self%nmatoms), Heff(3, self%nmatoms)
+    real(dp), intent(in) :: S(3, self%nspins), Heff(3, self%nspins)
     real(dp), intent(out) :: etot
     integer :: i, j
     etot=0.0_dp
-    do i=1, self%nmatoms
+    do i=1, self%nspins
        do j=1, 3
           etot=etot-Heff(j, i)*S(j,i)*self%ms(i)
        end do
@@ -696,20 +665,20 @@ contains
 #define ABI_FUNC 'spin_terms_t_get_dSdt'
 !End of the abilint section
 
-     class(spin_terms_t) ,intent(inout) :: self
-     real(dp), intent(in):: S(3, self%nmatoms), H_lang(3, self%nmatoms)
-     real(dp), intent(out):: dSdt(3, self%nmatoms)
-     real(dp):: Heff(3, self%nmatoms)
-     !call self%get_Heff(S=S, Heff=Heff)
-     call spin_terms_t_total_Heff(self=self, S=S, Heff=Heff)
-     call spin_terms_t_get_etot(self=self, S=S, Heff=Heff, etot=self%etot)
-     Heff(:,:)=Heff(:,:)+H_lang(:,:)
-     !call self%Heff_to_dsdt(Heff,S, dSdt)
-     call spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
+    class(spin_terms_t) ,intent(inout) :: self
+    real(dp), intent(in):: S(3, self%nspins), H_lang(3, self%nspins)
+    real(dp), intent(out):: dSdt(3, self%nspins)
+    real(dp):: Heff(3, self%nspins)
+    !call self%get_Heff(S=S, Heff=Heff)
+    call spin_terms_t_total_Heff(self=self, S=S, Heff=Heff)
+    call spin_terms_t_get_etot(self=self, S=S, Heff=Heff, etot=self%etot)
+    Heff(:,:)=Heff(:,:)+H_lang(:,:)
+    !call self%Heff_to_dsdt(Heff,S, dSdt)
+    call spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
 
-   end subroutine spin_terms_t_get_dSdt
+  end subroutine spin_terms_t_get_dSdt
 
-   subroutine spin_terms_t_finalize(self)
+  subroutine spin_terms_t_finalize(self)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -719,28 +688,32 @@ contains
 !End of the abilint section
 
     class(spin_terms_t), intent(inout):: self
-    integer::  err
+
+    if (allocated(self%S)) then
+        ABI_DEALLOCATE(self%S)
+    endif
+
+    if (allocated(self%Htmp)) then
+        ABI_DEALLOCATE(self%Htmp)
+    endif
+
+
     if (allocated(self%ms))  then
-    ABI_DEALLOCATE(self%ms)
+       ABI_DEALLOCATE(self%ms)
     endif
 
     if (allocated(self%pos))  then
-    ABI_DEALLOCATE(self%pos)
+       ABI_DEALLOCATE(self%pos)
     endif
 
 
     if (allocated(self%spinat))  then
-     ABI_DEALLOCATE(self%spinat)
-    endif
-
-   
-    if (allocated(self%zion))  then
-    ABI_DEALLOCATE(self%zion)
+       ABI_DEALLOCATE(self%spinat)
     endif
 
 
-    if (allocated(self%spin_index)) then
-       ABI_DEALLOCATE(self%spin_index)
+    if (allocated(self%iatoms)) then
+       ABI_DEALLOCATE(self%iatoms)
     endif
     if (allocated(self%ispin_prim)) then
        ABI_DEALLOCATE(self%ispin_prim)
@@ -751,66 +724,66 @@ contains
 
 
     if (allocated(self%gyro_ratio)) then
-    ABI_DEALLOCATE(self%gyro_ratio)
+       ABI_DEALLOCATE(self%gyro_ratio)
     endif
 
 
     if (allocated(self%external_hfield)) then 
-    ABI_DEALLOCATE(self%external_hfield)
+       ABI_DEALLOCATE(self%external_hfield)
     endif
 
 
     if (allocated(self%k1))  then
-    ABI_DEALLOCATE(self%k1)
+       ABI_DEALLOCATE(self%k1)
     endif
 
 
     if (allocated(self%k1dir)) then
-    ABI_DEALLOCATE(self%k1dir)
+       ABI_DEALLOCATE(self%k1dir)
     endif
 
 
     if (allocated(self%gilbert_damping))  then
-    ABI_DEALLOCATE(self%gilbert_damping)
+       ABI_DEALLOCATE(self%gilbert_damping)
     endif
 
 
     if (allocated(self%gamma_l))  then
-    ABI_DEALLOCATE(self%gamma_l)
+       ABI_DEALLOCATE(self%gamma_l)
     endif
 
 
 
     self%has_exchange=.False.
     if (allocated(self%exchange_i))  then
-    ABI_DEALLOCATE(self%exchange_i)
+       ABI_DEALLOCATE(self%exchange_i)
     endif
 
 
     if (allocated(self%exchange_j))  then
-    ABI_DEALLOCATE(self%exchange_j)
+       ABI_DEALLOCATE(self%exchange_j)
     endif
 
 
     if (allocated(self%exchange_val))  then
-    ABI_DEALLOCATE(self%exchange_val)
+       ABI_DEALLOCATE(self%exchange_val)
     endif
 
 
 
     self%has_DMI=.False.
     if (allocated(self%DMI_i))  then
-    ABI_DEALLOCATE(self%DMI_i)
+       ABI_DEALLOCATE(self%DMI_i)
     endif
 
 
     if (allocated(self%DMI_j)) then
-    ABI_DEALLOCATE(self%DMI_j)
+       ABI_DEALLOCATE(self%DMI_j)
     endif
 
 
     if (allocated(self%DMI_val))  then
-    ABI_DEALLOCATE(self%DMI_val)
+       ABI_DEALLOCATE(self%DMI_val)
     endif
 
 
