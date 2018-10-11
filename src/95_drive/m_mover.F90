@@ -855,7 +855,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13 .and. hist%mxhist > 3 )then
+     if (ab_mover%ionmov==13 )then  !MARCUS try to debug test.. .and. hist%mxhist > 3
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)
