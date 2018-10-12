@@ -509,6 +509,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%nnsclo>0) then
    ! ===== Self-consistent + imposed =====
      nnsclo_now=dtset%nnsclo
+   else if (dtset%nnsclo<0) then
+   ! ===== Self-consistent + imposed during abs(nnsclo) steps =====
+     nnsclo_now=1
+     if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
    ! ===== Self-consistent + default =====
      nnsclo_now=1
