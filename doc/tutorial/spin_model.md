@@ -130,7 +130,14 @@ In the .out file, lines below can be found, which gives a overview of the evolut
 
 In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using postprocessing tools. 
 
+##### To add
 
+- convergence wrt. time step (energy conservation), box size
+- observables: magnetization versus temperature, determine Curie temperature
+- spectral function
+- magnetic susceptibility
+- comparison with experiments?
+- alternating spins for antiferromagnets
 
 ## 5. Postprocessing
 
