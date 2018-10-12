@@ -1824,33 +1824,19 @@ subroutine phdos_ncwrite(phdos,ncid)
 
  ! Write variables. Note unit conversion.
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), phdos%prtdos))
- NCF_CHECK(nf90_put_var(ncid, vid('dossmear'), phdos%dossmear*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('wmesh'), phdos%omega*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('phdos'), phdos%phdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos'), phdos%pjdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_type'), phdos%pjdos_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "prtdos"), phdos%prtdos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'dossmear'), phdos%dossmear*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wmesh'), phdos%omega*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdos'), phdos%phdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos'), phdos%pjdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_type'), phdos%pjdos_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
 
 #else
  MSG_ERROR("netcdf support not enabled")
  ABI_UNUSED((/ncid, phdos%nomega/))
 #endif
-
-contains
- integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
 
 end subroutine phdos_ncwrite
 !!***
@@ -3467,10 +3453,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr
- !character(500) :: msg
+ integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
  type(kpath_t) :: qpath
 !arrays
+ real(dp),allocatable :: qph2l(:,:), qnrml2(:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
 
 ! *********************************************************************
@@ -3505,15 +3491,48 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ABI_MALLOC(weights, (nqpts))
    weights = one
 
+   ! Compute directions for non-analytical behaviour.
+   ! TODO: The same approach should be used in anaddb.
+   ABI_MALLOC(qph2l, (3, 2*dtset%ph_nqpath))
+   ABI_MALLOC(qnrml2, (2*dtset%ph_nqpath))
+   nph2l = 0
+   if (any(ifc%zeff /= zero)) then
+     do iqpt=1,dtset%ph_nqpath
+       if (sum(dtset%ph_qpath(:, iqpt)**2) < tol14) then
+         nph2l = nph2l + 1
+         if (iqpt == 1) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, 2) - dtset%ph_qpath(:, 1)
+         else if (iqpt == dtset%ph_nqpath) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, dtset%ph_nqpath - 1) - dtset%ph_qpath(:, dtset%ph_nqpath)
+         else
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt - 1) - dtset%ph_qpath(:, iqpt)
+           nph2l = nph2l + 1
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt + 1) - dtset%ph_qpath(:, iqpt)
+         end if
+       end if
+     end do
+     ! Convert to Cartesian coordinates.
+     do iqpt=1,nph2l
+       qph2l(:, iqpt) = matmul(cryst%gprimd, qph2l(:, iqpt))
+     end do
+     qnrml2 = zero
+   end if
+
 #ifdef HAVE_NETCDF
+   ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
+   ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   if (nph2l /= 0) call ifc_calcnwrite_nana_terms(ifc, cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
+
+   ABI_FREE(qph2l)
+   ABI_FREE(qnrml2)
 
    select case (dtset%prtphbands)
    case (1)
@@ -3730,9 +3749,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
    if(sum(integer_characters(:))==3*natom)exit
  end do !itol
 
-!DEBUG
 !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
-!ENDDEBUG
 
  write(message,'(a,a,es8.2,a)')ch10,&
 & ' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)'
@@ -3746,7 +3763,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
      call wrtout(std_out,message,'COLL')
      if(degeneracy(imode)>=2)then
        if(degeneracy(imode)==2) write(message,'(a,i4)') &
-&       '        degenerate with vibration mode #',imode+1
+'        degenerate with vibration mode #',imode+1
        if(degeneracy(imode)>=3) write(message,'(a,i4,a,i4)') &
 &       '       degenerate with vibration modes #',imode+1,' to ',imode+degeneracy(imode)-1
        call wrtout(iout,message,'COLL')

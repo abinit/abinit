@@ -3636,19 +3636,13 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  ! native support for array and array syntax is one of the reasons why we still use Fortran
  ! and we program like in C but without the power of C!o
 
-! Also, strange problem with Petrus + Nag5 : had to explicitly specify nf90_put_var,
+! Also, strange problem with Petrus + Nag5: had to explicitly specify nf90_put_var,
 ! with explicit definition of start, count and stride .
 ! Direct calls to NCF_CHECK, see below, were working for selected tests, but not all tests
  ABI_MALLOC(arr2d, (hdr%nkpt, hdr%nsppol))
  arr2d(:,:) = reshape(hdr%nband, [hdr%nkpt, hdr%nsppol])
  ncerr = nf90_put_var(ncid, vid("number_of_states"), arr2d, start=[1,1], count=[hdr%nkpt,hdr%nsppol], stride=[1,1])
  NCF_CHECK(ncerr)
-
- !NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), arr2d))
-!NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), reshape(hdr%nband, [hdr%nkpt, hdr%nsppol])))
-! XG 20160329  was working for v2#30-32 , tutorial tbs#1-4 and tutorespfn temp_3 , but not v7#68-69
-!NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), arr2d))
-! XG 20160329  was working for v7#68-69, but not v2#30-32 , tutorial tbs#1-4 and tutorespfn temp_3
  ABI_FREE(arr2d)
 
  ABI_MALLOC(arr3d, (hdr%mband, hdr%nkpt, hdr%nsppol))
@@ -4415,7 +4409,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (abs( hdr%wtk(ii)-hdr0%wtk(ii) )>tol6) then
        write(msg,'(a,i5,a,es17.7,a,a,es17.7)')&
 &       'kpt num',ii,', input weight=',hdr%wtk(ii),ch10,&
-&       'not equal  disk file weight=',hdr0%wtk(ii)
+&       'not equal to disk file weight=',hdr0%wtk(ii)
        MSG_WARNING(msg)
 
        tkpt=1 ; iwarning=iwarning+1

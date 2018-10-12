@@ -3546,7 +3546,7 @@ Variable(
     text="""
 Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
-the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]), 
+the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
 Then use these to compute the
 change of electronic eigenvalues due to electron-phonon interaction,
@@ -4793,6 +4793,7 @@ This variable can be used when performing electron-phonon calculations with [[op
 to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
+"""
 ),
 
 Variable(
@@ -6850,12 +6851,12 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:**
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by 
-Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]]. 
-The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22). 
-It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps. 
-The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones. 
-The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well. 
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by
+Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]].
+The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22).
+It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps.
+The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones.
+The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well.
 The positions are in reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
 **Purpose:** Relaxation
 **Cell optimization:** Yes (if [[optcell]]/=0)
@@ -10534,7 +10535,7 @@ output file (non time consuming).
 
 Higher values activate some internal tests for
 checking the implementation correctness (time consuming, not useable in parallel).
-If [[nonlinear_info]] == 2, same effect than 1 and tests are done in non-linear 
+If [[nonlinear_info]] == 2, same effect than 1 and tests are done in non-linear
 ([[optdriver]]==5 and [[usepead]] == 0).
 If [[nonlinear_info]] == 3, same effect than 1 and tests are done in rf2_init
 ([[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0).
@@ -13886,14 +13887,14 @@ Variable(
     mnemonics="PRint Electric Field Gradient",
     requires="[[usepaw]] == 1, [[quadmom]]",
     text="""
-If nonzero, calculate the electric field gradient at each atomic site in the unit cell. 
-Using this option requires [[quadmom]] to be set as well. 
-Values will be written to main output file (search for Electric Field Gradient). 
-If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported. 
-If prtefg=2, the full electric field gradient tensors in atomic units are also given, 
-showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction. 
-If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model. 
-This is useful for comparing the accurate PAW-based results to those of simple ion-only models. 
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
+Using this option requires [[quadmom]] to be set as well.
+Values will be written to main output file (search for Electric Field Gradient).
+If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
+If prtefg=2, the full electric field gradient tensors in atomic units are also given,
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model.
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
 [[nspden]]) and also LDA+U (see [[usepawu]]).
@@ -17759,8 +17760,8 @@ following a DFT+U calculation is done (important!).
 
   * If set to 0, the LDA+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used. 
-The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy. 
+  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used.
+The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
     * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
@@ -17811,7 +17812,7 @@ Variable(
     text=r"""
 Determine which non-linear implementation is used. If [[usepead]]=1, the Perturbation
 Expansion After Discretization formalism is used, as in [[cite:Veithen2005]].
-In that method, the electric field is treated numerically, i.e the k-space 
+In that method, the electric field is treated numerically, i.e the k-space
 gradient operator appearing in the expression of the electric field potential
 is discretized (see Eq.7 and 10 of [[cite:Veithen2005]]).
 If [[usepead]]=0, the electric field is treated analytically, leading to a better

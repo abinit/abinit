@@ -93,7 +93,7 @@ MODULE m_ebands
  public :: ebands_set_scheme       ! Set the occupation scheme.
  public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
  public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
- public :: ebands_report_gap       ! Print info on the fundamental and optical gap.
+ public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
  public :: ebands_ncwrite          ! Dump the object into NETCDF file (use ncid)
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
@@ -177,7 +177,7 @@ MODULE m_ebands
 !! gaps_t
 !!
 !! FUNCTION
-!! Structure with information on the fundamental and optical gaps returned by ebands_report_gap.
+!! Structure with information on the fundamental and direct gaps returned by ebands_report_gap.
 !!
 !! SOURCE
 
@@ -189,7 +189,7 @@ MODULE m_ebands
    integer,allocatable :: fo_kpos(:,:)
     ! fo_kpos(3,nsppol)
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
-    ! fo_kpos(3,spin)   ==> the index of k-point where the optical gap is located (for each spin).
+    ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
 
    integer,allocatable :: ierr(:)
      ! The third index corresponds to a "status" :
@@ -199,7 +199,7 @@ MODULE m_ebands
 
    real(dp),allocatable :: fo_values(:,:)
      ! fo_values(2,nsppol)]
-     ! Fundamental and optical gaps (in Hartree) for each spin.
+     ! Fundamental and direct gaps (in Hartree) for each spin.
 
    real(dp),pointer :: kpoints(:,:) => null()
      ! Reference to the k-points of the band structure used to compute the gaps.
@@ -267,7 +267,7 @@ CONTAINS  !=====================================================================
 !! get_gaps
 !!
 !! FUNCTION
-!!  Returns a structure with info on the fundamental and optical gap.
+!!  Returns a structure with info on the fundamental and direct gap.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
@@ -359,11 +359,11 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
      bot_conduct(ikibz)=ebands%eig(icb,ikibz,spin)
    end do
 
-   ! Minimum of the optical Gaps
+   ! Minimum of the direct Gaps
    ikopt= imin_loc(bot_conduct-top_valence,MASK=my_kmask)
    opt_gap=bot_conduct(ikopt)-top_valence(ikopt)
 
-   ! Fundamental Gap ===
+   ! Fundamental Gap
    ick = imin_loc(bot_conduct,MASK=my_kmask)
    ivk = imax_loc(top_valence,MASK=my_kmask)
    fun_gap = ebands%eig(icb,ick,spin)-ebands%eig(ivb,ivk,spin)
@@ -449,7 +449,7 @@ end subroutine gaps_free
 !! gaps_print
 !!
 !! FUNCTION
-!!  Print info on the fundamental and optical gap.
+!!  Print info on the fundamental and direct gap.
 !!
 !! INPUTS
 !!  gaps<gaps_t>=Object with info on the gaps.
@@ -511,7 +511,7 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
      continue
    end if
 
-   ! Get minimum of the optical Gap.
+   ! Get minimum of the direct Gap.
    fun_gap = gaps%fo_values(1,spin)
    opt_gap = gaps%fo_values(2,spin)
 
@@ -526,8 +526,8 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
 &    '  >>>> For spin ',spin,ch10,&
-&    '   Minimum optical gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',gaps%kpoints(:,ikopt),ch10,&
-&    '   Fundamental gap     = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',gaps%kpoints(:,ivk),ch10,  &
+&    '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',gaps%kpoints(:,ikopt),ch10,&
+&    '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',gaps%kpoints(:,ivk),ch10,  &
 &                                              '       Bottom of conduction at : ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
  end do !spin
@@ -2667,7 +2667,7 @@ end subroutine ebands_set_nelect
 !! ebands_report_gap
 !!
 !! FUNCTION
-!!  Print info on the fundamental and optical gap.
+!!  Print info on the fundamental and direct gap.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
@@ -2678,7 +2678,7 @@ end subroutine ebands_set_nelect
 !!
 !! OUTPUT
 !!  writing.
-!!  [gaps(3,nsppol)]=Fundamental and optical gaps. The third index corresponds to a "status":
+!!  [gaps(3,nsppol)]=Fundamental and direct gaps. The third index corresponds to a "status":
 !!      0.0dp if gaps were not computed (because there are only valence bands);
 !!     -1.0dp if the system (or spin-channel) is metallic;
 !!      1.0dp if the gap has been computed.
@@ -2771,7 +2771,7 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
      bot_conduct(ikibz) = ebands%eig(icb,ikibz,spin)
    end do
 
-   ! === Get minimum of the optical Gap ===
+   ! === Get minimum of the direct Gap ===
    ikopt= imin_loc(bot_conduct-top_valence,MASK=my_kmask)
    opt_gap=bot_conduct(ikopt)-top_valence(ikopt)
 
@@ -2782,9 +2782,9 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
 &    '  >>>> For spin ',spin,ch10,&
-&    '   Minimum optical gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
-&    '   Fundamental gap     = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
-&                                              '       Bottom of conduction at : ',ebands%kptns(:,ick)
+&    '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
+&    '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
+&                                              '      Bottom of conduction at : ',ebands%kptns(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
    if (PRESENT(gaps)) then

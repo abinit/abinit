@@ -450,9 +450,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000   21.589   21.589
@@ -465,6 +466,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -569,9 +574,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.052    1.000    0.000    0.000   21.589   21.589
@@ -584,6 +590,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -692,9 +702,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000   21.589   21.589
@@ -707,6 +718,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -817,9 +832,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.052    1.000    0.000    0.000   21.589   21.589
@@ -832,6 +848,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -941,9 +961,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000   21.589   21.589
@@ -956,6 +977,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1058,9 +1083,10 @@ Notations:
    FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
    OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.789    0.000    0.000   -0.001    1.000    0.000    0.000    0.000    0.000
    2  12.800   12.800    0.000    0.000   -0.333    1.000    0.000    0.000   21.589   21.589
@@ -1073,6 +1099,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 == END DATASET(S) ==============================================================
 ================================================================================

@@ -3584,26 +3584,27 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
    ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
 
 #ifdef HAVE_NETCDF
- if(present(ncid))then
+ if (present(ncid)) then
    iphl2 = 0
    call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
-   !ncerr = nctk_def_arrays(ncid, [ &
-   !  nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
-   !  nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")], &
-   !  defmode=.True.)
-   !NCF_CHECK(ncerr)
+   ! Add epsinf, Born effective charges and some useful metadata.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
+     nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
    ! TODO chneut is missing
-   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !    "asr", "chneut", "dipdip", "symdynmat"])
-   !NCF_CHECK(ncerr)
-   !NCF_CHECK(nctk_set_datamode(ncid))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'emacro_cart'), ifc%dielt))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'becs_cart'), ifc%zeff))
-   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "asr", "chneut", "dipdip", "symdynmat"], &
-   !  [ifc%asr, inp%chneut, ifc%dipdip, ifc%symdynmat])
-   !NCF_CHECK(ncerr)
- endif
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+       "asr", "dipdip", "symdynmat"])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'emacro_cart'), ifc%dielt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'becs_cart'), ifc%zeff))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "asr", "dipdip", "symdynmat"], &
+     [ifc%asr, ifc%dipdip, ifc%symdynmat])
+   NCF_CHECK(ncerr)
+ end if
 #endif
 
  ! Examine every wavevector of this list
