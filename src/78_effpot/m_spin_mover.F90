@@ -109,13 +109,14 @@ contains
 !!***
 
 
-  !!****f* m_spin_mover/spin_mover_t_run_one_step
+
+  !!****f* m_spin_mover/spin_mover_t_run_one_step_HeunP
   !!
   !! NAME
-  !!  spin_mover_t_run_one_step
+  !!  spin_mover_t_run_one_step_HeunP
   !!
   !! FUNCTION
-  !! run one spin step
+  !! run one spin step using HeunP method
   !!
   !! INPUTS
   !!
@@ -132,13 +133,14 @@ contains
   !!
   !! SOURCE
   
-  subroutine spin_mover_t_run_one_step(self, calculator, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
+
     !class (spin_mover_t), intent(inout):: self
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_one_step'
+#define ABI_FUNC 'spin_mover_t_run_one_step_HeunP'
 !End of the abilint section
 
     type(spin_mover_t), intent(inout):: self
@@ -147,10 +149,8 @@ contains
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
-         !& Heff(3, self%nspins), Heff2(3, self%nspins), &
          & H_lang(3, self%nspins)
     ! predict
-
     !call calculator%get_Langevin_Heff(self%dt, self%temperature, H_lang)
     call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
 
@@ -161,9 +161,6 @@ contains
        S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
     end do
     !$OMP END PARALLEL DO
-    !do i=1, self%nspins
-    !   S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
-    !end do
 
     ! correction
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)
@@ -174,15 +171,30 @@ contains
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
     end do
     !$OMP END PARALLEL DO
-    !print *, "S before norm", S_out
     do i=1, self%nspins
        S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
     end do
-    !print *, "dt: ",self%dt
-    !print *, "S:", S_out
-  end subroutine spin_mover_t_run_one_step
+  end subroutine spin_mover_t_run_one_step_HeunP
   !!***
 
+
+  subroutine spin_mover_t_run_one_step(self, calculator, hist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_mover_t_run_one_step'
+!End of the abilint section
+
+    type(spin_mover_t), intent(inout) :: self
+    type(spin_terms_t), intent(inout) :: calculator
+    type(spin_hist_t),intent(inout) :: hist
+    real(dp) :: S_out(3,self%nspins), etot
+    call spin_mover_t_run_one_step_HeunP(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+    ! do not inc until time is set to hist.
+    call spin_hist_t_set_vars(hist=hist, S=S_out, Snorm=calculator%ms, etot=etot, inc=.False.)
+  end subroutine spin_mover_t_run_one_step
 
   !!****f* m_spin_mover/spin_mover_t_run_time
   !!
@@ -217,7 +229,7 @@ contains
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
-    real(dp) ::  S(3, self%nspins), etot
+    !real(dp) ::  S(3, self%nspins)
     real(dp):: t
     integer :: counter
     character(len=66) :: msg
@@ -239,18 +251,17 @@ contains
 
     do while(t<self%total_time)
        counter=counter+1
-       !call self%run_one_step(calculator, hist%current_S, S)
-       call spin_mover_t_run_one_step(self, calculator, spin_hist_t_get_S(hist), S, etot)
-       call spin_hist_t_set_vars(hist=hist, S=S, time=t,etot=etot, inc=.True.)
+       call spin_mover_t_run_one_step(self, calculator, hist)
+       call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
+          ! TODO: call calc observables
           call spin_ncfile_t_write_one_step(ncfile, hist)
-          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, sqrt(sum((sum(S, dim=2)/self%nspins)**2)), &
+          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
+               & sqrt(sum((sum(hist%S(:,:, hist%ihist_prev), dim=2)/self%nspins)**2)), &
                & hist%etot(hist%ihist_prev)
           write(std_out,*) msg
           write(ab_out, *) msg
        endif
-       !call wrtout_myproc(std_out,msg)
-          !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
        t=t+self%dt
     enddo
     msg=repeat("=", 65)

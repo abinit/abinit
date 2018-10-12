@@ -226,12 +226,11 @@ contains
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_terms_t), intent(in) :: scell
-    integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, ncerr
+    integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, iatoms_id, ncerr
     ! sc_matric
 
 #if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
-
 
       call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id, &
       & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with units", "bohr")
@@ -241,6 +240,8 @@ contains
       & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
     call ab_define_var(self%ncid, (/self%three, self%nspins/), rvec_id, &
       & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
+    call ab_define_var(self%ncid, (/ self%nspins/), iatoms_id, &
+      & NF90_INT, "iatoms", "indices of atoms with spin", "dimensionless")
 
     !ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%three, self%three], unitcell_id)
     !ncerr=nf90_def_var(self%ncid, "xred", NF90_DOUBLE, [self%three, self%nspins], pos_id)
@@ -252,6 +253,7 @@ contains
     ncerr=nf90_put_var(self%ncid, pos_id, scell%pos)
     ncerr=nf90_put_var(self%ncid, ispin_prim_id, scell%ispin_prim)
     ncerr=nf90_put_var(self%ncid, rvec_id, scell%rvec)
+    ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
   end subroutine spin_ncfile_t_write_supercell
 

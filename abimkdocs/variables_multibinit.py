@@ -735,7 +735,6 @@ S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec).
 ),
 
 
-
 Variable(
     abivarname="spin_dynamics@multibinit",
     varset="multibinit",
@@ -750,6 +749,25 @@ Flag to run spin dynamics.
 * 1 --> Run spin dynamics.
 """,
 ),
+
+Variable(
+    abivarname="spin_init_state@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="SPIN INITial STATE",
+    text="""
+Flag to initialize spin state. (only option 1 and 2 are implemented.)
+* 0 --> Read from spinhist netcdf file. 
+* 1 --> Random spin state using uniform random numbers.
+* 2 --> Ferromagnetic state.
+* 3 --> State with q-vector using [[multibinit:spin_qpoint]]
+* 4 --> Random spin state with temperature of [[multibinit:spin_temperature]] 
+""",
+),
+
 
 Variable(
     abivarname="spin_mag_field@multibinit",
@@ -821,7 +839,67 @@ Default value: 325.
 """,
 ),
 
-]
 
+Variable(
+    abivarname="spin_var_temperature@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN  VARiable TEMPERATURE",
+    text="""
+Switch for variable temperature calculation. 0: off. 1: on.
+If switched on, a series of spin dynamics calculation with temperatures from
+[[multibinit:spin_temperature_start]] to [[multibinit:spin_temperature_end]],
+with number of steps [[multibinit:spin_temperature_nstep]] will be done.
+The corresponding _spinhist.nc  file has the corresponding temperature in the filename.
+""",
+),
+
+
+Variable(
+    abivarname="spin_temperature_start@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN TEMPERATURE START",
+    text="""
+Start point of variable temperature spin dynamcis calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="spin_temperature_end@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN TEMPERATURE END",
+    text="""
+End point of variable temperature spin dynamics calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="spin_temperature_nstep@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN TEMPERATURE Number of STEPs",
+    text="""
+Number of steps in the variable temperature spin dynamics calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+
+
+
+]
 
 
