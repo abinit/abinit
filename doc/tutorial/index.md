@@ -198,7 +198,7 @@ that can be followed independently of each other:**
 
 **After following tutorials DFPT1, DFPT2, Elastic and NLO, the tutorials on MULTIBINIT might be followed:**
 
-  * [The first tutorial on MULTIBINIT](multi1) presents the basic use of the MULTIBINIT application,
+  * [The first tutorial on MULTIBINIT](lattice_model) presents the basic use of the MULTIBINIT application,
     how to build a harmonic model by using a second-principles approach for lattice dynamics 
     simulations based on atomic potentials fitted on first-principles calculations.
 

@@ -126,6 +126,9 @@ ABI_UNITS = [
     'Rydbergs',
     'T',
     'Tesla',
+    'Second',
+    'S',
+    'Sec',
 ]
 
 # Operators supported by parser
@@ -235,6 +238,7 @@ ABI_TOPICS = [
     "SelfEnergy",
     "SmartSymm",
     "spinpolarisation",
+    "SpinDynamicsMultibinit",
     "STM",
     "Susceptibility",
     "TDDFT",

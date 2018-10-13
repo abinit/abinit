@@ -911,6 +911,9 @@ All the independent perturbations are available
 
 Interpolation of the electron-phonon coupling potential
 
+ From coarse q-mesh: [4,4,4] to: [8,8,8]
+Number of q-points found in initial DVDB 8
+Number of q-points requiring Fourier interpolation 21
 Interpolation of the electron-phonon coupling potential completed
 
 
@@ -1150,15 +1153,6 @@ qpoint: [ 3.7500E-01,  3.7500E-01,  0.0000E+00] is present in the DVDB file
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-
-
-
-
-
-
-
-
 
 All the independent perturbations are available
 --------------------------------------------------------------------------------

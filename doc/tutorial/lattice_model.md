@@ -2,7 +2,7 @@
 authors: AM, FR
 ---
 
-# First lesson on MULTIBINIT
+# First tutorial on MULTIBINIT
 
 ## Build a harmonic lattice model and run a dynamics
 
@@ -82,8 +82,7 @@ In this tutorial, we will take as an example of a material without lattice insta
 {% dialog tests/tutomultibinit/Input/tmulti1_DDB %}
 
 
-**Before starting, you might to consider working in a different subdirectory with respect to the other lessons. Why do not create "Work_latticeModel"?**
-
+**Before starting, you might to consider working in a different subdirectory than for the other lessons. Why not create "Work_latticeModel"?**
 
 The file ~abinit/tests/tutomultibinit/Input/tmulti1.files lists the file names and root names.
 You can copy it in the **Work_latticeModel** directory and look at this file content, you should see:

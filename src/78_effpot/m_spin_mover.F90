@@ -28,7 +28,6 @@
 !! SOURCE
 
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -55,12 +54,12 @@ module m_spin_mover
   !! dt: time step
   !! total_time
   !! temperature.
-  !! nmatoms number of magnetic atoms
+  !! nspins number of magnetic atoms
   !! SOURCE
   
   
   type spin_mover_t
-     integer :: nmatoms
+     integer :: nspins
      real(dp) :: dt, total_time, temperature
      !CONTAINS
      !   procedure :: initialize => spin_mover_t_initialize
@@ -90,7 +89,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, nmatoms, dt, total_time, temperature)
+  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature)
     !class (spin_mover_t):: self
 
 !This section has been created automatically by the script Abilint (TD).
@@ -101,8 +100,8 @@ contains
 
     type(spin_mover_t), intent(inout) :: self
     real(dp), intent(in) :: dt, total_time, temperature
-    integer, intent(in) :: nmatoms
-    self%nmatoms=nmatoms
+    integer, intent(in) :: nspins
+    self%nspins=nspins
     self%dt=dt
     self%total_time=total_time
     self%temperature=temperature
@@ -144,12 +143,12 @@ contains
 
     type(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
-    real(dp), intent(in) :: S_in(3,self%nmatoms)
-    real(dp), intent(out) :: S_out(3,self%nmatoms), etot
+    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    real(dp) ::  dSdt(3, self%nmatoms), dSdt2(3, self%nmatoms), &
-         & Heff(3, self%nmatoms), Heff2(3, self%nmatoms), &
-         & H_lang(3, self%nmatoms)
+    real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
+         !& Heff(3, self%nspins), Heff2(3, self%nspins), &
+         & H_lang(3, self%nspins)
     ! predict
 
     !call calculator%get_Langevin_Heff(self%dt, self%temperature, H_lang)
@@ -158,22 +157,25 @@ contains
     !call calculator%get_dSdt(S_in, H_lang, dSdt)
     call spin_terms_t_get_dSdt(calculator, S_in, H_lang, dSdt)
     !$OMP PARALLEL DO
-    do i =1, self%nmatoms
+    do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
     end do
     !$OMP END PARALLEL DO
+    !do i=1, self%nspins
+    !   S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
+    !end do
 
     ! correction
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)
     call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
     etot=calculator%etot
     !$OMP PARALLEL DO
-    do i =1, self%nmatoms
+    do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
     end do
     !$OMP END PARALLEL DO
     !print *, "S before norm", S_out
-    do i=1, self%nmatoms
+    do i=1, self%nspins
        S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
     end do
     !print *, "dt: ",self%dt
@@ -215,23 +217,23 @@ contains
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
-    real(dp) ::  S(3, self%nmatoms), etot
+    real(dp) ::  S(3, self%nspins), etot
     real(dp):: t
     integer :: counter
-    character(len=100) :: msg
+    character(len=66) :: msg
     t=0.0
     counter=0
     write(msg, *) " Begining spin dynamic steps :"
     write(std_out,*) msg
     write(ab_out, *) msg
-    write(msg, *)  "==================================================================================" 
+    msg=repeat("=", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
     write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average M", "Energy"
     write(std_out,*) msg
     write(ab_out, *) msg
-    write(msg, *)  "-----------------------------------------------------------------------------------" 
+    msg=repeat("-", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
@@ -242,7 +244,7 @@ contains
        call spin_hist_t_set_vars(hist=hist, S=S, time=t,etot=etot, inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
           call spin_ncfile_t_write_one_step(ncfile, hist)
-          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, sqrt(sum((sum(S, dim=2)/self%nmatoms)**2)), &
+          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, sqrt(sum((sum(S, dim=2)/self%nspins)**2)), &
                & hist%etot(hist%ihist_prev)
           write(std_out,*) msg
           write(ab_out, *) msg
@@ -251,7 +253,7 @@ contains
           !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
        t=t+self%dt
     enddo
-    write(msg, *)  "=====================================================================================" 
+    msg=repeat("=", 65)
     write(std_out,*) msg
     write(ab_out, *) msg
 
