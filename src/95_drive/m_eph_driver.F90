@@ -584,19 +584,22 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    call dvdb_init(dvdb, dvdb_path, comm)
-   if (my_rank == master) then
-     call dvdb_print(dvdb)
-     call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
-   end if
-
-   ! Set dielectric tensor, Becs and has_dielt_zeff flag that
+   ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
-   ! of the DFPT potentials.
+   ! of the DFPT potentials except when dipdip == 0
+   ! TODO: Change name: has_dielt_zeff --> lr_treatment = 0, 1
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
-     dvdb%has_dielt_zeff = .True.
-     call wrtout(std_out, "Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
+     if (dtset%dipdip /= 0) then
+       dvdb%has_dielt_zeff = .True.
+       call wrtout(std_out, "Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
+     end if
+   end if
+
+   if (my_rank == master) then
+     call dvdb_print(dvdb)
+     call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
 
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
@@ -669,8 +672,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (5)
    ! Interpolate the phonon potential
-   call dvdb_interpolate_and_write(dtfil%fnameabo_dvdb,ngfftc,ngfftf,cryst,dvdb,&
-     ifc%ngqpt,ifc%nqshft,ifc%qshft, dtset%eph_ngqpt_fine,dtset%qptopt,comm)
+   call dvdb_interpolate_and_write(dvdb, dtset, dtfil%fnameabo_dvdb, ngfftc,ngfftf, cryst, &
+     ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model

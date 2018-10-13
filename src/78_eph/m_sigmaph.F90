@@ -478,7 +478,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
@@ -685,6 +685,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
  call dvdb_qcache_read(dvdb, nfftf, ngfftf, comm)
 
+ ABI_MALLOC(displ_cart, (2,3,cryst%natom,3*cryst%natom))
+ ABI_MALLOC(displ_red, (2,3,cryst%natom,3*cryst%natom))
+
  ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
@@ -884,7 +887,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            cnum = zero
            do iatom=1,cryst%natom
              cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu)) * exp(-j_dpc * two_pi * cryst%xred(:, iatom))
-             !cdd = cdd * exp(-q**2)
+             !cdd = cdd * exp(-(q/sigma%qdamp)**2)
              cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
            end do
            do ib_k=1,nbcalc_ks
@@ -1501,6 +1504,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
  ABI_FREE(nqnu_tlist)
+ ABI_FREE(displ_cart)
+ ABI_FREE(displ_red)
  if (sigma%nwr > 0) then
    ABI_FREE(cfact_wr)
  end if
@@ -2157,8 +2162,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !new%ntheta = dtser%efmas_ntheta
    new%nphi = 2 * new%ntheta
    new%qrad = tol6
-   !new%qrad = pi * min(norm2(cryst%gprimd(:, 1)), norm2(cryst%gprimd(:, 2)), norm2(cryst%gprimd(:, 3)))
+   !new%qrad = half * min(norm2(cryst%gprimd(:, 1)), norm2(cryst%gprimd(:, 2)), norm2(cryst%gprimd(:, 3)))
    new%qrad = new%qrad / 2.0_dp
+   !new%qdamp = one
    new%nqr = 10
    write(std_out,"(a)")"Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")"ntheta:", new%ntheta, "nphi:", new%nphi
@@ -2279,7 +2285,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !NCF_CHECK(ncerr)
 
    if (new%frohl_model == 1) then
-     ! Arrays storing the Frolich self-energy.
+     ! Arrays storing the Frohlich self-energy.
      ! These arrays get two extra dimensions on file (nkcalc, nsppol).
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("frohl_vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -2678,7 +2684,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
 
- ! Add frohlich results to final results (frohl arrays are not symmetrized if symsigma == 1)
+ ! Add Frohlich results to final results (frohl arrays are not symmetrized if symsigma == 1)
  if (self%frohl_model == 1) then
    self%vals_e0ks = self%vals_e0ks + self%frohl_vals_e0ks
    self%dvals_de0ks = self%dvals_de0ks + self%frohl_dvals_de0ks
@@ -3282,7 +3288,7 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
             cnum = zero
             do iatom=1,cryst%natom
               cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu)) * exp(-j_dpc * two_pi * cryst%xred(:, iatom))
-              !cdd = cdd * exp(-q**2)
+              !cdd = cdd * exp(-q/self%qdamp**2)
               cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
             end do
             gkq2 = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu) * inv_qepsq * weigth_q * vol_fact
