@@ -182,7 +182,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,efmas_path,path,wfk_fname_dense
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -245,7 +245,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
- efmas_path = dtfil%fnameabi_efmas
  ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
  dvdb_path = dtfil%fildvdbin
  if (dvdb_path == ABI_NOFILE) then
@@ -254,8 +253,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1)
-
- if (dtset%eph_frohlichm /= 1) efmas_path = dtfil%fnameabi_efmas
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -308,10 +305,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
 
- if (dtset%eph_frohlichm /= 1) then
-   call xmpi_bcast(efmas_path,master,comm,ierr)
-   call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", efmas_path) )
- end if
+ if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
 
  ! autoparal section
  ! TODO: This just to activate autoparal in abipy. Lot of things should be improved.
@@ -623,7 +617,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
-   NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
+   NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
    NCF_CHECK(nf90_close(ncid))
 #else

@@ -1662,14 +1662,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: changed,found,isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
- type(hdr_type) :: hdr_wfk_dense
 !arrays
  integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  integer,allocatable :: gtmp(:,:),degblock(:,:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
- real(dp),pointer :: energies_dense(:,:,:)
+ !real(dp),pointer :: energies_dense(:,:,:)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
 
 ! *************************************************************************
@@ -2013,24 +2012,24 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
  new%use_doublegrid = .False.
- if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
-     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+ if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
+     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) )  then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
-   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
-
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      MSG_ERROR(msg)
    end if
+   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
 
-   call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
-   ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
-   ABI_FREE(energies_dense)
+   ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
+   !call wfk_read_eigenvalues(wfk_fname_dense, energies_dense, hdr_wfk_dense, comm)
+   !ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+   !ABI_FREE(energies_dense)
+   !call hdr_free(hdr_wfk_dense)
 
    !TODO add a check for consistency
    ! number of bands and kpoints (comensurability)
-   ABI_CHECK(hdr_wfk_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
-   call hdr_free(hdr_wfk_dense)
+   ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
 
    new%use_doublegrid = .True.
 
@@ -2051,9 +2050,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
    intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]
 
-   intp_shiftk = zero
    intp_nshiftk = 1
-   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
+   intp_shiftk = zero
+   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, &
                                       intp_nshiftk, intp_shiftk, band_block, comm)
    new%use_doublegrid = .True.
  end if
@@ -2063,19 +2062,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
-     !if (dtset% dtftil% ....) then
-     !  tmp_ebands = wfk_read_ebands(filepath, comm)
-     !else
-     !  do ii = 1, 3
-     !    intp_kptrlatt(:, ii) = dtset%bs_interp_kmult(ii) * ebands%kptrlatt(:, ii)
-     !  end do
-     !  tmp_ebands = ebands_interp_kmesh(ebands, cryst, dtset%einterp, &
-     !    intp_kptrlatt, my_nshiftq, my_shiftq, [bstart, bstart + new%nbsum - 1], comm)
-     !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
-     !end if
      new%ephwg          = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
-     !call ebands_free(tmp_ebands)
    else
      downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
      if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%shiftk /= my_shiftq)
@@ -2199,6 +2187,16 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    ABI_FREE(th)
    ABI_FREE(wth)
+
+   !if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
+   !    (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) )  then
+   !wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
+   !if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+   !  MSG_ERROR(msg)
+   !end if
+   !call wrtout(std_out,"Will read energies from: "//trim(wfk_fname_dense))
+   !ebands_dense = wfk_read_ebands(path, comm) result(ebands)
+   !call ebands_free(ebands_dense)
 
    ! Build SKW object for all bands where QP corrections are wanted.
    ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
@@ -2353,10 +2351,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
- ! Now reopen the file in parallel.
+ ! Now reopen the file (not xmpi_comm_self --> only master writes)
  call xmpi_barrier(comm)
  NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
@@ -2650,7 +2647,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  integer,parameter :: master=0, max_ntemp=1
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- real(dp) :: cpu, wall, gflops, self2fmts
+ real(dp) :: cpu, wall, gflops, invsig2fmts, tau
  complex(dpc) :: sig0c,sig0fr,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
@@ -2765,20 +2762,20 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      write(ab_out,"(3a,i1,a,f4.1,a)") &
        "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", spin: ", spin, ", T= ",self%kTmesh(it) / kb_HaK, " [K]"
    end if
-   !if (self%imag_only) then
-   !  if (self%frohl_model == 0) then
-   !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  TAU(eKS)  DeKS"
-   !  else
-   !    write(ab_out,"(a)")"   B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS"
-   !  end if
-   !else
+   if (self%imag_only) then
+     if (self%frohl_model == 0) then
+       write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
+     else
+       write(ab_out,"(a)")"   B    eKS    SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS"
+     end if
+   else
      if (self%frohl_model == 0) then
        write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
      else
        write(ab_out,"(a)")&
          "   B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS)  SE2(eKS)  SF2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
      end if
-   !end if
+   end if
 
    do ibc=1,self%nbcalc_ks(ikcalc,spin)
      band_ks = self%bstart_ks(ikcalc,spin) + ibc - 1
@@ -2805,19 +2802,21 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
      end if
      ! FIXME
-     !self2fmts = Time_Sec * tol15
-     !if (self%imag_only) then
-     !  if (self%frohl_model == 0) then
-     !    "   B    eKS     SE2(eKS)  TAU(eKS)  DeKS"
-     !    write(ab_out, "(i4,3(f8.3,1x))") &
-     !      band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, self2fmts / (two_pi * abs(aimag(sig0c))), (kse - kse_prev) * Ha_eV
-     !  else
-     !    "   B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS"
-     !    write(ab_out, "(i4,3(f8.3,1x))") &
-     !      band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, self2fmts / (two_pi * abs(aimag(sig0c))),
-     !      self2fmts / (two_pi * abs(aimag(sig0fr))), (kse - kse_prev) * Ha_eV
-     !  end if
-     !else
+     if (self%imag_only) then
+       invsig2fmts = Time_Sec * 1e+15 / two
+       tau = 999999.0_dp
+       if (abs(aimag(sig0c)) > tol16) tau = invsig2fmts / abs(aimag(sig0c))
+       tau = min(tau, 999999.0_dp)
+       if (self%frohl_model == 0) then
+         ! B    eKS     SE2(eKS)  TAU(eKS)  DeKS
+         write(ab_out, "(i4,2(f8.3,1x),f8.1,1x,f8.3)") &
+           band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+       else
+         ! B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS
+         write(ab_out, "(i4,2(f8.3,1x),2(f8.1,1x),f8.3)") &
+           band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+       end if
+     else
        if (self%frohl_model == 0) then
          ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
          write(ab_out, "(i4, 10(f8.3,1x))") &
@@ -2831,7 +2830,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
            real(sig0c) * Ha_eV, real(sig0fr) * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, real(zc), &
            fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
        end if
-     !end if
+     end if
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if

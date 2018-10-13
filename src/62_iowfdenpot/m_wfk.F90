@@ -2826,7 +2826,7 @@ type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
 
 !************************************************************************
 
- call wfk_read_eigenvalues(path,eigen,hdr,comm)
+ call wfk_read_eigenvalues(path, eigen, hdr, comm)
  ebands = ebands_from_hdr(hdr,maxval(hdr%nband),eigen)
 
  ABI_FREE(eigen)
