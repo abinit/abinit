@@ -1814,7 +1814,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange - 1, dtset%mband)
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
          end do
        end do
 
@@ -2577,7 +2577,13 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  end if
 
  ! Prepare weights for BZ(k) integration
- if (self%qint_method > 0) call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol)
+ if (self%qint_method > 0) then
+   if (self%use_doublegrid) then
+     call ephwg_double_grid_setup_kpoint(self%ephwg, self%eph_doublegrid, self%kcalc(:, ikcalc), prtvol)
+   else 
+     call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol)
+   end if
+ endif
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz

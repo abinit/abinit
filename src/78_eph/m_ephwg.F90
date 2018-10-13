@@ -46,6 +46,7 @@ module m_ephwg
  use m_ifc
  use m_lgroup
  use m_ebands
+ use m_eph_double_grid
 
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
@@ -146,6 +147,7 @@ type, public :: ephwg_t
  public :: ephwg_new             ! Basic Constructor
  public :: ephwg_from_ebands     ! Build object from ebands_t
  public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for given external k-point.
+ public :: ephwg_double_grid_setup_kpoint ! Prepare tetrahedron method for given external k-point using double grid routines.
  public :: ephwg_get_deltas      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
  public :: ephwg_get_dweights    ! Compute weights for a set of frequencies.
  public :: ephwg_zinv_weights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
@@ -423,6 +425,128 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
 
 end subroutine ephwg_setup_kpoint
 !!***
+
+!!****f* m_ephwg/ephwg_double_grid_setup_kpoint
+!! NAME
+!! ephwg_setup_kpoint
+!!
+!! FUNCTION
+!!  Set internal tables and object required to compute integration weights for a given k-point
+!!  using the double grid routines to map the different k-points.
+!!  This version should be more efficient than its counterpart without the double grid.
+!!
+!! INPUTS
+!!  kpoint(3): k-point in reduced coordinates.
+!!  prtvol: Verbosity level
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ephwg_setup_kpoint'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ephwg_t),target,intent(inout) :: self
+ type(eph_double_grid_t),intent(in) :: eph_doublegrid
+ integer,intent(in) :: prtvol
+!arrays
+ real(dp),intent(in) :: kpoint(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1
+ integer :: ierr,ii
+ real(dp) :: dksqmax
+ character(len=80) :: errorstring
+ character(len=500) :: msg
+ type(crystal_t),pointer :: cryst
+!arrays
+ integer,allocatable :: indkk(:,:)
+
+!----------------------------------------------------------------------
+
+ cryst => self%cryst
+
+ ! Get little group of the kpoint.
+ call lgroup_free(self%lgk)
+ self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
+ if (prtvol > 0) call lgroup_print(self%lgk)
+ self%nq_k = self%lgk%nibz
+
+ ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+ ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+ call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6)' ) &
+    "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
+   MSG_ERROR(msg)
+ end if
+ if (allocated(self%lgk2ibz)) then
+   ABI_FREE(self%lgk2ibz)
+ end if
+ call alloc_copy(indkk(:, 1), self%lgk2ibz)
+ ABI_FREE(indkk)
+
+ ! Get mapping (k + q) --> initial IBZ.
+ do ii=1,self%nq_k
+   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
+ end do
+ ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+
+ call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6)' ) &
+    "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+   MSG_ERROR(msg)
+ end if
+
+ if (allocated(self%kq2ibz)) then
+   ABI_FREE(self%kq2ibz)
+ end if
+ call alloc_copy(indkk(:, 1), self%kq2ibz)
+ ABI_FREE(indkk)
+ do ii=1,self%nq_k
+   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
+ end do
+
+ ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
+ ABI_MALLOC(indkk, (self%nbz * sppoldbl1,1))
+ call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+                             self%lgk%symrec_lg, self%lgk%nsym_lg, &
+                             indkk(:, 1))
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+ ! Build tetrahedron object using IBZ(k) as the effective IBZ
+ ! This means that input data for tetra routines must be provided in lgk%kibz_q
+ call destroy_tetra(self%tetra_k)
+ call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ if (ierr /= 0) then
+   MSG_ERROR(errorstring)
+ end if
+ ABI_FREE(indkk)
+
+end subroutine ephwg_double_grid_setup_kpoint
+!!***
+
 
 !----------------------------------------------------------------------
 
