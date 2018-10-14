@@ -544,6 +544,7 @@ class Project:
                     break
         self.files[fullname] = File_Class(file,dir=dir,read_only=read_only,message=self.message)
         if not create:
+            print("fullname", fullname)
             self.files[fullname].read()
         #Return the File instance
         return self.files[fullname]

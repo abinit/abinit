@@ -2103,13 +2103,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nelect = ebands_calc_nelect(tmp_ebands, new%kTmesh(it), new%mu_e(it))
 
      if (abs(nelect - ebands%nelect) > tol6) then
+       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
+       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+       ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
          'Calculated number of electrons nelect = ',nelect,&
          ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,&
          ' for T = ',new%kTmesh(it)
-       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
-       ! in this case we print a warning
        if (new%kTmesh(it) == 0) then
          MSG_WARNING(msg)
        else
