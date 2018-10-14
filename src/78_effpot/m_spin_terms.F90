@@ -271,6 +271,14 @@ contains
 
 
   subroutine spin_terms_t_add_SIA(self, mode, k1, k1dir)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_terms_t_add_SIA'
+!End of the abilint section
+
     class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: mode
     real(dp), intent(in) :: k1, k1dir
