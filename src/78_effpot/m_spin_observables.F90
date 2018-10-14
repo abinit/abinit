@@ -39,7 +39,7 @@ module m_spin_observables
   use m_spin_model_primitive, only: spin_model_primitive_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params
-  use m_spin_ncfile, only: spin_ncfile_t, & spin_ncfile_t_write_one_step
+  use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   implicit none
   !!***
   public :: spin_hist_t_ob_calc_staggered_M
@@ -61,9 +61,9 @@ contains
     class(spin_hist_t) :: self
   end subroutine spin_hist_t_ob_calc_thermo_obs
 
-  subroutine spin_hist_t_ob_calc_correlations_obs(self)
+  subroutine spin_hist_t_ob_calc_correlation_obs(self)
     class(spin_hist_t) :: self
-  end subroutine spin_hist_t_ob_calc_correlations_obs
+  end subroutine spin_hist_t_ob_calc_correlation_obs
 
 
 end module m_spin_observables
